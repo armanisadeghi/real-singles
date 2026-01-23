@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { email, password, display_name, referral_code } = validation.data;
-    const supabase = await createClient();
+    const supabase = await createApiClient();
     const adminClient = createAdminClient();
 
     // Sign up the user

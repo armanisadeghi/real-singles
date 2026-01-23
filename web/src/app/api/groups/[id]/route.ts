@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: groupId } = await params;
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },
@@ -101,7 +101,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: groupId } = await params;
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },
@@ -185,7 +185,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: groupId } = await params;
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },

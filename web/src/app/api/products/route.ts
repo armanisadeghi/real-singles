@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/products
  * Get list of available products for redemption
  */
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const { searchParams } = new URL(request.url);
   const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 50);

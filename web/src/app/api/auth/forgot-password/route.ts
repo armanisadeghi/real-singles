@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * POST /api/auth/forgot-password
  * Request a password reset email (uses Supabase magic link)
  */
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   try {
     let email: string | null = null;

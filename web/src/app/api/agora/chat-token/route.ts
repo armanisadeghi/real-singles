@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 import { generateChatToken, getAgoraConfig } from "@/lib/agora/token";
 
 /**
@@ -7,7 +7,7 @@ import { generateChatToken, getAgoraConfig } from "@/lib/agora/token";
  * Generate an Agora Chat token for the current user
  */
 export async function POST() {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },

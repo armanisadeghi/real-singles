@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 import { generateCallToken, getAgoraConfig } from "@/lib/agora/token";
 import { z } from "zod";
 
@@ -17,7 +17,7 @@ const callTokenSchema = z.object({
  * - role: "publisher" (can send/receive) or "subscriber" (receive only)
  */
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },

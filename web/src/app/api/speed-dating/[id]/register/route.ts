@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * POST /api/speed-dating/[id]/register
@@ -10,7 +10,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: sessionId } = await params;
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },
@@ -160,7 +160,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: sessionId } = await params;
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },

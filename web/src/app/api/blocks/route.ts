@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/blocks
  * Get list of users blocked by current user
  */
 export async function GET() {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },
@@ -67,7 +67,7 @@ export async function GET() {
  * Block a user
  */
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * POST /api/auth/social
@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
  * The actual OAuth flow is handled by Supabase.
  */
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   try {
     let provider: string | null = null;

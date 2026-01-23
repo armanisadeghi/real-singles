@@ -1,12 +1,12 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createClient as createSupabaseClient, SupabaseClient } from "@supabase/supabase-js";
 import { cookies, headers } from "next/headers";
 
 /**
  * Create a Supabase client for server-side use with cookie-based auth.
  * Use this for web app routes where auth is via cookies.
  */
-export async function createClient() {
+export async function createClient(): Promise<SupabaseClient> {
   const cookieStore = await cookies();
 
   return createServerClient(
@@ -44,7 +44,7 @@ export async function createClient() {
  * 
  * This checks for Authorization header first, then falls back to cookies.
  */
-export async function createApiClient() {
+export async function createApiClient(): Promise<SupabaseClient> {
   const headersList = await headers();
   const authHeader = headersList.get("authorization");
   
