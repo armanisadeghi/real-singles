@@ -82,24 +82,16 @@ def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInRelea
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
-    // ndkVersion rootProject.ext.ndkVersion
-    def ndkVersionOverride = findProperty('android.ndkVersion')
-if (ndkVersionOverride) {
-    ndkVersion ndkVersionOverride
-    println "Using NDK version override: ${ndkVersionOverride}"
-} else {
     ndkVersion rootProject.ext.ndkVersion
-    println "Using default NDK version: ${rootProject.ext.ndkVersion}"
-}
 
     buildToolsVersion rootProject.ext.buildToolsVersion
-    compileSdk 35
+    compileSdk rootProject.ext.compileSdkVersion
 
     namespace 'com.nayannew9.truSingle'
     defaultConfig {
         applicationId 'com.nayannew9.truSingle'
         minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion 35
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 22
         versionName "3.1"
     }
@@ -110,12 +102,6 @@ if (ndkVersionOverride) {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-        release {
-            storeFile file(MYAPP_UPLOAD_STORE_FILE)
-            storePassword MYAPP_UPLOAD_STORE_PASSWORD
-            keyAlias MYAPP_UPLOAD_KEY_ALIAS
-            keyPassword MYAPP_UPLOAD_KEY_PASSWORD
-        }
     }
     buildTypes {
         debug {
@@ -124,7 +110,7 @@ if (ndkVersionOverride) {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
             shrinkResources (findProperty('android.enableShrinkResourcesInReleaseBuilds')?.toBoolean() ?: false)
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
@@ -162,7 +148,6 @@ if (ndkVersionOverride) {
 }
 
 dependencies {
-
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
