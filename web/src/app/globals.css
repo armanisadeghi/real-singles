@@ -1,13 +1,37 @@
 @import "tailwindcss";
 
 :root {
+  /* Brand Colors */
+  --brand-primary: #CC3366;
+  --brand-primary-light: #E54B7D;
+  --brand-primary-dark: #A32952;
+  --brand-secondary: #333366;
+  --brand-secondary-light: #4A4A8A;
+  --brand-secondary-dark: #252550;
+  
+  /* Neutral Colors */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #333333;
+  --muted: #F5F5F5;
+  --muted-foreground: #666666;
+  --border: #E5E5E5;
+  
+  /* Header height for layout calculations */
+  --header-height: 72px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-light: var(--brand-primary-light);
+  --color-brand-primary-dark: var(--brand-primary-dark);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-secondary-light: var(--brand-secondary-light);
+  --color-brand-secondary-dark: var(--brand-secondary-dark);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -16,11 +40,56 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --muted: #1a1a1a;
+    --muted-foreground: #a0a0a0;
+    --border: #2a2a2a;
   }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Safe area insets for iOS */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Ensure inputs don't zoom on iOS */
+input, select, textarea {
+  font-size: 16px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
 }

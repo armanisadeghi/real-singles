@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [error, setError] = useState("");
@@ -19,6 +20,18 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -123,6 +136,28 @@ export default function RegisterPage() {
             placeholder="At least 8 characters"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
+        </div>
+
+        <div>
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            Confirm Password
+          </label>
+          <input
+            id="confirmPassword"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength={8}
+            placeholder="Enter password again"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          />
+          {password && confirmPassword && password !== confirmPassword && (
+            <p className="mt-1 text-sm text-red-600">Passwords do not match</p>
+          )}
+          {password && confirmPassword && password === confirmPassword && (
+            <p className="mt-1 text-sm text-green-600">Passwords match ✓</p>
+          )}
         </div>
 
         <div>

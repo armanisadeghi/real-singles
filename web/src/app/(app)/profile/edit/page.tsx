@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -17,20 +17,55 @@ const EXERCISE = ["never", "sometimes", "regularly", "daily"];
 const WANTS_KIDS = ["yes", "no", "maybe", "have_and_want_more"];
 const GENDERS = ["male", "female", "non-binary", "other"];
 
+const AUTOSAVE_DELAY = 5000; // 5 seconds
+
+type ProfileState = {
+  first_name: string;
+  last_name: string;
+  date_of_birth: string;
+  gender: string;
+  looking_for: string[];
+  height_inches: string;
+  body_type: string;
+  city: string;
+  state: string;
+  country: string;
+  occupation: string;
+  education: string;
+  religion: string;
+  smoking: string;
+  drinking: string;
+  exercise: string;
+  has_kids: boolean;
+  wants_kids: string;
+  interests: string[];
+  bio: string;
+  looking_for_description: string;
+};
+
+type SaveStatus = "saved" | "saving" | "unsaved" | "error" | "idle";
+
 export default function EditProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+  // Refs for autosave
+  const lastSavedProfileRef = useRef<string>("");
+  const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialLoadRef = useRef(true);
 
   // Form state
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<ProfileState>({
     first_name: "",
     last_name: "",
     date_of_birth: "",
     gender: "",
-    looking_for: [] as string[],
+    looking_for: [],
     height_inches: "",
     body_type: "",
     city: "",
@@ -44,70 +79,36 @@ export default function EditProfilePage() {
     exercise: "",
     has_kids: false,
     wants_kids: "",
-    interests: [] as string[],
+    interests: [],
     bio: "",
     looking_for_description: "",
   });
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  // Check if profile has changed from last saved state
+  const hasChanges = useCallback(() => {
+    const currentJson = JSON.stringify(profile);
+    return currentJson !== lastSavedProfileRef.current;
+  }, [profile]);
 
-  const loadProfile = async () => {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      router.push("/login");
-      return;
+  // Save function
+  const performSave = useCallback(async (isAutosave = false) => {
+    // Don't save if no changes
+    if (!hasChanges()) {
+      return true;
     }
 
-    const { data: existingProfile } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
-
-    if (existingProfile) {
-      setProfile({
-        first_name: existingProfile.first_name || "",
-        last_name: existingProfile.last_name || "",
-        date_of_birth: existingProfile.date_of_birth || "",
-        gender: existingProfile.gender || "",
-        looking_for: existingProfile.looking_for || [],
-        height_inches: existingProfile.height_inches?.toString() || "",
-        body_type: existingProfile.body_type || "",
-        city: existingProfile.city || "",
-        state: existingProfile.state || "",
-        country: existingProfile.country || "",
-        occupation: existingProfile.occupation || "",
-        education: existingProfile.education || "",
-        religion: existingProfile.religion || "",
-        smoking: existingProfile.smoking || "",
-        drinking: existingProfile.drinking || "",
-        exercise: existingProfile.exercise || "",
-        has_kids: existingProfile.has_kids || false,
-        wants_kids: existingProfile.wants_kids || "",
-        interests: existingProfile.interests || [],
-        bio: existingProfile.bio || "",
-        looking_for_description: existingProfile.looking_for_description || "",
-      });
+    if (!isAutosave) {
+      setSaving(true);
     }
-
-    setLoading(false);
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
+    setSaveStatus("saving");
     setError("");
-    setSuccess("");
 
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
       router.push("/login");
-      return;
+      return false;
     }
 
     const profileData = {
@@ -141,13 +142,151 @@ export default function EditProfilePage() {
 
     if (upsertError) {
       setError(upsertError.message);
-    } else {
-      setSuccess("Profile saved successfully!");
-      setTimeout(() => setSuccess(""), 3000);
+      setSaveStatus("error");
+      if (!isAutosave) {
+        setSaving(false);
+      }
+      return false;
     }
 
-    setSaving(false);
+    // Update last saved state
+    lastSavedProfileRef.current = JSON.stringify(profile);
+    setLastSaved(new Date());
+    setSaveStatus("saved");
+    
+    if (!isAutosave) {
+      setSuccess("Profile saved successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+      setSaving(false);
+    }
+
+    return true;
+  }, [profile, hasChanges, router]);
+
+  // Manual save handler
+  const handleSave = useCallback(async () => {
+    // Clear any pending autosave
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+    }
+    await performSave(false);
+  }, [performSave]);
+
+  // Load profile on mount
+  useEffect(() => {
+    loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadProfile = async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (existingProfile) {
+      const loadedProfile = {
+        first_name: existingProfile.first_name || "",
+        last_name: existingProfile.last_name || "",
+        date_of_birth: existingProfile.date_of_birth || "",
+        gender: existingProfile.gender || "",
+        looking_for: existingProfile.looking_for || [],
+        height_inches: existingProfile.height_inches?.toString() || "",
+        body_type: existingProfile.body_type || "",
+        city: existingProfile.city || "",
+        state: existingProfile.state || "",
+        country: existingProfile.country || "",
+        occupation: existingProfile.occupation || "",
+        education: existingProfile.education || "",
+        religion: existingProfile.religion || "",
+        smoking: existingProfile.smoking || "",
+        drinking: existingProfile.drinking || "",
+        exercise: existingProfile.exercise || "",
+        has_kids: existingProfile.has_kids || false,
+        wants_kids: existingProfile.wants_kids || "",
+        interests: existingProfile.interests || [],
+        bio: existingProfile.bio || "",
+        looking_for_description: existingProfile.looking_for_description || "",
+      };
+      setProfile(loadedProfile);
+      // Store the initial state as "last saved"
+      lastSavedProfileRef.current = JSON.stringify(loadedProfile);
+    } else {
+      // For new profiles, store empty state
+      lastSavedProfileRef.current = JSON.stringify(profile);
+    }
+
+    setLoading(false);
+    isInitialLoadRef.current = false;
   };
+
+  // Autosave effect - triggers when profile changes
+  useEffect(() => {
+    // Skip autosave during initial load
+    if (isInitialLoadRef.current || loading) {
+      return;
+    }
+
+    // Check if there are actual changes
+    if (!hasChanges()) {
+      setSaveStatus("saved");
+      return;
+    }
+
+    // Mark as unsaved
+    setSaveStatus("unsaved");
+
+    // Clear existing timer
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+
+    // Set new timer for autosave
+    autosaveTimerRef.current = setTimeout(() => {
+      performSave(true);
+    }, AUTOSAVE_DELAY);
+
+    // Cleanup
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, [profile, loading, hasChanges, performSave]);
+
+  // Save on page unload (safety net)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasChanges()) {
+        // Try to save synchronously (won't always work)
+        e.preventDefault();
+        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasChanges]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, []);
 
   const toggleInterest = (interest: string) => {
     setProfile(prev => ({
@@ -175,16 +314,76 @@ export default function EditProfilePage() {
     );
   }
 
+  // Helper to format relative time
+  const getRelativeTime = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return "just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ago`;
+  };
+
+  // Status indicator component
+  const SaveStatusIndicator = () => {
+    switch (saveStatus) {
+      case "saving":
+        return (
+          <div className="flex items-center text-sm text-gray-500">
+            <svg className="animate-spin h-4 w-4 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            Saving...
+          </div>
+        );
+      case "saved":
+        return (
+          <div className="flex items-center text-sm text-green-600">
+            <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Saved {lastSaved ? getRelativeTime(lastSaved) : ""}
+          </div>
+        );
+      case "unsaved":
+        return (
+          <div className="flex items-center text-sm text-amber-600">
+            <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Unsaved changes
+          </div>
+        );
+      case "error":
+        return (
+          <div className="flex items-center text-sm text-red-600">
+            <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Save failed
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>
+          <div className="mt-1">
+            <SaveStatusIndicator />
+          </div>
+        </div>
         <button
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || saveStatus === "saving"}
           className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
         >
-          {saving ? "Saving..." : "Save Changes"}
+          {saving || saveStatus === "saving" ? "Saving..." : "Save Changes"}
         </button>
       </div>
 
@@ -278,7 +477,7 @@ export default function EditProfilePage() {
                 type="number"
                 value={profile.height_inches}
                 onChange={(e) => setProfile(prev => ({ ...prev, height_inches: e.target.value }))}
-                placeholder="e.g., 68 for 5'8\""
+                placeholder="e.g., 68 for 5 ft 8 in"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
