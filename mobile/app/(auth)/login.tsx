@@ -298,11 +298,15 @@ const Login = () => {
                 onChangeText={handleEmailChange}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoComplete="off"
+                autoCorrect={false}
+                contextMenuHidden={true}
                 style={{
                   flex: 1,
-                  paddingHorizontal: 10,
+                  paddingLeft: 10,
                   paddingVertical: 10,
-                  color: 'black'
+                  color: 'black',
+                  fontSize: 16,
                 }}
               />
             </View>
@@ -323,12 +327,15 @@ const Login = () => {
                 value={password}
                 onChangeText={handlePasswordChange}
                 secureTextEntry={!showPassword}
+                autoComplete="off"
+                contextMenuHidden={true}
                 className="text-dark"
                 style={{
                   flex: 1,
-                  paddingHorizontal: 10,
+                  paddingLeft: 10,
                   paddingVertical: 10,
-                  color: 'black'
+                  color: 'black',
+                  fontSize: 16,
                 }}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
