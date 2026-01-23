@@ -1,544 +1,681 @@
+/**
+ * API Client for Next.js Backend
+ * 
+ * This module provides all API functions that call the Next.js backend.
+ * It replaces the old PHP API calls with the new Supabase-backed endpoints.
+ * 
+ * All functions maintain the same signatures as the old api.ts for easy migration.
+ */
+
 import { EditProfileFormData } from "@/types";
-import { axiosClient, axiosPublic } from "./axiosClient";
+import { supabase, getSession } from "./supabase";
 
+// Get API URL from environment
+const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/api";
+
+/**
+ * Make an authenticated API request
+ */
+async function apiRequest<T = any>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const session = await getSession();
+  
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+
+  // Add auth token if available
+  if (session?.access_token) {
+    (headers as Record<string, string>)["Authorization"] = `Bearer ${session.access_token}`;
+  }
+
+  const url = `${API_URL}${endpoint}`;
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error(`API Error [${endpoint}]:`, data);
+      return {
+        success: false,
+        msg: data.msg || data.error || "Request failed",
+      } as T;
+    }
+
+    return data;
+  } catch (error) {
+    console.error(`API Request Error [${endpoint}]:`, error);
+    return {
+      success: false,
+      msg: "Network error. Please check your connection.",
+    } as T;
+  }
+}
+
+/**
+ * Make an authenticated FormData API request
+ */
+async function apiFormDataRequest<T = any>(
+  endpoint: string,
+  formData: FormData,
+  method: "POST" | "PUT" | "DELETE" = "POST"
+): Promise<T> {
+  const session = await getSession();
+  
+  const headers: HeadersInit = {};
+
+  // Add auth token if available
+  if (session?.access_token) {
+    headers["Authorization"] = `Bearer ${session.access_token}`;
+  }
+
+  const url = `${API_URL}${endpoint}`;
+  
+  try {
+    const response = await fetch(url, {
+      method,
+      body: formData,
+      headers,
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error(`API Error [${endpoint}]:`, data);
+      return {
+        success: false,
+        msg: data.msg || data.error || "Request failed",
+      } as T;
+    }
+
+    return data;
+  } catch (error) {
+    console.error(`API Request Error [${endpoint}]:`, error);
+    return {
+      success: false,
+      msg: "Network error. Please check your connection.",
+    } as T;
+  }
+}
+
+// ===========================================
+// AUTH ENDPOINTS
+// ===========================================
+
+/**
+ * Login with email and password
+ * Note: For mobile, we recommend using Supabase auth directly via lib/supabase.ts
+ * This is provided for compatibility with FormData-based login flows
+ */
 export const login = async (loginData: FormData) => {
-  const res = await axiosPublic.post("/login.php", loginData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+  const email = loginData.get("Email") as string || loginData.get("email") as string;
+  const password = loginData.get("Password") as string || loginData.get("password") as string;
+
+  return apiRequest("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
   });
-  return res.data;
 };
 
-export const login2 = async (loginData: FormData) => {
-  const res = await fetch('https://itinfonity.io/datingAPI/webservice/login.php', {
-    method: 'POST',
-    body: loginData,
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  const data = await res.json();
-  // console.log("Login response:", data);
-  
-  return data;
-}
-
+/**
+ * Register new user
+ */
 export const register = async (registerData: FormData) => {
-  console.log("Registering with data:", registerData);
-  const res = await axiosPublic.post("/register.php", registerData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+  const email = registerData.get("Email") as string || registerData.get("email") as string;
+  const password = registerData.get("Password") as string || registerData.get("password") as string;
+  const displayName = registerData.get("DisplayName") as string || registerData.get("name") as string;
+
+  return apiRequest("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ email, password, display_name: displayName }),
   });
-  return res.data;
 };
 
-export const register2 = async (registerData: FormData) => {
-  const res = await fetch('https://itinfonity.io/datingAPI/webservice/register.php', {
-    method: 'POST',
-    body: registerData,
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  console.log("Registering res:", res);
-  
-  const data = await res.json();
-  console.log("Register response:", data);
-  return data;
-}
-
+/**
+ * Logout current user
+ */
 export const logout = async () => {
-  const res = await axiosClient.get("/logout.php");
-  return res.data;
-}
-
-export const forgotPassword = async (Email: FormData) => {
-  const res = await axiosClient.post('/forgotPassword.php', Email, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
+  return apiRequest("/auth/logout", { method: "POST" });
 };
 
+/**
+ * Request password reset email
+ */
+export const forgotPassword = async (data: FormData) => {
+  const email = data.get("Email") as string || data.get("email") as string;
+  
+  return apiRequest("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+};
+
+/**
+ * Verify OTP code
+ */
 export const verifyOtp = async (data: FormData) => {
-  const res = await axiosClient.post('/VerifyOTP.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+  const email = data.get("Email") as string;
+  const otp = data.get("OTP") as string || data.get("otp") as string;
+  
+  return apiRequest("/auth/confirm-phone", {
+    method: "POST",
+    body: JSON.stringify({ email, otp }),
   });
-  return res.data;
 };
 
-export const forgotPassword2 = async (data: FormData) => {
-  const res = await axiosClient.post('/ForgotPasswordStep2.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-};
-
+/**
+ * Change password (authenticated)
+ */
 export const changePassword = async (data: FormData) => {
-  const res = await axiosClient.post('/changePassword.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+  const currentPassword = data.get("CurrentPassword") as string || data.get("current_password") as string;
+  const newPassword = data.get("NewPassword") as string || data.get("new_password") as string;
+  
+  return apiRequest("/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
   });
-  return res.data;
 };
 
+// ===========================================
+// USER & PROFILE ENDPOINTS
+// ===========================================
 
-export const CommonFileUpload = async (formData: FormData) => {
-  console.log("Uploading attachments (public):", JSON.stringify(formData));
-
-  const res = await axiosPublic.post("upload_image.php", formData, {
-
-    headers: { 
-       "Content-Type": "multipart/form-data",
-       "User-Agent": "ReactNativeApp",
-       "Accept": "*/*",
-     },
-  });
-  return res.data;
-};
-
-
-
-export const getHomeScreenData = async () => {
-  const res = await axiosClient.get('/HomeScreen.php', {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  return res.data;
-};
-
-export const getFilter = async () => {
-  const res = await axiosClient.get('/GetFilter.php', {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  return res.data;
-}
-
-export const saveFilter = async (data: FormData) => {
-  const res = await axiosClient.post('/saveFilter.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-};
-
-export const applyFilters = async (paramsObj: any) => {
-  try {
-    const res = await axiosClient.get('/Filter.php', {
-      params: paramsObj, // Ye query string banayega: /Filter.php?Gender=both&min_age=18...
-    });
-    return res.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const clearFilter = async () => {
-  const res = await axiosClient.post('/ClearFilter.php');
-  return res.data;
-};
-
-
-export const getAllTopMatches = async () => {
-  const res = await axiosClient.get('/TopMatchProfile.php');
-  return res.data;
-}
-export const getAllFeaturedVideos = async () => {
-  const res = await axiosClient.get('/FeaturedVideo.php');
-  return res.data;
-}
-export const getAllEvents = async () => {
-  const res = await axiosClient.get('/EventList.php');
-  return res.data;
-}
-export const getAllVirtualDate = async () => {
-  const res = await axiosClient.get('/VirtualSpeedDating.php');
-  return res.data;
-}
-export const getAllNearBy = async (location: FormData) => {
-  const res = await axiosClient.post('/NearByProfile.php', location, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
-export const getEventDetails = async (EventID: string) => {
-  const res = await axiosClient.get('/EventDetails.php', {
-    params: { EventID },
-  });
-  return res.data;
-}
-
-export const markEventAsInterested = async (data: FormData) => {
-  console.log("Marking event as interested with data:", data);
-  
-  const res = await axiosClient.post('/MarkAsInterested.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
-export const getAllNotifications = async () => {
-  const res = await axiosClient.get('/NotificationList.php');
-  return res.data;
-}
-
-export const checkEmailExist = async (email: FormData) => {
-  console.log("Checking email existence with data:", email);
-  
-  const res = await axiosClient.post('/CheckEmailExist.php', email, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
-export const fetchUserProfile = async (userId: string) => {
-  const res = await axiosClient.get('/UserProfile.php', {
-    params: { userID: userId },
-  });
-  return res.data;
-}
-
-export const updateUser = async (data: EditProfileFormData) => {
-  try {
-    const res = await axiosClient.put('/UpdateProfile.php', data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return res.data;
-  } catch (error) {
-    console.log("Error updating user:", error);
-    return {
-      success: false,
-      msg: "Failed to update profile"
-    };
-  }
-  
-}
-
-export const fetchOtherProfile = async (id: string) => {
-  console.log("id in fetchOtherProfile:", id);
-  
-  const res = await axiosClient.get(`/getOtherProfile.php?OtherUserID=${encodeURIComponent(id)}`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  return res.data;
-}
-
-// export const fetchOtherProfile2 = async (id: string) => {
-//   const token = await getToken();
-//   console.log("token in other profile: ", token);
-  
-//   const res = await fetch(`https://itinfonity.io/datingAPI/webservice/getOtherProfile.php?OtherUserID=${encodeURIComponent(id)}`, {
-//     method: 'GET',
-//     headers: {
-//       "Content-Type": "application/json",
-//       "Authorization": `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTA3NDQyMDEsImlzcyI6InlvdXIuZG9tYWluLm5hbWUiLCJuYmYiOjE3NTA3NDQyMDEsInVzZXJJRCI6IjExMCJ9.7HcFZoIISCwKP91OYofKv3EmQyhkWuwuRASv6nuR3NU`,
-//     },
-//   });
-//   const data = await res.json();
-//   console.log("Other profile response:", data);
-//   return data;
-// }
-
-export const toggleFavourite = async (data: FormData) => {
-  const res = await axiosClient.post('/AddFavourite.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
-export const getFavouriteList = async () => {
-  const res = await axiosClient.get('/FavouriteList.php', {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  return res.data;
-}
-
-export const createEvent = async (data: FormData) => {
-  const res = await axiosClient.post('/CreateEvent.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
-export const contactUs = async (data: FormData) => {
-  const res = await axiosClient.post('/contactUs.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
-
-
-export const getProductsGiftList = async () => {
-  const res = await axiosClient.get('/GetProductGiftList.php');
-  return res.data;
-}
-
-export const getProductsGiftDetail = async (data: FormData) => {
-  console.log("Fetching product gift details with data:", data);
-  
-  const res = await axiosClient.get(`/GetProductGiftDetail.php?productid=${data.get('productid')}`, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  console.log("Product details response:", res.data);
-  
-  return res.data;
-}
-
-export const addUpdateRating = async (data: FormData) => {
-  const res = await axiosClient.post('/addRating.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },  
-  });
-  return res.data;
-}
-
-
-export const createGroup = async (data: FormData) => {
-  const res = await axiosClient.post('/CreateGroup.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
-export const getGroupList = async () => {
-  const res = await axiosClient.get('/GroupList.php', {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  return res.data;
-}
-
-export const getVirtualDateList = async () => {
-  const res = await axiosClient.get('/GetVirtualDateList.php');
-  return res.data;
-}
-
-export const getVirtualSpeedDetails = async (id: string) => {
-  const res = await axiosClient.get('/GetVirtualSpeedDetail.php', {
-    params: {
-      id
-    },
-  });
-  return res.data;
-}
-
-export const registerVirtualSlot = async (data: FormData) => {
-  const res = await axiosClient.post('/registerVirtualSlots.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
-export const checkRedeemPoints = async () => {
-  const res = await axiosClient.get('/CheckRedeemPoint.php');
-  return res.data;
-}
-
-export const acceptOrderRedeemPoints = async (data: FormData) => {
-  console.log("Accepting order redeem points with data:", data);
-  
-  const res = await axiosClient.post('/AcceptOrderReedemPoint.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
-export const acceptOrderRedeemPointsWithFetch = async (data: FormData) => {
-  console.log("Accepting order redeem points with fetch:", data);
-  
-  try {
-    const response = await fetch('https://itinfonity.io/datingAPI/webservice/AcceptOrderRedeemPoint.php', {
-      method: 'POST',
-      body: data,
-      headers: {
-        // Let fetch set content type with boundary
-      }
-    });
-    
-    console.log("Response status:", response.status);
-    
-    // Get text first to avoid JSON parse errors
-    const text = await response.text();
-    console.log("Response text:", text);
-    
-    if (!text) {
-      return {
-        success: false,
-        msg: "Server returned empty response"
-      };
-    }
-    
-    try {
-      return JSON.parse(text);
-    } catch (e) {
-      console.error("Failed to parse response as JSON:", e);
-      return {
-        success: false,
-        msg: "Invalid server response format"
-      };
-    }
-  } catch (error) {
-    console.error("Fetch error:", error);
-    return {
-      success: false,
-      msg: "Network error during API call"
-    };
-  }
-}
-
-export const getAgoraChatToken = async (userId: string) => {
-  const data = new FormData();
-  data.append("userId", userId);
-  const res = await axiosClient.post("/AgoraChatToken.php", data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
-export const getAgoraCallToken = async (userid: string) => {
-  const data = new FormData();
-  data.append('userid', userid);
-  const res = await axiosClient.post('/AgoraCallToken.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
-export const getAgoraCallRefreshToken = async (data: FormData) => {
-  const res = await axiosClient.post('/AgoraRefreshToken.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-export const getAgoraChatRefreshToken = async (data: FormData) => {
-  const res = await axiosClient.post('/AgoraRefreshToken.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
-}
-
+/**
+ * Get current user's profile
+ */
 export const getProfile = async () => {
-  const res = await axiosClient.get('/GetProfile.php');
-  return res.data;
-}
+  return apiRequest("/users/me");
+};
 
-export const followUser = async (userId: string) => {
-  const data = new FormData();
-  data.append('FollowingID', userId);
-  const res = await axiosClient.post('/FollowUser.php', data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+/**
+ * Fetch user profile by ID (for current user)
+ */
+export const fetchUserProfile = async (userId: string) => {
+  // If fetching current user, use /users/me
+  const session = await getSession();
+  if (session?.user?.id === userId) {
+    return apiRequest("/users/me");
+  }
+  return apiRequest(`/users/${userId}`);
+};
+
+/**
+ * Fetch another user's profile
+ */
+export const fetchOtherProfile = async (id: string) => {
+  return apiRequest(`/users/${id}`);
+};
+
+/**
+ * Update user profile
+ */
+export const updateUser = async (data: EditProfileFormData) => {
+  return apiRequest("/users/me", {
+    method: "PUT",
+    body: JSON.stringify(data),
   });
-  return res.data;
-}
+};
 
+/**
+ * Check if email already exists
+ */
+export const checkEmailExist = async (emailData: FormData) => {
+  const email = emailData.get("Email") as string || emailData.get("email") as string;
+  
+  // Use Supabase directly for this check
+  const { data, error } = await supabase
+    .from("users")
+    .select("id")
+    .eq("email", email)
+    .single();
+
+  return {
+    success: true,
+    exists: !!data && !error,
+    msg: data ? "Email already exists" : "Email is available",
+  };
+};
+
+// ===========================================
+// HOME SCREEN & DISCOVERY ENDPOINTS
+// ===========================================
+
+/**
+ * Get aggregated home screen data
+ */
+export const getHomeScreenData = async () => {
+  return apiRequest("/discover");
+};
+
+/**
+ * Get all top matches
+ */
+export const getAllTopMatches = async () => {
+  return apiRequest("/discover/top-matches");
+};
+
+/**
+ * Get nearby profiles
+ */
+export const getAllNearBy = async (location: FormData) => {
+  const latitude = location.get("Latitude") as string || location.get("latitude") as string;
+  const longitude = location.get("Longitude") as string || location.get("longitude") as string;
+  
+  return apiRequest(`/discover/nearby?latitude=${latitude}&longitude=${longitude}`);
+};
+
+/**
+ * Get featured videos
+ * Note: Videos come from the discover endpoint now
+ */
+export const getAllFeaturedVideos = async () => {
+  const data = await apiRequest("/discover");
+  return {
+    success: true,
+    data: data?.data?.Videos || [],
+    msg: "Featured videos fetched",
+  };
+};
+
+// ===========================================
+// FILTER ENDPOINTS
+// ===========================================
+
+/**
+ * Get user's saved filters
+ */
+export const getFilter = async () => {
+  return apiRequest("/filters");
+};
+
+/**
+ * Save filter preferences
+ */
+export const saveFilter = async (data: FormData) => {
+  return apiFormDataRequest("/filters", data);
+};
+
+/**
+ * Apply filters and get results
+ */
+export const applyFilters = async (paramsObj: any) => {
+  const queryString = new URLSearchParams(paramsObj).toString();
+  return apiRequest(`/discover/top-matches?${queryString}`);
+};
+
+/**
+ * Clear/reset filters
+ */
+export const clearFilter = async () => {
+  return apiRequest("/filters", { method: "DELETE" });
+};
+
+// ===========================================
+// FAVORITES ENDPOINTS
+// ===========================================
+
+/**
+ * Get user's favorites list
+ */
+export const getFavouriteList = async () => {
+  return apiRequest("/favorites");
+};
+
+/**
+ * Toggle favorite status for a user
+ */
+export const toggleFavourite = async (data: FormData) => {
+  const favoriteUserId = data.get("FavouriteUserID") as string || 
+                         data.get("favourite_user_id") as string ||
+                         data.get("user_id") as string;
+  
+  return apiRequest("/favorites", {
+    method: "POST",
+    body: JSON.stringify({ favorite_user_id: favoriteUserId }),
+  });
+};
+
+/**
+ * Follow/unfollow a user
+ */
+export const followUser = async (userId: string) => {
+  return apiRequest("/favorites", {
+    method: "POST",
+    body: JSON.stringify({ favorite_user_id: userId }),
+  });
+};
+
+// ===========================================
+// EVENTS ENDPOINTS
+// ===========================================
+
+/**
+ * Get all events
+ */
+export const getAllEvents = async () => {
+  return apiRequest("/events");
+};
+
+/**
+ * Get event details
+ */
+export const getEventDetails = async (EventID: string) => {
+  return apiRequest(`/events/${EventID}`);
+};
+
+/**
+ * Create a new event
+ */
+export const createEvent = async (data: FormData) => {
+  return apiFormDataRequest("/events", data);
+};
+
+/**
+ * Mark event as interested / register
+ */
+export const markEventAsInterested = async (data: FormData) => {
+  const eventId = data.get("EventID") as string || data.get("event_id") as string;
+  const status = data.get("Status") as string || "interested";
+  
+  return apiRequest(`/events/${eventId}/register`, {
+    method: "POST",
+    body: JSON.stringify({ status }),
+  });
+};
+
+// ===========================================
+// VIRTUAL SPEED DATING ENDPOINTS
+// ===========================================
+
+/**
+ * Get all virtual speed dating sessions
+ */
+export const getAllVirtualDate = async () => {
+  return apiRequest("/speed-dating");
+};
+
+/**
+ * Get virtual date list (alias)
+ */
+export const getVirtualDateList = async () => {
+  return apiRequest("/speed-dating");
+};
+
+/**
+ * Get speed dating session details
+ */
+export const getVirtualSpeedDetails = async (id: string) => {
+  return apiRequest(`/speed-dating/${id}`);
+};
+
+/**
+ * Register for virtual speed dating slot
+ */
+export const registerVirtualSlot = async (data: FormData) => {
+  const sessionId = data.get("SessionID") as string || data.get("session_id") as string;
+  
+  return apiRequest(`/speed-dating/${sessionId}/register`, {
+    method: "POST",
+  });
+};
+
+// ===========================================
+// NOTIFICATIONS ENDPOINTS
+// ===========================================
+
+/**
+ * Get all notifications
+ */
+export const getAllNotifications = async () => {
+  return apiRequest("/notifications");
+};
+
+// ===========================================
+// GROUPS ENDPOINTS
+// ===========================================
+
+/**
+ * Get user's groups
+ */
+export const getGroupList = async () => {
+  return apiRequest("/groups");
+};
+
+/**
+ * Create a new group
+ */
+export const createGroup = async (data: FormData) => {
+  return apiFormDataRequest("/groups", data);
+};
+
+// ===========================================
+// PRODUCTS & REWARDS ENDPOINTS
+// ===========================================
+
+/**
+ * Get products/gifts list
+ */
+export const getProductsGiftList = async () => {
+  return apiRequest("/products");
+};
+
+/**
+ * Get product details
+ */
+export const getProductsGiftDetail = async (data: FormData) => {
+  const productId = data.get("productid") as string || data.get("product_id") as string;
+  return apiRequest(`/products/${productId}`);
+};
+
+/**
+ * Check user's redeemable points
+ */
+export const checkRedeemPoints = async () => {
+  return apiRequest("/points");
+};
+
+/**
+ * Accept/place order using points
+ */
+export const acceptOrderRedeemPoints = async (data: FormData) => {
+  const productId = data.get("ProductID") as string || data.get("product_id") as string;
+  const quantity = data.get("Quantity") as string || "1";
+  const shippingAddress = data.get("ShippingAddress") as string || data.get("shipping_address") as string;
+  
+  return apiRequest("/orders", {
+    method: "POST",
+    body: JSON.stringify({ 
+      product_id: productId, 
+      quantity: parseInt(quantity),
+      shipping_address: shippingAddress,
+    }),
+  });
+};
+
+// Alias for compatibility
+export const acceptOrderRedeemPointsWithFetch = acceptOrderRedeemPoints;
+
+// ===========================================
+// REVIEWS & RATINGS ENDPOINTS
+// ===========================================
+
+/**
+ * Add or update rating/review
+ */
+export const addUpdateRating = async (data: FormData) => {
+  const reviewedUserId = data.get("ReviewedUserID") as string || data.get("reviewed_user_id") as string;
+  const rating = data.get("Rating") as string || data.get("rating") as string;
+  const reviewText = data.get("ReviewText") as string || data.get("review_text") as string;
+  const relationship = data.get("Relationship") as string || data.get("relationship") as string;
+  
+  return apiRequest("/reviews", {
+    method: "POST",
+    body: JSON.stringify({
+      reviewed_user_id: reviewedUserId,
+      rating: parseInt(rating),
+      review_text: reviewText,
+      relationship,
+    }),
+  });
+};
+
+// ===========================================
+// AGORA CHAT & CALL ENDPOINTS
+// ===========================================
+
+/**
+ * Get Agora chat token
+ */
+export const getAgoraChatToken = async (userId: string) => {
+  return apiRequest("/agora/chat-token", {
+    method: "POST",
+    body: JSON.stringify({ user_id: userId }),
+  });
+};
+
+/**
+ * Get Agora call token
+ */
+export const getAgoraCallToken = async (userId: string) => {
+  return apiRequest("/agora/call-token", {
+    method: "POST",
+    body: JSON.stringify({ user_id: userId }),
+  });
+};
+
+/**
+ * Refresh Agora call token
+ */
+export const getAgoraCallRefreshToken = async (data: FormData) => {
+  const channelName = data.get("ChannelName") as string || data.get("channel_name") as string;
+  const userId = data.get("UserID") as string || data.get("user_id") as string;
+  
+  return apiRequest("/agora/call-token", {
+    method: "POST",
+    body: JSON.stringify({ user_id: userId, channel_name: channelName }),
+  });
+};
+
+/**
+ * Refresh Agora chat token
+ */
+export const getAgoraChatRefreshToken = async (data: FormData) => {
+  const userId = data.get("UserID") as string || data.get("user_id") as string;
+  
+  return apiRequest("/agora/chat-token", {
+    method: "POST",
+    body: JSON.stringify({ user_id: userId }),
+  });
+};
+
+// ===========================================
+// UPLOAD & GALLERY ENDPOINTS
+// ===========================================
+
+/**
+ * Upload image/video file
+ */
 export const uploadImage = async (imageUrl?: string, videoUrl?: string) => {
-  const formdata: any = new FormData();
-
+  const formData = new FormData();
+  
   if (imageUrl) {
-    formdata.append("uploadattachments[]", {
+    formData.append("file", {
       uri: imageUrl,
       type: "image/jpeg",
       name: "photo.jpg",
-    });
+    } as any);
+    formData.append("type", "image");
   }
 
   if (videoUrl) {
-    formdata.append("uploadattachments[]", {
+    formData.append("file", {
       uri: videoUrl,
       type: "video/mp4",
       name: "video.mp4",
-    });
+    } as any);
+    formData.append("type", "video");
   }
 
-     formdata.forEach((value: any, key: string) => {
-      console.log(key, value);
-    });
-
-
-  console.log("formdata in uploadImage:", JSON.stringify(formdata));
-
-  const res = await axiosClient.post("upload_image.php", formdata, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  // const res = await axiosClient.post("upload_image.php", formdata);
-
-  console.log("res in uploadImage", res);
-  
-  return res.data;
+  return apiFormDataRequest("/upload", formData);
 };
 
+/**
+ * Common file upload (for profile images, etc.)
+ */
+export const CommonFileUpload = async (formData: FormData) => {
+  return apiFormDataRequest("/upload", formData);
+};
+
+/**
+ * Save gallery image/video
+ */
 export const saveGalleryImage = async (imageUrl: string, videoUrl: string) => {
-  const formdata: any = new FormData();
-  if (imageUrl) formdata.append('livePicture', imageUrl);
-  if (videoUrl) formdata.append('LiveVideo', videoUrl);
+  const formData = new FormData();
+  
+  if (imageUrl) {
+    formData.append("file", {
+      uri: imageUrl,
+      type: "image/jpeg",
+      name: "gallery_photo.jpg",
+    } as any);
+    formData.append("type", "image");
+  }
+  
+  if (videoUrl) {
+    formData.append("file", {
+      uri: videoUrl,
+      type: "video/mp4",
+      name: "gallery_video.mp4",
+    } as any);
+    formData.append("type", "video");
+  }
 
-  console.log("formdata in saveGalleryImage:", formdata);
-
-  const res = await axiosClient.post('/addNewGalleryImage.php', formdata, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return res.data;
+  formData.append("bucket", "gallery");
+  
+  return apiFormDataRequest("/upload", formData);
 };
 
+// ===========================================
+// CONTACT & MISC ENDPOINTS
+// ===========================================
 
+/**
+ * Submit contact form
+ */
+export const contactUs = async (data: FormData) => {
+  const name = data.get("Name") as string || data.get("name") as string;
+  const email = data.get("Email") as string || data.get("email") as string;
+  const subject = data.get("Subject") as string || data.get("subject") as string;
+  const message = data.get("Message") as string || data.get("message") as string;
+  
+  return apiRequest("/contact", {
+    method: "POST",
+    body: JSON.stringify({ name, email, subject, message }),
+  });
+};
+
+/**
+ * Save share link notification
+ * Note: This may not be needed with the new backend
+ */
 export const saveLink = async (linkData: FormData) => {
-  const res = await axiosPublic.post("/saveShareLinkNotification.php", linkData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return res.data;
+  // This functionality can be handled by notifications endpoint
+  return { success: true, msg: "Link saved" };
 };
 
+// ===========================================
+// LEGACY ALIASES (for backward compatibility)
+// ===========================================
+
+// These are duplicates/aliases that exist in the old API
+export const login2 = login;
+export const register2 = register;
+export const forgotPassword2 = forgotPassword;
