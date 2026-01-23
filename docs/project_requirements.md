@@ -56,6 +56,12 @@
 | **API** | `/api/groups` endpoints (GET/POST) | ✅ Complete |
 | **API** | `/api/groups/[id]` endpoints (GET/PUT/DELETE) | ✅ Complete |
 | **API** | `/api/groups/[id]/members` endpoints (POST/DELETE) | ✅ Complete |
+| **Auth** | `/api/auth/forgot-password` endpoint (POST) | ✅ Complete |
+| **Auth** | `/api/auth/change-password` endpoint (POST) | ✅ Complete |
+| **Auth** | `/api/auth/social` endpoint (GET/POST) | ✅ Complete |
+| **Auth** | `/api/auth/verify-phone` endpoint (POST) | ✅ Complete |
+| **Auth** | `/api/auth/confirm-phone` endpoint (POST) | ✅ Complete |
+| **API** | `/api/users/me/gallery` endpoints (GET/PUT/DELETE) | ✅ Complete |
 | **Admin** | Admin login page | ✅ Complete |
 | **Admin** | Admin dashboard with stats | ✅ Complete |
 | **Admin** | Admin users management page | ✅ Complete |
@@ -101,31 +107,27 @@
 |----------|------|--------|-------|
 | **Mobile** | API endpoint migration (PHP → Supabase) | 🔄 In Progress | Other Dev |
 | **Mobile** | iOS safe area fixes | 🔄 In Progress | Other Dev |
-| **API** | Auth social login | ⏳ Next Up | Apple/Google OAuth |
 
-### **Not Started** ⏳
+### **Web API - 100% Complete** ✅
 
-#### **Web/API - Remaining (8% of API)**
-| Category | Item | Priority | Notes |
-|----------|------|----------|-------|
-| **API** | Gallery management (reorder/primary) | Low | /api/users/me/gallery/reorder |
-| **Auth** | Social login (Apple, Google) | Medium | Supabase OAuth providers |
-| **Auth** | Phone verification (Twilio) | Low | OTP flow |
-| **Auth** | Forgot/reset password | Medium | Supabase magic link |
-| **Auth** | Change password | Low | Authenticated users |
+All API endpoints have been implemented. Below is a summary of recently completed work:
 
 #### **Recently Completed** ✅
 | Category | Item | Notes |
 |----------|------|-------|
+| **Auth** | Social login endpoints | /api/auth/social (GET/POST) |
+| **Auth** | Forgot password | /api/auth/forgot-password (POST) |
+| **Auth** | Change password | /api/auth/change-password (POST) |
+| **Auth** | Phone verification | /api/auth/verify-phone, confirm-phone |
+| **API** | Gallery management | /api/users/me/gallery (GET/PUT/DELETE) |
 | **API** | Groups endpoints | /api/groups/* (GET/POST/PUT/DELETE + members) |
 | **API** | Speed dating endpoints | /api/speed-dating/* |
 | **API** | Reviews endpoints | /api/reviews (GET/POST) |
 | **API** | Referrals endpoints | /api/referrals (GET/POST) |
-| **API** | Agora call token | /api/agora/call-token |
+| **API** | Agora tokens | /api/agora/chat-token, call-token |
 | **API** | Conversations endpoints | /api/conversations/* |
 | **API** | Events CRUD endpoints | /api/events/* |
 | **API** | Products/Orders endpoints | /api/products/*, /api/orders |
-| **API** | Points endpoint | /api/points |
 | **API** | Blocks/Reports endpoints | /api/blocks, /api/reports |
 | **API** | Notifications endpoints | /api/notifications/* |
 | **Storage** | Supabase Storage buckets | avatars, gallery, events |
@@ -692,11 +694,11 @@ CREATE TABLE contact_submissions (
 | POST | `/api/auth/login` | Login with email/password | ✅ |
 | POST | `/api/auth/logout` | Logout user | ✅ |
 | GET | `/api/auth/session` | Get current session/user | ✅ |
-| POST | `/api/auth/social` | Social login (Apple/Google) | ⏳ |
-| POST | `/api/auth/forgot-password` | Request password reset | ⏳ (uses Supabase magic link) |
-| POST | `/api/auth/change-password` | Change password (authenticated) | ⏳ |
-| POST | `/api/auth/verify-phone` | Send phone verification OTP | ⏳ |
-| POST | `/api/auth/confirm-phone` | Confirm phone with OTP | ⏳ |
+| GET/POST | `/api/auth/social` | Social login (Apple/Google) | ✅ |
+| POST | `/api/auth/forgot-password` | Request password reset | ✅ |
+| POST | `/api/auth/change-password` | Change password (authenticated) | ✅ |
+| POST | `/api/auth/verify-phone` | Send phone verification OTP | ✅ |
+| POST | `/api/auth/confirm-phone` | Confirm phone with OTP | ✅ |
 
 ### **3.2 User & Profile Endpoints**
 
@@ -705,9 +707,10 @@ CREATE TABLE contact_submissions (
 | GET | `/api/users/me` | Get current user profile | ✅ |
 | PUT | `/api/users/me` | Update current user profile | ✅ |
 | GET | `/api/users/[id]` | Get user profile by ID | ✅ |
+| GET | `/api/users/me/gallery` | Get user's gallery | ✅ |
 | POST | `/api/users/me/gallery` | Upload photo/video to gallery | ✅ (via /api/upload) |
-| DELETE | `/api/users/me/gallery/[id]` | Delete gallery item | ✅ (via /api/upload) |
-| PUT | `/api/users/me/gallery/reorder` | Reorder gallery items | ⏳ |
+| PUT | `/api/users/me/gallery` | Reorder/set primary | ✅ |
+| DELETE | `/api/users/me/gallery` | Delete gallery item | ✅ |
 
 ### **3.3 Discovery & Matching Endpoints**
 
@@ -819,12 +822,12 @@ CREATE TABLE contact_submissions (
 | DELETE | `/api/upload` | Delete file from storage | ✅ |
 | POST | `/api/contact` | Submit contact form | ✅ |
 
-### **API Completion Summary**
+### **API Completion Summary** ✅ 100% COMPLETE
 
 | Category | Complete | Total | Percentage |
 |----------|----------|-------|------------|
-| Authentication | 4 | 9 | 44% |
-| User & Profile | 6 | 7 | 86% |
+| Authentication | 9 | 9 | 100% |
+| User & Profile | 7 | 7 | 100% |
 | Discovery & Matching | 11 | 11 | 100% |
 | Favorites & Social | 8 | 8 | 100% |
 | Chat & Communication | 6 | 6 | 100% |
@@ -835,7 +838,7 @@ CREATE TABLE contact_submissions (
 | Reviews & Referrals | 5 | 5 | 100% |
 | Notifications | 4 | 4 | 100% |
 | Utility | 3 | 3 | 100% |
-| **TOTAL** | **70** | **76** | **92%** |
+| **TOTAL** | **76** | **76** | **100%** |
 
 ---
 
