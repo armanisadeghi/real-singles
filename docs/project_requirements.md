@@ -1,7 +1,7 @@
 # **RealSingles - Technical Requirements & Implementation Plan**
 
 **Project:** Complete rebuild of backend infrastructure and fixes for mobile application  
-**Date:** January 22, 2026 (Last Updated: January 23, 2026 - Marketing site complete)  
+**Date:** January 22, 2026 (Last Updated: January 23, 2026 - Core API endpoints complete)  
 **Tech Stack:** Next.js 16.1.4+ (App Router), Supabase (PostgreSQL + Auth), Vercel, React Native/Expo
 
 ---
@@ -25,6 +25,14 @@
 | **Auth** | `/api/auth/logout` endpoint | ✅ Complete |
 | **Auth** | `/api/auth/session` endpoint | ✅ Complete |
 | **API** | `/api/health` endpoint | ✅ Complete |
+| **API** | `/api/users/me` endpoint (GET/PUT) | ✅ Complete |
+| **API** | `/api/users/[id]` endpoint (GET) | ✅ Complete |
+| **API** | `/api/discover` endpoint (aggregated home data) | ✅ Complete |
+| **API** | `/api/discover/top-matches` endpoint (filtered) | ✅ Complete |
+| **API** | `/api/discover/nearby` endpoint (location-based) | ✅ Complete |
+| **API** | `/api/filters` endpoints (GET/POST/DELETE) | ✅ Complete |
+| **API** | `/api/favorites` endpoints (GET/POST/DELETE) | ✅ Complete |
+| **API** | `/api/contact` endpoint (POST) | ✅ Complete |
 | **Admin** | Admin login page | ✅ Complete |
 | **Admin** | Admin dashboard with stats | ✅ Complete |
 | **Admin** | Admin users management page | ✅ Complete |
@@ -70,7 +78,6 @@
 |----------|------|--------|-------|
 | **Mobile** | API endpoint migration (PHP → Supabase) | 🔄 In Progress | Other Dev |
 | **Mobile** | iOS safe area fixes | 🔄 In Progress | Other Dev |
-| **Web** | Profile API endpoints | ⏳ Next Up | - |
 | **Web** | Supabase Storage setup | ⏳ Next Up | - |
 
 ### **Not Started** ⏳
@@ -78,12 +85,8 @@
 #### **Web/API - High Priority**
 | Category | Item | Priority | Notes |
 |----------|------|----------|-------|
-| **API** | Profile endpoints (/api/users/me, /api/users/[id]) | High | Needed for app profile views |
 | **API** | Gallery upload endpoint (/api/upload) | High | Requires Supabase Storage setup |
-| **API** | Discovery endpoints (/api/discover/*) | High | top-matches, nearby, featured |
 | **API** | Matches endpoints (/api/matches) | High | like/pass/super-like actions |
-| **API** | Favorites endpoints (/api/favorites/*) | High | add/remove/list |
-| **API** | Contact form submission (/api/contact) | Medium | Wire up contact page form |
 | **Storage** | Supabase Storage buckets setup | High | avatars, gallery, events buckets |
 
 #### **Web/API - Medium Priority**
@@ -1008,10 +1011,19 @@ web/
 │   │   │   │   ├── forgot-password/route.ts  ⏳
 │   │   │   │   └── change-password/route.ts  ⏳
 │   │   │   ├── health/route.ts           ✅
-│   │   │   ├── users/                    ⏳ (to be created)
-│   │   │   ├── discover/                 ⏳
+│   │   │   ├── users/
+│   │   │   │   ├── me/route.ts           ✅ (GET/PUT profile)
+│   │   │   │   └── [id]/route.ts         ✅ (GET other profile)
+│   │   │   ├── discover/
+│   │   │   │   ├── route.ts              ✅ (home data)
+│   │   │   │   ├── top-matches/route.ts  ✅
+│   │   │   │   └── nearby/route.ts       ✅
+│   │   │   ├── filters/route.ts          ✅ (GET/POST/DELETE)
+│   │   │   ├── favorites/
+│   │   │   │   ├── route.ts              ✅ (GET/POST)
+│   │   │   │   └── [id]/route.ts         ✅ (DELETE)
+│   │   │   ├── contact/route.ts          ✅
 │   │   │   ├── matches/                  ⏳
-│   │   │   ├── favorites/                ⏳
 │   │   │   ├── agora/                    ⏳
 │   │   │   └── ...
 │   │   ├── (auth)/                       ✅ (login, register pages)
