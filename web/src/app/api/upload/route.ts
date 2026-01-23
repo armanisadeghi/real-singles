@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createApiClient } from "@/lib/supabase/server";
 import {
   STORAGE_BUCKETS,
   FILE_SIZE_LIMITS,
@@ -9,27 +8,6 @@ import {
   getGalleryPath,
   type StorageBucket,
 } from "@/lib/supabase/storage";
-
-// Helper to create authenticated Supabase client
-async function createClient() {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
-}
 
 /**
  * POST /api/upload
@@ -43,7 +21,7 @@ async function createClient() {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createApiClient();
 
     // Check authentication
     const {
@@ -245,7 +223,7 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createApiClient();
 
     // Check authentication
     const {
