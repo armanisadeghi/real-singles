@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNavigation } from "@/components/navigation/BottomNavigation";
+import { NotificationBell } from "@/components/notifications";
 
 async function getUser() {
   const supabase = await createClient();
@@ -73,13 +74,19 @@ export default async function AppLayout({
             </nav>
 
             {/* User Menu */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               {/* Points */}
-              <div className="hidden sm:flex items-center px-3 py-1 bg-yellow-100 rounded-full">
+              <Link
+                href="/rewards"
+                className="hidden sm:flex items-center px-3 py-1 bg-yellow-100 hover:bg-yellow-200 rounded-full transition-colors"
+              >
                 <span className="text-yellow-600 font-medium text-sm">
                   ⭐ {user.points} pts
                 </span>
-              </div>
+              </Link>
+
+              {/* Notifications */}
+              <NotificationBell />
 
               {/* Profile Dropdown */}
               <div className="relative group">
