@@ -416,23 +416,15 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
     onChangeField("Ethnicity", newEths);
   };
 
-  const toggleBodyType = (bodyValue: string) => {
-    const currentBodyTypes = formData.BodyType
-      ? formData.BodyType.split(",").map((e) => e.trim())
-      : [];
-    const isSelected = currentBodyTypes.includes(bodyValue);
-
-    let newBodyTypes;
-    if (isSelected) {
-      // Remove body type
-      newBodyTypes = currentBodyTypes.filter((e) => e !== bodyValue);
+  // Body type is SINGLE SELECT (database TEXT, not array)
+  const selectBodyType = (bodyValue: string) => {
+    // If already selected, deselect (set to empty)
+    if (formData.BodyType === bodyValue) {
+      onChangeField("BodyType", "");
     } else {
-      // Add body type
-      newBodyTypes = [...currentBodyTypes, bodyValue];
+      // Set the single value
+      onChangeField("BodyType", bodyValue);
     }
-
-    // Update formData as a comma-separated string
-    onChangeField("BodyType", newBodyTypes.join(", "));
   };
 
   const toggleLanguage = (value: string) => {
@@ -453,11 +445,25 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
     onChangeField("Language", selected);
   };
 
-  const toggleReligion = (value: string) => {
-    let selected: string[] = formData?.Religion
-      ? typeof formData.Religion === 'string'
-        ? formData.Religion.split(",").map((l: string) => l.trim())
-        : []
+  // Religion is SINGLE SELECT (database TEXT, not array)
+  const selectReligion = (value: string) => {
+    // If already selected, deselect (set to empty)
+    if (formData.Religion === value) {
+      onChangeField("Religion", "");
+    } else {
+      // Set the single value
+      onChangeField("Religion", value);
+    }
+  };
+
+  // Pets is MULTI-SELECT (database TEXT[] array)
+  const togglePets = (value: string) => {
+    let selected: string[] = formData?.Pets
+      ? Array.isArray(formData.Pets)
+        ? [...formData.Pets]
+        : typeof formData.Pets === 'string'
+          ? formData.Pets.split(",").map((p: string) => p.trim()).filter(Boolean)
+          : []
       : [];
 
     const isSelected = selected.includes(value);
@@ -468,7 +474,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       selected.push(value);
     }
 
-    onChangeField("Religion", selected.join(", "));
+    onChangeField("Pets", selected);
   };
 
 
@@ -1126,15 +1132,13 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               <Animated.View className="mt-2 gap-3">
                 <View className="flex-row gap-3 flex-wrap">
                   {BODY_TYPE_OPTIONS.map((option) => {
-                    const isSelected = formData.BodyType
-                      ? formData.BodyType.split(",").map((e) => e.trim()).includes(option.value)
-                      : false;
-
+                    // Single select - just compare directly
+                    const isSelected = formData.BodyType === option.value;
 
                     return (
                       <TouchableOpacity
                         key={option.value}
-                        onPress={() => toggleBodyType(option.value)}
+                        onPress={() => selectBodyType(option.value)}
                         activeOpacity={0.9}
                         style={{
                           marginBottom: 8,
@@ -1272,25 +1276,60 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             </View>
             <View>
               <Label text="Pets" />
-              <RNPickerSelect
-                onValueChange={(value) => onChangeField("Pets", value?.toLowerCase().trim())}
-                items={PETS_OPTIONS}
-                placeholder={{
-                  label: "Select Pets",
-                  value: null,
-                  color: "#A0A0A0",
-                }}
-                style={pickerSelectStyles}
-                value={formData.Pets}
-                useNativeAndroidPickerStyle={false}
-                Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
-                )}
-              />
+              <View className="flex-row gap-3 flex-wrap mt-2">
+                {PETS_OPTIONS.map((option) => {
+                  const isSelected = Array.isArray(formData.Pets)
+                    ? formData.Pets.includes(option.value)
+                    : typeof formData.Pets === 'string'
+                      ? formData.Pets.split(",").map((p) => p.trim()).includes(option.value)
+                      : false;
+
+                  return (
+                    <TouchableOpacity
+                      key={option.value}
+                      onPress={() => togglePets(option.value)}
+                      activeOpacity={0.9}
+                      style={{
+                        marginBottom: 8,
+                        borderRadius: 50,
+                        overflow: "hidden",
+                        borderWidth: 1,
+                        borderColor: isSelected ? "transparent" : "lightgrey",
+                      }}
+                    >
+                      {isSelected ? (
+                        <LinearBg
+                          style={{
+                            paddingHorizontal: 16,
+                            paddingVertical: 8,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 8,
+                            borderRadius: 50,
+                          }}
+                        >
+                          <Image
+                            source={icons.check}
+                            style={{ width: 20, height: 20 }}
+                            resizeMode="contain"
+                          />
+                          <Text style={{ color: "#fff" }}>{option.label}</Text>
+                        </LinearBg>
+                      ) : (
+                        <View
+                          style={{
+                            paddingHorizontal: 16,
+                            paddingVertical: 8,
+                            borderRadius: 50,
+                          }}
+                        >
+                          <Text style={{ color: "#000" }}>{option.label}</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
             </View>
             <View>
               <Label text="Exercise" />
@@ -1496,18 +1535,13 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           <Animated.View className="mt-4 gap-5">
             <View className="flex-row gap-3 flex-wrap">
               {RELIGION_OPTIONS.map((option) => {
-                // ✅ Put this here — inside the map
-                const isSelected = formData.Religion
-                  ? typeof formData.Religion === 'string'
-                    ? formData.Religion.split(",").map((l: string) => l.trim().toLowerCase()).includes(option.value.toLowerCase())
-                    : false
-                  : false;
-
+                // Single select - just compare directly (case-insensitive)
+                const isSelected = formData.Religion?.toLowerCase() === option.value.toLowerCase();
 
                 return (
                   <TouchableOpacity
                     key={option.value}
-                    onPress={() => toggleReligion(option.value)}
+                    onPress={() => selectReligion(option.value)}
                     activeOpacity={0.9}
                     style={{
                       marginBottom: 8,

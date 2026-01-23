@@ -1,6 +1,6 @@
 # RealSingles - Integration Tracker
 
-**Last Updated:** January 23, 2026 (Updated after Mobile Profile cleanup and integration)  
+**Last Updated:** January 23, 2026 (Updated after Native Navigation and Single/Multi-Select fixes)  
 **Purpose:** Track the implementation status of every field and feature across the full integration pipeline.
 
 ---
@@ -62,7 +62,7 @@
 - ~~Progressive signup flow~~ - IMPLEMENTED: Server-side API at `/api/profile/completion`
 - ~~"Prefer not to say" options~~ - IMPLEMENTED: Added to all sensitive fields
 - ~~Bottom Navigation~~ - IMPLEMENTED: Native tabs using Expo Router NativeTabs (UITabBarController on iOS, BottomNavigationView on Android)
-- Single vs Multi-Select standardization (body_type, religion, pets)
+- ~~Single vs Multi-Select standardization (body_type, religion, pets)~~ - FIXED
 
 ### New API Endpoint: `/api/profile/completion`
 
@@ -88,7 +88,7 @@
 | Category | Total | Documented | DB Ready | API Ready | Web Done | Mobile Done | Tested | Signed Off |
 |----------|-------|------------|----------|-----------|----------|-------------|--------|------------|
 | Profile Fields | 66 | 66 | 51 | 47 | 27 | 53 | 0 | 0 |
-| Navigation | 3 | 1 | N/A | N/A | 0 | 0 | 0 | 0 |
+| Navigation | 3 | 1 | N/A | N/A | 1 | 2 | 0 | 0 |
 | Auth Features | 8 | 0 | 8 | 8 | 4 | 4 | 0 | 0 |
 | Core Features | 12 | 0 | TBD | TBD | TBD | TBD | 0 | 0 |
 
@@ -141,26 +141,26 @@
 | first_name | X | X | X | X | X | X | X | X | X | X | - | - |
 | last_name | X | X | X | X | X | X | X | X | X | X | - | - |
 | date_of_birth | X | X | X | X | X | X | X | X | X | X | - | - |
-| gender | X | X | X | X | X | X | BUG | X | BUG | X | - | - |
-| looking_for | X | X | X | X | X | X | BUG | - | BUG | - | - | - |
+| gender | X | X | X | X | X | X | X | X | X | X | - | - |
+| looking_for | X | X | X | X | X | X | X | X | X | X | - | - |
 | zodiac_sign | - | X | X | X | - | X | X | X | X | X | - | - |
 | bio | X | X | X | X | X | X | X | X | X | X | - | - |
 
 **Notes:**
-- `gender` + `looking_for`: Mobile combines into one dropdown "I'm a [gender] seeking [gender]" - needs to be separated
+- `gender` + `looking_for`: ~~Mobile combines into one dropdown~~ FIXED - Now separate fields in EditProfileForm
 
 ### Profile - Physical
 
 | Field | Documented | DB | API-R | API-W | Web-E | Web-D | iOS-E | iOS-D | And-E | And-D | Tested | Signed |
 |-------|------------|----|----|----|----|----|----|----|----|----|----|-----|
-| height_inches | X | X | X | X | BUG | X | BUG | BUG | BUG | BUG | - | - |
-| body_type | X | X | X | X | X | X | BUG | X | BUG | X | - | - |
-| ethnicity | - | X | X | X | - | - | X | X | X | X | - | - |
+| height_inches | X | X | X | X | X | X | X | X | X | X | - | - |
+| body_type | X | X | X | X | X | X | X | X | X | X | - | - |
+| ethnicity | - | X | X | X | X | X | X | X | X | X | - | - |
 
 **Notes:**
-- `height_inches`: Mobile saves feet value as inches without conversion. Web uses raw inch input (not user-friendly). Both need feet+inches picker.
-- `body_type`: Mobile allows multi-select but DB is single value. Should be single select.
-- `ethnicity`: FIXED - Now available on web and API uses correct field name.
+- `height_inches`: FIXED - Mobile uses two-column native picker (feet + inches), properly converts to total inches.
+- `body_type`: FIXED - Mobile now single-select matching database constraint.
+- `ethnicity`: FIXED - Now available on web and mobile, API uses correct field name.
 
 ### Profile - Location
 
@@ -181,21 +181,21 @@
 
 | Field | Documented | DB | API-R | API-W | Web-E | Web-D | iOS-E | iOS-D | And-E | And-D | Tested | Signed |
 |-------|------------|----|----|----|----|----|----|----|----|----|----|-----|
-| religion | - | X | X | X | X | X | BUG | X | BUG | X | - | - |
-| political_views | - | X | X | X | - | - | BUG | X | BUG | X | - | - |
+| religion | - | X | X | X | X | X | X | X | X | X | - | - |
+| political_views | - | X | X | X | X | X | X | X | X | X | - | - |
 | education | X | X | X | X | X | X | X | X | X | X | - | - |
 | occupation | X | X | X | X | X | X | X | X | X | X | - | - |
 | smoking | X | X | X | X | X | X | X | X | X | X | - | - |
 | drinking | X | X | X | X | X | X | X | X | X | X | - | - |
-| marijuana | - | X | X | X | - | - | X | X | X | X | - | - |
-| exercise | - | X | - | - | X | X | - | - | - | - | - | - |
-| marital_status | - | - | - | - | - | - | X | X | X | X | - | - |
+| marijuana | - | X | X | X | X | X | X | X | X | X | - | - |
+| exercise | - | X | X | X | X | X | X | X | X | X | - | - |
+| marital_status | - | X | X | X | - | - | X | X | X | X | - | - |
 
 **Notes:**
-- `religion`: Mobile uses multi-select but should be single.
-- `political_views`: Missing from web. Mobile stores in wrong field (`NightAtHome`).
+- `religion`: ~~Mobile uses multi-select but should be single.~~ FIXED - Now single-select
+- `political_views`: ~~Missing from web. Mobile stores in wrong field.~~ FIXED - Now on web and mobile maps correctly
 - `marijuana`: FIXED - Now available on web and API uses correct field name.
-- `exercise`: In DB and web but NOT in API or mobile.
+- `exercise`: FIXED - Now in DB, web, API, and mobile EditProfileForm
 - `marital_status`: In mobile but not in DB. Needs migration.
 
 ### Profile - Family
@@ -207,7 +207,7 @@
 | pets | - | X | X | X | - | - | X | X | X | X | - | - |
 
 **Notes:**
-- `pets`: Missing from web. DB is array, mobile uses single select.
+- `pets`: FIXED - Mobile now uses multi-select chips matching DB array type.
 
 ### Profile - Personality/Interests
 
@@ -228,32 +228,36 @@
 | profile_image_url | X | X | X | X | X | X | X | X | X | X | - | - |
 | verification_selfie | - | X | - | - | - | - | X | - | X | - | - | - |
 
-### Profile - Prompts (All Missing from DB)
+### Profile - Prompts (Added in Migration 00005)
 
 | Field | Documented | DB | API-R | API-W | Web-E | Web-D | iOS-E | iOS-D | And-E | And-D | Tested | Signed |
 |-------|------------|----|----|----|----|----|----|----|----|----|----|-----|
-| craziest_thing | - | - | - | - | - | - | X | X | X | X | - | - |
-| way_to_heart | - | - | - | - | - | - | X | X | X | X | - | - |
-| find_me | - | - | - | - | - | - | X | X | X | X | - | - |
-| non_negotiable | - | - | - | - | - | - | X | X | X | X | - | - |
-| worst_job | - | - | - | - | - | - | X | X | X | X | - | - |
-| weirdest_gift | - | - | - | - | - | - | X | X | X | X | - | - |
-| past_event | - | - | - | - | - | - | X | X | X | X | - | - |
-| idea_date | - | - | - | - | - | - | X | X | X | X | - | - |
+| craziest_travel_story | - | X | X | X | - | - | X | X | X | X | - | - |
+| way_to_heart | - | X | X | X | - | - | X | X | X | X | - | - |
+| after_work (find_me) | - | X | X | X | - | - | X | X | X | X | - | - |
+| non_negotiables | - | X | X | X | - | - | X | X | X | X | - | - |
+| worst_job | - | X | X | X | - | - | X | X | X | X | - | - |
+| weirdest_gift | - | X | X | X | - | - | X | X | X | X | - | - |
+| past_event | - | X | X | X | - | - | X | X | X | X | - | - |
+| ideal_first_date | - | X | X | X | - | - | X | X | X | X | - | - |
+| nightclub_or_home | - | X | X | X | - | - | X | X | X | X | - | - |
+| pet_peeves | - | X | X | X | - | - | X | X | X | X | - | - |
+| dream_job | - | X | X | X | - | - | X | X | X | X | - | - |
 
-**Action Required:** Create migration to add all prompt fields to database.
+**Note:** All prompt fields added in migration 00005. Web edit UI pending.
 
-### Profile - Additional (All Missing from DB)
+### Profile - Additional (Added in Migration 00005)
 
 | Field | Documented | DB | API-R | API-W | Web-E | Web-D | iOS-E | iOS-D | And-E | And-D | Tested | Signed |
 |-------|------------|----|----|----|----|----|----|----|----|----|----|-----|
-| language | - | - | - | - | - | - | X | X | X | X | - | - |
-| school | - | - | - | - | - | - | X | X | X | X | - | - |
-| company | - | - | - | - | - | - | X | X | X | X | - | - |
-| social_link_1 | - | - | - | - | - | - | X | X | X | X | - | - |
-| social_link_2 | - | - | - | - | - | - | X | X | X | X | - | - |
+| languages | - | X | X | X | X | X | X | X | X | X | - | - |
+| schools | - | X | X | X | - | - | X | X | X | X | - | - |
+| company | - | X | X | X | - | - | X | X | X | X | - | - |
+| social_link_1 | - | X | X | X | - | - | X | X | X | X | - | - |
+| social_link_2 | - | X | X | X | - | - | X | X | X | X | - | - |
+| zip_code | - | X | X | X | - | - | X | X | X | X | - | - |
 
-**Action Required:** Create migration to add all additional fields to database.
+**Note:** All additional fields added in migration 00005.
 
 ---
 
@@ -317,10 +321,10 @@
 | Last Name | No | - | - | X | X | - | - |
 | Date of Birth | Yes | - | - | X | X | - | - |
 | Gender | Yes | - | - | X | X | - | - |
-| Looking For | Yes | - | - | BUG | BUG | - | - |
+| Looking For | Yes | - | - | X | X | - | - |
 | Profile Photo | No | - | - | X | X | - | - |
 | Location | No | - | - | X | X | - | - |
-| Height | No | - | - | BUG | BUG | - | - |
+| Height | No | - | - | X | X | - | - |
 | Body Type | No | - | - | X | X | - | - |
 | Interests | No | - | - | X | X | - | - |
 | Bio | No | - | - | X | X | - | - |
@@ -351,7 +355,7 @@
 ### Medium Priority (Polish)
 
 8. ~~**Height UI**~~ - FIXED: Mobile uses native two-column picker, web uses dropdowns
-9. **Single vs Multi-Select** - Standardize body_type, religion, pets
+9. ~~**Single vs Multi-Select**~~ - FIXED: body_type and religion now single-select, pets now multi-select chips
 10. ~~**Exercise Field**~~ - FIXED: Now available in API and mobile EditProfileForm
 11. ~~**Looking For Description**~~ - Already in API and mobile (mapped to IdeaDate field)
 
