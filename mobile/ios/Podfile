@@ -46,7 +46,7 @@ target 'TruSingle' do
   post_install do |installer|
     # Fix for iOS simulator architecture on Apple Silicon
     installer.pods_project.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
       # Removed EXCLUDED_ARCHS for arm64 to support Apple Silicon simulators
       config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf'
       config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
@@ -69,6 +69,7 @@ target 'TruSingle' do
     # Fix for Hermes and other build settings
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
         config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
         config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
         # Ensure arm64 is included for simulators on Apple Silicon
