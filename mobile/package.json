@@ -3,6 +3,13 @@
   "main": "expo-router/entry",
   "version": "4.0.0",
   "description": "RealSingles - Dating App (React Native/Expo)",
+  "expo": {
+    "autolinking": {
+      "exclude": [
+        "react-native-worklets-core"
+      ]
+    }
+  },
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
