@@ -70,6 +70,7 @@ target 'TruSingle' do
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
+        config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
         
         # Suppress warnings for third-party code (Pods) only
         config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
