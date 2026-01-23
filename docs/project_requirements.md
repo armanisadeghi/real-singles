@@ -1,8 +1,91 @@
-# **Tru. Singles - Technical Requirements & Implementation Plan**
+# **RealSingles - Technical Requirements & Implementation Plan**
 
 **Project:** Complete rebuild of backend infrastructure and fixes for mobile application  
-**Date:** January 22, 2026  
+**Date:** January 22, 2026 (Last Updated: January 23, 2026)  
 **Tech Stack:** Next.js 16.1.4+ (App Router), Supabase (PostgreSQL + Auth), Vercel, React Native/Expo
+
+---
+
+## **0. Implementation Progress Summary**
+
+### **Completed Items** ✅
+
+| Category | Item | Status |
+|----------|------|--------|
+| **Infrastructure** | Git repository setup | ✅ Complete |
+| **Infrastructure** | Next.js 16 project with App Router | ✅ Complete |
+| **Infrastructure** | Project structure (web/, mobile/, docs/) | ✅ Complete |
+| **Database** | Supabase project created | ✅ Complete |
+| **Database** | Initial schema migration (all tables) | ✅ Complete |
+| **Database** | RLS policies migration | ✅ Complete |
+| **Database** | Seed data (products, virtual speed dating) | ✅ Complete |
+| **Database** | Auto-create user trigger | ✅ Complete |
+| **Auth** | `/api/auth/register` endpoint | ✅ Complete |
+| **Auth** | `/api/auth/login` endpoint | ✅ Complete |
+| **Auth** | `/api/auth/logout` endpoint | ✅ Complete |
+| **Auth** | `/api/auth/session` endpoint | ✅ Complete |
+| **API** | `/api/health` endpoint | ✅ Complete |
+| **Admin** | Admin login page | ✅ Complete |
+| **Admin** | Admin dashboard with stats | ✅ Complete |
+| **Admin** | Admin users management page | ✅ Complete |
+| **Admin** | Admin events management page | ✅ Complete |
+| **Admin** | Admin reports management page | ✅ Complete |
+| **Admin** | Admin products management page | ✅ Complete |
+| **Admin** | Role-based access control (admin-guard) | ✅ Complete |
+| **Web UI** | Registration page with password confirmation | ✅ Complete |
+| **Web UI** | Login page | ✅ Complete |
+| **Web UI** | Profile view page | ✅ Complete |
+| **Web UI** | Profile edit page with autosave | ✅ Complete |
+| **Web UI** | Discover page | ✅ Complete |
+| **Web UI** | Matches page | ✅ Complete |
+| **Web UI** | Favorites page | ✅ Complete |
+| **Web UI** | Settings page | ✅ Complete |
+| **Web UI** | Marketing landing page | ✅ Complete |
+| **Web UI** | About page | ✅ Complete |
+| **Web UI** | Features page | ✅ Complete |
+| **Web UI** | Events page | ✅ Complete |
+| **Web UI** | Contact page | ✅ Complete |
+| **Config** | Environment variables setup | ✅ Complete |
+| **Config** | Supabase client (browser/server/admin) | ✅ Complete |
+| **Libs** | Email client (Resend) | ✅ Complete |
+| **Libs** | Matching algorithm stubs | ✅ Complete |
+| **Libs** | Agora token generation stubs | ✅ Complete |
+| **Types** | TypeScript interfaces for all tables | ✅ Complete |
+
+### **In Progress** 🔄
+
+| Category | Item | Status |
+|----------|------|--------|
+| **Mobile** | Supabase client integration | 🔄 Next Priority |
+| **Mobile** | Auth flow update (login/register) | 🔄 Next Priority |
+| **Mobile** | Profile edit with autosave | 🔄 Next Priority |
+| **Mobile** | API endpoint migration | 🔄 Planned |
+
+### **Not Started** ⏳
+
+| Category | Item | Priority |
+|----------|------|----------|
+| **API** | Profile endpoints (/api/users/me, /api/users/[id]) | High |
+| **API** | Gallery upload endpoint | High |
+| **API** | Discovery endpoints (/api/discover/*) | High |
+| **API** | Matches endpoints | High |
+| **API** | Favorites endpoints | High |
+| **API** | Conversations endpoints | Medium |
+| **API** | Events endpoints | Medium |
+| **API** | Products/Orders endpoints | Medium |
+| **API** | Agora token endpoints | Medium |
+| **Auth** | Social login (Apple, Google) | Medium |
+| **Auth** | Phone verification (Twilio) | Medium |
+| **Auth** | Forgot/reset password | Medium |
+| **Mobile** | iOS safe area fixes | High |
+| **Mobile** | Keyboard handling | High |
+| **Mobile** | Expo SDK upgrade | High |
+| **Integration** | Agora Chat setup | Medium |
+| **Integration** | Agora RTC setup | Medium |
+| **Integration** | Push notifications | Low |
+| **Deploy** | Vercel deployment | Medium |
+| **Deploy** | App Store submission | Low |
+| **Deploy** | Play Store submission | Low |
 
 ---
 
@@ -12,7 +95,7 @@
 |-------|------------|---------|
 | Database | Supabase (PostgreSQL) | Data storage, real-time subscriptions |
 | Authentication | Supabase Auth | User auth, social login (Apple, Google) |
-| Backend API | Next.js 15 App Router | REST API endpoints, server actions |
+| Backend API | Next.js 16 App Router | REST API endpoints, server actions |
 | Hosting | Vercel | API hosting, edge functions |
 | Mobile App | React Native / Expo | Existing app (requires fixes) |
 | Real-time Chat | Agora Chat SDK | Already integrated in mobile app |
@@ -692,32 +775,53 @@ CREATE TABLE contact_submissions (
 | Bottom Nav | Overlaps home indicator | Add `pb-safe` padding to bottom elements |
 | Header Height | Hardcoded values | Use CSS variable `--header-height` |
 
-### **4.2 API Integration Updates**
+### **4.2 API Integration Updates** 🔄 NEXT PRIORITY
 
-| File | Change Required |
-|------|-----------------|
-| `lib/axiosClient.ts` | Update base URL from `itinfonity.io` to new Vercel deployment |
-| `utils/token.ts` | Update media URLs to Supabase Storage URLs |
-| `lib/api.ts` | Update all endpoint paths to match new API structure |
+The mobile app currently uses the old PHP backend at `itinfonity.io`. We need to migrate to the new Supabase-based API.
 
-### **4.3 Authentication Updates**
+| File | Change Required | Status |
+|------|-----------------|--------|
+| `lib/axiosClient.ts` | Replace with Supabase client | ⏳ Pending |
+| `lib/supabase.ts` | Create new Supabase client for mobile | ⏳ Pending |
+| `utils/token.ts` | Replace with Supabase session management | ⏳ Pending |
+| `lib/api.ts` | Rewrite all functions to use Supabase client | ⏳ Pending |
 
-| Feature | Current | New Implementation |
-|---------|---------|-------------------|
-| Login | Custom JWT | Supabase Auth |
-| Register | Custom PHP | Supabase Auth + API |
-| Social Login | Custom PHP | Supabase Auth (Apple, Google) |
-| Token Storage | AsyncStorage | Supabase session management |
-| Password Reset | Missing backend | Supabase Auth + Twilio OTP |
+### **4.3 Authentication Updates** 🔄 NEXT PRIORITY
+
+| Feature | Current | New Implementation | Status |
+|---------|---------|-------------------|--------|
+| Login | Custom JWT + PHP | Supabase Auth | ⏳ Pending |
+| Register | Custom PHP | Supabase Auth | ⏳ Pending |
+| Social Login | Custom PHP | Supabase Auth (Apple, Google) | ⏳ Pending |
+| Token Storage | AsyncStorage | Supabase session (auto-managed) | ⏳ Pending |
+| Password Reset | OTP via PHP | Supabase Auth magic link/OTP | ⏳ Pending |
+| Profile Save | Manual save only | **Autosave** (mirror web) | ⏳ Pending |
 
 ### **4.4 Environment Configuration**
 
-Create proper environment handling:
+The mobile `.env` file has been updated. Create proper environment handling:
+
+```typescript
+// lib/supabase.ts (NEW - to be created)
+import { createClient } from '@supabase/supabase-js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+});
+```
 
 ```typescript
 // config/env.ts
 export const ENV = {
-  API_URL: process.env.EXPO_PUBLIC_API_URL,
   SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
   SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
   AGORA_APP_ID: process.env.EXPO_PUBLIC_AGORA_APP_ID,
@@ -732,9 +836,9 @@ export const ENV = {
 
 ### **5.1 Supabase Setup**
 
-- [ ] Create Supabase project
-- [ ] Run database migrations (all tables above)
-- [ ] Configure Row Level Security (RLS) policies
+- [x] Create Supabase project
+- [x] Run database migrations (all tables above)
+- [x] Configure Row Level Security (RLS) policies
 - [ ] Set up Storage buckets (avatars, gallery, events)
 - [ ] Configure Auth providers (Email, Apple, Google)
 - [ ] Set up Edge Functions if needed
@@ -763,10 +867,10 @@ export const ENV = {
 
 ### **5.5 Email Service**
 
-- [ ] Set up Resend or SendGrid account
+- [x] Set up Resend or SendGrid account (Resend client created)
 - [ ] Configure domain authentication
-- [ ] Create email templates (welcome, password reset, etc.)
-- [ ] Implement email sending service
+- [x] Create email templates (welcome, password reset, etc.)
+- [x] Implement email sending service
 
 ---
 
@@ -810,21 +914,21 @@ Score = (LocationScore * 0.25) +
 
 ## **7. Implementation Phases**
 
-### **Phase 1: Foundation (Days 1-3)**
+### **Phase 1: Foundation (Days 1-3)** ✅ COMPLETE
 
-- [ ] Set up Supabase project and database schema
-- [ ] Set up Next.js project with proper structure
+- [x] Set up Supabase project and database schema
+- [x] Set up Next.js project with proper structure
 - [ ] Deploy to Vercel
-- [ ] Implement authentication endpoints
-- [ ] Update mobile app to use Supabase Auth
+- [x] Implement authentication endpoints
+- [ ] Update mobile app to use Supabase Auth ← **NEXT PRIORITY**
 
-### **Phase 2: Core Features (Days 4-7)**
+### **Phase 2: Core Features (Days 4-7)** 🔄 IN PROGRESS
 
 - [ ] Implement user/profile endpoints
 - [ ] Implement file upload to Supabase Storage
 - [ ] Implement discovery endpoints (home, top matches, nearby)
 - [ ] Implement favorites and blocking
-- [ ] Basic matching algorithm
+- [x] Basic matching algorithm (stubs created)
 
 ### **Phase 3: Communication (Days 8-10)**
 
@@ -860,73 +964,62 @@ Score = (LocationScore * 0.25) +
 
 ## **8. File Structure for Next.js Backend**
 
+**Current Structure (web/):**
+
 ```
-next-api/
-├── app/
-│   ├── api/
+web/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   │   ├── register/route.ts     ✅
+│   │   │   │   ├── login/route.ts        ✅
+│   │   │   │   ├── logout/route.ts       ✅
+│   │   │   │   ├── session/route.ts      ✅
+│   │   │   │   ├── social/route.ts       ⏳
+│   │   │   │   ├── forgot-password/route.ts  ⏳
+│   │   │   │   └── change-password/route.ts  ⏳
+│   │   │   ├── health/route.ts           ✅
+│   │   │   ├── users/                    ⏳ (to be created)
+│   │   │   ├── discover/                 ⏳
+│   │   │   ├── matches/                  ⏳
+│   │   │   ├── favorites/                ⏳
+│   │   │   ├── agora/                    ⏳
+│   │   │   └── ...
+│   │   ├── (auth)/                       ✅ (login, register pages)
+│   │   ├── (app)/                        ✅ (authenticated user pages)
+│   │   ├── (marketing)/                  ✅ (public marketing pages)
+│   │   ├── admin/                        ✅ (admin portal)
+│   │   └── layout.tsx
+│   ├── lib/
+│   │   ├── supabase/
+│   │   │   ├── client.ts                 ✅
+│   │   │   ├── server.ts                 ✅
+│   │   │   └── admin.ts                  ✅
 │   │   ├── auth/
-│   │   │   ├── register/route.ts
-│   │   │   ├── login/route.ts
-│   │   │   ├── logout/route.ts
-│   │   │   ├── social/route.ts
-│   │   │   ├── forgot-password/route.ts
-│   │   │   ├── verify-otp/route.ts
-│   │   │   ├── reset-password/route.ts
-│   │   │   └── change-password/route.ts
-│   │   ├── users/
-│   │   │   ├── me/
-│   │   │   │   ├── route.ts
-│   │   │   │   └── gallery/
-│   │   │   │       └── route.ts
-│   │   │   └── [id]/
-│   │   │       └── route.ts
-│   │   ├── discover/
-│   │   │   ├── route.ts
-│   │   │   ├── top-matches/route.ts
-│   │   │   └── nearby/route.ts
-│   │   ├── matches/route.ts
-│   │   ├── favorites/
-│   │   │   └── [userId]/route.ts
-│   │   ├── blocks/
-│   │   │   └── [userId]/route.ts
-│   │   ├── conversations/
-│   │   │   └── [id]/route.ts
-│   │   ├── groups/
-│   │   │   └── [id]/route.ts
-│   │   ├── events/
-│   │   │   └── [id]/route.ts
-│   │   ├── speed-dating/
-│   │   │   └── [id]/route.ts
+│   │   │   └── admin-guard.ts            ✅
 │   │   ├── agora/
-│   │   │   ├── chat-token/route.ts
-│   │   │   └── call-token/route.ts
-│   │   ├── points/route.ts
-│   │   ├── products/
-│   │   │   └── [id]/route.ts
-│   │   ├── orders/route.ts
-│   │   ├── notifications/route.ts
-│   │   ├── reviews/route.ts
-│   │   ├── referrals/route.ts
-│   │   ├── upload/route.ts
-│   │   └── contact/route.ts
-│   └── layout.tsx
-├── lib/
-│   ├── supabase/
-│   │   ├── client.ts
-│   │   ├── server.ts
-│   │   └── admin.ts
-│   ├── agora/
-│   │   └── token.ts
-│   ├── twilio/
-│   │   └── client.ts
-│   ├── email/
-│   │   └── client.ts
-│   └── matching/
-│       └── algorithm.ts
-├── types/
-│   └── index.ts
-└── middleware.ts
+│   │   │   └── token.ts                  ✅ (stubs)
+│   │   ├── email/
+│   │   │   └── client.ts                 ✅
+│   │   └── matching/
+│   │       └── algorithm.ts              ✅ (stubs)
+│   ├── components/
+│   │   └── layout/
+│   │       ├── Header.tsx                ✅
+│   │       └── Footer.tsx                ✅
+│   └── types/
+│       └── index.ts                      ✅
+├── supabase/
+│   ├── migrations/
+│   │   ├── 00001_initial_schema.sql      ✅
+│   │   └── 00002_rls_policies.sql        ✅
+│   ├── seed.sql                          ✅
+│   └── config.toml                       ✅
+└── .env.local                            ✅
 ```
+
+**Note:** Next.js 16 deprecated `middleware.ts`. Authentication is handled in server components using `@supabase/ssr`.
 
 ---
 

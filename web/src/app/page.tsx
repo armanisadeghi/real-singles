@@ -124,26 +124,26 @@ export default function HomePage() {
       <Header />
       <main className="flex-1 pt-[var(--header-height)]">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-brand-secondary to-brand-secondary-dark overflow-hidden">
-          <div className="absolute inset-0 bg-[url('/images/hero/couples-hero.jpg')] bg-cover bg-center opacity-10" />
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-secondary via-brand-secondary/95 to-transparent" />
+        <section className="relative bg-gradient-to-br from-[#F6EDE1] to-white overflow-hidden">
+          <div className="absolute inset-0 bg-[url('/images/hero/homepage-hero.jpg')] bg-cover bg-center opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#F6EDE1] via-[#F6EDE1]/90 to-transparent" />
           
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
+              <div className="inline-flex items-center gap-2 bg-brand-primary/10 rounded-full px-4 py-2 mb-6">
                 <Sparkles className="w-4 h-4 text-brand-primary" />
-                <span className="text-sm text-white font-medium">
+                <span className="text-sm text-brand-primary font-medium">
                   Real People. Real Connections.
                 </span>
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight">
                 Find Your{" "}
                 <span className="text-brand-primary">Real</span>{" "}
                 Connection
               </h1>
               
-              <p className="mt-6 text-lg sm:text-xl text-gray-300 max-w-lg">
+              <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-lg">
                 Join the dating community that prioritizes authenticity. With verified profiles, video introductions, and curated events, find someone who's genuinely looking for what you are.
               </p>
               
@@ -157,7 +157,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/features"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-8 py-4 text-lg font-semibold text-white hover:bg-white/20 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-secondary px-8 py-4 text-lg font-semibold text-white hover:bg-brand-secondary-dark transition-colors"
                 >
                   Learn More
                   <ArrowRight className="w-5 h-5" />
@@ -169,17 +169,17 @@ export default function HomePage() {
                   {[1, 2, 3, 4].map((i) => (
                     <div
                       key={i}
-                      className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-brand-primary to-brand-primary-dark"
+                      className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-brand-primary to-brand-secondary"
                     />
                   ))}
                 </div>
                 <div>
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" />
+                      <Star key={i} className="w-4 h-4 text-yellow-500" fill="currentColor" />
                     ))}
                   </div>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-gray-600">
                     Trusted by 50,000+ singles
                   </p>
                 </div>
@@ -277,13 +277,13 @@ export default function HomePage() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="bg-brand-secondary py-20 sm:py-28">
+        <section className="bg-[#F6EDE1] py-20 sm:py-28">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-white">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
                 Real <span className="text-brand-primary">Success Stories</span>
               </h2>
-              <p className="mt-4 text-lg text-gray-300">
+              <p className="mt-4 text-lg text-gray-600">
                 Thousands of singles have found meaningful connections through Real Singles.
               </p>
             </div>
@@ -292,25 +292,25 @@ export default function HomePage() {
               {testimonials.map((testimonial, index) => (
                 <div
                   key={index}
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10"
+                  className="bg-white rounded-2xl p-8 shadow-sm"
                 >
                   <div className="flex gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" />
+                      <Star key={i} className="w-5 h-5 text-yellow-500" fill="currentColor" />
                     ))}
                   </div>
-                  <p className="text-gray-200 leading-relaxed">
+                  <p className="text-gray-600 leading-relaxed">
                     &quot;{testimonial.content}&quot;
                   </p>
                   <div className="mt-6 flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-primary to-brand-primary-dark flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full border-4 border-brand-primary bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center">
                       <span className="text-white font-semibold">
                         {testimonial.author.charAt(0)}
                       </span>
                     </div>
                     <div>
-                      <p className="font-semibold text-white">{testimonial.author}</p>
-                      <p className="text-sm text-gray-400">{testimonial.role}</p>
+                      <p className="font-semibold text-foreground">{testimonial.author}</p>
+                      <p className="text-sm text-gray-500">{testimonial.role}</p>
                     </div>
                   </div>
                 </div>

@@ -88,13 +88,13 @@ export default function ContactPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-brand-secondary to-brand-secondary-dark py-20">
+      <section className="bg-[#F6EDE1] py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-bold text-white">
+            <h1 className="text-4xl sm:text-5xl font-bold text-foreground">
               Get in <span className="text-brand-primary">Touch</span>
             </h1>
-            <p className="mt-6 text-xl text-gray-300">
+            <p className="mt-6 text-xl text-gray-600">
               Have a question or feedback? We'd love to hear from you. Our team is here to help.
             </p>
           </div>

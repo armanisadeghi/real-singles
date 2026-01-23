@@ -133,13 +133,13 @@ export default function FeaturesPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-brand-secondary to-brand-secondary-dark py-20 sm:py-28">
+      <section className="bg-[#F6EDE1] py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-bold text-white">
+            <h1 className="text-4xl sm:text-5xl font-bold text-foreground">
               Features That Make <span className="text-brand-primary">Real Connections</span> Happen
             </h1>
-            <p className="mt-6 text-xl text-gray-300">
+            <p className="mt-6 text-xl text-gray-600">
               Discover the tools and features designed to help you find authentic, meaningful relationships.
             </p>
             <Link
@@ -261,7 +261,7 @@ export default function FeaturesPage() {
 
           <div className="max-w-3xl mx-auto">
             <div className="bg-muted rounded-2xl overflow-hidden">
-              <div className="grid grid-cols-3 bg-brand-secondary text-white font-semibold">
+              <div className="grid grid-cols-3 bg-brand-primary text-white font-semibold">
                 <div className="p-4">Feature</div>
                 <div className="p-4 text-center">Real Singles</div>
                 <div className="p-4 text-center">Other Apps</div>

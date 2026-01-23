@@ -59,13 +59,13 @@ export default function AboutPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-brand-secondary to-brand-secondary-dark py-20 sm:py-28">
+      <section className="bg-[#F6EDE1] py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-bold text-white">
+            <h1 className="text-4xl sm:text-5xl font-bold text-foreground">
               About <span className="text-brand-primary">Real Singles</span>
             </h1>
-            <p className="mt-6 text-xl text-gray-300">
+            <p className="mt-6 text-xl text-gray-600">
               We started Real Singles because we believe everyone deserves to find genuine love. Our mission is to create a space where real connections can flourish.
             </p>
           </div>
@@ -195,13 +195,13 @@ export default function AboutPage() {
       </section>
 
       {/* Team Section */}
-      <section className="bg-brand-secondary py-20 sm:py-28">
+      <section className="bg-[#F6EDE1] py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
               Meet Our <span className="text-brand-primary">Team</span>
             </h2>
-            <p className="mt-4 text-lg text-gray-300">
+            <p className="mt-4 text-lg text-gray-600">
               Passionate people dedicated to helping you find love.
             </p>
           </div>
@@ -210,18 +210,18 @@ export default function AboutPage() {
             {team.map((member) => (
               <div
                 key={member.name}
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-center border border-white/10"
+                className="bg-white rounded-2xl p-8 text-center shadow-sm"
               >
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-brand-primary to-brand-primary-dark mx-auto flex items-center justify-center">
+                <div className="w-24 h-24 rounded-full border-4 border-brand-primary bg-gradient-to-br from-brand-primary to-brand-secondary mx-auto flex items-center justify-center">
                   <span className="text-3xl font-bold text-white">
                     {member.name.split(' ').map(n => n[0]).join('')}
                   </span>
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-white">
+                <h3 className="mt-6 text-xl font-semibold text-foreground">
                   {member.name}
                 </h3>
                 <p className="text-brand-primary font-medium">{member.role}</p>
-                <p className="mt-4 text-gray-300 text-sm">{member.bio}</p>
+                <p className="mt-4 text-gray-600 text-sm">{member.bio}</p>
               </div>
             ))}
           </div>

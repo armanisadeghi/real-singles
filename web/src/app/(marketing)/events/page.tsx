@@ -106,13 +106,13 @@ export default function EventsPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-brand-secondary to-brand-secondary-dark py-20 sm:py-28">
+      <section className="bg-[#F6EDE1] py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-bold text-white">
+            <h1 className="text-4xl sm:text-5xl font-bold text-foreground">
               Singles <span className="text-brand-primary">Events</span>
             </h1>
-            <p className="mt-6 text-xl text-gray-300">
+            <p className="mt-6 text-xl text-gray-600">
               Skip the endless swiping. Meet real singles at our curated events, both in-person and virtual.
             </p>
           </div>
@@ -255,7 +255,7 @@ export default function EventsPage() {
             </p>
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-secondary px-8 py-3 font-semibold text-white hover:bg-brand-secondary-dark transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-8 py-3 font-semibold text-white hover:bg-brand-primary-dark transition-colors"
             >
               <Sparkles className="w-5 h-5" />
               Sign Up for Free

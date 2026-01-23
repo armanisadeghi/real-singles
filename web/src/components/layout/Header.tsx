@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, Heart, Sparkles } from "lucide-react";
+import Image from "next/image";
+import { Menu, X, Sparkles } from "lucide-react";
 
 const navigation = [
   { name: "Features", href: "/features" },
@@ -21,12 +22,14 @@ export function Header() {
           {/* Logo */}
           <div className="flex lg:flex-1">
             <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-2">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary">
-                <Heart className="w-5 h-5 text-white" fill="white" />
-              </div>
-              <span className="text-xl font-bold text-brand-secondary">
-                Real<span className="text-brand-primary">Singles</span>
-              </span>
+              <Image
+                src="/images/logo.png"
+                alt="Real Singles"
+                width={140}
+                height={45}
+                className="h-10 w-auto"
+                priority
+              />
             </Link>
           </div>
 

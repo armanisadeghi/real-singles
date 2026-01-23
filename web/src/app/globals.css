@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand Colors */
-  --brand-primary: #CC3366;
-  --brand-primary-light: #E54B7D;
-  --brand-primary-dark: #A32952;
-  --brand-secondary: #333366;
-  --brand-secondary-light: #4A4A8A;
-  --brand-secondary-dark: #252550;
+  /* Brand Colors - Matching WordPress Original */
+  --brand-primary: #8F5924;
+  --brand-primary-light: #A86B2D;
+  --brand-primary-dark: #6B421B;
+  --brand-secondary: #19C6B7;
+  --brand-secondary-light: #2DD9CA;
+  --brand-secondary-dark: #0AAD9E;
   
   /* Neutral Colors */
   --background: #ffffff;
@@ -57,10 +57,15 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-baskervville), Georgia, "Times New Roman", serif;
+  font-weight: 400;
 }
 
 /* Safe area insets for iOS */
