@@ -1,0 +1,95 @@
+import { createAdminClient } from "@/lib/supabase/admin";
+
+async function getStats() {
+  const supabase = createAdminClient();
+
+  const [
+    { count: usersCount },
+    { count: profilesCount },
+    { count: eventsCount },
+    { count: reportsCount },
+    { count: productsCount },
+  ] = await Promise.all([
+    supabase.from("users").select("*", { count: "exact", head: true }),
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+    supabase.from("events").select("*", { count: "exact", head: true }),
+    supabase.from("reports").select("*", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("products").select("*", { count: "exact", head: true }).eq("is_active", true),
+  ]);
+
+  return {
+    users: usersCount || 0,
+    profiles: profilesCount || 0,
+    events: eventsCount || 0,
+    pendingReports: reportsCount || 0,
+    activeProducts: productsCount || 0,
+  };
+}
+
+export default async function AdminDashboardPage() {
+  const stats = await getStats();
+
+  const statCards = [
+    { label: "Total Users", value: stats.users, color: "bg-blue-500" },
+    { label: "Profiles Created", value: stats.profiles, color: "bg-green-500" },
+    { label: "Active Events", value: stats.events, color: "bg-purple-500" },
+    { label: "Pending Reports", value: stats.pendingReports, color: "bg-red-500" },
+    { label: "Active Products", value: stats.activeProducts, color: "bg-yellow-500" },
+  ];
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        {statCards.map((stat) => (
+          <div
+            key={stat.label}
+            className="bg-white rounded-lg shadow p-6"
+          >
+            <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center mb-4`}>
+              <span className="text-white text-xl font-bold">{stat.value}</span>
+            </div>
+            <h3 className="text-gray-600 text-sm">{stat.label}</h3>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <a
+            href="/admin/users"
+            className="p-4 border rounded-lg hover:bg-gray-50 text-center"
+          >
+            <span className="block text-2xl mb-2">👥</span>
+            <span className="text-sm text-gray-600">Manage Users</span>
+          </a>
+          <a
+            href="/admin/events"
+            className="p-4 border rounded-lg hover:bg-gray-50 text-center"
+          >
+            <span className="block text-2xl mb-2">📅</span>
+            <span className="text-sm text-gray-600">Manage Events</span>
+          </a>
+          <a
+            href="/admin/reports"
+            className="p-4 border rounded-lg hover:bg-gray-50 text-center"
+          >
+            <span className="block text-2xl mb-2">🚨</span>
+            <span className="text-sm text-gray-600">Review Reports</span>
+          </a>
+          <a
+            href="/admin/products"
+            className="p-4 border rounded-lg hover:bg-gray-50 text-center"
+          >
+            <span className="block text-2xl mb-2">🎁</span>
+            <span className="text-sm text-gray-600">Manage Products</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -23,6 +24,7 @@ export async function POST(request: NextRequest) {
 
     const { email, password, display_name, referral_code } = validation.data;
     const supabase = await createClient();
+    const adminClient = createAdminClient();
 
     // Sign up the user
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -46,28 +48,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create user record in users table
-    const { error: userError } = await supabase.from("users").insert({
-      id: authData.user.id,
-      email: authData.user.email,
-      display_name,
-      referral_code: generateReferralCode(),
-    });
-
-    if (userError) {
-      console.error("Error creating user record:", userError);
-    }
-
-    // Handle referral if provided
+    // Note: User record is created automatically by database trigger (handle_new_user)
+    // We only need to handle referral tracking here using admin client (bypasses RLS)
+    
     if (referral_code) {
-      const { data: referrer } = await supabase
+      const { data: referrer } = await adminClient
         .from("users")
         .select("id")
         .eq("referral_code", referral_code)
         .single();
 
       if (referrer) {
-        await supabase.from("referrals").insert({
+        await adminClient.from("referrals").insert({
           referrer_id: referrer.id,
           referred_user_id: authData.user.id,
           status: "pending",
@@ -91,13 +83,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function generateReferralCode(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let code = "";
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
 }
