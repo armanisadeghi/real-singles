@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/notifications
  * Get user's notifications
+ * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },
@@ -76,9 +77,10 @@ export async function GET(request: NextRequest) {
 /**
  * PUT /api/notifications
  * Mark all notifications as read
+ * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function PUT() {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },

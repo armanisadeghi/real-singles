@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/users/[id]
  * Get another user's public profile
+ * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: targetUserId } = await params;
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   // Get current user (optional - for checking favorite/follow status)
   const {

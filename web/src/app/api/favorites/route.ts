@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/favorites
  * Get current user's favorites list
+ * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function GET() {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },
@@ -86,9 +87,10 @@ export async function GET() {
 /**
  * POST /api/favorites
  * Add a user to favorites (toggle - add if not exists, remove if exists)
+ * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/discover/nearby
  * POST /api/discover/nearby
  * Get profiles near the user's location
+ * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function GET(request: Request) {
   return handleNearbyRequest(request);
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
 }
 
 async function handleNearbyRequest(request: Request) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },

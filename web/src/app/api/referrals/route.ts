@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/referrals
  * Get user's referrals and referral stats
  */
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
  * This is typically called internally during registration
  */
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   try {
     let referralCode: string | null = null;

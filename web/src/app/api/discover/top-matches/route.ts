@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/discover/top-matches
  * Get all top matches with optional filter parameters
+ * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function GET(request: Request) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
   const { searchParams } = new URL(request.url);
 
   const {

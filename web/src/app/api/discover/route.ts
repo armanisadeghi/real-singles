@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/discover
  * Home screen aggregated data - Top Matches, Nearby, Videos, Events, Virtual Dating
+ * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function GET() {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },

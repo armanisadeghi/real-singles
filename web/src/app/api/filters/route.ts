@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createApiClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/filters
  * Get current user's saved filters
+ * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function GET() {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },
@@ -72,9 +73,10 @@ export async function GET() {
 /**
  * POST /api/filters
  * Save user's filters
+ * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },
@@ -183,9 +185,10 @@ export async function POST(request: Request) {
 /**
  * DELETE /api/filters
  * Clear user's filters (reset to defaults)
+ * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function DELETE() {
-  const supabase = await createClient();
+  const supabase = await createApiClient();
 
   const {
     data: { user },
