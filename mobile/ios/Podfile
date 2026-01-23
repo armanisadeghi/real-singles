@@ -50,6 +50,16 @@ target 'TruSingle' do
       # Removed EXCLUDED_ARCHS for arm64 to support Apple Silicon simulators
       config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf'
       config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
+      # Disable script sandboxing for all targets
+      config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+    end
+    
+    # Also disable script sandboxing for the main app target
+    installer.generated_aggregate_targets.each do |aggregate_target|
+      aggregate_target.xcconfigs.each do |config_name, config_file|
+        xcconfig_path = aggregate_target.xcconfig_path(config_name)
+        config_file.save_as(xcconfig_path)
+      end
     end
 
     installer.target_installation_results.pod_target_installation_results.each do |pod_name, target_installation_result|
@@ -84,6 +94,15 @@ target 'TruSingle' do
         # Ensure arm64 is included for simulators on Apple Silicon
         config.build_settings.delete('EXCLUDED_ARCHS[sdk=iphonesimulator*]')
         config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
+      end
+      
+      # Remove README.md from Agora Chat build phases (causes build errors)
+      if target.name == 'react-native-chat-sdk'
+        target.source_build_phase.files.each do |build_file|
+          if build_file.file_ref.path.end_with?('README.md')
+            target.source_build_phase.files.delete(build_file)
+          end
+        end
       end
     end
   end
