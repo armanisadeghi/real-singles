@@ -45,11 +45,12 @@ target 'TruSingle' do
   pod 'HyphenateChat', '4.10.2'
 
   post_install do |installer|
-    # Fix for iOS simulator architecture
+    # Fix for iOS simulator architecture on Apple Silicon
     installer.pods_project.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-      config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
+      # Removed EXCLUDED_ARCHS for arm64 to support Apple Silicon simulators
       config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf'
+      config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
     end
 
     installer.target_installation_results.pod_target_installation_results.each do |pod_name, target_installation_result|
@@ -71,6 +72,9 @@ target 'TruSingle' do
       target.build_configurations.each do |config|
         config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
         config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
+        # Ensure arm64 is included for simulators on Apple Silicon
+        config.build_settings.delete('EXCLUDED_ARCHS[sdk=iphonesimulator*]')
+        config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
       end
     end
   end
