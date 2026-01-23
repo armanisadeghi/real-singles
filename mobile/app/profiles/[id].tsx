@@ -1,0 +1,451 @@
+import NotificationBell from "@/components/NotificationBell";
+import ProfileDetails from "@/components/ProfileDetails";
+import { BACKGROUND_COLORS } from "@/components/ui/ProfileCard";
+import { icons } from "@/constants/icons";
+import { fetchOtherProfile } from "@/lib/api";
+import { User } from "@/types";
+import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
+import { MaterialIcons } from "@expo/vector-icons";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { useNavigationState } from "@react-navigation/native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Animated,
+  Image,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
+import Toast from "react-native-toast-message";
+
+export default function ProfileDetail() {
+  const navState = useNavigationState((state) => state);
+  const canGoBack = navState?.routes?.length > 1;
+
+  const { id } = useLocalSearchParams();
+  const router = useRouter();
+
+  const [profile, setProfile] = useState<User>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [retryAnimation] = useState(new Animated.Value(1));
+  // const [loadfollow, setLoadfollow] = useState(false);
+  // const [isFollowing, setIsFollowing] = useState(false);
+
+
+
+  const fetchProfile = async (id: string) => {
+    // setLoading(true);
+     setError(false);
+    try {
+      console.log("id: ", id);
+
+      const res = await fetchOtherProfile(id as string);
+      console.log("Profile data fetched:", res);
+      if (res?.success) {
+        setProfile(res?.data);
+      } else {
+        setError(true);
+        Toast.show({
+          type: "error",
+          text1: res?.msg || "Failed to fetch profile",
+          position: "bottom",
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+        console.log("Failed to fetch profile:", res?.msg);
+      }
+    } catch (error) {
+      console.error("Error fetching profile data:", error.response);
+      setError(true);
+      Toast.show({
+        type: "error",
+        text1: "An error occurred while fetching profile data",
+        position: "top",
+        swipeable: true,
+        visibilityTime: 4000,
+        autoHide: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile(id as string);
+  }, [id]);
+
+  const bgColor = useMemo(() => {
+    const seed = profile?.id || profile?.ID || profile?.DisplayName || "";
+    const index = Math.abs(
+      seed
+        .toString()
+        .split("")
+        .reduce((acc, char) => {
+          return acc + char.charCodeAt(0);
+        }, 0) % BACKGROUND_COLORS.length
+    );
+    return BACKGROUND_COLORS[index];
+  }, [profile]);
+
+  const getInitial = () => {
+
+
+    if (!profile?.DisplayName) return "?";
+
+    const nameParts = profile.DisplayName.split(" ");
+    if (nameParts.length === 1) {
+      return nameParts[0].charAt(0).toUpperCase();
+    } else {
+      return (
+        nameParts[0].charAt(0).toUpperCase() +
+        nameParts[nameParts.length - 1].charAt(0).toUpperCase()
+      );
+    }
+  };
+
+  const displayContent = () => {
+
+    if (profile?.Image) {
+      if (profile.Image.startsWith("uploads/")) {
+        return {
+          type: "image",
+          source: { uri: `${IMAGE_URL}${profile.Image}` },
+        };
+      } else {
+        return {
+          type: "image",
+          source: { uri: `${VIDEO_URL}${profile.Image}` },
+        };
+      }
+    }
+
+    // Return initials with background color
+    return {
+      type: "initials",
+      initials: getInitial(),
+      bgColor: bgColor,
+    };
+  };
+
+  const content = displayContent();
+
+
+
+  const handleRetry = () => {
+    // Animate the retry button
+    Animated.sequence([
+      Animated.timing(retryAnimation, {
+        toValue: 0.8,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(retryAnimation, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Fetch the profile again
+    fetchProfile(id as string);
+  };
+
+  //change this function
+  // const handleFollow = async () => {
+  //   try {
+  //     setLoadfollow(true);
+  //     const res = await followUser(id as string);
+  //     console.log("follow user res", res);
+
+  //     if (res?.success) {
+  //       // Toggle follow state
+  //       setIsFollowing((prev) => !prev);
+  //     } else {
+  //       Toast.show({
+  //         type: "error",
+  //         text1: res?.msg || "Failed to follow user",
+  //         position: "bottom",
+  //         visibilityTime: 2000,
+  //         autoHide: true,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     Toast.show({
+  //       type: "error",
+  //       text1: "An error occurred while following user",
+  //       position: "bottom",
+  //       visibilityTime: 2000,
+  //       autoHide: true,
+  //     });
+  //     console.log("something wrong while following user", error);
+  //   } finally {
+  //     setLoadfollow(false);
+  //   }
+  // };
+
+
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  const snapPoints = useMemo(() => ["62%", "80%"], []);
+
+
+  if (loading) {
+    return (
+      <View className="w-full h-full flex items-center justify-center py-4">
+        <ActivityIndicator size="large" color="#000000" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Toast />
+        <View
+          className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.1,
+            shadowRadius: 16,
+            elevation: 5,
+          }}
+        >
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity
+              onPress={router.back}
+              className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
+            >
+              <Image
+                source={icons.back}
+                className="size-4"
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+            <Text className="leading-[22px] text-dark text-base font-medium tracking-[-0.41px]">
+              Profile
+            </Text>
+          </View>
+
+          <NotificationBell />
+        </View>
+
+        <View style={styles.errorContent}>
+          <MaterialIcons name="error-outline" size={80} color="#FF6B6B" />
+          <Text style={styles.errorTitle}>Oops!</Text>
+          <Text style={styles.errorMessage}>{error}</Text>
+
+          <Animated.View
+            style={[
+              styles.retryButtonContainer,
+              { transform: [{ scale: retryAnimation }] },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={handleRetry}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="refresh" size={20} color="#FFFFFF" />
+              <Text style={styles.retryText}>Try Again</Text>
+            </TouchableOpacity>
+          </Animated.View>
+
+          <TouchableOpacity style={styles.goBackButton} onPress={router.back}>
+            <Text style={styles.goBackText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View className="flex-1 bg-backgground">
+      <Toast />
+      {profile && profile?.Image ? (
+        <ImageBackground
+          className="h-[347px]"
+          source={{ uri: profile.Image?.startsWith('uploads/') ? IMAGE_URL + profile.Image : VIDEO_URL + profile.Image }}
+          resizeMode="cover"
+        >
+          <View className="flex-row justify-between items-start px-3 mt-16">
+            <View className="flex-row gap-2 items-center">
+              <TouchableOpacity
+                onPress={() => {
+                  if (canGoBack) {
+                    router.back();
+                  } else {
+                    router.replace("/(tabs)"); // fallback
+                  }
+                }}
+                className="border border-white rounded-lg p-2 px-3 bg-white"
+              >
+                <Image source={icons.back} tintColor={"#1D2733"} />
+              </TouchableOpacity>
+              <Text className="text-base tracking-[-0.41px] font-medium text-white">
+                Profile
+              </Text>
+            </View>
+            <NotificationBell />
+          </View>
+        </ImageBackground>
+      ) : (
+        <View
+          style={{
+            height: 347,
+            backgroundColor: content.bgColor,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View style={styles.initialsCircle}>
+            <Text style={styles.initialsText}>{content.initials}</Text>
+          </View>
+
+          <View className="flex-row justify-between items-start px-3 absolute top-16 left-0 right-0">
+            <View className="flex-row gap-2 items-center">
+              <TouchableOpacity
+                onPress={router.back}
+                className="border border-white rounded-lg p-2 px-3 bg-white"
+              >
+                <Image source={icons.back} tintColor={"#1D2733"} />
+              </TouchableOpacity>
+              <Text className="text-base tracking-[-0.41px] font-medium text-white">
+                Profile
+              </Text>
+            </View>
+            <NotificationBell />
+          </View>
+        </View>
+      )}
+      <BottomSheet
+        ref={bottomSheetRef}
+        snapPoints={snapPoints}
+        index={0}
+        enablePanDownToClose={false}
+        enableContentPanningGesture={true}
+      >
+        <BottomSheetView  style={{ backgroundColor: "transparent" }}> 
+          {profile && (
+            <ProfileDetails
+              profile={profile}
+              me={false}
+              fetchProfile={() => fetchProfile(id as string)}
+              // handleFollow={handleFollow}
+              // loadfollow={loadfollow}
+              // isFollowing={isFollowing} //add this
+            />
+          )}
+        </BottomSheetView>
+      </BottomSheet>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  errorContainer: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 50,
+    paddingBottom: 16,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E8E8E8",
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: "#F0F0F0",
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "#333333",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333333",
+  },
+  errorContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  errorTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#333333",
+    marginTop: 24,
+    marginBottom: 8,
+  },
+  errorMessage: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#666666",
+    marginBottom: 32,
+    lineHeight: 22,
+  },
+  retryButtonContainer: {
+    width: "100%",
+    maxWidth: 200,
+  },
+  retryButton: {
+    flexDirection: "row",
+    backgroundColor: "#B06D1E",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  retryText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  goBackButton: {
+    marginTop: 16,
+    padding: 12,
+  },
+  goBackText: {
+    color: "#666666",
+    fontSize: 14,
+  },
+  initialsCircle: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 4,
+    borderColor: "rgba(255, 255, 255, 0.6)",
+  },
+  initialsText: {
+    fontSize: 72,
+    fontWeight: "bold",
+    color: "white",
+    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+});

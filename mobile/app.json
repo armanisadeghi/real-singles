@@ -1,0 +1,97 @@
+{
+  "expo": {
+    "name": "RealSingles",
+    "slug": "truSingle",
+    "version": "3.1",
+    "orientation": "portrait",
+    "icon": "./assets/images/app-icon.png",
+    "scheme": "truSingle",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nayannew9.truSingle",
+      "config": {
+        "googleMapsApiKey": "AIzaSyDblJIvry0qolbvxNme6-M_6SSfaRt-CAs"
+      },
+      "infoPlist": {
+        "NSCameraUsageDescription": "RealSingles need access to your camera to record your video.",
+        "NSMicrophoneUsageDescription": "RealSingles need access to your microphone to record audio in your video."
+      }
+    },
+    "android": {
+      "versionCode": 22,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.nayannew9.truSingle",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDblJIvry0qolbvxNme6-M_6SSfaRt-CAs"
+        }
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": true,
+          "supportsPictureInPicture": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "RealSingles accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow RealSingles to use your location."
+        }
+      ],
+      [
+        "react-native-full-screen-notification-incoming-call",
+        {
+          "statusBarColor": "#000000"
+        }
+      ],
+      "expo-web-browser",
+      "react-native-vision-camera",
+      "react-native-video"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "41a25188-4a43-4d9a-a0de-99becd5d7f05"
+      }
+    }
+  }
+}
