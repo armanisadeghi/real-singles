@@ -33,6 +33,20 @@
 | **API** | `/api/filters` endpoints (GET/POST/DELETE) | ✅ Complete |
 | **API** | `/api/favorites` endpoints (GET/POST/DELETE) | ✅ Complete |
 | **API** | `/api/contact` endpoint (POST) | ✅ Complete |
+| **API** | `/api/matches` endpoints (GET/POST) | ✅ Complete |
+| **API** | `/api/matches/history` endpoint (GET) | ✅ Complete |
+| **API** | `/api/matches/likes-received` endpoint (GET) | ✅ Complete |
+| **API** | `/api/blocks` endpoints (GET/POST) | ✅ Complete |
+| **API** | `/api/blocks/[id]` endpoint (DELETE) | ✅ Complete |
+| **API** | `/api/events` endpoints (GET/POST) | ✅ Complete |
+| **API** | `/api/notifications` endpoints (GET/PUT) | ✅ Complete |
+| **API** | `/api/notifications/[id]` endpoints (PUT/DELETE) | ✅ Complete |
+| **API** | `/api/reports` endpoints (GET/POST) | ✅ Complete |
+| **API** | `/api/conversations` endpoints (GET/POST) | ✅ Complete |
+| **API** | `/api/conversations/[id]` endpoints (GET/PUT/DELETE) | ✅ Complete |
+| **API** | `/api/conversations/[id]/participants` endpoints (POST/DELETE) | ✅ Complete |
+| **API** | `/api/agora/chat-token` endpoint (POST) | ✅ Complete |
+| **API** | `/api/agora/call-token` endpoint (POST) | ✅ Complete |
 | **Admin** | Admin login page | ✅ Complete |
 | **Admin** | Admin dashboard with stats | ✅ Complete |
 | **Admin** | Admin users management page | ✅ Complete |
@@ -78,30 +92,35 @@
 |----------|------|--------|-------|
 | **Mobile** | API endpoint migration (PHP → Supabase) | 🔄 In Progress | Other Dev |
 | **Mobile** | iOS safe area fixes | 🔄 In Progress | Other Dev |
-| **API** | Matches endpoints (/api/matches) | ⏳ Next Up | - |
+| **API** | Speed Dating endpoints | ⏳ Next Up | - |
 
 ### **Not Started** ⏳
 
-#### **Web/API - High Priority**
+#### **Web/API - Remaining**
 | Category | Item | Priority | Notes |
 |----------|------|----------|-------|
-| **API** | Gallery management endpoints | Medium | reorder, set primary photo |
-| **API** | Matches endpoints (/api/matches) | High | like/pass/super-like actions |
-| **Storage** | Supabase Storage buckets created | ✅ Complete | avatars, gallery, events |
-| **Storage** | Storage RLS policies migration | ✅ Complete | 00004_storage_policies.sql |
-| **API** | `/api/upload` endpoint (POST/DELETE) | ✅ Complete | File upload & delete |
-| **Lib** | Storage utilities (storage.ts) | ✅ Complete | Helpers, validation, constants |
-
-#### **Web/API - Medium Priority**
-| Category | Item | Priority | Notes |
-|----------|------|----------|-------|
-| **API** | Conversations endpoints | Medium | For chat functionality |
-| **API** | Events CRUD endpoints | Medium | Create/read/update/delete events |
-| **API** | Products/Orders endpoints | Medium | Points redemption system |
-| **API** | Agora token endpoints | Medium | Chat/call token generation |
+| **API** | Gallery management (reorder/primary) | Medium | /api/users/me/gallery/reorder |
+| **API** | Groups endpoints | Medium | /api/groups/* |
+| **API** | Speed dating endpoints | Medium | /api/speed-dating/* |
+| **API** | Reviews/Referrals endpoints | Medium | /api/reviews, /api/referrals |
+| **API** | Agora call token endpoint | Medium | /api/agora/call-token |
 | **Auth** | Social login (Apple, Google) | Medium | Supabase OAuth providers |
 | **Auth** | Phone verification (Twilio) | Medium | OTP flow |
 | **Auth** | Forgot/reset password | Medium | Supabase magic link |
+
+#### **Recently Completed** ✅
+| Category | Item | Notes |
+|----------|------|-------|
+| **Storage** | Supabase Storage buckets | avatars, gallery, events |
+| **Storage** | Storage RLS policies | 00004_storage_policies.sql |
+| **API** | Upload endpoint | /api/upload (POST/DELETE) |
+| **API** | Conversations endpoints | /api/conversations/* |
+| **API** | Events CRUD endpoints | /api/events/* |
+| **API** | Products/Orders endpoints | /api/products/*, /api/orders |
+| **API** | Points endpoint | /api/points |
+| **API** | Blocks/Reports endpoints | /api/blocks, /api/reports |
+| **API** | Notifications endpoints | /api/notifications/* |
+| **API** | Agora chat token | /api/agora/chat-token |
 
 #### **Mobile - Being handled by other developer**
 | Category | Item | Priority | Notes |
@@ -689,8 +708,10 @@ CREATE TABLE contact_submissions (
 | GET | `/api/discover/top-matches` | Get top match profiles | ✅ |
 | GET | `/api/discover/nearby` | Get nearby profiles | ✅ |
 | GET | `/api/discover/featured-videos` | Get featured video profiles | ⏳ |
-| POST | `/api/matches` | Record match action (like/pass/super-like) | ⏳ **HIGH PRIORITY** |
-| GET | `/api/matches` | Get mutual matches | ⏳ |
+| POST | `/api/matches` | Record match action (like/pass/super-like) | ✅ |
+| GET | `/api/matches` | Get mutual matches | ✅ |
+| GET | `/api/matches/history` | Get user's match action history | ✅ |
+| GET | `/api/matches/likes-received` | Get "who liked me" (unacted) | ✅ |
 | GET | `/api/filters` | Get saved filters | ✅ |
 | POST | `/api/filters` | Save/update filters | ✅ |
 | DELETE | `/api/filters` | Clear filters | ✅ |
@@ -702,19 +723,22 @@ CREATE TABLE contact_submissions (
 | GET | `/api/favorites` | Get favorites list | ✅ |
 | POST | `/api/favorites` | Add to favorites | ✅ |
 | DELETE | `/api/favorites/[id]` | Remove from favorites | ✅ |
-| POST | `/api/blocks/[userId]` | Block user | ⏳ |
-| DELETE | `/api/blocks/[userId]` | Unblock user | ⏳ |
-| POST | `/api/reports` | Report user | ⏳ |
+| GET | `/api/blocks` | Get blocked users list | ✅ |
+| POST | `/api/blocks` | Block user | ✅ |
+| DELETE | `/api/blocks/[id]` | Unblock user | ✅ |
+| GET | `/api/reports` | Get user's submitted reports | ✅ |
+| POST | `/api/reports` | Report user | ✅ |
 
 ### **3.5 Chat & Communication Endpoints**
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| GET | `/api/conversations` | Get all conversations | ⏳ |
-| POST | `/api/conversations` | Create new conversation | ⏳ |
-| GET | `/api/conversations/[id]` | Get conversation details | ⏳ |
-| POST | `/api/agora/chat-token` | Generate Agora chat token | ⏳ (stub exists) |
-| POST | `/api/agora/call-token` | Generate Agora call token | ⏳ (stub exists) |
+| GET | `/api/conversations` | Get all conversations | ✅ |
+| POST | `/api/conversations` | Create new conversation | ✅ |
+| GET | `/api/conversations/[id]` | Get conversation details | ✅ |
+| GET | `/api/conversations/[id]/participants` | Get conversation participants | ✅ |
+| POST | `/api/agora/chat-token` | Generate Agora chat token | ✅ |
+| POST | `/api/agora/call-token` | Generate Agora call token | ✅ |
 
 ### **3.6 Groups Endpoints**
 
@@ -730,12 +754,13 @@ CREATE TABLE contact_submissions (
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| GET | `/api/events` | Get events list | ⏳ |
-| POST | `/api/events` | Create new event | ⏳ |
-| GET | `/api/events/[id]` | Get event details | ⏳ |
-| PUT | `/api/events/[id]` | Update event | ⏳ |
-| DELETE | `/api/events/[id]` | Delete event | ⏳ |
-| POST | `/api/events/[id]/register` | Register for event | ⏳ |
+| GET | `/api/events` | Get events list | ✅ |
+| POST | `/api/events` | Create new event | ✅ |
+| GET | `/api/events/[id]` | Get event details | ✅ |
+| PUT | `/api/events/[id]` | Update event | ✅ |
+| DELETE | `/api/events/[id]` | Delete/cancel event | ✅ |
+| POST | `/api/events/[id]/register` | Register for event | ✅ |
+| DELETE | `/api/events/[id]/register` | Cancel registration | ✅ |
 
 ### **3.8 Virtual Speed Dating Endpoints**
 
@@ -749,11 +774,11 @@ CREATE TABLE contact_submissions (
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| GET | `/api/points` | Get user's points balance and history | ⏳ |
-| GET | `/api/products` | Get available products | ⏳ |
-| GET | `/api/products/[id]` | Get product details | ⏳ |
-| POST | `/api/orders` | Create redemption order | ⏳ |
-| GET | `/api/orders` | Get user's orders | ⏳ |
+| GET | `/api/points` | Get user's points balance and history | ✅ |
+| GET | `/api/products` | Get available products | ✅ |
+| GET | `/api/products/[id]` | Get product details | ✅ |
+| POST | `/api/orders` | Create redemption order | ✅ |
+| GET | `/api/orders` | Get user's orders | ✅ |
 
 ### **3.10 Reviews & Referrals Endpoints**
 
@@ -767,9 +792,10 @@ CREATE TABLE contact_submissions (
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| GET | `/api/notifications` | Get user's notifications | ⏳ |
-| PUT | `/api/notifications/[id]/read` | Mark notification as read | ⏳ |
-| PUT | `/api/notifications/read-all` | Mark all as read | ⏳ |
+| GET | `/api/notifications` | Get user's notifications | ✅ |
+| PUT | `/api/notifications/[id]` | Mark notification as read | ✅ |
+| DELETE | `/api/notifications/[id]` | Delete notification | ✅ |
+| PUT | `/api/notifications` | Mark all as read | ✅ |
 
 ### **3.12 Utility Endpoints**
 
@@ -785,17 +811,17 @@ CREATE TABLE contact_submissions (
 |----------|----------|-------|------------|
 | Authentication | 4 | 9 | 44% |
 | User & Profile | 5 | 6 | 83% |
-| Discovery & Matching | 6 | 9 | 67% |
-| Favorites & Social | 3 | 6 | 50% |
-| Chat & Communication | 0 | 5 | 0% |
+| Discovery & Matching | 11 | 11 | 100% |
+| Favorites & Social | 8 | 8 | 100% |
+| Chat & Communication | 6 | 6 | 100% |
 | Groups | 0 | 5 | 0% |
-| Events | 0 | 6 | 0% |
+| Events | 7 | 7 | 100% |
 | Speed Dating | 0 | 3 | 0% |
-| Rewards & Products | 0 | 5 | 0% |
+| Rewards & Products | 5 | 5 | 100% |
 | Reviews & Referrals | 0 | 3 | 0% |
-| Notifications | 0 | 3 | 0% |
+| Notifications | 4 | 4 | 100% |
 | Utility | 3 | 3 | 100% |
-| **TOTAL** | **21** | **63** | **33%** |
+| **TOTAL** | **53** | **70** | **76%** |
 
 ---
 
@@ -961,7 +987,7 @@ Score = (LocationScore * 0.25) +
 - [x] Set up TypeScript interfaces for all tables
 - [x] Update mobile app to use Supabase Auth
 
-### **Phase 2: Core Features** ✅ MOSTLY COMPLETE
+### **Phase 2: Core Features** ✅ COMPLETE
 
 - [x] Implement user/profile endpoints (`/api/users/me`, `/api/users/[id]`)
 - [x] Implement discovery endpoints (`/api/discover`, `/top-matches`, `/nearby`)
@@ -972,23 +998,27 @@ Score = (LocationScore * 0.25) +
 - [x] Supabase Storage buckets (avatars, gallery, events)
 - [x] Storage RLS policies
 - [x] File upload/delete endpoint (`/api/upload`)
-- [ ] Implement matches endpoints (like/pass actions) ← **NEXT PRIORITY**
+- [x] Matches endpoints (like/pass/super-like, mutual matches, history, likes-received)
 
-### **Phase 3: Communication** ⏳ NOT STARTED
+### **Phase 3: Communication** ✅ MOSTLY COMPLETE
 
-- [ ] Implement Agora token endpoints
-- [ ] Implement conversations endpoints
-- [ ] Fix chat integration in mobile app
-- [ ] Fix video/voice call integration
-- [ ] Implement groups functionality
+- [x] Implement Agora token endpoints (chat-token, call-token)
+- [x] Implement conversations endpoints (GET/POST/PUT/DELETE)
+- [x] Implement conversation participants management
+- [ ] Fix chat integration in mobile app (Other Dev)
+- [ ] Fix video/voice call integration (Other Dev)
+- [ ] Implement groups functionality (low priority - conversations support groups)
 
-### **Phase 4: Events & Social** ⏳ NOT STARTED
+### **Phase 4: Events & Social** ✅ MOSTLY COMPLETE
 
-- [ ] Implement events CRUD endpoints
+- [x] Implement events CRUD endpoints
+- [x] Implement notifications endpoints
+- [x] Implement blocks endpoints
+- [x] Implement reports endpoints
+- [x] Implement points/products endpoints
 - [ ] Implement virtual speed dating endpoints
 - [ ] Implement reviews system
 - [ ] Implement referrals system
-- [ ] Implement points/rewards system
 
 ### **Phase 5: Mobile Fixes** 🔄 IN PROGRESS (Other Dev)
 
@@ -1000,9 +1030,9 @@ Score = (LocationScore * 0.25) +
 - [ ] Update all API integrations
 - [ ] Expo SDK upgrade
 
-### **Phase 6: Polish & Deployment** ⏳ NOT STARTED
+### **Phase 6: Polish & Deployment** 🔄 IN PROGRESS
 
-- [ ] Deploy to Vercel
+- [x] Deploy to Vercel
 - [ ] End-to-end testing
 - [ ] Performance optimization
 - [ ] Bug fixes
@@ -1041,8 +1071,37 @@ web/
 │   │   │   │   └── [id]/route.ts         ✅ (DELETE)
 │   │   │   ├── contact/route.ts          ✅
 │   │   │   ├── upload/route.ts           ✅ (POST/DELETE)
-│   │   │   ├── matches/                  ⏳
-│   │   │   ├── agora/                    ⏳
+│   │   │   ├── matches/
+│   │   │   │   ├── route.ts              ✅ (GET/POST)
+│   │   │   │   ├── history/route.ts      ✅
+│   │   │   │   └── likes-received/route.ts ✅
+│   │   │   ├── blocks/
+│   │   │   │   ├── route.ts              ✅ (GET/POST)
+│   │   │   │   └── [id]/route.ts         ✅ (DELETE)
+│   │   │   ├── reports/route.ts          ✅ (GET/POST)
+│   │   │   ├── notifications/
+│   │   │   │   ├── route.ts              ✅ (GET/PUT mark all)
+│   │   │   │   └── [id]/route.ts         ✅ (PUT/DELETE)
+│   │   │   ├── events/
+│   │   │   │   ├── route.ts              ✅ (GET/POST)
+│   │   │   │   └── [id]/
+│   │   │   │       ├── route.ts          ✅ (GET/PUT/DELETE)
+│   │   │   │       └── register/route.ts ✅ (POST/DELETE)
+│   │   │   ├── points/route.ts           ✅ (GET)
+│   │   │   ├── products/
+│   │   │   │   ├── route.ts              ✅ (GET)
+│   │   │   │   └── [id]/route.ts         ✅ (GET)
+│   │   │   ├── orders/route.ts           ✅ (GET/POST)
+│   │   │   ├── conversations/
+│   │   │   │   ├── route.ts              ✅ (GET/POST)
+│   │   │   │   └── [id]/
+│   │   │   │       ├── route.ts          ✅ (GET/PUT/DELETE)
+│   │   │   │       └── participants/route.ts ✅ (POST/DELETE)
+│   │   │   ├── agora/
+│   │   │   │   ├── chat-token/route.ts   ✅ (POST)
+│   │   │   │   └── call-token/route.ts   ✅ (POST)
+│   │   │   ├── agora/
+│   │   │   │   └── chat-token/route.ts   ✅
 │   │   │   └── ...
 │   │   ├── (auth)/                       ✅ (login, register pages)
 │   │   ├── (app)/                        ✅ (authenticated user pages)
