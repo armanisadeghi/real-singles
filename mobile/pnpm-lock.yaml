@@ -193,7 +193,7 @@ importers:
         version: 6.19.0(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
       react-native-vision-camera:
         specifier: ^4.7.3
-        version: 4.7.3(react-native-reanimated@3.17.5(@babel/core@7.28.6)(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native-worklets-core@1.3.3(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
+        version: 4.7.3(react-native-reanimated@3.17.5(@babel/core@7.28.6)(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native-worklets-core@1.6.2(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
       react-native-web:
         specifier: ~0.20.0
         version: 0.20.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -203,6 +203,9 @@ importers:
       react-native-worklets:
         specifier: ^0.7.2
         version: 0.7.2(@babel/core@7.28.6)(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
+      react-native-worklets-core:
+        specifier: ^1.6.2
+        version: 1.6.2(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.19(yaml@2.8.2)
@@ -4163,9 +4166,8 @@ packages:
       react: '*'
       react-native: '*'
 
-  react-native-worklets-core@1.3.3:
-    resolution: {integrity: sha512-wlkuhpUo4Wd9WBcnKuXWv775rYNYMfDxUySCZYxd3VDtwnF8PHPqAJllVIlHjamPNKpcitFvAgQa/C3YOsJwgQ==}
-    engines: {node: '>= 16.0.0'}
+  react-native-worklets-core@1.6.2:
+    resolution: {integrity: sha512-zw73JfL40ZL/OD2TOil1El4D9ZwS3l6AFPeFfUWXh+V2/dHN8i28jHX8QXlz5DYtAkR+Ju3U1h4yiaODi/igZw==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -9792,13 +9794,13 @@ snapshots:
       react: 19.0.0
       react-native: 0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0)
 
-  react-native-vision-camera@4.7.3(react-native-reanimated@3.17.5(@babel/core@7.28.6)(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native-worklets-core@1.3.3(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0):
+  react-native-vision-camera@4.7.3(react-native-reanimated@3.17.5(@babel/core@7.28.6)(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native-worklets-core@1.6.2(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0):
     dependencies:
       react: 19.0.0
       react-native: 0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0)
     optionalDependencies:
       react-native-reanimated: 3.17.5(@babel/core@7.28.6)(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
-      react-native-worklets-core: 1.3.3(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
+      react-native-worklets-core: 1.6.2(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
 
   react-native-web@0.20.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
@@ -9822,12 +9824,11 @@ snapshots:
       react: 19.0.0
       react-native: 0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0)
 
-  react-native-worklets-core@1.3.3(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0):
+  react-native-worklets-core@1.6.2(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0):
     dependencies:
       react: 19.0.0
       react-native: 0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0)
       string-hash-64: 1.0.3
-    optional: true
 
   react-native-worklets@0.7.2(@babel/core@7.28.6)(react-native@0.79.6(@babel/core@7.28.6)(@react-native-community/cli@20.1.0(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0):
     dependencies:
@@ -10217,8 +10218,7 @@ snapshots:
 
   strict-uri-encode@2.0.0: {}
 
-  string-hash-64@1.0.3:
-    optional: true
+  string-hash-64@1.0.3: {}
 
   string-width@4.2.3:
     dependencies:
