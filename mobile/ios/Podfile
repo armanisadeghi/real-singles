@@ -70,8 +70,16 @@ target 'TruSingle' do
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
+        
+        # Suppress warnings for third-party code (Pods) only
         config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
         config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
+        
+        # Specifically suppress deprecation warnings for third-party code
+        config.build_settings['GCC_WARN_DEPRECATED_FUNCTIONS'] = 'NO'
+        config.build_settings['CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS'] = 'NO'
+        config.build_settings['WARNING_CFLAGS'] = '-Wno-deprecated -Wno-deprecated-declarations'
+        
         # Ensure arm64 is included for simulators on Apple Silicon
         config.build_settings.delete('EXCLUDED_ARCHS[sdk=iphonesimulator*]')
         config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
