@@ -1,50 +1,242 @@
-# Welcome to your Expo app 👋
+# RealSingles Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+React Native / Expo mobile application for the RealSingles dating platform.
 
-## Get started
+## Tech Stack
 
-1. Install dependencies
+- **Framework**: React Native 0.79.6 with Expo SDK 53
+- **Navigation**: Expo Router 5.x (file-based routing)
+- **Styling**: NativeWind 4.x (Tailwind CSS for React Native)
+- **State Management**: React Context (AuthContext)
+- **Backend**: Supabase (PostgreSQL + Auth)
+- **Real-time**: Agora Chat SDK, Agora RTC SDK
 
-   ```bash
-   npm install
-   ```
+## Getting Started
 
-2. Start the app
+### Prerequisites
 
-   ```bash
-   npx expo start
-   ```
+- Node.js 18+
+- pnpm (recommended) or npm
+- Expo CLI: `npm install -g expo-cli`
+- iOS Simulator (Mac) or Android Studio (for Android emulator)
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### Installation
 
 ```bash
-npm run reset-project
+# Install dependencies
+pnpm install
+
+# Start the development server
+pnpm start
+
+# Run on iOS simulator
+pnpm ios
+
+# Run on Android emulator
+pnpm android
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Environment Variables
 
-## Learn more
+Create a `.env` file in the mobile directory with:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+# API Configuration
+EXPO_PUBLIC_API_URL=http://localhost:3000/api
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# Supabase Configuration
+EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-publishable-key
 
-## Join the community
+# Agora Configuration (optional)
+EXPO_PUBLIC_AGORA_APP_ID=
+EXPO_PUBLIC_AGORA_CHAT_APP_KEY=
 
-Join our community of developers creating universal apps.
+# Google Maps (optional)
+EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Architecture
+
+### Authentication Flow
+
+The app uses **Supabase Auth** for authentication:
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Login/Signup  │────▶│  Supabase Auth  │────▶│   AuthContext   │
+│     Screens     │     │   (lib/supabase)│     │  (utils/auth)   │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+                                                        ▼
+                                                ┌─────────────────┐
+                                                │   App Screens   │
+                                                │  (/(tabs), etc) │
+                                                └─────────────────┘
+```
+
+**Key files:**
+- `lib/supabase.ts` - Supabase client configuration and helper functions
+- `utils/authContext.tsx` - React Context for auth state management
+- `app/(auth)/login.tsx` - Login screen
+- `app/(auth)/signup.tsx` - Multi-step signup flow
+
+### Autosave Feature
+
+The profile edit screen (`app/editProfile/index.tsx`) includes autosave:
+
+- **5-second debounce**: Saves after 5 seconds of inactivity
+- **Change detection**: Only saves when data actually changes
+- **Background save**: Saves when app goes to background
+- **Visual feedback**: Shows "Saved", "Saving...", "Unsaved changes"
+
+### File Structure
+
+```
+mobile/
+├── app/                    # Expo Router screens
+│   ├── (auth)/            # Auth screens (login, signup)
+│   ├── (tabs)/            # Main tab navigation
+│   ├── editProfile/       # Profile editing
+│   ├── chat/              # Chat screens
+│   └── ...
+├── components/            # Reusable components
+│   ├── forms/            # Form components
+│   ├── signup/           # Signup flow steps
+│   └── ui/               # UI primitives
+├── lib/                   # Core libraries
+│   ├── supabase.ts       # Supabase client ⭐
+│   └── api.ts            # Legacy API functions
+├── utils/                 # Utilities
+│   ├── authContext.tsx   # Auth context ⭐
+│   └── token.ts          # Token utilities (deprecated)
+├── constants/             # Constants and config
+├── types/                 # TypeScript types
+└── assets/               # Images, fonts, etc.
+```
+
+## Migration Notes
+
+### From PHP Backend to Supabase
+
+The app is being migrated from a PHP backend to Supabase. Here's the status:
+
+| Feature | Old (PHP) | New (Supabase) | Status |
+|---------|-----------|----------------|--------|
+| Login | `/login.php` | `supabase.auth.signInWithPassword()` | ✅ Done |
+| Register | `/register.php` | `supabase.auth.signUp()` | ✅ Done |
+| Profile | `/UpdateProfile.php` | `supabase.from('profiles').upsert()` | ✅ Done |
+| Token Storage | AsyncStorage (JWT) | Supabase session (auto) | ✅ Done |
+| Home Screen | `/HomeScreen.php` | Supabase queries | 🔄 Pending |
+| Favorites | `/FavouriteList.php` | Supabase queries | 🔄 Pending |
+| Chat | `/AgoraChatToken.php` | `/api/agora/chat-token` | 🔄 Pending |
+
+### Deprecated Functions
+
+The following functions in `utils/token.ts` are deprecated:
+
+- `storeToken()` - Use Supabase session instead
+- `getToken()` - Use `supabase.auth.getSession()` instead
+- `removeToken()` - Use `supabase.auth.signOut()` instead
+- `addCurrentUserId()` - User ID managed by Supabase
+- `getCurrentUserId()` - Use `supabase.auth.getUser()` instead
+
+## Common Tasks
+
+### Adding a New Screen
+
+1. Create a file in `app/` directory (e.g., `app/newscreen/index.tsx`)
+2. Export a default React component
+3. Expo Router will automatically create the route
+
+### Accessing Auth State
+
+```tsx
+import { useAuth } from '@/utils/authContext';
+
+function MyComponent() {
+  const { user, isAuthenticated, isLoading, signOut } = useAuth();
+  
+  if (isLoading) return <Loading />;
+  if (!isAuthenticated) return <LoginPrompt />;
+  
+  return <View>Welcome, {user?.profile?.first_name}</View>;
+}
+```
+
+### Making Supabase Queries
+
+```tsx
+import { supabase } from '@/lib/supabase';
+
+// Fetch data
+const { data, error } = await supabase
+  .from('profiles')
+  .select('*')
+  .eq('user_id', userId)
+  .single();
+
+// Update data
+const { error } = await supabase
+  .from('profiles')
+  .update({ first_name: 'John' })
+  .eq('user_id', userId);
+```
+
+## Testing
+
+### Running on Device
+
+```bash
+# iOS (requires Mac)
+pnpm ios
+
+# Android
+pnpm android
+
+# Physical device (scan QR code)
+pnpm start
+```
+
+### Building for Production
+
+```bash
+# Install EAS CLI
+npm install -g eas-cli
+
+# Build for iOS
+eas build --platform ios
+
+# Build for Android
+eas build --platform android
+```
+
+## Troubleshooting
+
+### "Session not found" error
+- Check that `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` are set
+- Verify Supabase project is running
+- Check network connectivity
+
+### Auth state not updating
+- Ensure `AuthProvider` wraps your app in `_layout.tsx`
+- Check the console for `[Auth]` logs
+
+### Profile not saving
+- Check RLS policies in Supabase
+- Verify user is authenticated
+- Check console for Supabase errors
+
+## Contributing
+
+1. Create a feature branch from `main`
+2. Make changes
+3. Test on both iOS and Android
+4. Submit a pull request
+
+## Related Documentation
+
+- [Project Requirements](../docs/project_requirements.md)
+- [Web Backend README](../web/README.md)
+- [Supabase Docs](https://supabase.com/docs)
+- [Expo Docs](https://docs.expo.dev)

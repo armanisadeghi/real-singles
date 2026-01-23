@@ -19,14 +19,8 @@ import TakePhoto from "@/components/signup/TakePhoto";
 import TakeVideo2 from "@/components/signup/TakeVideo2";
 import WantChildren from "@/components/signup/WantChildren";
 import { images } from "@/constants/images";
-import { register } from "@/lib/api";
+import { signUpWithEmail, supabase, updateProfile } from "@/lib/supabase";
 import { SignupData } from "@/types";
-import {
-  addCurrentUserId,
-  getCurrentUserId,
-  removeCurrentUserId,
-  storeToken,
-} from "@/utils/token";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -369,7 +363,6 @@ const Signup = () => {
 
         const location = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
-          timeout: 15000, // 15 sec wait
         })
 
         if (location?.coords) {
@@ -396,58 +389,102 @@ const Signup = () => {
 
 
   const handleSubmit = async () => {
-    // try {
-    const formData = new FormData();
-    Object.entries(signupData).forEach(([key, value]) => {
-      if (value === null || value === undefined) return;
-
-      if (key === "DOB" && typeof value === "string" && value.includes("/")) {
-        // Convert MM/DD/YYYY → YYYY-MM-DD
-        const [month, day, year] = value.split("/");
-        const formattedDOB = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-        formData.append("DOB", formattedDOB);
-      } else if (Array.isArray(value)) {
-        if (key === "Interest") {
-          formData.append(key, value.join(","));
-        } else if (key === "School") {
-          formData.append(key, value.join(", "));
-        }
-      } else if (key === "Pets" && value) {
-        formData.append("Pets", value);
-      } else {
-        formData.append(key, String(value));
-      }
-    });
-
-    console.log("Form data created successfully");
-    console.log("formData: ", formData);
+    console.log("Starting registration with Supabase...");
     setLoading(true);
     setSectionError("");
-    try {
-      const res = await register(formData);
-      console.log("Register response:", res);
 
-      if (res?.success) {
-        console.log("Form submitted successfully:", res);
-        if (res?.data?.token) {
-          await storeToken(res?.data?.token);
-          const id = await getCurrentUserId();
-          if (id) {
-            await removeCurrentUserId();
-          }
-          await addCurrentUserId(res?.data?.ID);
-          setIsSubmitted(true);
-          setSectionError("");
+    try {
+      // Step 1: Create auth user with Supabase
+      const authData = await signUpWithEmail(
+        signupData.Email,
+        signupData.Password,
+        {
+          display_name: signupData.DisplayName || `${signupData.FirstName} ${signupData.LastName}`.trim(),
         }
-      } else {
-        console.error(res?.msg || "Unknown error");
-        setSectionError(
-          res?.msg || "Failed to submit your information. Please try again."
-        );
+      );
+
+      console.log("Auth signup response:", authData);
+
+      if (!authData.user) {
+        throw new Error("Failed to create account. Please try again.");
       }
-    } catch (error) {
+
+      // Step 2: Update the profile with all the collected data
+      // Format date of birth
+      let formattedDOB = signupData.DOB;
+      if (signupData.DOB && signupData.DOB.includes("/")) {
+        const [month, day, year] = signupData.DOB.split("/");
+        formattedDOB = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      }
+
+      // Map signup data to profile schema
+      const profileData = {
+        first_name: signupData.FirstName || null,
+        last_name: signupData.LastName || null,
+        date_of_birth: formattedDOB || null,
+        gender: signupData.Gender?.toLowerCase() || null,
+        height_inches: signupData.Height ? Number(signupData.Height) : null,
+        body_type: signupData.BodyType?.toLowerCase() || null,
+        city: signupData.City || null,
+        state: signupData.State || null,
+        country: null, // Country not collected in signup flow
+        occupation: signupData.JobTitle || null,
+        education: signupData.Education || null,
+        religion: signupData.Religion?.toLowerCase() || null,
+        smoking: signupData.Smoking?.toLowerCase() || null,
+        drinking: signupData.Drinks?.toLowerCase() || null,
+        has_kids: signupData.HaveChild === "Yes",
+        wants_kids: signupData.WantChild?.toLowerCase().replace(" ", "_") || null,
+        interests: signupData.Interest?.length > 0 ? signupData.Interest : null,
+        bio: signupData.About || null,
+        profile_image_url: signupData.livePicture || null,
+        // Additional fields mapped from old schema
+        ethnicity: signupData.Ethniticity || null,
+      };
+
+      // Update profile - wait a moment for the trigger to create the user record
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      try {
+        await updateProfile(profileData);
+        console.log("Profile updated successfully");
+      } catch (profileError) {
+        console.warn("Profile update warning:", profileError);
+        // Continue anyway - user can update profile later
+      }
+
+      // Step 3: Update users table with additional data
+      try {
+        const { error: userError } = await supabase
+          .from('users')
+          .update({
+            display_name: signupData.DisplayName || `${signupData.FirstName} ${signupData.LastName}`.trim(),
+            phone: signupData.Phone || null,
+          })
+          .eq('id', authData.user.id);
+        
+        if (userError) {
+          console.warn("User update warning:", userError);
+        }
+      } catch (userUpdateError) {
+        console.warn("User update warning:", userUpdateError);
+      }
+
+      console.log("Registration completed successfully!");
+      setIsSubmitted(true);
+      setSectionError("");
+      
+    } catch (error: any) {
       console.error("Error registering user:", error);
-      setSectionError("Failed to register. Please try again.");
+      
+      // Handle specific Supabase errors
+      if (error?.message?.includes("User already registered")) {
+        setSectionError("This email is already registered. Please log in instead.");
+      } else if (error?.message?.includes("Password")) {
+        setSectionError("Password must be at least 8 characters long.");
+      } else {
+        setSectionError(error?.message || "Failed to register. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

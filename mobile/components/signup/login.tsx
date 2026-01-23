@@ -1,5 +1,5 @@
 import { icons } from "@/constants/icons";
-import { checkEmailExist } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Image, Modal, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -15,48 +15,57 @@ const SignupLogin = ({
 }: any) => {
   const [validationError, setValidationError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [checked, setChecked] = useState(false);
-   const [showWebView, setShowWebView] = useState(false);
-   const [webViewUrl, setWebViewUrl] = useState("");
-   const [webViewTitle, setWebViewTitle] = useState("");
+  const [isChecking, setIsChecking] = useState(false);
+  const [showWebView, setShowWebView] = useState(false);
+  const [webViewUrl, setWebViewUrl] = useState("");
+  const [webViewTitle, setWebViewTitle] = useState("");
   const [visible, setVisible] = useState(false);
   const [pdfSource, setPdfSource] = useState<any>(null);
   
-    const openModal = (source: any) => {
-      setPdfSource(source);
-      setVisible(true);
-    };
+  const openModal = (source: any) => {
+    setPdfSource(source);
+    setVisible(true);
+  };
 
-    const handleNext = async () => {
-      setValidationError("");
+  const handleNext = async () => {
+    setValidationError("");
 
-      if (!data.Username) return setValidationError("Username is required");
-      if (!data.Email) return setValidationError("Email is required");
-      if (!data.Email.includes('@')) return setValidationError("Please enter a valid email");
-      if (!data.Password) return setValidationError("Password is required");
-      if (data.Password.length < 6) return setValidationError("Password must be at least 6 characters");
-      if (!checked) return;
+    // Validation
+    if (!data.Username) return setValidationError("Username is required");
+    if (!data.Email) return setValidationError("Email is required");
+    if (!data.Email.includes('@')) return setValidationError("Please enter a valid email");
+    if (!data.Password) return setValidationError("Password is required");
+    if (data.Password.length < 8) return setValidationError("Password must be at least 8 characters");
+    if (data.Password !== confirmPassword) return setValidationError("Passwords do not match");
+    if (!checked) return setValidationError("Please agree to the Terms and Privacy Policy");
 
-      // 🔒 Ensure email update is synced before next step
-      updateData({ Email: data.Email.trim() });
+    // Ensure email update is synced before next step
+    updateData({ Email: data.Email.trim() });
 
-      const emailCheck = new FormData();
-      emailCheck.append("Email", data.Email);
+    setIsChecking(true);
+    try {
+      console.log("Checking email availability:", data.Email);
+      
+      // Check if email exists in Supabase auth
+      // We can't directly check email existence, but we can try a sign-in 
+      // and check the error. For now, we'll just proceed and let signup handle it.
+      // The signup endpoint will return an error if email already exists.
+      
+      onNext(); // Move to next step
+    } catch (error: any) {
+      console.log("Error in signup validation:", error);
+      setValidationError(error?.message || "An error occurred. Please try again.");
+    } finally {
+      setIsChecking(false);
+    }
+  };
 
-      try {
-        console.log("data.Email in login/signup screen=>>>>", data.Email);
-        const res = await checkEmailExist(emailCheck);
-        console.log("Email check response:", res);
-        if (res?.success) {
-          onNext(); // this moves to next step
-        } else {
-          setValidationError(res?.msg || "Email already exists");
-        }
-      } catch (error) {
-        console.log("Error checking email:", error);
-        setValidationError("Email Already exists, Please try with another one.");
-      }
-    };
+  // Check if passwords match for visual feedback
+  const passwordsMatch = data.Password && confirmPassword && data.Password === confirmPassword;
+  const showPasswordMismatch = confirmPassword && data.Password !== confirmPassword;
 
  
 
@@ -202,7 +211,7 @@ const SignupLogin = ({
             <TextInput
               value={data.Password}
               onChangeText={(text) => updateData({ Password: text })}
-              placeholder="Password"
+              placeholder="Password (min 8 characters)"
               placeholderTextColor="#B0B0B0"
               secureTextEntry={!showPassword}
               className="text-dark"
@@ -220,6 +229,52 @@ const SignupLogin = ({
               />
             </TouchableOpacity>
           </View>
+        </View>
+
+        {/* Confirm Password Input */}
+        <View className="mb-5">
+          <View 
+            className="flex-row items-center border rounded-[99] pl-3 pr-5 bg-light-200"
+            style={{
+              paddingVertical: Platform.OS == 'ios' ? 15 : 5,
+              borderColor: showPasswordMismatch ? '#ef4444' : passwordsMatch ? '#22c55e' : '#e5e7eb'
+            }}
+          >
+            <Image 
+              source={icons.lock} 
+              style={{ width: 15, height: 15, marginRight: 10 }} 
+              resizeMode="contain" 
+            />
+            <TextInput
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              placeholder="Confirm Password"
+              placeholderTextColor="#B0B0B0"
+              secureTextEntry={!showConfirmPassword}
+              className="text-dark"
+              style={{ flex: 1, color: 'black' }}
+            />
+            <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+              <Image 
+                source={
+                  showConfirmPassword 
+                    ? icons.eyeClosed 
+                    : icons.eyeOpen
+                } 
+                style={{ width: 15, height: 15 }} 
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          </View>
+          {/* Password match indicator */}
+          {confirmPassword ? (
+            <Text 
+              className="text-xs mt-1 ml-3"
+              style={{ color: passwordsMatch ? '#22c55e' : '#ef4444' }}
+            >
+              {passwordsMatch ? '✓ Passwords match' : 'Passwords do not match'}
+            </Text>
+          ) : null}
         </View>
 
         {/* Display validation error */}
@@ -294,12 +349,14 @@ const SignupLogin = ({
     </View>}
       
       <GradientButton
-        text="Next"
+        text={isChecking ? "Please wait..." : "Next"}
         onPress={handleNext}
+        disabled={isChecking}
         containerStyle={{
           marginTop: 30,
           width: "50%",
           marginHorizontal: "auto",
+          opacity: isChecking ? 0.7 : 1,
         }}
       />
     </View>

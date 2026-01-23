@@ -2,15 +2,7 @@ import LinearBg from "@/components/LinearBg";
 import SociaLoginButtons from "@/components/SociaLoginButtons";
 import GradientButton from "@/components/ui/GradientButton";
 import { icons } from "@/constants/icons";
-import { forgotPassword, forgotPassword2, login, verifyOtp } from "@/lib/api";
-import {
-  addCurrentUserId,
-  getCurrentUserId,
-  getToken,
-  removeCurrentUserId,
-  removeToken,
-  storeToken,
-} from "@/utils/token";
+import { signInWithEmail, resetPassword as supabaseResetPassword } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -106,41 +98,35 @@ const Login = () => {
 
     setIsLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("Email", email);
-      formData.append("Password", password);
-      formData.append("Latitude", '37.4220936');
-      formData.append("Longitude", '-122.083922');
-
-      console.log("formdata in login:", formData);
+      // Use Supabase Auth for login
+      const data = await signInWithEmail(email, password);
       
+      console.log("Login response:", data);
 
-      const res = await login(formData);
-      console.log("Login response:", res);
-
-      if (res?.success) {
-        const token = await getToken();
-        if(token){
-          await removeToken();
-        }
-        await storeToken(res?.data?.token);
-        const id = await getCurrentUserId();
-        if (id) {
-          await removeCurrentUserId();
-        }
-        await addCurrentUserId(res?.data?.ID);
-        const storedToken = await getToken();
-        if (storedToken) {
-          router.replace("/(tabs)");
-        } else {
-          setGeneralError("Token not stored");
-        }
+      if (data?.session) {
+        // Session is automatically stored by Supabase
+        // Auth context will pick up the change via onAuthStateChange
+        Toast.show({
+          type: "success",
+          text1: "Welcome back!",
+          position: "bottom",
+          visibilityTime: 2000,
+        });
+        router.replace("/(tabs)");
       } else {
-        setGeneralError(res?.msg || "Login failed. Please try again.");
+        setGeneralError("Login failed. Please try again.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      setGeneralError("Something went wrong. Please try again later.");
+      
+      // Handle specific Supabase auth errors
+      if (error?.message?.includes("Invalid login credentials")) {
+        setGeneralError("Invalid email or password. Please try again.");
+      } else if (error?.message?.includes("Email not confirmed")) {
+        setGeneralError("Please verify your email before logging in.");
+      } else {
+        setGeneralError(error?.message || "Something went wrong. Please try again later.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -157,109 +143,50 @@ const Login = () => {
 
     setSendingEmail(true);
     try {
-      const emailData = new FormData();
-      emailData.append("Email", forgotEmail);
+      // Use Supabase password reset
+      await supabaseResetPassword(forgotEmail);
+      console.log("Password reset email sent");
 
-      const res = await forgotPassword(emailData);
-      console.log("Forgot password response:", res);
-
-      if (res?.success) {
-        Toast.show({
-          type: "success",
-          text1: res?.msg || "Otp sent to your email",
-          text2: "Please check your email for password reset instructions",
-          position: "bottom",
-        });
-        setOtpSent(true);
-      } else {
-        setForgotEmailError(
-          res?.msg || "Failed to send reset email. Please try again."
-        );
-      }
-    } catch (error) {
+      Toast.show({
+        type: "success",
+        text1: "Password reset email sent",
+        text2: "Please check your email for reset instructions",
+        position: "bottom",
+      });
+      
+      // Close modal since Supabase uses magic link instead of OTP
+      setShowForgotPasswordModal(false);
+      setForgotEmail("");
+    } catch (error: any) {
       console.error("Forgot password error:", error);
-      setForgotEmailError("Something went wrong. Please try again later.");
+      setForgotEmailError(error?.message || "Failed to send reset email. Please try again.");
     } finally {
       setSendingEmail(false);
     }
   };
 
+  // NOTE: Supabase uses magic link for password reset (sent via email)
+  // The OTP and direct password reset functions are no longer used
+  // Users will receive an email with a link to reset their password
+  
   const handleVerifyOtp = async () => {
-    if (!otp.trim()) {
-      setOtpError("OTP is required");
-      return;
-    }
-
-    setVerifyingOtp(true);
-    try {
-      const otpData = new FormData();
-      otpData.append("Email", forgotEmail);
-      otpData.append("otp", otp);
-
-      const res = await verifyOtp(otpData);
-      console.log("Verify OTP response:", res);
-
-      if (res?.success) {
-        Toast.show({
-          type: "success",
-          text1: res?.msg || "OTP verified successfully",
-          position: "bottom",
-        });
-        setShowResetPassword(true); // Show password reset form
-      } else {
-        setOtpError(res?.msg || "Invalid OTP. Please try again.");
-      }
-    } catch (error) {
-      console.error("OTP verification error:", error);
-      setOtpError("Something went wrong. Please try again later.");
-    } finally {
-      setVerifyingOtp(false);
-    }
+    // Legacy OTP flow - Supabase uses magic link instead
+    Toast.show({
+      type: "info",
+      text1: "Check your email",
+      text2: "Click the link in the email to reset your password",
+      position: "bottom",
+    });
   };
 
   const handleResetPassword = async () => {
-    if (!newPassword.trim()) {
-      setNewPasswordError("New password is required");
-      return;
-    } else if (newPassword.length < 6) {
-      setNewPasswordError("Password must be at least 6 characters");
-      return;
-    }
-
-    setResettingPassword(true);
-    try {
-      const resetData = new FormData();
-      resetData.append("Email", forgotEmail);
-      resetData.append("NewPassword", newPassword);
-
-      const res = await forgotPassword2(resetData);
-      console.log("Reset password response:", res);
-
-      if (res?.success) {
-        Toast.show({
-          type: "success",
-          text1: res?.msg || "Password reset successfully",
-          text2: "You can now login with your new password",
-          position: "bottom",
-        });
-        // Reset all states and close modal
-        setForgotEmail("");
-        setOtp("");
-        setNewPassword("");
-        setOtpSent(false);
-        setShowResetPassword(false);
-        setShowForgotPasswordModal(false);
-      } else {
-        setNewPasswordError(
-          res?.msg || "Failed to reset password. Please try again."
-        );
-      }
-    } catch (error) {
-      console.error("Password reset error:", error);
-      setNewPasswordError("Something went wrong. Please try again later.");
-    } finally {
-      setResettingPassword(false);
-    }
+    // Legacy reset flow - Supabase uses magic link instead
+    Toast.show({
+      type: "info", 
+      text1: "Check your email",
+      text2: "Click the link in the email to reset your password",
+      position: "bottom",
+    });
   };
 
     // Show Privacy Policy

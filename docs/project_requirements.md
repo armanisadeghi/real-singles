@@ -1,7 +1,7 @@
 # **RealSingles - Technical Requirements & Implementation Plan**
 
 **Project:** Complete rebuild of backend infrastructure and fixes for mobile application  
-**Date:** January 22, 2026 (Last Updated: January 23, 2026)  
+**Date:** January 22, 2026 (Last Updated: January 23, 2026 - Marketing site complete)  
 **Tech Stack:** Next.js 16.1.4+ (App Router), Supabase (PostgreSQL + Auth), Vercel, React Native/Expo
 
 ---
@@ -40,52 +40,80 @@
 | **Web UI** | Matches page | ✅ Complete |
 | **Web UI** | Favorites page | ✅ Complete |
 | **Web UI** | Settings page | ✅ Complete |
-| **Web UI** | Marketing landing page | ✅ Complete |
-| **Web UI** | About page | ✅ Complete |
-| **Web UI** | Features page | ✅ Complete |
-| **Web UI** | Events page | ✅ Complete |
-| **Web UI** | Contact page | ✅ Complete |
+| **Web UI** | Marketing landing page (homepage with hero, features, testimonials) | ✅ Complete |
+| **Web UI** | About page (mission, values, team) | ✅ Complete |
+| **Web UI** | Features page (feature grid, comparison table) | ✅ Complete |
+| **Web UI** | Events page (public listing, host inquiry form) | ✅ Complete |
+| **Web UI** | Contact page (form, FAQ, contact methods) | ✅ Complete |
+| **Web UI** | Header component (responsive nav, mobile menu) | ✅ Complete |
+| **Web UI** | Footer component (nav links, app store buttons, social) | ✅ Complete |
+| **Assets** | WordPress site assets migrated to /public/images | ✅ Complete |
+| **Assets** | Brand colors (#8F5924 primary, #19C6B7 secondary) | ✅ Complete |
+| **Assets** | Typography (Baskervville headings, Poppins body) | ✅ Complete |
+| **Assets** | Logo and 23 SVG icons migrated | ✅ Complete |
 | **Config** | Environment variables setup | ✅ Complete |
 | **Config** | Supabase client (browser/server/admin) | ✅ Complete |
 | **Libs** | Email client (Resend) | ✅ Complete |
 | **Libs** | Matching algorithm stubs | ✅ Complete |
 | **Libs** | Agora token generation stubs | ✅ Complete |
 | **Types** | TypeScript interfaces for all tables | ✅ Complete |
+| **Mobile** | Supabase client (lib/supabase.ts) | ✅ Complete |
+| **Mobile** | Auth context with Supabase sessions | ✅ Complete |
+| **Mobile** | Login page with Supabase Auth | ✅ Complete |
+| **Mobile** | Signup flow with password confirmation | ✅ Complete |
+| **Mobile** | Profile edit with autosave | ✅ Complete |
+| **Mobile** | @supabase/supabase-js dependency | ✅ Complete |
 
 ### **In Progress** 🔄
 
-| Category | Item | Status |
-|----------|------|--------|
-| **Mobile** | Supabase client integration | 🔄 Next Priority |
-| **Mobile** | Auth flow update (login/register) | 🔄 Next Priority |
-| **Mobile** | Profile edit with autosave | 🔄 Next Priority |
-| **Mobile** | API endpoint migration | 🔄 Planned |
+| Category | Item | Status | Owner |
+|----------|------|--------|-------|
+| **Mobile** | API endpoint migration (PHP → Supabase) | 🔄 In Progress | Other Dev |
+| **Mobile** | iOS safe area fixes | 🔄 In Progress | Other Dev |
+| **Web** | Profile API endpoints | ⏳ Next Up | - |
+| **Web** | Supabase Storage setup | ⏳ Next Up | - |
 
 ### **Not Started** ⏳
 
-| Category | Item | Priority |
-|----------|------|----------|
-| **API** | Profile endpoints (/api/users/me, /api/users/[id]) | High |
-| **API** | Gallery upload endpoint | High |
-| **API** | Discovery endpoints (/api/discover/*) | High |
-| **API** | Matches endpoints | High |
-| **API** | Favorites endpoints | High |
-| **API** | Conversations endpoints | Medium |
-| **API** | Events endpoints | Medium |
-| **API** | Products/Orders endpoints | Medium |
-| **API** | Agora token endpoints | Medium |
-| **Auth** | Social login (Apple, Google) | Medium |
-| **Auth** | Phone verification (Twilio) | Medium |
-| **Auth** | Forgot/reset password | Medium |
-| **Mobile** | iOS safe area fixes | High |
-| **Mobile** | Keyboard handling | High |
-| **Mobile** | Expo SDK upgrade | High |
-| **Integration** | Agora Chat setup | Medium |
-| **Integration** | Agora RTC setup | Medium |
-| **Integration** | Push notifications | Low |
-| **Deploy** | Vercel deployment | Medium |
-| **Deploy** | App Store submission | Low |
-| **Deploy** | Play Store submission | Low |
+#### **Web/API - High Priority**
+| Category | Item | Priority | Notes |
+|----------|------|----------|-------|
+| **API** | Profile endpoints (/api/users/me, /api/users/[id]) | High | Needed for app profile views |
+| **API** | Gallery upload endpoint (/api/upload) | High | Requires Supabase Storage setup |
+| **API** | Discovery endpoints (/api/discover/*) | High | top-matches, nearby, featured |
+| **API** | Matches endpoints (/api/matches) | High | like/pass/super-like actions |
+| **API** | Favorites endpoints (/api/favorites/*) | High | add/remove/list |
+| **API** | Contact form submission (/api/contact) | Medium | Wire up contact page form |
+| **Storage** | Supabase Storage buckets setup | High | avatars, gallery, events buckets |
+
+#### **Web/API - Medium Priority**
+| Category | Item | Priority | Notes |
+|----------|------|----------|-------|
+| **API** | Conversations endpoints | Medium | For chat functionality |
+| **API** | Events CRUD endpoints | Medium | Create/read/update/delete events |
+| **API** | Products/Orders endpoints | Medium | Points redemption system |
+| **API** | Agora token endpoints | Medium | Chat/call token generation |
+| **Auth** | Social login (Apple, Google) | Medium | Supabase OAuth providers |
+| **Auth** | Phone verification (Twilio) | Medium | OTP flow |
+| **Auth** | Forgot/reset password | Medium | Supabase magic link |
+
+#### **Mobile - Being handled by other developer**
+| Category | Item | Priority | Notes |
+|----------|------|----------|-------|
+| **Mobile** | iOS safe area fixes | High | SafeAreaView implementation |
+| **Mobile** | Keyboard handling | High | KeyboardAvoidingView |
+| **Mobile** | Expo SDK upgrade | High | SDK 53 → 54 |
+| **Mobile** | API endpoint migration | High | Switch from PHP to Supabase |
+
+#### **Integration & Deployment**
+| Category | Item | Priority | Notes |
+|----------|------|----------|-------|
+| **Integration** | Agora Chat setup | Medium | Verify existing config |
+| **Integration** | Agora RTC setup | Medium | Video/voice calls |
+| **Integration** | Push notifications | Low | Expo Push or OneSignal |
+| **Deploy** | Vercel deployment | Medium | Deploy web app |
+| **Deploy** | App Store submission | Low | After mobile fixes |
+| **Deploy** | Play Store submission | Low | After mobile fixes |
 
 ---
 
@@ -988,8 +1016,20 @@ web/
 │   │   │   └── ...
 │   │   ├── (auth)/                       ✅ (login, register pages)
 │   │   ├── (app)/                        ✅ (authenticated user pages)
+│   │   │   ├── discover/page.tsx         ✅
+│   │   │   ├── matches/page.tsx          ✅
+│   │   │   ├── favorites/page.tsx        ✅
+│   │   │   ├── profile/page.tsx          ✅
+│   │   │   ├── profile/edit/page.tsx     ✅
+│   │   │   └── settings/page.tsx         ✅
 │   │   ├── (marketing)/                  ✅ (public marketing pages)
+│   │   │   ├── about/page.tsx            ✅
+│   │   │   ├── features/page.tsx         ✅
+│   │   │   ├── events/page.tsx           ✅
+│   │   │   ├── contact/page.tsx          ✅
+│   │   │   └── layout.tsx                ✅
 │   │   ├── admin/                        ✅ (admin portal)
+│   │   ├── page.tsx                      ✅ (homepage with Header/Footer)
 │   │   └── layout.tsx
 │   ├── lib/
 │   │   ├── supabase/
@@ -1005,11 +1045,21 @@ web/
 │   │   └── matching/
 │   │       └── algorithm.ts              ✅ (stubs)
 │   ├── components/
-│   │   └── layout/
-│   │       ├── Header.tsx                ✅
-│   │       └── Footer.tsx                ✅
+│   │   ├── layout/
+│   │   │   ├── Header.tsx                ✅ (responsive nav, mobile menu)
+│   │   │   ├── Footer.tsx                ✅ (full footer with links)
+│   │   │   └── index.ts                  ✅
+│   │   ├── marketing/                    (future marketing components)
+│   │   └── ui/                           (shared UI components)
 │   └── types/
 │       └── index.ts                      ✅
+├── public/
+│   └── images/
+│       ├── logo.png                      ✅ (migrated from WordPress)
+│       ├── icons/                        ✅ (23 SVG icons)
+│       ├── hero/                         ✅ (hero images)
+│       ├── team/                         ✅ (team photos)
+│       └── testimonials/                 ✅ (testimonial photos)
 ├── supabase/
 │   ├── migrations/
 │   │   ├── 00001_initial_schema.sql      ✅

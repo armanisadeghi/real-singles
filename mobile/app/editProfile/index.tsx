@@ -1,13 +1,37 @@
+/**
+ * Edit Profile Screen
+ * 
+ * Features:
+ * - Autosave: Automatically saves after 5 seconds of inactivity
+ * - Change detection: Only saves when data actually changes
+ * - Visual status indicator: Shows save status (Saved, Saving, Unsaved)
+ * - Uses Supabase for data persistence
+ */
+
 import EditProfileForm from "@/components/forms/EditProfileForm";
 import { icons } from "@/constants/icons";
-import { fetchUserProfile, updateUser } from "@/lib/api";
+import { supabase, getProfile, updateProfile, getCurrentUser } from "@/lib/supabase";
 import { EditProfileFormData } from "@/types";
 import { useAuth } from "@/utils/authContext";
-import { getCurrentUserId } from "@/utils/token";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Image, Keyboard, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useState, useRef, useEffect } from "react";
+import { 
+  ActivityIndicator, 
+  Image, 
+  Keyboard, 
+  ScrollView, 
+  Text, 
+  TouchableOpacity, 
+  View,
+  AppState,
+  AppStateStatus
+} from "react-native";
 import Toast from "react-native-toast-message";
+
+// Autosave delay in milliseconds
+const AUTOSAVE_DELAY = 5000;
+
+type SaveStatus = "saved" | "saving" | "unsaved" | "error" | "idle";
 
 const EditProfile = () => {
   const router = useRouter();
@@ -15,102 +39,74 @@ const EditProfile = () => {
 
   const [formData, setFormData] = useState<EditProfileFormData | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  const fetchUserData = async () => {
-    try {
-      const userid = await getCurrentUserId();
-      if (!userid) return;
+  // Refs for autosave
+  const lastSavedDataRef = useRef<string>("");
+  const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialLoadRef = useRef(true);
+  const appStateRef = useRef(AppState.currentState);
 
-      const res = await fetchUserProfile(userid);
-      console.log("res in fetchUserData:", res);
+  // Check if data has changed
+  const hasChanges = useCallback(() => {
+    if (!formData) return false;
+    const currentJson = JSON.stringify(formData);
+    return currentJson !== lastSavedDataRef.current;
+  }, [formData]);
 
-
-      if (res?.success && res?.data) {
-        const profileData = res.data;
-        console.log("profileData.Ethniticity:", profileData.Ethniticity);
-
-
-        setFormData({
-          SocialType: profileData?.SocialType || "",
-          Username: profileData?.Username || "",
-          FirstName: profileData?.FirstName || "",
-          LastName: profileData?.LastName || "",
-          DisplayName: profileData?.DisplayName || "",
-          Phone: profileData?.Phone || "",
-          Zipcode: profileData?.Zipcode || "",
-          Address: profileData?.Address || "",
-          City: profileData?.City || "",
-          State: profileData?.State || "",
-          Country: profileData?.Country || "",
-          Street: profileData?.Street || "",
-          NightAtHome: profileData?.NightAtHome || "", //PoliticalViews key change to NightAtHome
-          craziestTravelStory: profileData?.craziestTravelStory || "",
-          CraziestThings: profileData?.CraziestThings || "",
-          weiredestGift: profileData?.weiredestGift || "",
-          livePicture: profileData?.livePicture || "",
-          HSign: profileData?.HSign || "",
-          DOB: profileData?.DOB ? profileData.DOB.split("T")[0] : "",
-          MaritalStatus: profileData?.MaritalStatus || "",
-          HaveChild: profileData?.HaveChild || "",
-          WantChild: profileData?.WantChild || "",
-          Education: profileData?.Education || "",
-          School: profileData?.School || "",
-          JobTitle: profileData?.JobTitle || "",
-          Company: profileData?.Company || "",
-          Height: profileData?.Height || "",
-          BodyType: profileData?.BodyType || "",
-          Marijuna: profileData?.Marijuna || "",
-          Smoking: profileData?.Smoking || "",
-          Drinks: profileData?.Drinks || "",
-          Pets: profileData?.Pets?.toLowerCase().trim() || "",
-          Ethniticity: profileData?.Ethniticity || "",
-          Language: profileData?.Language || "",
-          Religion: profileData?.Religion || "",
-          About: profileData?.About || "",
-          Interest: profileData?.Interest || "",
-          IdeaDate: profileData?.IdeaDate || "",
-          WayToHeart: profileData?.WayToHeart || "",
-          Gender: profileData?.Gender || "",
-          Image: profileData?.Image || "",
-          DeviceToken: profileData?.DeviceToken || "",
-          NonNegotiable: profileData?.Political || "",
-          WorstJob: profileData?.WorstJob || "",
-          JobID: profileData?.JobID || "",
-          PastEvent: profileData?.PastEvent || "",
-          FindMe: profileData?.FindMe || "",
-          social_link1: profileData?.social_link1 || "",
-          social_link2: profileData?.social_link2 || "",
-          applicantID: profileData?.applicantID || "",
-        });
-
-      } else {
-        console.error(res?.msg || "Failed to fetch profile");
-      }
-    } catch (err) {
-      console.error("Error fetching profile:", err);
+  // Perform save operation
+  const performSave = useCallback(async (isAutosave = false) => {
+    if (!formData || !hasChanges()) {
+      return true;
     }
-  };
 
-  // ✅ Refetch profile every time screen is focused
-  useFocusEffect(
-    useCallback(() => {
-      fetchUserData();
-    }, [])
-  );
-
-  const handleChange = (field: string, value: any) => {
-    if (!formData) return;
-    setFormData({ ...formData, [field]: value });
-  };
-
-  const handleSave = async () => {
-    Keyboard.dismiss();
-    if (!formData) return;
+    if (!isAutosave) {
+      setSaving(true);
+    }
+    setSaveStatus("saving");
 
     try {
-      setSaving(true);
-      const res = await updateUser(formData);
-      if (res?.success) {
+      const user = await getCurrentUser();
+      if (!user) {
+        router.push("/login");
+        return false;
+      }
+
+      // Map form data to profile schema
+      const profileData = {
+        first_name: formData.FirstName || null,
+        last_name: formData.LastName || null,
+        date_of_birth: formData.DOB || null,
+        gender: formData.Gender?.toLowerCase() || null,
+        height_inches: formData.Height ? Number(formData.Height) : null,
+        body_type: formData.BodyType?.toLowerCase() || null,
+        city: formData.City || null,
+        state: formData.State || null,
+        country: formData.Country || null,
+        occupation: formData.JobTitle || null,
+        education: formData.Education || null,
+        religion: formData.Religion?.toLowerCase() || null,
+        smoking: formData.Smoking?.toLowerCase() || null,
+        drinking: formData.Drinks?.toLowerCase() || null,
+        has_kids: formData.HaveChild === "Yes",
+        wants_kids: formData.WantChild?.toLowerCase().replace(" ", "_") || null,
+        interests: formData.Interest ? 
+          (Array.isArray(formData.Interest) ? formData.Interest : formData.Interest.split(",").map((s: string) => s.trim())) 
+          : null,
+        bio: formData.About || null,
+        looking_for_description: formData.IdeaDate || null,
+        profile_image_url: formData.Image || null,
+      };
+
+      await updateProfile(profileData);
+
+      // Update last saved state
+      lastSavedDataRef.current = JSON.stringify(formData);
+      setLastSaved(new Date());
+      setSaveStatus("saved");
+
+      if (!isAutosave) {
         await refreshUser();
         Toast.show({
           type: "success",
@@ -120,40 +116,301 @@ const EditProfile = () => {
           bottomOffset: 100,
           autoHide: true,
         });
-        console.log("Profile updated successfully");
-        // router.back()
-          setTimeout(() => {
-            router.back();
-          }, 1000); 
+        setSaving(false);
+      }
 
-      } else {
+      return true;
+    } catch (error: any) {
+      console.error("Error saving profile:", error);
+      setSaveStatus("error");
+      
+      if (!isAutosave) {
         Toast.show({
           type: "error",
-          text1: res?.msg || "Failed to update profile",
+          text1: error?.message || "Failed to update profile",
           position: "bottom",
           visibilityTime: 2000,
           bottomOffset: 100,
           autoHide: true,
         });
+        setSaving(false);
       }
+      
+      return false;
+    }
+  }, [formData, hasChanges, router, refreshUser]);
+
+  // Manual save handler
+  const handleSave = useCallback(async () => {
+    Keyboard.dismiss();
+    
+    // Clear any pending autosave
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+    }
+    
+    const success = await performSave(false);
+    if (success) {
+      setTimeout(() => {
+        router.back();
+      }, 1000);
+    }
+  }, [performSave, router]);
+
+  // Fetch user data
+  const fetchUserData = async () => {
+    try {
+      const user = await getCurrentUser();
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+
+      const profile = await getProfile();
+      console.log("Profile loaded:", profile);
+
+      if (profile) {
+        const loadedData: EditProfileFormData = {
+          SocialType: "",
+          Username: "",
+          FirstName: profile.first_name || "",
+          LastName: profile.last_name || "",
+          DisplayName: `${profile.first_name || ""} ${profile.last_name || ""}`.trim(),
+          Phone: "",
+          Zipcode: "",
+          Address: "",
+          City: profile.city || "",
+          State: profile.state || "",
+          Country: profile.country || "",
+          Street: "",
+          NightAtHome: "",
+          craziestTravelStory: "",
+          CraziestThings: "",
+          weiredestGift: "",
+          livePicture: profile.profile_image_url || "",
+          HSign: "",
+          DOB: profile.date_of_birth || "",
+          MaritalStatus: "",
+          HaveChild: profile.has_kids ? "Yes" : "No",
+          WantChild: profile.wants_kids || "",
+          Education: profile.education || "",
+          School: "",
+          JobTitle: profile.occupation || "",
+          Company: "",
+          Height: profile.height_inches?.toString() || "",
+          BodyType: profile.body_type || "",
+          Marijuna: "",
+          Smoking: profile.smoking || "",
+          Drinks: profile.drinking || "",
+          Pets: "",
+          Ethniticity: "",
+          Language: "",
+          Religion: profile.religion || "",
+          About: profile.bio || "",
+          Interest: profile.interests?.join(", ") || "",
+          IdeaDate: profile.looking_for_description || "",
+          WayToHeart: "",
+          Gender: profile.gender || "",
+          Image: profile.profile_image_url || "",
+          DeviceToken: "",
+          NonNegotiable: "",
+          WorstJob: "",
+          JobID: "",
+          PastEvent: "",
+          FindMe: "",
+          social_link1: "",
+          social_link2: "",
+          applicantID: "",
+        };
+
+        setFormData(loadedData);
+        lastSavedDataRef.current = JSON.stringify(loadedData);
+      } else {
+        // Initialize empty form for new profile
+        const emptyData: EditProfileFormData = {
+          SocialType: "",
+          Username: "",
+          FirstName: "",
+          LastName: "",
+          DisplayName: "",
+          Phone: "",
+          Zipcode: "",
+          Address: "",
+          City: "",
+          State: "",
+          Country: "",
+          Street: "",
+          NightAtHome: "",
+          craziestTravelStory: "",
+          CraziestThings: "",
+          weiredestGift: "",
+          livePicture: "",
+          HSign: "",
+          DOB: "",
+          MaritalStatus: "",
+          HaveChild: "",
+          WantChild: "",
+          Education: "",
+          School: "",
+          JobTitle: "",
+          Company: "",
+          Height: "",
+          BodyType: "",
+          Marijuna: "",
+          Smoking: "",
+          Drinks: "",
+          Pets: "",
+          Ethniticity: "",
+          Language: "",
+          Religion: "",
+          About: "",
+          Interest: "",
+          IdeaDate: "",
+          WayToHeart: "",
+          Gender: "",
+          Image: "",
+          DeviceToken: "",
+          NonNegotiable: "",
+          WorstJob: "",
+          JobID: "",
+          PastEvent: "",
+          FindMe: "",
+          social_link1: "",
+          social_link2: "",
+          applicantID: "",
+        };
+        setFormData(emptyData);
+        lastSavedDataRef.current = JSON.stringify(emptyData);
+      }
+
+      isInitialLoadRef.current = false;
     } catch (err) {
-       Toast.show({
-          type: "error",
-          text1: "Failed to update profile",
-          position: "bottom",
-          visibilityTime: 2000,
-          bottomOffset: 100,
-          autoHide: true,
-        });
-    } finally {
-      setSaving(false); // ⬅️ Stop loader
+      console.error("Error fetching profile:", err);
+    }
+  };
+
+  // Refetch profile every time screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserData();
+    }, [])
+  );
+
+  // Autosave effect
+  useEffect(() => {
+    if (isInitialLoadRef.current || !formData) {
+      return;
+    }
+
+    if (!hasChanges()) {
+      setSaveStatus("saved");
+      return;
+    }
+
+    setSaveStatus("unsaved");
+
+    // Clear existing timer
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+
+    // Set new timer
+    autosaveTimerRef.current = setTimeout(() => {
+      performSave(true);
+    }, AUTOSAVE_DELAY);
+
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, [formData, hasChanges, performSave]);
+
+  // Save on app background
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState: AppStateStatus) => {
+      if (
+        appStateRef.current.match(/active/) &&
+        nextAppState.match(/inactive|background/)
+      ) {
+        // App is going to background - save if there are changes
+        if (hasChanges()) {
+          performSave(true);
+        }
+      }
+      appStateRef.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [hasChanges, performSave]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleChange = (field: string, value: any) => {
+    if (!formData) return;
+    setFormData({ ...formData, [field]: value });
+  };
+
+  // Get relative time string
+  const getRelativeTime = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return "just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ago`;
+  };
+
+  // Render save status indicator
+  const renderSaveStatus = () => {
+    switch (saveStatus) {
+      case "saving":
+        return (
+          <View className="flex-row items-center">
+            <ActivityIndicator size="small" color="#B06D1E" />
+            <Text className="ml-2 text-xs text-gray-500">Saving...</Text>
+          </View>
+        );
+      case "saved":
+        return (
+          <View className="flex-row items-center">
+            <Text className="text-xs text-green-600">
+              ✓ Saved {lastSaved ? getRelativeTime(lastSaved) : ""}
+            </Text>
+          </View>
+        );
+      case "unsaved":
+        return (
+          <View className="flex-row items-center">
+            <Text className="text-xs text-amber-600">● Unsaved changes</Text>
+          </View>
+        );
+      case "error":
+        return (
+          <View className="flex-row items-center">
+            <Text className="text-xs text-red-600">⚠ Save failed</Text>
+          </View>
+        );
+      default:
+        return null;
     }
   };
 
   if (!formData) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text>Loading profile...</Text>
+        <ActivityIndicator size="large" color="#B06D1E" />
+        <Text className="mt-4 text-gray-600">Loading profile...</Text>
       </View>
     );
   }
@@ -169,11 +426,20 @@ const EditProfile = () => {
           <TouchableOpacity onPress={router.back} className="border border-gray rounded-lg w-8 h-8 justify-center items-center">
             <Image source={icons.back} className="size-4" resizeMode="contain" />
           </TouchableOpacity>
-          <Text className="leading-[22px] text-base font-medium tracking-[-0.41px] text-black">Edit Profile</Text>
+          <View>
+            <Text className="leading-[22px] text-base font-medium tracking-[-0.41px] text-black">Edit Profile</Text>
+            {renderSaveStatus()}
+          </View>
         </View>
 
-        <TouchableOpacity onPress={handleSave} style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
-          <Text className="text-primary w-full font-medium text-base tracking-[-0.41px] leading-[22px]">Save</Text>
+        <TouchableOpacity 
+          onPress={handleSave} 
+          disabled={saving || saveStatus === "saving"}
+          style={{ paddingHorizontal: 20, paddingVertical: 10, opacity: saving ? 0.5 : 1 }}
+        >
+          <Text className="text-primary w-full font-medium text-base tracking-[-0.41px] leading-[22px]">
+            {saving ? "Saving..." : "Save"}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -185,7 +451,7 @@ const EditProfile = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.2)", // light transparent black
+            backgroundColor: "rgba(0,0,0,0.2)",
             justifyContent: "center",
             alignItems: "center",
             zIndex: 9999,
@@ -195,13 +461,14 @@ const EditProfile = () => {
         </View>
       )}
 
-
       {/* Body */}
       <ScrollView className="flex-1">
         <View className="mt-8 px-6 pb-10">
           <EditProfileForm formData={formData} onChangeField={handleChange} />
         </View>
       </ScrollView>
+
+      <Toast />
     </View>
   );
 };
