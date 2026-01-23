@@ -121,7 +121,7 @@ PODS:
     - ExpoModulesCore
   - ExpoLocation (18.1.6):
     - ExpoModulesCore
-  - ExpoMediaLibrary (18.2.1):
+  - ExpoMediaLibrary (17.1.7):
     - ExpoModulesCore
     - React-Core
   - ExpoModulesCore (2.5.0):
@@ -2255,7 +2255,7 @@ DEPENDENCIES:
   - "ExpoLinearGradient (from `../node_modules/.pnpm/expo-linear-gradient@14.1.5_expo@53.0.25_@babel+core@7.28.6_@expo+metro-runtime@5.0.5_r_1bef10302b652aafcd4765910a1f884b/node_modules/expo-linear-gradient/ios`)"
   - "ExpoLinking (from `../node_modules/.pnpm/expo-linking@7.1.7_expo@53.0.25_@babel+core@7.28.6_@expo+metro-runtime@5.0.5_react-nati_439f715c68175a30b53ad0eb94a3db67/node_modules/expo-linking/ios`)"
   - "ExpoLocation (from `../node_modules/.pnpm/expo-location@18.1.6_expo@53.0.25_@babel+core@7.28.6_@expo+metro-runtime@5.0.5_react-na_0e9d19f4b8038837afa44e1546ef2f65/node_modules/expo-location/ios`)"
-  - "ExpoMediaLibrary (from `../node_modules/.pnpm/expo-media-library@18.2.1_expo@53.0.25_@babel+core@7.28.6_@expo+metro-runtime@5.0.5_rea_de72a1576c73509b6657cc5475c3fe28/node_modules/expo-media-library/ios`)"
+  - "ExpoMediaLibrary (from `../node_modules/.pnpm/expo-media-library@17.1.7_expo@53.0.25_@babel+core@7.28.6_@expo+metro-runtime@5.0.5_rea_04bb42fc87b1a6476cedeb4807650de2/node_modules/expo-media-library/ios`)"
   - "ExpoModulesCore (from `../node_modules/.pnpm/expo-modules-core@2.5.0/node_modules/expo-modules-core`)"
   - "ExpoSplashScreen (from `../node_modules/.pnpm/expo-splash-screen@0.30.10_expo@53.0.25_@babel+core@7.28.6_@expo+metro-runtime@5.0.5_re_74aa90dc9bbc3c5b67fbb79c4f02d602/node_modules/expo-splash-screen/ios`)"
   - "ExpoSymbols (from `../node_modules/.pnpm/expo-symbols@0.4.5_expo@53.0.25_@babel+core@7.28.6_@expo+metro-runtime@5.0.5_react-nati_a17310e3ff8eb5d52f23c49356227665/node_modules/expo-symbols/ios`)"
@@ -2421,7 +2421,7 @@ EXTERNAL SOURCES:
   ExpoLocation:
     :path: "../node_modules/.pnpm/expo-location@18.1.6_expo@53.0.25_@babel+core@7.28.6_@expo+metro-runtime@5.0.5_react-na_0e9d19f4b8038837afa44e1546ef2f65/node_modules/expo-location/ios"
   ExpoMediaLibrary:
-    :path: "../node_modules/.pnpm/expo-media-library@18.2.1_expo@53.0.25_@babel+core@7.28.6_@expo+metro-runtime@5.0.5_rea_de72a1576c73509b6657cc5475c3fe28/node_modules/expo-media-library/ios"
+    :path: "../node_modules/.pnpm/expo-media-library@17.1.7_expo@53.0.25_@babel+core@7.28.6_@expo+metro-runtime@5.0.5_rea_04bb42fc87b1a6476cedeb4807650de2/node_modules/expo-media-library/ios"
   ExpoModulesCore:
     :path: "../node_modules/.pnpm/expo-modules-core@2.5.0/node_modules/expo-modules-core"
   ExpoSplashScreen:
@@ -2641,7 +2641,7 @@ SPEC CHECKSUMS:
   ExpoLinearGradient: 7734c8059972fcf691fb4330bcdf3390960a152d
   ExpoLinking: d5c183998ca6ada66ff45e407e0f965b398a8902
   ExpoLocation: a43df2ff15f2fae9504b23a77060e7cd16b3e326
-  ExpoMediaLibrary: a3093b04365b245bb23b25b6eba84eb6ab55fecb
+  ExpoMediaLibrary: 0daf5e811e00daa47690f5da2989e71ff7de56e0
   ExpoModulesCore: 9c1392e0564a7d937cab9390c3668a0573357cb3
   ExpoSplashScreen: 1c22c5d37647106e42d4ae1582bb6d0dda3b2385
   ExpoSymbols: c5612a90fb9179cdaebcd19bea9d8c69e5d3b859
