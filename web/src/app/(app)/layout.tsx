@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 
 async function getUser() {
   const supabase = await createClient();
@@ -131,27 +132,8 @@ export default async function AppLayout({
         </div>
       </header>
 
-      {/* Mobile Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-50">
-        <div className="flex justify-around py-2">
-          <Link href="/" className="flex flex-col items-center py-2 px-4 text-gray-600">
-            <span className="text-xl">🏠</span>
-            <span className="text-xs">Home</span>
-          </Link>
-          <Link href="/matches" className="flex flex-col items-center py-2 px-4 text-gray-600">
-            <span className="text-xl">💕</span>
-            <span className="text-xs">Matches</span>
-          </Link>
-          <Link href="/favorites" className="flex flex-col items-center py-2 px-4 text-gray-600">
-            <span className="text-xl">⭐</span>
-            <span className="text-xs">Favorites</span>
-          </Link>
-          <Link href="/profile" className="flex flex-col items-center py-2 px-4 text-gray-600">
-            <span className="text-xl">👤</span>
-            <span className="text-xs">Profile</span>
-          </Link>
-        </div>
-      </nav>
+      {/* Mobile Bottom Navigation */}
+      <BottomNavigation />
 
       {/* Main Content */}
       <main className="pb-20 md:pb-0">

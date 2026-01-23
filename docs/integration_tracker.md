@@ -61,7 +61,7 @@
 - ~~TypeScript errors in signup components~~ - FIXED: All `data` possibly undefined errors resolved
 - ~~Progressive signup flow~~ - IMPLEMENTED: Server-side API at `/api/profile/completion`
 - ~~"Prefer not to say" options~~ - IMPLEMENTED: Added to all sensitive fields
-- Bottom Navigation - Not using native patterns on iOS/Android
+- ~~Bottom Navigation~~ - IMPLEMENTED: Native tabs using Expo Router NativeTabs (UITabBarController on iOS, BottomNavigationView on Android)
 - Single vs Multi-Select standardization (body_type, religion, pets)
 
 ### New API Endpoint: `/api/profile/completion`
@@ -261,14 +261,15 @@
 
 | Component | Documented | Web | iOS | Android | Tested | Signed |
 |-----------|------------|-----|-----|---------|--------|--------|
-| Bottom Tab Bar | X | - | - | - | - | - |
+| Bottom Tab Bar | X | X | X | X | - | - |
 | Header/Top Nav | - | X | ... | ... | - | - |
 | Side Menu | - | ... | - | - | - | - |
 
 **Notes:**
-- Bottom tab bar on mobile needs to be native-style (not current implementation).
-- iOS should use standard UITabBarController pattern.
-- Android should use Material Design 3 bottom navigation.
+- ~~Bottom tab bar on mobile needs to be native-style (not current implementation).~~ IMPLEMENTED
+- iOS uses UITabBarController via Expo Router NativeTabs (supports Liquid Glass on iOS 26+)
+- Android uses BottomNavigationView via Expo Router NativeTabs (Material Design 3)
+- Web uses custom BottomNavigation component matching native app tabs
 
 ---
 
@@ -345,7 +346,7 @@
 4. ~~**Missing Web Fields**~~ - FIXED: ethnicity, marijuana now on web
 5. ~~**API Field Typos**~~ - FIXED: All legacy misspellings removed (Ethnicity, Marijuana)
 6. ~~**Options Standardization**~~ - FIXED: All signup and profile edit forms now use standardized options from `constants/options.ts`
-7. **Bottom Navigation** - Not using native patterns on either iOS or Android
+7. ~~**Bottom Navigation**~~ - IMPLEMENTED: Native tabs using Expo Router NativeTabs (UITabBarController/BottomNavigationView)
 
 ### Medium Priority (Polish)
 

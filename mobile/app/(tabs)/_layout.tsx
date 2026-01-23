@@ -1,90 +1,65 @@
-import { icons } from '@/constants/icons'
-import { Tabs } from 'expo-router'
-import React from 'react'
-import { Image, ImageBackground, View } from 'react-native'
+import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
+import { icons } from '@/constants/icons';
 
-const TabIcon = ({focused, icon, title}: any) => {
-  if(!focused){
-    return (
-      <View className='size-full justify-center items-center mt-7 rounded-full'>
-        <Image source={icon} className="size-7" tintColor="#ffffff" resizeMode='contain'/>
-      </View>
-    )
-  }
+/**
+ * Native Bottom Tab Navigation
+ * 
+ * Uses platform-native components:
+ * - iOS: UITabBarController (supports Liquid Glass on iOS 26+)
+ * - Android: BottomNavigationView (Material Design 3)
+ * 
+ * Following platform guidelines:
+ * - iOS HIG: 3-5 tabs, always show labels, 25x25pt icons
+ * - Material Design 3: 3-5 destinations, visible labels, active indicator
+ * 
+ * Note: Native tab components provide built-in haptic feedback on both platforms.
+ * iOS UITabBarController has subtle haptic on selection (iOS 15+).
+ * Android BottomNavigationView provides ripple effect feedback.
+ */
+export default function TabLayout() {
   return (
-    <ImageBackground
-    source={icons.highlight}
-    className={`${title ? 'flex flex-row w-full flex-1 min-w-[36px] min-h-10 mt-7 justify-center items-center rounded-full overflow-hidden' : 'flex flex-row w-full flex-1 min-w-[70px] min-h-16 mt-4 justify-center items-center rounded-full overflow-hidden'}`}
+    <NativeTabs
+      // Android-specific styling
+      rippleColor="#E91E6340"
+      indicatorColor="#E91E63"
+      // Label always visible (Material Design 3 guideline)
+      labelVisibilityMode="labeled"
     >
-      <Image source={icon} tintColor={`${title ? '#ffffff' : null}`} className="size-4" resizeMode='contain' />
-    </ImageBackground>
-  )
-}
+      {/* Home / Discover Tab */}
+      <NativeTabs.Trigger name="index">
+        <Label>Home</Label>
+        <Icon
+          sf={{ default: 'house', selected: 'house.fill' }}
+          androidSrc={icons.home}
+        />
+      </NativeTabs.Trigger>
 
-const _layout = () => {
-  return (
-    <Tabs
-    screenOptions={{
-      tabBarShowLabel: false,
-      tabBarItemStyle: {
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      tabBarStyle: {
-        backgroundColor: '#1D2733',
-        borderRadius: 56,
-        marginHorizontal: 20,
-        marginBottom: 50,
-        height: 68,
-        position: 'absolute',
-        overflow: 'hidden',
-      }
-    }}
-    >
-        <Tabs.Screen 
-        name='index'
-        options={{
-          title: 'Home',
-          headerShown: false,
-          tabBarIcon: ({focused}) => (
-            <TabIcon focused={focused} icon={icons.home} title="Home"/>
-          )
-        }}
+      {/* Chats / Messages Tab */}
+      <NativeTabs.Trigger name="chats">
+        <Label>Chats</Label>
+        <Icon
+          sf={{ default: 'bubble.left.and.bubble.right', selected: 'bubble.left.and.bubble.right.fill' }}
+          androidSrc={icons.chats}
         />
-        <Tabs.Screen 
-        name='chats'
-        options={{
-          title: 'Chats',
-          headerShown: false,
-          tabBarIcon: ({focused}) => (
-            <TabIcon focused={focused} icon={icons.chats} title="Chats"/>
-          )
-        }}
-        />
-        <Tabs.Screen 
-        name='favourites'
-        options={{
-          title: 'Favourites',
-          headerShown: false,
-          tabBarIcon: ({focused}) => (
-            <TabIcon focused={focused} icon={icons.heart} title="Favourites"/>
-          )
-        }}
-        />
-        <Tabs.Screen 
-        name='profile'
-        options={{
-          title: 'Profile',
-          headerShown: false,
-          tabBarIcon: ({focused}) => (
-            <TabIcon focused={focused} icon={icons.profile} title="Profile"/>
-          )
-        }}
-        />
-    </Tabs>
-  )
-}
+      </NativeTabs.Trigger>
 
-export default _layout
+      {/* Favourites / Likes Tab */}
+      <NativeTabs.Trigger name="favourites">
+        <Label>Favourites</Label>
+        <Icon
+          sf={{ default: 'heart', selected: 'heart.fill' }}
+          androidSrc={icons.heart}
+        />
+      </NativeTabs.Trigger>
+
+      {/* Profile Tab */}
+      <NativeTabs.Trigger name="profile">
+        <Label>Profile</Label>
+        <Icon
+          sf={{ default: 'person', selected: 'person.fill' }}
+          androidSrc={icons.profile}
+        />
+      </NativeTabs.Trigger>
+    </NativeTabs>
+  );
+}
