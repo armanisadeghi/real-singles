@@ -47,6 +47,15 @@
 | **API** | `/api/conversations/[id]/participants` endpoints (POST/DELETE) | ✅ Complete |
 | **API** | `/api/agora/chat-token` endpoint (POST) | ✅ Complete |
 | **API** | `/api/agora/call-token` endpoint (POST) | ✅ Complete |
+| **API** | `/api/speed-dating` endpoint (GET) | ✅ Complete |
+| **API** | `/api/speed-dating/[id]` endpoint (GET) | ✅ Complete |
+| **API** | `/api/speed-dating/[id]/register` endpoints (POST/DELETE) | ✅ Complete |
+| **API** | `/api/reviews` endpoints (GET/POST) | ✅ Complete |
+| **API** | `/api/users/[id]/reviews` endpoint (GET) | ✅ Complete |
+| **API** | `/api/referrals` endpoints (GET/POST) | ✅ Complete |
+| **API** | `/api/groups` endpoints (GET/POST) | ✅ Complete |
+| **API** | `/api/groups/[id]` endpoints (GET/PUT/DELETE) | ✅ Complete |
+| **API** | `/api/groups/[id]/members` endpoints (POST/DELETE) | ✅ Complete |
 | **Admin** | Admin login page | ✅ Complete |
 | **Admin** | Admin dashboard with stats | ✅ Complete |
 | **Admin** | Admin users management page | ✅ Complete |
@@ -92,35 +101,35 @@
 |----------|------|--------|-------|
 | **Mobile** | API endpoint migration (PHP → Supabase) | 🔄 In Progress | Other Dev |
 | **Mobile** | iOS safe area fixes | 🔄 In Progress | Other Dev |
-| **API** | Speed Dating endpoints | ⏳ Next Up | - |
+| **API** | Auth social login | ⏳ Next Up | Apple/Google OAuth |
 
 ### **Not Started** ⏳
 
-#### **Web/API - Remaining**
+#### **Web/API - Remaining (8% of API)**
 | Category | Item | Priority | Notes |
 |----------|------|----------|-------|
-| **API** | Gallery management (reorder/primary) | Medium | /api/users/me/gallery/reorder |
-| **API** | Groups endpoints | Medium | /api/groups/* |
-| **API** | Speed dating endpoints | Medium | /api/speed-dating/* |
-| **API** | Reviews/Referrals endpoints | Medium | /api/reviews, /api/referrals |
-| **API** | Agora call token endpoint | Medium | /api/agora/call-token |
+| **API** | Gallery management (reorder/primary) | Low | /api/users/me/gallery/reorder |
 | **Auth** | Social login (Apple, Google) | Medium | Supabase OAuth providers |
-| **Auth** | Phone verification (Twilio) | Medium | OTP flow |
+| **Auth** | Phone verification (Twilio) | Low | OTP flow |
 | **Auth** | Forgot/reset password | Medium | Supabase magic link |
+| **Auth** | Change password | Low | Authenticated users |
 
 #### **Recently Completed** ✅
 | Category | Item | Notes |
 |----------|------|-------|
-| **Storage** | Supabase Storage buckets | avatars, gallery, events |
-| **Storage** | Storage RLS policies | 00004_storage_policies.sql |
-| **API** | Upload endpoint | /api/upload (POST/DELETE) |
+| **API** | Groups endpoints | /api/groups/* (GET/POST/PUT/DELETE + members) |
+| **API** | Speed dating endpoints | /api/speed-dating/* |
+| **API** | Reviews endpoints | /api/reviews (GET/POST) |
+| **API** | Referrals endpoints | /api/referrals (GET/POST) |
+| **API** | Agora call token | /api/agora/call-token |
 | **API** | Conversations endpoints | /api/conversations/* |
 | **API** | Events CRUD endpoints | /api/events/* |
 | **API** | Products/Orders endpoints | /api/products/*, /api/orders |
 | **API** | Points endpoint | /api/points |
 | **API** | Blocks/Reports endpoints | /api/blocks, /api/reports |
 | **API** | Notifications endpoints | /api/notifications/* |
-| **API** | Agora chat token | /api/agora/chat-token |
+| **Storage** | Supabase Storage buckets | avatars, gallery, events |
+| **Storage** | Storage RLS policies | 00004_storage_policies.sql |
 
 #### **Mobile - Being handled by other developer**
 | Category | Item | Priority | Notes |
@@ -744,11 +753,13 @@ CREATE TABLE contact_submissions (
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| GET | `/api/groups` | Get user's groups | ⏳ |
-| POST | `/api/groups` | Create new group | ⏳ |
-| GET | `/api/groups/[id]` | Get group details | ⏳ |
-| PUT | `/api/groups/[id]` | Update group | ⏳ |
-| DELETE | `/api/groups/[id]` | Delete group | ⏳ |
+| GET | `/api/groups` | Get user's groups | ✅ |
+| POST | `/api/groups` | Create new group | ✅ |
+| GET | `/api/groups/[id]` | Get group details | ✅ |
+| PUT | `/api/groups/[id]` | Update group | ✅ |
+| DELETE | `/api/groups/[id]` | Delete group | ✅ |
+| POST | `/api/groups/[id]/members` | Add member to group | ✅ |
+| DELETE | `/api/groups/[id]/members` | Remove member from group | ✅ |
 
 ### **3.7 Events Endpoints**
 
@@ -766,9 +777,10 @@ CREATE TABLE contact_submissions (
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| GET | `/api/speed-dating` | Get speed dating sessions | ⏳ |
-| GET | `/api/speed-dating/[id]` | Get session details | ⏳ |
-| POST | `/api/speed-dating/[id]/register` | Register for session | ⏳ |
+| GET | `/api/speed-dating` | Get speed dating sessions | ✅ |
+| GET | `/api/speed-dating/[id]` | Get session details | ✅ |
+| POST | `/api/speed-dating/[id]/register` | Register for session | ✅ |
+| DELETE | `/api/speed-dating/[id]/register` | Cancel registration | ✅ |
 
 ### **3.9 Rewards & Products Endpoints**
 
@@ -784,9 +796,11 @@ CREATE TABLE contact_submissions (
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| GET | `/api/users/[id]/reviews` | Get reviews for user | ⏳ |
-| POST | `/api/reviews` | Submit review for user | ⏳ |
-| GET | `/api/referrals` | Get user's referrals | ⏳ |
+| GET | `/api/users/[id]/reviews` | Get reviews for user | ✅ |
+| GET | `/api/reviews` | Get user's reviews (submitted/received) | ✅ |
+| POST | `/api/reviews` | Submit review for user | ✅ |
+| GET | `/api/referrals` | Get user's referrals | ✅ |
+| POST | `/api/referrals` | Track referral | ✅ |
 
 ### **3.11 Notifications Endpoints**
 
@@ -810,18 +824,18 @@ CREATE TABLE contact_submissions (
 | Category | Complete | Total | Percentage |
 |----------|----------|-------|------------|
 | Authentication | 4 | 9 | 44% |
-| User & Profile | 5 | 6 | 83% |
+| User & Profile | 6 | 7 | 86% |
 | Discovery & Matching | 11 | 11 | 100% |
 | Favorites & Social | 8 | 8 | 100% |
 | Chat & Communication | 6 | 6 | 100% |
-| Groups | 0 | 5 | 0% |
+| Groups | 7 | 7 | 100% |
 | Events | 7 | 7 | 100% |
-| Speed Dating | 0 | 3 | 0% |
+| Speed Dating | 4 | 4 | 100% |
 | Rewards & Products | 5 | 5 | 100% |
-| Reviews & Referrals | 0 | 3 | 0% |
+| Reviews & Referrals | 5 | 5 | 100% |
 | Notifications | 4 | 4 | 100% |
 | Utility | 3 | 3 | 100% |
-| **TOTAL** | **53** | **70** | **76%** |
+| **TOTAL** | **70** | **76** | **92%** |
 
 ---
 
@@ -1009,16 +1023,16 @@ Score = (LocationScore * 0.25) +
 - [ ] Fix video/voice call integration (Other Dev)
 - [ ] Implement groups functionality (low priority - conversations support groups)
 
-### **Phase 4: Events & Social** ✅ MOSTLY COMPLETE
+### **Phase 4: Events & Social** ✅ COMPLETE
 
 - [x] Implement events CRUD endpoints
 - [x] Implement notifications endpoints
 - [x] Implement blocks endpoints
 - [x] Implement reports endpoints
 - [x] Implement points/products endpoints
-- [ ] Implement virtual speed dating endpoints
-- [ ] Implement reviews system
-- [ ] Implement referrals system
+- [x] Implement virtual speed dating endpoints
+- [x] Implement reviews system
+- [x] Implement referrals system
 
 ### **Phase 5: Mobile Fixes** 🔄 IN PROGRESS (Other Dev)
 
@@ -1100,8 +1114,13 @@ web/
 │   │   │   ├── agora/
 │   │   │   │   ├── chat-token/route.ts   ✅ (POST)
 │   │   │   │   └── call-token/route.ts   ✅ (POST)
-│   │   │   ├── agora/
-│   │   │   │   └── chat-token/route.ts   ✅
+│   │   │   ├── speed-dating/
+│   │   │   │   ├── route.ts              ✅ (GET)
+│   │   │   │   └── [id]/
+│   │   │   │       ├── route.ts          ✅ (GET)
+│   │   │   │       └── register/route.ts ✅ (POST/DELETE)
+│   │   │   ├── reviews/route.ts          ✅ (GET/POST)
+│   │   │   ├── referrals/route.ts        ✅ (GET/POST)
 │   │   │   └── ...
 │   │   ├── (auth)/                       ✅ (login, register pages)
 │   │   ├── (app)/                        ✅ (authenticated user pages)
