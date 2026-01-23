@@ -78,16 +78,19 @@
 |----------|------|--------|-------|
 | **Mobile** | API endpoint migration (PHP → Supabase) | 🔄 In Progress | Other Dev |
 | **Mobile** | iOS safe area fixes | 🔄 In Progress | Other Dev |
-| **Web** | Supabase Storage setup | ⏳ Next Up | - |
+| **API** | Matches endpoints (/api/matches) | ⏳ Next Up | - |
 
 ### **Not Started** ⏳
 
 #### **Web/API - High Priority**
 | Category | Item | Priority | Notes |
 |----------|------|----------|-------|
-| **API** | Gallery upload endpoint (/api/upload) | High | Requires Supabase Storage setup |
+| **API** | Gallery management endpoints | Medium | reorder, set primary photo |
 | **API** | Matches endpoints (/api/matches) | High | like/pass/super-like actions |
-| **Storage** | Supabase Storage buckets setup | High | avatars, gallery, events buckets |
+| **Storage** | Supabase Storage buckets created | ✅ Complete | avatars, gallery, events |
+| **Storage** | Storage RLS policies migration | ✅ Complete | 00004_storage_policies.sql |
+| **API** | `/api/upload` endpoint (POST/DELETE) | ✅ Complete | File upload & delete |
+| **Lib** | Storage utilities (storage.ts) | ✅ Complete | Helpers, validation, constants |
 
 #### **Web/API - Medium Priority**
 | Category | Item | Priority | Notes |
@@ -114,7 +117,7 @@
 | **Integration** | Agora Chat setup | Medium | Verify existing config |
 | **Integration** | Agora RTC setup | Medium | Video/voice calls |
 | **Integration** | Push notifications | Low | Expo Push or OneSignal |
-| **Deploy** | Vercel deployment | Medium | Deploy web app |
+| **Deploy** | Vercel deployment | ✅ Complete | - |
 | **Deploy** | App Store submission | Low | After mobile fixes |
 | **Deploy** | Play Store submission | Low | After mobile fixes |
 
@@ -649,147 +652,150 @@ CREATE TABLE contact_submissions (
 
 ---
 
-## **3. API Endpoints to Build**
+## **3. API Endpoints Status**
+
+> **Legend**: ✅ = Complete | 🔄 = In Progress | ⏳ = Not Started
 
 ### **3.1 Authentication Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register new user with email/password |
-| POST | `/api/auth/login` | Login with email/password |
-| POST | `/api/auth/logout` | Logout user |
-| POST | `/api/auth/social` | Social login (Apple/Google) |
-| POST | `/api/auth/forgot-password` | Request password reset |
-| POST | `/api/auth/verify-otp` | Verify OTP code |
-| POST | `/api/auth/reset-password` | Reset password with token |
-| POST | `/api/auth/change-password` | Change password (authenticated) |
-| POST | `/api/auth/verify-phone` | Send phone verification OTP |
-| POST | `/api/auth/confirm-phone` | Confirm phone with OTP |
-| GET | `/api/auth/session` | Get current session/user |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| POST | `/api/auth/register` | Register new user with email/password | ✅ |
+| POST | `/api/auth/login` | Login with email/password | ✅ |
+| POST | `/api/auth/logout` | Logout user | ✅ |
+| GET | `/api/auth/session` | Get current session/user | ✅ |
+| POST | `/api/auth/social` | Social login (Apple/Google) | ⏳ |
+| POST | `/api/auth/forgot-password` | Request password reset | ⏳ (uses Supabase magic link) |
+| POST | `/api/auth/change-password` | Change password (authenticated) | ⏳ |
+| POST | `/api/auth/verify-phone` | Send phone verification OTP | ⏳ |
+| POST | `/api/auth/confirm-phone` | Confirm phone with OTP | ⏳ |
 
 ### **3.2 User & Profile Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/users/me` | Get current user profile |
-| PUT | `/api/users/me` | Update current user profile |
-| GET | `/api/users/[id]` | Get user profile by ID |
-| POST | `/api/users/me/gallery` | Upload photo/video to gallery |
-| DELETE | `/api/users/me/gallery/[id]` | Delete gallery item |
-| PUT | `/api/users/me/gallery/reorder` | Reorder gallery items |
-| GET | `/api/users/check-email` | Check if email exists |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/api/users/me` | Get current user profile | ✅ |
+| PUT | `/api/users/me` | Update current user profile | ✅ |
+| GET | `/api/users/[id]` | Get user profile by ID | ✅ |
+| POST | `/api/users/me/gallery` | Upload photo/video to gallery | ✅ (via /api/upload) |
+| DELETE | `/api/users/me/gallery/[id]` | Delete gallery item | ✅ (via /api/upload) |
+| PUT | `/api/users/me/gallery/reorder` | Reorder gallery items | ⏳ |
 
 ### **3.3 Discovery & Matching Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/discover` | Get home screen data (matches, nearby, events) |
-| GET | `/api/discover/top-matches` | Get top match profiles |
-| GET | `/api/discover/nearby` | Get nearby profiles |
-| GET | `/api/discover/featured-videos` | Get featured video profiles |
-| POST | `/api/matches` | Record match action (like/pass/super-like) |
-| GET | `/api/matches` | Get mutual matches |
-| GET | `/api/filters` | Get saved filters |
-| PUT | `/api/filters` | Save/update filters |
-| DELETE | `/api/filters` | Clear filters |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/api/discover` | Get home screen data (matches, nearby, events) | ✅ |
+| GET | `/api/discover/top-matches` | Get top match profiles | ✅ |
+| GET | `/api/discover/nearby` | Get nearby profiles | ✅ |
+| GET | `/api/discover/featured-videos` | Get featured video profiles | ⏳ |
+| POST | `/api/matches` | Record match action (like/pass/super-like) | ⏳ **HIGH PRIORITY** |
+| GET | `/api/matches` | Get mutual matches | ⏳ |
+| GET | `/api/filters` | Get saved filters | ✅ |
+| POST | `/api/filters` | Save/update filters | ✅ |
+| DELETE | `/api/filters` | Clear filters | ✅ |
 
 ### **3.4 Favorites & Social Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/favorites` | Get favorites list |
-| POST | `/api/favorites/[userId]` | Add to favorites |
-| DELETE | `/api/favorites/[userId]` | Remove from favorites |
-| POST | `/api/follows/[userId]` | Follow user |
-| DELETE | `/api/follows/[userId]` | Unfollow user |
-| POST | `/api/blocks/[userId]` | Block user |
-| DELETE | `/api/blocks/[userId]` | Unblock user |
-| POST | `/api/reports` | Report user |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/api/favorites` | Get favorites list | ✅ |
+| POST | `/api/favorites` | Add to favorites | ✅ |
+| DELETE | `/api/favorites/[id]` | Remove from favorites | ✅ |
+| POST | `/api/blocks/[userId]` | Block user | ⏳ |
+| DELETE | `/api/blocks/[userId]` | Unblock user | ⏳ |
+| POST | `/api/reports` | Report user | ⏳ |
 
 ### **3.5 Chat & Communication Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/conversations` | Get all conversations |
-| POST | `/api/conversations` | Create new conversation |
-| GET | `/api/conversations/[id]` | Get conversation details |
-| POST | `/api/agora/chat-token` | Generate Agora chat token |
-| POST | `/api/agora/call-token` | Generate Agora call token |
-| POST | `/api/agora/refresh-token` | Refresh Agora token |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/api/conversations` | Get all conversations | ⏳ |
+| POST | `/api/conversations` | Create new conversation | ⏳ |
+| GET | `/api/conversations/[id]` | Get conversation details | ⏳ |
+| POST | `/api/agora/chat-token` | Generate Agora chat token | ⏳ (stub exists) |
+| POST | `/api/agora/call-token` | Generate Agora call token | ⏳ (stub exists) |
 
 ### **3.6 Groups Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/groups` | Get user's groups |
-| POST | `/api/groups` | Create new group |
-| GET | `/api/groups/[id]` | Get group details |
-| PUT | `/api/groups/[id]` | Update group |
-| DELETE | `/api/groups/[id]` | Delete group |
-| POST | `/api/groups/[id]/members` | Add members to group |
-| DELETE | `/api/groups/[id]/members/[userId]` | Remove member from group |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/api/groups` | Get user's groups | ⏳ |
+| POST | `/api/groups` | Create new group | ⏳ |
+| GET | `/api/groups/[id]` | Get group details | ⏳ |
+| PUT | `/api/groups/[id]` | Update group | ⏳ |
+| DELETE | `/api/groups/[id]` | Delete group | ⏳ |
 
 ### **3.7 Events Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/events` | Get events list |
-| POST | `/api/events` | Create new event |
-| GET | `/api/events/[id]` | Get event details |
-| PUT | `/api/events/[id]` | Update event |
-| DELETE | `/api/events/[id]` | Delete event |
-| POST | `/api/events/[id]/register` | Register for event |
-| DELETE | `/api/events/[id]/register` | Cancel registration |
-| POST | `/api/events/[id]/interest` | Mark interest in event |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/api/events` | Get events list | ⏳ |
+| POST | `/api/events` | Create new event | ⏳ |
+| GET | `/api/events/[id]` | Get event details | ⏳ |
+| PUT | `/api/events/[id]` | Update event | ⏳ |
+| DELETE | `/api/events/[id]` | Delete event | ⏳ |
+| POST | `/api/events/[id]/register` | Register for event | ⏳ |
 
 ### **3.8 Virtual Speed Dating Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/speed-dating` | Get speed dating sessions |
-| GET | `/api/speed-dating/[id]` | Get session details |
-| POST | `/api/speed-dating/[id]/register` | Register for session |
-| DELETE | `/api/speed-dating/[id]/register` | Cancel registration |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/api/speed-dating` | Get speed dating sessions | ⏳ |
+| GET | `/api/speed-dating/[id]` | Get session details | ⏳ |
+| POST | `/api/speed-dating/[id]/register` | Register for session | ⏳ |
 
 ### **3.9 Rewards & Products Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/points` | Get user's points balance and history |
-| GET | `/api/products` | Get available products |
-| GET | `/api/products/[id]` | Get product details |
-| POST | `/api/orders` | Create redemption order |
-| GET | `/api/orders` | Get user's orders |
-| GET | `/api/orders/[id]` | Get order details |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/api/points` | Get user's points balance and history | ⏳ |
+| GET | `/api/products` | Get available products | ⏳ |
+| GET | `/api/products/[id]` | Get product details | ⏳ |
+| POST | `/api/orders` | Create redemption order | ⏳ |
+| GET | `/api/orders` | Get user's orders | ⏳ |
 
-### **3.10 Reviews & Ratings Endpoints**
+### **3.10 Reviews & Referrals Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/users/[id]/reviews` | Get reviews for user |
-| POST | `/api/reviews` | Submit review for user |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/api/users/[id]/reviews` | Get reviews for user | ⏳ |
+| POST | `/api/reviews` | Submit review for user | ⏳ |
+| GET | `/api/referrals` | Get user's referrals | ⏳ |
 
-### **3.11 Referrals Endpoints**
+### **3.11 Notifications Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/referrals` | Get user's referrals |
-| POST | `/api/referrals/track` | Track referral link click |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| GET | `/api/notifications` | Get user's notifications | ⏳ |
+| PUT | `/api/notifications/[id]/read` | Mark notification as read | ⏳ |
+| PUT | `/api/notifications/read-all` | Mark all as read | ⏳ |
 
-### **3.12 Notifications Endpoints**
+### **3.12 Utility Endpoints**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/notifications` | Get user's notifications |
-| PUT | `/api/notifications/[id]/read` | Mark notification as read |
-| PUT | `/api/notifications/read-all` | Mark all as read |
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| POST | `/api/upload` | Upload file to storage | ✅ |
+| DELETE | `/api/upload` | Delete file from storage | ✅ |
+| POST | `/api/contact` | Submit contact form | ✅ |
 
-### **3.13 Utility Endpoints**
+### **API Completion Summary**
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/upload` | Upload file to storage |
-| POST | `/api/contact` | Submit contact form |
+| Category | Complete | Total | Percentage |
+|----------|----------|-------|------------|
+| Authentication | 4 | 9 | 44% |
+| User & Profile | 5 | 6 | 83% |
+| Discovery & Matching | 6 | 9 | 67% |
+| Favorites & Social | 3 | 6 | 50% |
+| Chat & Communication | 0 | 5 | 0% |
+| Groups | 0 | 5 | 0% |
+| Events | 0 | 6 | 0% |
+| Speed Dating | 0 | 3 | 0% |
+| Rewards & Products | 0 | 5 | 0% |
+| Reviews & Referrals | 0 | 3 | 0% |
+| Notifications | 0 | 3 | 0% |
+| Utility | 3 | 3 | 100% |
+| **TOTAL** | **21** | **63** | **33%** |
 
 ---
 
@@ -870,8 +876,9 @@ export const ENV = {
 - [x] Create Supabase project
 - [x] Run database migrations (all tables above)
 - [x] Configure Row Level Security (RLS) policies
-- [ ] Set up Storage buckets (avatars, gallery, events)
-- [ ] Configure Auth providers (Email, Apple, Google)
+- [x] Set up Storage buckets (avatars, gallery, events)
+- [x] Configure Storage RLS policies (00004_storage_policies.sql)
+- [ ] Configure Auth providers (Email done, Apple/Google pending)
 - [ ] Set up Edge Functions if needed
 
 ### **5.2 Agora Setup**
@@ -945,51 +952,61 @@ Score = (LocationScore * 0.25) +
 
 ## **7. Implementation Phases**
 
-### **Phase 1: Foundation (Days 1-3)** ✅ COMPLETE
+### **Phase 1: Foundation** ✅ COMPLETE
 
 - [x] Set up Supabase project and database schema
 - [x] Set up Next.js project with proper structure
-- [ ] Deploy to Vercel
-- [x] Implement authentication endpoints
-- [ ] Update mobile app to use Supabase Auth ← **NEXT PRIORITY**
+- [x] Implement authentication endpoints (register, login, logout, session)
+- [x] Create Supabase clients (browser, server, admin)
+- [x] Set up TypeScript interfaces for all tables
+- [x] Update mobile app to use Supabase Auth
 
-### **Phase 2: Core Features (Days 4-7)** 🔄 IN PROGRESS
+### **Phase 2: Core Features** ✅ MOSTLY COMPLETE
 
-- [ ] Implement user/profile endpoints
-- [ ] Implement file upload to Supabase Storage
-- [ ] Implement discovery endpoints (home, top matches, nearby)
-- [ ] Implement favorites and blocking
+- [x] Implement user/profile endpoints (`/api/users/me`, `/api/users/[id]`)
+- [x] Implement discovery endpoints (`/api/discover`, `/top-matches`, `/nearby`)
+- [x] Implement filters endpoints (`/api/filters` GET/POST/DELETE)
+- [x] Implement favorites endpoints (`/api/favorites` GET/POST/DELETE)
 - [x] Basic matching algorithm (stubs created)
+- [x] Mobile profile edit with autosave
+- [x] Supabase Storage buckets (avatars, gallery, events)
+- [x] Storage RLS policies
+- [x] File upload/delete endpoint (`/api/upload`)
+- [ ] Implement matches endpoints (like/pass actions) ← **NEXT PRIORITY**
 
-### **Phase 3: Communication (Days 8-10)**
+### **Phase 3: Communication** ⏳ NOT STARTED
 
-- [ ] Implement Agora token generation
+- [ ] Implement Agora token endpoints
+- [ ] Implement conversations endpoints
 - [ ] Fix chat integration in mobile app
 - [ ] Fix video/voice call integration
 - [ ] Implement groups functionality
 
-### **Phase 4: Events & Social (Days 11-14)**
+### **Phase 4: Events & Social** ⏳ NOT STARTED
 
-- [ ] Implement events CRUD
-- [ ] Implement virtual speed dating
+- [ ] Implement events CRUD endpoints
+- [ ] Implement virtual speed dating endpoints
 - [ ] Implement reviews system
 - [ ] Implement referrals system
 - [ ] Implement points/rewards system
 
-### **Phase 5: Mobile Fixes (Days 15-18)**
+### **Phase 5: Mobile Fixes** 🔄 IN PROGRESS (Other Dev)
 
-- [ ] Fix all iOS safe area issues
-- [ ] Fix keyboard handling
+- [x] Supabase client integration
+- [x] Auth flow update (login/register)
+- [x] Profile edit with autosave
+- [ ] iOS safe area fixes
+- [ ] Keyboard handling
 - [ ] Update all API integrations
-- [ ] Implement proper error handling
-- [ ] Add loading states throughout
+- [ ] Expo SDK upgrade
 
-### **Phase 6: Polish & Testing (Days 19-21)**
+### **Phase 6: Polish & Deployment** ⏳ NOT STARTED
 
+- [ ] Deploy to Vercel
 - [ ] End-to-end testing
 - [ ] Performance optimization
 - [ ] Bug fixes
-- [ ] Documentation
+- [ ] App Store/Play Store submission
 
 ---
 
@@ -1023,6 +1040,7 @@ web/
 │   │   │   │   ├── route.ts              ✅ (GET/POST)
 │   │   │   │   └── [id]/route.ts         ✅ (DELETE)
 │   │   │   ├── contact/route.ts          ✅
+│   │   │   ├── upload/route.ts           ✅ (POST/DELETE)
 │   │   │   ├── matches/                  ⏳
 │   │   │   ├── agora/                    ⏳
 │   │   │   └── ...
@@ -1047,7 +1065,8 @@ web/
 │   │   ├── supabase/
 │   │   │   ├── client.ts                 ✅
 │   │   │   ├── server.ts                 ✅
-│   │   │   └── admin.ts                  ✅
+│   │   │   ├── admin.ts                  ✅
+│   │   │   └── storage.ts                ✅ (bucket helpers)
 │   │   ├── auth/
 │   │   │   └── admin-guard.ts            ✅
 │   │   ├── agora/
@@ -1075,7 +1094,9 @@ web/
 ├── supabase/
 │   ├── migrations/
 │   │   ├── 00001_initial_schema.sql      ✅
-│   │   └── 00002_rls_policies.sql        ✅
+│   │   ├── 00002_rls_policies.sql        ✅
+│   │   ├── 00003_promote_admin.sql       ✅
+│   │   └── 00004_storage_policies.sql    ✅
 │   ├── seed.sql                          ✅
 │   └── config.toml                       ✅
 └── .env.local                            ✅
