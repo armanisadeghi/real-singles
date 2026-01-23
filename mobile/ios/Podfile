@@ -41,9 +41,6 @@ target 'TruSingle' do
   )
     pod 'react-native-google-maps', :path => '../node_modules/react-native-maps'
 
-  # Worklets dependency for Reanimated  
-  pod 'react-native-worklets-core', :path => '../node_modules/react-native-worklets-core'
-
   pod 'HyphenateChat', '4.10.2'
 
   post_install do |installer|
