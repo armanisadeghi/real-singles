@@ -41,6 +41,7 @@ export const HAS_KIDS_OPTIONS = [
   { label: "No", value: "no" },
   { label: "Yes (Live at home)", value: "yes_live_at_home" },
   { label: "Yes (Live away)", value: "yes_live_away" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Wants kids options - matches database CHECK constraint
@@ -49,6 +50,7 @@ export const WANTS_KIDS_OPTIONS = [
   { label: "Definitely", value: "definitely" },
   { label: "Someday", value: "someday" },
   { label: "No (but OK if partner has)", value: "ok_if_partner_has" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Smoking options - matches database CHECK constraint
@@ -72,6 +74,7 @@ export const MARIJUANA_OPTIONS = [
   { label: "No", value: "no" },
   { label: "Occasionally", value: "occasionally" },
   { label: "Yes", value: "yes" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Exercise options - matches database CHECK constraint

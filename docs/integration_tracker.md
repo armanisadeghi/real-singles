@@ -58,8 +58,28 @@
    - Connected to API and database properly
 
 ### Remaining
-- Additional TypeScript errors in mobile unrelated to field naming (optional `data` prop checks needed in signup components)
+- ~~TypeScript errors in signup components~~ - FIXED: All `data` possibly undefined errors resolved
+- ~~Progressive signup flow~~ - IMPLEMENTED: Server-side API at `/api/profile/completion`
+- ~~"Prefer not to say" options~~ - IMPLEMENTED: Added to all sensitive fields
 - Bottom Navigation - Not using native patterns on iOS/Android
+- Single vs Multi-Select standardization (body_type, religion, pets)
+
+### New API Endpoint: `/api/profile/completion`
+
+**GET** - Returns profile completion status:
+- `percentage` - Completion percentage (0-100)
+- `nextField` - Next field to complete
+- `canStartMatching` - True if all required fields filled
+- `isComplete` - True if all fields complete or marked "prefer not to say"
+- `fields` - Full list of profile fields with metadata
+
+**POST** - Update completion tracking:
+- `action: "skip"` - Mark field as skipped (will ask again later)
+- `action: "prefer_not"` - Mark field as "prefer not to say" (won't ask again)
+- `action: "unskip"` - Remove field from skipped list
+- `action: "remove_prefer_not"` - Remove field from prefer_not list
+- `action: "set_step"` - Save current completion step
+- `action: "mark_complete"` - Mark profile as fully complete
 
 ---
 
@@ -336,9 +356,9 @@
 
 ### Low Priority (Enhancements)
 
-12. **Progressive Signup** - Implement save-as-you-go flow
-13. **"Prefer Not to Say"** - Add option to sensitive fields
-14. **Skip Tracking** - Track skipped vs blank fields
+12. ~~**Progressive Signup**~~ - IMPLEMENTED: New `/api/profile/completion` endpoint handles all logic server-side
+13. ~~**"Prefer Not to Say"~~ - IMPLEMENTED: Added to all sensitive fields (ethnicity, religion, political_views, marital_status, has_kids, wants_kids, marijuana)
+14. ~~**Skip Tracking**~~ - IMPLEMENTED: Server tracks `profile_completion_skipped` and `profile_completion_prefer_not` arrays
 
 ---
 

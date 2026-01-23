@@ -34,6 +34,7 @@ export const HAS_KIDS_OPTIONS = [
   { value: "no", label: "No" },
   { value: "yes_live_at_home", label: "Yes (Live at home)" },
   { value: "yes_live_away", label: "Yes (Live away)" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 export const WANTS_KIDS_OPTIONS = [
@@ -41,6 +42,7 @@ export const WANTS_KIDS_OPTIONS = [
   { value: "definitely", label: "Definitely" },
   { value: "someday", label: "Someday" },
   { value: "ok_if_partner_has", label: "No (but OK if partner has)" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 export const SMOKING_OPTIONS = [
@@ -61,6 +63,7 @@ export const MARIJUANA_OPTIONS = [
   { value: "no", label: "No" },
   { value: "occasionally", label: "Occasionally" },
   { value: "yes", label: "Yes" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 export const EXERCISE_OPTIONS = [
@@ -583,3 +586,39 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   limit: number;
   hasMore: boolean;
 }
+
+// ============================================
+// PROFILE COMPLETION TYPES
+// ============================================
+
+export interface ProfileField {
+  key: string;
+  label: string;
+  step: number;
+  category: string;
+  required: boolean;
+  sensitive: boolean;
+}
+
+export interface ProfileCompletionStatus {
+  percentage: number;
+  completedCount: number;
+  totalCount: number;
+  completedFields: string[];
+  incompleteFields: string[];
+  requiredIncomplete: string[];
+  skippedFields: string[];
+  preferNotFields: string[];
+  nextField: ProfileField | null;
+  canStartMatching: boolean;
+  isComplete: boolean;
+  fields: ProfileField[];
+}
+
+export type ProfileCompletionAction = 
+  | "skip" 
+  | "prefer_not" 
+  | "unskip" 
+  | "remove_prefer_not" 
+  | "set_step" 
+  | "mark_complete";
