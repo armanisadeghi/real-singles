@@ -100,13 +100,34 @@
 | **Mobile** | Signup flow with password confirmation | ✅ Complete |
 | **Mobile** | Profile edit with autosave | ✅ Complete |
 | **Mobile** | @supabase/supabase-js dependency | ✅ Complete |
+| **Mobile** | API client migration (PHP → Next.js) | ✅ Complete |
+| **Mobile** | lib/api.ts - New API wrapper | ✅ Complete |
+| **Mobile** | lib/axiosClient.ts - Updated base URL | ✅ Complete |
+| **Mobile** | 34 screens/components auto-migrated | ✅ Complete |
 
 ### **In Progress** 🔄
 
 | Category | Item | Status | Owner |
 |----------|------|--------|-------|
-| **Mobile** | API endpoint migration (PHP → Supabase) | 🔄 In Progress | Other Dev |
 | **Mobile** | iOS safe area fixes | 🔄 In Progress | Other Dev |
+| **Mobile** | Testing new API client | 🔄 In Progress | - |
+
+### **Mobile API Migration - Complete** ✅
+
+The mobile app has been migrated from the PHP backend to the Next.js API backend:
+
+| File | Change | Status |
+|------|--------|--------|
+| `lib/api.ts` | New API client calling Next.js `/api/*` routes | ✅ Complete |
+| `lib/axiosClient.ts` | Updated to use `EXPO_PUBLIC_API_URL` | ✅ Complete |
+| `lib/api.legacy.ts` | Old PHP API preserved as backup | ✅ Backed up |
+| 34 screen/component files | Auto-migrated via import path | ✅ Complete |
+
+**Key changes:**
+- All API calls now route to Next.js backend (`/api/*` endpoints)
+- Authentication uses Supabase session tokens
+- FormData requests converted to JSON where appropriate
+- Same function signatures maintained for compatibility
 
 ### **Web API - 100% Complete** ✅
 
@@ -133,13 +154,13 @@ All API endpoints have been implemented. Below is a summary of recently complete
 | **Storage** | Supabase Storage buckets | avatars, gallery, events |
 | **Storage** | Storage RLS policies | 00004_storage_policies.sql |
 
-#### **Mobile - Being handled by other developer**
+#### **Mobile - Remaining Work**
 | Category | Item | Priority | Notes |
 |----------|------|----------|-------|
 | **Mobile** | iOS safe area fixes | High | SafeAreaView implementation |
 | **Mobile** | Keyboard handling | High | KeyboardAvoidingView |
-| **Mobile** | Expo SDK upgrade | High | SDK 53 → 54 |
-| **Mobile** | API endpoint migration | High | Switch from PHP to Supabase |
+| **Mobile** | Expo SDK upgrade | Medium | SDK 53 → 54 |
+| **Mobile** | API migration testing | High | Verify all screens work with new backend |
 
 #### **Integration & Deployment**
 | Category | Item | Priority | Notes |
