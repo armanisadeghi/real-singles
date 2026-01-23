@@ -26,7 +26,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": false,
+      "edgeToEdgeEnabled": true,
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",

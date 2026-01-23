@@ -3,6 +3,7 @@ import { VIDEO_URL } from "@/utils/token";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import { TYPOGRAPHY, SPACING, BORDER_RADIUS, CARD_DIMENSIONS, ICON_SIZES } from "@/constants/designTokens";
 
 // Array of background colors for initials
 const BACKGROUND_COLORS = [
@@ -59,51 +60,59 @@ export default function VideoCard(videoProps: any) {
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={() => router.push({pathname: `/video/${videoProps?.video?.ID}`, params: { data: JSON.stringify(videoProps?.video) }})}
-      className="w-[154px] rounded-[10px] overflow-hidden"
+      className="overflow-hidden"
+      style={{ width: CARD_DIMENSIONS.listItem.width, borderRadius: BORDER_RADIUS.input }}
     >
       {/* Top image container */}
-      <View className="relative w-[154px] h-[127px] rounded-[10px] overflow-hidden border-[0.5px] border-[#D0D0D0]">
+      <View
+        className="relative overflow-hidden border border-border"
+        style={{
+          width: CARD_DIMENSIONS.listItem.width,
+          height: CARD_DIMENSIONS.video.height,
+          borderRadius: BORDER_RADIUS.input
+        }}
+      >
        <View
-            className="w-full h-full rounded-[10px] justify-center items-center"
-            style={{ backgroundColor: bgColor }}
+            className="w-full h-full justify-center items-center"
+            style={{ backgroundColor: bgColor, borderRadius: BORDER_RADIUS.input }}
           >
             {videoProps?.video?.VideoURL && (
               <Image
                 source={{ uri: VIDEO_URL + videoProps.video.VideoURL }}
-                className="w-full h-full absolute rounded-[10px]"
+                className="w-full h-full absolute"
                 resizeMode="cover"
+                style={{ borderRadius: BORDER_RADIUS.input }}
               />
             )}
 
             {!videoProps?.video?.VideoURL && (
-              <Text className="text-white text-3xl font-bold">
+              <Text className="text-white font-bold" style={TYPOGRAPHY.h2}>
                 {getInitials()}
               </Text>
             )}
           </View>
-
-
 
         {videoProps?.isVideo && (
             <View
               className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center"
               style={{ flex: 1 }}
             >
-              <View className="bg-black/40 p-2 rounded-full">
-                <Image source={icons.videoIcon} className="w-6 h-6" />
+              <View className="bg-black/40 rounded-full" style={{ padding: SPACING.xs }}>
+                <Image
+                  source={icons.videoIcon}
+                  style={{ width: ICON_SIZES.md, height: ICON_SIZES.md }}
+                  resizeMode="contain"
+                />
               </View>
             </View>
           )}
       </View>
 
       {/* Text content container */}
-      <View className="p-2">
-        <Text className="font-bold text-dark text-xs" numberOfLines={1}>
+      <View style={{ padding: SPACING.xs }}>
+        <Text className="font-bold text-dark" style={TYPOGRAPHY.subheadline} numberOfLines={1}>
           {videoProps?.video?.Name}
         </Text>
-        {/* <Text className="text-[10px] text-[#9A9CA0] mt-1" numberOfLines={1}>
-          By {videoProps?.video?.ID || "User"}
-        </Text> */}
       </View>
     </TouchableOpacity>
   );

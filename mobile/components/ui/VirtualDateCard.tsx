@@ -2,6 +2,7 @@ import { VIDEO_URL } from "@/utils/token";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import { TYPOGRAPHY, SPACING, BORDER_RADIUS, CARD_DIMENSIONS } from "@/constants/designTokens";
 
 export interface VirtualDateProps {
     ID: string;
@@ -67,22 +68,35 @@ export default function VirtualDateCard({virtualDate}: { virtualDate: VirtualDat
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={() => router.push(`/virtualdate/${virtualDate?.ID}`)}
-      className="w-[154px] h-[175px] rounded-[10px] overflow-hidden"
+      className="overflow-hidden"
+      style={{
+        width: CARD_DIMENSIONS.listItem.width,
+        height: CARD_DIMENSIONS.listItem.height,
+        borderRadius: BORDER_RADIUS.input
+      }}
     >
       {/* Top image container */}
-      <View className="relative w-[154px] h-[127px] rounded-[10px] overflow-hidden">
+      <View
+        className="relative overflow-hidden"
+        style={{
+          width: CARD_DIMENSIONS.listItem.width,
+          height: CARD_DIMENSIONS.video.height,
+          borderRadius: BORDER_RADIUS.input
+        }}
+      >
         {virtualDate?.Image ? (
           <Image
             source={{ uri: VIDEO_URL + virtualDate.Image }}
-            className="w-full h-full rounded-[10px]"
+            className="w-full h-full"
             resizeMode="cover"
+            style={{ borderRadius: BORDER_RADIUS.input }}
           />
         ) : (
-          <View 
-            className="w-full h-full rounded-[10px] justify-center items-center"
-            style={{ backgroundColor: bgColor }}
+          <View
+            className="w-full h-full justify-center items-center"
+            style={{ backgroundColor: bgColor, borderRadius: BORDER_RADIUS.input }}
           >
-            <Text className="text-white text-3xl font-bold">
+            <Text className="text-white font-bold" style={TYPOGRAPHY.h2}>
               {getInitials()}
             </Text>
           </View>
@@ -90,11 +104,11 @@ export default function VirtualDateCard({virtualDate}: { virtualDate: VirtualDat
       </View>
 
       {/* Text content container */}
-      <View className="p-2">
-        <Text className="font-bold text-dark text-xs" numberOfLines={1}>
+      <View style={{ padding: SPACING.xs }}>
+        <Text className="font-bold text-dark" style={TYPOGRAPHY.subheadline} numberOfLines={1}>
           {virtualDate?.Title}
         </Text>
-        <Text className="text-[10px] text-[#9A9CA0] mt-1" numberOfLines={1}>
+        <Text className="text-gray" style={{ ...TYPOGRAPHY.caption1, marginTop: SPACING.xxs }} numberOfLines={1}>
           {virtualDate?.Description || "User"}
         </Text>
       </View>

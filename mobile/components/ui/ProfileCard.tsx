@@ -11,6 +11,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useCardDimensions } from "@/hooks/useResponsive";
+import { TYPOGRAPHY, SPACING, ICON_SIZES } from "@/constants/designTokens";
 
 
 // Array of background colors for initials
@@ -34,8 +36,9 @@ export const BACKGROUND_COLORS = [
 
 export default function ProfileCard({ profile }: { profile: User }) {
   const router = useRouter();
- 
 
+  // Responsive card dimensions (2 columns, 1.18 aspect ratio)
+  const { width: cardWidth, height: cardHeight, gap } = useCardDimensions(2, 1.18);
 
   // Generate a random but consistent color for each user based on their ID or name
   const bgColor = useMemo(() => {
@@ -93,11 +96,14 @@ export default function ProfileCard({ profile }: { profile: User }) {
 
   return (
     <Link asChild href={`/profiles/${profile?.id || profile?.ID}`}>
-      <TouchableOpacity className="relative w-[149px] h-[176px] rounded-xl overflow-hidden">
+      <TouchableOpacity
+        className="relative rounded-card overflow-hidden"
+        style={{ width: cardWidth, height: cardHeight }}
+      >
         {content.type === "image" ? (
           <ImageBackground
             source={content.source}
-            className="w-full h-full rounded-xl overflow-hidden"
+            className="w-full h-full rounded-card overflow-hidden"
             resizeMode="cover"
           >
             {/* Rating and content overlays for image background */}
@@ -106,11 +112,14 @@ export default function ProfileCard({ profile }: { profile: User }) {
           </ImageBackground>
         ) : (
           <View
-            className="w-full h-full rounded-xl overflow-hidden justify-center items-center"
+            className="w-full h-full rounded-card overflow-hidden justify-center items-center"
             style={{ backgroundColor: content.bgColor }}
           >
             {/* Initials */}
-            <Text className="text-white text-4xl font-bold">
+            <Text
+              className="text-white font-bold"
+              style={TYPOGRAPHY.display}
+            >
               {content.initials !== '?' ? content.initials : "User"}
             </Text>
 
@@ -118,11 +127,17 @@ export default function ProfileCard({ profile }: { profile: User }) {
             <RatingOverlay profile={profile} />
 
             {/* Name and location overlay for solid background */}
-            <View className="absolute bottom-0 left-0 right-0 p-3">
-              <Text className="text-white font-bold text-xs">
+            <View className="absolute bottom-0 left-0 right-0" style={{ padding: SPACING.sm }}>
+              <Text
+                className="text-white font-bold"
+                style={TYPOGRAPHY.subheadline}
+              >
                 {profile?.DisplayName || "Anonymous User"}
               </Text>
-              <Text className="text-white font-normal text-[10px]">
+              <Text
+                className="text-white font-normal"
+                style={TYPOGRAPHY.caption1}
+              >
                 {profile?.City}{profile?.City ? ',' : ''} {profile?.State}
               </Text>
             </View>
@@ -136,28 +151,52 @@ export default function ProfileCard({ profile }: { profile: User }) {
 
 // Extracted Rating component to avoid duplication
 function RatingOverlay({ profile }: { profile: User }) {
-  // console.log("profile in RatingOverlay",profile);
-
-
   const finalRating =
     profile?.RATINGS !== undefined && profile?.RATINGS !== null
       ? profile.RATINGS
       : profile?.TotalRating ?? "";
 
   return (
-    <View className="absolute top-2 right-2 flex-row items-center gap-2">
+    <View
+      className="absolute flex-row items-center"
+      style={{ top: SPACING.sm, right: SPACING.sm, gap: SPACING.xs }}
+    >
       {profile?.distance_in_km && (
-        <View className="flex-row items-center gap-[2px] bg-white px-[4px] py-[3px] rounded-[30px] shadow-black shadow-lg">
-          <Text className="font-medium text-[6px] text-[#1D2733]">
+        <View
+          className="flex-row items-center bg-white rounded-full shadow-sm"
+          style={{
+            gap: SPACING.xxs,
+            paddingHorizontal: SPACING.xs,
+            paddingVertical: SPACING.xxs
+          }}
+        >
+          <Text
+            className="font-medium text-dark"
+            style={TYPOGRAPHY.caption2}
+          >
             {profile?.distance_in_km.toFixed(2)} Away
           </Text>
         </View>
       )}
-      <View className="flex-row items-center gap-[2px] bg-white px-[4px] py-[3px] rounded-[30px] shadow-black shadow-lg">
-        <Text className="font-medium text-[6px] text-[#1D2733]">
+      <View
+        className="flex-row items-center bg-white rounded-full shadow-sm"
+        style={{
+          gap: SPACING.xxs,
+          paddingHorizontal: SPACING.xs,
+          paddingVertical: SPACING.xxs
+        }}
+      >
+        <Text
+          className="font-medium text-dark"
+          style={TYPOGRAPHY.caption2}
+        >
           {profile?.RATINGS ?? profile?.TotalRating ?? profile?.AvgRating ?? ""}
         </Text>
-        <Image source={icons.star} className="w-[6px] h-[6px]" />
+        <Image
+          source={icons.star}
+          style={{ width: ICON_SIZES.xs * 0.4, height: ICON_SIZES.xs * 0.4 }}
+          resizeMode="contain"
+        />
       </View>
     </View>
   );
@@ -177,11 +216,20 @@ function GradientOverlay({ profile }: { profile: User }) {
         zIndex: 50,
       }}
     >
-      <View className="absolute bottom-4 left-3 z-20">
-        <Text className="text-white font-bold text-xs">
+      <View
+        className="absolute z-20"
+        style={{ bottom: SPACING.md, left: SPACING.sm }}
+      >
+        <Text
+          className="text-white font-bold"
+          style={TYPOGRAPHY.subheadline}
+        >
           {profile?.DisplayName || "User"}
         </Text>
-        <Text className="text-white font-normal text-[10px]">
+        <Text
+          className="text-white font-normal"
+          style={TYPOGRAPHY.caption1}
+        >
           {profile?.State}{profile?.State ? ',' : ''} {profile?.City}
         </Text>
       </View>

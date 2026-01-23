@@ -19,6 +19,8 @@ import {
   View
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { useSafeArea, useBottomSpacing } from "@/hooks/useResponsive";
+import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES, COMPONENT_SIZES, BORDER_RADIUS, SHADOWS } from "@/constants/designTokens";
 
 interface MessageItem {
   id: string;
@@ -122,7 +124,15 @@ const renderMessageItem = ({ item }: { item: MessageItem }) => (
     href={{ pathname: "/chat/[userid]", params: { userid: item.id, name: item.name, image: item.image?.uri, online: item.online.toString(), time: item.time } }}
     asChild
   >
-    <TouchableOpacity className="flex-row items-center mx-6 py-3 px-3 border mb-4 rounded-[10px] border-border">
+    <TouchableOpacity
+      className="flex-row items-center border border-border rounded-input"
+      style={{
+        marginHorizontal: SPACING.screenPadding,
+        paddingVertical: SPACING.sm,
+        paddingHorizontal: SPACING.sm,
+        marginBottom: SPACING.md
+      }}
+    >
       <View className="relative">
         {(item?.image?.uri && item.image.uri !== "profile_img_url") || (item.image.uri && item.image.uri.startsWith("uploads/")) ? (
           <Image
@@ -131,13 +141,16 @@ const renderMessageItem = ({ item }: { item: MessageItem }) => (
                 ? { uri: IMAGE_URL + item.image.uri }
                 : { uri: VIDEO_URL + item.image.uri }
             }
-            className="w-[50px] h-[50px] rounded-[12px]"
+            className="rounded-input"
+            style={{ width: COMPONENT_SIZES.avatar.lg, height: COMPONENT_SIZES.avatar.lg }}
             resizeMode="cover"
           />
         ) : (
           <View
-            className="w-[50px] h-[50px] rounded-[12px] justify-center items-center"
+            className="rounded-input justify-center items-center"
             style={{
+              width: COMPONENT_SIZES.avatar.lg,
+              height: COMPONENT_SIZES.avatar.lg,
               backgroundColor: BACKGROUND_COLORS[
                 Math.abs(
                   (item.name || "User")
@@ -239,19 +252,33 @@ const renderGroupItem = ({ item }: { item: GroupItem }) => (
     }
   }} asChild>
     <TouchableOpacity
-      className="flex-row items-center mx-6 py-3 px-3 border mb-4 rounded-[10px] border-border"
+      className="flex-row items-center border border-border rounded-input"
+      style={{
+        marginHorizontal: SPACING.screenPadding,
+        paddingVertical: SPACING.sm,
+        paddingHorizontal: SPACING.sm,
+        marginBottom: SPACING.md
+      }}
     >{item?.Image ? (
       <Image
         source={{ uri: item?.Image.startsWith('uploads/') ? IMAGE_URL + item?.Image : VIDEO_URL + item?.Image }}
-        className="w-[50px] h-[50px] rounded-[12px]"
+        className="rounded-input"
+        style={{ width: COMPONENT_SIZES.avatar.lg, height: COMPONENT_SIZES.avatar.lg }}
         resizeMode="cover"
       />) : (
-      <View className={`w-[50px] h-[50px] rounded-[12px] justify-center items-center`} style={{ backgroundColor: getGroupColor(item.GroupID) }}>
-        <Text className="text-white text-xl font-bold text-black">{item.GroupName.charAt(0).toUpperCase()}</Text>
+      <View
+        className="rounded-input justify-center items-center"
+        style={{
+          width: COMPONENT_SIZES.avatar.lg,
+          height: COMPONENT_SIZES.avatar.lg,
+          backgroundColor: getGroupColor(item.GroupID)
+        }}
+      >
+        <Text className="text-white font-bold" style={TYPOGRAPHY.h3}>{item.GroupName.charAt(0).toUpperCase()}</Text>
       </View>
     )
       }
-      <View className="flex-1 ml-3">
+      <View className="flex-1" style={{ marginLeft: SPACING.sm }}>
         <View className="flex-row items-center">
           {/* LEFT: Group name */}
           <Text
@@ -335,6 +362,10 @@ export default function Chats() {
   const [currUserId, setCurrUserId] = useState<string | null>(null);
   const [loadingGroups, setLoadingGroups] = useState(false);
   const [deletingGroups, setDeletingGroups] = useState(false);
+
+  // Responsive hooks
+  const safeArea = useSafeArea();
+  const { contentPadding: bottomTabPadding } = useBottomSpacing(true);
 
   // 🗑️ TEMPORARY: Delete all Agora groups function
   const handleDeleteAllAgoraGroups = async () => {
@@ -666,45 +697,58 @@ export default function Chats() {
 
   return (
     <>
-      {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
-      <View className="relative flex-1 bg-backgground">
+      <View className="relative flex-1 bg-background">
         <TouchableOpacity
           activeOpacity={0.7}
-          className={`absolute right-6 bottom-40 z-50 shadow-lg shadow-primary/20 rounded-full overflow-hidden ${selectMode ? "hidden" : ""
+          className={`absolute z-50 shadow-lg shadow-primary/20 rounded-full overflow-hidden ${selectMode ? "hidden" : ""
             } ${activeTab === "messages" ? "hidden" : ""}`}
+          style={{
+            right: SPACING.screenPadding,
+            bottom: bottomTabPadding + VERTICAL_SPACING['2xl']
+          }}
           onPress={handleCreate}
         >
-          <View className="p-2 rounded-full justify-center items-center bg-primary/20">
+          <View
+            className="rounded-full justify-center items-center bg-primary/20"
+            style={{ padding: SPACING.xs }}
+          >
             <LinearBg
-              className="w-16 h-16 rounded-full justify-center items-center"
-              style={{ borderRadius: 99 }}
+              className="rounded-full justify-center items-center"
+              style={{
+                width: ICON_SIZES['3xl'] * 1.33,
+                height: ICON_SIZES['3xl'] * 1.33,
+                borderRadius: BORDER_RADIUS.full
+              }}
             >
-              <Ionicons name="add-sharp" size={30} color="white" />
+              <Ionicons name="add-sharp" size={ICON_SIZES.lg} color="white" />
             </LinearBg>
           </View>
         </TouchableOpacity>
         <View
-          className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
+          className="bg-white flex-row justify-between items-center rounded-b-card z-30"
           style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.1,
-            shadowRadius: 16,
-            elevation: 5,
+            paddingHorizontal: SPACING.base,
+            paddingTop: safeArea.top + VERTICAL_SPACING.sm,
+            paddingBottom: VERTICAL_SPACING.md,
+            ...SHADOWS.md
           }}
         >
-          <View className="flex-row items-center gap-2">
+          <View className="flex-row items-center" style={{ gap: SPACING.xs }}>
             <TouchableOpacity
               onPress={router.back}
-              className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
+              className="border border-gray rounded-button flex justify-center items-center"
+              style={{
+                width: ICON_SIZES.xl,
+                height: ICON_SIZES.xl
+              }}
             >
               <Image
                 source={icons.back}
-                className="size-4"
+                style={{ width: ICON_SIZES.sm * 0.8, height: ICON_SIZES.sm * 0.8 }}
                 resizeMode="contain"
               />
             </TouchableOpacity>
-            <Text className="leading-[22px] text-base font-medium tracking-[-0.41px] text-black">
+            <Text className="font-medium text-black" style={TYPOGRAPHY.body}>
               {selectMode ? "Select Friends" : "Chats"}
             </Text>
           </View>
@@ -712,7 +756,7 @@ export default function Chats() {
           {selectMode ? (
             selectedUsers.length && (
               <TouchableOpacity onPress={handleNavigateShippingInfo}>
-                <Text className="text-primary font-medium text-base tracking-[-0.41px] leading-[22px]">Send</Text>
+                <Text className="text-primary font-medium" style={TYPOGRAPHY.body}>Send</Text>
               </TouchableOpacity>
             )
           ) : (
@@ -720,19 +764,28 @@ export default function Chats() {
           )}
         </View>
 
-        <View className="mt-8">
-          <View className="mx-3 flex-row gap-2 p-2 mb-6 bg-white border rounded-xl border-border">
+        <View style={{ marginTop: VERTICAL_SPACING.lg }}>
+          <View
+            className="flex-row bg-white border border-border rounded-card"
+            style={{
+              marginHorizontal: SPACING.screenPadding,
+              gap: SPACING.xs,
+              padding: SPACING.xs,
+              marginBottom: VERTICAL_SPACING.md
+            }}
+          >
             <TouchableOpacity
               disabled={selectMode}
-              className={`flex-1 items-center py-3 rounded-[10px] ${activeTab === "messages"
+              className={`flex-1 items-center rounded-input ${activeTab === "messages"
                 ? "border border-primary bg-white"
                 : "bg-light-100"
                 }`}
+              style={{ paddingVertical: SPACING.sm }}
               onPress={() => setActiveTab("messages")}
             >
-              <Text style={{ color: 'black' }}
-                className={`text-base ${activeTab === "messages" ? "text-primary" : ""
-                  }`}
+              <Text
+                className={activeTab === "messages" ? "text-primary" : "text-black"}
+                style={TYPOGRAPHY.body}
               >
                 Messages
               </Text>
@@ -740,15 +793,16 @@ export default function Chats() {
 
             <TouchableOpacity
               disabled={selectMode}
-              className={`flex-1 items-center py-3 rounded-[10px] ${activeTab === "groups"
+              className={`flex-1 items-center rounded-input ${activeTab === "groups"
                 ? "border border-primary bg-white"
                 : "bg-light-100"
                 }`}
+              style={{ paddingVertical: SPACING.sm }}
               onPress={() => setActiveTab("groups")}
             >
-              <Text style={{ color: 'black' }}
-                className={`text-base ${activeTab === "groups" ? "text-primary" : ""
-                  }`}
+              <Text
+                className={activeTab === "groups" ? "text-primary" : "text-black"}
+                style={TYPOGRAPHY.body}
               >
                 Groups
               </Text>

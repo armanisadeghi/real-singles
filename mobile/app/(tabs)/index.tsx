@@ -35,15 +35,19 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { useSafeArea, useBottomSpacing, useHeaderSpacing } from "@/hooks/useResponsive";
+import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES } from "@/constants/designTokens";
 
 export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
   const [menuVisible, setMenuVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  // console.log("user", user);
 
-  // console.log("Current user in Home component:", user);
+  // Responsive hooks for safe areas and spacing
+  const safeArea = useSafeArea();
+  const { contentPadding } = useBottomSpacing(true);
+  const { minimal: headerTopPadding } = useHeaderSpacing();
 
   interface HomeData {
     TopMatch: User[];
@@ -379,10 +383,11 @@ export default function Home() {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" hidden />
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        className="flex-1 bg-backgground pb-28"
+        className="flex-1 bg-background"
+        contentContainerStyle={{ paddingBottom: contentPadding }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -400,24 +405,29 @@ export default function Home() {
           onClose={() => setMenuVisible(false)}
           userAvatar={profile?.Image ? { uri: VIDEO_URL + profile.Image } : null}
           userName={profile?.DisplayName || "User"}
-        // direction="right"
         />
         <ImageBackground
-          className="h-[244px]"
           source={images.hero}
           resizeMode="cover"
+          style={{ minHeight: 244 + safeArea.top }}
         >
-          <View className="flex-row justify-between items-start px-3 mt-16">
+          <View
+            className="flex-row justify-between items-start"
+            style={{ paddingHorizontal: SPACING.screenPadding, paddingTop: headerTopPadding }}
+          >
             <TouchableOpacity onPress={() => router.push("/profile")}>
               {profile?.Image ? (
                 <Image
                   source={{ uri: VIDEO_URL + profile.Image }}
-                  className="size-[60px] border-2 border-white rounded-full"
+                  className="border-2 border-white rounded-full"
+                  style={{ width: ICON_SIZES['3xl'] * 1.25, height: ICON_SIZES['3xl'] * 1.25 }}
                 />
               ) : (
                 <View
-                  className="size-[60px] border-2 border-white rounded-full justify-center items-center"
+                  className="border-2 border-white rounded-full justify-center items-center"
                   style={{
+                    width: ICON_SIZES['3xl'] * 1.25,
+                    height: ICON_SIZES['3xl'] * 1.25,
                     backgroundColor:
                       BACKGROUND_COLORS[
                       Math.abs(
@@ -431,7 +441,7 @@ export default function Home() {
                       ],
                   }}
                 >
-                  <Text className="text-white text-xl font-bold">
+                  <Text className="text-white font-bold" style={TYPOGRAPHY.h3}>
                     {profile?.DisplayName
                       ? profile.DisplayName.split(" ")
                         .map((part) => part.charAt(0))
@@ -443,28 +453,40 @@ export default function Home() {
                 </View>
               )}
             </TouchableOpacity>
-            <View className="flex-row gap-2 items-center">
+            <View className="flex-row items-center" style={{ gap: SPACING.xs }}>
               <TouchableOpacity
                 onPress={() => router.push("/notification")}
-                className="border border-border rounded-lg p-2"
+                className="border border-border rounded-button"
+                style={{ padding: SPACING.xs }}
               >
                 <Image
                   source={icons.bell}
-                  className="w-5 h-5"
+                  style={{ width: ICON_SIZES.sm, height: ICON_SIZES.sm }}
                   resizeMode="contain"
                 />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setMenuVisible(true)}
-                className="border border-border rounded-lg p-2"
+                className="border border-border rounded-button"
+                style={{ padding: SPACING.xs }}
               >
-                <Image source={icons.menu} />
+                <Image
+                  source={icons.menu}
+                  style={{ width: ICON_SIZES.sm, height: ICON_SIZES.sm }}
+                  resizeMode="contain"
+                />
               </TouchableOpacity>
             </View>
           </View>
-          <View className="flex-row justify-between items-start px-3 mt-8">
+          <View
+            className="flex-row justify-between items-start"
+            style={{ paddingHorizontal: SPACING.screenPadding, marginTop: VERTICAL_SPACING.lg }}
+          >
             <View className="w-3/4">
-              <Text className="font-bold text-[28px] leading-[34px] tracking-wide text-white">
+              <Text
+                className="font-bold text-white"
+                style={TYPOGRAPHY.h1}
+              >
                 Find Your Perfect Match
               </Text>
             </View>
@@ -474,26 +496,29 @@ export default function Home() {
               className="relative w-1/4"
             >
               <Image source={images.heart} />
-              <View className="absolute top-3 left-7 flex flex-col justify-center items-center">
-                <Text className="text-lg font-bold text-white">
+              <View className="absolute flex flex-col justify-center items-center" style={{ top: 12, left: 28 }}>
+                <Text className="font-bold text-white" style={TYPOGRAPHY.h3}>
                   {redeemPoints}
                 </Text>
-                <Text className="text-[10px] font-medium text-white">
+                <Text className="font-medium text-white" style={TYPOGRAPHY.caption1}>
                   Points
                 </Text>
               </View>
             </TouchableOpacity>
           </View>
         </ImageBackground>
-        <View className="mt-4 flex-row items-center">
+        <View className="flex-row items-center" style={{ marginTop: VERTICAL_SPACING.md }}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="px-3 pe-8"
+            contentContainerStyle={{ paddingLeft: SPACING.screenPadding, paddingRight: SPACING.xl }}
           >
-            <View className="flex-row gap-3 me-8">
-              <TouchableOpacity className="px-4 py-2 bg-primary rounded-full">
-                <Text className="text-white text-xs font-medium">All</Text>
+            <View className="flex-row" style={{ gap: SPACING.sm, marginRight: SPACING.lg }}>
+              <TouchableOpacity
+                className="bg-primary rounded-full"
+                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
+              >
+                <Text className="text-white font-medium" style={TYPOGRAPHY.subheadline}>All</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() =>
@@ -502,9 +527,10 @@ export default function Home() {
                     params: { category: "topMatches" },
                   })
                 }
-                className="px-4 py-2 border border-primary bg-secondary rounded-full"
+                className="border border-primary bg-secondary rounded-full"
+                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
               >
-                <Text className="text-gray-600 text-xs font-medium text-black">
+                <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
                   Top Matches
                 </Text>
               </TouchableOpacity>
@@ -515,10 +541,11 @@ export default function Home() {
                     params: { category: "featuredVideos" },
                   })
                 }
-                className="px-4 py-2 border border-primary bg-secondary rounded-full"
+                className="border border-primary bg-secondary rounded-full"
+                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
               >
-                <Text className="text-gray-600 text-xs font-medium text-black">
-                  Fearured Videos
+                <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
+                  Featured Videos
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -528,25 +555,28 @@ export default function Home() {
                     params: { category: "virtualDates" },
                   })
                 }
-                className="px-4 py-2 border border-primary bg-secondary rounded-full"
+                className="border border-primary bg-secondary rounded-full"
+                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
               >
-                <Text className="text-gray-600 text-xs font-medium text-black">
+                <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
                   Virtual Speed Dating
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => router.push("/nearbyprofile")}
-                className="px-4 py-2 border border-primary bg-secondary rounded-full"
+                className="border border-primary bg-secondary rounded-full"
+                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
               >
-                <Text className="text-gray-600 text-xs font-medium text-black">
+                <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
                   Nearby Profile
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => router.push("/events")}
-                className="px-4 py-2 border border-primary bg-secondary rounded-full"
+                className="border border-primary bg-secondary rounded-full"
+                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
               >
-                <Text className="text-gray-600 text-xs font-medium text-black">
+                <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
                   Events
                 </Text>
               </TouchableOpacity>
@@ -555,16 +585,28 @@ export default function Home() {
 
           <TouchableOpacity
             onPress={handleFilterPress}
-            className="mr-3 shadow-lg shadow-white rounded-lg overflow-hidden"
+            className="shadow-lg shadow-white rounded-button overflow-hidden"
+            style={{ marginRight: SPACING.screenPadding }}
           >
-            <LinearBg className="p-3" style={{ paddingVertical: 8, paddingHorizontal: 10 }}>
-              <Image source={icons.filter} className="size-5" />
+            <LinearBg style={{ padding: SPACING.xs }}>
+              <Image
+                source={icons.filter}
+                style={{ width: ICON_SIZES.sm, height: ICON_SIZES.sm }}
+                resizeMode="contain"
+              />
             </LinearBg>
           </TouchableOpacity>
         </View>
         <View>
-          <View className="flex-row justify-between items-center px-3 mt-4 mb-3">
-            <Text className="text-primary font-bold text-lg">Top Matches</Text>
+          <View
+            className="flex-row justify-between items-center"
+            style={{
+              paddingHorizontal: SPACING.screenPadding,
+              marginTop: VERTICAL_SPACING.md,
+              marginBottom: VERTICAL_SPACING.sm
+            }}
+          >
+            <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>Top Matches</Text>
             <TouchableOpacity
               onPress={() =>
                 router.push({
@@ -574,7 +616,7 @@ export default function Home() {
               }
               className="z-20"
             >
-              <Text className="font-medium text-xs underline solid text-black">
+              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
                 View All
               </Text>
             </TouchableOpacity>
@@ -582,16 +624,18 @@ export default function Home() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingRight: 20 }}
-            className="pl-3 pr-10"
+            contentContainerStyle={{
+              paddingLeft: SPACING.screenPadding,
+              paddingRight: SPACING.screenPadding
+            }}
           >
-            <View className="flex-row gap-[18px]">
+            <View className="flex-row" style={{ gap: SPACING.md }}>
               {topMatch && topMatch.length ? (
                 topMatch.map((profile, index) => (
                   <ProfileCard key={index} profile={profile} />
                 ))
               ) : (
-                <Text className="text-gray text-sm">
+                <Text className="text-gray" style={TYPOGRAPHY.body}>
                   No top matches available
                 </Text>
               )}
@@ -599,8 +643,15 @@ export default function Home() {
           </ScrollView>
         </View>
         <View>
-          <View className="flex-row justify-between items-center px-3 mt-4 mb-3">
-            <Text className="text-primary font-bold text-lg">
+          <View
+            className="flex-row justify-between items-center"
+            style={{
+              paddingHorizontal: SPACING.screenPadding,
+              marginTop: VERTICAL_SPACING.md,
+              marginBottom: VERTICAL_SPACING.sm
+            }}
+          >
+            <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>
               Featured Videos
             </Text>
             <TouchableOpacity
@@ -612,7 +663,7 @@ export default function Home() {
               }
               className="z-20"
             >
-              <Text className="font-medium text-xs underline solid text-black">
+              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
                 View All
               </Text>
             </TouchableOpacity>
@@ -620,16 +671,18 @@ export default function Home() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingRight: 20 }}
-            className="pl-3 pr-10"
+            contentContainerStyle={{
+              paddingLeft: SPACING.screenPadding,
+              paddingRight: SPACING.screenPadding
+            }}
           >
-            <View className="flex-row gap-[18px]">
+            <View className="flex-row" style={{ gap: SPACING.md }}>
               {videos && videos?.length ? (
                 videos?.map((video, index) => (
                   <VideoCard key={index} video={video} isVideo={true} />
                 ))
               ) : (
-                <Text className="text-gray text-sm">
+                <Text className="text-gray" style={TYPOGRAPHY.body}>
                   No featured videos available
                 </Text>
               )}
@@ -637,8 +690,15 @@ export default function Home() {
           </ScrollView>
         </View>
         <View>
-          <View className="flex-row justify-between items-center px-3 mt-4 mb-3">
-            <Text className="text-primary font-bold text-lg">
+          <View
+            className="flex-row justify-between items-center"
+            style={{
+              paddingHorizontal: SPACING.screenPadding,
+              marginTop: VERTICAL_SPACING.md,
+              marginBottom: VERTICAL_SPACING.sm
+            }}
+          >
+            <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>
               Virtual Speed Dating
             </Text>
             <TouchableOpacity
@@ -650,7 +710,7 @@ export default function Home() {
                 })
               }
             >
-              <Text className="font-medium text-xs underline solid text-black">
+              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
                 View All
               </Text>
             </TouchableOpacity>
@@ -658,16 +718,18 @@ export default function Home() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingRight: 20 }}
-            className="pl-3 pr-10"
+            contentContainerStyle={{
+              paddingLeft: SPACING.screenPadding,
+              paddingRight: SPACING.screenPadding
+            }}
           >
-            <View className="flex-row gap-[18px]">
+            <View className="flex-row" style={{ gap: SPACING.md }}>
               {virtual && virtual.length ? (
                 virtual.map((video, index) => (
                   <VirtualDateCard key={index} virtualDate={video} />
                 ))
               ) : (
-                <Text className="text-gray text-sm">
+                <Text className="text-gray" style={TYPOGRAPHY.body}>
                   No virtual speed dating available
                 </Text>
               )}
@@ -675,15 +737,22 @@ export default function Home() {
           </ScrollView>
         </View>
         <View>
-          <View className="flex-row justify-between items-center px-3 mt-4 mb-3">
-            <Text className="text-primary font-bold text-lg">
+          <View
+            className="flex-row justify-between items-center"
+            style={{
+              paddingHorizontal: SPACING.screenPadding,
+              marginTop: VERTICAL_SPACING.md,
+              marginBottom: VERTICAL_SPACING.sm
+            }}
+          >
+            <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>
               Nearby Profile
             </Text>
             <TouchableOpacity
               onPress={() => router.push("/nearbyprofile")}
               className="z-20"
             >
-              <Text className="font-medium text-xs underline solid text-black">
+              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
                 View All
               </Text>
             </TouchableOpacity>
@@ -691,30 +760,39 @@ export default function Home() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingRight: 20 }}
-            className="pl-3 pr-10"
+            contentContainerStyle={{
+              paddingLeft: SPACING.screenPadding,
+              paddingRight: SPACING.screenPadding
+            }}
           >
-            <View className="flex-row gap-[18px]">
+            <View className="flex-row" style={{ gap: SPACING.md }}>
               {nearBy && nearBy.length ? (
                 nearBy.map((profile, index) => (
                   <ProfileCard key={index} profile={profile} />
                 ))
               ) : (
-                <Text className="text-gray text-sm">
+                <Text className="text-gray" style={TYPOGRAPHY.body}>
                   No nearby profiles available
                 </Text>
               )}
             </View>
           </ScrollView>
         </View>
-        <View className="mb-36">
-          <View className="flex-row justify-between items-center px-3 mt-4 mb-3">
-            <Text className="text-primary font-bold text-lg">Events</Text>
+        <View>
+          <View
+            className="flex-row justify-between items-center"
+            style={{
+              paddingHorizontal: SPACING.screenPadding,
+              marginTop: VERTICAL_SPACING.md,
+              marginBottom: VERTICAL_SPACING.sm
+            }}
+          >
+            <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>Events</Text>
             <TouchableOpacity
               onPress={() => router.push("/events")}
               className="z-20"
             >
-              <Text className="font-medium text-xs underline solid text-black">
+              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
                 View All
               </Text>
             </TouchableOpacity>
@@ -722,16 +800,18 @@ export default function Home() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingRight: 20 }}
-            className="pl-3 pr-10"
+            contentContainerStyle={{
+              paddingLeft: SPACING.screenPadding,
+              paddingRight: SPACING.screenPadding
+            }}
           >
-            <View className="flex-row gap-[18px]">
+            <View className="flex-row" style={{ gap: SPACING.md }}>
               {events && events?.length ? (
                 events?.map((event, index) => (
                   <EventCard key={event?.EventID || index} event={event} />
                 ))
               ) : (
-                <Text className="text-gray text-sm">No events available</Text>
+                <Text className="text-gray" style={TYPOGRAPHY.body}>No events available</Text>
               )}
             </View>
           </ScrollView>
