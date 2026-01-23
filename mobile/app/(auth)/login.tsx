@@ -299,8 +299,8 @@ const Login = () => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 style={{
-                  width: "80%",
-                  paddingInlineStart: 10,
+                  flex: 1,
+                  paddingHorizontal: 10,
                   paddingVertical: 10,
                   color: 'black'
                 }}
@@ -325,8 +325,8 @@ const Login = () => {
                 secureTextEntry={!showPassword}
                 className="text-dark"
                 style={{
-                  width: "73%",
-                  paddingInlineStart: 10,
+                  flex: 1,
+                  paddingHorizontal: 10,
                   paddingVertical: 10,
                   color: 'black'
                 }}
