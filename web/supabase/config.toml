@@ -1,0 +1,87 @@
+# Supabase Configuration for RealSingles
+# https://supabase.com/docs/guides/cli/config
+
+[project]
+id = "realsingles"
+
+[api]
+# Port to use for the API URL
+port = 54321
+# Schemas to expose in your API
+schemas = ["public", "storage"]
+# Extra schemas to add to the search_path of every request
+extra_search_path = ["public", "extensions"]
+# The maximum number of rows returned from a view, table, or stored procedure
+max_rows = 1000
+
+[db]
+# Port to use for the local database URL
+port = 54322
+# The database major version to use
+major_version = 15
+
+[studio]
+# Port to use for Supabase Studio
+port = 54323
+
+[inbucket]
+# Port to use for the email testing server (web interface)
+port = 54324
+# Port to use for the email testing server (SMTP)
+smtp_port = 54325
+# Port to use for the email testing server (POP3)
+pop3_port = 54326
+
+[storage]
+# The maximum file size allowed (e.g. "5MB")
+file_size_limit = "50MiB"
+
+[auth]
+# Site URL for auth redirects
+site_url = "http://localhost:3000"
+# Additional redirect URLs (comma separated)
+additional_redirect_urls = ["https://localhost:3000"]
+# JWT expiry in seconds
+jwt_expiry = 3600
+# Enable email signups
+enable_signup = true
+
+[auth.email]
+# Enable email confirmations
+enable_confirmations = true
+# Mailer URL for custom SMTP
+# smtp_host = ""
+# smtp_port = 465
+# smtp_user = ""
+# smtp_pass = ""
+
+[auth.external.apple]
+enabled = true
+client_id = ""
+secret = ""
+
+[auth.external.google]
+enabled = true
+client_id = ""
+secret = ""
+
+# Storage buckets
+[storage.buckets.avatars]
+public = true
+file_size_limit = "5MB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/gif", "image/webp"]
+
+[storage.buckets.gallery]
+public = true
+file_size_limit = "50MB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/gif", "image/webp", "video/mp4", "video/quicktime"]
+
+[storage.buckets.events]
+public = true
+file_size_limit = "10MB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/gif", "image/webp"]
+
+[storage.buckets.products]
+public = true
+file_size_limit = "5MB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/gif", "image/webp"]
