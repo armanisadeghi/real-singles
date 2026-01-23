@@ -1,5 +1,5 @@
 import { images } from "@/constants/images";
-import { bodyTypeOptions } from "@/constants/utils";
+import { BODY_TYPE_OPTIONS } from "@/constants/options";
 import { signupProps } from "@/types";
 import Slider from "@react-native-community/slider";
 import React, { useState } from "react";
@@ -12,7 +12,7 @@ const Appearance = ({ data, updateData, onNext, error }: signupProps) => {
 
 
   const handleSelect = (value: string) => {
-  let updatedSelection = Array.isArray(data.BodyType) ? [...data.BodyType] : [];
+  let updatedSelection = Array.isArray(data?.BodyType) ? [...data.BodyType] : [];
 
   if (updatedSelection.includes(value)) {
     // If already selected → remove it
@@ -27,19 +27,19 @@ const Appearance = ({ data, updateData, onNext, error }: signupProps) => {
 };
 
 const handleNext = () => {
-  if (!data.BodyType || data.BodyType.length === 0) {
+  if (!data?.BodyType || data.BodyType.length === 0) {
     setValidationError("Please select at least one body type to continue");
     return;
   }
-  if (!data.Height) {
+  if (!data?.Height) {
     setValidationError("Please select your height to continue");
     return;
   }
 
   // Convert to comma-separated string before sending
-  const bodyTypeString = Array.isArray(data.BodyType)
+  const bodyTypeString = Array.isArray(data?.BodyType)
     ? data.BodyType.join(", ")
-    : data.BodyType;
+    : data?.BodyType;
 
   updateData({ BodyType: bodyTypeString });
 
@@ -96,7 +96,7 @@ const handleNext = () => {
               style={{ width: '100%', height: 30 }}
               minimumValue={4.5}
               maximumValue={7.0}
-              value={data.Height || 0}
+              value={data?.Height || 0}
               onValueChange={(value) => updateData({ Height: value })}
               step={0.1}
               minimumTrackTintColor="#B06D1E"
@@ -105,7 +105,7 @@ const handleNext = () => {
             />
           </View>
           <Text className="text-dark text-sm text-center mt-2">
-              {data.Height ? `${data.Height.toFixed(1)}ft` : ''}
+              {data?.Height ? `${data.Height.toFixed(1)}ft` : ''}
             </Text>
         </View>
 
@@ -124,8 +124,8 @@ const handleNext = () => {
               </Text>
             </TouchableOpacity>
           ))} */}
-          {bodyTypeOptions.map((option, index) => {
-              const isSelected = Array.isArray(data.BodyType) && data.BodyType.includes(option.value);
+          {BODY_TYPE_OPTIONS.map((option, index) => {
+              const isSelected = Array.isArray(data?.BodyType) && data.BodyType.includes(option.value);
 
               return (
                 <TouchableOpacity

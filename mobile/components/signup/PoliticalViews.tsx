@@ -1,5 +1,5 @@
 import { images } from "@/constants/images";
-import { politicalViewsOptions } from "@/constants/utils";
+import { POLITICAL_OPTIONS } from "@/constants/options";
 import { signupProps } from "@/types";
 import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -17,7 +17,7 @@ const PoliticalViews = ({ data, updateData, onNext, error }: signupProps) => {
 
 
   const handleNext = () => {
-    if (!data.NightAtHome) {
+    if (!data?.NightAtHome) {
       setValidationError("Please select your political views to continue");
       return;
     }
@@ -48,12 +48,12 @@ const PoliticalViews = ({ data, updateData, onNext, error }: signupProps) => {
       </View>
 
       <View className="mt-16 px-6 bg-white rounded-2xl shadow-lg py-6">
-        {politicalViewsOptions.map((option, index) => (
+        {POLITICAL_OPTIONS.map((option, index) => (
           <TouchableOpacity
             activeOpacity={1}
             key={option.value + index}
             onPress={() => handleSelect(option.value)}
-            className={`flex-row gap-4 items-center mb-4 py-5 px-4 border rounded-[99] ${data.NightAtHome === option.value ? 'bg-secondary border-primary' : 'border-border bg-light-200'} `}
+            className={`flex-row gap-4 items-center mb-4 py-5 px-4 border rounded-[99] ${data?.NightAtHome === option.value ? 'bg-secondary border-primary' : 'border-border bg-light-200'} `}
           >
             <Text className="text-sm font-normal text-dark">
               {option.label}

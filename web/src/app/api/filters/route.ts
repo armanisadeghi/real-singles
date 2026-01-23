@@ -44,7 +44,7 @@ export async function GET() {
         min_height: filters.min_height ? filters.min_height / 12 : 4, // Convert inches to feet
         max_height: filters.max_height ? filters.max_height / 12 : 10,
         BodyType: filters.body_types?.[0] || "",
-        Ethniticity: filters.ethnicities?.[0] || "",
+        Ethnicity: filters.ethnicities?.[0] || "",
         Drinks: filters.drinking || "",
         Religion: filters.religions?.[0] || "",
         Education: filters.education_levels?.[0] || "",
@@ -52,7 +52,7 @@ export async function GET() {
         WantChild: filters.wants_kids || "",
         Pets: false,
         Hsign: filters.zodiac_signs?.join(",") || "",
-        Marijuna: filters.marijuana || "",
+        Marijuana: filters.marijuana || "",
         min_distance: 0,
         max_distance: filters.max_distance_miles || 10000,
         exercise: "",
@@ -126,7 +126,7 @@ export async function POST(request: Request) {
     const bodyType = formData.get("BodyType") as string;
     if (bodyType) filters.body_types = [bodyType.toLowerCase()];
 
-    const ethnicity = formData.get("Ethniticity") as string;
+    const ethnicity = formData.get("Ethnicity") as string;
     if (ethnicity) filters.ethnicities = [ethnicity];
 
     const religion = formData.get("Religion") as string;
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
     const smoke = formData.get("Smoke") as string;
     if (smoke) filters.smoking = smoke.toLowerCase();
 
-    const marijuana = formData.get("Marijuna") as string;
+    const marijuana = formData.get("Marijuana") as string;
     if (marijuana) filters.marijuana = marijuana.toLowerCase();
 
     const hasKids = formData.get("HaveChild") as string;

@@ -1,5 +1,5 @@
 import { images } from "@/constants/images";
-import { languageOptions } from "@/constants/utils";
+import { LANGUAGE_OPTIONS } from "@/constants/options";
 import { signupProps } from "@/types";
 import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -9,8 +9,10 @@ const Languages = ({ data, updateData, onNext, error }: signupProps) => {
   const [validationError, setValidationError] = useState("");
 
    // Convert saved string to array (for toggling)
-  const selectedLanguages = data.Language
-    ? data.Language.split(",").map((lang) => lang.trim())
+  const selectedLanguages: string[] = data?.Language
+    ? Array.isArray(data.Language)
+      ? data.Language
+      : data.Language.split(",").map((lang: string) => lang.trim())
     : [];
 
   const handleSelect = (value: string) => {
@@ -18,7 +20,7 @@ const Languages = ({ data, updateData, onNext, error }: signupProps) => {
 
     if (selectedLanguages.includes(value)) {
       // Remove if already selected
-      updatedLanguages = selectedLanguages.filter((item) => item !== value);
+      updatedLanguages = selectedLanguages.filter((item: string) => item !== value);
     } else {
       // Add new selection
       updatedLanguages = [...selectedLanguages, value];
@@ -30,7 +32,7 @@ const Languages = ({ data, updateData, onNext, error }: signupProps) => {
   };
 
   const handleNext = () => {
-    if (!data.Language || data.Language.trim() === "") {
+    if (!data?.Language || (typeof data.Language === 'string' && data.Language.trim() === "") || (Array.isArray(data.Language) && data.Language.length === 0)) {
       setValidationError("Please select at least one language to continue");
       return;
     }
@@ -74,7 +76,7 @@ const Languages = ({ data, updateData, onNext, error }: signupProps) => {
       </View>
 
       <View className="mt-16 px-6 bg-white rounded-2xl shadow-lg py-6">
-         {languageOptions.map((option, index) => {
+         {LANGUAGE_OPTIONS.map((option, index) => {
           const isSelected = selectedLanguages.includes(option.value);
 
           return (

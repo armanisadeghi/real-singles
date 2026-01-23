@@ -49,64 +49,132 @@ export async function GET() {
     );
   }
 
-  // Transform data to match mobile app format
+  // Transform data to match expected format
+  // Field names are standardized: Ethnicity, Marijuana (legacy misspellings removed)
+  // Arrays are returned as arrays, not comma-separated strings
   const responseData = {
     // Core user info
     ID: user.id,
     id: user.id,
     Email: user.email,
-    Phone: userData?.phone || user.phone,
+    Phone: userData?.phone || user.phone || "",
+    Username: userData?.username || "",
     DisplayName: userData?.display_name || profile?.first_name || "",
+    
+    // Basic Info
     FirstName: profile?.first_name || "",
     LastName: profile?.last_name || "",
-    
-    // Profile details
     DOB: profile?.date_of_birth || "",
     Gender: profile?.gender || "",
+    LookingFor: profile?.looking_for || [],
+    ZodiacSign: profile?.zodiac_sign || "",
+    Bio: profile?.bio || "",
+    LookingForDescription: profile?.looking_for_description || "",
+    
+    // Legacy field names for mobile compatibility (will be deprecated)
+    About: profile?.bio || "",
+    HSign: profile?.zodiac_sign || "",
+    
+    // Media
     Image: profile?.profile_image_url || "",
     livePicture: profile?.profile_image_url || "",
-    About: profile?.bio || "",
+    ProfileImageUrl: profile?.profile_image_url || "",
     
     // Location
     City: profile?.city || "",
     State: profile?.state || "",
     Country: profile?.country || "",
+    ZipCode: profile?.zip_code || "",
     Address: profile?.city && profile?.state ? `${profile.city}, ${profile.state}` : "",
     Latitude: profile?.latitude?.toString() || "",
     Longitude: profile?.longitude?.toString() || "",
     
     // Physical attributes
     Height: profile?.height_inches?.toString() || "",
+    HeightInches: profile?.height_inches || null,
     BodyType: profile?.body_type || "",
-    Ethniticity: profile?.ethnicity || "",
+    
+    // Ethnicity (multi-select for mixed heritage)
+    Ethnicity: profile?.ethnicity || [],
     
     // Lifestyle
+    MaritalStatus: profile?.marital_status || "",
     Religion: profile?.religion || "",
     Political: profile?.political_views || "",
+    PoliticalViews: profile?.political_views || "",
     Education: profile?.education || "",
-    JobTitle: profile?.occupation || "",
+    Occupation: profile?.occupation || "",
+    JobTitle: profile?.occupation || "", // Legacy alias
+    Company: profile?.company || "",
+    Schools: profile?.schools || [],
+    Languages: profile?.languages || [],
+    
+    // Habits
     Smoking: profile?.smoking || "",
-    Drinks: profile?.drinking || "",
-    Marijuna: profile?.marijuana || "",
+    Drinking: profile?.drinking || "",
+    Drinks: profile?.drinking || "", // Legacy alias
+    
+    // Marijuana
+    Marijuana: profile?.marijuana || "",
+    
+    Exercise: profile?.exercise || "",
     
     // Family
-    HaveChild: profile?.has_kids ? "Yes" : "No",
-    WantChild: profile?.wants_kids || "",
-    Pets: profile?.pets?.join(", ") || "",
+    HasKids: profile?.has_kids || "",
+    HaveChild: profile?.has_kids || "", // Legacy alias
+    WantsKids: profile?.wants_kids || "",
+    WantChild: profile?.wants_kids || "", // Legacy alias
+    Pets: profile?.pets || [],
     
-    // Interests & Personality
-    HSign: profile?.zodiac_sign || "",
-    Interest: profile?.interests?.join(", ") || "",
+    // Interests
+    Interests: profile?.interests || [],
+    Interest: profile?.interests?.join(", ") || "", // Legacy comma-separated for mobile
     
-    // Verification & Stats
+    // Profile Prompts (Structured Storytelling)
+    IdealFirstDate: profile?.ideal_first_date || "",
+    NonNegotiables: profile?.non_negotiables || "",
+    WorstJob: profile?.worst_job || "",
+    DreamJob: profile?.dream_job || "",
+    NightclubOrHome: profile?.nightclub_or_home || "",
+    PetPeeves: profile?.pet_peeves || "",
+    AfterWork: profile?.after_work || "",
+    WayToHeart: profile?.way_to_heart || "",
+    CraziestTravelStory: profile?.craziest_travel_story || "",
+    WeirdestGift: profile?.weirdest_gift || "",
+    PastEvent: profile?.past_event || "",
+    
+    // Social Links
+    SocialLink1: profile?.social_link_1 || "",
+    SocialLink2: profile?.social_link_2 || "",
+    
+    // Verification - Basic
     is_verified: profile?.is_verified || false,
+    IsVerified: profile?.is_verified || false,
+    VerifiedAt: profile?.verified_at || "",
+    VerificationSelfieUrl: profile?.verification_selfie_url || "",
+    
+    // Verification - Photo (Required for matching)
+    IsPhotoVerified: profile?.is_photo_verified || false,
+    PhotoVerifiedAt: profile?.photo_verified_at || "",
+    
+    // Verification - ID (Premium tier)
+    IsIdVerified: profile?.is_id_verified || false,
+    IdVerifiedAt: profile?.id_verified_at || "",
+    
+    // Profile Completion
+    ProfileCompletionStep: profile?.profile_completion_step || 0,
+    ProfileCompletionSkipped: profile?.profile_completion_skipped || [],
+    ProfileCompletionPreferNot: profile?.profile_completion_prefer_not || [],
+    ProfileCompletedAt: profile?.profile_completed_at || "",
+    
+    // Stats & Points
     RATINGS: 0, // TODO: Calculate from reviews
     TotalRating: 0,
-    
-    // Points
     WalletPoint: userData?.points_balance || 0,
     ReedemPoints: userData?.points_balance || 0,
+    PointsBalance: userData?.points_balance || 0,
     RefferalCode: userData?.referral_code || "",
+    ReferralCode: userData?.referral_code || "",
     
     // Gallery
     gallery: gallery || [],
@@ -149,6 +217,7 @@ export async function PUT(request: Request) {
     // Update users table
     const userUpdates: Record<string, unknown> = {};
     if (body.DisplayName !== undefined) userUpdates.display_name = body.DisplayName;
+    if (body.Username !== undefined) userUpdates.username = body.Username;
     if (body.Phone !== undefined) userUpdates.phone = body.Phone;
 
     if (Object.keys(userUpdates).length > 0) {
@@ -166,36 +235,90 @@ export async function PUT(request: Request) {
     // Update profiles table
     const profileUpdates: Record<string, unknown> = {};
     
-    // Map mobile field names to database field names
+    // Map API field names to database field names
+    // Supports both new correct names and legacy names with typos
     const fieldMapping: Record<string, string> = {
+      // Basic Info
       FirstName: "first_name",
       LastName: "last_name",
       DOB: "date_of_birth",
       Gender: "gender",
+      ZodiacSign: "zodiac_sign",
+      HSign: "zodiac_sign", // Legacy
+      Bio: "bio",
+      About: "bio", // Legacy
+      LookingForDescription: "looking_for_description",
+      
+      // Media
       Image: "profile_image_url",
       livePicture: "profile_image_url",
-      About: "bio",
+      ProfileImageUrl: "profile_image_url",
+      
+      // Location
       City: "city",
       State: "state",
       Country: "country",
-      Height: "height_inches",
-      BodyType: "body_type",
-      Ethniticity: "ethnicity",
-      Religion: "religion",
-      Political: "political_views",
-      Education: "education",
-      JobTitle: "occupation",
-      Smoking: "smoking",
-      Drinks: "drinking",
-      Marijuna: "marijuana",
-      HSign: "zodiac_sign",
+      ZipCode: "zip_code",
       Latitude: "latitude",
       Longitude: "longitude",
+      
+      // Physical
+      Height: "height_inches",
+      HeightInches: "height_inches",
+      BodyType: "body_type",
+      
+      // Ethnicity (multi-select for mixed heritage)
+      Ethnicity: "ethnicity",
+      
+      // Lifestyle
+      MaritalStatus: "marital_status",
+      Religion: "religion",
+      Political: "political_views",
+      PoliticalViews: "political_views",
+      Education: "education",
+      Occupation: "occupation",
+      JobTitle: "occupation", // Legacy
+      Company: "company",
+      
+      // Habits
+      Smoking: "smoking",
+      Drinking: "drinking",
+      Drinks: "drinking", // Legacy
+      
+      // Marijuana
+      Marijuana: "marijuana",
+      
+      Exercise: "exercise",
+      
+      // Family
+      HasKids: "has_kids",
+      WantsKids: "wants_kids",
+      WantChild: "wants_kids", // Legacy
+      
+      // Profile Prompts
+      IdealFirstDate: "ideal_first_date",
+      NonNegotiables: "non_negotiables",
+      WorstJob: "worst_job",
+      DreamJob: "dream_job",
+      NightclubOrHome: "nightclub_or_home",
+      PetPeeves: "pet_peeves",
+      AfterWork: "after_work",
+      WayToHeart: "way_to_heart",
+      CraziestTravelStory: "craziest_travel_story",
+      WeirdestGift: "weirdest_gift",
+      PastEvent: "past_event",
+      
+      // Social Links
+      SocialLink1: "social_link_1",
+      SocialLink2: "social_link_2",
+      
+      // Profile Completion
+      ProfileCompletionStep: "profile_completion_step",
     };
 
-    for (const [mobileField, dbField] of Object.entries(fieldMapping)) {
-      if (body[mobileField] !== undefined) {
-        let value = body[mobileField];
+    for (const [apiField, dbField] of Object.entries(fieldMapping)) {
+      if (body[apiField] !== undefined) {
+        let value = body[apiField];
         
         // Handle special conversions
         if (dbField === "height_inches" && value) {
@@ -204,33 +327,92 @@ export async function PUT(request: Request) {
         if ((dbField === "latitude" || dbField === "longitude") && value) {
           value = parseFloat(value) || null;
         }
+        if (dbField === "profile_completion_step" && value) {
+          value = parseInt(value, 10) || 0;
+        }
         
         profileUpdates[dbField] = value;
       }
     }
 
-    // Handle has_kids conversion
+    // Handle has_kids - support both new string values and legacy boolean
     if (body.HaveChild !== undefined) {
-      profileUpdates.has_kids = body.HaveChild === "Yes" || body.HaveChild === true;
-    }
-    
-    // Handle wants_kids
-    if (body.WantChild !== undefined) {
-      profileUpdates.wants_kids = body.WantChild;
+      const val = body.HaveChild;
+      if (val === "Yes" || val === true) {
+        profileUpdates.has_kids = "yes_live_at_home"; // Default for legacy
+      } else if (val === "No" || val === false) {
+        profileUpdates.has_kids = "no";
+      } else if (typeof val === "string") {
+        profileUpdates.has_kids = val; // New string value
+      }
     }
 
-    // Handle interests array
-    if (body.Interest !== undefined) {
-      profileUpdates.interests = typeof body.Interest === "string" 
-        ? body.Interest.split(",").map((i: string) => i.trim()).filter(Boolean)
-        : body.Interest;
+    // Handle looking_for array
+    if (body.LookingFor !== undefined) {
+      profileUpdates.looking_for = Array.isArray(body.LookingFor) 
+        ? body.LookingFor 
+        : typeof body.LookingFor === "string" 
+          ? body.LookingFor.split(",").map((i: string) => i.trim()).filter(Boolean)
+          : null;
+    }
+
+    // Handle interests array - support both array and comma-separated string
+    if (body.Interests !== undefined || body.Interest !== undefined) {
+      const interestsValue = body.Interests ?? body.Interest;
+      profileUpdates.interests = Array.isArray(interestsValue)
+        ? interestsValue
+        : typeof interestsValue === "string" 
+          ? interestsValue.split(",").map((i: string) => i.trim()).filter(Boolean)
+          : null;
     }
 
     // Handle pets array
     if (body.Pets !== undefined) {
-      profileUpdates.pets = typeof body.Pets === "string"
-        ? body.Pets.split(",").map((p: string) => p.trim()).filter(Boolean)
-        : body.Pets;
+      profileUpdates.pets = Array.isArray(body.Pets)
+        ? body.Pets
+        : typeof body.Pets === "string"
+          ? body.Pets.split(",").map((p: string) => p.trim()).filter(Boolean)
+          : null;
+    }
+
+    // Handle ethnicity array (now supports multiple for mixed heritage)
+    if (body.Ethnicity !== undefined) {
+      const ethnicityValue = body.Ethnicity;
+      profileUpdates.ethnicity = Array.isArray(ethnicityValue)
+        ? ethnicityValue
+        : typeof ethnicityValue === "string"
+          ? ethnicityValue.split(",").map((e: string) => e.trim()).filter(Boolean)
+          : null;
+    }
+
+    // Handle languages array
+    if (body.Languages !== undefined) {
+      profileUpdates.languages = Array.isArray(body.Languages)
+        ? body.Languages
+        : typeof body.Languages === "string"
+          ? body.Languages.split(",").map((l: string) => l.trim()).filter(Boolean)
+          : null;
+    }
+
+    // Handle schools array
+    if (body.Schools !== undefined) {
+      profileUpdates.schools = Array.isArray(body.Schools)
+        ? body.Schools
+        : typeof body.Schools === "string"
+          ? body.Schools.split(",").map((s: string) => s.trim()).filter(Boolean)
+          : null;
+    }
+
+    // Handle profile completion arrays
+    if (body.ProfileCompletionSkipped !== undefined) {
+      profileUpdates.profile_completion_skipped = Array.isArray(body.ProfileCompletionSkipped)
+        ? body.ProfileCompletionSkipped
+        : null;
+    }
+    if (body.ProfileCompletionPreferNot !== undefined) {
+      profileUpdates.profile_completion_prefer_not = Array.isArray(body.ProfileCompletionPreferNot)
+        ? body.ProfileCompletionPreferNot
+        : null;
     }
 
     if (Object.keys(profileUpdates).length > 0) {
@@ -248,7 +430,7 @@ export async function PUT(request: Request) {
       if (profileUpdateError) {
         console.error("Error updating profile:", profileUpdateError);
         return NextResponse.json(
-          { success: false, msg: "Error updating profile" },
+          { success: false, msg: "Error updating profile", error: profileUpdateError.message },
           { status: 500 }
         );
       }

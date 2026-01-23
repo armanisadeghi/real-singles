@@ -1,7 +1,7 @@
 import Appearance from "@/components/signup/Appearance";
 import ChooseInterests from "@/components/signup/ChooseInterests";
 import EducationJob from "@/components/signup/EducationJob";
-import Ethinicity from "@/components/signup/Ethinicity";
+import Ethnicity from "@/components/signup/Ethnicity";
 import Gender from "@/components/signup/gender";
 import HabitInterests from "@/components/signup/HabitInterests";
 import HaveChildren from "@/components/signup/HaveChildren";
@@ -138,9 +138,9 @@ const getSections = (signupData: any, updateSignupData: any, goToNextSection: an
     ),
   },
   {
-    title: "Ethinicity",
+    title: "Ethnicity",
     component: (
-      <Ethinicity
+      <Ethnicity
         data={signupData}
         updateData={updateSignupData}
         onNext={goToNextSection}
@@ -252,6 +252,7 @@ const Signup = () => {
     Email: "",
     Password: "",
     Gender: "",
+    LookingFor: [],
     FirstName: "",
     LastName: "",
     DisplayName: "",
@@ -270,11 +271,11 @@ const Signup = () => {
     Company: "",
     Height: 0,
     BodyType: "",
-    Marijuna: "",
+    Marijuana: "",
     Smoking: "",
     Drinks: "",
     Pets: "",
-    Ethniticity: "",
+    Ethnicity: "",
     Language: "",
     Religion: "",
     // Political: "",
@@ -422,7 +423,8 @@ const Signup = () => {
         first_name: signupData.FirstName || null,
         last_name: signupData.LastName || null,
         date_of_birth: formattedDOB || null,
-        gender: signupData.Gender?.toLowerCase() || null,
+        gender: signupData.Gender || null,
+        looking_for: signupData.LookingFor?.length > 0 ? signupData.LookingFor : null,
         height_inches: signupData.Height ? Number(signupData.Height) : null,
         body_type: signupData.BodyType?.toLowerCase() || null,
         city: signupData.City || null,
@@ -438,8 +440,11 @@ const Signup = () => {
         interests: signupData.Interest?.length > 0 ? signupData.Interest : null,
         bio: signupData.About || null,
         profile_image_url: signupData.livePicture || null,
-        // Additional fields mapped from old schema
-        ethnicity: signupData.Ethniticity || null,
+        // Additional fields
+        ethnicity: Array.isArray(signupData.Ethnicity) 
+          ? signupData.Ethnicity 
+          : signupData.Ethnicity ? [signupData.Ethnicity] : null,
+        marijuana: signupData.Marijuana || null,
       };
 
       // Update profile - wait a moment for the trigger to create the user record

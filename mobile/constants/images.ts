@@ -58,7 +58,8 @@ export const images = {
   ellipseEnd,
   ellipseStart,
   heart,
-  ethinicity,
+  ethinicity, // Legacy misspelled name
+  ethnicity: ethinicity, // Correct spelling (alias)
   gardening,
   gender,
   habit,

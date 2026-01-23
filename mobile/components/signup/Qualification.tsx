@@ -46,7 +46,7 @@ const [validationError, setValidationError] = useState("");
   };
 
   const handleNext = () => {
-    if(!data.Education){
+    if(!data?.Education){
       setValidationError("Please select your qualification to continue");
       return;
     }
@@ -80,7 +80,7 @@ const [validationError, setValidationError] = useState("");
           activeOpacity={1}
             key={option.value + index}
             onPress={() => handleSelect(option.value)}
-            className={`flex-row gap-4 items-center mb-4 py-5 px-4 border rounded-[99] ${data.Education === option.value ? 'bg-secondary border-primary' : 'border-border bg-light-200'} `}
+            className={`flex-row gap-4 items-center mb-4 py-5 px-4 border rounded-[99] ${data?.Education === option.value ? 'bg-secondary border-primary' : 'border-border bg-light-200'} `}
           >
             <Text
               className="text-sm font-normal text-dark"

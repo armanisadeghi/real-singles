@@ -121,7 +121,7 @@ const ReviewProfile = ({
             value={data.Height ? `${data.Height.toFixed(1)} feet` : "Not provided"}
           />
           <InfoRow label="Body Type" value={data.BodyType || "Not provided"} />
-          <InfoRow label="Ethnicity" value={data.Ethniticity || "Not provided"} />
+          <InfoRow label="Ethnicity" value={Array.isArray(data.Ethnicity) ? data.Ethnicity.join(", ") : (data.Ethnicity || "Not provided")} />
           <InfoRow label="Religion" value={capitalizeWords(data.Religion) || "Not provided"} />
           <InfoRow
             label="Political Views"
@@ -152,7 +152,7 @@ const ReviewProfile = ({
           </Text>
           <InfoRow
             label="Marijuana Use"
-            value={data.Marijuna || "Not provided"}
+            value={data.Marijuana || "Not provided"}
           />
           <InfoRow label="Smoking" value={capitalizeWords(data.Smoking) || "Not provided"} />
           <InfoRow label="Drinking" value={data.Drinks || "Not provided"} />

@@ -1,25 +1,28 @@
 import { Label, styles } from "@/components/forms/ContactForm";
 import { icons } from "@/constants/icons";
 import {
-  bodyTypeOptions,
-  drinkingOption,
-  educationOptions,
-  ethinicityOptions,
-  haveChildrenOptions,
-  interestOptions,
-  languageOptions,
-  marijuanOption,
-  maritalOptions,
-  petsOptions,
-  politicalViewOptions,
-  religionOptions,
-  smokeOptions
-} from "@/constants/utils";
+  BODY_TYPE_OPTIONS,
+  DRINKING_OPTIONS,
+  EDUCATION_OPTIONS,
+  ETHNICITY_OPTIONS,
+  EXERCISE_OPTIONS,
+  HAS_KIDS_OPTIONS,
+  INTEREST_OPTIONS,
+  LANGUAGE_OPTIONS,
+  MARIJUANA_OPTIONS,
+  MARITAL_STATUS_OPTIONS,
+  PETS_OPTIONS,
+  POLITICAL_OPTIONS,
+  RELIGION_OPTIONS,
+  SMOKING_OPTIONS,
+  HEIGHT_FEET_OPTIONS,
+  HEIGHT_INCHES_OPTIONS,
+} from "@/constants/options";
 import { changePassword, CommonFileUpload } from "@/lib/api";
 import { EditProfileFormData } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Slider from "@react-native-community/slider";
+import { Picker } from "@react-native-picker/picker";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useRef, useState } from "react";
@@ -152,23 +155,25 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
 
   const toggleInterest = (interestValue: string) => {
     const currentInterests = formData.Interest
-      ? formData.Interest.split(",")
+      ? Array.isArray(formData.Interest)
+        ? formData.Interest
+        : formData.Interest.split(",")
       : [];
     const isSelected = currentInterests.includes(interestValue);
 
-    let newInterests;
+    let newInterests: string[];
     if (isSelected) {
       // Remove the interest
       newInterests = currentInterests.filter(
-        (interest) => interest !== interestValue
+        (interest: string) => interest !== interestValue
       );
     } else {
       // Add the interest
       newInterests = [...currentInterests, interestValue];
     }
 
-    // Convert back to comma-separated string and update formData
-    onChangeField("Interest", newInterests.join(","));
+    // Update formData as array
+    onChangeField("Interest", newInterests);
   };
 
   const pickImage = async () => {
@@ -389,9 +394,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   }
 
   const toggleEthnicity = (ethValue: string) => {
-    const currentEths = formData.Ethniticity
-      ? formData.Ethniticity.split(",").map((e) => e.trim())
-      : [];
+    const currentEths = Array.isArray(formData.Ethnicity)
+      ? formData.Ethnicity
+      : formData.Ethnicity
+        ? formData.Ethnicity.split(",").map((e) => e.trim())
+        : [];
     const isSelected = currentEths.includes(ethValue);
     console.log("isSelected in toggleEthnicity==>>>>", isSelected);
 
@@ -405,8 +412,8 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       newEths = [...currentEths, ethValue];
     }
 
-    // Update formData as a comma-separated string
-    onChangeField("Ethniticity", newEths.join(", "));
+    // Update formData as array (preferred) or comma-separated string
+    onChangeField("Ethnicity", newEths);
   };
 
   const toggleBodyType = (bodyValue: string) => {
@@ -429,24 +436,28 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   };
 
   const toggleLanguage = (value: string) => {
-    let selected = formData?.Language
-      ? formData.Language.split(",").map((l) => l.trim())
+    let selected: string[] = formData?.Language
+      ? Array.isArray(formData.Language)
+        ? [...formData.Language]
+        : formData.Language.split(",").map((l: string) => l.trim())
       : [];
 
     const isSelected = selected.includes(value);
 
     if (isSelected) {
-      selected = selected.filter((item) => item !== value);
+      selected = selected.filter((item: string) => item !== value);
     } else {
       selected.push(value);
     }
 
-    onChangeField("Language", selected.join(", "));
+    onChangeField("Language", selected);
   };
 
   const toggleReligion = (value: string) => {
-    let selected = formData?.Religion
-      ? formData.Religion.split(",").map((l) => l.trim())
+    let selected: string[] = formData?.Religion
+      ? typeof formData.Religion === 'string'
+        ? formData.Religion.split(",").map((l: string) => l.trim())
+        : []
       : [];
 
     const isSelected = selected.includes(value);
@@ -652,15 +663,15 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         {showPersonalDetails && (
           <Animated.View className="mt-4 gap-5">
             <View>
-              <Label text="Gender" marginLeft="" />
+              <Label text="I am a..." marginLeft="" />
 
               <RNPickerSelect
                 onValueChange={(value) => onChangeField("Gender", value)}
                 items={[
-                  { label: "I'm a man seeking a woman", value: "man" },
-                  { label: "I'm a woman seeking a man", value: "woman" },
-                  { label: "I'm a man seeking a man", value: "man2" },
-                  { label: "I'm a woman seeking a woman", value: "woman2" },
+                  { label: "Man", value: "male" },
+                  { label: "Woman", value: "female" },
+                  { label: "Non-binary", value: "non-binary" },
+                  { label: "Other", value: "other" },
                 ]}
                 placeholder={{
                   label: "Select Gender",
@@ -668,7 +679,48 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                   color: "#A0A0A0",
                 }}
                 style={pickerSelectStyles}
-                value={formData.Gender} // <-- yaha actual value
+                value={formData.Gender}
+                useNativeAndroidPickerStyle={false}
+                Icon={() => (
+                  <Image
+                    source={icons.down}
+                    style={{ width: 15, height: 15, marginRight: 15 }}
+                    resizeMode="contain"
+                  />
+                )}
+              />
+            </View>
+
+            <View>
+              <Label text="Looking for..." marginLeft="" />
+
+              <RNPickerSelect
+                onValueChange={(value) => {
+                  // Convert single selection to array format
+                  if (value === "everyone") {
+                    onChangeField("LookingFor", ["male", "female"]);
+                  } else if (value) {
+                    onChangeField("LookingFor", [value]);
+                  } else {
+                    onChangeField("LookingFor", []);
+                  }
+                }}
+                items={[
+                  { label: "Men", value: "male" },
+                  { label: "Women", value: "female" },
+                  { label: "Everyone", value: "everyone" },
+                ]}
+                placeholder={{
+                  label: "Select who you're looking for",
+                  value: null,
+                  color: "#A0A0A0",
+                }}
+                style={pickerSelectStyles}
+                value={
+                  formData.LookingFor?.includes("male") && formData.LookingFor?.includes("female")
+                    ? "everyone"
+                    : formData.LookingFor?.[0] || null
+                }
                 useNativeAndroidPickerStyle={false}
                 Icon={() => (
                   <Image
@@ -723,7 +775,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               <RNPickerSelect
                 value={formData.MaritalStatus?.toLowerCase()}
                 onValueChange={(value) => onChangeField("MaritalStatus", value)}
-                items={maritalOptions}
+                items={MARITAL_STATUS_OPTIONS}
                 placeholder={{
                   label: "Select Marital Status",
                   value: null,
@@ -744,7 +796,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               <Label text="Have Children" />
               <RNPickerSelect
                 onValueChange={(value) => onChangeField("HaveChild", value)}
-                items={haveChildrenOptions}
+                items={HAS_KIDS_OPTIONS}
                 placeholder={{
                   label: "Select Option",
                   value: null,
@@ -768,7 +820,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
 
               <RNPickerSelect
                 onValueChange={(value) => onChangeField("Education", value)}
-                items={educationOptions}
+                items={EDUCATION_OPTIONS}
                 placeholder={{
                   label: "Select Education",
                   value: null,
@@ -810,9 +862,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         {pickInterest && (
           <Animated.View className="mt-4 gap-5">
             <View className="flex-row gap-3 flex-wrap">
-              {interestOptions.map((option) => {
+              {INTEREST_OPTIONS.map((option) => {
                 const isSelected = formData.Interest
-                  ? formData.Interest.split(",").includes(option.value)
+                  ? Array.isArray(formData.Interest)
+                    ? formData.Interest.includes(option.value)
+                    : formData.Interest.split(",").includes(option.value)
                   : false;
 
                 return (
@@ -896,19 +950,19 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
 
               {/* Schools list */}
               {formData.School ? (
-                // Split the comma-separated schools and render each one
-                formData.School.split(",").map((school, index) => (
+                // Handle both array and comma-separated string
+                (Array.isArray(formData.School) ? formData.School : formData.School.split(",")).map((school: string, index: number) => (
                   <View key={index} className="flex-row items-center mb-4">
                     <TextInput
                       value={school.trim()}
                       onChangeText={(text) => {
                         // Update the school at this index
                         const schools = formData.School
-                          ? formData.School.split(",")
+                          ? Array.isArray(formData.School) ? [...formData.School] : formData.School.split(",")
                           : [];
                         schools[index] = text;
-                        // Join back and update formData
-                        onChangeField("School", schools.join(","));
+                        // Update formData as array
+                        onChangeField("School", schools);
                       }}
                       placeholder="Add school name"
                       placeholderTextColor="#B0B0B0"
@@ -919,14 +973,14 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                     <TouchableOpacity
                       onPress={() => {
                         const schools = formData.School
-                          ? formData.School.split(",")
+                          ? Array.isArray(formData.School) ? [...formData.School] : formData.School.split(",")
                           : [];
                         // Remove this school
                         const updatedSchools = schools.filter(
-                          (_, i) => i !== index
+                          (_: string, i: number) => i !== index
                         );
-                        // Join back and update formData
-                        onChangeField("School", updatedSchools.join(","));
+                        // Update formData as array
+                        onChangeField("School", updatedSchools);
                       }}
                       className="p-2"
                     >
@@ -937,7 +991,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               ) : (
                 // Add first school button
                 <TouchableOpacity
-                  onPress={() => onChangeField("School", "")}
+                  onPress={() => onChangeField("School", [""])}
                   className="bg-primary py-2 px-4 rounded-lg"
                 >
                   <Text className="text-white text-center">Add School</Text>
@@ -950,10 +1004,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                   onPress={() => {
                     // Add a new empty school to the list
                     const schools = formData.School
-                      ? formData.School.split(",")
+                      ? Array.isArray(formData.School) ? [...formData.School] : formData.School.split(",")
                       : [];
                     schools.push("");
-                    onChangeField("School", schools.join(","));
+                    onChangeField("School", schools);
                   }}
                   className="bg-gray-200 py-2 px-4 rounded-lg mt-2"
                 >
@@ -1017,38 +1071,61 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
 
         {appearance && (
           <Animated.View className="mt-4 gap-5">
-            {/* Height Slider */}
+            {/* Height Picker - Two-column for feet and inches (native feel) */}
             <View className="mb-6 pb-6 border-b border-b-border">
               <View className="flex-row items-center justify-between">
                 <Text className="text-base font-medium mb-3 text-dark">
                   Height
                 </Text>
                 <Text className="text-xs font-normal mb-3 text-gray">
-                  {formData.Height ? `${formData.Height} ft` : "Select Height"}
+                  {formData.HeightFeet && formData.HeightInches !== undefined 
+                    ? `${formData.HeightFeet}' ${formData.HeightInches}"` 
+                    : "Select Height"}
                 </Text>
               </View>
-              <Slider
-                style={{ width: "100%", height: 30 }}
-                minimumValue={4.5}
-                maximumValue={7.0}
-                value={formData.Height ? parseFloat(formData.Height) : 5.5}
-                onValueChange={(value) => {
-                  // Round to 1 decimal place for better display
-                  const heightValue = Math.round(value * 10) / 10;
-                  onChangeField("Height", heightValue.toString());
-                }}
-                step={0.1}
-                minimumTrackTintColor="#B06D1E"
-                maximumTrackTintColor="#D9D9D9"
-                thumbTintColor="#B06D1E"
-              />
+              <View className="flex-row bg-light-200 rounded-xl overflow-hidden">
+                {/* Feet Picker */}
+                <View className="flex-1">
+                  <Picker
+                    selectedValue={formData.HeightFeet || 5}
+                    onValueChange={(value) => onChangeField("HeightFeet", value)}
+                    style={{ height: 150 }}
+                  >
+                    {[4, 5, 6, 7].map((feet) => (
+                      <Picker.Item 
+                        key={feet} 
+                        label={`${feet}'`} 
+                        value={feet}
+                        color="#333"
+                      />
+                    ))}
+                  </Picker>
+                </View>
+                {/* Inches Picker */}
+                <View className="flex-1">
+                  <Picker
+                    selectedValue={formData.HeightInches ?? 6}
+                    onValueChange={(value) => onChangeField("HeightInches", value)}
+                    style={{ height: 150 }}
+                  >
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((inches) => (
+                      <Picker.Item 
+                        key={inches} 
+                        label={`${inches}"`} 
+                        value={inches}
+                        color="#333"
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
             </View>
 
             <View className="mt-4">
               <Label text="Body Type" />
               <Animated.View className="mt-2 gap-3">
                 <View className="flex-row gap-3 flex-wrap">
-                  {bodyTypeOptions.map((option) => {
+                  {BODY_TYPE_OPTIONS.map((option) => {
                     const isSelected = formData.BodyType
                       ? formData.BodyType.split(",").map((e) => e.trim()).includes(option.value)
                       : false;
@@ -1131,7 +1208,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               <Label text="Smoking" marginLeft="" />
               <RNPickerSelect
                 onValueChange={(value) => onChangeField("Smoking", value)}
-                items={smokeOptions}
+                items={SMOKING_OPTIONS}
                 placeholder={{
                   label: "Select options",
                   value: null,
@@ -1152,9 +1229,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             <View>
               <Label text="Marijuana" />
               <RNPickerSelect
-                value={formData.Marijuna}
-                onValueChange={(value) => onChangeField("Marijuna", value)}
-                items={marijuanOption}
+                value={formData.Marijuana}
+                onValueChange={(value) => onChangeField("Marijuana", value)}
+                items={MARIJUANA_OPTIONS}
                 placeholder={{
                   label: "Select marijuana option",
                   value: null,
@@ -1175,7 +1252,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               <Label text="How often do you drink?" />
               <RNPickerSelect
                 onValueChange={(value) => onChangeField("Drinks", value)}
-                items={drinkingOption}
+                items={DRINKING_OPTIONS}
                 placeholder={{
                   label: "Select Option",
                   value: null,
@@ -1197,7 +1274,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               <Label text="Pets" />
               <RNPickerSelect
                 onValueChange={(value) => onChangeField("Pets", value?.toLowerCase().trim())}
-                items={petsOptions}
+                items={PETS_OPTIONS}
                 placeholder={{
                   label: "Select Pets",
                   value: null,
@@ -1205,6 +1282,28 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 }}
                 style={pickerSelectStyles}
                 value={formData.Pets}
+                useNativeAndroidPickerStyle={false}
+                Icon={() => (
+                  <Image
+                    source={icons.down}
+                    style={{ width: 15, height: 15, marginRight: 15 }}
+                    resizeMode="contain"
+                  />
+                )}
+              />
+            </View>
+            <View>
+              <Label text="Exercise" />
+              <RNPickerSelect
+                onValueChange={(value) => onChangeField("Exercise", value)}
+                items={EXERCISE_OPTIONS}
+                placeholder={{
+                  label: "How often do you exercise?",
+                  value: null,
+                  color: "#A0A0A0",
+                }}
+                style={pickerSelectStyles}
+                value={formData.Exercise}
                 useNativeAndroidPickerStyle={false}
                 Icon={() => (
                   <Image
@@ -1237,11 +1336,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         {ethinicity && (
           <Animated.View className="mt-4 gap-5">
             <View className="flex-row gap-3 flex-wrap">
-              {ethinicityOptions.map((option) => {
-                const isSelected = formData.Ethniticity
-                  ? formData.Ethniticity.split(",")
-                    .map((e) => e.trim())
-                    .includes(option.value)
+              {ETHNICITY_OPTIONS.map((option) => {
+                const isSelected = Array.isArray(formData.Ethnicity)
+                  ? formData.Ethnicity.includes(option.value)
+                  : formData.Ethnicity
+                    ? formData.Ethnicity.split(",").map((e) => e.trim()).includes(option.value)
                   : false;
 
                 return (
@@ -1312,12 +1411,12 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         {language && (
           <Animated.View className="mt-4 gap-5">
             <View className="flex-row gap-3 flex-wrap">
-              {languageOptions.map((option) => {
+              {LANGUAGE_OPTIONS.map((option) => {
                 // ✅ Put this here — inside the map
                 const isSelected = formData.Language
-                  ? formData.Language.split(",")
-                    .map((l) => l.trim().toLowerCase())
-                    .includes(option.value.toLowerCase())
+                  ? Array.isArray(formData.Language)
+                    ? formData.Language.map((l: string) => l.trim().toLowerCase()).includes(option.value.toLowerCase())
+                    : formData.Language.split(",").map((l: string) => l.trim().toLowerCase()).includes(option.value.toLowerCase())
                   : false;
 
 
@@ -1396,12 +1495,12 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         {religion && (
           <Animated.View className="mt-4 gap-5">
             <View className="flex-row gap-3 flex-wrap">
-              {religionOptions.map((option) => {
+              {RELIGION_OPTIONS.map((option) => {
                 // ✅ Put this here — inside the map
                 const isSelected = formData.Religion
-                  ? formData.Religion.split(",")
-                    .map((l) => l.trim().toLowerCase())
-                    .includes(option.value.toLowerCase())
+                  ? typeof formData.Religion === 'string'
+                    ? formData.Religion.split(",").map((l: string) => l.trim().toLowerCase()).includes(option.value.toLowerCase())
+                    : false
                   : false;
 
 
@@ -1482,7 +1581,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             <View>
               <RNPickerSelect
                 onValueChange={(value) => onChangeField("NightAtHome", value)}
-                items={politicalViewOptions}
+                items={POLITICAL_OPTIONS}
                 placeholder={{
                   label: "Select options",
                   value: null,

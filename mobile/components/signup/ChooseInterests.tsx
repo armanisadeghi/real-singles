@@ -7,7 +7,7 @@ import GradientButton from "../ui/GradientButton";
 
 const ChooseInterests = ({ data, updateData, onNext, error }: signupProps) => {
   const [validationError, setValidationError] = useState("");
-  const [selectedInterests, setSelectedInterests] = useState<string[]>(data.Interest || []);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(data?.Interest || []);
 
   useEffect(() => {
     updateData({ Interest: selectedInterests });

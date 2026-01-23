@@ -30,14 +30,14 @@ export async function GET(request: Request) {
     min_height: searchParams.get("min_height"),
     max_height: searchParams.get("max_height"),
     BodyType: searchParams.get("BodyType"),
-    Ethniticity: searchParams.get("Ethniticity"),
+    Ethnicity: searchParams.get("Ethnicity"),
     Drinks: searchParams.get("Drinks"),
     Religion: searchParams.get("Religion"),
     Education: searchParams.get("Education"),
     HaveChild: searchParams.get("HaveChild"),
     WantChild: searchParams.get("WantChild"),
     Hsign: searchParams.get("Hsign"),
-    Marijuna: searchParams.get("Marijuna"),
+    Marijuana: searchParams.get("Marijuana"),
     Smoke: searchParams.get("Smoke"),
     marital_status: searchParams.get("marital_status"),
     looking_for: searchParams.get("looking_for"),
@@ -129,8 +129,8 @@ export async function GET(request: Request) {
     query = query.eq("body_type", filters.BodyType.toLowerCase());
   }
 
-  if (filters.Ethniticity) {
-    query = query.eq("ethnicity", filters.Ethniticity);
+  if (filters.Ethnicity) {
+    query = query.contains("ethnicity", [filters.Ethnicity]);
   }
 
   if (filters.Religion) {
@@ -149,8 +149,8 @@ export async function GET(request: Request) {
     query = query.eq("smoking", filters.Smoke.toLowerCase());
   }
 
-  if (filters.Marijuna) {
-    query = query.eq("marijuana", filters.Marijuna.toLowerCase());
+  if (filters.Marijuana) {
+    query = query.eq("marijuana", filters.Marijuana.toLowerCase());
   }
 
   if (filters.HaveChild && filters.HaveChild !== "any") {
@@ -203,7 +203,7 @@ export async function GET(request: Request) {
       State: profile.state || "",
       Height: profile.height_inches?.toString() || "",
       BodyType: profile.body_type || "",
-      Ethniticity: profile.ethnicity || "",
+      Ethnicity: profile.ethnicity || [],
       Religion: profile.religion || "",
       HSign: profile.zodiac_sign || "",
       Interest: profile.interests?.join(", ") || "",

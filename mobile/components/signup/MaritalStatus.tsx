@@ -1,5 +1,5 @@
 import { images } from "@/constants/images";
-import { maritalOptions } from "@/constants/utils";
+import { MARITAL_STATUS_OPTIONS } from "@/constants/options";
 import { signupProps } from "@/types";
 import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -20,7 +20,7 @@ const [validationError, setValidationError] = useState("");
   };
 
   const handleNext = () => {
-    if(!data.MaritalStatus){
+    if(!data?.MaritalStatus){
       setValidationError("Please select your marital status to continue");
       return;
     }
@@ -49,12 +49,12 @@ const [validationError, setValidationError] = useState("");
       </View>
 
       <View className="mt-16 px-6 bg-white rounded-2xl shadow-lg py-6">
-        {maritalOptions.map((option, index) => (
+        {MARITAL_STATUS_OPTIONS.map((option, index) => (
           <TouchableOpacity
           activeOpacity={1}
             key={option.value + index}
             onPress={() => handleSelect(option.value)}
-            className={`flex-row gap-4 items-center mb-4 py-5 px-4 border rounded-[99] ${data.MaritalStatus === option.value ? 'bg-secondary border-primary' : 'border-border bg-light-200'} `}
+            className={`flex-row gap-4 items-center mb-4 py-5 px-4 border rounded-[99] ${data?.MaritalStatus === option.value ? 'bg-secondary border-primary' : 'border-border bg-light-200'} `}
           >
             <Text
               className="text-sm font-normal text-dark"

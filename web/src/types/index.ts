@@ -2,12 +2,217 @@
 // These types should be generated from Supabase once the database is set up
 // For now, these are based on the schema defined in project_requirements.md
 
+// ============================================
+// STANDARDIZED OPTIONS (Must match across all platforms)
+// ============================================
+
+export const GENDER_OPTIONS = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "non-binary", label: "Non-Binary" },
+  { value: "other", label: "Other" },
+] as const;
+
+export const BODY_TYPE_OPTIONS = [
+  { value: "slim", label: "Slim/Slender" },
+  { value: "athletic", label: "Athletic/Fit" },
+  { value: "average", label: "Average" },
+  { value: "muscular", label: "Muscular" },
+  { value: "curvy", label: "Curvy" },
+  { value: "plus_size", label: "A few extra pounds" },
+] as const;
+
+export const MARITAL_STATUS_OPTIONS = [
+  { value: "never_married", label: "Never Married" },
+  { value: "separated", label: "Currently Separated" },
+  { value: "divorced", label: "Divorced" },
+  { value: "widowed", label: "Widow/Widower" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+export const HAS_KIDS_OPTIONS = [
+  { value: "no", label: "No" },
+  { value: "yes_live_at_home", label: "Yes (Live at home)" },
+  { value: "yes_live_away", label: "Yes (Live away)" },
+] as const;
+
+export const WANTS_KIDS_OPTIONS = [
+  { value: "no", label: "No" },
+  { value: "definitely", label: "Definitely" },
+  { value: "someday", label: "Someday" },
+  { value: "ok_if_partner_has", label: "No (but OK if partner has)" },
+] as const;
+
+export const SMOKING_OPTIONS = [
+  { value: "no", label: "No" },
+  { value: "occasionally", label: "Yes (Occasionally)" },
+  { value: "daily", label: "Yes (Daily)" },
+  { value: "trying_to_quit", label: "Trying to quit" },
+] as const;
+
+export const DRINKING_OPTIONS = [
+  { value: "never", label: "Never" },
+  { value: "social", label: "Social" },
+  { value: "moderate", label: "Moderately" },
+  { value: "regular", label: "Regular" },
+] as const;
+
+export const MARIJUANA_OPTIONS = [
+  { value: "no", label: "No" },
+  { value: "occasionally", label: "Occasionally" },
+  { value: "yes", label: "Yes" },
+] as const;
+
+export const EXERCISE_OPTIONS = [
+  { value: "never", label: "Never" },
+  { value: "sometimes", label: "Sometimes" },
+  { value: "regularly", label: "Regularly" },
+  { value: "daily", label: "Daily" },
+] as const;
+
+export const EDUCATION_OPTIONS = [
+  { value: "high_school", label: "High School" },
+  { value: "some_college", label: "Some College" },
+  { value: "associate", label: "Associate Degree" },
+  { value: "bachelor", label: "Bachelor's Degree" },
+  { value: "graduate", label: "Graduate Degree" },
+  { value: "phd", label: "PhD/Post-doctoral" },
+] as const;
+
+export const ETHNICITY_OPTIONS = [
+  { value: "white", label: "White/Caucasian" },
+  { value: "latino", label: "Latino/Hispanic" },
+  { value: "black", label: "Black/African American" },
+  { value: "asian", label: "Asian" },
+  { value: "native_american", label: "Native American" },
+  { value: "east_indian", label: "East Indian" },
+  { value: "pacific_islander", label: "Pacific Islander" },
+  { value: "middle_eastern", label: "Middle Eastern" },
+  { value: "armenian", label: "Armenian" },
+  { value: "mixed", label: "Mixed/Multi-racial" },
+  { value: "other", label: "Other" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+export const RELIGION_OPTIONS = [
+  { value: "adventist", label: "Adventist" },
+  { value: "agnostic", label: "Agnostic" },
+  { value: "atheist", label: "Atheist" },
+  { value: "buddhist", label: "Buddhist" },
+  { value: "catholic", label: "Catholic" },
+  { value: "christian", label: "Christian/LDS/Protestant" },
+  { value: "hindu", label: "Hindu" },
+  { value: "jewish", label: "Jewish" },
+  { value: "muslim", label: "Muslim/Islam" },
+  { value: "spiritual", label: "Spiritual but not religious" },
+  { value: "other", label: "Other" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+export const POLITICAL_OPTIONS = [
+  { value: "no_answer", label: "No answer" },
+  { value: "undecided", label: "Undecided" },
+  { value: "conservative", label: "Conservative" },
+  { value: "liberal", label: "Liberal" },
+  { value: "libertarian", label: "Libertarian" },
+  { value: "moderate", label: "Moderate" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+export const ZODIAC_OPTIONS = [
+  { value: "aries", label: "Aries" },
+  { value: "taurus", label: "Taurus" },
+  { value: "gemini", label: "Gemini" },
+  { value: "cancer", label: "Cancer" },
+  { value: "leo", label: "Leo" },
+  { value: "virgo", label: "Virgo" },
+  { value: "libra", label: "Libra" },
+  { value: "scorpio", label: "Scorpio" },
+  { value: "sagittarius", label: "Sagittarius" },
+  { value: "capricorn", label: "Capricorn" },
+  { value: "aquarius", label: "Aquarius" },
+  { value: "pisces", label: "Pisces" },
+] as const;
+
+export const PETS_OPTIONS = [
+  { value: "none", label: "None" },
+  { value: "dog", label: "Dog" },
+  { value: "cat", label: "Cat" },
+  { value: "other", label: "Other" },
+] as const;
+
+export const LANGUAGE_OPTIONS = [
+  { value: "english", label: "English" },
+  { value: "spanish", label: "Spanish" },
+  { value: "french", label: "French" },
+  { value: "german", label: "German" },
+  { value: "italian", label: "Italian" },
+  { value: "portuguese", label: "Portuguese" },
+  { value: "chinese", label: "Chinese" },
+  { value: "japanese", label: "Japanese" },
+  { value: "korean", label: "Korean" },
+  { value: "arabic", label: "Arabic" },
+  { value: "armenian", label: "Armenian" },
+  { value: "dutch", label: "Dutch" },
+  { value: "hebrew", label: "Hebrew" },
+  { value: "hindi", label: "Hindi" },
+  { value: "norwegian", label: "Norwegian" },
+  { value: "russian", label: "Russian" },
+  { value: "swedish", label: "Swedish" },
+  { value: "tagalog", label: "Tagalog" },
+  { value: "turkish", label: "Turkish" },
+  { value: "urdu", label: "Urdu" },
+  { value: "other", label: "Other" },
+] as const;
+
+// Comprehensive interests list (merged from web + mobile + business logic)
+export const INTEREST_OPTIONS = [
+  // From business logic
+  { value: "dining_out", label: "Dining out" },
+  { value: "sports", label: "Sports" },
+  { value: "museums_art", label: "Museums/Art" },
+  { value: "music", label: "Music" },
+  { value: "gardening", label: "Gardening" },
+  { value: "basketball", label: "Basketball" },
+  { value: "dancing", label: "Dancing" },
+  { value: "travel", label: "Travel" },
+  // From current web (deduplicated)
+  { value: "movies", label: "Movies" },
+  { value: "reading", label: "Reading" },
+  { value: "fitness", label: "Fitness" },
+  { value: "cooking", label: "Cooking" },
+  { value: "photography", label: "Photography" },
+  { value: "gaming", label: "Gaming" },
+  { value: "hiking", label: "Hiking" },
+  { value: "yoga", label: "Yoga" },
+  { value: "wine", label: "Wine" },
+  { value: "coffee", label: "Coffee" },
+  { value: "dogs", label: "Dogs" },
+  { value: "cats", label: "Cats" },
+  { value: "fashion", label: "Fashion" },
+  { value: "technology", label: "Technology" },
+  { value: "nature", label: "Nature" },
+  { value: "beach", label: "Beach" },
+  { value: "mountains", label: "Mountains" },
+  // Additional common interests
+  { value: "running", label: "Running" },
+  { value: "cycling", label: "Cycling" },
+  { value: "concerts", label: "Concerts" },
+  { value: "theater", label: "Theater" },
+  { value: "volunteering", label: "Volunteering" },
+] as const;
+
+// ============================================
+// ENTITY INTERFACES
+// ============================================
+
 export interface User {
   id: string;
   email: string;
   phone?: string;
   phone_verified: boolean;
   display_name?: string;
+  username?: string;
   created_at: string;
   updated_at: string;
   last_active_at?: string;
@@ -22,38 +227,93 @@ export interface User {
 export interface Profile {
   id: string;
   user_id: string;
+  
+  // Basic Info
   first_name?: string;
   last_name?: string;
   date_of_birth?: string;
   gender?: "male" | "female" | "non-binary" | "other";
   looking_for?: string[];
+  zodiac_sign?: string;
+  bio?: string;
+  looking_for_description?: string;
+  
+  // Physical Attributes
   height_inches?: number;
-  body_type?: "slim" | "athletic" | "average" | "curvy" | "plus-size";
-  ethnicity?: string;
+  body_type?: "slim" | "athletic" | "average" | "muscular" | "curvy" | "plus_size";
+  ethnicity?: string[]; // Array for mixed heritage
+  
+  // Location
   city?: string;
   state?: string;
   country?: string;
+  zip_code?: string;
   latitude?: number;
   longitude?: number;
+  
+  // Lifestyle
+  marital_status?: "never_married" | "separated" | "divorced" | "widowed" | "prefer_not_to_say";
   religion?: string;
   political_views?: string;
   education?: string;
   occupation?: string;
-  smoking?: "never" | "occasionally" | "regularly";
-  drinking?: "never" | "socially" | "regularly";
-  marijuana?: "never" | "occasionally" | "regularly";
+  company?: string;
+  schools?: string[];
+  languages?: string[];
+  smoking?: "no" | "occasionally" | "daily" | "trying_to_quit";
+  drinking?: "never" | "social" | "moderate" | "regular";
+  marijuana?: "no" | "yes" | "occasionally";
   exercise?: "never" | "sometimes" | "regularly" | "daily";
-  has_kids?: boolean;
-  wants_kids?: "yes" | "no" | "maybe" | "have_and_want_more";
+  
+  // Family
+  has_kids?: "no" | "yes_live_at_home" | "yes_live_away";
+  wants_kids?: "no" | "definitely" | "someday" | "ok_if_partner_has";
   pets?: string[];
-  zodiac_sign?: string;
+  
+  // Interests
   interests?: string[];
-  bio?: string;
-  looking_for_description?: string;
+  
+  // Profile Prompts (Structured Storytelling per business logic)
+  ideal_first_date?: string;
+  non_negotiables?: string;
+  worst_job?: string;
+  dream_job?: string;
+  nightclub_or_home?: string;
+  pet_peeves?: string;
+  after_work?: string;
+  way_to_heart?: string;
+  craziest_travel_story?: string;
+  weirdest_gift?: string;
+  past_event?: string;
+  
+  // Social Links
+  social_link_1?: string;
+  social_link_2?: string;
+  
+  // Media
+  profile_image_url?: string;
+  
+  // Verification (Basic - selfie)
   is_verified: boolean;
   verified_at?: string;
   verification_selfie_url?: string;
-  profile_image_url?: string;
+  
+  // Photo Verification (Required for matching)
+  is_photo_verified?: boolean;
+  photo_verified_at?: string;
+  
+  // ID Verification (Premium tier)
+  is_id_verified?: boolean;
+  id_verified_at?: string;
+  id_document_url?: string;
+  
+  // Profile Completion Tracking
+  profile_completion_step?: number;
+  profile_completion_skipped?: string[];
+  profile_completion_prefer_not?: string[];
+  profile_completed_at?: string;
+  
+  // Timestamps
   created_at: string;
   updated_at: string;
 }

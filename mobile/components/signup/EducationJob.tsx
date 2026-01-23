@@ -74,8 +74,8 @@ const EducationJob = ({
         {/* Schools section */}
         <View className="mt-16 px-6 bg-white rounded-2xl shadow-lg py-6">
           <Text className="text-dark font-medium text-sm mb-4">Add Your School</Text>
-          {data.School?.length > 0 ? (
-            data.School.map((school, index) => (
+          {data?.School?.length > 0 ? (
+            data.School.map((school: string, index: number) => (
               <View key={index} className="flex-row items-center mb-4">
                 <TextInput
                   value={school}
@@ -91,7 +91,7 @@ const EducationJob = ({
                 />
                 <TouchableOpacity 
                   onPress={() => {
-                    const newSchools = data.School.filter((_, i) => i !== index);
+                    const newSchools = data.School.filter((_: string, i: number) => i !== index);
                     updateData({ School: newSchools });
                   }}
                   disabled={data.School.length === 1}

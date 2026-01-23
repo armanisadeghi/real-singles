@@ -48,18 +48,21 @@ export const languageOptions = [
     { label: "Spanish", value: "spanish" },
   ];
 
-  export const ethinicityOptions = [
+  // @deprecated Use ETHNICITY_OPTIONS from @/constants/options instead
+  export const ethnicityOptions = [
   { label: "White/Caucasian", value: "White/Caucasian" },
   { label: "Latino/Hispanic", value: "Latino/Hispanic" },
   { label: "Black/African American", value: "Black/African American" },
   { label: "Asian", value: "Asian" },
   { label: "Native American", value: "Native American" },
   { label: "East Indian", value: "East Indian" },
-  { label: "Pacific Islander", value: "Pacific Isla" },
-  { label: "Middle eastern", value: "Middle eastern" },
+  { label: "Pacific Islander", value: "Pacific Islander" },
+  { label: "Middle Eastern", value: "Middle Eastern" },
   { label: "Armenian", value: "Armenian" },
   { label: "Other", value: "Other" },
 ];
+  // Legacy alias for backward compatibility during migration
+  export const ethinicityOptions = ethnicityOptions;
 
 
 

@@ -3,7 +3,7 @@ import {
   bodyTypeOptions,
   drinkingOption,
   educationOptions,
-  ethinicityOptions,
+  ethnicityOptions,
   haveChildrenOptions,
   lookingForOptions,
   marijuanOption,
@@ -38,10 +38,14 @@ export interface FilterData {
     min: number;
     max: number;
   };
+  distanceRange?: {
+    min: number;
+    max: number;
+  };
   gender: "woman" | "man" | "man2" | "woman2" | "";
   bodyType: string;
   maritalStatus: string;
-  ethinicity: string;
+  ethnicity: string;
   religion: string;
   marijuana: string;
   drinking: string;
@@ -49,6 +53,11 @@ export interface FilterData {
   wantKids: string;
   pets: boolean;
   zodiac: string[];
+  education?: string;
+  smoke?: string;
+  politicalView?: string;
+  exercise?: string;
+  lookingFor?: string;
 }
 
 interface FilterOptionsProps {
@@ -91,8 +100,8 @@ export default function FilterOptions({
   const [maxDistance, setMaxDistance] = useState<number>(
     initialFilters?.distanceRange?.max || 10000
   );
-  const [gender, setGender] = useState<"woman" | "man" | "woman2" | "man2">(
-    initialFilters?.gender 
+  const [gender, setGender] = useState<"woman" | "man" | "woman2" | "man2" | "">(
+    initialFilters?.gender || ""
   );
   const [bodyType, setBodyType] = useState<string>(
     initialFilters?.bodyType || ""
@@ -100,8 +109,8 @@ export default function FilterOptions({
   const [maritalStatus, setMaritalStatus] = useState<string>(
     initialFilters?.maritalStatus || ""
   );
-  const [ethinicity, setEthinicity] = useState<string>(
-    initialFilters?.ethinicity || ""
+  const [ethnicity, setEthnicity] = useState<string>(
+    initialFilters?.ethnicity || ""
   );
   const [religion, setReligion] = useState<string>(
     initialFilters?.religion || ""
@@ -118,14 +127,37 @@ export default function FilterOptions({
   );
   const [pets, setPets] = useState<boolean>(initialFilters?.pets || false);
   const [loadingclear, setLoadingClear] = useState<boolean>(false);
-  const [filterData, setFilterData] = useState({
+  const [filterData, setFilterData] = useState<{
+    Gender: string;
+    min_age: number;
+    max_age: number;
+    min_height: number;
+    max_height: number;
+    BodyType: string;
+    Ethnicity: string;
+    Drinks: string;
+    Religion: string;
+    Education: string;
+    HaveChild: string;
+    WantChild: string;
+    Pets: boolean;
+    Hsign: string;
+    Marijuana: string;
+    min_distance: number;
+    max_distance: number;
+    exercise: string;
+    marital_status: string;
+    looking_for: string;
+    Smoke: string;
+    PoliticalView: string;
+  } | null>({
     Gender: "",
     min_age: 18,
     max_age: 70,
     min_height: 4,
     max_height: 10,
     BodyType: "",
-    Ethniticity: "",
+    Ethnicity: "",
     Drinks: "",
     Religion: "",
     Education: "",
@@ -133,7 +165,7 @@ export default function FilterOptions({
     WantChild: "",
     Pets: false,
     Hsign: "",
-    Marijuna: "",
+    Marijuana: "",
     min_distance: 0,
     max_distance: 10000,
     exercise: "",
@@ -170,7 +202,7 @@ export default function FilterOptions({
     formData.append("min_height", heightMin.toString());
     formData.append("max_height", heightMax.toString());
     formData.append("BodyType", bodyType);
-    formData.append("Ethniticity", ethinicity);
+    formData.append("Ethnicity", ethnicity);
     formData.append("Drinks", drinking);
     formData.append("Religion", religion);
     formData.append("Education", education);
@@ -178,7 +210,7 @@ export default function FilterOptions({
     formData.append("WantChild", wantKids);
     formData.append("Pets", pets ? "true" : "false");
     formData.append("Hsign", zodiac.join(","));
-    formData.append("Marijuna", marijuana);
+    formData.append("Marijuana", marijuana);
     formData.append("min_distance", minDistance.toString());
     formData.append("max_distance", maxDistance.toString());
     // formData.append("exercise", exercise);
@@ -270,7 +302,7 @@ export default function FilterOptions({
         setGender("");
         setBodyType("");
         setMaritalStatus("");
-        setEthinicity("");
+        setEthnicity("");
         setReligion("");
         setMarijuana("");
         setDrinking("");
@@ -460,12 +492,12 @@ export default function FilterOptions({
         items={maritalOptions}
       />
       <RNPickerSelect
-        value={filterData?.Ethniticity || ethinicity}
-        onValueChange={(value) => setEthinicity(value)}
-        placeholder={{ label: "Ethinicity", value: null, color: "#9EA0A4" }}
+        value={filterData?.Ethnicity || ethnicity}
+        onValueChange={(value) => setEthnicity(value)}
+        placeholder={{ label: "Ethnicity", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
-        key="Ethinicity"
+        key="Ethnicity"
         Icon={() => (
           <Image
             source={icons.down}
@@ -473,7 +505,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={ethinicityOptions}
+        items={ethnicityOptions}
       />
       <RNPickerSelect
         value={filterData?.Religion || religion}
@@ -492,7 +524,7 @@ export default function FilterOptions({
         items={religionOptions}
       />
       <RNPickerSelect
-        value={filterData?.Marijuna || marijuana}
+        value={filterData?.Marijuana || marijuana}
         onValueChange={(value) => setMarijuana(value)}
         placeholder={{ label: "Marijuana", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}

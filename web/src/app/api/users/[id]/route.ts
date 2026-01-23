@@ -130,7 +130,7 @@ export async function GET(
     // Physical attributes
     Height: profile?.height_inches?.toString() || "",
     BodyType: profile?.body_type || "",
-    Ethniticity: profile?.ethnicity || "",
+    Ethnicity: profile?.ethnicity || [],
     
     // Lifestyle
     Religion: profile?.religion || "",
@@ -138,7 +138,7 @@ export async function GET(
     JobTitle: profile?.occupation || "",
     Smoking: profile?.smoking || "",
     Drinks: profile?.drinking || "",
-    Marijuna: profile?.marijuana || "",
+    Marijuana: profile?.marijuana || "",
     
     // Family
     HaveChild: profile?.has_kids ? "Yes" : "No",

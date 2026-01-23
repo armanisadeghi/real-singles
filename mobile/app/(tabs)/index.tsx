@@ -81,7 +81,7 @@ export default function Home() {
     gender: "",
     bodyType: "",
     maritalStatus: "",
-    ethinicity: "",
+    ethnicity: "",
     religion: "",
     marijuana: "",
     drinking: "",

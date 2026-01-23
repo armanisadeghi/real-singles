@@ -1,5 +1,5 @@
 import { images } from "@/constants/images";
-import { religionOptions } from "@/constants/utils";
+import { RELIGION_OPTIONS } from "@/constants/options";
 import { signupProps } from "@/types";
 import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -10,8 +10,10 @@ const Religion = ({ data, updateData, onNext, error }: signupProps) => {
 
 
   // Convert saved string into array for selection handling
-  const selectedReligions = data.Religion
-    ? data.Religion.split(",").map((item) => item.trim())
+  const selectedReligions: string[] = data?.Religion
+    ? typeof data.Religion === 'string'
+      ? data.Religion.split(",").map((item: string) => item.trim())
+      : []
     : [];
 
   const handleSelect = (value: string) => {
@@ -31,7 +33,7 @@ const Religion = ({ data, updateData, onNext, error }: signupProps) => {
   };
 
   const handleNext = () => {
-    if (!data.Religion || data.Religion.trim() === "") {
+    if (!data?.Religion || (typeof data.Religion === 'string' && data.Religion.trim() === "")) {
       setValidationError("Please select at least one religion to continue");
       return;
     }
@@ -76,7 +78,7 @@ const Religion = ({ data, updateData, onNext, error }: signupProps) => {
       </View>
 
       <View className="mt-16 px-6 bg-white rounded-2xl shadow-lg py-6">
-         {religionOptions.map((option, index) => {
+         {RELIGION_OPTIONS.map((option, index) => {
           const isSelected = selectedReligions.includes(option.value);
 
           return (

@@ -44,7 +44,7 @@ const EditProfile = () => {
 
   // Refs for autosave
   const lastSavedDataRef = useRef<string>("");
-  const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitialLoadRef = useRef(true);
   const appStateRef = useRef(AppState.currentState);
 
@@ -74,28 +74,80 @@ const EditProfile = () => {
       }
 
       // Map form data to profile schema
+      // Note: Height is stored as feet and inches in form, convert to total inches for DB
+      const heightInches = formData.HeightFeet && formData.HeightInches !== undefined
+        ? (Number(formData.HeightFeet) * 12) + Number(formData.HeightInches)
+        : formData.Height ? Number(formData.Height) : null;
+
       const profileData = {
+        // Basic info
         first_name: formData.FirstName || null,
         last_name: formData.LastName || null,
         date_of_birth: formData.DOB || null,
-        gender: formData.Gender?.toLowerCase() || null,
-        height_inches: formData.Height ? Number(formData.Height) : null,
-        body_type: formData.BodyType?.toLowerCase() || null,
+        gender: formData.Gender || null,
+        looking_for: formData.LookingFor && formData.LookingFor.length > 0 ? formData.LookingFor : null,
+        zodiac_sign: formData.HSign?.toLowerCase() || null,
+        bio: formData.About || null,
+        looking_for_description: formData.IdeaDate || null,
+        
+        // Physical - height now properly converted
+        height_inches: heightInches,
+        body_type: formData.BodyType || null,
+        ethnicity: formData.Ethnicity ? 
+          (Array.isArray(formData.Ethnicity) ? formData.Ethnicity : formData.Ethnicity.split(",").map((s: string) => s.trim()).filter(Boolean)) 
+          : null,
+        
+        // Location
         city: formData.City || null,
         state: formData.State || null,
         country: formData.Country || null,
-        occupation: formData.JobTitle || null,
+        zip_code: formData.Zipcode || null,
+        
+        // Lifestyle
+        marital_status: formData.MaritalStatus || null,
+        religion: formData.Religion || null,
+        political_views: formData.Political || null,
         education: formData.Education || null,
-        religion: formData.Religion?.toLowerCase() || null,
-        smoking: formData.Smoking?.toLowerCase() || null,
-        drinking: formData.Drinks?.toLowerCase() || null,
-        has_kids: formData.HaveChild === "Yes",
-        wants_kids: formData.WantChild?.toLowerCase().replace(" ", "_") || null,
-        interests: formData.Interest ? 
-          (Array.isArray(formData.Interest) ? formData.Interest : formData.Interest.split(",").map((s: string) => s.trim())) 
+        occupation: formData.JobTitle || null,
+        company: formData.Company || null,
+        smoking: formData.Smoking || null,
+        drinking: formData.Drinks || null,
+        marijuana: formData.Marijuana || null,
+        exercise: formData.Exercise || null,
+        languages: formData.Language ? 
+          (Array.isArray(formData.Language) ? formData.Language : formData.Language.split(",").map((s: string) => s.trim()).filter(Boolean)) 
           : null,
-        bio: formData.About || null,
-        looking_for_description: formData.IdeaDate || null,
+        
+        // Family
+        has_kids: formData.HaveChild || null,
+        wants_kids: formData.WantChild || null,
+        pets: formData.Pets ? 
+          (Array.isArray(formData.Pets) ? formData.Pets : formData.Pets.split(",").map((s: string) => s.trim()).filter(Boolean)) 
+          : null,
+        
+        // Interests
+        interests: formData.Interest ? 
+          (Array.isArray(formData.Interest) ? formData.Interest : formData.Interest.split(",").map((s: string) => s.trim()).filter(Boolean)) 
+          : null,
+        
+        // Profile prompts
+        ideal_first_date: formData.IdeaDate || null,
+        non_negotiables: formData.NonNegotiable || null,
+        worst_job: formData.WorstJob || null,
+        dream_job: formData.DreamJob || null,
+        nightclub_or_home: formData.NightAtHome || null,
+        pet_peeves: formData.PetPeeves || null,
+        after_work: formData.FindMe || null,
+        way_to_heart: formData.WayToHeart || null,
+        craziest_travel_story: formData.craziestTravelStory || formData.CraziestThings || null,
+        weirdest_gift: formData.weiredestGift || null,
+        past_event: formData.PastEvent || null,
+        
+        // Social links
+        social_link_1: formData.social_link1 || null,
+        social_link_2: formData.social_link2 || null,
+        
+        // Media
         profile_image_url: formData.Image || null,
       };
 
@@ -171,56 +223,86 @@ const EditProfile = () => {
       console.log("Profile loaded:", profile);
 
       if (profile) {
+        // Convert height from total inches to feet and inches for the form
+        const heightFeet = profile.height_inches ? Math.floor(profile.height_inches / 12) : 5;
+        const heightInchesRemainder = profile.height_inches ? profile.height_inches % 12 : 6;
+
         const loadedData: EditProfileFormData = {
+          // Basic info
           SocialType: "",
           Username: "",
           FirstName: profile.first_name || "",
           LastName: profile.last_name || "",
           DisplayName: `${profile.first_name || ""} ${profile.last_name || ""}`.trim(),
           Phone: "",
-          Zipcode: "",
+          DOB: profile.date_of_birth || "",
+          Gender: profile.gender || "",
+          LookingFor: profile.looking_for || [],
+          HSign: profile.zodiac_sign || "",
+          About: profile.bio || "",
+          
+          // Height - stored as separate feet and inches for proper UI
+          Height: profile.height_inches?.toString() || "",
+          HeightFeet: heightFeet,
+          HeightInches: heightInchesRemainder,
+          
+          // Physical
+          BodyType: profile.body_type || "",
+          Ethnicity: profile.ethnicity || [],
+          
+          // Location
           Address: "",
+          Street: "",
           City: profile.city || "",
           State: profile.state || "",
           Country: profile.country || "",
-          Street: "",
-          NightAtHome: "",
-          craziestTravelStory: "",
-          CraziestThings: "",
-          weiredestGift: "",
-          livePicture: profile.profile_image_url || "",
-          HSign: "",
-          DOB: profile.date_of_birth || "",
-          MaritalStatus: "",
-          HaveChild: profile.has_kids ? "Yes" : "No",
-          WantChild: profile.wants_kids || "",
+          Zipcode: profile.zip_code || "",
+          
+          // Lifestyle
+          MaritalStatus: profile.marital_status || "",
+          Religion: profile.religion || "",
+          Political: profile.political_views || "",
           Education: profile.education || "",
-          School: "",
+          School: profile.schools || [],
           JobTitle: profile.occupation || "",
-          Company: "",
-          Height: profile.height_inches?.toString() || "",
-          BodyType: profile.body_type || "",
-          Marijuna: "",
+          Company: profile.company || "",
+          JobID: "",
           Smoking: profile.smoking || "",
           Drinks: profile.drinking || "",
-          Pets: "",
-          Ethniticity: "",
-          Language: "",
-          Religion: profile.religion || "",
-          About: profile.bio || "",
-          Interest: profile.interests?.join(", ") || "",
-          IdeaDate: profile.looking_for_description || "",
-          WayToHeart: "",
-          Gender: profile.gender || "",
+          Marijuana: profile.marijuana || "",
+          Exercise: profile.exercise || "",
+          Language: profile.languages || [],
+          
+          // Family
+          HaveChild: profile.has_kids || "",
+          WantChild: profile.wants_kids || "",
+          Pets: profile.pets || [],
+          
+          // Interests
+          Interest: profile.interests || [],
+          
+          // Profile prompts
+          IdeaDate: profile.ideal_first_date || profile.looking_for_description || "",
+          NonNegotiable: profile.non_negotiables || "",
+          WorstJob: profile.worst_job || "",
+          DreamJob: profile.dream_job || "",
+          NightAtHome: profile.nightclub_or_home || "",
+          PetPeeves: profile.pet_peeves || "",
+          FindMe: profile.after_work || "",
+          WayToHeart: profile.way_to_heart || "",
+          craziestTravelStory: profile.craziest_travel_story || "",
+          CraziestThings: "",
+          weiredestGift: profile.weirdest_gift || "",
+          PastEvent: profile.past_event || "",
+          
+          // Social and media
+          livePicture: profile.profile_image_url || "",
+          social_link1: profile.social_link_1 || "",
+          social_link2: profile.social_link_2 || "",
           Image: profile.profile_image_url || "",
+          
+          // System
           DeviceToken: "",
-          NonNegotiable: "",
-          WorstJob: "",
-          JobID: "",
-          PastEvent: "",
-          FindMe: "",
-          social_link1: "",
-          social_link2: "",
           applicantID: "",
         };
 
@@ -257,18 +339,19 @@ const EditProfile = () => {
           Company: "",
           Height: "",
           BodyType: "",
-          Marijuna: "",
+          Marijuana: "",
           Smoking: "",
           Drinks: "",
           Pets: "",
-          Ethniticity: "",
-          Language: "",
+          Ethnicity: [],
+          Language: [],
           Religion: "",
           About: "",
           Interest: "",
           IdeaDate: "",
           WayToHeart: "",
           Gender: "",
+          LookingFor: [],
           Image: "",
           DeviceToken: "",
           NonNegotiable: "",

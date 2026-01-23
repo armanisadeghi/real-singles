@@ -3,47 +3,104 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-
-const INTERESTS = [
-  "Travel", "Music", "Movies", "Reading", "Fitness", "Cooking", "Photography",
-  "Art", "Gaming", "Sports", "Dancing", "Hiking", "Yoga", "Wine", "Coffee",
-  "Dogs", "Cats", "Fashion", "Technology", "Nature", "Beach", "Mountains"
-];
-
-const BODY_TYPES = ["slim", "athletic", "average", "curvy", "plus-size"];
-const SMOKING = ["never", "occasionally", "regularly"];
-const DRINKING = ["never", "socially", "regularly"];
-const EXERCISE = ["never", "sometimes", "regularly", "daily"];
-const WANTS_KIDS = ["yes", "no", "maybe", "have_and_want_more"];
-const GENDERS = ["male", "female", "non-binary", "other"];
+import {
+  GENDER_OPTIONS,
+  BODY_TYPE_OPTIONS,
+  MARITAL_STATUS_OPTIONS,
+  HAS_KIDS_OPTIONS,
+  WANTS_KIDS_OPTIONS,
+  SMOKING_OPTIONS,
+  DRINKING_OPTIONS,
+  MARIJUANA_OPTIONS,
+  EXERCISE_OPTIONS,
+  EDUCATION_OPTIONS,
+  ETHNICITY_OPTIONS,
+  RELIGION_OPTIONS,
+  POLITICAL_OPTIONS,
+  ZODIAC_OPTIONS,
+  PETS_OPTIONS,
+  LANGUAGE_OPTIONS,
+  INTEREST_OPTIONS,
+} from "@/types";
 
 const AUTOSAVE_DELAY = 5000; // 5 seconds
 
 type ProfileState = {
+  // Basic Info
   first_name: string;
   last_name: string;
   date_of_birth: string;
   gender: string;
   looking_for: string[];
-  height_inches: string;
+  zodiac_sign: string;
+  bio: string;
+  looking_for_description: string;
+  
+  // Physical
+  height_feet: number;
+  height_inches: number;
   body_type: string;
+  ethnicity: string[];
+  
+  // Location
   city: string;
   state: string;
   country: string;
-  occupation: string;
-  education: string;
+  zip_code: string;
+  
+  // Lifestyle
+  marital_status: string;
   religion: string;
+  political_views: string;
+  education: string;
+  occupation: string;
+  company: string;
   smoking: string;
   drinking: string;
+  marijuana: string;
   exercise: string;
-  has_kids: boolean;
+  languages: string[];
+  
+  // Family
+  has_kids: string;
   wants_kids: string;
+  pets: string[];
+  
+  // Interests
   interests: string[];
-  bio: string;
-  looking_for_description: string;
+  
+  // Profile Prompts
+  ideal_first_date: string;
+  non_negotiables: string;
+  worst_job: string;
+  dream_job: string;
+  nightclub_or_home: string;
+  pet_peeves: string;
+  after_work: string;
+  way_to_heart: string;
+  craziest_travel_story: string;
+  weirdest_gift: string;
+  
+  // Social
+  social_link_1: string;
+  social_link_2: string;
 };
 
 type SaveStatus = "saved" | "saving" | "unsaved" | "error" | "idle";
+
+// Helper to convert total inches to feet and inches
+const inchesToFeetAndInches = (totalInches: number | null): { feet: number; inches: number } => {
+  if (!totalInches) return { feet: 5, inches: 6 }; // Default 5'6"
+  return {
+    feet: Math.floor(totalInches / 12),
+    inches: totalInches % 12,
+  };
+};
+
+// Helper to convert feet and inches to total inches
+const feetAndInchesToInches = (feet: number, inches: number): number => {
+  return (feet * 12) + inches;
+};
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -66,22 +123,44 @@ export default function EditProfilePage() {
     date_of_birth: "",
     gender: "",
     looking_for: [],
-    height_inches: "",
+    zodiac_sign: "",
+    bio: "",
+    looking_for_description: "",
+    height_feet: 5,
+    height_inches: 6,
     body_type: "",
+    ethnicity: [],
     city: "",
     state: "",
     country: "",
-    occupation: "",
-    education: "",
+    zip_code: "",
+    marital_status: "",
     religion: "",
+    political_views: "",
+    education: "",
+    occupation: "",
+    company: "",
     smoking: "",
     drinking: "",
+    marijuana: "",
     exercise: "",
-    has_kids: false,
+    languages: [],
+    has_kids: "",
     wants_kids: "",
+    pets: [],
     interests: [],
-    bio: "",
-    looking_for_description: "",
+    ideal_first_date: "",
+    non_negotiables: "",
+    worst_job: "",
+    dream_job: "",
+    nightclub_or_home: "",
+    pet_peeves: "",
+    after_work: "",
+    way_to_heart: "",
+    craziest_travel_story: "",
+    weirdest_gift: "",
+    social_link_1: "",
+    social_link_2: "",
   });
 
   // Check if profile has changed from last saved state
@@ -92,7 +171,6 @@ export default function EditProfilePage() {
 
   // Save function
   const performSave = useCallback(async (isAutosave = false) => {
-    // Don't save if no changes
     if (!hasChanges()) {
       return true;
     }
@@ -111,29 +189,61 @@ export default function EditProfilePage() {
       return false;
     }
 
+    // Convert height from feet+inches to total inches
+    const totalHeightInches = feetAndInchesToInches(profile.height_feet, profile.height_inches);
+
     const profileData = {
       user_id: user.id,
+      // Basic Info
       first_name: profile.first_name || null,
       last_name: profile.last_name || null,
       date_of_birth: profile.date_of_birth || null,
       gender: profile.gender || null,
       looking_for: profile.looking_for.length > 0 ? profile.looking_for : null,
-      height_inches: profile.height_inches ? parseInt(profile.height_inches) : null,
+      zodiac_sign: profile.zodiac_sign || null,
+      bio: profile.bio || null,
+      looking_for_description: profile.looking_for_description || null,
+      // Physical
+      height_inches: totalHeightInches || null,
       body_type: profile.body_type || null,
+      ethnicity: profile.ethnicity.length > 0 ? profile.ethnicity : null,
+      // Location
       city: profile.city || null,
       state: profile.state || null,
       country: profile.country || null,
-      occupation: profile.occupation || null,
-      education: profile.education || null,
+      zip_code: profile.zip_code || null,
+      // Lifestyle
+      marital_status: profile.marital_status || null,
       religion: profile.religion || null,
+      political_views: profile.political_views || null,
+      education: profile.education || null,
+      occupation: profile.occupation || null,
+      company: profile.company || null,
       smoking: profile.smoking || null,
       drinking: profile.drinking || null,
+      marijuana: profile.marijuana || null,
       exercise: profile.exercise || null,
-      has_kids: profile.has_kids,
+      languages: profile.languages.length > 0 ? profile.languages : null,
+      // Family
+      has_kids: profile.has_kids || null,
       wants_kids: profile.wants_kids || null,
+      pets: profile.pets.length > 0 ? profile.pets : null,
+      // Interests
       interests: profile.interests.length > 0 ? profile.interests : null,
-      bio: profile.bio || null,
-      looking_for_description: profile.looking_for_description || null,
+      // Prompts
+      ideal_first_date: profile.ideal_first_date || null,
+      non_negotiables: profile.non_negotiables || null,
+      worst_job: profile.worst_job || null,
+      dream_job: profile.dream_job || null,
+      nightclub_or_home: profile.nightclub_or_home || null,
+      pet_peeves: profile.pet_peeves || null,
+      after_work: profile.after_work || null,
+      way_to_heart: profile.way_to_heart || null,
+      craziest_travel_story: profile.craziest_travel_story || null,
+      weirdest_gift: profile.weirdest_gift || null,
+      // Social
+      social_link_1: profile.social_link_1 || null,
+      social_link_2: profile.social_link_2 || null,
     };
 
     const { error: upsertError } = await supabase
@@ -149,7 +259,6 @@ export default function EditProfilePage() {
       return false;
     }
 
-    // Update last saved state
     lastSavedProfileRef.current = JSON.stringify(profile);
     setLastSaved(new Date());
     setSaveStatus("saved");
@@ -165,7 +274,6 @@ export default function EditProfilePage() {
 
   // Manual save handler
   const handleSave = useCallback(async () => {
-    // Clear any pending autosave
     if (autosaveTimerRef.current) {
       clearTimeout(autosaveTimerRef.current);
       autosaveTimerRef.current = null;
@@ -195,34 +303,56 @@ export default function EditProfilePage() {
       .single();
 
     if (existingProfile) {
-      const loadedProfile = {
+      const { feet, inches } = inchesToFeetAndInches(existingProfile.height_inches);
+      
+      const loadedProfile: ProfileState = {
         first_name: existingProfile.first_name || "",
         last_name: existingProfile.last_name || "",
         date_of_birth: existingProfile.date_of_birth || "",
         gender: existingProfile.gender || "",
         looking_for: existingProfile.looking_for || [],
-        height_inches: existingProfile.height_inches?.toString() || "",
+        zodiac_sign: existingProfile.zodiac_sign || "",
+        bio: existingProfile.bio || "",
+        looking_for_description: existingProfile.looking_for_description || "",
+        height_feet: feet,
+        height_inches: inches,
         body_type: existingProfile.body_type || "",
+        ethnicity: existingProfile.ethnicity || [],
         city: existingProfile.city || "",
         state: existingProfile.state || "",
         country: existingProfile.country || "",
-        occupation: existingProfile.occupation || "",
-        education: existingProfile.education || "",
+        zip_code: existingProfile.zip_code || "",
+        marital_status: existingProfile.marital_status || "",
         religion: existingProfile.religion || "",
+        political_views: existingProfile.political_views || "",
+        education: existingProfile.education || "",
+        occupation: existingProfile.occupation || "",
+        company: existingProfile.company || "",
         smoking: existingProfile.smoking || "",
         drinking: existingProfile.drinking || "",
+        marijuana: existingProfile.marijuana || "",
         exercise: existingProfile.exercise || "",
-        has_kids: existingProfile.has_kids || false,
+        languages: existingProfile.languages || [],
+        has_kids: existingProfile.has_kids || "",
         wants_kids: existingProfile.wants_kids || "",
+        pets: existingProfile.pets || [],
         interests: existingProfile.interests || [],
-        bio: existingProfile.bio || "",
-        looking_for_description: existingProfile.looking_for_description || "",
+        ideal_first_date: existingProfile.ideal_first_date || "",
+        non_negotiables: existingProfile.non_negotiables || "",
+        worst_job: existingProfile.worst_job || "",
+        dream_job: existingProfile.dream_job || "",
+        nightclub_or_home: existingProfile.nightclub_or_home || "",
+        pet_peeves: existingProfile.pet_peeves || "",
+        after_work: existingProfile.after_work || "",
+        way_to_heart: existingProfile.way_to_heart || "",
+        craziest_travel_story: existingProfile.craziest_travel_story || "",
+        weirdest_gift: existingProfile.weirdest_gift || "",
+        social_link_1: existingProfile.social_link_1 || "",
+        social_link_2: existingProfile.social_link_2 || "",
       };
       setProfile(loadedProfile);
-      // Store the initial state as "last saved"
       lastSavedProfileRef.current = JSON.stringify(loadedProfile);
     } else {
-      // For new profiles, store empty state
       lastSavedProfileRef.current = JSON.stringify(profile);
     }
 
@@ -230,33 +360,27 @@ export default function EditProfilePage() {
     isInitialLoadRef.current = false;
   };
 
-  // Autosave effect - triggers when profile changes
+  // Autosave effect
   useEffect(() => {
-    // Skip autosave during initial load
     if (isInitialLoadRef.current || loading) {
       return;
     }
 
-    // Check if there are actual changes
     if (!hasChanges()) {
       setSaveStatus("saved");
       return;
     }
 
-    // Mark as unsaved
     setSaveStatus("unsaved");
 
-    // Clear existing timer
     if (autosaveTimerRef.current) {
       clearTimeout(autosaveTimerRef.current);
     }
 
-    // Set new timer for autosave
     autosaveTimerRef.current = setTimeout(() => {
       performSave(true);
     }, AUTOSAVE_DELAY);
 
-    // Cleanup
     return () => {
       if (autosaveTimerRef.current) {
         clearTimeout(autosaveTimerRef.current);
@@ -264,11 +388,10 @@ export default function EditProfilePage() {
     };
   }, [profile, loading, hasChanges, performSave]);
 
-  // Save on page unload (safety net)
+  // Save on page unload
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasChanges()) {
-        // Try to save synchronously (won't always work)
         e.preventDefault();
         e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
         return e.returnValue;
@@ -288,22 +411,17 @@ export default function EditProfilePage() {
     };
   }, []);
 
-  const toggleInterest = (interest: string) => {
-    setProfile(prev => ({
-      ...prev,
-      interests: prev.interests.includes(interest)
-        ? prev.interests.filter(i => i !== interest)
-        : [...prev.interests, interest],
-    }));
-  };
-
-  const toggleLookingFor = (gender: string) => {
-    setProfile(prev => ({
-      ...prev,
-      looking_for: prev.looking_for.includes(gender)
-        ? prev.looking_for.filter(g => g !== gender)
-        : [...prev.looking_for, gender],
-    }));
+  // Toggle handlers for multi-select fields
+  const toggleArrayField = (field: keyof ProfileState, value: string) => {
+    setProfile(prev => {
+      const currentArray = prev[field] as string[];
+      return {
+        ...prev,
+        [field]: currentArray.includes(value)
+          ? currentArray.filter(i => i !== value)
+          : [...currentArray, value],
+      };
+    });
   };
 
   if (loading) {
@@ -314,7 +432,6 @@ export default function EditProfilePage() {
     );
   }
 
-  // Helper to format relative time
   const getRelativeTime = (date: Date) => {
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
     if (seconds < 60) return "just now";
@@ -324,7 +441,6 @@ export default function EditProfilePage() {
     return `${hours}h ago`;
   };
 
-  // Status indicator component
   const SaveStatusIndicator = () => {
     switch (saveStatus) {
       case "saving":
@@ -368,6 +484,66 @@ export default function EditProfilePage() {
         return null;
     }
   };
+
+  // Reusable select component
+  const SelectField = ({ 
+    label, 
+    value, 
+    onChange, 
+    options 
+  }: { 
+    label: string; 
+    value: string; 
+    onChange: (value: string) => void; 
+    options: readonly { value: string; label: string }[];
+  }) => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+      >
+        <option value="">Select...</option>
+        {options.map(opt => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    </div>
+  );
+
+  // Reusable multi-select chips component
+  const MultiSelectChips = ({ 
+    label, 
+    selected, 
+    options, 
+    onToggle 
+  }: { 
+    label: string; 
+    selected: string[]; 
+    options: readonly { value: string; label: string }[];
+    onToggle: (value: string) => void;
+  }) => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <div className="flex flex-wrap gap-2">
+        {options.map(opt => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onToggle(opt.value)}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              selected.includes(opt.value)
+                ? "bg-indigo-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -431,39 +607,33 @@ export default function EditProfilePage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-              <select
-                value={profile.gender}
-                onChange={(e) => setProfile(prev => ({ ...prev, gender: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-                <option value="">Select...</option>
-                {GENDERS.map(g => (
-                  <option key={g} value={g}>{g.charAt(0).toUpperCase() + g.slice(1).replace("-", " ")}</option>
-                ))}
-              </select>
-            </div>
+            <SelectField
+              label="Gender"
+              value={profile.gender}
+              onChange={(value) => setProfile(prev => ({ ...prev, gender: value }))}
+              options={GENDER_OPTIONS}
+            />
+            <SelectField
+              label="Zodiac Sign"
+              value={profile.zodiac_sign}
+              onChange={(value) => setProfile(prev => ({ ...prev, zodiac_sign: value }))}
+              options={ZODIAC_OPTIONS}
+            />
+            <SelectField
+              label="Marital Status"
+              value={profile.marital_status}
+              onChange={(value) => setProfile(prev => ({ ...prev, marital_status: value }))}
+              options={MARITAL_STATUS_OPTIONS}
+            />
           </div>
 
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Looking For</label>
-            <div className="flex flex-wrap gap-2">
-              {GENDERS.map(gender => (
-                <button
-                  key={gender}
-                  type="button"
-                  onClick={() => toggleLookingFor(gender)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    profile.looking_for.includes(gender)
-                      ? "bg-indigo-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {gender.charAt(0).toUpperCase() + gender.slice(1).replace("-", " ")}
-                </button>
-              ))}
-            </div>
+            <MultiSelectChips
+              label="Looking For"
+              selected={profile.looking_for}
+              options={GENDER_OPTIONS}
+              onToggle={(value) => toggleArrayField("looking_for", value)}
+            />
           </div>
         </section>
 
@@ -471,36 +641,52 @@ export default function EditProfilePage() {
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Physical</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Height with separate feet and inches dropdowns */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Height (inches)</label>
-              <input
-                type="number"
-                value={profile.height_inches}
-                onChange={(e) => setProfile(prev => ({ ...prev, height_inches: e.target.value }))}
-                placeholder="e.g., 68 for 5 ft 8 in"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Height</label>
+              <div className="flex gap-2">
+                <select
+                  value={profile.height_feet}
+                  onChange={(e) => setProfile(prev => ({ ...prev, height_feet: parseInt(e.target.value) }))}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                >
+                  {[4, 5, 6, 7].map(f => (
+                    <option key={f} value={f}>{f}&apos;</option>
+                  ))}
+                </select>
+                <select
+                  value={profile.height_inches}
+                  onChange={(e) => setProfile(prev => ({ ...prev, height_inches: parseInt(e.target.value) }))}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                >
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => (
+                    <option key={i} value={i}>{i}&quot;</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Body Type</label>
-              <select
-                value={profile.body_type}
-                onChange={(e) => setProfile(prev => ({ ...prev, body_type: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-                <option value="">Select...</option>
-                {BODY_TYPES.map(type => (
-                  <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1).replace("-", " ")}</option>
-                ))}
-              </select>
-            </div>
+            <SelectField
+              label="Body Type"
+              value={profile.body_type}
+              onChange={(value) => setProfile(prev => ({ ...prev, body_type: value }))}
+              options={BODY_TYPE_OPTIONS}
+            />
+          </div>
+          
+          <div className="mt-4">
+            <MultiSelectChips
+              label="Ethnicity"
+              selected={profile.ethnicity}
+              options={ETHNICITY_OPTIONS}
+              onToggle={(value) => toggleArrayField("ethnicity", value)}
+            />
           </div>
         </section>
 
         {/* Location */}
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Location</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
               <input
@@ -528,6 +714,15 @@ export default function EditProfilePage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+              <input
+                type="text"
+                value={profile.zip_code}
+                onChange={(e) => setProfile(prev => ({ ...prev, zip_code: e.target.value }))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
           </div>
         </section>
 
@@ -545,113 +740,115 @@ export default function EditProfilePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Education</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
               <input
                 type="text"
-                value={profile.education}
-                onChange={(e) => setProfile(prev => ({ ...prev, education: e.target.value }))}
+                value={profile.company}
+                onChange={(e) => setProfile(prev => ({ ...prev, company: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Religion</label>
-              <input
-                type="text"
-                value={profile.religion}
-                onChange={(e) => setProfile(prev => ({ ...prev, religion: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Smoking</label>
-              <select
-                value={profile.smoking}
-                onChange={(e) => setProfile(prev => ({ ...prev, smoking: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-                <option value="">Select...</option>
-                {SMOKING.map(opt => (
-                  <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Drinking</label>
-              <select
-                value={profile.drinking}
-                onChange={(e) => setProfile(prev => ({ ...prev, drinking: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-                <option value="">Select...</option>
-                {DRINKING.map(opt => (
-                  <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Exercise</label>
-              <select
-                value={profile.exercise}
-                onChange={(e) => setProfile(prev => ({ ...prev, exercise: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-                <option value="">Select...</option>
-                {EXERCISE.map(opt => (
-                  <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
-                ))}
-              </select>
-            </div>
+            <SelectField
+              label="Education"
+              value={profile.education}
+              onChange={(value) => setProfile(prev => ({ ...prev, education: value }))}
+              options={EDUCATION_OPTIONS}
+            />
+            <SelectField
+              label="Religion"
+              value={profile.religion}
+              onChange={(value) => setProfile(prev => ({ ...prev, religion: value }))}
+              options={RELIGION_OPTIONS}
+            />
+            <SelectField
+              label="Political Views"
+              value={profile.political_views}
+              onChange={(value) => setProfile(prev => ({ ...prev, political_views: value }))}
+              options={POLITICAL_OPTIONS}
+            />
+            <SelectField
+              label="Exercise"
+              value={profile.exercise}
+              onChange={(value) => setProfile(prev => ({ ...prev, exercise: value }))}
+              options={EXERCISE_OPTIONS}
+            />
           </div>
 
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="has_kids"
-                checked={profile.has_kids}
-                onChange={(e) => setProfile(prev => ({ ...prev, has_kids: e.target.checked }))}
-                className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
-              />
-              <label htmlFor="has_kids" className="ml-2 text-sm text-gray-700">I have kids</label>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Wants Kids</label>
-              <select
-                value={profile.wants_kids}
-                onChange={(e) => setProfile(prev => ({ ...prev, wants_kids: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-                <option value="">Select...</option>
-                {WANTS_KIDS.map(opt => (
-                  <option key={opt} value={opt}>{opt.split("_").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}</option>
-                ))}
-              </select>
-            </div>
+          <div className="mt-4">
+            <MultiSelectChips
+              label="Languages"
+              selected={profile.languages}
+              options={LANGUAGE_OPTIONS}
+              onToggle={(value) => toggleArrayField("languages", value)}
+            />
+          </div>
+        </section>
+
+        {/* Habits */}
+        <section className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Habits</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <SelectField
+              label="Smoking"
+              value={profile.smoking}
+              onChange={(value) => setProfile(prev => ({ ...prev, smoking: value }))}
+              options={SMOKING_OPTIONS}
+            />
+            <SelectField
+              label="Drinking"
+              value={profile.drinking}
+              onChange={(value) => setProfile(prev => ({ ...prev, drinking: value }))}
+              options={DRINKING_OPTIONS}
+            />
+            <SelectField
+              label="Marijuana"
+              value={profile.marijuana}
+              onChange={(value) => setProfile(prev => ({ ...prev, marijuana: value }))}
+              options={MARIJUANA_OPTIONS}
+            />
+          </div>
+        </section>
+
+        {/* Family */}
+        <section className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Family</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SelectField
+              label="Do you have kids?"
+              value={profile.has_kids}
+              onChange={(value) => setProfile(prev => ({ ...prev, has_kids: value }))}
+              options={HAS_KIDS_OPTIONS}
+            />
+            <SelectField
+              label="Do you want kids?"
+              value={profile.wants_kids}
+              onChange={(value) => setProfile(prev => ({ ...prev, wants_kids: value }))}
+              options={WANTS_KIDS_OPTIONS}
+            />
+          </div>
+          
+          <div className="mt-4">
+            <MultiSelectChips
+              label="Pets"
+              selected={profile.pets}
+              options={PETS_OPTIONS}
+              onToggle={(value) => toggleArrayField("pets", value)}
+            />
           </div>
         </section>
 
         {/* Interests */}
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Interests</h2>
-          <div className="flex flex-wrap gap-2">
-            {INTERESTS.map(interest => (
-              <button
-                key={interest}
-                type="button"
-                onClick={() => toggleInterest(interest)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  profile.interests.includes(interest)
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {interest}
-              </button>
-            ))}
-          </div>
+          <MultiSelectChips
+            label="Select your interests"
+            selected={profile.interests}
+            options={INTEREST_OPTIONS}
+            onToggle={(value) => toggleArrayField("interests", value)}
+          />
         </section>
 
-        {/* Bio */}
+        {/* About Me */}
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">About Me</h2>
           <div className="space-y-4">
@@ -672,6 +869,131 @@ export default function EditProfilePage() {
                 onChange={(e) => setProfile(prev => ({ ...prev, looking_for_description: e.target.value }))}
                 rows={3}
                 placeholder="Describe your ideal match..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Profile Prompts */}
+        <section className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Get to Know Me</h2>
+          <p className="text-sm text-gray-500 mb-4">Answer these prompts to help others learn more about you.</p>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">My ideal first date starts with... and ends with...</label>
+              <textarea
+                value={profile.ideal_first_date}
+                onChange={(e) => setProfile(prev => ({ ...prev, ideal_first_date: e.target.value }))}
+                rows={2}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">My top non-negotiables</label>
+              <textarea
+                value={profile.non_negotiables}
+                onChange={(e) => setProfile(prev => ({ ...prev, non_negotiables: e.target.value }))}
+                rows={2}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">The way to my heart is through...</label>
+              <textarea
+                value={profile.way_to_heart}
+                onChange={(e) => setProfile(prev => ({ ...prev, way_to_heart: e.target.value }))}
+                rows={2}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">After work, you can find me...</label>
+              <textarea
+                value={profile.after_work}
+                onChange={(e) => setProfile(prev => ({ ...prev, after_work: e.target.value }))}
+                rows={2}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nightclub or night at home?</label>
+              <input
+                type="text"
+                value={profile.nightclub_or_home}
+                onChange={(e) => setProfile(prev => ({ ...prev, nightclub_or_home: e.target.value }))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">My pet peeves</label>
+              <textarea
+                value={profile.pet_peeves}
+                onChange={(e) => setProfile(prev => ({ ...prev, pet_peeves: e.target.value }))}
+                rows={2}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Craziest travel story</label>
+              <textarea
+                value={profile.craziest_travel_story}
+                onChange={(e) => setProfile(prev => ({ ...prev, craziest_travel_story: e.target.value }))}
+                rows={2}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Weirdest gift I&apos;ve received</label>
+              <textarea
+                value={profile.weirdest_gift}
+                onChange={(e) => setProfile(prev => ({ ...prev, weirdest_gift: e.target.value }))}
+                rows={2}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">The worst job I ever had</label>
+              <textarea
+                value={profile.worst_job}
+                onChange={(e) => setProfile(prev => ({ ...prev, worst_job: e.target.value }))}
+                rows={2}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">The job I&apos;d do for no money</label>
+              <textarea
+                value={profile.dream_job}
+                onChange={(e) => setProfile(prev => ({ ...prev, dream_job: e.target.value }))}
+                rows={2}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Social Links */}
+        <section className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Social Links</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Social Link 1</label>
+              <input
+                type="url"
+                value={profile.social_link_1}
+                onChange={(e) => setProfile(prev => ({ ...prev, social_link_1: e.target.value }))}
+                placeholder="https://..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Social Link 2</label>
+              <input
+                type="url"
+                value={profile.social_link_2}
+                onChange={(e) => setProfile(prev => ({ ...prev, social_link_2: e.target.value }))}
+                placeholder="https://..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>

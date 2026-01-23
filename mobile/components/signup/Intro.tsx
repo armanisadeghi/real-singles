@@ -8,11 +8,11 @@ const Intro = ({ data, updateData, onNext, error }: signupProps) => {
   const [validationError, setValidationError] = useState("");
 
   const handleNext = () => {
-    if (!data.About) {
+    if (!data?.About) {
       setValidationError("Please fill out to continue");
       return;
     }
-    if (!data.CraziestThings) {
+    if (!data?.CraziestThings) {
       setValidationError("Please fill out to continue");
       return;
     }
@@ -50,7 +50,7 @@ const Intro = ({ data, updateData, onNext, error }: signupProps) => {
             maxLength={300}
             placeholder="Tell me a little about yourself"
             placeholderTextColor="#B0B0B0"
-            value={data.About}
+            value={data?.About}
             onChangeText={(text) => updateData({ About: text })}
             textAlignVertical="top"
             style={{
@@ -59,7 +59,7 @@ const Intro = ({ data, updateData, onNext, error }: signupProps) => {
             }}
           />
           <Text className="absolute bottom-3 right-3 text-xs text-gray">
-            {data.About?.length || 0}/300
+            {data?.About?.length || 0}/300
           </Text>
         </View>
         <View className="relative py-[13px] px-[15px] border border-border rounded-2xl bg-light-200">
@@ -69,7 +69,7 @@ const Intro = ({ data, updateData, onNext, error }: signupProps) => {
             maxLength={300}
             placeholder="Craziest thing you have done"
             placeholderTextColor="#B0B0B0"
-            value={data.CraziestThings}
+            value={data?.CraziestThings}
             onChangeText={(text) => updateData({ CraziestThings: text })}
             textAlignVertical="top"
             style={{
@@ -78,7 +78,7 @@ const Intro = ({ data, updateData, onNext, error }: signupProps) => {
             }}
           />
           <Text className="absolute bottom-3 right-3 text-xs text-gray">
-            {data.CraziestThings?.length || 0}/300
+            {data?.CraziestThings?.length || 0}/300
           </Text>
         </View>
 

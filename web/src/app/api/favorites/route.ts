@@ -65,7 +65,7 @@ export async function GET() {
         State: profile.state || "",
         Height: profile.height_inches?.toString() || "",
         BodyType: profile.body_type || "",
-        Ethniticity: profile.ethnicity || "",
+        Ethnicity: profile.ethnicity || [],
         Religion: profile.religion || "",
         HSign: profile.zodiac_sign || "",
         Interest: profile.interests?.join(", ") || "",

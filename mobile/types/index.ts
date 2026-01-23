@@ -6,7 +6,8 @@ export interface SignupData {
   LastName: string;
   DisplayName: string;
   DOB: string;
-  Gender: string;
+  Gender: string; // 'male', 'female', 'non-binary', 'other'
+  LookingFor: string[]; // Array of genders: ['male'], ['female'], ['male', 'female'], etc.
   Phone: string | null;
   Zipcode: string;
   HSign: string;
@@ -17,15 +18,15 @@ export interface SignupData {
   WantChild: string;
   Height: number;
   BodyType: string;
-  Ethniticity: string;
-  Language: string;
+  Ethnicity: string | string[]; // Fixed spelling, now supports multi-select
+  Language: string | string[]; // Now supports multi-select
   Religion: string;
-  // Political: string;
+  Political?: string;
   Education: string;
   School: string[];
   JobTitle: string;
   Company: string;
-  Marijuna: string;
+  Marijuana: string; // Fixed spelling
   Smoking: string;
   Drinks: string;
   Pets: string;
@@ -142,57 +143,82 @@ export interface User {
 }
 
 export interface EditProfileFormData {
+  // Basic info
   SocialType?: string;
-  Username: string;
+  Username?: string;
   FirstName: string;
   LastName: string;
   DisplayName: string;
   Phone?: string;
-  Zipcode?: string;
   DOB?: string;
-  Image?: string;
+  Gender?: string; // 'male', 'female', 'non-binary', 'other'
+  LookingFor?: string[]; // Array of genders seeking
+  HSign?: string;
+  About?: string;
+  
+  // Height - stored as total inches in DB, but displayed as feet/inches in UI
+  Height?: string; // Legacy: total inches as string
+  HeightFeet?: number; // New: feet portion (4-7)
+  HeightInches?: number; // New: inches portion (0-11)
+  
+  // Physical
+  BodyType?: string;
+  Ethnicity?: string | string[]; // Multi-select for mixed heritage
+  
+  // Location
   Address?: string;
+  Street?: string;
   City?: string;
   State?: string;
   Country?: string;
-  Street?: string;
-  Gender?: string;
-  HSign?: string;
-  Height?: string;
-  BodyType?: string;
-  Ethniticity?: string;
-  Religion?: string;
-  About?: string;
+  Zipcode?: string;
+  
+  // Lifestyle
   MaritalStatus?: string;
-  HaveChild?: string;
-  WantChild?: string;
-  Marijuna?: string;
-  Smoking?: string;
-  Drinks?: string;
-  Pets?: string;
+  Religion?: string;
+  Political?: string;
   Education?: string;
-  School?: string;
+  School?: string | string[]; // Multi-select
   JobTitle?: string;
   Company?: string;
   JobID?: string | number;
-  WorstJob?: string;
-  Interest?: string;
-  Language?: string;
-  IdeaDate?: string;
-  WayToHeart?: string;
-  NightAtHome?: string;
-  PastEvent?: string;
-  craziestTravelStory?: string;
-  CraziestThings?: string;
-  weiredestGift?: string;
+  Smoking?: string;
+  Drinks?: string;
+  Marijuana?: string; // Fixed spelling
+  Exercise?: string;
+  Language?: string | string[]; // Multi-select
+  
+  // Family
+  HaveChild?: string;
+  WantChild?: string;
+  Pets?: string | string[]; // Multi-select
+  
+  // Interests
+  Interest?: string | string[]; // Multi-select
+  
+  // Profile prompts
+  IdeaDate?: string; // ideal_first_date
+  NonNegotiable?: string; // non_negotiables
+  WorstJob?: string; // worst_job
+  DreamJob?: string; // dream_job
+  NightAtHome?: string; // nightclub_or_home
+  PetPeeves?: string; // pet_peeves
+  FindMe?: string; // after_work
+  WayToHeart?: string; // way_to_heart
+  craziestTravelStory?: string; // craziest_travel_story
+  CraziestThings?: string; // Legacy duplicate of above
+  weiredestGift?: string; // weirdest_gift (keeping typo for compatibility)
+  PastEvent?: string; // past_event
+  
+  // Social and media
   social_link1?: string;
   social_link2?: string;
-  FindMe?: string;
   livePicture?: string;
-  NonNegotiable?: string;
+  Image?: string;
+  
+  // System
   DeviceToken?: string;
   applicantID?: string;
-  Political?: string
 }
 
 
