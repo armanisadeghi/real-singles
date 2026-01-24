@@ -27,6 +27,7 @@ import {
   ActivityIndicator,
   Image,
   ImageBackground,
+  Platform,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -493,30 +494,56 @@ export default function Home() {
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.push("/redeem")}
-              className="relative w-1/4"
+              className="items-end"
             >
-              <Image source={images.heart} />
-              <View className="absolute flex flex-col justify-center items-center" style={{ top: 12, left: 28 }}>
-                <Text className="font-bold text-white" style={TYPOGRAPHY.h3}>
-                  {redeemPoints}
-                </Text>
-                <Text className="font-medium text-white" style={TYPOGRAPHY.caption1}>
-                  Points
-                </Text>
+              <View className="relative">
+                <Image source={images.heart} />
+                <View 
+                  className="absolute flex flex-col justify-center items-center"
+                  style={{ 
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                  }}
+                >
+                  <Text className="font-bold text-white" style={TYPOGRAPHY.h3}>
+                    {redeemPoints}
+                  </Text>
+                  <Text className="font-medium text-white" style={TYPOGRAPHY.caption1}>
+                    Points
+                  </Text>
+                </View>
               </View>
             </TouchableOpacity>
           </View>
         </ImageBackground>
-        <View className="flex-row items-center" style={{ marginTop: VERTICAL_SPACING.md }}>
+        <View 
+          className="flex-row items-center" 
+          style={{ 
+            marginTop: VERTICAL_SPACING.md,
+            paddingRight: SPACING.screenPadding,
+          }}
+        >
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingLeft: SPACING.screenPadding, paddingRight: SPACING.xl }}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ 
+              paddingLeft: SPACING.screenPadding,
+              paddingRight: SPACING.sm,
+            }}
           >
-            <View className="flex-row" style={{ gap: SPACING.sm, marginRight: SPACING.lg }}>
+            <View className="flex-row" style={{ gap: SPACING.sm }}>
               <TouchableOpacity
                 className="bg-primary rounded-full"
-                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
+                style={{ 
+                  paddingHorizontal: SPACING.base, 
+                  paddingVertical: SPACING.sm,
+                  minHeight: 36,
+                  justifyContent: 'center',
+                }}
+                activeOpacity={0.7}
               >
                 <Text className="text-white font-medium" style={TYPOGRAPHY.subheadline}>All</Text>
               </TouchableOpacity>
@@ -528,7 +555,13 @@ export default function Home() {
                   })
                 }
                 className="border border-primary bg-secondary rounded-full"
-                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
+                style={{ 
+                  paddingHorizontal: SPACING.base, 
+                  paddingVertical: SPACING.sm,
+                  minHeight: 36,
+                  justifyContent: 'center',
+                }}
+                activeOpacity={0.7}
               >
                 <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
                   Top Matches
@@ -542,7 +575,13 @@ export default function Home() {
                   })
                 }
                 className="border border-primary bg-secondary rounded-full"
-                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
+                style={{ 
+                  paddingHorizontal: SPACING.base, 
+                  paddingVertical: SPACING.sm,
+                  minHeight: 36,
+                  justifyContent: 'center',
+                }}
+                activeOpacity={0.7}
               >
                 <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
                   Featured Videos
@@ -556,25 +595,43 @@ export default function Home() {
                   })
                 }
                 className="border border-primary bg-secondary rounded-full"
-                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
+                style={{ 
+                  paddingHorizontal: SPACING.base, 
+                  paddingVertical: SPACING.sm,
+                  minHeight: 36,
+                  justifyContent: 'center',
+                }}
+                activeOpacity={0.7}
               >
                 <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
-                  Virtual Speed Dating
+                  Virtual Dates
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => router.push("/nearbyprofile")}
                 className="border border-primary bg-secondary rounded-full"
-                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
+                style={{ 
+                  paddingHorizontal: SPACING.base, 
+                  paddingVertical: SPACING.sm,
+                  minHeight: 36,
+                  justifyContent: 'center',
+                }}
+                activeOpacity={0.7}
               >
                 <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
-                  Nearby Profile
+                  Nearby
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => router.push("/events")}
                 className="border border-primary bg-secondary rounded-full"
-                style={{ paddingHorizontal: SPACING.base, paddingVertical: SPACING.xs }}
+                style={{ 
+                  paddingHorizontal: SPACING.base, 
+                  paddingVertical: SPACING.sm,
+                  minHeight: 36,
+                  justifyContent: 'center',
+                }}
+                activeOpacity={0.7}
               >
                 <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
                   Events
@@ -585,10 +642,27 @@ export default function Home() {
 
           <TouchableOpacity
             onPress={handleFilterPress}
-            className="shadow-lg shadow-white rounded-button overflow-hidden"
-            style={{ marginRight: SPACING.screenPadding }}
+            className="rounded-full overflow-hidden"
+            style={{ 
+              marginLeft: SPACING.sm,
+              ...Platform.select({
+                ios: {
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                },
+                android: {
+                  elevation: 3,
+                },
+              }),
+            }}
+            activeOpacity={0.7}
           >
-            <LinearBg style={{ padding: SPACING.xs }}>
+            <LinearBg style={{ 
+              padding: SPACING.sm,
+              borderRadius: 9999,
+            }}>
               <Image
                 source={icons.filter}
                 style={{ width: ICON_SIZES.sm, height: ICON_SIZES.sm }}
