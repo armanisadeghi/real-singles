@@ -2,8 +2,9 @@ import { icons } from "@/constants/icons";
 import { User } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
 import { Link, useRouter } from "expo-router";
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import {
   Image,
   ImageBackground,
@@ -103,13 +104,17 @@ export default function ProfileCard({ profile }: { profile: User }) {
 
   const content = displayContent();
 
-
+  // Haptic feedback for native feel when tapping profile cards
+  const handlePressIn = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, []);
 
   return (
     <Link asChild href={`/profiles/${profile?.id || profile?.ID}`}>
       <TouchableOpacity
         className="relative rounded-card overflow-hidden"
         style={{ width: cardWidth, height: cardHeight }}
+        onPressIn={handlePressIn}
       >
         {content.type === "image" ? (
           <ImageBackground

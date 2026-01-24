@@ -173,6 +173,9 @@ export interface EditProfileFormData {
   Country?: string;
   Zipcode?: string;
   
+  // Dating
+  DatingIntentions?: string; // life_partner, long_term, long_term_open, figuring_out, prefer_not_to_say
+  
   // Lifestyle
   MaritalStatus?: string;
   Religion?: string;

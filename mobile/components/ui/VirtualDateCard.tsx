@@ -1,6 +1,7 @@
 import { VIDEO_URL } from "@/utils/token";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { TYPOGRAPHY, SPACING, BORDER_RADIUS, CARD_DIMENSIONS } from "@/constants/designTokens";
 
@@ -63,10 +64,16 @@ export default function VirtualDateCard({virtualDate}: { virtualDate: VirtualDat
       );
     }
   };
+
+  // Haptic feedback for native feel
+  const handlePressIn = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, []);
   
   return (
     <TouchableOpacity
       activeOpacity={0.7}
+      onPressIn={handlePressIn}
       onPress={() => router.push(`/virtualdate/${virtualDate?.ID}`)}
       className="overflow-hidden"
       style={{

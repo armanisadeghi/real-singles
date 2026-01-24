@@ -1,5 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React, { ReactNode } from "react";
+import * as Haptics from "expo-haptics";
+import React, { ReactNode, useCallback } from "react";
 import {
   StyleProp,
   Text,
@@ -18,6 +19,8 @@ interface GradientButtonProps extends TouchableOpacityProps {
   textStyle?: StyleProp<TextStyle>;
   text?: string;
   children?: ReactNode;
+  /** Disable haptic feedback (default: false) */
+  disableHaptics?: boolean;
 }
 
 const GradientButton: React.FC<GradientButtonProps> = ({
@@ -28,10 +31,21 @@ const GradientButton: React.FC<GradientButtonProps> = ({
   textStyle,
   text,
   children,
+  disableHaptics = false,
+  onPress,
   ...touchableProps
 }) => {
+  // Wrap onPress with haptic feedback for native feel
+  const handlePress = useCallback((event: any) => {
+    if (!disableHaptics) {
+      // Light impact for button presses - feels premium and native
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    onPress?.(event);
+  }, [onPress, disableHaptics]);
+
   return (
-    <TouchableOpacity activeOpacity={0.8} {...touchableProps}>
+    <TouchableOpacity activeOpacity={0.8} onPress={handlePress} {...touchableProps}>
       <LinearGradient
         colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
         start={start}

@@ -1,8 +1,9 @@
 import { EventCardProps } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
 import { Link, useRouter } from "expo-router";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   ImageBackground,
   Text,
@@ -48,11 +49,17 @@ export default function EventCard({event} : {event: EventCardProps}) {
   // Get initials for the event name
   const initials = useMemo(() => getInitials(EventName), [EventName]);
 
+  // Haptic feedback for native feel
+  const handlePressIn = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, []);
+
   return (
     <Link asChild href={`/events/event/${EventID}`}>
       <TouchableOpacity
         className="relative rounded-card overflow-hidden"
         style={{ width: cardWidth, height: cardHeight }}
+        onPressIn={handlePressIn}
       >
         {EventImage ? (
           <ImageBackground

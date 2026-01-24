@@ -1,9 +1,6 @@
-import NotificationBell from "@/components/NotificationBell";
 import NotificationCard from "@/components/ui/NotificationCard";
-import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
 import { getAllNotifications } from "@/lib/api";
-import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, Text, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
@@ -23,7 +20,6 @@ interface Notification {
 }
 
 export default function Notification() {
-  const router = useRouter();
   const [data, setData] = useState<Notification[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -85,12 +81,6 @@ export default function Notification() {
       {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
       <View className="flex-1 bg-background">
         <Toast/>
-        <ScreenHeader
-          title="Notification"
-          showBackButton
-          onBackPress={router.back}
-          rightContent={<NotificationBell />}
-        />
         <View className="mt-4 px-2">
           <FlatList
             data={data}

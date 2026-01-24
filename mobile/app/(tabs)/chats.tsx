@@ -1,6 +1,5 @@
 import LinearBg from "@/components/LinearBg";
 import NotificationBell from "@/components/NotificationBell";
-import { ScreenHeader, HeaderBackButton } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
 import { fetchUserProfile, getAgoraChatToken, getGroupList } from "@/lib/api";
@@ -14,11 +13,13 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  Platform,
   Text,
   TextInput,
   TouchableOpacity,
   View
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { useBottomSpacing } from "@/hooks/useResponsive";
 import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES, COMPONENT_SIZES, BORDER_RADIUS, SHADOWS } from "@/constants/designTokens";
@@ -135,7 +136,7 @@ const renderMessageItem = ({ item }: { item: MessageItem }) => (
       }}
     >
       <View className="relative">
-        {(item?.image?.uri && item.image.uri !== "profile_img_url") || (item.image.uri && item.image.uri.startsWith("uploads/")) ? (
+        {item?.image?.uri && item.image.uri !== "profile_img_url" ? (
           <Image
             source={{
               uri: item.image.uri.startsWith("http")
@@ -368,6 +369,10 @@ export default function Chats() {
 
   // Responsive hooks
   const { contentPadding: bottomTabPadding } = useBottomSpacing(true);
+  const insets = useSafeAreaInsets();
+  
+  // Native header height: iOS 44pt, Android 56dp
+  const headerHeight = Platform.OS === 'ios' ? 44 : 56;
 
   // 🗑️ TEMPORARY: Delete all Agora groups function
   const handleDeleteAllAgoraGroups = async () => {
@@ -527,7 +532,8 @@ export default function Chats() {
       return {
         id: conv.peerUserId, // ⚠️ convId nahi, peerUserId
         name: peerName,
-        image: conv.profile?.Image ? { uri: conv.profile.Image } : icons.ic_user,
+        // Pass null if no image - renderMessageItem will show colored initials fallback
+        image: conv.profile?.Image ? { uri: conv.profile.Image } : null,
         message,
         time,
         unread: conv.unread || 0,
@@ -726,24 +732,47 @@ export default function Chats() {
             </LinearBg>
           </View>
         </TouchableOpacity>
-        <ScreenHeader
-          title={selectMode ? "Select Friends" : "Chats"}
-          showBackButton
-          onBackPress={router.back}
-          rightContent={
-            selectMode ? (
-              selectedUsers.length > 0 && (
-                <TouchableOpacity onPress={handleNavigateShippingInfo}>
+        {/* Native-style header for tab screen */}
+        <View 
+          style={{ 
+            paddingTop: insets.top,
+            backgroundColor: '#FFFFFF',
+          }}
+        >
+          <View 
+            style={{ 
+              height: headerHeight,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingHorizontal: 16,
+            }}
+          >
+            {selectMode ? (
+              <TouchableOpacity onPress={router.back} style={{ width: 40 }}>
+                <Ionicons name="arrow-back" size={24} color="#E91E63" />
+              </TouchableOpacity>
+            ) : (
+              <View style={{ width: 40 }} />
+            )}
+            <Text style={{ fontSize: 17, fontWeight: '600', color: '#000' }}>
+              {selectMode ? "Select Friends" : "Chats"}
+            </Text>
+            {selectMode ? (
+              selectedUsers.length > 0 ? (
+                <TouchableOpacity onPress={handleNavigateShippingInfo} style={{ width: 40 }}>
                   <Text className="text-primary font-medium" style={TYPOGRAPHY.body}>Send</Text>
                 </TouchableOpacity>
+              ) : (
+                <View style={{ width: 40 }} />
               )
             ) : (
               <NotificationBell />
-            )
-          }
-        />
+            )}
+          </View>
+        </View>
 
-        <View style={{ marginTop: VERTICAL_SPACING.lg }}>
+        <View style={{ marginTop: VERTICAL_SPACING.sm }}>
           <View
             className="flex-row bg-white border border-border rounded-card"
             style={{

@@ -4,13 +4,35 @@ Master Data Inventory & Requirements
 
 *Industry Best Practices Amalgamation*
 
-Last Updated: January 23, 2026
+Last Updated: January 24, 2026
 
-Version 2.0 - Merged with Industry Research
+Version 3.0 - Implementation Decisions Finalized
 
 **Research Sources**
 
 The League • Hinge • Bumble • Raya
+
+---
+
+# **Implementation Decisions (January 24, 2026)**
+
+The following decisions have been finalized for RealSingles:
+
+| Decision | Choice | Notes |
+| :---- | :---- | :---- |
+| Photo Minimum | **1 photo required** | Primary photo auto-syncs to user avatar across app |
+| Life Goals | **APPROVED - Full** | Implement The League model with filtering |
+| Voice Prompts | **APPROVED - Core** | Implement infrastructure; "Coming Soon" for incomplete |
+| Video Intros | **APPROVED - Core** | Implement infrastructure; "Coming Soon" for incomplete |
+| Application Review/Vetting | **DECLINED** | Not implementing - open registration |
+| LinkedIn Verification | **DECLINED** | Not implementing |
+| Profile Prompts | **APPROVED - Migrate** | Separate table with admin interface for prompt management |
+
+### Completed Fixes (January 24, 2026)
+- ✅ Political views bug fixed (was saving to NightAtHome, now saves to Political)
+- ✅ Gender/looking_for properly separated in mobile
+
+---
 
 # **Executive Summary**
 
@@ -27,9 +49,10 @@ This document consolidates the current RealSingles data inventory with extensive
 
 | Priority | Fields |
 | :---- | :---- |
-| REQUIRED | Name, Age, Gender, Location, Height, 6 Verified Photos, Dating Intentions, 3 Prompts, Occupation, Education, Phone Verification |
+| REQUIRED | Name, Age, Gender, Location, Height, **1 Photo minimum**, Dating Intentions, 3 Prompts, Occupation, Education, Phone Verification |
 | STRONGLY RECOMMENDED | Family Plans, Children Status, Religion, Politics, Drinking, Smoking, Marijuana, 5-10 Interest Badges, Bio (250 chars), Marital Status |
-| NICE TO HAVE | Voice Prompts, Video Intro, Life Goals, Spotify Integration, Instagram Connect, Zodiac, Languages, Schools |
+| APPROVED FOR IMPLEMENTATION | **Voice Prompts**, **Video Intro**, **Life Goals (full with filtering)**, Zodiac, Languages, Schools |
+| DECLINED | ~~LinkedIn Verification~~, ~~Application Review/Vetting~~ |
 
 # **1. Basic Demographics (Required)**
 
@@ -47,9 +70,7 @@ Core identity fields required from all users. Industry standard across all platf
 
 Options: male, female, non-binary, other, prefer_not_to_say
 
-Current Status: BUG - Mobile combines gender with looking_for in single dropdown
-
-*Action Required: Separate into two distinct fields on mobile*
+Current Status: ✅ FIXED - Mobile now has separate Gender and Looking For fields
 
 ### **1.2 Looking For (Gender Preference)**
 
@@ -249,7 +270,7 @@ Type: Single select (change mobile from multi-select)
 
 ### **7.2 Political Views**
 
-Current Status: Missing from web, mobile stores in wrong field (NightAtHome)
+Current Status: ✅ FIXED - Mobile now correctly saves to Political field
 
 | Value | Display Text |
 | :---- | :---- |
@@ -314,23 +335,27 @@ Photo requirements based on industry best practices from The League and Hinge.
 
 | Requirement | Specification |
 | :---- | :---- |
-| Total Photos | 6 required (industry standard: League, Hinge) |
+| **Minimum Photos** | **1 required** (RealSingles decision - lower barrier to entry) |
+| Maximum Photos | 10 allowed |
+| Primary Photo | **Auto-syncs to user avatar** across messages, profiles, etc. |
 | Minimum Resolution | 800x800 pixels (higher than Hinge's 640x640) |
 | First Photo | Must show clear, unobstructed face |
 | Full Body | At least 1 full-body photo recommended |
 | Verification Selfie | Required for verification badge |
 
+*Note: Industry standard is 6 photos (League, Hinge), but RealSingles prioritizes lower barrier to entry with 1 photo minimum.*
+
 ### **9.2 Media Fields Status**
 
 | Field | Status | Notes |
 | :---- | :---- | :---- |
-| profile_image_url | **FULL** | Main profile photo |
-| verification_selfie_url | **PARTIAL** | Not fully implemented |
-| photo_urls[] | **NEW (RECOMMENDED)** | Array for 6 photos |
-| voice_prompt_url | **NEW (RECOMMENDED)** | 30-sec voice intro (Hinge model) |
-| video_intro_url | **NEW (RECOMMENDED)** | 30-60 sec video option |
+| profile_image_url | **FULL** | Main profile photo - syncs to avatar |
+| verification_selfie_url | **FULL** | Photo verification implemented |
+| user_gallery | **FULL** | Gallery table for multiple photos/videos |
+| voice_prompt_url | **APPROVED** | 30-sec voice intro - core implementation |
+| video_intro_url | **APPROVED** | 30-60 sec video - core implementation |
 
-*Industry Note: Raya uses a unique photo slideshow with music integration - consider Spotify connection for profile personality.*
+*Voice and video prompts implementing core infrastructure with "Coming Soon" UI for incomplete features.*
 
 # **10. Bio & Profile Prompts**
 
@@ -346,9 +371,13 @@ Hinge pioneered the prompt system - now industry standard. Prompts generate bett
 
 ### **10.2 Prompts (REQUIRED - 3 minimum)**
 
-Current Status: All prompts missing from database - add as separate table or JSONB field
+**Implementation Decision:** Separate `profile_prompts` table with admin-controllable prompt definitions
 
-Character Limit: 200 characters per response (higher than Hinge's 150)
+- Admin interface for managing available prompts (add/edit/disable)
+- `prompt_definitions` table for available prompts (admin-managed)
+- `user_profile_prompts` table for user responses
+- Character Limit: 200 characters per response (higher than Hinge's 150)
+- Dev environment sync checking between code and database
 
 ### **10.3 Recommended Prompt Categories (50+ options)**
 
@@ -429,6 +458,8 @@ Family-oriented, Ambitious, Environmentally Conscious, Faith-focused, Health-con
 
 # **12. Life Goals (The League Model)**
 
+**Status: APPROVED - Full implementation with filtering**
+
 Unique feature from The League - allows filtering by shared ambitions. Differentiator for luxury positioning.
 
 ### **12.1 Implementation**
@@ -437,7 +468,10 @@ Type: TEXT[] (array)
 
 Selection: Up to 10 goals from 100+ options
 
-Current Status: NEW - not in current implementation
+Implementation: 
+- Add `life_goals TEXT[]` field to profiles table
+- Admin-manageable goal definitions in database
+- Filtering by shared goals in discovery
 
 ### **12.2 Goal Categories**
 
@@ -453,30 +487,32 @@ Current Status: NEW - not in current implementation
 
 * Buy a home, Start a family, Achieve financial independence, Learn professional-level cooking, Master an instrument, Build a dream home
 
-# **13. Verification & Vetting**
+# **13. Verification**
 
-Critical for luxury positioning and user trust. Based on The League and Raya models.
+Verification features for user trust. 
 
-| Verification Type | Priority | Notes |
+| Verification Type | Priority | Status |
 | :---- | :---- | :---- |
-| Photo Verification | REQUIRED | Selfie match to photos |
-| Phone Verification | REQUIRED | SMS verification |
-| Email Verification | RECOMMENDED | Weighted in trust score |
-| LinkedIn Sync | RECOMMENDED | Professional verification (League model) |
-| Instagram Connect | OPTIONAL | Social proof (Raya model) |
-| Application Review | RECOMMENDED | Manual or AI-assisted vetting |
-| Member Referrals | OPTIONAL | Priority for referred users |
+| Photo Verification | REQUIRED | **Implementing** - Selfie match to photos |
+| Phone Verification | REQUIRED | **Implementing** - SMS OTP verification |
+| Email Verification | RECOMMENDED | **Implementing** - Weighted in trust score |
+| ~~LinkedIn Sync~~ | ~~RECOMMENDED~~ | **DECLINED** - Not implementing |
+| Instagram Connect | OPTIONAL | Future consideration |
+| ~~Application Review~~ | ~~RECOMMENDED~~ | **DECLINED** - Open registration model |
+| Member Referrals | OPTIONAL | Future consideration |
 
 ### **13.1 Current Verification Fields**
 
 | Field | Status | Notes |
 | :---- | :---- | :---- |
-| is_verified | **PARTIAL** | Display badge only |
-| verified_at | **PARTIAL** | Not exposed in API |
-| phone_verified | **PARTIAL** | Not in API |
-| verification_selfie_url | **PARTIAL** | iOS has, web missing |
+| is_verified | **FULL** | Display badge - selfie verification |
+| is_photo_verified | **FULL** | Required for matching |
+| is_id_verified | **FULL** | Premium tier verification |
+| verified_at | **FULL** | Timestamp exposed |
+| phone_verified | **FULL** | Via OTP system |
+| verification_selfie_url | **FULL** | Implemented on web and mobile |
 
-*Industry Acceptance Rates: The League ~20%, Raya ~8%. Consider implementing waitlist for exclusivity perception.*
+*RealSingles uses open registration with verification tiers (basic, photo-verified, ID-verified) rather than acceptance rate gatekeeping.*
 
 # **14. Additional Optional Fields**
 
@@ -570,31 +606,27 @@ JobTitle → occupation (consistency)
 
 # **16. Implementation Roadmap**
 
-### **Phase 1: Critical Fixes (Immediate)**
+### **Phase 1: Critical Fixes (COMPLETED)**
 
-1. Fix height conversion bug on mobile (feet → inches)  
-2. Separate gender and looking_for fields on mobile  
-3. Fix political_views storage (currently uses NightAtHome)  
-4. Fix API field name typos (Ethnicity, Marijuana)
+1. ✅ Fix height conversion bug on mobile (feet → inches)  
+2. ✅ Separate gender and looking_for fields on mobile  
+3. ✅ Fix political_views storage (was using NightAtHome)  
+4. ✅ Standardize all dropdown options across platforms
+5. ✅ Add dating_intentions field
+6. ✅ Add marital_status field
 
-### **Phase 2: Core Profile (Week 1-2)**
+### **Phase 2: Current Sprint**
 
-5. Add dating_intentions field (required)  
-6. Add marital_status field  
-7. Implement profile_prompts table and 3 required prompts  
-8. Enforce 6 photo requirement with quality standards
+7. Implement 1 photo minimum with primary photo avatar auto-sync
+8. Create profile_prompts table with admin interface
+9. Create prompt_definitions table (admin-manageable)
+10. Add life_goals TEXT[] field and implement full feature with filtering
+11. Add voice_prompt_url and video_intro_url fields
+12. Implement voice/video prompt core (with "Coming Soon" for incomplete)
 
-### **Phase 3: Standardization (Week 3-4)**
+### **Declined Features**
 
-9. Standardize all dropdown options across platforms  
-10. Add missing web UI fields (zodiac, ethnicity, political, marijuana, pets)  
-11. Implement comprehensive interest badge system
-
-### **Phase 4: Luxury Features (Week 5-6)**
-
-12. Implement Life Goals system (League model)  
-13. Add voice prompt capability  
-14. Implement LinkedIn verification option  
-15. Consider application review/vetting process
+- ~~LinkedIn verification~~ - Not implementing
+- ~~Application review/vetting process~~ - Open registration model
 
 *— End of Document —*

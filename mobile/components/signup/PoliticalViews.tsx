@@ -11,13 +11,13 @@ const PoliticalViews = ({ data, updateData, onNext, error }: signupProps) => {
  
 
   const handleSelect = (value: string) => {
-    updateData({ NightAtHome: value });
+    updateData({ Political: value });
     setValidationError("");
   };
 
 
   const handleNext = () => {
-    if (!data?.NightAtHome) {
+    if (!data?.Political) {
       setValidationError("Please select your political views to continue");
       return;
     }
@@ -53,7 +53,7 @@ const PoliticalViews = ({ data, updateData, onNext, error }: signupProps) => {
             activeOpacity={1}
             key={option.value + index}
             onPress={() => handleSelect(option.value)}
-            className={`flex-row gap-4 items-center mb-4 py-5 px-4 border rounded-[99] ${data?.NightAtHome === option.value ? 'bg-secondary border-primary' : 'border-border bg-light-200'} `}
+            className={`flex-row gap-4 items-center mb-4 py-5 px-4 border rounded-[99] ${data?.Political === option.value ? 'bg-secondary border-primary' : 'border-border bg-light-200'} `}
           >
             <Text className="text-sm font-normal text-dark">
               {option.label}

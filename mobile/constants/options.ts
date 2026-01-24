@@ -15,6 +15,7 @@ export const GENDER_OPTIONS = [
   { label: "Female", value: "female" },
   { label: "Non-Binary", value: "non-binary" },
   { label: "Other", value: "other" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Body type options - matches database CHECK constraint
@@ -25,6 +26,7 @@ export const BODY_TYPE_OPTIONS = [
   { label: "Muscular", value: "muscular" },
   { label: "Curvy", value: "curvy" },
   { label: "A few extra pounds", value: "plus_size" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Marital status options - matches database CHECK constraint
@@ -59,6 +61,7 @@ export const SMOKING_OPTIONS = [
   { label: "Yes (Occasionally)", value: "occasionally" },
   { label: "Yes (Daily)", value: "daily" },
   { label: "Trying to quit", value: "trying_to_quit" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Drinking options - matches database CHECK constraint
@@ -67,6 +70,7 @@ export const DRINKING_OPTIONS = [
   { label: "Social", value: "social" },
   { label: "Moderately", value: "moderate" },
   { label: "Regular", value: "regular" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Marijuana options - matches database CHECK constraint
@@ -83,6 +87,7 @@ export const EXERCISE_OPTIONS = [
   { label: "Sometimes", value: "sometimes" },
   { label: "Regularly", value: "regularly" },
   { label: "Daily", value: "daily" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Education options
@@ -93,6 +98,7 @@ export const EDUCATION_OPTIONS = [
   { label: "Bachelor's Degree", value: "bachelor" },
   { label: "Graduate Degree", value: "graduate" },
   { label: "PhD/Post-doctoral", value: "phd" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Ethnicity options (multi-select allowed)
@@ -292,6 +298,15 @@ export const LOOKING_FOR_OPTIONS = [
   { label: "Something casual", value: "casual" },
   { label: "Marriage", value: "marriage" },
   { label: "Not sure yet", value: "not_sure" },
+];
+
+// Dating intentions - critical for serious-dater positioning (The League, Hinge model)
+export const DATING_INTENTIONS_OPTIONS = [
+  { label: "Life Partner", value: "life_partner" },
+  { label: "Long-term Relationship", value: "long_term" },
+  { label: "Long-term, Open to Short", value: "long_term_open" },
+  { label: "Figuring Out My Goals", value: "figuring_out" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 /**

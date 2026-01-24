@@ -1,15 +1,21 @@
 import { icons } from "@/constants/icons";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useRef, useState } from "react";
+import * as Haptics from "expo-haptics";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  Animated,
-  Easing,
   Image,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+  interpolate,
+} from "react-native-reanimated";
 import LinearBg from "../LinearBg";
 
 interface ChatInputProps {
@@ -20,82 +26,56 @@ export default function ChatInput({ onSend }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [toggledMenu, setToggledMenu] = useState(false);
 
-  // Animation values
-  const animatedHeight = useRef(new Animated.Value(0)).current;
-  const animatedOpacity = useRef(new Animated.Value(0)).current;
-  const animatedRotation = useRef(new Animated.Value(0)).current;
+  // Native reanimated shared values (run on UI thread for smooth 60fps)
+  const animationProgress = useSharedValue(0);
 
-  // Animation configurations
-  const animationDuration = 300;
-  const easing = Easing.bezier(0.25, 0.1, 0.25, 1); // Smooth easing function
+  // Animation configuration
+  const animationConfig = {
+    duration: 300,
+    easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+  };
 
-  // Animation effect
+  // React to menu toggle changes
   useEffect(() => {
-    if (toggledMenu) {
-      // Animate menu in
-      Animated.parallel([
-        Animated.timing(animatedHeight, {
-          toValue: 1,
-          duration: animationDuration,
-          easing,
-          useNativeDriver: false,
-        }),
-        Animated.timing(animatedOpacity, {
-          toValue: 1,
-          duration: animationDuration,
-          easing,
-          useNativeDriver: false,
-        }),
-        Animated.timing(animatedRotation, {
-          toValue: 1,
-          duration: animationDuration,
-          easing,
-          useNativeDriver: false,
-        }),
-      ]).start();
-    } else {
-      // Animate menu out
-      Animated.parallel([
-        Animated.timing(animatedHeight, {
-          toValue: 0,
-          duration: animationDuration,
-          easing,
-          useNativeDriver: false,
-        }),
-        Animated.timing(animatedOpacity, {
-          toValue: 0,
-          duration: animationDuration,
-          easing,
-          useNativeDriver: false,
-        }),
-        Animated.timing(animatedRotation, {
-          toValue: 0,
-          duration: animationDuration,
-          easing,
-          useNativeDriver: false,
-        }),
-      ]).start();
-    }
+    animationProgress.value = withTiming(toggledMenu ? 1 : 0, animationConfig);
   }, [toggledMenu]);
 
-  // Interpolate rotation for menu button
-  const rotate = animatedRotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["45deg", "0deg"],
+  // Animated styles using native driver (runs on UI thread)
+  const menuAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      maxHeight: interpolate(animationProgress.value, [0, 1], [0, 80]),
+      opacity: animationProgress.value,
+      transform: [
+        {
+          translateY: interpolate(animationProgress.value, [0, 1], [-10, 0]),
+        },
+      ],
+    };
   });
 
-  // Calculate height of the menu (from 0 to 80)
-  const maxHeight = animatedHeight.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 80],
+  const rotationAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          rotate: `${interpolate(animationProgress.value, [0, 1], [45, 0])}deg`,
+        },
+      ],
+    };
   });
 
-  const handleSend = () => {
+  const handleSend = useCallback(() => {
     if (message.trim().length > 0) {
+      // Haptic feedback for message sent - success feel
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       onSend(message);
       setMessage("");
     }
-  };
+  }, [message, onSend]);
+
+  const handleToggleMenu = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setToggledMenu((prev) => !prev);
+  }, []);
 
   return (
     <View
@@ -159,21 +139,8 @@ export default function ChatInput({ onSend }: ChatInputProps) {
 
       
 
-      {/* Animated menu container */}
-      <Animated.View
-        style={{
-          maxHeight,
-          opacity: animatedOpacity,
-          transform: [
-            {
-              translateY: animatedOpacity.interpolate({
-                inputRange: [0, 1],
-                outputRange: [-10, 0],
-              }),
-            },
-          ],
-        }}
-      >
+      {/* Animated menu container - using native reanimated for smooth 60fps */}
+      <Animated.View style={menuAnimatedStyle}>
         <View className="border-[1px] border-border w-full my-4 rounded-full" />
         <View className="flex-row items-center justify-center gap-4">
           <TouchableOpacity className="flex-row items-center justify-center gap-2 bg-light-100 border border-border py-[6px] px-3 rounded-[50px]">

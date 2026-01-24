@@ -149,7 +149,9 @@ export async function GET() {
     JobTitle: profile?.occupation || "", // Alias for mobile
     Company: profile?.company || "",
     Schools: profile?.schools || [],
+    School: profile?.schools || [], // Mobile alias
     Languages: profile?.languages || [],
+    Language: profile?.languages || [], // Mobile alias
     
     // Habits
     Smoking: profile?.smoking || "",
@@ -172,18 +174,34 @@ export async function GET() {
     Interests: profile?.interests || [],
     Interest: profile?.interests?.join(", ") || "", // Comma-separated format for mobile
     
+    // Life Goals (The League model)
+    LifeGoals: profile?.life_goals || [],
+    life_goals: profile?.life_goals || [], // Alias
+    
     // Profile Prompts (Structured Storytelling)
     IdealFirstDate: profile?.ideal_first_date || "",
+    IdeaDate: profile?.ideal_first_date || "", // Mobile alias
     NonNegotiables: profile?.non_negotiables || "",
+    NonNegotiable: profile?.non_negotiables || "", // Mobile alias (singular)
     WorstJob: profile?.worst_job || "",
     DreamJob: profile?.dream_job || "",
     NightclubOrHome: profile?.nightclub_or_home || "",
+    NightAtHome: profile?.nightclub_or_home || "", // Mobile alias
     PetPeeves: profile?.pet_peeves || "",
     AfterWork: profile?.after_work || "",
+    FindMe: profile?.after_work || "", // Mobile alias
     WayToHeart: profile?.way_to_heart || "",
     CraziestTravelStory: profile?.craziest_travel_story || "",
+    craziestTravelStory: profile?.craziest_travel_story || "", // Mobile alias (camelCase)
     WeirdestGift: profile?.weirdest_gift || "",
+    weirdestGift: profile?.weirdest_gift || "", // Mobile alias (camelCase)
     PastEvent: profile?.past_event || "",
+    
+    // Voice & Video Prompts
+    VoicePromptUrl: profile?.voice_prompt_url || "",
+    VideoIntroUrl: profile?.video_intro_url || "",
+    VoicePromptDurationSeconds: profile?.voice_prompt_duration_seconds || null,
+    VideoIntroDurationSeconds: profile?.video_intro_duration_seconds || null,
     
     // Social Links
     SocialLink1: profile?.social_link_1 || "",
@@ -277,6 +295,7 @@ export async function PUT(request: Request) {
     const profileUpdates: Record<string, unknown> = {};
     
     // Map API field names to database field names
+    // Includes both standard names and mobile app aliases for backward compatibility
     const fieldMapping: Record<string, string> = {
       // Basic Info
       FirstName: "first_name",
@@ -284,9 +303,9 @@ export async function PUT(request: Request) {
       DOB: "date_of_birth",
       Gender: "gender",
       ZodiacSign: "zodiac_sign",
-      HSign: "zodiac_sign", // Alias
+      HSign: "zodiac_sign", // Mobile alias
       Bio: "bio",
-      About: "bio", // Alias
+      About: "bio", // Mobile alias
       LookingForDescription: "looking_for_description",
       DatingIntentions: "dating_intentions",
       
@@ -300,6 +319,7 @@ export async function PUT(request: Request) {
       State: "state",
       Country: "country",
       ZipCode: "zip_code",
+      Zipcode: "zip_code", // Mobile alias (lowercase c)
       Latitude: "latitude",
       Longitude: "longitude",
       
@@ -318,13 +338,13 @@ export async function PUT(request: Request) {
       PoliticalViews: "political_views",
       Education: "education",
       Occupation: "occupation",
-      JobTitle: "occupation", // Alias
+      JobTitle: "occupation", // Mobile alias
       Company: "company",
       
       // Habits
       Smoking: "smoking",
       Drinking: "drinking",
-      Drinks: "drinking", // Alias
+      Drinks: "drinking", // Mobile alias
       
       // Marijuana
       Marijuana: "marijuana",
@@ -334,9 +354,9 @@ export async function PUT(request: Request) {
       // Family
       HasKids: "has_kids",
       WantsKids: "wants_kids",
-      WantChild: "wants_kids", // Alias
+      WantChild: "wants_kids", // Mobile alias
       
-      // Profile Prompts
+      // Profile Prompts - Standard names
       IdealFirstDate: "ideal_first_date",
       NonNegotiables: "non_negotiables",
       WorstJob: "worst_job",
@@ -349,9 +369,25 @@ export async function PUT(request: Request) {
       WeirdestGift: "weirdest_gift",
       PastEvent: "past_event",
       
+      // Profile Prompts - Mobile aliases (critical for mobile app compatibility)
+      IdeaDate: "ideal_first_date", // Mobile uses IdeaDate
+      NonNegotiable: "non_negotiables", // Mobile uses singular
+      FindMe: "after_work", // Mobile uses FindMe
+      NightAtHome: "nightclub_or_home", // Mobile uses NightAtHome
+      craziestTravelStory: "craziest_travel_story", // Mobile uses camelCase
+      weirdestGift: "weirdest_gift", // Mobile uses camelCase
+      
       // Social Links
       SocialLink1: "social_link_1",
       SocialLink2: "social_link_2",
+      social_link1: "social_link_1", // Mobile alias
+      social_link2: "social_link_2", // Mobile alias
+      
+      // Voice & Video Prompts
+      VoicePromptUrl: "voice_prompt_url",
+      VideoIntroUrl: "video_intro_url",
+      VoicePromptDurationSeconds: "voice_prompt_duration_seconds",
+      VideoIntroDurationSeconds: "video_intro_duration_seconds",
       
       // Profile Completion
       ProfileCompletionStep: "profile_completion_step",
@@ -426,22 +462,32 @@ export async function PUT(request: Request) {
           : null;
     }
 
-    // Handle languages array
-    if (body.Languages !== undefined) {
-      profileUpdates.languages = Array.isArray(body.Languages)
-        ? body.Languages
-        : typeof body.Languages === "string"
-          ? body.Languages.split(",").map((l: string) => l.trim()).filter(Boolean)
+    // Handle languages array (supports both "Languages" and "Language" from mobile)
+    if (body.Languages !== undefined || body.Language !== undefined) {
+      const langValue = body.Languages ?? body.Language;
+      profileUpdates.languages = Array.isArray(langValue)
+        ? langValue.filter(Boolean)
+        : typeof langValue === "string"
+          ? langValue.split(",").map((l: string) => l.trim()).filter(Boolean)
           : null;
     }
 
-    // Handle schools array
-    if (body.Schools !== undefined) {
-      profileUpdates.schools = Array.isArray(body.Schools)
-        ? body.Schools
-        : typeof body.Schools === "string"
-          ? body.Schools.split(",").map((s: string) => s.trim()).filter(Boolean)
+    // Handle schools array (supports both "Schools" and "School" from mobile)
+    if (body.Schools !== undefined || body.School !== undefined) {
+      const schoolsValue = body.Schools ?? body.School;
+      profileUpdates.schools = Array.isArray(schoolsValue)
+        ? schoolsValue.filter(Boolean)
+        : typeof schoolsValue === "string"
+          ? schoolsValue.split(",").map((s: string) => s.trim()).filter(Boolean)
           : null;
+    }
+
+    // Handle life_goals array
+    if (body.LifeGoals !== undefined || body.life_goals !== undefined) {
+      const lifeGoalsValue = body.LifeGoals ?? body.life_goals;
+      profileUpdates.life_goals = Array.isArray(lifeGoalsValue)
+        ? lifeGoalsValue.filter(Boolean)
+        : null;
     }
 
     // Handle profile completion arrays

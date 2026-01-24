@@ -1,7 +1,5 @@
-import NotificationBell from "@/components/NotificationBell";
 import CurrentEventCard from "@/components/ui/CurrentEventCard";
 import PastEventCard from "@/components/ui/PastEventCard";
-import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { getAllEvents } from "@/lib/api";
 import { getCurrentUserId } from "@/utils/token";
 import { useRouter } from "expo-router";
@@ -89,13 +87,7 @@ export default function Events() {
     <>
       {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
       <View className="flex-1 bg-background">
-        <ScreenHeader
-          title="Nearby Events"
-          showBackButton
-          onBackPress={router.back}
-          rightContent={<NotificationBell />}
-        />
-        <View className="mt-8 pb-36">
+        <View className="mt-4 pb-36">
           <FlatList
             // data={data?.pastEvent}
             data={data?.pastEvent}

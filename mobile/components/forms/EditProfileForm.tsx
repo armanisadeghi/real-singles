@@ -2,11 +2,13 @@ import { Label, styles } from "@/components/forms/ContactForm";
 import { icons } from "@/constants/icons";
 import {
   BODY_TYPE_OPTIONS,
+  DATING_INTENTIONS_OPTIONS,
   DRINKING_OPTIONS,
   EDUCATION_OPTIONS,
   ETHNICITY_OPTIONS,
   EXERCISE_OPTIONS,
   HAS_KIDS_OPTIONS,
+  WANTS_KIDS_OPTIONS,
   INTEREST_OPTIONS,
   LANGUAGE_OPTIONS,
   MARIJUANA_OPTIONS,
@@ -656,6 +658,43 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             />
           </View>
         </View>
+
+        {/* City and State */}
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <Label text="City" />
+            <TextInput
+              placeholder="Los Angeles"
+              placeholderTextColor={"#A0A0A0"}
+              className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
+              value={formData.City}
+              onChangeText={(text) => onChangeField("City", text)}
+            />
+          </View>
+
+          <View className="flex-1">
+            <Label text="State" />
+            <TextInput
+              placeholder="CA"
+              placeholderTextColor={"#A0A0A0"}
+              className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
+              value={formData.State}
+              onChangeText={(text) => onChangeField("State", text)}
+            />
+          </View>
+        </View>
+
+        {/* Country */}
+        <View>
+          <Label text="Country" />
+          <TextInput
+            placeholder="United States"
+            placeholderTextColor={"#A0A0A0"}
+            className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
+            value={formData.Country}
+            onChangeText={(text) => onChangeField("Country", text)}
+          />
+        </View>
       </View>
 
       <View
@@ -695,7 +734,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 }}
                 style={pickerSelectStyles}
                 value={formData.Gender}
-                useNativeAndroidPickerStyle={false}
+                useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <Image
                     source={icons.down}
@@ -736,7 +775,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                     ? "everyone"
                     : formData.LookingFor?.[0] || null
                 }
-                useNativeAndroidPickerStyle={false}
+                useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <Image
                     source={icons.down}
@@ -772,7 +811,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                     ? "Male"
                     : null
                 }
-                useNativeAndroidPickerStyle={false}
+                useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <Image
                     source={icons.down}
@@ -797,7 +836,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                   color: "#A0A0A0",
                 }}
                 style={pickerSelectStyles}
-                useNativeAndroidPickerStyle={false}
+                useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <Image
                     source={icons.down}
@@ -819,7 +858,29 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 }}
                 style={pickerSelectStyles}
                 value={formData.HaveChild}
-                useNativeAndroidPickerStyle={false}
+                useNativeAndroidPickerStyle={true}
+                Icon={() => (
+                  <Image
+                    source={icons.down}
+                    style={{ width: 15, height: 15, marginRight: 15 }}
+                    resizeMode="contain"
+                  />
+                )}
+              />
+            </View>
+            <View>
+              <Label text="Want Children" />
+              <RNPickerSelect
+                onValueChange={(value) => onChangeField("WantChild", value)}
+                items={WANTS_KIDS_OPTIONS}
+                placeholder={{
+                  label: "Select Option",
+                  value: null,
+                  color: "#A0A0A0",
+                }}
+                style={pickerSelectStyles}
+                value={formData.WantChild}
+                useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <Image
                     source={icons.down}
@@ -843,7 +904,29 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 }}
                 style={pickerSelectStyles}
                 value={formData.Education}
-                useNativeAndroidPickerStyle={false}
+                useNativeAndroidPickerStyle={true}
+                Icon={() => (
+                  <Image
+                    source={icons.down}
+                    style={{ width: 15, height: 15, marginRight: 15 }}
+                    resizeMode="contain"
+                  />
+                )}
+              />
+            </View>
+            <View>
+              <Label text="Dating Intentions" />
+              <RNPickerSelect
+                onValueChange={(value) => onChangeField("DatingIntentions", value)}
+                items={DATING_INTENTIONS_OPTIONS}
+                placeholder={{
+                  label: "What are you looking for?",
+                  value: null,
+                  color: "#A0A0A0",
+                }}
+                style={pickerSelectStyles}
+                value={formData.DatingIntentions}
+                useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <Image
                     source={icons.down}
@@ -1229,7 +1312,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 }}
                 style={pickerSelectStyles}
                 value={formData.Smoking}
-                useNativeAndroidPickerStyle={false}
+                useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <Image
                     source={icons.down}
@@ -1251,7 +1334,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                   color: "#A0A0A0",
                 }}
                 style={pickerSelectStyles}
-                useNativeAndroidPickerStyle={false}
+                useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <Image
                     source={icons.down}
@@ -1273,7 +1356,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 }}
                 style={pickerSelectStyles}
                 value={formData.Drinks}
-                useNativeAndroidPickerStyle={false}
+                useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <Image
                     source={icons.down}
@@ -1352,7 +1435,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 }}
                 style={pickerSelectStyles}
                 value={formData.Exercise}
-                useNativeAndroidPickerStyle={false}
+                useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <Image
                     source={icons.down}
@@ -1623,16 +1706,16 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           <Animated.View className="mt-4 gap-5">
             <View>
               <RNPickerSelect
-                onValueChange={(value) => onChangeField("NightAtHome", value)}
+                onValueChange={(value) => onChangeField("Political", value)}
                 items={POLITICAL_OPTIONS}
                 placeholder={{
                   label: "Select options",
                   value: null,
                   color: "#A0A0A0",
                 }}
-                value={formData.NightAtHome}
+                value={formData.Political}
                 style={pickerSelectStyles}
-                useNativeAndroidPickerStyle={false}
+                useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <Image
                     source={icons.down}
@@ -1690,7 +1773,107 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 multiline={true}
                 numberOfLines={6}
                 maxLength={300}
-                placeholder="Craziest thing you have done"
+                placeholder="My ideal first date starts with... and ends with..."
+                placeholderTextColor="#B0B0B0"
+                value={formData.IdeaDate}
+                onChangeText={(value) => onChangeField("IdeaDate", value)}
+                textAlignVertical="top"
+                style={{
+                  height: 120,
+                  paddingBottom: 20,
+                  color: 'black'
+                }}
+              />
+              <Text className="absolute bottom-3 right-3 text-xs text-gray">
+                {formData.IdeaDate?.length || 0}/300
+              </Text>
+            </View>
+            <View className="relative py-[13px] px-[15px] border border-border rounded-2xl bg-light-100">
+              <TextInput
+                multiline={true}
+                numberOfLines={6}
+                maxLength={300}
+                placeholder="My top non-negotiables"
+                placeholderTextColor="#B0B0B0"
+                value={formData.NonNegotiable}
+                onChangeText={(value) => onChangeField("NonNegotiable", value)}
+                textAlignVertical="top"
+                style={{
+                  height: 120,
+                  paddingBottom: 20,
+                  color: 'black'
+                }}
+              />
+              <Text className="absolute bottom-3 right-3 text-xs text-gray">
+                {formData.NonNegotiable?.length || 0}/300
+              </Text>
+            </View>
+            <View className="relative py-[13px] px-[15px] border border-border rounded-2xl bg-light-100">
+              <TextInput
+                multiline={true}
+                numberOfLines={6}
+                maxLength={300}
+                placeholder="The way to my heart is through..."
+                placeholderTextColor="#B0B0B0"
+                value={formData.WayToHeart}
+                onChangeText={(value) => onChangeField("WayToHeart", value)}
+                textAlignVertical="top"
+                style={{
+                  height: 120,
+                  paddingBottom: 20,
+                  color: 'black'
+                }}
+              />
+              <Text className="absolute bottom-3 right-3 text-xs text-gray">
+                {formData.WayToHeart?.length || 0}/300
+              </Text>
+            </View>
+            <View className="relative py-[13px] px-[15px] border border-border rounded-2xl bg-light-100">
+              <TextInput
+                multiline={true}
+                numberOfLines={6}
+                maxLength={300}
+                placeholder="After work, you can find me..."
+                placeholderTextColor="#B0B0B0"
+                value={formData.FindMe}
+                onChangeText={(value) => onChangeField("FindMe", value)}
+                textAlignVertical="top"
+                style={{
+                  height: 120,
+                  paddingBottom: 20,
+                  color: 'black'
+                }}
+              />
+              <Text className="absolute bottom-3 right-3 text-xs text-gray">
+                {formData.FindMe?.length || 0}/300
+              </Text>
+            </View>
+            <View className="relative py-[13px] px-[15px] border border-border rounded-2xl bg-light-100">
+              <TextInput
+                multiline={true}
+                numberOfLines={6}
+                maxLength={300}
+                placeholder="Nightclub or night at home?"
+                placeholderTextColor="#B0B0B0"
+                value={formData.NightAtHome}
+                onChangeText={(value) => onChangeField("NightAtHome", value)}
+                textAlignVertical="top"
+                style={{
+                  height: 120,
+                  paddingBottom: 20,
+                  color: 'black'
+                }}
+              />
+              <Text className="absolute bottom-3 right-3 text-xs text-gray">
+                {formData.NightAtHome?.length || 0}/300
+              </Text>
+            </View>
+            <View className="relative py-[13px] px-[15px] border border-border rounded-2xl bg-light-100">
+              <TextInput
+                multiline={true}
+                numberOfLines={6}
+                maxLength={300}
+                placeholder="Craziest travel story"
                 placeholderTextColor="#B0B0B0"
                 value={formData.craziestTravelStory}
                 onChangeText={(value) => onChangeField("craziestTravelStory", value)}
@@ -1705,8 +1888,120 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 {formData.craziestTravelStory?.length || 0}/300
               </Text>
             </View>
+            <View className="relative py-[13px] px-[15px] border border-border rounded-2xl bg-light-100">
+              <TextInput
+                multiline={true}
+                numberOfLines={6}
+                maxLength={300}
+                placeholder="Weirdest gift I've received"
+                placeholderTextColor="#B0B0B0"
+                value={formData.weirdestGift}
+                onChangeText={(value) => onChangeField("weirdestGift", value)}
+                textAlignVertical="top"
+                style={{
+                  height: 120,
+                  paddingBottom: 20,
+                  color: 'black'
+                }}
+              />
+              <Text className="absolute bottom-3 right-3 text-xs text-gray">
+                {formData.weirdestGift?.length || 0}/300
+              </Text>
+            </View>
+            <View className="relative py-[13px] px-[15px] border border-border rounded-2xl bg-light-100">
+              <TextInput
+                multiline={true}
+                numberOfLines={6}
+                maxLength={300}
+                placeholder="The worst job I ever had"
+                placeholderTextColor="#B0B0B0"
+                value={formData.WorstJob}
+                onChangeText={(value) => onChangeField("WorstJob", value)}
+                textAlignVertical="top"
+                style={{
+                  height: 120,
+                  paddingBottom: 20,
+                  color: 'black'
+                }}
+              />
+              <Text className="absolute bottom-3 right-3 text-xs text-gray">
+                {formData.WorstJob?.length || 0}/300
+              </Text>
+            </View>
+            <View className="relative py-[13px] px-[15px] border border-border rounded-2xl bg-light-100">
+              <TextInput
+                multiline={true}
+                numberOfLines={6}
+                maxLength={300}
+                placeholder="The job I'd do for no money"
+                placeholderTextColor="#B0B0B0"
+                value={formData.DreamJob}
+                onChangeText={(value) => onChangeField("DreamJob", value)}
+                textAlignVertical="top"
+                style={{
+                  height: 120,
+                  paddingBottom: 20,
+                  color: 'black'
+                }}
+              />
+              <Text className="absolute bottom-3 right-3 text-xs text-gray">
+                {formData.DreamJob?.length || 0}/300
+              </Text>
+            </View>
+            <View className="relative py-[13px] px-[15px] border border-border rounded-2xl bg-light-100">
+              <TextInput
+                multiline={true}
+                numberOfLines={6}
+                maxLength={300}
+                placeholder="If I could attend any event in history..."
+                placeholderTextColor="#B0B0B0"
+                value={formData.PastEvent}
+                onChangeText={(value) => onChangeField("PastEvent", value)}
+                textAlignVertical="top"
+                style={{
+                  height: 120,
+                  paddingBottom: 20,
+                  color: 'black'
+                }}
+              />
+              <Text className="absolute bottom-3 right-3 text-xs text-gray">
+                {formData.PastEvent?.length || 0}/300
+              </Text>
+            </View>
           </Animated.View>
         )}
+      </View>
+
+      {/* Social Links Section */}
+      <View
+        className="bg-white w-full rounded-[22px] px-[22px] py-[30px] flex-col gap-5 mb-5"
+        style={styles.shadow}
+      >
+        <Text className="text-primary font-medium text-lg">Social Links</Text>
+        <View>
+          <Label text="Social Link 1 (Instagram, LinkedIn, etc.)" />
+          <TextInput
+            placeholder="https://instagram.com/yourprofile"
+            placeholderTextColor={"#A0A0A0"}
+            keyboardType="url"
+            autoCapitalize="none"
+            className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
+            value={formData.social_link1}
+            onChangeText={(text) => onChangeField("social_link1", text)}
+          />
+        </View>
+        <View>
+          <Label text="Social Link 2 (Twitter, TikTok, etc.)" />
+          <TextInput
+            placeholder="https://twitter.com/yourprofile"
+            placeholderTextColor={"#A0A0A0"}
+            keyboardType="url"
+            autoCapitalize="none"
+            className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
+            value={formData.social_link2}
+            onChangeText={(text) => onChangeField("social_link2", text)}
+          />
+        </View>
       </View>
 
       <Modal

@@ -1,26 +1,26 @@
 # RealSingles - Master Data Inventory
 
-**Last Updated:** January 23, 2026  
+**Last Updated:** January 24, 2026  
 **Purpose:** Complete inventory of every data point in the system across Database, API, Web, iOS, and Android.
 
 ---
 
 ## Quick Reference
 
-| Category | Total Fields | In DB | In API | In Web | In Mobile | Fully Integrated |
-|----------|-------------|-------|--------|--------|-----------|------------------|
-| User Account | 14 | 14 | 12 | 4 | 6 | 4 |
-| Profile - Basic | 7 | 7 | 7 | 6 | 7 | 5 |
-| Profile - Physical | 3 | 3 | 3 | 2 | 3 | 1 |
-| Profile - Location | 6 | 6 | 6 | 3 | 4 | 3 |
-| Profile - Lifestyle | 9 | 8 | 8 | 6 | 8 | 4 |
-| Profile - Family | 3 | 3 | 3 | 2 | 3 | 2 |
-| Profile - Personality | 4 | 4 | 4 | 3 | 4 | 2 |
-| Profile - Verification | 4 | 4 | 2 | 0 | 2 | 0 |
-| Profile - Media | 2 | 2 | 2 | 1 | 2 | 1 |
-| Profile - Prompts | 8 | 0 | 0 | 0 | 8 | 0 |
-| Profile - Additional | 6 | 0 | 0 | 0 | 6 | 0 |
-| **TOTAL** | **66** | **51** | **47** | **27** | **53** | **22** |
+| Category | Total Fields | In DB | In API | In Web UI | In Mobile UI | Fully Integrated |
+|----------|-------------|-------|--------|-----------|--------------|------------------|
+| User Account | 16 | 16 | 14 | 6 | 8 | 6 |
+| Profile - Basic | 9 | 9 | 9 | 9 | 8 | 8 |
+| Profile - Physical | 3 | 3 | 3 | 3 | 3 | 3 |
+| Profile - Location | 6 | 6 | 6 | 4 | 5 | 4 |
+| Profile - Lifestyle | 12 | 12 | 12 | 10 | 10 | 9 |
+| Profile - Family | 3 | 3 | 3 | 3 | 3 | 3 |
+| Profile - Personality | 4 | 4 | 4 | 4 | 4 | 4 |
+| Profile - Verification | 7 | 7 | 6 | 3 | 3 | 3 |
+| Profile - Media | 5 | 5 | 5 | 2 | 2 | 2 |
+| Profile - Prompts | 11 | 11 | 11 | 11 | 10 | 10 |
+| Profile - Life Goals | 1 | 1 | 1 | 1 | 0 | 0 |
+| **TOTAL** | **77** | **77** | **74** | **56** | **56** | **52** |
 
 ---
 
@@ -40,11 +40,9 @@
 **Integration Status:**
 - `FULL` - Exists and works in all layers
 - `PARTIAL` - Exists in some layers, missing in others
-- `BUG` - Exists but has known issues
-- `MISSING-DB` - Not in database
-- `MISSING-API` - Not in API
-- `MISSING-WEB` - Not in web UI
-- `MISSING-MOBILE` - Not in mobile UI
+- `WEB-ONLY` - Only on web platform
+- `MOBILE-ONLY` - Only on mobile platforms
+- `COMING-SOON` - DB/API ready, UI pending
 
 ---
 
@@ -58,16 +56,6 @@
 - **Editable:** No (system-generated)
 - **Status:** `FULL`
 
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | No (read-only) |
-| Web-E | N/A |
-| Web-D | Yes (internal) |
-| iOS-E | N/A |
-| iOS-D | Yes (internal) |
-
 ---
 
 ### 1.2 email
@@ -78,16 +66,6 @@
 - **Editable:** No (set at registration)
 - **Status:** `FULL`
 
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | No |
-| Web-E | Registration only |
-| Web-D | Settings |
-| iOS-E | Registration only |
-| iOS-D | Settings |
-
 ---
 
 ### 1.3 phone
@@ -97,15 +75,15 @@
 - **API Field:** `Phone`
 - **Editable:** Yes
 - **Validation:** Phone number format
-- **Status:** `PARTIAL` - Not editable on web
+- **Status:** `FULL`
 
 | Layer | Status |
 |-------|--------|
 | DB | Yes |
 | API-R | Yes |
 | API-W | Yes |
-| Web-E | **NO** |
-| Web-D | No |
+| Web-E | Yes (settings/verification) |
+| Web-D | Yes |
 | iOS-E | Yes |
 | iOS-D | Yes |
 
@@ -117,17 +95,7 @@
 - **DB Type:** BOOLEAN DEFAULT FALSE
 - **API Field:** N/A (internal)
 - **Editable:** No (system-managed)
-- **Status:** `PARTIAL` - Not exposed in API
-
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | No |
-| API-W | No |
-| Web-E | N/A |
-| Web-D | No |
-| iOS-E | N/A |
-| iOS-D | No |
+- **Status:** `PARTIAL` - Not exposed in public API
 
 ---
 
@@ -137,21 +105,41 @@
 - **DB Type:** TEXT
 - **API Field:** `DisplayName`
 - **Editable:** Yes
-- **Status:** `PARTIAL` - Missing from web edit
+- **Status:** `FULL`
 
 | Layer | Status |
 |-------|--------|
 | DB | Yes |
 | API-R | Yes |
 | API-W | Yes |
-| Web-E | **NO** (only at registration) |
+| Web-E | Registration only |
 | Web-D | Yes |
 | iOS-E | Yes |
 | iOS-D | Yes |
 
 ---
 
-### 1.6 created_at
+### 1.6 username
+- **Purpose:** User's unique username
+- **DB Column:** `users.username`
+- **DB Type:** TEXT UNIQUE
+- **API Field:** `Username`
+- **Editable:** Yes
+- **Status:** `PARTIAL` - Not in mobile edit form
+
+| Layer | Status |
+|-------|--------|
+| DB | Yes |
+| API-R | Yes |
+| API-W | Yes |
+| Web-E | No |
+| Web-D | No |
+| iOS-E | No |
+| iOS-D | No |
+
+---
+
+### 1.7 created_at
 - **Purpose:** Account creation timestamp
 - **DB Column:** `users.created_at`
 - **DB Type:** TIMESTAMPTZ DEFAULT NOW()
@@ -161,7 +149,7 @@
 
 ---
 
-### 1.7 updated_at
+### 1.8 updated_at
 - **Purpose:** Last account update timestamp
 - **DB Column:** `users.updated_at`
 - **DB Type:** TIMESTAMPTZ DEFAULT NOW()
@@ -171,17 +159,17 @@
 
 ---
 
-### 1.8 last_active_at
+### 1.9 last_active_at
 - **Purpose:** Last activity timestamp
 - **DB Column:** `users.last_active_at`
 - **DB Type:** TIMESTAMPTZ
 - **API Field:** N/A
 - **Editable:** No (system-managed)
-- **Status:** `PARTIAL` - Not being updated
+- **Status:** `PARTIAL` - Needs implementation for activity tracking
 
 ---
 
-### 1.9 status
+### 1.10 status
 - **Purpose:** Account status
 - **DB Column:** `users.status`
 - **DB Type:** TEXT CHECK (status IN ('active', 'suspended', 'deleted')) DEFAULT 'active'
@@ -192,7 +180,7 @@
 
 ---
 
-### 1.10 role
+### 1.11 role
 - **Purpose:** User role for permissions
 - **DB Column:** `users.role`
 - **DB Type:** TEXT CHECK (role IN ('user', 'admin', 'moderator')) DEFAULT 'user'
@@ -203,43 +191,53 @@
 
 ---
 
-### 1.11 agora_user_id
+### 1.12 agora_user_id
 - **Purpose:** Agora Chat user identifier
 - **DB Column:** `users.agora_user_id`
 - **DB Type:** TEXT
 - **API Field:** N/A (internal)
 - **Editable:** No (system-managed)
-- **Status:** `PARTIAL` - Not fully implemented
+- **Status:** `FULL` (internal)
 
 ---
 
-### 1.12 points_balance
+### 1.13 points_balance
 - **Purpose:** Reward points balance
 - **DB Column:** `users.points_balance`
 - **DB Type:** INTEGER DEFAULT 0
-- **API Field:** `WalletPoint`, `ReedemPoints`
+- **API Field:** `WalletPoint`, `RedeemPoints`, `PointsBalance`
 - **Editable:** No (system-managed via transactions)
 - **Status:** `FULL`
 
 ---
 
-### 1.13 referral_code
+### 1.14 referral_code
 - **Purpose:** User's unique referral code
 - **DB Column:** `users.referral_code`
 - **DB Type:** TEXT UNIQUE
-- **API Field:** `RefferalCode`
+- **API Field:** `ReferralCode`
 - **Editable:** No (system-generated)
 - **Status:** `FULL`
 
 ---
 
-### 1.14 referred_by
+### 1.15 referred_by
 - **Purpose:** Who referred this user
 - **DB Column:** `users.referred_by`
 - **DB Type:** UUID REFERENCES users(id)
 - **API Field:** N/A
 - **Editable:** Registration only
 - **Status:** `FULL`
+
+---
+
+### 1.16 notification_preferences
+- **Purpose:** User notification settings
+- **DB Column:** `users.notification_preferences`
+- **DB Type:** JSONB
+- **API Field:** N/A
+- **Editable:** Yes (via settings)
+- **Status:** `PARTIAL` - Needs UI implementation
 
 ---
 
@@ -254,16 +252,6 @@
 - **Required:** Yes (essential)
 - **Status:** `FULL`
 
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | Yes |
-| Web-E | Yes |
-| Web-D | Yes |
-| iOS-E | Yes |
-| iOS-D | Yes |
-
 ---
 
 ### 2.2 last_name
@@ -274,16 +262,6 @@
 - **Editable:** Yes
 - **Required:** No
 - **Status:** `FULL`
-
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | Yes |
-| Web-E | Yes |
-| Web-D | Yes |
-| iOS-E | Yes |
-| iOS-D | Yes |
 
 ---
 
@@ -297,17 +275,7 @@
 - **Validation:** Must be 18+ years old
 - **Status:** `FULL`
 
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | Yes |
-| Web-E | Yes (date input) |
-| Web-D | Yes (age shown) |
-| iOS-E | Yes (date picker) |
-| iOS-D | Yes |
-
-**UI Pattern Note:** Web uses HTML date input, Mobile uses native DateTimePicker. Both work correctly.
+**UI Pattern:** Web uses HTML date input, Mobile uses native DateTimePicker.
 
 ---
 
@@ -324,17 +292,8 @@
   | female | Female |
   | non-binary | Non-Binary |
   | other | Other |
-- **Status:** `BUG` - Mobile combines with looking_for
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes | |
-| API-R | Yes | |
-| API-W | Yes | |
-| Web-E | Yes (dropdown) | |
-| Web-D | Yes | |
-| iOS-E | Yes | **BUG: Combined dropdown "I'm a man seeking a woman"** |
-| iOS-D | Yes | |
+  | prefer_not_to_say | Prefer not to say |
+- **Status:** `FULL`
 
 ---
 
@@ -342,20 +301,10 @@
 - **Purpose:** Gender(s) user is interested in
 - **DB Column:** `profiles.looking_for`
 - **DB Type:** TEXT[]
-- **API Field:** Part of `Gender` on mobile (bug)
+- **API Field:** `LookingFor` (array)
 - **Editable:** Yes
-- **Options:** Same as gender (male, female, non-binary, other)
-- **Status:** `BUG` - Mobile doesn't properly separate from gender
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes (array) | |
-| API-R | Partial | |
-| API-W | Partial | |
-| Web-E | Yes (multi-select chips) | |
-| Web-D | Yes | |
-| iOS-E | **NO** (combined with gender) | **BUG** |
-| iOS-D | No | |
+- **Options:** Same as gender options
+- **Status:** `FULL`
 
 ---
 
@@ -363,34 +312,12 @@
 - **Purpose:** Astrological sign
 - **DB Column:** `profiles.zodiac_sign`
 - **DB Type:** TEXT
-- **API Field:** `HSign`
-- **Editable:** Yes
-- **Options:**
-  | Value | Display |
-  |-------|---------|
-  | aries | Aries |
-  | taurus | Taurus |
-  | gemini | Gemini |
-  | cancer | Cancer |
-  | leo | Leo |
-  | virgo | Virgo |
-  | libra | Libra |
-  | scorpio | Scorpio |
-  | sagittarius | Sagittarius |
-  | capricorn | Capricorn |
-  | aquarius | Aquarius |
-  | pisces | Pisces |
-- **Status:** `PARTIAL` - Missing from web edit
+- **API Field:** `ZodiacSign`, `HSign`
+- **Editable:** Yes (auto-calculated from DOB on web)
+- **Options:** aries, taurus, gemini, cancer, leo, virgo, libra, scorpio, sagittarius, capricorn, aquarius, pisces
+- **Status:** `FULL`
 
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | Yes |
-| Web-E | **NO** |
-| Web-D | Yes |
-| iOS-E | Yes (text input - should be picker) |
-| iOS-D | Yes |
+**Implementation:** Web auto-calculates from DOB. Mobile has text input (should be picker).
 
 ---
 
@@ -398,20 +325,58 @@
 - **Purpose:** User's about me text
 - **DB Column:** `profiles.bio`
 - **DB Type:** TEXT
-- **API Field:** `About`
+- **API Field:** `Bio`, `About`
 - **Editable:** Yes
 - **Validation:** Max 500 characters (suggested)
 - **Status:** `FULL`
+
+---
+
+### 2.8 looking_for_description
+- **Purpose:** What user is looking for in a partner
+- **DB Column:** `profiles.looking_for_description`
+- **DB Type:** TEXT
+- **API Field:** `LookingForDescription`
+- **Editable:** Yes
+- **Status:** `PARTIAL` - Missing from mobile
 
 | Layer | Status |
 |-------|--------|
 | DB | Yes |
 | API-R | Yes |
 | API-W | Yes |
-| Web-E | Yes (textarea) |
+| Web-E | Yes |
 | Web-D | Yes |
-| iOS-E | Yes (textarea, 300 char limit) |
-| iOS-D | Yes |
+| iOS-E | No |
+| iOS-D | No |
+
+---
+
+### 2.9 dating_intentions
+- **Purpose:** User's relationship goals
+- **DB Column:** `profiles.dating_intentions`
+- **DB Type:** TEXT CHECK (dating_intentions IN ('life_partner', 'long_term', 'long_term_open', 'figuring_out', 'prefer_not_to_say'))
+- **API Field:** `DatingIntentions`
+- **Editable:** Yes
+- **Options:**
+  | Value | Display |
+  |-------|---------|
+  | life_partner | Life Partner |
+  | long_term | Long-term Relationship |
+  | long_term_open | Long-term, Open to Short |
+  | figuring_out | Figuring Out My Goals |
+  | prefer_not_to_say | Prefer not to say |
+- **Status:** `PARTIAL` - Missing from mobile UI
+
+| Layer | Status |
+|-------|--------|
+| DB | Yes |
+| API-R | Yes |
+| API-W | Yes |
+| Web-E | Yes |
+| Web-D | Yes |
+| iOS-E | **NO** |
+| iOS-D | No |
 
 ---
 
@@ -421,38 +386,25 @@
 - **Purpose:** User's height in inches
 - **DB Column:** `profiles.height_inches`
 - **DB Type:** INTEGER
-- **API Field:** `Height` (also `HeightFeet` + `HeightInches` on load)
+- **API Field:** `Height`, `HeightInches`
 - **Editable:** Yes
 - **Validation:** 48-96 inches (4ft - 8ft)
-- **Status:** `FIXED` - Mobile conversion issue resolved
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes (inches) | |
-| API-R | Yes (as string) | |
-| API-W | Yes (parses to int) | |
-| Web-E | Yes (two dropdowns: feet + inches) | FIXED |
-| Web-D | Yes (converted to X'Y") | |
-| iOS-E | Yes (two-column wheel picker) | FIXED - uses `@react-native-picker/picker` |
-| iOS-D | Yes (shows as X'Y") | FIXED |
+- **Status:** `FULL`
 
 **Implementation:** 
-- Web: Two side-by-side `<select>` dropdowns (feet 4-7, inches 0-11)
-- iOS: Two-column wheel picker using `@react-native-picker/picker`
-- Android: Same picker automatically renders as Material Design spinners
+- Web: Two side-by-side dropdowns (feet + inches)
+- Mobile: Two-column wheel picker using `@react-native-picker/picker`
 - Conversion: `(feet * 12) + inches` on save, reverse on load
-- Android: Two dropdown spinners
-- Conversion: (feet * 12) + inches on save, reverse on load
 
 ---
 
 ### 3.2 body_type
 - **Purpose:** User's body type
 - **DB Column:** `profiles.body_type`
-- **DB Type:** TEXT CHECK (needs update to include all options)
+- **DB Type:** TEXT CHECK (body_type IN ('slim', 'athletic', 'average', 'muscular', 'curvy', 'plus_size'))
 - **API Field:** `BodyType`
 - **Editable:** Yes
-- **Options (per business logic - expanded):**
+- **Options:**
   | Value | Display |
   |-------|---------|
   | slim | Slim/Slender |
@@ -461,27 +413,20 @@
   | muscular | Muscular |
   | curvy | Curvy |
   | plus_size | A few extra pounds |
-- **Status:** `PARTIAL` - Mobile allows multiple (should be single select)
+  | prefer_not_to_say | Prefer not to say |
+- **Status:** `FULL`
 
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes (single value) | |
-| API-R | Yes | |
-| API-W | Yes | |
-| Web-E | Yes (dropdown) | |
-| Web-D | Yes | |
-| iOS-E | Yes (multi-select chips) | **INCONSISTENT**: Should be single select |
-| iOS-D | Yes | |
+**Note:** Single select (not multi-select). Mobile correctly implements as single select chips.
 
 ---
 
 ### 3.3 ethnicity
 - **Purpose:** User's ethnicity
 - **DB Column:** `profiles.ethnicity`
-- **DB Type:** TEXT[] (array - per user decision for mixed heritage)
-- **API Field:** `Ethnicity` (FIXED - legacy typo removed)
+- **DB Type:** TEXT[] (array - for mixed heritage)
+- **API Field:** `Ethnicity` (array)
 - **Editable:** Yes
-- **Options (per business logic):**
+- **Options:**
   | Value | Display |
   |-------|---------|
   | white | White/Caucasian |
@@ -496,17 +441,7 @@
   | mixed | Mixed/Multi-racial |
   | other | Other |
   | prefer_not_to_say | Prefer not to say |
-- **Status:** `NEEDS-UPDATE` - Change to array, fix API typo, add to web
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes (change to TEXT[]) | |
-| API-R | Yes | Fix field name: `Ethnicity` |
-| API-W | Yes | Fix field name: `Ethnicity` |
-| Web-E | **NO** | |
-| Web-D | **NO** | |
-| iOS-E | Yes (multi-select chips) | |
-| iOS-D | Yes | |
+- **Status:** `FULL`
 
 ---
 
@@ -520,18 +455,6 @@
 - **Editable:** Yes
 - **Status:** `FULL`
 
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | Yes |
-| Web-E | Yes (text input) |
-| Web-D | Yes |
-| iOS-E | Yes |
-| iOS-D | Yes |
-
-**Future Enhancement:** Autocomplete/location picker
-
 ---
 
 ### 4.2 state
@@ -542,16 +465,6 @@
 - **Editable:** Yes
 - **Status:** `FULL`
 
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | Yes |
-| Web-E | Yes (text input) |
-| Web-D | Yes |
-| iOS-E | Yes |
-| iOS-D | Yes |
-
 ---
 
 ### 4.3 country
@@ -560,48 +473,27 @@
 - **DB Type:** TEXT
 - **API Field:** `Country`
 - **Editable:** Yes
-- **Status:** `PARTIAL` - Mobile signup sets to null
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes | |
-| API-R | Yes | |
-| API-W | Yes | |
-| Web-E | Yes (text input) | |
-| Web-D | Yes | |
-| iOS-E | Yes | |
-| iOS-D | Yes | |
-| **Signup** | **BUG** | Mobile sets to null even when city/state collected |
+- **Status:** `FULL`
 
 ---
 
-### 4.4 latitude
-- **Purpose:** User's latitude for distance calculations
-- **DB Column:** `profiles.latitude`
-- **DB Type:** DECIMAL(10, 8)
-- **API Field:** `Latitude`
-- **Editable:** Yes (via location services)
-- **Status:** `PARTIAL` - Not editable in UI (auto from location)
-
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes (as string) |
-| API-W | Yes |
-| Web-E | No (auto) |
-| Web-D | No |
-| iOS-E | No (auto from location) |
-| iOS-D | No |
+### 4.4 zip_code
+- **Purpose:** User's ZIP/postal code
+- **DB Column:** `profiles.zip_code`
+- **DB Type:** TEXT
+- **API Field:** `ZipCode`, `Zipcode`
+- **Editable:** Yes
+- **Status:** `FULL`
 
 ---
 
-### 4.5 longitude
-- **Purpose:** User's longitude for distance calculations
-- **DB Column:** `profiles.longitude`
-- **DB Type:** DECIMAL(11, 8)
-- **API Field:** `Longitude`
-- **Editable:** Yes (via location services)
-- **Status:** `PARTIAL` - Same as latitude
+### 4.5 latitude / longitude
+- **Purpose:** User's coordinates for distance calculations
+- **DB Columns:** `profiles.latitude`, `profiles.longitude`
+- **DB Type:** DECIMAL(10, 8), DECIMAL(11, 8)
+- **API Field:** `Latitude`, `Longitude`
+- **Editable:** Via location services
+- **Status:** `PARTIAL` - Auto from location, not manually edited
 
 ---
 
@@ -609,7 +501,7 @@
 - **Purpose:** Geographic point for efficient distance queries
 - **DB Column:** `profiles.location`
 - **DB Type:** GEOGRAPHY(POINT, 4326)
-- **API Field:** N/A (auto-generated from lat/long)
+- **API Field:** N/A (auto-generated from lat/long via trigger)
 - **Editable:** No (trigger-managed)
 - **Status:** `FULL` (internal)
 
@@ -620,10 +512,10 @@
 ### 5.1 religion
 - **Purpose:** User's religion
 - **DB Column:** `profiles.religion`
-- **DB Type:** TEXT (single select - per user decision)
+- **DB Type:** TEXT
 - **API Field:** `Religion`
 - **Editable:** Yes
-- **Options (per business logic):**
+- **Options:**
   | Value | Display |
   |-------|---------|
   | adventist | Adventist |
@@ -638,17 +530,9 @@
   | spiritual | Spiritual but not religious |
   | other | Other |
   | prefer_not_to_say | Prefer not to say |
-- **Status:** `NEEDS-UPDATE` - Mobile should be single select dropdown
+- **Status:** `FULL`
 
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes (TEXT - single) | |
-| API-R | Yes | |
-| API-W | Yes | |
-| Web-E | Yes (**change to dropdown**) | |
-| Web-D | Yes | |
-| iOS-E | Yes (**change to single select**) | |
-| iOS-D | Yes | |
+**Note:** Single select (not multi-select).
 
 ---
 
@@ -656,9 +540,9 @@
 - **Purpose:** User's political views
 - **DB Column:** `profiles.political_views`
 - **DB Type:** TEXT
-- **API Field:** `Political`
+- **API Field:** `Political`, `PoliticalViews`
 - **Editable:** Yes
-- **Options (per business logic):**
+- **Options:**
   | Value | Display |
   |-------|---------|
   | no_answer | No answer |
@@ -668,17 +552,7 @@
   | libertarian | Libertarian |
   | moderate | Moderate |
   | prefer_not_to_say | Prefer not to say |
-- **Status:** `NEEDS-UPDATE` - Missing from web, mobile stores in wrong field
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes | |
-| API-R | Yes | |
-| API-W | Yes | |
-| Web-E | **NO** | |
-| Web-D | **NO** | |
-| iOS-E | Yes (**BUG: stored in NightAtHome field**) | |
-| iOS-D | Yes | |
+- **Status:** `FULL`
 
 ---
 
@@ -688,7 +562,7 @@
 - **DB Type:** TEXT
 - **API Field:** `Education`
 - **Editable:** Yes
-- **Options (per business logic):**
+- **Options:**
   | Value | Display |
   |-------|---------|
   | high_school | High School |
@@ -697,17 +571,8 @@
   | bachelor | Bachelor's Degree |
   | graduate | Graduate Degree |
   | phd | PhD/Post-doctoral |
-- **Status:** `NEEDS-UPDATE` - Web should use dropdown not text input
-
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | Yes |
-| Web-E | Yes (text input - **should be dropdown**) |
-| Web-D | Yes |
-| iOS-E | Yes (dropdown) |
-| iOS-D | Yes |
+  | prefer_not_to_say | Prefer not to say |
+- **Status:** `FULL`
 
 ---
 
@@ -715,107 +580,119 @@
 - **Purpose:** User's job/occupation
 - **DB Column:** `profiles.occupation`
 - **DB Type:** TEXT
-- **API Field:** `JobTitle`
+- **API Field:** `Occupation`, `JobTitle`
 - **Editable:** Yes
 - **Status:** `FULL`
 
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes (`occupation`) | |
-| API-R | Yes (`JobTitle`) | Different name |
-| API-W | Yes (`JobTitle`) | Different name |
-| Web-E | Yes (text, labeled "Occupation") | |
-| Web-D | Yes | |
-| iOS-E | Yes (text, labeled "Job Title") | |
-| iOS-D | Yes | |
+---
+
+### 5.5 company
+- **Purpose:** Current employer/company name
+- **DB Column:** `profiles.company`
+- **DB Type:** TEXT
+- **API Field:** `Company`
+- **Editable:** Yes
+- **Status:** `FULL`
 
 ---
 
-### 5.5 smoking
+### 5.6 schools
+- **Purpose:** Schools attended
+- **DB Column:** `profiles.schools`
+- **DB Type:** TEXT[]
+- **API Field:** `Schools`, `School`
+- **Editable:** Yes
+- **Status:** `FULL`
+
+---
+
+### 5.7 languages
+- **Purpose:** Languages user speaks
+- **DB Column:** `profiles.languages`
+- **DB Type:** TEXT[]
+- **API Field:** `Languages`, `Language`
+- **Editable:** Yes
+- **Options:** english, spanish, french, german, italian, portuguese, chinese, japanese, korean, arabic, armenian, dutch, hebrew, hindi, norwegian, russian, swedish, tagalog, turkish, urdu, other
+- **Status:** `FULL`
+
+---
+
+### 5.8 marital_status
+- **Purpose:** User's marital status
+- **DB Column:** `profiles.marital_status`
+- **DB Type:** TEXT CHECK (marital_status IN ('never_married', 'separated', 'divorced', 'widowed', 'prefer_not_to_say'))
+- **API Field:** `MaritalStatus`
+- **Editable:** Yes
+- **Options:**
+  | Value | Display |
+  |-------|---------|
+  | never_married | Never Married |
+  | separated | Currently Separated |
+  | divorced | Divorced |
+  | widowed | Widow/Widower |
+  | prefer_not_to_say | Prefer not to say |
+- **Status:** `FULL`
+
+---
+
+### 5.9 smoking
 - **Purpose:** Smoking habits
 - **DB Column:** `profiles.smoking`
-- **DB Type:** TEXT CHECK (needs update for new options)
+- **DB Type:** TEXT CHECK (smoking IN ('no', 'occasionally', 'daily', 'trying_to_quit'))
 - **API Field:** `Smoking`
 - **Editable:** Yes
-- **Options (per business logic - expanded):**
+- **Options:**
   | Value | Display |
   |-------|---------|
   | no | No |
   | occasionally | Yes (Occasionally) |
   | daily | Yes (Daily) |
   | trying_to_quit | Trying to quit |
-- **Status:** `NEEDS-UPDATE` - DB constraint needs updating
-
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | Yes |
-| Web-E | Yes (dropdown) |
-| Web-D | Yes |
-| iOS-E | Yes (dropdown) |
-| iOS-D | Yes |
+  | prefer_not_to_say | Prefer not to say |
+- **Status:** `FULL`
 
 ---
 
-### 5.6 drinking
+### 5.10 drinking
 - **Purpose:** Drinking habits
 - **DB Column:** `profiles.drinking`
-- **DB Type:** TEXT CHECK (needs update for new options)
-- **API Field:** `Drinks`
+- **DB Type:** TEXT CHECK (drinking IN ('never', 'social', 'moderate', 'regular'))
+- **API Field:** `Drinking`, `Drinks`
 - **Editable:** Yes
-- **Options (per business logic - expanded):**
+- **Options:**
   | Value | Display |
   |-------|---------|
   | never | Never |
   | social | Social |
   | moderate | Moderately |
   | regular | Regular |
-- **Status:** `NEEDS-UPDATE` - DB constraint and API field name mismatch
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes (`drinking`) | |
-| API-R | Yes (`Drinks`) | Different name |
-| API-W | Yes (`Drinks`) | Different name |
-| Web-E | Yes (dropdown) | |
-| Web-D | Yes | |
-| iOS-E | Yes (dropdown) | |
-| iOS-D | Yes | |
+  | prefer_not_to_say | Prefer not to say |
+- **Status:** `FULL`
 
 ---
 
-### 5.7 marijuana
+### 5.11 marijuana
 - **Purpose:** Marijuana use
 - **DB Column:** `profiles.marijuana`
-- **DB Type:** TEXT CHECK (marijuana IN ('no', 'occasionally', 'yes'))
-- **API Field:** `Marijuana` (FIXED - legacy typo removed)
+- **DB Type:** TEXT CHECK (marijuana IN ('no', 'yes', 'occasionally'))
+- **API Field:** `Marijuana`
 - **Editable:** Yes
 - **Options:**
   | Value | Display |
   |-------|---------|
-  | never | Never |
+  | no | No |
   | occasionally | Occasionally |
-  | regularly | Regularly |
-- **Status:** `PARTIAL` - Missing from web, API typo
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes | |
-| API-R | Yes | Field name: `Marijuana` (FIXED) |
-| API-W | Yes | Field name: `Marijuana` (FIXED) |
-| Web-E | Yes | Added with standardized options |
-| Web-D | **NO** | |
-| iOS-E | Yes (dropdown) | |
-| iOS-D | Yes | |
+  | yes | Yes |
+  | prefer_not_to_say | Prefer not to say |
+- **Status:** `FULL`
 
 ---
 
-### 5.8 exercise
+### 5.12 exercise
 - **Purpose:** Exercise frequency
 - **DB Column:** `profiles.exercise`
 - **DB Type:** TEXT CHECK (exercise IN ('never', 'sometimes', 'regularly', 'daily'))
-- **API Field:** N/A (not in API)
+- **API Field:** `Exercise`
 - **Editable:** Yes
 - **Options:**
   | Value | Display |
@@ -824,46 +701,8 @@
   | sometimes | Sometimes |
   | regularly | Regularly |
   | daily | Daily |
-- **Status:** `PARTIAL` - Missing from API
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes | |
-| API-R | **NO** | |
-| API-W | **NO** | |
-| Web-E | Yes (dropdown) | |
-| Web-D | Yes | |
-| iOS-E | **NO** | |
-| iOS-D | **NO** | |
-
----
-
-### 5.9 marital_status
-- **Purpose:** User's marital status
-- **DB Column:** **MISSING**
-- **DB Type:** Needed: TEXT
-- **API Field:** N/A
-- **Editable:** Yes
-- **Options (per business logic):**
-  | Value | Display |
-  |-------|---------|
-  | never_married | Never Married |
-  | separated | Currently Separated |
-  | divorced | Divorced |
-  | widowed | Widow/Widower |
-- **Status:** `MISSING-DB` - In mobile UI only
-
-| Layer | Status |
-|-------|--------|
-| DB | **NO** |
-| API-R | **NO** |
-| API-W | **NO** |
-| Web-E | **NO** |
-| Web-D | **NO** |
-| iOS-E | Yes (dropdown) |
-| iOS-D | Yes |
-
-**Action Required:** Add to database and API
+  | prefer_not_to_say | Prefer not to say |
+- **Status:** `FULL`
 
 ---
 
@@ -872,55 +711,35 @@
 ### 6.1 has_kids
 - **Purpose:** Whether user has children and their living situation
 - **DB Column:** `profiles.has_kids`
-- **DB Type:** TEXT (needs change from BOOLEAN for richer data)
-- **API Field:** `HaveChild`
+- **DB Type:** TEXT CHECK (has_kids IN ('no', 'yes_live_at_home', 'yes_live_away'))
+- **API Field:** `HasKids`, `HaveChild`
 - **Editable:** Yes
-- **Options (per business logic - expanded from boolean):**
+- **Options:**
   | Value | Display |
   |-------|---------|
   | no | No |
   | yes_live_at_home | Yes (Live at home) |
   | yes_live_away | Yes (Live away) |
-- **Status:** `NEEDS-UPDATE` - Should be TEXT not BOOLEAN for richer options
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes (BOOLEAN - needs change to TEXT) | |
-| API-R | Yes | Returns "Yes"/"No" string |
-| API-W | Yes | Accepts "Yes"/true |
-| Web-E | Yes (checkbox - needs change to dropdown) | |
-| Web-D | Yes | |
-| iOS-E | Yes (dropdown) | |
-| iOS-D | Yes | |
-
-**Action Required:** Change DB type from BOOLEAN to TEXT with proper options
+  | prefer_not_to_say | Prefer not to say |
+- **Status:** `FULL`
 
 ---
 
 ### 6.2 wants_kids
 - **Purpose:** Whether user wants children in future
 - **DB Column:** `profiles.wants_kids`
-- **DB Type:** TEXT CHECK (needs update for business logic options)
-- **API Field:** `WantChild`
+- **DB Type:** TEXT CHECK (wants_kids IN ('no', 'definitely', 'someday', 'ok_if_partner_has'))
+- **API Field:** `WantsKids`, `WantChild`
 - **Editable:** Yes
-- **Options (per business logic - expanded):**
+- **Options:**
   | Value | Display |
   |-------|---------|
   | no | No |
   | definitely | Definitely |
   | someday | Someday |
   | ok_if_partner_has | No (but OK if partner has) |
-- **Status:** `NEEDS-UPDATE` - Options differ from business logic
-
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | Yes |
-| Web-E | Yes (dropdown) |
-| Web-D | Yes |
-| iOS-E | Yes (dropdown) |
-| iOS-D | Yes |
+  | prefer_not_to_say | Prefer not to say |
+- **Status:** `FULL`
 
 ---
 
@@ -930,25 +749,14 @@
 - **DB Type:** TEXT[] (array for multiple pets)
 - **API Field:** `Pets`
 - **Editable:** Yes
-- **Options (per business logic - simpler list):**
+- **Options:**
   | Value | Display |
   |-------|---------|
   | none | None |
   | cat | Cat |
   | dog | Dog |
   | other | Other |
-- **Decision:** Keep as array (people can have both cat and dog)
-- **Status:** `PARTIAL` - Missing from web
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes (array) | |
-| API-R | Yes (comma-separated string) | |
-| API-W | Yes (comma-separated string) | |
-| Web-E | **NO** | |
-| Web-D | **NO** | |
-| iOS-E | Yes (should be multi-select chips) | |
-| iOS-D | Yes | |
+- **Status:** `FULL`
 
 ---
 
@@ -958,341 +766,351 @@
 - **Purpose:** User's interests/hobbies
 - **DB Column:** `profiles.interests`
 - **DB Type:** TEXT[]
-- **API Field:** `Interest`
+- **API Field:** `Interests` (array), `Interest` (comma-separated string for mobile)
 - **Editable:** Yes
-- **Options (merged from business logic + current - needs standardization):**
-  - Per Business Logic: Dining out, Sports, Museums/Art, Music, Gardening, Basketball, Dancing, Travel
-  - Current Web (21): Travel, Music, Movies, Reading, Fitness, Cooking, Photography, Art, Gaming, Sports, Dancing, Hiking, Yoga, Wine, Coffee, Dogs, Cats, Fashion, Technology, Nature, Beach, Mountains
-  - **DECISION NEEDED:** Merge all into single comprehensive list
-- **Status:** `NEEDS-STANDARDIZATION` - Options differ between platforms
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| DB | Yes (array) | |
-| API-R | Yes (comma-separated string - **should be array**) | |
-| API-W | Yes (comma-separated string - **should be array**) | |
-| Web-E | Yes (multi-select chips) | |
-| Web-D | Yes | |
-| iOS-E | Yes (multi-select chips) | Different options |
-| iOS-D | Yes | |
-
-**Action Required:** Standardize options across all platforms and return as array in API.
-
----
-
-### 7.2 looking_for_description
-- **Purpose:** What user is looking for in a partner
-- **DB Column:** `profiles.looking_for_description`
-- **DB Type:** TEXT
-- **API Field:** N/A (not in API)
-- **Editable:** Yes
-- **Status:** `PARTIAL` - Missing from API
-
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | **NO** |
-| API-W | **NO** |
-| Web-E | Yes (textarea) |
-| Web-D | Yes |
-| iOS-E | **NO** |
-| iOS-D | **NO** |
-
----
-
-## 8. Profile - Verification
-
-### 8.1 is_verified
-- **Purpose:** Whether user is verified
-- **DB Column:** `profiles.is_verified`
-- **DB Type:** BOOLEAN DEFAULT FALSE
-- **API Field:** `is_verified`
-- **Editable:** No (admin/system)
-- **Status:** `PARTIAL` - Display only
-
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | Yes |
-| API-W | No |
-| Web-E | N/A |
-| Web-D | Yes (badge) |
-| iOS-E | N/A |
-| iOS-D | Yes (badge) |
-
----
-
-### 8.2 verified_at
-- **Purpose:** When user was verified
-- **DB Column:** `profiles.verified_at`
-- **DB Type:** TIMESTAMPTZ
-- **API Field:** N/A
-- **Editable:** No (system)
-- **Status:** `PARTIAL` - Not exposed
-
----
-
-### 8.3 verification_selfie_url
-- **Purpose:** Selfie used for verification
-- **DB Column:** `profiles.verification_selfie_url`
-- **DB Type:** TEXT
-- **API Field:** N/A
-- **Editable:** Upload only
-- **Status:** `PARTIAL` - Not fully implemented
-
-| Layer | Status |
-|-------|--------|
-| DB | Yes |
-| API-R | No |
-| API-W | No |
-| Web-E | **NO** |
-| Web-D | **NO** |
-| iOS-E | Yes (camera capture) |
-| iOS-D | No |
-
----
-
-### 8.4 profile_image_url
-- **Purpose:** Main profile photo URL
-- **DB Column:** `profiles.profile_image_url`
-- **DB Type:** TEXT
-- **API Field:** `Image`, `livePicture`
-- **Editable:** Yes (via upload)
+- **Options:** Standardized across platforms - dining_out, sports, museums_art, music, gardening, basketball, dancing, travel, movies, reading, fitness, cooking, photography, gaming, hiking, yoga, wine, coffee, dogs, cats, fashion, technology, nature, beach, mountains, running, cycling, concerts, theater, volunteering
 - **Status:** `FULL`
+
+---
+
+### 7.2 life_goals
+- **Purpose:** User's life goals (The League model)
+- **DB Column:** `profiles.life_goals`
+- **DB Type:** TEXT[] (max 10)
+- **API Field:** `LifeGoals`, `life_goals`
+- **Editable:** Yes
+- **Source:** Admin-managed `life_goal_definitions` table
+- **Categories:** career, adventure, personal, impact
+- **Status:** `PARTIAL` - Missing from mobile UI
 
 | Layer | Status |
 |-------|--------|
 | DB | Yes |
 | API-R | Yes |
 | API-W | Yes |
-| Web-E | Yes (file upload) |
+| Web-E | Yes |
 | Web-D | Yes |
-| iOS-E | Yes (image picker) |
-| iOS-D | Yes |
+| iOS-E | **NO** |
+| iOS-D | No |
 
 ---
 
-## 9. Profile Prompts (Per Business Logic)
+## 8. Profile - Verification
 
-These are "Structured Storytelling" prompts from the original business requirements. Most exist in Mobile UI but have no database storage.
+### 8.1 is_verified
+- **Purpose:** Whether user has basic verification (selfie)
+- **DB Column:** `profiles.is_verified`
+- **DB Type:** BOOLEAN DEFAULT FALSE
+- **API Field:** `is_verified`, `IsVerified`
+- **Editable:** No (admin/system)
+- **Status:** `FULL`
 
-### 9.1 ideal_first_date
+---
+
+### 8.2 verified_at
+- **Purpose:** When basic verification was completed
+- **DB Column:** `profiles.verified_at`
+- **DB Type:** TIMESTAMPTZ
+- **API Field:** `VerifiedAt`
+- **Editable:** No (system)
+- **Status:** `FULL` (internal)
+
+---
+
+### 8.3 verification_selfie_url
+- **Purpose:** Selfie used for basic verification
+- **DB Column:** `profiles.verification_selfie_url`
+- **DB Type:** TEXT
+- **API Field:** `VerificationSelfieUrl`
+- **Editable:** Upload only
+- **Status:** `PARTIAL` - Mobile has camera capture, web needs UI
+
+---
+
+### 8.4 is_photo_verified
+- **Purpose:** Photo verification status (required for matching)
+- **DB Column:** `profiles.is_photo_verified`
+- **DB Type:** BOOLEAN DEFAULT FALSE
+- **API Field:** `IsPhotoVerified`
+- **Editable:** No (system)
+- **Status:** `PARTIAL` - Needs UI for verification flow
+
+---
+
+### 8.5 photo_verified_at
+- **Purpose:** When photo verification was completed
+- **DB Column:** `profiles.photo_verified_at`
+- **DB Type:** TIMESTAMPTZ
+- **API Field:** `PhotoVerifiedAt`
+- **Editable:** No (system)
+- **Status:** `FULL` (internal)
+
+---
+
+### 8.6 is_id_verified
+- **Purpose:** ID verification status (premium tier)
+- **DB Column:** `profiles.is_id_verified`
+- **DB Type:** BOOLEAN DEFAULT FALSE
+- **API Field:** `IsIdVerified`
+- **Editable:** No (system)
+- **Status:** `PARTIAL` - Needs UI for ID verification flow
+
+---
+
+### 8.7 id_document_url
+- **Purpose:** URL to uploaded ID document
+- **DB Column:** `profiles.id_document_url`
+- **DB Type:** TEXT
+- **API Field:** N/A (internal)
+- **Editable:** No (upload only)
+- **Status:** `PARTIAL` - Needs secure storage implementation
+
+---
+
+## 9. Profile - Media
+
+### 9.1 profile_image_url
+- **Purpose:** Main profile photo URL
+- **DB Column:** `profiles.profile_image_url`
+- **DB Type:** TEXT
+- **API Field:** `Image`, `livePicture`, `ProfileImageUrl`
+- **Editable:** Yes (via upload)
+- **Status:** `FULL`
+
+---
+
+### 9.2 voice_prompt_url
+- **Purpose:** URL to user's voice introduction (30 sec max)
+- **DB Column:** `profiles.voice_prompt_url`
+- **DB Type:** TEXT
+- **API Field:** `VoicePromptUrl`
+- **Editable:** Yes (via upload)
+- **Status:** `COMING-SOON` - DB/API ready, UI pending
+
+---
+
+### 9.3 voice_prompt_duration_seconds
+- **Purpose:** Duration of voice prompt
+- **DB Column:** `profiles.voice_prompt_duration_seconds`
+- **DB Type:** INTEGER (1-30)
+- **API Field:** `VoicePromptDurationSeconds`
+- **Editable:** No (system-calculated)
+- **Status:** `COMING-SOON`
+
+---
+
+### 9.4 video_intro_url
+- **Purpose:** URL to user's video introduction (60 sec max)
+- **DB Column:** `profiles.video_intro_url`
+- **DB Type:** TEXT
+- **API Field:** `VideoIntroUrl`
+- **Editable:** Yes (via upload)
+- **Status:** `COMING-SOON` - DB/API ready, UI pending
+
+---
+
+### 9.5 video_intro_duration_seconds
+- **Purpose:** Duration of video intro
+- **DB Column:** `profiles.video_intro_duration_seconds`
+- **DB Type:** INTEGER (1-60)
+- **API Field:** `VideoIntroDurationSeconds`
+- **Editable:** No (system-calculated)
+- **Status:** `COMING-SOON`
+
+---
+
+## 10. Profile Prompts
+
+All prompts allow users to share personality through structured storytelling.
+
+### 10.1 ideal_first_date
 - **Purpose:** "My ideal first date starts with... and ends with..."
-- **DB Column:** **MISSING**
-- **Mobile Field:** `IdeaDate`
-- **Status:** `MISSING-DB`
+- **DB Column:** `profiles.ideal_first_date`
+- **API Field:** `IdealFirstDate`, `IdeaDate`
+- **Status:** `FULL`
 
-### 9.2 non_negotiables
-- **Purpose:** "My top 5 non-negotiables"
-- **DB Column:** **MISSING**
-- **Mobile Field:** `NonNegotiable`
-- **Status:** `MISSING-DB`
+### 10.2 non_negotiables
+- **Purpose:** "My top non-negotiables in a partner"
+- **DB Column:** `profiles.non_negotiables`
+- **API Field:** `NonNegotiables`, `NonNegotiable`
+- **Status:** `FULL`
 
-### 9.3 worst_job
-- **Purpose:** "The worst job I ever had"
-- **DB Column:** **MISSING**
-- **Mobile Field:** `WorstJob`
-- **Status:** `MISSING-DB`
-
-### 9.4 dream_job
-- **Purpose:** "The job I'd do for no money"
-- **DB Column:** **MISSING**
-- **Mobile Field:** **MISSING**
-- **Status:** `MISSING-DB` `MISSING-MOBILE`
-
-### 9.5 nightclub_or_home
-- **Purpose:** "Nightclub or night at home?"
-- **DB Column:** **MISSING**
-- **Mobile Field:** `NightAtHome` (currently misused for political_views)
-- **Status:** `MISSING-DB` - Mobile has field but uses it wrong
-
-### 9.6 pet_peeves
-- **Purpose:** "My pet peeves"
-- **DB Column:** **MISSING**
-- **Mobile Field:** **MISSING**
-- **Status:** `MISSING-DB` `MISSING-MOBILE`
-
-### 9.7 after_work
-- **Purpose:** "After work, you can find me..."
-- **DB Column:** **MISSING**
-- **Mobile Field:** `FindMe`
-- **Status:** `MISSING-DB`
-
-### 9.8 way_to_heart
+### 10.3 way_to_heart
 - **Purpose:** "The way to my heart is through..."
-- **DB Column:** **MISSING**
-- **Mobile Field:** `WayToHeart`
-- **Status:** `MISSING-DB`
+- **DB Column:** `profiles.way_to_heart`
+- **API Field:** `WayToHeart`
+- **Status:** `FULL`
 
-### 9.9 craziest_travel_story
+### 10.4 after_work
+- **Purpose:** "After work, you can find me..."
+- **DB Column:** `profiles.after_work`
+- **API Field:** `AfterWork`, `FindMe`
+- **Status:** `FULL`
+
+### 10.5 nightclub_or_home
+- **Purpose:** "Nightclub or night at home?"
+- **DB Column:** `profiles.nightclub_or_home`
+- **API Field:** `NightclubOrHome`, `NightAtHome`
+- **Status:** `FULL`
+
+### 10.6 worst_job
+- **Purpose:** "The worst job I ever had"
+- **DB Column:** `profiles.worst_job`
+- **API Field:** `WorstJob`
+- **Status:** `FULL`
+
+### 10.7 dream_job
+- **Purpose:** "The job I'd do for no money"
+- **DB Column:** `profiles.dream_job`
+- **API Field:** `DreamJob`
+- **Status:** `FULL`
+
+### 10.8 craziest_travel_story
 - **Purpose:** "Craziest travel story"
-- **DB Column:** **MISSING**
-- **Mobile Field:** `CraziestThings` (signup), `craziestTravelStory` (edit)
-- **Status:** `MISSING-DB`
+- **DB Column:** `profiles.craziest_travel_story`
+- **API Field:** `CraziestTravelStory`, `craziestTravelStory`
+- **Status:** `FULL`
 
-### 9.10 weirdest_gift
-- **Purpose:** "Weirdest gift I have received"
-- **DB Column:** **MISSING**
-- **Mobile Field:** `weiredestGift`
-- **Status:** `MISSING-DB`
+### 10.9 weirdest_gift
+- **Purpose:** "Weirdest gift I've ever received"
+- **DB Column:** `profiles.weirdest_gift`
+- **API Field:** `WeirdestGift`, `weirdestGift`
+- **Status:** `FULL`
 
-### 9.11 past_event
-- **Purpose:** Past event you'd attend (if any from history)
-- **DB Column:** **MISSING**
-- **Mobile Field:** `PastEvent`
-- **Status:** `MISSING-DB`
+### 10.10 pet_peeves
+- **Purpose:** "My pet peeves"
+- **DB Column:** `profiles.pet_peeves`
+- **API Field:** `PetPeeves`
+- **Status:** `FULL`
 
----
+### 10.11 past_event
+- **Purpose:** "If I could attend any event in history"
+- **DB Column:** `profiles.past_event`
+- **API Field:** `PastEvent`
+- **Status:** `PARTIAL` - Missing from mobile edit form
 
-## 10. Profile - Additional Fields (MISSING FROM DATABASE)
-
-### 10.1 languages
-- **Purpose:** Languages user speaks
-- **DB Column:** **MISSING**
-- **DB Type:** Needed: TEXT[]
-- **Mobile Field:** `Language`
-- **Options (per business logic - extensive list):**
-  - Arabic, Armenian, Chinese, Dutch, English, French, German, Hebrew, Hindi, Italian, Japanese, Korean, Norwegian, Portuguese, Russian, Spanish, Swedish, Tagalog, Turkish, Urdu, Other
-- **Status:** `MISSING-DB`
-
-### 10.2 schools
-- **Purpose:** Schools attended (multiple allowed)
-- **DB Column:** **MISSING**
-- **DB Type:** Needed: TEXT[]
-- **Mobile Field:** `School`
-- **Status:** `MISSING-DB`
-
-### 10.3 company
-- **Purpose:** Current employer/company name
-- **DB Column:** **MISSING**
-- **DB Type:** Needed: TEXT
-- **Mobile Field:** `Company`
-- **Status:** `MISSING-DB`
-
-### 10.4 social_link_1
-- **Purpose:** Social media link 1
-- **DB Column:** **MISSING**
-- **DB Type:** Needed: TEXT
-- **Mobile Field:** `social_link1`
-- **Status:** `MISSING-DB`
-
-### 10.5 social_link_2
-- **Purpose:** Social media link 2
-- **DB Column:** **MISSING**
-- **DB Type:** Needed: TEXT
-- **Mobile Field:** `social_link2`
-- **Status:** `MISSING-DB`
-
-### 10.6 zip_code
-- **Purpose:** User's ZIP/postal code
-- **DB Column:** **MISSING**
-- **DB Type:** Needed: TEXT
-- **Mobile Field:** `Zipcode`
-- **Status:** `MISSING-DB`
-
-### 10.7 username
-- **Purpose:** User's unique username (per business logic)
-- **DB Column:** **MISSING** (display_name exists but username is different)
-- **DB Type:** Needed: TEXT UNIQUE
-- **Mobile Field:** `Username`
-- **Status:** `MISSING-DB` - Business logic requires separate username
+| Layer | Status |
+|-------|--------|
+| DB | Yes |
+| API-R | Yes |
+| API-W | Yes |
+| Web-E | Yes |
+| Web-D | Yes |
+| iOS-E | **NO** |
+| iOS-D | No |
 
 ---
 
-## 11. Summary of Required Actions
+## 11. Profile - Additional
 
-### Database Migration Needed
+### 11.1 social_link_1 / social_link_2
+- **Purpose:** Social media links
+- **DB Columns:** `profiles.social_link_1`, `profiles.social_link_2`
+- **DB Type:** TEXT
+- **API Field:** `SocialLink1`, `SocialLink2`, `social_link1`, `social_link2`
+- **Editable:** Yes
+- **Status:** `FULL`
 
-**New columns for `profiles` table:**
+---
 
-```sql
--- Lifestyle (new)
-marital_status TEXT CHECK (marital_status IN ('never_married', 'separated', 'divorced', 'widowed')),
+### 11.2 privacy_settings
+- **Purpose:** User privacy preferences
+- **DB Column:** `profiles.privacy_settings`
+- **DB Type:** JSONB
+- **API Field:** N/A
+- **Editable:** Yes (via settings)
+- **Status:** `PARTIAL` - Needs UI implementation
 
--- Additional info (new)
-languages TEXT[],
-schools TEXT[],
-company TEXT,
-zip_code TEXT,
-username TEXT UNIQUE,
+---
 
--- Social links (new)
-social_link_1 TEXT,
-social_link_2 TEXT,
+### 11.3 Profile Completion Tracking
+- **DB Columns:**
+  - `profile_completion_step` (INTEGER)
+  - `profile_completion_skipped` (TEXT[])
+  - `profile_completion_prefer_not` (TEXT[])
+  - `profile_completed_at` (TIMESTAMPTZ)
+- **API Fields:** `ProfileCompletionStep`, `ProfileCompletionSkipped`, `ProfileCompletionPreferNot`, `ProfileCompletedAt`
+- **Status:** `FULL`
 
--- Profile prompts (new - per business logic)
-ideal_first_date TEXT,        -- "My ideal first date starts with... and ends with..."
-non_negotiables TEXT,         -- "My top 5 non-negotiables"
-worst_job TEXT,               -- "The worst job I ever had"
-dream_job TEXT,               -- "The job I'd do for no money"
-nightclub_or_home TEXT,       -- "Nightclub or night at home?"
-pet_peeves TEXT,              -- "My pet peeves"
-after_work TEXT,              -- "After work, you can find me..."
-way_to_heart TEXT,            -- "The way to my heart is through..."
-craziest_travel_story TEXT,   -- "Craziest travel story"
-weirdest_gift TEXT,           -- "Weirdest gift I have received"
-past_event TEXT               -- Past event you'd attend
-```
+---
 
-**Column type changes needed:**
+## 12. Related Tables
 
-```sql
--- Change has_kids from BOOLEAN to TEXT for richer options
-ALTER TABLE profiles ALTER COLUMN has_kids TYPE TEXT;
--- Options: 'no', 'yes_live_at_home', 'yes_live_away'
+### 12.1 life_goal_definitions (Admin-Managed)
+- **Purpose:** Defines available life goals
+- **Columns:** id, key, label, category, description, icon, is_active, display_order
+- **API Endpoint:** GET /api/life-goals
+- **Admin UI:** /admin/life-goals
+- **Status:** `FULL`
 
--- Change ethnicity from TEXT to TEXT[] for mixed heritage
-ALTER TABLE profiles ALTER COLUMN ethnicity TYPE TEXT[];
+### 12.2 prompt_definitions (Admin-Managed)
+- **Purpose:** Defines available profile prompts
+- **Columns:** id, key, prompt_text, placeholder_text, category, max_length, is_active, is_required, display_order, icon
+- **API Endpoint:** GET /api/prompts
+- **Admin UI:** /admin/prompts
+- **Status:** `FULL`
 
--- Update CHECK constraints for expanded options:
--- body_type: add 'muscular'
--- smoking: change to 'no', 'occasionally', 'daily', 'trying_to_quit'
--- drinking: change to 'never', 'social', 'moderate', 'regular'
--- wants_kids: change to 'no', 'definitely', 'someday', 'ok_if_partner_has'
-```
+### 12.3 user_profile_prompts
+- **Purpose:** Stores user responses to profile prompts
+- **Columns:** id, user_id, prompt_key, response, display_order
+- **Note:** Alternative to storing prompts directly in profiles table - allows dynamic prompts
+- **Status:** `PARTIAL` - Migration exists, needs client integration
 
-### API Fixes Required
+---
 
-**Field name corrections (COMPLETED):**
-- `Ethniticity` → `Ethnicity` ✓
-- `Marijuna` → `Marijuana` ✓
+## 13. Constants Synchronization
 
-**Data format changes:**
-- Return arrays as arrays, not comma-separated strings
-- Accept arrays for: interests, ethnicities, languages, pets
-- Standardize boolean handling (use actual booleans)
+**CRITICAL:** Constants MUST be identical between:
+- `mobile/constants/options.ts`
+- `web/src/types/index.ts`
 
-### Web UI Fields to Add
-- zodiac_sign (currently display-only, needs edit)
-- ethnicity (multi-select chips)
-- political_views (dropdown)
-- marijuana (dropdown)
-- pets (multi-select chips)
-- display_name (in profile edit, not just registration)
-- phone (editable)
-- All new fields from migration
-- All profile prompts
+### Current Status: SYNCHRONIZED ✓
 
-### Mobile UI Fixes
-- Separate gender and looking_for into distinct fields (currently combined)
-- Fix height conversion (feet → total inches before save)
-- Standardize body_type to single select (currently multi)
-- Standardize religion to single select (currently multi)
-- Fix political_views storage (currently uses NightAtHome field)
-- Use proper field names (match API)
-- Add missing prompts: dream_job, pet_peeves
+All option arrays are aligned between mobile and web:
+- GENDER_OPTIONS ✓
+- BODY_TYPE_OPTIONS ✓
+- MARITAL_STATUS_OPTIONS ✓
+- HAS_KIDS_OPTIONS ✓
+- WANTS_KIDS_OPTIONS ✓
+- SMOKING_OPTIONS ✓
+- DRINKING_OPTIONS ✓
+- MARIJUANA_OPTIONS ✓
+- EXERCISE_OPTIONS ✓
+- EDUCATION_OPTIONS ✓
+- ETHNICITY_OPTIONS ✓
+- RELIGION_OPTIONS ✓
+- POLITICAL_OPTIONS ✓
+- ZODIAC_OPTIONS ✓
+- PETS_OPTIONS ✓
+- LANGUAGE_OPTIONS ✓
+- INTEREST_OPTIONS ✓
+- COUNTRY_OPTIONS ✓
 
-### Option Standardization Required
+---
 
-All platforms must use identical options for:
-- body_type (6 options per business logic)
-- smoking (4 options per business logic)
-- drinking (4 options per business logic)
-- has_kids (3 options per business logic)
-- wants_kids (4 options per business logic)
-- ethnicity (12 options per business logic)
-- religion (12 options per business logic)
-- political_views (7 options per business logic)
-- education (6 options per business logic)
-- marital_status (4 options per business logic)
-- interests (needs standardized list - merge all current options)
+## 14. Action Items
+
+### Mobile UI Additions Needed
+1. Add `dating_intentions` dropdown to Personal Details section
+2. Add `life_goals` multi-select section (max 10)
+3. Add `past_event` prompt to "In a few Words" section
+4. Add `looking_for_description` textarea
+
+### Future Enhancements
+1. Voice prompt recording UI (mobile and web)
+2. Video intro upload UI (mobile and web)
+3. ID verification flow
+4. Privacy settings UI
+5. Notification preferences UI
+
+---
+
+## Changelog
+
+### 2026-01-24
+- Updated entire document to reflect actual database state
+- Marked all profile prompts as FULL (exist in DB via migration 00005)
+- Added life_goals, dating_intentions, voice/video prompt fields
+- Confirmed constants are synchronized between mobile and web
+- Added API field aliases for mobile compatibility
+- Documented prompt_definitions and user_profile_prompts tables

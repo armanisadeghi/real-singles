@@ -278,7 +278,7 @@ const Signup = () => {
     Ethnicity: "",
     Language: "",
     Religion: "",
-    // Political: "",
+    Political: "",
     NightAtHome: "",
     About: "",
     CraziestThings: "",
@@ -445,6 +445,8 @@ const Signup = () => {
           ? signupData.Ethnicity 
           : signupData.Ethnicity ? [signupData.Ethnicity] : null,
         marijuana: signupData.Marijuana || null,
+        political_views: signupData.Political || null,
+        nightclub_or_home: signupData.NightAtHome || null,
       };
 
       // Update profile - wait a moment for the trigger to create the user record

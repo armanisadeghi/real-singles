@@ -1,6 +1,4 @@
 import LinearBg from "@/components/LinearBg";
-import NotificationBell from "@/components/NotificationBell";
-import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
 import { getProfile } from "@/lib/api";
 import { User } from "@/types";
@@ -271,13 +269,6 @@ export default function Settings() {
 
             />
           </Modal>}
-
-        <ScreenHeader
-          title="Settings"
-          showBackButton
-          onBackPress={router.back}
-          rightContent={<NotificationBell />}
-        />
 
         <ScrollView className="flex-1">
           <View className="items-center mt-8 mb-6">

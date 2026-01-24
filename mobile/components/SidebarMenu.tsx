@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { usePathname, useRouter } from "expo-router";
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   Animated,
   Dimensions,
@@ -37,6 +38,8 @@ const SideMenu = ({
   ).current;
 
   const handleReferFriend = async () => {
+    // Haptic feedback for share action
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       const result = await Share.share({
         title: "Join me on RealSinglesApp!",
@@ -89,6 +92,7 @@ const SideMenu = ({
       icon: "person-outline" as const,
       path: "/(tabs)/profile",
       onPress: () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onClose();
         router.push("/(tabs)/profile");
       },
@@ -98,6 +102,7 @@ const SideMenu = ({
       icon: "notifications-outline" as const,
       path: "/notification",
       onPress: () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onClose();
         router.push("/notification");
       },
@@ -107,6 +112,7 @@ const SideMenu = ({
       icon: "mail-outline" as const,
       path: "/contact",
       onPress: () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onClose();
         router.push("/contact");
       },
@@ -116,6 +122,7 @@ const SideMenu = ({
       icon: "people-outline" as const,
       path: "/refer",
       onPress: () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onClose();
         router.push("/refer");
       },

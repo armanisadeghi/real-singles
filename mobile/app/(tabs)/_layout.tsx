@@ -1,38 +1,21 @@
 import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
-import { Platform } from 'react-native';
 import { icons } from '@/constants/icons';
 
 /**
  * Native Bottom Tab Navigation
  * 
- * Uses platform-native components:
- * - iOS: UITabBarController (supports Liquid Glass on iOS 26+)
+ * IMPORTANT: This uses actual platform-native components, not JS approximations:
+ * - iOS: UITabBarController
  * - Android: BottomNavigationView (Material Design 3)
  * 
- * Following platform guidelines:
- * - iOS HIG: 3-5 tabs, always show labels, 25x25pt icons
- * - Material Design 3: 3-5 destinations, visible labels, active indicator
+ * DO NOT override platform defaults unless absolutely necessary.
+ * Native components handle haptics, animations, accessibility, and safe areas automatically.
  * 
- * Material Design 3 Specs (Android):
- * - Icon size: 24dp (default)
- * - Active indicator: pill shape
- * - Label: Always visible
- * - Ripple color: #E91E6340 (pink with 25% opacity)
- * - Indicator color: #E91E63 (pink-600)
- * 
- * Note: Native tab components provide built-in haptic feedback on both platforms.
- * iOS UITabBarController has subtle haptic on selection (iOS 15+).
- * Android BottomNavigationView provides ripple effect feedback.
+ * @see /docs/NATIVE_FEEL_GUIDELINES.md
  */
 export default function TabLayout() {
   return (
-    <NativeTabs
-      // Android Material Design 3 styling
-      rippleColor="#E91E6340"
-      indicatorColor="#E91E63"
-      // Label always visible (Material Design 3 guideline)
-      labelVisibilityMode="labeled"
-    >
+    <NativeTabs>
       {/* Home Tab - Route: /home */}
       <NativeTabs.Trigger name="index">
         <Label>Home</Label>

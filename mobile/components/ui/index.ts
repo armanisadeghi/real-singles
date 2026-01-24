@@ -22,7 +22,6 @@ export { default as PastEventCard } from "./PastEventCard";
 
 // Form components
 export { default as GradientButton } from "./GradientButton";
-export { default as RangeSlider } from "./RangeSlider";
 
 // Badge components
 export { PointsHeart } from "./PointsHeart";
