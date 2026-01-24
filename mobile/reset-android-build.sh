@@ -1,13 +1,24 @@
 #!/bin/bash
 
-echo "🛑 Step 1: Stopping all processes..."
-killall -9 "Android Studio" 2>/dev/null || true
-killall -9 java 2>/dev/null || true
-killall -9 node 2>/dev/null || true
-killall -9 Metro 2>/dev/null || true
-killall -9 gradle 2>/dev/null || true
-killall -9 qemu-system-x86_64 2>/dev/null || true
-killall -9 qemu-system-aarch64 2>/dev/null || true
+echo "🛑 Step 1: Stopping React Native & Android processes..."
+
+# Kill Metro bundler specifically (port 8081)
+lsof -ti:8081 | xargs kill -9 2>/dev/null || true
+
+# Kill React Native processes (not all node processes)
+pkill -f "react-native" 2>/dev/null || true
+pkill -f "metro" 2>/dev/null || true
+pkill -f "@react-native" 2>/dev/null || true
+
+# Kill Gradle daemon specifically (not all Java processes)
+pkill -f "GradleDaemon" 2>/dev/null || true
+./android/gradlew --stop 2>/dev/null || true
+
+# Kill Android emulator processes
+pkill -f "qemu-system" 2>/dev/null || true
+
+# Optional: Kill Android Studio if needed (commented out by default)
+# killall -9 "Android Studio" 2>/dev/null || true
 
 echo ""
 echo "🧹 Step 2: Cleaning Gradle caches..."
