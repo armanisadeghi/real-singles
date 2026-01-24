@@ -92,12 +92,19 @@ export async function GET(request: Request) {
   }
 
   // Apply filters
+  // Supports both legacy values (woman, man, woman2, man2) and new standardized values (male, female, non-binary, other)
   if (filters.Gender && filters.Gender !== "both") {
     const genderMap: Record<string, string> = {
+      // Legacy mobile values (deprecated)
       woman: "female",
       man: "male",
       woman2: "non-binary",
       man2: "other",
+      // New standardized values pass through as-is
+      male: "male",
+      female: "female",
+      "non-binary": "non-binary",
+      other: "other",
     };
     query = query.eq("gender", genderMap[filters.Gender] || filters.Gender);
   }

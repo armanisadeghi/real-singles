@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Platform, ScrollView, Text, TextInput, View } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import GradientButton from "../ui/GradientButton";
-import { countryOptions, getZodiacFromDate, zodiacOptions } from "@/constants/utils";
+import { COUNTRY_OPTIONS, getZodiacFromDate, ZODIAC_OPTIONS } from "@/constants/options";
 
 const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
   const [validationError, setValidationError] = useState("");
@@ -272,7 +272,7 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
             <View style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16 }}>
               <Text style={{ color: data.HSign ? 'black' : '#B0B0B0' }}>
                 {data.HSign 
-                  ? zodiacOptions.find(z => z.value === data.HSign)?.label || data.HSign
+                  ? ZODIAC_OPTIONS.find(z => z.value === data.HSign)?.label || data.HSign
                   : 'Zodiac (from DOB)'}
               </Text>
             </View>
@@ -284,7 +284,7 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
           <RNPickerSelect
             value={data.Country || "US"}
             onValueChange={(value) => updateData({ Country: value })}
-            items={countryOptions}
+            items={COUNTRY_OPTIONS}
             placeholder={{ label: "Select Country", value: null }}
             style={{
               inputIOS: {

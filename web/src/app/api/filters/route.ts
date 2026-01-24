@@ -100,13 +100,20 @@ export async function POST(request: Request) {
     };
 
     // Map mobile field names to database field names
+    // Supports both legacy values (woman, man, woman2, man2) and new standardized values (male, female, non-binary, other)
     const gender = formData.get("Gender") as string;
     if (gender) {
       const genderMap: Record<string, string> = {
+        // Legacy mobile values (deprecated)
         woman: "female",
         man: "male",
         woman2: "non-binary",
         man2: "other",
+        // New standardized values pass through as-is
+        male: "male",
+        female: "female",
+        "non-binary": "non-binary",
+        other: "other",
       };
       filters.gender = [genderMap[gender] || gender];
     }

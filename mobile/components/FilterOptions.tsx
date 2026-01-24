@@ -1,18 +1,20 @@
 import { icons } from "@/constants/icons";
+// Import standardized options that match database schema
 import {
-  bodyTypeOptions,
-  drinkingOption,
-  educationOptions,
-  ethnicityOptions,
-  haveChildrenOptions,
-  lookingForOptions,
-  marijuanOption,
-  maritalOptions,
-  politicalViewsOptions,
-  religionOptions,
-  smokeOptions,
-  wantChildrenOptions
-} from "@/constants/utils";
+  BODY_TYPE_OPTIONS,
+  DRINKING_OPTIONS,
+  EDUCATION_OPTIONS,
+  ETHNICITY_OPTIONS,
+  GENDER_OPTIONS,
+  HAS_KIDS_OPTIONS,
+  LOOKING_FOR_OPTIONS,
+  MARIJUANA_OPTIONS,
+  MARITAL_STATUS_OPTIONS,
+  POLITICAL_OPTIONS,
+  RELIGION_OPTIONS,
+  SMOKING_OPTIONS,
+  WANTS_KIDS_OPTIONS,
+} from "@/constants/options";
 import { clearFilter, getFilter } from "@/lib/api";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
@@ -42,7 +44,7 @@ export interface FilterData {
     min: number;
     max: number;
   };
-  gender: "woman" | "man" | "man2" | "woman2" | "";
+  gender: "male" | "female" | "non-binary" | "other" | "";
   bodyType: string;
   maritalStatus: string;
   ethnicity: string;
@@ -100,7 +102,7 @@ export default function FilterOptions({
   const [maxDistance, setMaxDistance] = useState<number>(
     initialFilters?.distanceRange?.max || 10000
   );
-  const [gender, setGender] = useState<"woman" | "man" | "woman2" | "man2" | "">(
+  const [gender, setGender] = useState<"male" | "female" | "non-binary" | "other" | "">(
     initialFilters?.gender || ""
   );
   const [bodyType, setBodyType] = useState<string>(
@@ -327,91 +329,37 @@ export default function FilterOptions({
   return (
     <View className="p-6">
       <Toast />
-      {/* Gender filter */}
+      {/* Gender filter - uses standardized GENDER_OPTIONS from constants/options.ts */}
       <View className="mb-6 pb-6 border-b border-b-border">
         <Text className="text-base font-medium mb-3 text-dark">Gender</Text>
-        <View className="flex-row gap-3">
-          <TouchableOpacity
-            className={`rounded-full overflow-hidden ${gender === "woman" || filterData?.Gender === "woman"
-              ? "border border-primary"
-              : "bg-light-100 border border-border"
-              }`}
-            onPress={() => setGender("woman")}
-          >
-            {gender === "woman" || filterData?.Gender === "woman" ? (
-              <LinearGradient
-                colors={["#B06D1E", "#F99F2D", "#B06D1E"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ padding: 8, borderRadius: 4 }}
+        <View className="flex-row gap-3 flex-wrap">
+          {GENDER_OPTIONS.map((option) => {
+            const isSelected = gender === option.value || filterData?.Gender === option.value;
+            return (
+              <TouchableOpacity
+                key={option.value}
+                className={`rounded-full overflow-hidden ${
+                  isSelected
+                    ? "border border-primary"
+                    : "bg-light-100 border border-border"
+                }`}
+                onPress={() => setGender(option.value as "male" | "female" | "non-binary" | "other")}
               >
-                <Text style={{ color: "white", fontWeight: "bold" }}>Woman</Text>
-              </LinearGradient>
-            ) : (
-              <Text className={"text-dark px-4 py-2"}>Woman</Text>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            className={`rounded-full overflow-hidden ${gender === "man" || filterData?.Gender === "man"
-              ? "border border-primary"
-              : "bg-light-100 border border-border"
-              }`}
-            onPress={() => setGender("man")}
-          >
-            {gender === "man" || filterData?.Gender === "man" ? (
-              <LinearGradient
-                colors={["#B06D1E", "#F99F2D", "#B06D1E"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ padding: 8, borderRadius: 4 }}
-              >
-                <Text style={{ color: "white", fontWeight: "bold" }}>Man</Text>
-              </LinearGradient>
-            ) : (
-              <Text className={"text-dark px-4 py-2"}>Man</Text>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            className={`rounded-full overflow-hidden ${gender === "woman2" || filterData?.Gender === "woman2"
-              ? "border border-primary"
-              : "bg-light-100 border border-border"
-              }`}
-            onPress={() => setGender("woman2")}
-          >
-            {gender === "woman2" || filterData?.Gender === "woman2" ? (
-              <LinearGradient
-                colors={["#B06D1E", "#F99F2D", "#B06D1E"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ padding: 8, borderRadius: 4 }}
-              >
-                <Text style={{ color: "white", fontWeight: "bold" }}>Woman2</Text>
-              </LinearGradient>
-            ) : (
-              <Text className={"text-dark px-4 py-2"}>Woman2</Text>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            className={`rounded-full overflow-hidden ${gender === "man2" || filterData?.Gender === "man2"
-              ? "border border-primary"
-              : "bg-light-100 border border-border"
-              }`}
-            onPress={() => setGender("man2")}
-          >
-            {gender === "man2" || filterData?.Gender === "man2" ? (
-              <LinearGradient
-                colors={["#B06D1E", "#F99F2D", "#B06D1E"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ padding: 8, borderRadius: 4 }}
-              >
-                <Text style={{ color: "white", fontWeight: "bold" }}>Man2</Text>
-              </LinearGradient>
-            ) : (
-              <Text className={"text-dark px-4 py-2"}>Man2</Text>
-            )}
-          </TouchableOpacity>
-           
+                {isSelected ? (
+                  <LinearGradient
+                    colors={["#B06D1E", "#F99F2D", "#B06D1E"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{ padding: 8, borderRadius: 4 }}
+                  >
+                    <Text style={{ color: "white", fontWeight: "bold" }}>{option.label}</Text>
+                  </LinearGradient>
+                ) : (
+                  <Text className={"text-dark px-4 py-2"}>{option.label}</Text>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
 
@@ -473,7 +421,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={bodyTypeOptions}
+        items={BODY_TYPE_OPTIONS}
       />
       <RNPickerSelect
         value={filterData?.marital_status || maritalStatus}
@@ -489,7 +437,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={maritalOptions}
+        items={MARITAL_STATUS_OPTIONS}
       />
       <RNPickerSelect
         value={filterData?.Ethnicity || ethnicity}
@@ -505,7 +453,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={ethnicityOptions}
+        items={ETHNICITY_OPTIONS}
       />
       <RNPickerSelect
         value={filterData?.Religion || religion}
@@ -521,7 +469,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={religionOptions}
+        items={RELIGION_OPTIONS}
       />
       <RNPickerSelect
         value={filterData?.Marijuana || marijuana}
@@ -537,7 +485,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={marijuanOption}
+        items={MARIJUANA_OPTIONS}
       />
       <RNPickerSelect
         value={filterData?.Drinks || drinking}
@@ -553,7 +501,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={drinkingOption}
+        items={DRINKING_OPTIONS}
       />
       <RNPickerSelect
         value={filterData?.HaveChild || hasKids}
@@ -569,7 +517,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={haveChildrenOptions}
+        items={HAS_KIDS_OPTIONS}
       />
       <RNPickerSelect
         value={filterData?.WantChild || wantKids}
@@ -585,7 +533,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={wantChildrenOptions}
+        items={WANTS_KIDS_OPTIONS}
       />
       <RNPickerSelect
         value={filterData?.Education || education}
@@ -601,7 +549,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={educationOptions}
+        items={EDUCATION_OPTIONS}
       />
       <RNPickerSelect
         value={filterData?.Smoke || smoke}
@@ -617,7 +565,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={smokeOptions}
+        items={SMOKING_OPTIONS}
       />
       <RNPickerSelect
         value={filterData?.PoliticalView || politicalView}
@@ -633,7 +581,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={politicalViewsOptions}
+        items={POLITICAL_OPTIONS}
       />
       {/* <RNPickerSelect
         value={filterData?.exercise || exercise}
@@ -665,7 +613,7 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={lookingForOptions}
+        items={LOOKING_FOR_OPTIONS}
       />
 
       <View className="mb-6 pb-6 border-b border-b-border">
