@@ -70,6 +70,20 @@ export async function GET() {
     })
   );
 
+  // Convert profile image URL to signed URL
+  let profileImageUrl = "";
+  if (profile?.profile_image_url) {
+    if (profile.profile_image_url.startsWith("http")) {
+      profileImageUrl = profile.profile_image_url;
+    } else {
+      const bucket = profile.profile_image_url.includes("/avatar") ? "avatars" : "gallery";
+      const { data: imgData } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(profile.profile_image_url, 3600);
+      profileImageUrl = imgData?.signedUrl || "";
+    }
+  }
+
   if (userError && userError.code !== "PGRST116") {
     return NextResponse.json(
       { success: false, msg: "Error fetching user data" },
@@ -103,9 +117,9 @@ export async function GET() {
     HSign: profile?.zodiac_sign || "",
     
     // Media
-    Image: profile?.profile_image_url || "",
-    livePicture: profile?.profile_image_url || "",
-    ProfileImageUrl: profile?.profile_image_url || "",
+    Image: profileImageUrl,
+    livePicture: profileImageUrl,
+    ProfileImageUrl: profileImageUrl,
     
     // Location
     City: profile?.city || "",
