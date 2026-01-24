@@ -126,7 +126,7 @@ export default function EventDetail() {
         {data?.EventImage ? (
           <ImageBackground
             className="relative h-[253px] mt-[-10px]"
-            source={{uri: data?.EventImage?.startsWith('uploads/') ? IMAGE_URL + data?.EventImage : VIDEO_URL + data?.EventImage}}
+            source={{uri: data?.EventImage?.startsWith('http') ? data?.EventImage : (data?.EventImage?.startsWith('uploads/') ? IMAGE_URL + data?.EventImage : VIDEO_URL + data?.EventImage)}}
             resizeMode="cover"
           >
             {/* Add semi-transparent overlay */}

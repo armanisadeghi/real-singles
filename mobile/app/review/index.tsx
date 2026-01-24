@@ -122,6 +122,15 @@ export default function Review() {
 
   const displayContent = () => {
     if (userImageStr) {
+      // If it's already a full URL, use it directly
+      if (userImageStr.startsWith("http://") || userImageStr.startsWith("https://")) {
+        return {
+          type: "image",
+          source: { uri: userImageStr },
+        };
+      }
+      
+      // Otherwise, prepend the appropriate base URL
       if (userImageStr.startsWith("uploads/")) {
         return {
           type: "image",
@@ -198,9 +207,11 @@ export default function Review() {
                   {userImageStr ? (
                     <Image
                       source={{
-                        uri: userImageStr.startsWith("uploads/")
-                          ? IMAGE_URL + userImageStr
-                          : VIDEO_URL + userImageStr,
+                        uri: userImageStr.startsWith("http")
+                          ? userImageStr
+                          : (userImageStr.startsWith("uploads/")
+                              ? IMAGE_URL + userImageStr
+                              : VIDEO_URL + userImageStr),
                       }}
                       className="w-full h-full"
                       resizeMode="cover"
@@ -284,7 +295,7 @@ export default function Review() {
                   <Image
                     source={
                       userImage
-                        ? { uri: VIDEO_URL + userImage }
+                        ? { uri: userImage.startsWith('http') ? userImage : VIDEO_URL + userImage }
                         : icons.ic_user
                     }
                     className="w-full h-full"

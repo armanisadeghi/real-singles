@@ -67,9 +67,11 @@ const Conversation = ({ messages, currentUserId, contact }: ConversationProps) =
               contact.image ? (
                 <Image
                   source={{
-                    uri: contact.image.startsWith('uploads/')
-                      ? IMAGE_URL + contact.image
-                      : MEDIA_BASE_URL + contact.image
+                    uri: contact.image.startsWith('http')
+                      ? contact.image
+                      : (contact.image.startsWith('uploads/')
+                          ? IMAGE_URL + contact.image
+                          : MEDIA_BASE_URL + contact.image)
                   }}
                   className="w-8 h-8 rounded-full mr-2 mt-1"
                   resizeMode="cover"

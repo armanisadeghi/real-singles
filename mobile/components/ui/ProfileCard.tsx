@@ -69,15 +69,26 @@ export default function ProfileCard({ profile }: { profile: User }) {
   // Decide what to display as the background
   const displayContent = () => {
     if (profile?.Image) {
-      if (profile.Image.startsWith("uploads/")) {
+      const img = profile.Image.trim();
+      
+      // If it's already a full URL, use it directly
+      if (img.startsWith("http://") || img.startsWith("https://")) {
         return {
           type: "image",
-          source: { uri: `${IMAGE_URL}${profile.Image}` }
+          source: { uri: img }
+        };
+      }
+      
+      // Otherwise, prepend the appropriate base URL
+      if (img.startsWith("uploads/")) {
+        return {
+          type: "image",
+          source: { uri: `${IMAGE_URL}${img}` }
         };
       } else {
         return {
           type: "image",
-          source: { uri: `${VIDEO_URL}${profile.Image}` }
+          source: { uri: `${VIDEO_URL}${img}` }
         };
       }
     }

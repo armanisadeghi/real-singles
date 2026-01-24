@@ -78,13 +78,16 @@ const ReviewProfile = ({
         <View className="items-start mb-6">
           {data.Image ? (
             <Image
-              source={{ uri: VIDEO_URL + data.Image }}
+              source={{ uri: data.Image.startsWith("http") ? data.Image : VIDEO_URL + data.Image }}
               className="w-24 h-24 rounded-full"
             />
           ) : data.livePicture ? (
             <Image
               source={{
-                uri: IMAGE_URL + data.livePicture.split(",")[0], // ✅ pick only first one
+                uri: (() => {
+                  const img = data.livePicture.split(",")[0].trim();
+                  return img.startsWith("http") ? img : IMAGE_URL + img;
+                })(),
               }}
               className="w-24 h-24 rounded-full"
             />

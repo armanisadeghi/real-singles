@@ -239,7 +239,7 @@ export default function NearBy() {
           <View className="rounded-full">
             {profile?.Image ? (
               <Image
-                source={{ uri: VIDEO_URL + profile.Image }}
+                source={{ uri: profile.Image.startsWith('http') ? profile.Image : VIDEO_URL + profile.Image }}
                 className="w-10 h-10 rounded-full"
                 resizeMode="contain"
               />
@@ -301,7 +301,7 @@ export default function NearBy() {
                     className="bg-white p-1 rounded-full shadow-md">
                     {user?.Image ? (
                       <Image
-                        source={{ uri: VIDEO_URL + user.Image }}
+                        source={{ uri: user.Image.startsWith('http') ? user.Image : VIDEO_URL + user.Image }}
                         className="w-10 h-10 rounded-full"
                         resizeMode="cover"
                       />
@@ -427,7 +427,7 @@ export default function NearBy() {
                   <Image
                     source={
                       selectedUser?.Image
-                        ? { uri: VIDEO_URL + selectedUser?.Image }
+                        ? { uri: selectedUser.Image.startsWith('http') ? selectedUser.Image : VIDEO_URL + selectedUser?.Image }
                         : icons.placeholder
                     }
                     style={{ width: "100%", height: "100%", resizeMode: 'cover' }}

@@ -95,7 +95,7 @@ const PastEventCard = (
         {pastEvent?.EventImage ? (
           <>
             <Image
-              source={{ uri: pastEvent.EventImage.startsWith('uploads/') ? `${IMAGE_URL}${pastEvent?.EventImage}` : VIDEO_URL+pastEvent?.EventImage }}
+              source={{ uri: pastEvent.EventImage.startsWith('http') ? pastEvent?.EventImage : (pastEvent.EventImage.startsWith('uploads/') ? `${IMAGE_URL}${pastEvent?.EventImage}` : VIDEO_URL+pastEvent?.EventImage) }}
               className="w-full h-full"
               resizeMode="cover"
             />

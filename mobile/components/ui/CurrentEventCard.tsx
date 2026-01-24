@@ -91,7 +91,7 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
       <View className="relative rounded-xl overflow-hidden">
         {currentEvent?.EventImage ? (
           <Image
-            source={{ uri: currentEvent?.EventImage.startsWith('uploads/') ? `${IMAGE_URL}${currentEvent?.EventImage}` : VIDEO_URL+currentEvent?.EventImage }}
+            source={{ uri: currentEvent?.EventImage.startsWith('http') ? currentEvent?.EventImage : (currentEvent?.EventImage.startsWith('uploads/') ? `${IMAGE_URL}${currentEvent?.EventImage}` : VIDEO_URL+currentEvent?.EventImage) }}
             className="w-full h-[150px]"
             resizeMode="cover"
           />

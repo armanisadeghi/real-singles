@@ -78,7 +78,7 @@ export default function VideoCard(videoProps: any) {
           >
             {videoProps?.video?.VideoURL && (
               <Image
-                source={{ uri: VIDEO_URL + videoProps.video.VideoURL }}
+                source={{ uri: videoProps.video.VideoURL.startsWith('http') ? videoProps.video.VideoURL : VIDEO_URL + videoProps.video.VideoURL }}
                 className="w-full h-full absolute"
                 resizeMode="cover"
                 style={{ borderRadius: BORDER_RADIUS.input }}

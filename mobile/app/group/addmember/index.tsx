@@ -313,7 +313,7 @@ export default function Addmember() {
             renderItem={({ item: user }: { item: any }) => {
               const imageSource =
                 user.image && typeof user.image === "object" && user.image.uri
-                  ? { uri: MEDIA_BASE_URL + user.image.uri }
+                  ? { uri: user.image.uri.startsWith('http') ? user.image.uri : MEDIA_BASE_URL + user.image.uri }
                   : icons.ic_user;
 
               return (

@@ -21,7 +21,7 @@ const router = useRouter();
       ]}
     >
       <Image
-        source={product?.Image ? {uri: VIDEO_URL + product?.Image} : icons.placeholder} // replace with your image path
+        source={product?.Image ? {uri: product.Image.startsWith('http') ? product.Image : VIDEO_URL + product?.Image} : icons.placeholder} // replace with your image path
         className='rounded-lg'
         style={[
           {

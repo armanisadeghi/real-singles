@@ -500,9 +500,11 @@ export default function ChatDetail() {
                 {contact.image ? (
                   <Image
                     source={{
-                      uri: contact.image.startsWith('uploads/')
-                        ? IMAGE_URL + contact.image
-                        : VIDEO_URL + contact.image
+                      uri: contact.image.startsWith('http')
+                        ? contact.image
+                        : (contact.image.startsWith('uploads/')
+                            ? IMAGE_URL + contact.image
+                            : VIDEO_URL + contact.image)
                     }}
                     className="w-8 h-8 rounded-lg mr-2"
                     resizeMode="cover"

@@ -56,7 +56,7 @@ export default function EventCard({event} : {event: EventCardProps}) {
       >
         {EventImage ? (
           <ImageBackground
-            source={{ uri: EventImage.startsWith('uploads/') ? `${IMAGE_URL}${EventImage}` : VIDEO_URL+EventImage }}
+            source={{ uri: EventImage.startsWith('http') ? EventImage : (EventImage.startsWith('uploads/') ? `${IMAGE_URL}${EventImage}` : VIDEO_URL+EventImage) }}
             className="w-full h-full rounded-card overflow-hidden"
             resizeMode="cover"
           >

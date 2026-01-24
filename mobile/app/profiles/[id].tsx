@@ -111,15 +111,26 @@ export default function ProfileDetail() {
   const displayContent = () => {
 
     if (profile?.Image) {
-      if (profile.Image.startsWith("uploads/")) {
+      const img = profile.Image.trim();
+      
+      // If it's already a full URL, use it directly
+      if (img.startsWith("http://") || img.startsWith("https://")) {
         return {
           type: "image",
-          source: { uri: `${IMAGE_URL}${profile.Image}` },
+          source: { uri: img },
+        };
+      }
+      
+      // Otherwise, prepend the appropriate base URL
+      if (img.startsWith("uploads/")) {
+        return {
+          type: "image",
+          source: { uri: `${IMAGE_URL}${img}` },
         };
       } else {
         return {
           type: "image",
-          source: { uri: `${VIDEO_URL}${profile.Image}` },
+          source: { uri: `${VIDEO_URL}${img}` },
         };
       }
     }
@@ -270,7 +281,7 @@ export default function ProfileDetail() {
       {profile && profile?.Image ? (
         <ImageBackground
           className="h-[347px]"
-          source={{ uri: profile.Image?.startsWith('uploads/') ? IMAGE_URL + profile.Image : VIDEO_URL + profile.Image }}
+          source={{ uri: profile.Image?.startsWith('http') ? profile.Image : (profile.Image?.startsWith('uploads/') ? IMAGE_URL + profile.Image : VIDEO_URL + profile.Image) }}
           resizeMode="cover"
         >
           <View className="flex-row justify-between items-start px-3 mt-16">

@@ -481,7 +481,7 @@ export default function GroupChat() {
                   {/* Profile Image / Icon */}
                   {item.Image ? (
                     <Image
-                      source={{ uri: MEDIA_BASE_URL + item.Image }}
+                      source={{ uri: item.Image.startsWith('http') ? item.Image : MEDIA_BASE_URL + item.Image }}
                       className="w-9 h-9 rounded-full mr-3"
                       resizeMode="cover"
                     />
@@ -551,9 +551,11 @@ export default function GroupChat() {
           {image ? (
             <Image
               source={{
-                uri: image.startsWith("uploads/")
-                  ? IMAGE_URL + image
-                  : VIDEO_URL + image
+                uri: image.startsWith("http")
+                  ? image
+                  : (image.startsWith("uploads/")
+                      ? IMAGE_URL + image
+                      : VIDEO_URL + image)
               }}
               className="w-8 h-8 rounded-lg mr-2"
               resizeMode="cover"

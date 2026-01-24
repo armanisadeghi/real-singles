@@ -77,6 +77,13 @@ export default function Profile() {
   const getProfileImage = () => {
     if (profile?.Image) {
       const img = profile.Image.trim();
+      
+      // If it's already a full URL, use it directly
+      if (img.startsWith("http://") || img.startsWith("https://")) {
+        return { uri: img };
+      }
+      
+      // Otherwise, prepend the appropriate base URL
       const finalUrl = img.startsWith("uploads/")
         ? IMAGE_URL + img
         : MEDIA_BASE_URL + img;
@@ -86,6 +93,13 @@ export default function Profile() {
 
     if (profile?.livePicture) {
       const firstImage = profile.livePicture.split(",")[0].trim();
+      
+      // If it's already a full URL, use it directly
+      if (firstImage.startsWith("http://") || firstImage.startsWith("https://")) {
+        return { uri: firstImage };
+      }
+      
+      // Otherwise, prepend the appropriate base URL
       const finalUrl = firstImage.startsWith("uploads/")
         ? IMAGE_URL + firstImage
         : MEDIA_BASE_URL + firstImage;
@@ -105,7 +119,7 @@ export default function Profile() {
         onClose={() => setMenuVisible(false)}
         userAvatar={
           profile?.Image
-            ? { uri: MEDIA_BASE_URL + profile.Image }
+            ? { uri: profile.Image.startsWith("http") ? profile.Image : MEDIA_BASE_URL + profile.Image }
             : icons.ic_user
         }
         userName={profile?.DisplayName || ""}

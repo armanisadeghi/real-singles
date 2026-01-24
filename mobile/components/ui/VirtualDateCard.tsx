@@ -86,7 +86,7 @@ export default function VirtualDateCard({virtualDate}: { virtualDate: VirtualDat
       >
         {virtualDate?.Image ? (
           <Image
-            source={{ uri: VIDEO_URL + virtualDate.Image }}
+            source={{ uri: virtualDate.Image.startsWith('http') ? virtualDate.Image : VIDEO_URL + virtualDate.Image }}
             className="w-full h-full"
             resizeMode="cover"
             style={{ borderRadius: BORDER_RADIUS.input }}

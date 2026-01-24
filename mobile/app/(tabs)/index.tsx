@@ -227,7 +227,7 @@ export default function Home() {
         <SideMenu
           visible={menuVisible}
           onClose={() => setMenuVisible(false)}
-          userAvatar={profile?.Image ? { uri: VIDEO_URL + profile.Image } : null}
+          userAvatar={profile?.Image ? { uri: profile.Image.startsWith('http') ? profile.Image : VIDEO_URL + profile.Image } : null}
           userName={profile?.DisplayName || "User"}
         />
         <ImageBackground
@@ -242,7 +242,7 @@ export default function Home() {
             <TouchableOpacity onPress={() => router.push("/profile")}>
               {profile?.Image ? (
                 <Image
-                  source={{ uri: VIDEO_URL + profile.Image }}
+                  source={{ uri: profile.Image.startsWith('http') ? profile.Image : VIDEO_URL + profile.Image }}
                   className="border-2 border-white rounded-full"
                   style={{ width: ICON_SIZES['3xl'] * 1.25, height: ICON_SIZES['3xl'] * 1.25 }}
                 />

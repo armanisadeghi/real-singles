@@ -24,7 +24,7 @@ export default function VideoPage() {
   const [playbackRate, setPlaybackRate] = useState(1);
   const [isSeeking, setIsSeeking] = useState(false);
 
-  const videoUrl = VIDEO_URL + videoData?.VideoURL;
+  const videoUrl = videoData?.VideoURL?.startsWith('http') ? videoData.VideoURL : VIDEO_URL + videoData?.VideoURL;
   
   const player = useVideoPlayer(videoUrl, (player) => {
     player.loop = true;

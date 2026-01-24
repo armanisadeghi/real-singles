@@ -14,8 +14,9 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
   const isVideo = videoExtensions.some(ext => item.toLowerCase().endsWith(ext));
 
   const isLocalFile = item.startsWith("file://");
+  const isFullUrl = item.startsWith("http://") || item.startsWith("https://");
   // final URL to display
-  const mediaUri = isLocalFile ? item : IMAGE_URL + item;
+  const mediaUri = isLocalFile || isFullUrl ? item : IMAGE_URL + item;
 
   const [isPlaying, setIsPlaying] = useState(false);
   
@@ -60,7 +61,7 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
         }}
       >
         <Image
-          source={{ uri: IMAGE_URL + item }}
+          source={{ uri: mediaUri }}
           style={{ width: "100%", height: "100%", borderRadius: 12 }}
           resizeMode="cover"
         />

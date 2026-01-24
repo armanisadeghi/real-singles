@@ -164,7 +164,7 @@ export default function EventDetails({
                   onPress={() => router.push(`/profiles/${member?.ID}`)}
                   >
                   <Image
-                    source={{ uri: VIDEO_URL + member?.Image }}
+                    source={{ uri: member.Image.startsWith('http') ? member.Image : VIDEO_URL + member?.Image }}
                     className={`w-[26px] h-[26px] rounded-full border-2 border-white ${
                       index > 0 ? "ml-[-8px]" : ""
                     }`}

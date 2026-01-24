@@ -136,11 +136,13 @@ const renderMessageItem = ({ item }: { item: MessageItem }) => (
       <View className="relative">
         {(item?.image?.uri && item.image.uri !== "profile_img_url") || (item.image.uri && item.image.uri.startsWith("uploads/")) ? (
           <Image
-            source={
-              item.image.uri.startsWith("uploads/")
-                ? { uri: IMAGE_URL + item.image.uri }
-                : { uri: VIDEO_URL + item.image.uri }
-            }
+            source={{
+              uri: item.image.uri.startsWith("http")
+                ? item.image.uri
+                : (item.image.uri.startsWith("uploads/")
+                    ? IMAGE_URL + item.image.uri
+                    : VIDEO_URL + item.image.uri)
+            }}
             className="rounded-input"
             style={{ width: COMPONENT_SIZES.avatar.lg, height: COMPONENT_SIZES.avatar.lg }}
             resizeMode="cover"
@@ -261,7 +263,7 @@ const renderGroupItem = ({ item }: { item: GroupItem }) => (
       }}
     >{item?.Image ? (
       <Image
-        source={{ uri: item?.Image.startsWith('uploads/') ? IMAGE_URL + item?.Image : VIDEO_URL + item?.Image }}
+        source={{ uri: item?.Image.startsWith('http') ? item?.Image : (item?.Image.startsWith('uploads/') ? IMAGE_URL + item?.Image : VIDEO_URL + item?.Image) }}
         className="rounded-input"
         style={{ width: COMPONENT_SIZES.avatar.lg, height: COMPONENT_SIZES.avatar.lg }}
         resizeMode="cover"

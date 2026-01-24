@@ -381,12 +381,21 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       return { uri: imageUri };
     }
     else if (formData?.Image) {
-      return { uri: VIDEO_URL + formData.Image };
+      const img = formData.Image.trim();
+      // If it's already a full URL, use it directly
+      if (img.startsWith("http://") || img.startsWith("https://")) {
+        return { uri: img };
+      }
+      return { uri: VIDEO_URL + img };
     }
     else if (formData?.livePicture) {
       const imageLive = formData.livePicture.split(",")[0].trim();
       console.log("imageLive in getImage:", imageLive);
-
+      
+      // If it's already a full URL, use it directly
+      if (imageLive.startsWith("http://") || imageLive.startsWith("https://")) {
+        return { uri: imageLive };
+      }
       return { uri: IMAGE_URL + imageLive };
     } else {
       return icons.ic_user

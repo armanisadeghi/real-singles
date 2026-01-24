@@ -177,6 +177,13 @@ export default function Settings() {
   const getProfileImage = () => {
     if (profile?.Image) {
       const img = profile.Image.trim();
+      
+      // If it's already a full URL, use it directly
+      if (img.startsWith("http://") || img.startsWith("https://")) {
+        return { uri: img };
+      }
+      
+      // Otherwise, prepend the appropriate base URL
       const finalUrl = img.startsWith("uploads/")
         ? IMAGE_URL + img
         : MEDIA_BASE_URL + img;
@@ -186,6 +193,13 @@ export default function Settings() {
 
     if (profile?.livePicture) {
       const firstImage = profile.livePicture.split(",")[0].trim();
+      
+      // If it's already a full URL, use it directly
+      if (firstImage.startsWith("http://") || firstImage.startsWith("https://")) {
+        return { uri: firstImage };
+      }
+      
+      // Otherwise, prepend the appropriate base URL
       const finalUrl = firstImage.startsWith("uploads/")
         ? IMAGE_URL + firstImage
         : MEDIA_BASE_URL + firstImage;
