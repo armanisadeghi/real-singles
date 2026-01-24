@@ -21,31 +21,64 @@ export async function GET() {
     );
   }
 
-  // Get favorites with profile data
-  const { data: favorites, error } = await supabase
+  // Get favorites first
+  const { data: favorites, error: favError } = await supabase
     .from("favorites")
-    .select(`
-      id,
-      created_at,
-      favorite_user_id,
-      profiles:favorite_user_id(
-        *,
-        users:user_id(id, display_name, email, status)
-      )
-    `)
+    .select("id, created_at, favorite_user_id")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching favorites:", error);
+  if (favError) {
+    console.error("Error fetching favorites:", favError);
     return NextResponse.json(
       { success: false, msg: "Error fetching favorites" },
       { status: 500 }
     );
   }
 
+  // If no favorites, return empty array
+  if (!favorites || favorites.length === 0) {
+    return NextResponse.json({
+      success: true,
+      data: [],
+      msg: "No favorites found",
+    });
+  }
+
+  // Get profile data for each favorite
+  const favoriteUserIds = favorites.map((f) => f.favorite_user_id).filter(Boolean);
+  
+  const { data: profiles, error: profileError } = await supabase
+    .from("profiles")
+    .select(`
+      *,
+      users:user_id(id, display_name, email, status)
+    `)
+    .in("user_id", favoriteUserIds);
+
+  if (profileError) {
+    console.error("Error fetching profiles for favorites:", profileError);
+    // Return favorites without profile data rather than failing completely
+    return NextResponse.json({
+      success: true,
+      data: [],
+      msg: "Favorites found but profile data unavailable",
+    });
+  }
+
+  // Create a map of profiles by user_id
+  const profileMap = new Map(
+    (profiles || []).map((p: any) => [p.user_id, p])
+  );
+
+  // Merge favorites with profiles
+  const favoritesWithProfiles = favorites.map((fav) => ({
+    ...fav,
+    profiles: profileMap.get(fav.favorite_user_id) || null,
+  }));
+
   // Format profiles for mobile app
-  const formattedFavorites = (favorites || [])
+  const formattedFavorites = favoritesWithProfiles
     .filter((fav: any) => fav.profiles && fav.profiles.users?.status === "active")
     .map((fav: any) => {
       const profile = fav.profiles;

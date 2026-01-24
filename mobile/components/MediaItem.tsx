@@ -1,7 +1,7 @@
 import { IMAGE_URL } from "@/utils/token";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Video, ResizeMode } from "expo-av";
-import React, { useRef, useState } from "react";
+import { useVideoPlayer, VideoView } from "expo-video";
+import React, { useState, useEffect } from "react";
 import { Image, Pressable, View } from "react-native";
 
 interface MediaItemProps {
@@ -14,44 +14,68 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
   const isVideo = videoExtensions.some(ext => item.toLowerCase().endsWith(ext));
 
   const isLocalFile = item.startsWith("file://");
-   // final URL to display
-   const mediaUri = isLocalFile ? item : IMAGE_URL + item;
+  // final URL to display
+  const mediaUri = isLocalFile ? item : IMAGE_URL + item;
 
-  const videoRef = useRef<Video>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  
+  // Create video player only for video items
+  const player = useVideoPlayer(isVideo ? mediaUri : null, (player) => {
+    if (player) {
+      player.loop = true;
+    }
+  });
+
+  // Subscribe to playing state changes
+  useEffect(() => {
+    if (!player) return;
+    
+    const subscription = player.addListener('playingChange', (event) => {
+      setIsPlaying(event.isPlaying);
+    });
+    
+    return () => {
+      subscription.remove();
+    };
+  }, [player]);
 
   if (!isVideo) {
-     if (item.startsWith("file://")) {
-    return null; // <-- ye line extra blank box remove karegi
-  }
+    if (item.startsWith("file://")) {
+      return null; // Remove extra blank box for local files
+    }
 
-  
     return (
       <View
         style={{
           width: itemWidth,
           aspectRatio: 1,
           borderRadius: 12,
-          // overflow: "hidden",
           backgroundColor: "#fff",
           padding: 5,
-
-           // Shadow
-            shadowColor: "#000",
-            shadowOpacity: 0.15,
-            shadowRadius: 6,
-            shadowOffset: { width: 0, height: 3 },
-            elevation: 6,
+          shadowColor: "#000",
+          shadowOpacity: 0.15,
+          shadowRadius: 6,
+          shadowOffset: { width: 0, height: 3 },
+          elevation: 6,
         }}
       >
         <Image
           source={{ uri: IMAGE_URL + item }}
-          style={{ width: "100%", height: "100%", borderRadius: 12, }}
-          resizeMode={ResizeMode.COVER}
+          style={{ width: "100%", height: "100%", borderRadius: 12 }}
+          resizeMode="cover"
         />
       </View>
     );
   }
+
+  const togglePlayback = () => {
+    if (!player) return;
+    if (isPlaying) {
+      player.pause();
+    } else {
+      player.play();
+    }
+  };
 
   return (
     <View
@@ -59,41 +83,21 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
         width: itemWidth,
         aspectRatio: 1,
         borderRadius: 12,
-        // overflow: "hidden",
         backgroundColor: "#fff",
         padding: 5,
-
-        // ⭐ BEAUTIFUL SHADOW
         shadowColor: "#000",
         shadowOpacity: 0.15,
         shadowRadius: 6,
         shadowOffset: { width: 0, height: 3 },
-
-        elevation: 6, // Android shadow
+        elevation: 6,
       }}
     >
-      <Pressable
-        style={{ flex: 1 }}
-        onPress={async () => {
-          if (!videoRef.current) return;
-          const status: any = await videoRef.current.getStatusAsync();
-          console.log("status of video:",status);
-          
-          if (status.isPlaying) {
-            await videoRef.current.pauseAsync();
-            setIsPlaying(false);
-          } else {
-            await videoRef.current.playAsync();
-            setIsPlaying(true);
-          }
-        }}
-      >
-        <Video
-          ref={videoRef}
-          source={{ uri: mediaUri }}
+      <Pressable style={{ flex: 1 }} onPress={togglePlayback}>
+        <VideoView
+          player={player}
           style={{ width: "100%", height: "100%", borderRadius: 12 }}
-          resizeMode={ResizeMode.COVER}
-          isLooping
+          contentFit="cover"
+          nativeControls={false}
         />
 
         {/* Play/Pause Overlay */}

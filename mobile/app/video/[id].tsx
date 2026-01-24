@@ -3,9 +3,9 @@ import { icons } from "@/constants/icons";
 import { VIDEO_URL } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
-import { Video, ResizeMode } from "expo-av";
+import { useVideoPlayer, VideoView } from "expo-video";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Image,
   Text,
@@ -18,57 +18,86 @@ export default function VideoPage() {
   const router = useRouter();
   const videoData = JSON.parse(data);
 
-  const videoRef = useRef<Video>(null);
-
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [isSeeking, setIsSeeking] = useState(false);
 
-  // Handle video status updates
-  const onPlaybackStatusUpdate = (status: any) => {
-    if (!status.isLoaded) return;
-    setPosition(status.positionMillis / 1000);
-    setDuration(status.durationMillis / 1000);
-    setIsPlaying(status.isPlaying);
-  };
+  const videoUrl = VIDEO_URL + videoData?.VideoURL;
+  
+  const player = useVideoPlayer(videoUrl, (player) => {
+    player.loop = true;
+    player.playbackRate = playbackRate;
+  });
 
-  const togglePlay = async () => {
-    if (!videoRef.current) return;
-    const status = await videoRef.current.getStatusAsync();
-    if (status.isLoaded && status.isPlaying) {
-      await videoRef.current.pauseAsync();
-      setIsPlaying(false);
-    } else if (status.isLoaded) {
-      await videoRef.current.playAsync();
-      setIsPlaying(true);
+  // Subscribe to player events
+  useEffect(() => {
+    if (!player) return;
+
+    const playingSubscription = player.addListener('playingChange', (event) => {
+      setIsPlaying(event.isPlaying);
+    });
+
+    const statusSubscription = player.addListener('statusChange', (event) => {
+      if (event.status === 'readyToPlay') {
+        setDuration(player.duration);
+      }
+    });
+
+    // Poll for position updates (expo-video doesn't have a position change event)
+    const positionInterval = setInterval(() => {
+      if (!isSeeking && player.currentTime !== undefined) {
+        setPosition(player.currentTime);
+      }
+    }, 250);
+
+    return () => {
+      playingSubscription.remove();
+      statusSubscription.remove();
+      clearInterval(positionInterval);
+    };
+  }, [player, isSeeking]);
+
+  const togglePlay = () => {
+    if (!player) return;
+    if (isPlaying) {
+      player.pause();
+    } else {
+      player.play();
     }
   };
 
-  const changeSpeed = async () => {
+  const changeSpeed = () => {
+    if (!player) return;
     const newRate = playbackRate >= 2 ? 1 : playbackRate + 0.5;
     setPlaybackRate(newRate);
-    if (videoRef.current) {
-      await videoRef.current.setRateAsync(newRate, true);
-    }
+    player.playbackRate = newRate;
   };
 
-  const skipForward = async () => {
-    if (videoRef.current) {
-      const status = await videoRef.current.getStatusAsync();
-      if (status.isLoaded) {
-        await videoRef.current.setPositionAsync(Math.min(status.positionMillis + 10000, status.durationMillis || 0));
-      }
-    }
+  const skipForward = () => {
+    if (!player) return;
+    const newPosition = Math.min(player.currentTime + 10, duration);
+    player.currentTime = newPosition;
+    setPosition(newPosition);
   };
 
-  const skipBackward = async () => {
-    if (videoRef.current) {
-      const status = await videoRef.current.getStatusAsync();
-      if (status.isLoaded) {
-        await videoRef.current.setPositionAsync(Math.max(status.positionMillis - 10000, 0));
-      }
-    }
+  const skipBackward = () => {
+    if (!player) return;
+    const newPosition = Math.max(player.currentTime - 10, 0);
+    player.currentTime = newPosition;
+    setPosition(newPosition);
+  };
+
+  const onSeekStart = () => {
+    setIsSeeking(true);
+  };
+
+  const onSeekComplete = (value: number) => {
+    if (!player) return;
+    player.currentTime = value;
+    setPosition(value);
+    setIsSeeking(false);
   };
 
   const formatTime = (sec: number) => {
@@ -95,15 +124,11 @@ export default function VideoPage() {
         </View>
 
         {/* Video */}
-        <Video
-          ref={videoRef}
-          source={{ uri: VIDEO_URL + videoData?.VideoURL }}
+        <VideoView
+          player={player}
           style={{ width: "100%", height: "100%" }}
-          resizeMode={ResizeMode.CONTAIN}
-          shouldPlay={false}
-          isLooping
-          rate={playbackRate}
-          onPlaybackStatusUpdate={onPlaybackStatusUpdate}
+          contentFit="contain"
+          nativeControls={false}
         />
 
         {/* Controls */}
@@ -114,14 +139,13 @@ export default function VideoPage() {
           <Slider
             style={{ width: "100%", height: 30 }}
             minimumValue={0}
-            maximumValue={duration}
+            maximumValue={duration || 1}
             value={position}
             minimumTrackTintColor="#FFA500"
             maximumTrackTintColor="#fff"
             thumbTintColor="#FFA500"
-            onSlidingComplete={async (value) => {
-              if (videoRef.current) await videoRef.current.setPositionAsync(value * 1000);
-            }}
+            onSlidingStart={onSeekStart}
+            onSlidingComplete={onSeekComplete}
           />
           <View className="flex-row justify-between">
             <Text className="text-white text-xs">{formatTime(position)}</Text>

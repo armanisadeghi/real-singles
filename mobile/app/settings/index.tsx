@@ -15,11 +15,11 @@ import {
   Image,
   Modal,
   Platform,
-  SafeAreaView,
   Text,
   TouchableOpacity,
   View
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import Pdf from "react-native-pdf";
 import Toast from "react-native-toast-message";

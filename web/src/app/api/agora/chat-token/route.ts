@@ -25,10 +25,20 @@ export async function POST() {
     // Check if Agora is configured
     const config = getAgoraConfig();
     if (!config.appId) {
-      return NextResponse.json(
-        { success: false, msg: "Chat service not configured" },
-        { status: 503 }
-      );
+      // Agora not configured - return stub response for development
+      console.log("[Agora Chat] Service not configured - returning stub response");
+      return NextResponse.json({
+        success: true,
+        data: {
+          token: null,
+          expiresAt: null,
+          agoraUserId: null,
+          appId: null,
+          chatAppKey: null,
+          configured: false,
+        },
+        msg: "Chat service not configured - using stub response",
+      });
     }
 
     // Get or create Agora user ID for this user

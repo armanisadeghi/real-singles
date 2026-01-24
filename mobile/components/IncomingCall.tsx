@@ -1,7 +1,7 @@
 import { useCall } from '@/context/CallContext';
 import { Ionicons } from '@expo/vector-icons';
-import { Audio } from "expo-av";
-import React, { useEffect, useState } from 'react';
+import { useAudioPlayer, AudioPlayer } from "expo-audio";
+import React, { useEffect, useRef } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
   Gesture,
@@ -17,48 +17,44 @@ import Animated, {
 
 const IncomingCall = () => {
   const { incomingCall, acceptCall, rejectCall } = useCall();
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const player = useAudioPlayer(require("../assets/sounds/ringtone.mp3"));
+  const hasStartedPlaying = useRef(false);
   const translationX = useSharedValue(0);
 
   // Play sound on incoming call
   useEffect(() => {
-    const playSound = async () => {
-      if (incomingCall && !sound) {
-        try {
-          const { sound: newSound } = await Audio.Sound.createAsync(
-            require("../assets/sounds/ringtone.mp3"),
-            { shouldPlay: true, isLooping: true }
-          );
-          setSound(newSound);
-        } catch (error) {
-          console.error(
-            "Failed to load sound. Please check the path and ensure the file exists in assets/sounds.",
-            error
-          );
-        }
+    if (incomingCall && player && !hasStartedPlaying.current) {
+      try {
+        player.loop = true;
+        player.play();
+        hasStartedPlaying.current = true;
+      } catch (error) {
+        console.error(
+          "Failed to play sound. Please check the path and ensure the file exists in assets/sounds.",
+          error
+        );
       }
-    };
-
-    playSound();
+    }
 
     // Cleanup sound
     return () => {
-      if (sound) {
-        sound.unloadAsync();
+      if (player) {
+        player.pause();
+        hasStartedPlaying.current = false;
       }
     };
-  }, [incomingCall]);
+  }, [incomingCall, player]);
 
   const handleReject = () => {
-    if (sound) {
-      sound.stopAsync();
+    if (player) {
+      player.pause();
     }
     rejectCall();
   };
 
   const handleAccept = () => {
-    if (sound) {
-      sound.stopAsync();
+    if (player) {
+      player.pause();
     }
     acceptCall();
   };

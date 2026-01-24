@@ -2,8 +2,7 @@ import { icons } from "@/constants/icons";
 import { CommonFileUpload } from "@/lib/api";
 import { signupProps } from "@/types";
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
-import { Audio } from "expo-av";
-import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import { CameraType, CameraView, useCameraPermissions, useMicrophonePermissions } from "expo-camera";
 import * as FileSystem from "expo-file-system";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -21,7 +20,7 @@ const TakeVideo = ({ data, updateData, onNext, error }: signupProps) => {
 
   const [facing, setFacing] = useState<CameraType>("front");
   const [permission, requestPermission] = useCameraPermissions();
-  const [audioPermission, requestAudioPermission] = Audio.usePermissions();
+  const [audioPermission, requestAudioPermission] = useMicrophonePermissions();
   const [recordedVideo, setRecordedVideo] = useState<string | null>(null);
   const [recording, setRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);

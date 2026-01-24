@@ -10,12 +10,12 @@ import {
   Keyboard,
   Modal,
   Platform,
-  SafeAreaView,
   Text,
   TextInput,
   TouchableOpacity,
   View
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Pdf from "react-native-pdf";
 import Toast from "react-native-toast-message";
 import { WebView } from "react-native-webview";
