@@ -1,0 +1,80 @@
+---
+description: RealSingles project context and codebase orientation
+alwaysApply: true
+---
+
+# RealSingles Project Context
+
+**What:** Dating app with dual platforms sharing a single backend.
+
+| Platform | Stack | Status |
+|----------|-------|--------|
+| Mobile | Expo (React Native) | Live on App Store + Play Store |
+| Web | Next.js 15+ on Vercel | Marketing site + authenticated app |
+| Backend | Supabase (PostgreSQL + Auth + Storage) | 76+ API endpoints |
+
+---
+
+## Codebase Structure
+
+```
+/mobile    → Expo app (iOS + Android)
+/web       → Next.js app (API routes + Web UI)
+/docs      → Legacy documentation (mostly outdated, reference only)
+```
+
+---
+
+## Key Reference Files
+
+### Mobile
+
+| File | Purpose |
+|------|---------|
+| `mobile/app/(tabs)/_layout.tsx` | Native bottom tabs (best example of native-first) |
+| `mobile/constants/options.ts` | Standardized dropdown options (shared across forms) |
+| `mobile/components/forms/EditProfileForm.tsx` | Form patterns and field handling |
+| `mobile/lib/api.ts` | API client (calls Next.js endpoints) |
+
+### Web
+
+| File | Purpose |
+|------|---------|
+| `web/src/app/api/users/me/route.ts` | API route pattern example |
+| `web/src/app/(app)/layout.tsx` | Authenticated app layout |
+| `web/src/app/(app)/profile/edit/page.tsx` | Form page pattern |
+| `web/src/components/ui/` | Shared UI components (ShadCN/Radix) |
+
+---
+
+## API Structure
+
+- All API routes live in `web/src/app/api/`
+- Mobile calls these same endpoints via `mobile/lib/api.ts`
+- Key endpoint groups: auth, users, matches, conversations, events, rewards, speed-dating
+
+---
+
+## Database Migrations
+
+**Location:** `web/supabase/migrations/`
+
+**Commands (run from `/web`):**
+| Command | Use |
+|---------|-----|
+| `pnpm db:migrate` | Push migrations + regenerate types (interactive) |
+| `pnpm db:types` | Regenerate TypeScript types only |
+| `pnpm db:status` | Check migration sync status |
+
+**Rules:**
+1. **Always make migrations idempotent** — use `DROP ... IF EXISTS` before `CREATE`, use `IF NOT EXISTS` for tables/columns
+2. **Always regenerate types after schema changes** — run `pnpm db:types` or use `pnpm db:migrate`
+3. **Never reuse migration numbers** — each migration needs a unique numeric prefix
+
+---
+
+## Cross-References
+
+- **CRITICAL - Cross-platform parity:** See `cross-platform-parity.mdc` (all features on all platforms)
+- **Mobile native-feel rules:** See `mobile-native-ios-android-rules.mdc`
+- **General coding standards:** See user rules (tech stack, layout essentials, file organization)

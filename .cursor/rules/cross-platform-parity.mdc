@@ -1,0 +1,97 @@
+---
+description: CRITICAL - All features must exist on ALL platforms
+alwaysApply: true
+---
+
+# Cross-Platform Parity Rules
+
+**This is the most important rule in this project.**
+
+---
+
+## The Platforms
+
+Every feature must work on ALL of these:
+
+| Platform | Location |
+|----------|----------|
+| **Mobile iOS** | `/mobile` (Expo) |
+| **Mobile Android** | `/mobile` (Expo) |
+| **Web Desktop** | `/web` (Next.js) |
+| **Web Mobile** | `/web` (Next.js, responsive) |
+
+---
+
+## The Rule
+
+**When you implement or modify ANY feature, you MUST implement it on ALL platforms.**
+
+If the user says "add feature X to the discovery page", that means:
+1. Mobile iOS - with native-feel implementation
+2. Mobile Android - with native-feel implementation  
+3. Web Desktop - fully functional
+4. Web Mobile - fully functional and touch-friendly
+
+**Do NOT consider a task complete until all platforms are addressed.**
+
+---
+
+## Single Source of Truth
+
+### API Logic
+
+All business logic (search, filters, matching, etc.) MUST go through shared API endpoints.
+
+```
+CORRECT:
+  Mobile → /api/discover/top-matches → returns filtered users
+  Web    → /api/discover/top-matches → returns filtered users
+
+WRONG:
+  Mobile → local filtering logic
+  Web    → different local filtering logic
+```
+
+**API routes live in:** `web/src/app/api/`
+**Mobile calls them via:** `mobile/lib/api.ts`
+
+### Constants & Options
+
+Dropdown options, filter values, and other constants MUST be identical across platforms.
+
+| Platform | Constants File |
+|----------|----------------|
+| Mobile | `mobile/constants/options.ts` |
+| Web | `web/src/types/index.ts` (or dedicated constants file) |
+
+**CRITICAL:** When modifying constants in one file, you MUST update the other to match.
+
+Before completing any task that touches constants:
+1. Check both files
+2. Ensure values are identical
+3. If they differ, fix the discrepancy
+
+---
+
+## Checklist Before Marking Complete
+
+For ANY feature work, confirm:
+
+- [ ] Works on iOS (native feel)
+- [ ] Works on Android (native feel)
+- [ ] Works on Web Desktop
+- [ ] Works on Web Mobile (responsive, touch-friendly)
+- [ ] Uses shared API endpoint (not local logic)
+- [ ] Constants are synced between mobile and web
+
+---
+
+## Exceptions
+
+The ONLY acceptable exceptions are platform-specific capabilities that genuinely cannot exist elsewhere:
+
+- Push notifications (native mobile only, browser notifications on web)
+- Camera/gallery access patterns (different APIs, same outcome)
+- Haptic feedback (mobile only)
+
+Even these should have equivalent UX on other platforms where possible.

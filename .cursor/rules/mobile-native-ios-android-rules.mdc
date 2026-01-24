@@ -1,0 +1,52 @@
+---
+description: 
+alwaysApply: true
+---
+
+# Native Feel Guidelines
+
+**Target audience:** Senior developers who know React Native and platform conventions.
+
+---
+
+## Core Principle
+
+Use actual native components. Not JS approximations that mimic native appearance.
+
+---
+
+## Rules
+
+1. **Don't override platform defaults.** If iOS or Android handles something automatically, don't customize it. This includes colors, spacing, animations, and haptics.
+
+2. **Use platform-native icons.**
+   - iOS: SF Symbols (`expo-symbols`)
+   - Android: Material Icons or properly-sized PNGs (24dp)
+
+3. **Prefer native-backed libraries.**
+   - ✅ `expo-router/unstable-native-tabs` (actual `UITabBarController`/`BottomNavigationView`)
+   - ❌ `@react-navigation/bottom-tabs` (JS-drawn views)
+   - ✅ `@gorhom/bottom-sheet` with native driver
+   - ❌ Custom `Animated.View` bottom sheets
+   - ✅ `react-native-gesture-handler` + `react-native-reanimated` (native thread)
+   - ❌ JS-based touch handlers and animations
+
+4. **Trust safe area handling.** Native components handle safe areas. Don't add manual padding that fights the system.
+
+5. **Less code = more native.** If you're writing extensive styling to "fix" how something looks, you're probably overriding native behavior.
+
+---
+
+## Reference Implementations
+
+| Component | File | Notes |
+|-----|---|----|
+| Bottom Navigation | `mobile/app/(tabs)/_layout.tsx` | Best example—minimal code, fully native |
+
+---
+
+## Quick Test
+
+Ask yourself: "Would this component look identical if I built it in Swift/Kotlin?"
+
+If no, you're probably overriding platform behavior.
