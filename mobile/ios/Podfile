@@ -20,6 +20,8 @@ ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] ||= podfile_properties['EX_DEV_CLIENT_NET
 # Disable prebuilt binaries to make RCT-Folly available for Agora Chat
 ENV['RCT_USE_RN_DEP'] = '0'
 ENV['RCT_USE_PREBUILT_RNCORE'] = '0'
+# Disable VisionCamera Frame Processors (not used in app, beta worklets-core incompatible with New Arch)
+ENV['VCEnableFrameProcessors'] = '0'
 platform :ios, podfile_properties['ios.deploymentTarget'] || '15.1'
 
 # Explicitly specify the Xcode project to avoid ambiguity
@@ -64,7 +66,7 @@ target 'RealSingles' do
   )
   
   pod 'RNWorklets', :path => '../node_modules/react-native-worklets'
-  pod 'react-native-worklets-core', :path => '../node_modules/react-native-worklets-core', :modular_headers => true
+  # react-native-worklets-core will be auto-linked via use_native_modules
 
   pod 'HyphenateChat', '4.10.2'
 
