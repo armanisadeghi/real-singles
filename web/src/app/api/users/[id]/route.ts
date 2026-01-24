@@ -193,6 +193,22 @@ export async function GET(
     HSign: profile?.zodiac_sign || "",
     Interest: profile?.interests?.join(", ") || "",
     
+    // Dating Intentions
+    DatingIntentions: profile?.dating_intentions || "",
+    
+    // Profile Prompts (Structured Storytelling)
+    IdealFirstDate: profile?.ideal_first_date || "",
+    NonNegotiables: profile?.non_negotiables || "",
+    WorstJob: profile?.worst_job || "",
+    DreamJob: profile?.dream_job || "",
+    NightclubOrHome: profile?.nightclub_or_home || "",
+    PetPeeves: profile?.pet_peeves || "",
+    AfterWork: profile?.after_work || "",
+    WayToHeart: profile?.way_to_heart || "",
+    CraziestTravelStory: profile?.craziest_travel_story || "",
+    WeirdestGift: profile?.weirdest_gift || "",
+    PastEvent: profile?.past_event || "",
+    
     // Verification & Stats
     is_verified: profile?.is_verified || false,
     RATINGS: avgRating,

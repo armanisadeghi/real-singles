@@ -377,6 +377,45 @@ export type Database = {
           },
         ]
       }
+      life_goal_definitions: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          key: string
+          label: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          key: string
+          label: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          key?: string
+          label?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           action: string
@@ -526,6 +565,47 @@ export type Database = {
           },
         ]
       }
+      phone_verification_otps: {
+        Row: {
+          attempts: number | null
+          created_at: string | null
+          expires_at: string
+          id: string
+          otp_code: string
+          phone: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          otp_code: string
+          phone: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          otp_code?: string
+          phone?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phone_verification_otps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       point_transactions: {
         Row: {
           amount: number
@@ -623,6 +703,7 @@ export type Database = {
           craziest_travel_story: string | null
           created_at: string | null
           date_of_birth: string | null
+          dating_intentions: string | null
           dream_job: string | null
           drinking: string | null
           education: string | null
@@ -643,6 +724,7 @@ export type Database = {
           languages: string[] | null
           last_name: string | null
           latitude: number | null
+          life_goals: string[] | null
           location: unknown
           longitude: number | null
           looking_for: string[] | null
@@ -657,6 +739,7 @@ export type Database = {
           pets: string[] | null
           photo_verified_at: string | null
           political_views: string | null
+          privacy_settings: Json | null
           profile_completed_at: string | null
           profile_completion_prefer_not: string[] | null
           profile_completion_skipped: string[] | null
@@ -672,6 +755,10 @@ export type Database = {
           user_id: string | null
           verification_selfie_url: string | null
           verified_at: string | null
+          video_intro_duration_seconds: number | null
+          video_intro_url: string | null
+          voice_prompt_duration_seconds: number | null
+          voice_prompt_url: string | null
           wants_kids: string | null
           way_to_heart: string | null
           weirdest_gift: string | null
@@ -689,6 +776,7 @@ export type Database = {
           craziest_travel_story?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          dating_intentions?: string | null
           dream_job?: string | null
           drinking?: string | null
           education?: string | null
@@ -709,6 +797,7 @@ export type Database = {
           languages?: string[] | null
           last_name?: string | null
           latitude?: number | null
+          life_goals?: string[] | null
           location?: unknown
           longitude?: number | null
           looking_for?: string[] | null
@@ -723,6 +812,7 @@ export type Database = {
           pets?: string[] | null
           photo_verified_at?: string | null
           political_views?: string | null
+          privacy_settings?: Json | null
           profile_completed_at?: string | null
           profile_completion_prefer_not?: string[] | null
           profile_completion_skipped?: string[] | null
@@ -738,6 +828,10 @@ export type Database = {
           user_id?: string | null
           verification_selfie_url?: string | null
           verified_at?: string | null
+          video_intro_duration_seconds?: number | null
+          video_intro_url?: string | null
+          voice_prompt_duration_seconds?: number | null
+          voice_prompt_url?: string | null
           wants_kids?: string | null
           way_to_heart?: string | null
           weirdest_gift?: string | null
@@ -755,6 +849,7 @@ export type Database = {
           craziest_travel_story?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          dating_intentions?: string | null
           dream_job?: string | null
           drinking?: string | null
           education?: string | null
@@ -775,6 +870,7 @@ export type Database = {
           languages?: string[] | null
           last_name?: string | null
           latitude?: number | null
+          life_goals?: string[] | null
           location?: unknown
           longitude?: number | null
           looking_for?: string[] | null
@@ -789,6 +885,7 @@ export type Database = {
           pets?: string[] | null
           photo_verified_at?: string | null
           political_views?: string | null
+          privacy_settings?: Json | null
           profile_completed_at?: string | null
           profile_completion_prefer_not?: string[] | null
           profile_completion_skipped?: string[] | null
@@ -804,6 +901,10 @@ export type Database = {
           user_id?: string | null
           verification_selfie_url?: string | null
           verified_at?: string | null
+          video_intro_duration_seconds?: number | null
+          video_intro_url?: string | null
+          voice_prompt_duration_seconds?: number | null
+          voice_prompt_url?: string | null
           wants_kids?: string | null
           way_to_heart?: string | null
           weirdest_gift?: string | null
@@ -820,6 +921,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      prompt_definitions: {
+        Row: {
+          category: string
+          created_at: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_required: boolean | null
+          key: string
+          max_length: number | null
+          placeholder_text: string | null
+          prompt_text: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          key: string
+          max_length?: number | null
+          placeholder_text?: string | null
+          prompt_text: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          key?: string
+          max_length?: number | null
+          placeholder_text?: string | null
+          prompt_text?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       referrals: {
         Row: {
@@ -1172,6 +1318,44 @@ export type Database = {
           },
         ]
       }
+      user_profile_prompts: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string
+          prompt_key: string
+          response: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          prompt_key: string
+          response: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          prompt_key?: string
+          response?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profile_prompts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           agora_user_id: string | null
@@ -1180,6 +1364,7 @@ export type Database = {
           email: string
           id: string
           last_active_at: string | null
+          notification_preferences: Json | null
           phone: string | null
           phone_verified: boolean | null
           points_balance: number | null
@@ -1197,6 +1382,7 @@ export type Database = {
           email: string
           id: string
           last_active_at?: string | null
+          notification_preferences?: Json | null
           phone?: string | null
           phone_verified?: boolean | null
           points_balance?: number | null
@@ -1214,6 +1400,7 @@ export type Database = {
           email?: string
           id?: string
           last_active_at?: string | null
+          notification_preferences?: Json | null
           phone?: string | null
           phone_verified?: boolean | null
           points_balance?: number | null

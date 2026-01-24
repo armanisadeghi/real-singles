@@ -80,6 +80,12 @@ const REQUIRED_FIELDS = PROFILE_FIELDS.filter(f => f.required).map(f => f.key);
 // Total number of fields for percentage calculation
 const TOTAL_FIELDS = PROFILE_FIELDS.length;
 
+// Minimum photo requirement configuration
+// Set to 0 to disable, or a positive number (e.g., 3, 6) to require minimum photos
+// RealSingles decision: 1 photo minimum (lower barrier to entry)
+// Industry standard from The League, Hinge: 6 photos required
+const MIN_PHOTOS_REQUIRED = parseInt(process.env.MIN_PHOTOS_REQUIRED || "1", 10);
+
 /**
  * Check if a field has a value (not empty/null/undefined)
  */
@@ -99,7 +105,8 @@ function fieldHasValue(profile: Record<string, unknown>, fieldKey: string): bool
 function calculateCompletion(
   profile: Record<string, unknown>,
   skippedFields: string[],
-  preferNotFields: string[]
+  preferNotFields: string[],
+  photoCount: number = 0
 ) {
   const completedFields: string[] = [];
   const incompleteFields: string[] = [];
@@ -137,11 +144,15 @@ function calculateCompletion(
     ? PROFILE_FIELDS.find(f => incompleteFields.includes(f.key))
     : null;
   
-  // Check if all required fields are complete
-  const canStartMatching = requiredIncomplete.length === 0;
+  // Check photo requirement
+  const hasMinimumPhotos = MIN_PHOTOS_REQUIRED <= 0 || photoCount >= MIN_PHOTOS_REQUIRED;
+  const photoShortfall = MIN_PHOTOS_REQUIRED > 0 ? Math.max(0, MIN_PHOTOS_REQUIRED - photoCount) : 0;
+  
+  // Check if all required fields are complete AND photo requirement is met
+  const canStartMatching = requiredIncomplete.length === 0 && hasMinimumPhotos;
   
   // Check if profile is fully complete (all fields have value or prefer_not)
-  const isComplete = incompleteFields.length === 0;
+  const isComplete = incompleteFields.length === 0 && hasMinimumPhotos;
   
   return {
     percentage,
@@ -162,6 +173,11 @@ function calculateCompletion(
     } : null,
     canStartMatching,
     isComplete,
+    // Photo requirement info
+    photoCount,
+    minPhotosRequired: MIN_PHOTOS_REQUIRED,
+    hasMinimumPhotos,
+    photoShortfall,
   };
 }
 
@@ -203,11 +219,19 @@ export async function GET() {
     );
   }
 
+  // Get gallery photo count (only images, not videos)
+  const { count: photoCount } = await supabase
+    .from("user_gallery")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("media_type", "image");
+
   // Calculate completion
   const completion = calculateCompletion(
     profile || {},
     profile?.profile_completion_skipped || [],
-    profile?.profile_completion_prefer_not || []
+    profile?.profile_completion_prefer_not || [],
+    photoCount || 0
   );
 
   return NextResponse.json({
@@ -392,10 +416,18 @@ export async function POST(request: NextRequest) {
     .eq("user_id", user.id)
     .single();
 
+  // Get gallery photo count
+  const { count: photoCount } = await supabase
+    .from("user_gallery")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("media_type", "image");
+
   const completion = calculateCompletion(
     updatedProfile || {},
     updatedProfile?.profile_completion_skipped || [],
-    updatedProfile?.profile_completion_prefer_not || []
+    updatedProfile?.profile_completion_prefer_not || [],
+    photoCount || 0
   );
 
   return NextResponse.json({

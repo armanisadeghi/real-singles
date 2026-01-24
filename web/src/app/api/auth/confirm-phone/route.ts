@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 
+const MAX_ATTEMPTS = 5;
+
 /**
  * POST /api/auth/confirm-phone
  * Confirm phone with OTP code
+ * 
+ * Verifies the OTP code against stored value in database.
+ * Supports demo mode when Twilio is not configured.
  */
 export async function POST(request: Request) {
   const supabase = await createApiClient();
@@ -60,12 +65,21 @@ export async function POST(request: Request) {
 
     // Check if Twilio is configured
     const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+    const isDemoMode = !twilioSid;
 
-    if (!twilioSid) {
-      // Demo mode - accept "123456" as valid OTP
-      if (otp === "123456") {
-        // Mark phone as verified
-        const { error: updateError } = await supabase
+    // Get stored OTP from database
+    const { data: otpRecord } = await supabase
+      .from("phone_verification_otps")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("phone", targetPhone)
+      .single();
+
+    // If no OTP record exists, fall back to demo mode check
+    if (!otpRecord) {
+      if (isDemoMode && otp === "123456") {
+        // Mark phone as verified (demo mode)
+        await supabase
           .from("users")
           .update({
             phone: targetPhone,
@@ -73,37 +87,92 @@ export async function POST(request: Request) {
           })
           .eq("id", user.id);
 
-        if (updateError) {
-          console.error("Error updating phone verification:", updateError);
-          return NextResponse.json(
-            { success: false, msg: "Failed to verify phone" },
-            { status: 500 }
-          );
-        }
-
         return NextResponse.json({
           success: true,
           demo_mode: true,
           msg: "Phone verified successfully (demo mode)",
         });
-      } else {
-        return NextResponse.json(
-          { success: false, msg: "Invalid verification code" },
-          { status: 400 }
-        );
       }
+      
+      return NextResponse.json(
+        { success: false, msg: "No verification code found. Please request a new code." },
+        { status: 400 }
+      );
     }
 
-    // TODO: Implement actual OTP verification
-    // 1. Retrieve stored OTP from database
-    // 2. Check if OTP matches and hasn't expired
-    // 3. Mark phone as verified
+    // Check if already verified
+    if (otpRecord.verified_at) {
+      return NextResponse.json(
+        { success: false, msg: "This code has already been used." },
+        { status: 400 }
+      );
+    }
 
-    // Placeholder for real implementation
-    return NextResponse.json(
-      { success: false, msg: "Phone verification not fully configured" },
-      { status: 501 }
-    );
+    // Check if too many attempts
+    const attempts = otpRecord.attempts ?? 0;
+    if (attempts >= MAX_ATTEMPTS) {
+      return NextResponse.json(
+        { success: false, msg: "Too many attempts. Please request a new code." },
+        { status: 429 }
+      );
+    }
+
+    // Check if expired
+    if (new Date(otpRecord.expires_at) < new Date()) {
+      return NextResponse.json(
+        { success: false, msg: "Verification code has expired. Please request a new code." },
+        { status: 400 }
+      );
+    }
+
+    // Increment attempt counter
+    await supabase
+      .from("phone_verification_otps")
+      .update({ attempts: attempts + 1 })
+      .eq("id", otpRecord.id);
+
+    // Verify OTP
+    if (otpRecord.otp_code !== otp) {
+      const remainingAttempts = MAX_ATTEMPTS - attempts - 1;
+      return NextResponse.json(
+        { 
+          success: false, 
+          msg: remainingAttempts > 0 
+            ? `Invalid code. ${remainingAttempts} attempt${remainingAttempts === 1 ? '' : 's'} remaining.`
+            : "Invalid code. Please request a new code."
+        },
+        { status: 400 }
+      );
+    }
+
+    // OTP is valid - mark as verified
+    await supabase
+      .from("phone_verification_otps")
+      .update({ verified_at: new Date().toISOString() })
+      .eq("id", otpRecord.id);
+
+    // Update user's phone verification status
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({
+        phone: targetPhone,
+        phone_verified: true,
+      })
+      .eq("id", user.id);
+
+    if (updateError) {
+      console.error("Error updating phone verification:", updateError);
+      return NextResponse.json(
+        { success: false, msg: "Failed to verify phone" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      demo_mode: isDemoMode,
+      msg: "Phone verified successfully",
+    });
   } catch (error) {
     console.error("Error in confirm-phone:", error);
     return NextResponse.json(

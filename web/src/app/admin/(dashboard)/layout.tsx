@@ -58,6 +58,18 @@ export default async function AdminDashboardLayout({
                 >
                   Products
                 </Link>
+                <Link
+                  href="/admin/prompts"
+                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Prompts
+                </Link>
+                <Link
+                  href="/admin/life-goals"
+                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Life Goals
+                </Link>
               </nav>
             </div>
             <div className="flex items-center space-x-4">

@@ -111,6 +111,7 @@ export async function GET() {
     ZodiacSign: profile?.zodiac_sign || "",
     Bio: profile?.bio || "",
     LookingForDescription: profile?.looking_for_description || "",
+    DatingIntentions: profile?.dating_intentions || "",
     
     // Field aliases for mobile app compatibility
     About: profile?.bio || "",
@@ -287,6 +288,7 @@ export async function PUT(request: Request) {
       Bio: "bio",
       About: "bio", // Alias
       LookingForDescription: "looking_for_description",
+      DatingIntentions: "dating_intentions",
       
       // Media
       Image: "profile_image_url",

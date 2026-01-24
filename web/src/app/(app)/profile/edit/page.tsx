@@ -23,6 +23,7 @@ import {
   LANGUAGE_OPTIONS,
   INTEREST_OPTIONS,
   COUNTRY_OPTIONS,
+  DATING_INTENTIONS_OPTIONS,
   getZodiacFromDate,
 } from "@/types";
 
@@ -38,6 +39,7 @@ type ProfileState = {
   zodiac_sign: string;
   bio: string;
   looking_for_description: string;
+  dating_intentions: string;
   
   // Physical
   height_feet: number;
@@ -71,6 +73,9 @@ type ProfileState = {
   
   // Interests
   interests: string[];
+  
+  // Life Goals (The League model)
+  life_goals: string[];
   
   // Profile Prompts
   ideal_first_date: string;
@@ -113,6 +118,7 @@ export default function EditProfilePage() {
   const [success, setSuccess] = useState("");
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [lifeGoalOptions, setLifeGoalOptions] = useState<{key: string; label: string; category: string; description?: string}[]>([]);
 
   // Refs for autosave
   const lastSavedProfileRef = useRef<string>("");
@@ -129,6 +135,7 @@ export default function EditProfilePage() {
     zodiac_sign: "",
     bio: "",
     looking_for_description: "",
+    dating_intentions: "",
     height_feet: 5,
     height_inches: 6,
     body_type: "",
@@ -152,6 +159,7 @@ export default function EditProfilePage() {
     wants_kids: "",
     pets: [],
     interests: [],
+    life_goals: [],
     ideal_first_date: "",
     non_negotiables: "",
     worst_job: "",
@@ -206,6 +214,7 @@ export default function EditProfilePage() {
       zodiac_sign: profile.zodiac_sign || null,
       bio: profile.bio || null,
       looking_for_description: profile.looking_for_description || null,
+      dating_intentions: profile.dating_intentions || null,
       // Physical
       height_inches: totalHeightInches || null,
       body_type: profile.body_type || null,
@@ -233,6 +242,8 @@ export default function EditProfilePage() {
       pets: profile.pets.length > 0 ? profile.pets : null,
       // Interests
       interests: profile.interests.length > 0 ? profile.interests : null,
+      // Life Goals
+      life_goals: profile.life_goals.length > 0 ? profile.life_goals : null,
       // Prompts
       ideal_first_date: profile.ideal_first_date || null,
       non_negotiables: profile.non_negotiables || null,
@@ -293,6 +304,27 @@ export default function EditProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Load life goal options
+  useEffect(() => {
+    const fetchLifeGoals = async () => {
+      try {
+        const response = await fetch("/api/life-goals");
+        const data = await response.json();
+        if (data.success && data.data?.goals) {
+          setLifeGoalOptions(data.data.goals.map((g: {key: string; label: string; category: string; description?: string}) => ({
+            key: g.key,
+            label: g.label,
+            category: g.category,
+            description: g.description,
+          })));
+        }
+      } catch (error) {
+        console.error("Error fetching life goals:", error);
+      }
+    };
+    fetchLifeGoals();
+  }, []);
+
   // Auto-calculate zodiac sign when date of birth changes
   useEffect(() => {
     if (profile.date_of_birth) {
@@ -330,6 +362,7 @@ export default function EditProfilePage() {
         zodiac_sign: existingProfile.zodiac_sign || "",
         bio: existingProfile.bio || "",
         looking_for_description: existingProfile.looking_for_description || "",
+        dating_intentions: existingProfile.dating_intentions || "",
         height_feet: feet,
         height_inches: inches,
         body_type: existingProfile.body_type || "",
@@ -353,6 +386,7 @@ export default function EditProfilePage() {
         wants_kids: existingProfile.wants_kids || "",
         pets: existingProfile.pets || [],
         interests: existingProfile.interests || [],
+        life_goals: existingProfile.life_goals || [],
         ideal_first_date: existingProfile.ideal_first_date || "",
         non_negotiables: existingProfile.non_negotiables || "",
         worst_job: existingProfile.worst_job || "",
@@ -653,6 +687,12 @@ export default function EditProfilePage() {
               onChange={(value) => setProfile(prev => ({ ...prev, marital_status: value }))}
               options={MARITAL_STATUS_OPTIONS}
             />
+            <SelectField
+              label="Dating Intentions"
+              value={profile.dating_intentions}
+              onChange={(value) => setProfile(prev => ({ ...prev, dating_intentions: value }))}
+              options={DATING_INTENTIONS_OPTIONS}
+            />
           </div>
 
           <div className="mt-4">
@@ -871,6 +911,111 @@ export default function EditProfilePage() {
             options={INTEREST_OPTIONS}
             onToggle={(value) => toggleArrayField("interests", value)}
           />
+        </section>
+
+        {/* Life Goals */}
+        <section className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Life Goals</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Select up to 10 life goals to help find matches with shared ambitions.
+          </p>
+          {lifeGoalOptions.length > 0 ? (
+            <>
+              {/* Group by category */}
+              {["career", "adventure", "personal", "impact"].map((category) => {
+                const categoryGoals = lifeGoalOptions.filter((g) => g.category === category);
+                if (categoryGoals.length === 0) return null;
+                const categoryLabels: Record<string, string> = {
+                  career: "Career & Achievement",
+                  adventure: "Adventure & Travel",
+                  personal: "Personal & Lifestyle",
+                  impact: "Impact & Legacy",
+                };
+                return (
+                  <div key={category} className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-700 mb-2">{categoryLabels[category]}</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {categoryGoals.map((goal) => {
+                        const isSelected = profile.life_goals.includes(goal.key);
+                        const canSelect = profile.life_goals.length < 10 || isSelected;
+                        return (
+                          <button
+                            key={goal.key}
+                            type="button"
+                            onClick={() => {
+                              if (!canSelect && !isSelected) return;
+                              toggleArrayField("life_goals", goal.key);
+                            }}
+                            disabled={!canSelect && !isSelected}
+                            title={goal.description}
+                            className={`px-3 py-2 text-sm rounded-full border transition-colors ${
+                              isSelected
+                                ? "bg-indigo-100 border-indigo-500 text-indigo-700"
+                                : canSelect
+                                ? "border-gray-300 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50"
+                                : "border-gray-200 text-gray-400 cursor-not-allowed"
+                            }`}
+                          >
+                            {goal.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+              <p className="text-xs text-gray-400 mt-2">
+                {profile.life_goals.length}/10 selected
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-gray-400">Loading life goals...</p>
+          )}
+        </section>
+
+        {/* Voice & Video Prompts - Coming Soon */}
+        <section className="bg-white rounded-xl shadow-sm p-6 relative overflow-hidden">
+          <div className="absolute top-3 right-3 bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-1 rounded-full">
+            Coming Soon
+          </div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Voice & Video Prompts</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Add a personal touch to your profile with voice and video introductions.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-60 pointer-events-none">
+            {/* Voice Prompt Placeholder */}
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-pink-100 to-indigo-100 flex items-center justify-center">
+                <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+              </div>
+              <h3 className="font-medium text-gray-900 mb-1">Voice Prompt</h3>
+              <p className="text-xs text-gray-500 mb-3">Record a 30-second voice intro</p>
+              <button className="px-4 py-2 bg-gray-100 text-gray-500 rounded-lg text-sm cursor-not-allowed">
+                Record Voice
+              </button>
+            </div>
+            
+            {/* Video Intro Placeholder */}
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-pink-100 to-indigo-100 flex items-center justify-center">
+                <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="font-medium text-gray-900 mb-1">Video Introduction</h3>
+              <p className="text-xs text-gray-500 mb-3">Upload a 30-60 second video</p>
+              <button className="px-4 py-2 bg-gray-100 text-gray-500 rounded-lg text-sm cursor-not-allowed">
+                Upload Video
+              </button>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mt-4 text-center">
+            Voice and video prompts help you stand out and make better connections.
+            {/* TODO: Implement voice recording with Web Audio API */}
+            {/* TODO: Implement video upload with duration validation (max 60 seconds) */}
+          </p>
         </section>
 
         {/* About Me */}

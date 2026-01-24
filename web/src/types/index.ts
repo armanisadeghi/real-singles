@@ -11,6 +11,7 @@ export const GENDER_OPTIONS = [
   { value: "female", label: "Female" },
   { value: "non-binary", label: "Non-Binary" },
   { value: "other", label: "Other" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 export const BODY_TYPE_OPTIONS = [
@@ -20,6 +21,7 @@ export const BODY_TYPE_OPTIONS = [
   { value: "muscular", label: "Muscular" },
   { value: "curvy", label: "Curvy" },
   { value: "plus_size", label: "A few extra pounds" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 export const MARITAL_STATUS_OPTIONS = [
@@ -50,6 +52,7 @@ export const SMOKING_OPTIONS = [
   { value: "occasionally", label: "Yes (Occasionally)" },
   { value: "daily", label: "Yes (Daily)" },
   { value: "trying_to_quit", label: "Trying to quit" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 export const DRINKING_OPTIONS = [
@@ -57,6 +60,7 @@ export const DRINKING_OPTIONS = [
   { value: "social", label: "Social" },
   { value: "moderate", label: "Moderately" },
   { value: "regular", label: "Regular" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 export const MARIJUANA_OPTIONS = [
@@ -71,6 +75,16 @@ export const EXERCISE_OPTIONS = [
   { value: "sometimes", label: "Sometimes" },
   { value: "regularly", label: "Regularly" },
   { value: "daily", label: "Daily" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+// Dating intentions - critical for serious-dater positioning (The League, Hinge model)
+export const DATING_INTENTIONS_OPTIONS = [
+  { value: "life_partner", label: "Life Partner" },
+  { value: "long_term", label: "Long-term Relationship" },
+  { value: "long_term_open", label: "Long-term, Open to Short" },
+  { value: "figuring_out", label: "Figuring Out My Goals" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 export const EDUCATION_OPTIONS = [
@@ -80,6 +94,7 @@ export const EDUCATION_OPTIONS = [
   { value: "bachelor", label: "Bachelor's Degree" },
   { value: "graduate", label: "Graduate Degree" },
   { value: "phd", label: "PhD/Post-doctoral" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 export const ETHNICITY_OPTIONS = [
@@ -319,6 +334,7 @@ export interface Profile {
   zodiac_sign?: string;
   bio?: string;
   looking_for_description?: string;
+  dating_intentions?: "life_partner" | "long_term" | "long_term_open" | "figuring_out" | "prefer_not_to_say";
   
   // Physical Attributes
   height_inches?: number;
@@ -374,6 +390,13 @@ export interface Profile {
   
   // Media
   profile_image_url?: string;
+  voice_prompt_url?: string;
+  video_intro_url?: string;
+  voice_prompt_duration_seconds?: number;
+  video_intro_duration_seconds?: number;
+  
+  // Life Goals (The League model)
+  life_goals?: string[];
   
   // Verification (Basic - selfie)
   is_verified: boolean;
@@ -701,3 +724,65 @@ export type ProfileCompletionAction =
   | "remove_prefer_not" 
   | "set_step" 
   | "mark_complete";
+
+// ============================================
+// LIFE GOALS (The League model)
+// ============================================
+
+export interface LifeGoalDefinition {
+  id: string;
+  key: string;
+  label: string;
+  category: string;
+  description: string | null;
+  icon: string | null;
+  is_active: boolean | null;
+  display_order: number | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export const LIFE_GOAL_CATEGORIES = [
+  { value: "career", label: "Career & Achievement" },
+  { value: "adventure", label: "Adventure & Travel" },
+  { value: "personal", label: "Personal & Lifestyle" },
+  { value: "impact", label: "Impact & Legacy" },
+] as const;
+
+// ============================================
+// PROFILE PROMPTS SYSTEM
+// ============================================
+
+export interface PromptDefinition {
+  id: string;
+  key: string;
+  prompt_text: string;
+  placeholder_text: string | null;
+  category: string;
+  max_length: number | null;
+  is_active: boolean | null;
+  is_required: boolean | null;
+  display_order: number | null;
+  icon: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface UserProfilePrompt {
+  id: string;
+  user_id: string;
+  prompt_key: string;
+  response: string;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export const PROMPT_CATEGORIES = [
+  { value: "about_me", label: "About Me" },
+  { value: "conversation", label: "Conversation Starters" },
+  { value: "experiences", label: "Life & Experiences" },
+  { value: "work", label: "Work & Career" },
+  { value: "fun", label: "Fun & Quirky" },
+  { value: "looking_for", label: "Looking For" },
+] as const;

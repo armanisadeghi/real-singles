@@ -8,6 +8,7 @@ async function getMyProfile() {
   
   if (!user) return null;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
@@ -190,16 +191,33 @@ export default async function MyProfilePage() {
           </div>
 
           {/* Interests */}
-          {profile.interests && profile.interests.length > 0 && (
+          {profile.interests && (profile.interests as string[]).length > 0 && (
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Interests</h3>
               <div className="flex flex-wrap gap-2">
-                {profile.interests.map((interest: string) => (
+                {(profile.interests as string[]).map((interest) => (
                   <span
                     key={interest}
                     className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm"
                   >
                     {interest}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Life Goals */}
+          {profile.life_goals && profile.life_goals.length > 0 && (
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Life Goals</h3>
+              <div className="flex flex-wrap gap-2">
+                {profile.life_goals.map((goal) => (
+                  <span
+                    key={goal}
+                    className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm capitalize"
+                  >
+                    {goal.replace(/_/g, " ")}
                   </span>
                 ))}
               </div>
@@ -283,6 +301,12 @@ export default async function MyProfilePage() {
                 <div>
                   <p className="text-sm text-gray-500">Zodiac</p>
                   <p className="font-medium capitalize">{profile.zodiac_sign}</p>
+                </div>
+              )}
+              {profile.dating_intentions && (
+                <div>
+                  <p className="text-sm text-gray-500">Looking For</p>
+                  <p className="font-medium capitalize">{profile.dating_intentions.replace(/_/g, " ")}</p>
                 </div>
               )}
             </div>

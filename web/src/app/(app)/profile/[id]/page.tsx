@@ -59,6 +59,19 @@ interface ProfileData {
   Pets: string;
   HSign: string;
   Interest: string;
+  DatingIntentions: string;
+  // Profile Prompts
+  IdealFirstDate: string;
+  NonNegotiables: string;
+  WorstJob: string;
+  DreamJob: string;
+  NightclubOrHome: string;
+  PetPeeves: string;
+  AfterWork: string;
+  WayToHeart: string;
+  CraziestTravelStory: string;
+  WeirdestGift: string;
+  PastEvent: string;
   is_verified: boolean;
   RATINGS: number;
   TotalRating: number;
@@ -496,6 +509,77 @@ export default function OtherProfilePage() {
               </section>
             )}
 
+            {/* Profile Prompts - Get to Know Me */}
+            {(profile.IdealFirstDate || profile.NonNegotiables || profile.WayToHeart || 
+              profile.AfterWork || profile.NightclubOrHome || profile.PetPeeves ||
+              profile.CraziestTravelStory || profile.WeirdestGift || profile.WorstJob || profile.DreamJob) && (
+              <section className="bg-white rounded-2xl p-6 shadow-sm">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Get to Know Me</h2>
+                <div className="space-y-5">
+                  {profile.IdealFirstDate && (
+                    <PromptCard
+                      prompt="My ideal first date starts with... and ends with..."
+                      response={profile.IdealFirstDate}
+                    />
+                  )}
+                  {profile.NonNegotiables && (
+                    <PromptCard
+                      prompt="My top non-negotiables"
+                      response={profile.NonNegotiables}
+                    />
+                  )}
+                  {profile.WayToHeart && (
+                    <PromptCard
+                      prompt="The way to my heart is through..."
+                      response={profile.WayToHeart}
+                    />
+                  )}
+                  {profile.AfterWork && (
+                    <PromptCard
+                      prompt="After work, you can find me..."
+                      response={profile.AfterWork}
+                    />
+                  )}
+                  {profile.NightclubOrHome && (
+                    <PromptCard
+                      prompt="Nightclub or night at home?"
+                      response={profile.NightclubOrHome}
+                    />
+                  )}
+                  {profile.PetPeeves && (
+                    <PromptCard
+                      prompt="My pet peeves"
+                      response={profile.PetPeeves}
+                    />
+                  )}
+                  {profile.CraziestTravelStory && (
+                    <PromptCard
+                      prompt="Craziest travel story"
+                      response={profile.CraziestTravelStory}
+                    />
+                  )}
+                  {profile.WeirdestGift && (
+                    <PromptCard
+                      prompt="Weirdest gift I've received"
+                      response={profile.WeirdestGift}
+                    />
+                  )}
+                  {profile.WorstJob && (
+                    <PromptCard
+                      prompt="The worst job I ever had"
+                      response={profile.WorstJob}
+                    />
+                  )}
+                  {profile.DreamJob && (
+                    <PromptCard
+                      prompt="The job I'd do for no money"
+                      response={profile.DreamJob}
+                    />
+                  )}
+                </div>
+              </section>
+            )}
+
             {/* Interests */}
             {interests.length > 0 && (
               <section className="bg-white rounded-2xl p-6 shadow-sm">
@@ -590,6 +674,13 @@ export default function OtherProfilePage() {
                     icon={<Sparkles className="w-4 h-4" />}
                     label="Ethnicity"
                     value={Array.isArray(profile.Ethnicity) ? profile.Ethnicity.join(", ") : profile.Ethnicity}
+                  />
+                )}
+                {profile.DatingIntentions && (
+                  <InfoRow
+                    icon={<Heart className="w-4 h-4" />}
+                    label="Looking For"
+                    value={profile.DatingIntentions.replace(/_/g, " ")}
                   />
                 )}
               </div>
@@ -850,6 +941,22 @@ function InfoRow({
         <span className="text-sm">{label}</span>
       </div>
       <span className="text-sm font-medium text-gray-900 capitalize">{value}</span>
+    </div>
+  );
+}
+
+// Helper component for profile prompts
+function PromptCard({
+  prompt,
+  response,
+}: {
+  prompt: string;
+  response: string;
+}) {
+  return (
+    <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-100/50">
+      <p className="text-sm font-medium text-pink-700 mb-2">{prompt}</p>
+      <p className="text-gray-700 leading-relaxed">{response}</p>
     </div>
   );
 }

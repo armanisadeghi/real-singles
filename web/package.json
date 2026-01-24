@@ -10,7 +10,12 @@
     "lint": "eslint",
     "type-check": "tsc --noEmit",
     "seed:users": "tsx scripts/seed-test-users.ts",
-    "seed:cleanup": "tsx scripts/cleanup-test-users.ts"
+    "seed:cleanup": "tsx scripts/cleanup-test-users.ts",
+    "db:migrate": "tsx scripts/db-migrate.ts",
+    "db:migrate:dry": "tsx scripts/db-migrate.ts --dry-run",
+    "db:migrate:yes": "tsx scripts/db-migrate.ts --yes",
+    "db:types": "tsx scripts/db-migrate.ts --types-only",
+    "db:status": "npx supabase migration list"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -25,6 +30,7 @@
     "react-image-crop": "^11.0.10",
     "resend": "^6.8.0",
     "tailwind-merge": "^3.4.0",
+    "twilio": "^5.12.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

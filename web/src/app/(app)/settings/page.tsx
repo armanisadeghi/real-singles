@@ -12,7 +12,8 @@ import {
   FileText,
   HelpCircle,
   Shield,
-  ChevronRight 
+  ChevronRight,
+  BadgeCheck,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -109,6 +110,22 @@ export default function SettingsPage() {
               <div>
                 <h3 className="font-semibold text-gray-900">Privacy</h3>
                 <p className="text-sm text-gray-500">Control what others see</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </Link>
+
+          <Link
+            href="/settings/verification"
+            className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <BadgeCheck className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Verification</h3>
+                <p className="text-sm text-gray-500">Verify phone and photos</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400" />
