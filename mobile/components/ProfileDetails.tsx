@@ -247,8 +247,9 @@ console.log("profile?.Height",profile?.Height);
                 ? router.push("/(tabs)/chats")
                 :
                 router.push({
-                  pathname: `/chat/${profile?.ID}`,
+                  pathname: "/chat/[userid]",
                   params: {
+                    userid: profile?.ID || "",
                     name: `${profile?.FirstName || ""} ${profile?.LastName || ""}`,
                     image: profile?.Image || "",
                     online: "false",
