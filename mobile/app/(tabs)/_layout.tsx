@@ -25,12 +25,21 @@ export default function TabLayout() {
       // Label always visible (Material Design 3 guideline)
       labelVisibilityMode="labeled"
     >
-      {/* Home / Discover Tab */}
+      {/* Home Tab */}
       <NativeTabs.Trigger name="index">
         <Label>Home</Label>
         <Icon
           sf={{ default: 'house', selected: 'house.fill' }}
           androidSrc={icons.home}
+        />
+      </NativeTabs.Trigger>
+
+      {/* Discover Tab */}
+      <NativeTabs.Trigger name="discover">
+        <Label>Discover</Label>
+        <Icon
+          sf={{ default: 'magnifyingglass', selected: 'magnifyingglass' }}
+          androidSrc={icons.discover}
         />
       </NativeTabs.Trigger>
 
@@ -44,7 +53,7 @@ export default function TabLayout() {
       </NativeTabs.Trigger>
 
       {/* Favorites / Likes Tab */}
-      <NativeTabs.Trigger name="git s">
+      <NativeTabs.Trigger name="favorites">
         <Label>Favorites</Label>
         <Icon
           sf={{ default: 'heart', selected: 'heart.fill' }}

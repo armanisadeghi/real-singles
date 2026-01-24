@@ -21,6 +21,7 @@ import google from '../assets/icons/google.png';
 import heart from '../assets/icons/heart.png';
 import highlight from '../assets/icons/highlight.png';
 import home from '../assets/icons/home.png';
+import discover from '../assets/icons/search.png';
 import ic_dots from '../assets/icons/ic_dots.png';
 import ic_splash from '../assets/icons/ic_splash.gif';
 import ic_user from '../assets/icons/ic_user.png';
@@ -90,6 +91,7 @@ export const icons = {
     flip,
     home,
     search,
+    discover,
     chats,
     back,
     heart,
