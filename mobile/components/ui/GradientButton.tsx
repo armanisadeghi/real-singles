@@ -8,6 +8,7 @@ import {
   TouchableOpacityProps,
   ViewStyle,
 } from "react-native";
+import { COMPONENT_SIZES, TYPOGRAPHY, BORDER_RADIUS } from "@/constants/designTokens";
 
 interface GradientButtonProps extends TouchableOpacityProps {
   colors?: string[];
@@ -35,24 +36,28 @@ const GradientButton: React.FC<GradientButtonProps> = ({
         colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
         start={start}
         end={end}
-        className="text-center py-5"
         style={[
           {
-            borderRadius: 99,
-            paddingVertical: 16, // Add vertical padding here
-            width: "100%", // Make sure button takes full width
-          },containerStyle
+            borderRadius: BORDER_RADIUS.full,
+            paddingVertical: COMPONENT_SIZES.button.medium.paddingVertical,
+            paddingHorizontal: COMPONENT_SIZES.button.medium.paddingHorizontal,
+            minHeight: COMPONENT_SIZES.button.medium.height,
+            width: "100%",
+            justifyContent: "center",
+            alignItems: "center",
+          },
+          containerStyle
         ]}
       >
         {text ? (
           <Text
             style={[
+              TYPOGRAPHY.button,
               {
-                color: "#fff", // Ensure text is white
-                textAlign: "center", // Ensure text is centered
-                fontWeight: "500", // Make text semi-bold
-                fontSize: 16, // Set appropriate font size
+                color: "#fff",
+                textAlign: "center",
               },
+              textStyle
             ]}
           >
             {text}
