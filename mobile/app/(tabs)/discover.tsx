@@ -4,7 +4,7 @@ import NotificationBell from "@/components/NotificationBell";
 import ProfileCard from "@/components/ui/ProfileCard";
 import { icons } from "@/constants/icons";
 import { ICON_SIZES, SPACING, TYPOGRAPHY, VERTICAL_SPACING } from "@/constants/designTokens";
-import { getHomeScreenData } from "@/lib/api";
+import { applyFilters, clearFilter, getHomeScreenData, saveFilter } from "@/lib/api";
 import { User } from "@/types";
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -32,8 +32,9 @@ export default function Discover() {
   
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [applyingFilters, setApplyingFilters] = useState(false);
   const [discoverProfiles, setDiscoverProfiles] = useState<User[]>([]);
-  const [filtersChanged, setFiltersChanged] = useState(false);
+  const [filtersApplied, setFiltersApplied] = useState(false);
   
   // Filter state
   // Note: gender preference is NOT a filter - it comes from user's profile "looking_for" field
@@ -56,6 +57,10 @@ export default function Discover() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["80%", "90%"], []);
   const [bottomSheetIndex, setBottomSheetIndex] = useState(-1);
+  
+  // Track pending filter changes (to be saved on sheet close)
+  const pendingFiltersRef = useRef<Record<string, string> | null>(null);
+  const filtersChangedRef = useRef(false);
 
   const fetchDiscoverProfiles = async () => {
     setLoading(true);
@@ -113,27 +118,100 @@ export default function Discover() {
   }, []);
 
   const handleFilterPress = useCallback(() => {
+    // Reset change tracking when opening the sheet
+    filtersChangedRef.current = false;
     setBottomSheetIndex(0);
   }, []);
 
-  // Called when filters are changed in FilterOptions
-  const handleFiltersChanged = useCallback(() => {
-    console.log("Filters changed, will refresh on close");
-    setFiltersChanged(true);
+  // Called whenever filter values change in FilterOptions
+  const handleFilterChange = useCallback((filterParams: Record<string, string>) => {
+    console.log("Filter values changed:", filterParams);
+    pendingFiltersRef.current = filterParams;
+    filtersChangedRef.current = true;
   }, []);
 
-  // Handle bottom sheet close - refresh profiles if filters changed
-  const handleBottomSheetChange = useCallback((index: number) => {
-    if (index === -1) {
-      // Bottom sheet closed
-      setBottomSheetIndex(-1);
-      if (filtersChanged) {
-        console.log("Refreshing profiles after filter change");
-        fetchDiscoverProfiles();
-        setFiltersChanged(false);
-      }
+  // Called when user clears all filters
+  const handleClearFilters = useCallback(() => {
+    console.log("Filters cleared");
+    pendingFiltersRef.current = null;
+    filtersChangedRef.current = true;
+    setFiltersApplied(false);
+  }, []);
+
+  // Save and apply filters when bottom sheet closes
+  const handleSheetClose = useCallback(async () => {
+    setBottomSheetIndex(-1);
+    
+    // Only save if filters were changed
+    if (!filtersChangedRef.current) {
+      console.log("No filter changes to save");
+      return;
     }
-  }, [filtersChanged]);
+    
+    const filterParams = pendingFiltersRef.current;
+    
+    // If filters were cleared, just refresh with default results
+    if (!filterParams) {
+      console.log("Filters were cleared, fetching default profiles");
+      fetchDiscoverProfiles();
+      return;
+    }
+    
+    console.log("Saving and applying filters on close:", filterParams);
+    setApplyingFilters(true);
+    
+    try {
+      // Create FormData for the save API
+      const formData = new FormData();
+      Object.entries(filterParams).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      
+      // Save filters to server
+      const saveRes = await saveFilter(formData);
+      console.log("Save filter response:", saveRes);
+
+      if (saveRes?.success) {
+        // Apply filters to get updated results
+        const filterRes = await applyFilters(filterParams);
+        console.log("Apply filter response:", filterRes);
+
+        if (filterRes?.success) {
+          setDiscoverProfiles(filterRes?.data || []);
+          setFiltersApplied(true);
+          
+          Toast.show({
+            type: "success",
+            text1: "Filters saved",
+            text2: `Found ${filterRes?.data?.length || 0} matches`,
+            position: "bottom",
+            visibilityTime: 2000,
+            autoHide: true,
+          });
+        }
+      } else {
+        Toast.show({
+          type: "error",
+          text1: saveRes?.msg || "Failed to save filters",
+          position: "bottom",
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error saving filters:", error);
+      Toast.show({
+        type: "error",
+        text1: "Failed to save filters",
+        position: "bottom",
+        visibilityTime: 2000,
+        autoHide: true,
+      });
+    } finally {
+      setApplyingFilters(false);
+      filtersChangedRef.current = false;
+    }
+  }, []);
 
   const renderBackdrop = useCallback(
     (props: any) => (
@@ -222,6 +300,32 @@ export default function Discover() {
           </View>
         </View>
 
+        {/* Filter Applied Badge */}
+        {filtersApplied && (
+          <View 
+            className="flex-row items-center justify-center bg-primary/10"
+            style={{ 
+              paddingVertical: SPACING.xs,
+              paddingHorizontal: SPACING.screenPadding,
+            }}
+          >
+            <Text className="text-primary font-medium" style={TYPOGRAPHY.caption1}>
+              Filters active
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                setFiltersApplied(false);
+                fetchDiscoverProfiles();
+              }}
+              style={{ marginLeft: SPACING.sm }}
+            >
+              <Text className="text-primary font-semibold underline" style={TYPOGRAPHY.caption1}>
+                Clear
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Content */}
         {loading && !refreshing ? (
           <View className="flex-1 items-center justify-center">
@@ -304,7 +408,7 @@ export default function Discover() {
         index={bottomSheetIndex}
         snapPoints={snapPoints}
         enablePanDownToClose={true}
-        onChange={handleBottomSheetChange}
+        onClose={handleSheetClose}
         backdropComponent={renderBackdrop}
         handleIndicatorStyle={{ backgroundColor: '#CBD5E1' }}
       >
@@ -316,10 +420,25 @@ export default function Discover() {
         >
           <FilterOptions
             initialFilters={filters}
-            onFiltersChanged={handleFiltersChanged}
+            onFilterChange={handleFilterChange}
+            onClearFilters={handleClearFilters}
           />
         </BottomSheetScrollView>
       </BottomSheet>
+      
+      {/* Loading overlay when saving filters */}
+      {applyingFilters && (
+        <View 
+          className="absolute inset-0 bg-black/30 z-50 items-center justify-center"
+        >
+          <View className="bg-white rounded-xl p-6 items-center">
+            <ActivityIndicator size="large" color="#B06D1E" />
+            <Text className="text-primary mt-3" style={TYPOGRAPHY.body}>
+              Saving filters...
+            </Text>
+          </View>
+        </View>
+      )}
     </>
   );
 }
