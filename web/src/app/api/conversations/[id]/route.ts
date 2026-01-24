@@ -71,9 +71,9 @@ export async function GET(
   }
 
   // Get participant profiles
-  const participantIds = conversation.conversation_participants.map(
-    (p: { user_id: string }) => p.user_id
-  );
+  const participantIds = conversation.conversation_participants
+    .map((p) => p.user_id)
+    .filter((id): id is string => id !== null);
 
   const { data: profiles } = await supabase
     .from("profiles")
@@ -86,14 +86,16 @@ export async function GET(
     .in("id", participantIds);
 
   // Format participants
-  const formattedParticipants = conversation.conversation_participants.map(
-    (p: { user_id: string; role: string; joined_at: string; last_read_at: string | null; is_muted: boolean }) => {
-      const profile = profiles?.find((pr) => pr.user_id === p.user_id);
-      const userData = users?.find((u) => u.id === p.user_id);
-      const isMe = p.user_id === user.id;
+  const formattedParticipants = conversation.conversation_participants
+    .filter((p) => p.user_id !== null)
+    .map((p) => {
+      const user_id = p.user_id!; // Already filtered nulls above
+      const profile = profiles?.find((pr) => pr.user_id === user_id);
+      const userData = users?.find((u) => u.id === user_id);
+      const isMe = user_id === user.id;
 
       return {
-        UserID: p.user_id,
+        UserID: user_id,
         IsMe: isMe,
         DisplayName: userData?.display_name || 
           `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || 
@@ -103,13 +105,12 @@ export async function GET(
         ProfileImage: profile?.profile_image_url || "",
         IsVerified: profile?.is_verified || false,
         LastActiveAt: userData?.last_active_at,
-        Role: p.role,
-        JoinedAt: p.joined_at,
+        Role: p.role || "",
+        JoinedAt: p.joined_at || "",
         LastReadAt: p.last_read_at,
-        IsMuted: p.is_muted,
+        IsMuted: p.is_muted || false,
       };
-    }
-  );
+    });
 
   // Determine display info for direct chats
   const otherParticipants = formattedParticipants.filter((p: { IsMe: boolean }) => !p.IsMe);

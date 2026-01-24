@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const conversationIds = participations.map((p) => p.conversation_id);
+  const conversationIds = participations.map((p) => p.conversation_id).filter((id): id is string => id !== null);
 
   // Get conversations with participant info
   const { data: conversations, error: convError } = await supabase
@@ -95,8 +95,8 @@ export async function GET(request: NextRequest) {
   // Get all participant user IDs
   const allParticipantIds = new Set<string>();
   conversations?.forEach((conv) => {
-    conv.conversation_participants?.forEach((p: { user_id: string }) => {
-      if (p.user_id !== user.id) {
+    conv.conversation_participants?.forEach((p) => {
+      if (p.user_id && p.user_id !== user.id) {
         allParticipantIds.add(p.user_id);
       }
     });
@@ -117,15 +117,15 @@ export async function GET(request: NextRequest) {
   const formattedConversations = (conversations || []).map((conv) => {
     const participants = conv.conversation_participants || [];
     const otherParticipants = participants.filter(
-      (p: { user_id: string }) => p.user_id !== user.id
+      (p) => p.user_id && p.user_id !== user.id
     );
     const myParticipation = participants.find(
-      (p: { user_id: string }) => p.user_id === user.id
+      (p) => p.user_id === user.id
     );
 
     // Get other user info for direct chats
-    const otherUserIds = otherParticipants.map((p: { user_id: string }) => p.user_id);
-    const otherProfiles = profiles?.filter((p) => otherUserIds.includes(p.user_id)) || [];
+    const otherUserIds = otherParticipants.map((p) => p.user_id).filter((id): id is string => id !== null);
+    const otherProfiles = profiles?.filter((p) => p.user_id && otherUserIds.includes(p.user_id)) || [];
     const otherUsers = users?.filter((u) => otherUserIds.includes(u.id)) || [];
 
     // Determine display name and image
@@ -153,19 +153,21 @@ export async function GET(request: NextRequest) {
       UpdatedAt: conv.updated_at,
       IsMuted: myParticipation?.is_muted || false,
       LastReadAt: myParticipation?.last_read_at,
-      Participants: otherParticipants.map((p: { user_id: string; role: string }) => {
-        const profile = profiles?.find((pr) => pr.user_id === p.user_id);
-        const userData = users?.find((u) => u.id === p.user_id);
-        return {
-          UserID: p.user_id,
-          DisplayName: userData?.display_name || profile?.first_name || "User",
-          FirstName: profile?.first_name || "",
-          LastName: profile?.last_name || "",
-          ProfileImage: profile?.profile_image_url || "",
-          LastActiveAt: userData?.last_active_at,
-          Role: p.role,
-        };
-      }),
+      Participants: otherParticipants
+        .filter((p) => p.user_id !== null)
+        .map((p) => {
+          const profile = profiles?.find((pr) => pr.user_id === p.user_id);
+          const userData = users?.find((u) => u.id === p.user_id);
+          return {
+            UserID: p.user_id!,
+            DisplayName: userData?.display_name || profile?.first_name || "User",
+            FirstName: profile?.first_name || "",
+            LastName: profile?.last_name || "",
+            ProfileImage: profile?.profile_image_url || "",
+            LastActiveAt: userData?.last_active_at,
+            Role: p.role || "member",
+          };
+        }),
     };
   });
 

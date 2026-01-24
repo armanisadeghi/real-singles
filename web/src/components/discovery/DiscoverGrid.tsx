@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface Profile {
   id: string;
-  user_id: string;
+  user_id: string | null;
   first_name?: string | null;
   last_name?: string | null;
   date_of_birth?: string | null;
@@ -19,7 +19,7 @@ interface Profile {
   occupation?: string | null;
   bio?: string | null;
   profile_image_url?: string | null;
-  is_verified?: boolean;
+  is_verified?: boolean | null;
   height_inches?: number | null;
   interests?: string[] | null;
   user?: {
@@ -53,7 +53,7 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
       if (res.ok) {
         setLikedProfiles((prev) => new Set([...prev, userId]));
         // Optionally remove from list after action
-        setProfiles((prev) => prev.filter((p) => p.user_id !== userId));
+        setProfiles((prev) => prev.filter((p) => p.user_id && p.user_id !== userId));
       }
     } catch (error) {
       console.error("Error liking profile:", error);
@@ -73,7 +73,7 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
 
       if (res.ok) {
         setPassedProfiles((prev) => new Set([...prev, userId]));
-        setProfiles((prev) => prev.filter((p) => p.user_id !== userId));
+        setProfiles((prev) => prev.filter((p) => p.user_id && p.user_id !== userId));
       }
     } catch (error) {
       console.error("Error passing profile:", error);
@@ -93,7 +93,7 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
 
       if (res.ok) {
         setLikedProfiles((prev) => new Set([...prev, userId]));
-        setProfiles((prev) => prev.filter((p) => p.user_id !== userId));
+        setProfiles((prev) => prev.filter((p) => p.user_id && p.user_id !== userId));
       }
     } catch (error) {
       console.error("Error super liking profile:", error);
@@ -109,7 +109,7 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
   }, []);
 
   const visibleProfiles = profiles.filter(
-    (p) => !likedProfiles.has(p.user_id) && !passedProfiles.has(p.user_id)
+    (p) => p.user_id && !likedProfiles.has(p.user_id) && !passedProfiles.has(p.user_id)
   );
 
   return (
@@ -195,7 +195,7 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
               onLike={handleLike}
               onPass={handlePass}
               onSuperLike={handleSuperLike}
-              actionLoading={actionLoading === profile.user_id}
+              actionLoading={!!profile.user_id && actionLoading === profile.user_id}
             />
           ))}
         </div>

@@ -104,7 +104,7 @@ export default async function AdminUsersPage() {
                   {user.points_balance}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(user.created_at).toLocaleDateString()}
+                  {user.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <Link

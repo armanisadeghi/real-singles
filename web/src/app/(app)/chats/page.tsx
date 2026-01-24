@@ -27,7 +27,7 @@ async function getConversations(): Promise<{
     return { conversations: [], userId: user.id };
   }
 
-  const conversationIds = participations.map((p) => p.conversation_id);
+  const conversationIds = participations.map((p) => p.conversation_id).filter((id): id is string => id !== null);
 
   // Get full conversation data
   const { data: conversations } = await supabase
@@ -36,14 +36,13 @@ async function getConversations(): Promise<{
       `
       id,
       type,
-      name,
-      last_message,
-      last_message_at,
-      created_at
+      group_name,
+      created_at,
+      updated_at
     `
     )
     .in("id", conversationIds)
-    .order("last_message_at", { ascending: false, nullsFirst: false });
+    .order("updated_at", { ascending: false, nullsFirst: false });
 
   if (!conversations) {
     return { conversations: [], userId: user.id };
@@ -68,19 +67,21 @@ async function getConversations(): Promise<{
 
       return {
         id: conv.id,
-        type: conv.type as "direct" | "group",
-        name: conv.name,
-        last_message: conv.last_message,
-        last_message_at: conv.last_message_at,
+        type: (conv.type || "direct") as "direct" | "group",
+        name: conv.group_name || null,
+        last_message: null, // TODO: Implement message fetching
+        last_message_at: conv.updated_at,
         unread_count: unreadCount,
-        participants: (participants || []).map((p) => ({
-          user_id: p.user_id,
-          user: p.user as { display_name?: string | null } | null,
-          profile: p.profile as {
-            first_name?: string | null;
-            profile_image_url?: string | null;
-          } | null,
-        })),
+        participants: (participants || [])
+          .filter((p) => p.user_id !== null)
+          .map((p) => ({
+            user_id: p.user_id!,
+            user: p.user as { display_name?: string | null } | null,
+            profile: p.profile as {
+              first_name?: string | null;
+              profile_image_url?: string | null;
+            } | null,
+          })),
       };
     })
   );

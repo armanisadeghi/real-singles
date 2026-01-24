@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
           .maybeSingle();
 
         // Find conversation with target user
-        if (existingConvo) {
+        if (existingConvo?.conversation_id) {
           const { data: sharedConvo } = await supabase
             .from("conversation_participants")
             .select("conversation_id")
@@ -269,7 +269,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const likedUserIds = myLikes.map((m) => m.target_user_id);
+    const likedUserIds = myLikes
+      .map((m) => m.target_user_id)
+      .filter((id): id is string => id !== null);
 
     // Find mutual matches (users who also liked us back)
     const { data: mutualMatches, error: matchError } = await supabase
@@ -298,7 +300,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const matchedUserIds = mutualMatches.map((m) => m.user_id);
+    const matchedUserIds = mutualMatches
+      .map((m) => m.user_id)
+      .filter((id): id is string => id !== null);
 
     // Get profiles for matched users
     const { data: profiles, error: profileError } = await supabase
@@ -360,7 +364,9 @@ export async function GET(request: NextRequest) {
 
       if (otherParticipants) {
         otherParticipants.forEach((p) => {
-          conversationMap[p.user_id] = p.conversation_id;
+          if (p.user_id && p.conversation_id) {
+            conversationMap[p.user_id] = p.conversation_id;
+          }
         });
       }
     }

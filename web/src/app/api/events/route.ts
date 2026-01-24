@@ -179,7 +179,19 @@ export async function POST(request: Request) {
     const { data: event, error } = await supabase
       .from("events")
       .insert({
-        ...eventData,
+        title: eventData.title!,
+        event_type: eventData.event_type || "in_person",
+        start_datetime: eventData.start_datetime!,
+        description: eventData.description || null,
+        image_url: eventData.image_url || null,
+        venue_name: eventData.venue_name || null,
+        address: eventData.address || null,
+        city: eventData.city || null,
+        state: eventData.state || null,
+        latitude: eventData.latitude || null,
+        longitude: eventData.longitude || null,
+        end_datetime: eventData.end_datetime || null,
+        max_attendees: eventData.max_attendees || null,
         created_by: user.id,
         is_public: true,
         status: "upcoming",

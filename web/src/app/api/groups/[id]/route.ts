@@ -123,7 +123,7 @@ export async function PUT(
     .eq("user_id", user.id)
     .single();
 
-  if (!membership || !["owner", "admin"].includes(membership.role)) {
+  if (!membership || !membership.role || !["owner", "admin"].includes(membership.role)) {
     return NextResponse.json(
       { success: false, msg: "Not authorized to update this group" },
       { status: 403 }

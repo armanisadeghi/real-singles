@@ -11,10 +11,10 @@ async function getDiscoverProfiles() {
   // Get blocked user IDs to exclude
   const { data: blockedUsers } = await supabase
     .from("blocks")
-    .select("blocked_user_id")
-    .eq("user_id", user.id);
+    .select("blocked_id")
+    .eq("blocker_id", user.id);
 
-  const blockedIds = blockedUsers?.map(b => b.blocked_user_id) || [];
+  const blockedIds = blockedUsers?.map(b => b.blocked_id).filter((id): id is string => id !== null) || [];
 
   // Get profiles already liked/passed to exclude
   const { data: matchedUsers } = await supabase
@@ -22,7 +22,7 @@ async function getDiscoverProfiles() {
     .select("target_user_id")
     .eq("user_id", user.id);
 
-  const matchedIds = matchedUsers?.map(m => m.target_user_id) || [];
+  const matchedIds = matchedUsers?.map(m => m.target_user_id).filter((id): id is string => id !== null) || [];
 
   // Get profiles excluding current user, blocked users, and already matched
   const excludeIds = [user.id, ...blockedIds, ...matchedIds];

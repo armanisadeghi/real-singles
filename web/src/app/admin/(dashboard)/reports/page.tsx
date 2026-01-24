@@ -47,7 +47,7 @@ export default async function AdminReportsPage() {
                   )}
                 </div>
                 <div className="text-sm text-gray-500">
-                  {new Date(report.created_at).toLocaleString()}
+                  {report.created_at ? new Date(report.created_at).toLocaleString() : "N/A"}
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t grid grid-cols-2 gap-4 text-sm">

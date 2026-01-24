@@ -94,7 +94,10 @@ export async function GET(request: NextRequest) {
       .eq("is_approved", true);
 
     if (allReviews && allReviews.length > 0) {
-      avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+      const validRatings = allReviews.filter((r) => r.rating !== null).map((r) => r.rating!);
+      if (validRatings.length > 0) {
+        avgRating = validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length;
+      }
       totalReviews = allReviews.length;
     }
   }

@@ -102,9 +102,10 @@ export async function GET(
     .eq("reviewed_user_id", targetUserId)
     .eq("is_approved", true);
 
+  const validRatings = reviews?.filter((r) => r.rating !== null).map((r) => r.rating!) || [];
   const avgRating =
-    reviews && reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    validRatings.length > 0
+      ? validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length
       : 0;
 
   // Transform data to match mobile app format

@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
     if (bucket === STORAGE_BUCKETS.AVATARS && publicUrl) {
       await supabase
         .from("profiles")
-        .update({ profile_photo_url: publicUrl })
+        .update({ profile_image_url: publicUrl })
         .eq("user_id", user.id);
     }
 

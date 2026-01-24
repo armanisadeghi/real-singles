@@ -38,7 +38,9 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const conversationIds = participantData?.map((p) => p.conversation_id) || [];
+  const conversationIds = participantData
+    ?.map((p) => p.conversation_id)
+    .filter((id): id is string => id !== null) || [];
 
   if (conversationIds.length === 0) {
     return NextResponse.json({

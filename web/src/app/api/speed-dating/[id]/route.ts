@@ -76,7 +76,7 @@ export async function GET(
       MinParticipants: session.min_participants,
       MaxParticipants: session.max_participants,
       CurrentParticipants: registrations.length,
-      SpotsAvailable: session.max_participants - registrations.length,
+      SpotsAvailable: session.max_participants !== null ? session.max_participants - registrations.length : null,
       GenderPreference: session.gender_preference,
       AgeMin: session.age_min,
       AgeMax: session.age_max,

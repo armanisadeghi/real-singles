@@ -46,7 +46,7 @@ export async function POST(
   }
 
   // Check capacity
-  if (event.max_attendees && event.current_attendees >= event.max_attendees) {
+  if (event.max_attendees && event.current_attendees !== null && event.current_attendees >= event.max_attendees) {
     return NextResponse.json(
       { success: false, msg: "This event has reached maximum capacity" },
       { status: 400 }
@@ -172,7 +172,7 @@ export async function DELETE(
     .eq("id", eventId)
     .single();
 
-  if (event && event.current_attendees > 0) {
+  if (event && event.current_attendees !== null && event.current_attendees > 0) {
     await supabase
       .from("events")
       .update({ current_attendees: event.current_attendees - 1 })

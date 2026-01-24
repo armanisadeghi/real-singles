@@ -38,8 +38,25 @@ async function getSpeedDatingSessions() {
           .select("*", { count: "exact", head: true })
           .eq("session_id", session.id);
 
+        // Map database fields to SpeedDatingSession interface
+        const scheduledDate = session.scheduled_datetime ? new Date(session.scheduled_datetime) : new Date();
+        const durationMinutes = session.duration_minutes || 60;
+        const roundDurationMinutes = session.round_duration_seconds ? Math.floor(session.round_duration_seconds / 60) : 5;
+
         return {
-          ...session,
+          id: session.id,
+          name: session.title,
+          description: session.description,
+          session_date: scheduledDate.toISOString().split('T')[0],
+          start_time: scheduledDate.toTimeString().split(' ')[0].slice(0, 5),
+          end_time: new Date(scheduledDate.getTime() + durationMinutes * 60000).toTimeString().split(' ')[0].slice(0, 5),
+          duration_minutes: durationMinutes,
+          round_duration_minutes: roundDurationMinutes,
+          max_participants: session.max_participants || 20,
+          status: (session.status || "upcoming") as "upcoming" | "ongoing" | "completed" | "cancelled",
+          event_type: "virtual" as const,
+          city: null,
+          image_url: session.image_url,
           registration_count: count || 0,
         } as SpeedDatingSession;
       })

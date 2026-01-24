@@ -67,7 +67,7 @@ export async function POST(
   }
 
   // Check if session is full
-  if (registrations.length >= session.max_participants) {
+  if (session.max_participants !== null && registrations.length >= session.max_participants) {
     return NextResponse.json(
       { success: false, msg: "This session is full" },
       { status: 400 }

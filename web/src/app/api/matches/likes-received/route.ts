@@ -61,7 +61,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const likerIds = likesReceived.map((l) => l.user_id);
+    const likerIds = likesReceived
+      .map((l) => l.user_id)
+      .filter((id): id is string => id !== null);
 
     // Check which ones the current user has already acted on
     const { data: myActions } = await supabase
@@ -72,12 +74,14 @@ export async function GET(request: NextRequest) {
 
     const myActionsMap: Record<string, string> = {};
     myActions?.forEach((a) => {
-      myActionsMap[a.target_user_id] = a.action;
+      if (a.target_user_id) {
+        myActionsMap[a.target_user_id] = a.action;
+      }
     });
 
     // Filter to only show unacted likes (not yet mutual or passed)
     const unactedLikes = likesReceived.filter(
-      (l) => !myActionsMap[l.user_id]
+      (l) => l.user_id && !myActionsMap[l.user_id]
     );
 
     if (unactedLikes.length === 0) {
@@ -90,7 +94,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const unactedLikerIds = unactedLikes.map((l) => l.user_id);
+    const unactedLikerIds = unactedLikes
+      .map((l) => l.user_id)
+      .filter((id): id is string => id !== null);
 
     // Get profiles for users who liked
     const { data: profiles } = await supabase
@@ -167,7 +173,9 @@ export async function GET(request: NextRequest) {
     likesWithProfiles.sort((a, b) => {
       if (a.is_super_like && !b.is_super_like) return -1;
       if (!a.is_super_like && b.is_super_like) return 1;
-      return new Date(b.liked_at).getTime() - new Date(a.liked_at).getTime();
+      const aTime = a.liked_at ? new Date(a.liked_at).getTime() : 0;
+      const bTime = b.liked_at ? new Date(b.liked_at).getTime() : 0;
+      return bTime - aTime;
     });
 
     return NextResponse.json({

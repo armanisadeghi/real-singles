@@ -59,17 +59,19 @@ async function getConversation(conversationId: string) {
   return {
     conversation: {
       id: conversation.id,
-      type: conversation.type as "direct" | "group",
-      name: conversation.name,
+      type: (conversation.type || "direct") as "direct" | "group",
+      name: conversation.group_name,
     },
-    participants: (participants || []).map((p) => ({
-      user_id: p.user_id,
-      user: p.user as { display_name?: string | null } | null,
-      profile: p.profile as {
-        first_name?: string | null;
-        profile_image_url?: string | null;
-      } | null,
-    })),
+    participants: (participants || [])
+      .filter((p) => p.user_id !== null)
+      .map((p) => ({
+        user_id: p.user_id!,
+        user: p.user as { display_name?: string | null } | null,
+        profile: p.profile as {
+          first_name?: string | null;
+          profile_image_url?: string | null;
+        } | null,
+      })),
     currentUserId: user.id,
   };
 }

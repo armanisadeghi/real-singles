@@ -18,7 +18,7 @@ import { cn, calculateAge, formatHeight } from "@/lib/utils";
 interface ProfileCardProps {
   profile: {
     id: string;
-    user_id: string;
+    user_id: string | null;
     first_name?: string | null;
     last_name?: string | null;
     date_of_birth?: string | null;
@@ -27,7 +27,7 @@ interface ProfileCardProps {
     occupation?: string | null;
     bio?: string | null;
     profile_image_url?: string | null;
-    is_verified?: boolean;
+    is_verified?: boolean | null;
     height_inches?: number | null;
     interests?: string[] | null;
     user?: {
@@ -115,7 +115,7 @@ export function ProfileCard({
     >
       {/* Photo Section */}
       <Link
-        href={`/profile/${profile.user_id}`}
+        href={profile.user_id ? `/profile/${profile.user_id}` : "#"}
         className="block relative aspect-[3/4] bg-gradient-to-br from-pink-100 to-purple-100"
       >
         {photos.length > 0 ? (
@@ -236,8 +236,8 @@ export function ProfileCard({
         <div className="flex items-center justify-center gap-4 px-4 py-3 border-t bg-gray-50">
           {/* Pass Button */}
           <button
-            onClick={() => onPass?.(profile.user_id)}
-            disabled={actionLoading}
+            onClick={() => profile.user_id && onPass?.(profile.user_id)}
+            disabled={actionLoading || !profile.user_id}
             className={cn(
               "w-14 h-14 rounded-full flex items-center justify-center",
               "bg-white border-2 border-gray-200 text-gray-500",
@@ -251,8 +251,8 @@ export function ProfileCard({
 
           {/* Super Like Button */}
           <button
-            onClick={() => onSuperLike?.(profile.user_id)}
-            disabled={actionLoading}
+            onClick={() => profile.user_id && onSuperLike?.(profile.user_id)}
+            disabled={actionLoading || !profile.user_id}
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center",
               "bg-white border-2 border-blue-200 text-blue-500",
@@ -266,8 +266,8 @@ export function ProfileCard({
 
           {/* Like Button */}
           <button
-            onClick={() => onLike?.(profile.user_id)}
-            disabled={actionLoading}
+            onClick={() => profile.user_id && onLike?.(profile.user_id)}
+            disabled={actionLoading || !profile.user_id}
             className={cn(
               "w-14 h-14 rounded-full flex items-center justify-center",
               "bg-gradient-to-br from-pink-500 to-rose-500 text-white",
@@ -281,7 +281,7 @@ export function ProfileCard({
 
           {/* Info Button */}
           <Link
-            href={`/profile/${profile.user_id}`}
+            href={profile.user_id ? `/profile/${profile.user_id}` : "#"}
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center",
               "bg-white border-2 border-gray-200 text-gray-500",

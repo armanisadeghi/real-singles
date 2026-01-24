@@ -32,7 +32,7 @@ export async function POST(
     .eq("user_id", user.id)
     .single();
 
-  if (!membership || !["owner", "admin"].includes(membership.role)) {
+  if (!membership || !membership.role || !["owner", "admin"].includes(membership.role)) {
     return NextResponse.json(
       { success: false, msg: "Not authorized to add members" },
       { status: 403 }
@@ -180,7 +180,7 @@ export async function DELETE(
 
   // Check if user is trying to remove themselves or has permission
   const isSelfRemoval = userIdToRemove === user.id;
-  const hasPermission = ["owner", "admin"].includes(membership.role);
+  const hasPermission = membership.role ? ["owner", "admin"].includes(membership.role) : false;
 
   if (!isSelfRemoval && !hasPermission) {
     return NextResponse.json(

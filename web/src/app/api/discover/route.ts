@@ -42,9 +42,9 @@ export async function GET() {
 
   const blockedIds = new Set<string>();
   blockedUsers?.forEach((block) => {
-    if (block.blocker_id === user.id) {
+    if (block.blocker_id === user.id && block.blocked_id) {
       blockedIds.add(block.blocked_id);
-    } else {
+    } else if (block.blocker_id) {
       blockedIds.add(block.blocker_id);
     }
   });
@@ -56,7 +56,7 @@ export async function GET() {
     .select("favorite_user_id")
     .eq("user_id", user.id);
 
-  const favoriteIds = new Set(favorites?.map((f) => f.favorite_user_id) || []);
+  const favoriteIds = new Set(favorites?.map((f) => f.favorite_user_id).filter((id): id is string => id !== null) || []);
 
   // Build base query for profiles
   let profilesQuery = supabase
