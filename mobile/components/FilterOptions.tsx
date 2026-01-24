@@ -1,11 +1,11 @@
 import { icons } from "@/constants/icons";
 // Import standardized options that match database schema
+// Note: GENDER_OPTIONS removed - gender preference comes from user's profile "looking_for" field
 import {
   BODY_TYPE_OPTIONS,
   DRINKING_OPTIONS,
   EDUCATION_OPTIONS,
   ETHNICITY_OPTIONS,
-  GENDER_OPTIONS,
   HAS_KIDS_OPTIONS,
   LOOKING_FOR_OPTIONS,
   MARIJUANA_OPTIONS,
@@ -44,7 +44,7 @@ export interface FilterData {
     min: number;
     max: number;
   };
-  gender: "male" | "female" | "non-binary" | "other" | "";
+  // Note: gender preference is NOT a filter - it comes from user's profile "looking_for" field
   bodyType: string;
   maritalStatus: string;
   ethnicity: string;
@@ -102,9 +102,7 @@ export default function FilterOptions({
   const [maxDistance, setMaxDistance] = useState<number>(
     initialFilters?.distanceRange?.max || 10000
   );
-  const [gender, setGender] = useState<"male" | "female" | "non-binary" | "other" | "">(
-    initialFilters?.gender || ""
-  );
+  // Note: gender state removed - gender preference comes from user's profile "looking_for" field
   const [bodyType, setBodyType] = useState<string>(
     initialFilters?.bodyType || ""
   );
@@ -130,7 +128,7 @@ export default function FilterOptions({
   const [pets, setPets] = useState<boolean>(initialFilters?.pets || false);
   const [loadingclear, setLoadingClear] = useState<boolean>(false);
   const [filterData, setFilterData] = useState<{
-    Gender: string;
+    // Note: Gender removed - gender preference comes from user's profile "looking_for" field
     min_age: number;
     max_age: number;
     min_height: number;
@@ -153,7 +151,7 @@ export default function FilterOptions({
     Smoke: string;
     PoliticalView: string;
   } | null>({
-    Gender: "",
+    // Note: Gender removed - gender preference comes from user's profile "looking_for" field
     min_age: 18,
     max_age: 70,
     min_height: 4,
@@ -198,7 +196,7 @@ export default function FilterOptions({
     const formData = new FormData();
 
     // Add all filter values to FormData
-    formData.append("Gender", gender);
+    // Note: Gender is intentionally excluded - it comes from user's profile "looking_for" field
     formData.append("min_age", ageMin.toString());
     formData.append("max_age", ageMax.toString());
     formData.append("min_height", heightMin.toString());
@@ -301,7 +299,7 @@ export default function FilterOptions({
         setLookingFor("");
         setMinDistance(0);
         setMaxDistance(10000);
-        setGender("");
+        // Note: gender state removed - comes from profile
         setBodyType("");
         setMaritalStatus("");
         setEthnicity("");
@@ -329,39 +327,8 @@ export default function FilterOptions({
   return (
     <View className="p-6">
       <Toast />
-      {/* Gender filter - uses standardized GENDER_OPTIONS from constants/options.ts */}
-      <View className="mb-6 pb-6 border-b border-b-border">
-        <Text className="text-base font-medium mb-3 text-dark">Gender</Text>
-        <View className="flex-row gap-3 flex-wrap">
-          {GENDER_OPTIONS.map((option) => {
-            const isSelected = gender === option.value || filterData?.Gender === option.value;
-            return (
-              <TouchableOpacity
-                key={option.value}
-                className={`rounded-full overflow-hidden ${
-                  isSelected
-                    ? "border border-primary"
-                    : "bg-light-100 border border-border"
-                }`}
-                onPress={() => setGender(option.value as "male" | "female" | "non-binary" | "other")}
-              >
-                {isSelected ? (
-                  <LinearGradient
-                    colors={["#B06D1E", "#F99F2D", "#B06D1E"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={{ padding: 8, borderRadius: 4 }}
-                  >
-                    <Text style={{ color: "white", fontWeight: "bold" }}>{option.label}</Text>
-                  </LinearGradient>
-                ) : (
-                  <Text className={"text-dark px-4 py-2"}>{option.label}</Text>
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
+      {/* Note: Gender filter removed - gender preference comes from user's profile "looking_for" field */}
+      {/* Users can change their gender preference in Profile Settings */}
 
       <View className="mb-6 pb-6 border-b border-b-border">
         <View className="flex-row items-center justify-between">

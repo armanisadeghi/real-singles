@@ -36,9 +36,10 @@ export async function GET() {
   }
 
   // Transform to mobile app format
+  // Note: Gender is intentionally excluded - it comes from user's profile "looking_for" field
   const responseData = filters
     ? {
-        Gender: filters.gender?.[0] || "",
+        // Gender removed - comes from profile.looking_for
         min_age: filters.min_age || 18,
         max_age: filters.max_age || 70,
         min_height: filters.min_height ? filters.min_height / 12 : 4, // Convert inches to feet
@@ -100,23 +101,9 @@ export async function POST(request: Request) {
     };
 
     // Map mobile field names to database field names
-    // Supports both legacy values (woman, man, woman2, man2) and new standardized values (male, female, non-binary, other)
-    const gender = formData.get("Gender") as string;
-    if (gender) {
-      const genderMap: Record<string, string> = {
-        // Legacy mobile values (deprecated)
-        woman: "female",
-        man: "male",
-        woman2: "non-binary",
-        man2: "other",
-        // New standardized values pass through as-is
-        male: "male",
-        female: "female",
-        "non-binary": "non-binary",
-        other: "other",
-      };
-      filters.gender = [genderMap[gender] || gender];
-    }
+    // Note: Gender filter is intentionally NOT saved here
+    // Gender preference comes from user's profile "looking_for" field and is
+    // automatically applied in the discover API. Users can change it in profile settings.
 
     const minAge = formData.get("min_age");
     if (minAge) filters.min_age = parseInt(minAge as string, 10);

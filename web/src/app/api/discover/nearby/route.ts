@@ -63,14 +63,15 @@ async function handleNearbyRequest(request: Request) {
     }
   }
 
+  // Get current user's profile for location AND looking_for preference
+  const { data: currentUserProfile } = await supabase
+    .from("profiles")
+    .select("latitude, longitude, looking_for")
+    .eq("user_id", user.id)
+    .single();
+
   // If no location provided in request, use user's profile location
   if (!userLat || !userLon) {
-    const { data: currentUserProfile } = await supabase
-      .from("profiles")
-      .select("latitude, longitude")
-      .eq("user_id", user.id)
-      .single();
-
     if (currentUserProfile?.latitude && currentUserProfile?.longitude) {
       userLat = currentUserProfile.latitude;
       userLon = currentUserProfile.longitude;
@@ -122,6 +123,12 @@ async function handleNearbyRequest(request: Request) {
 
   if (blockedIds.size > 0) {
     query = query.not("user_id", "in", `(${Array.from(blockedIds).join(",")})`);
+  }
+
+  // ALWAYS apply user's "looking_for" preference from their profile
+  // This is the core gender preference that determines who the user wants to see
+  if (currentUserProfile?.looking_for && currentUserProfile.looking_for.length > 0) {
+    query = query.in("gender", currentUserProfile.looking_for);
   }
 
   const { data: profiles, error } = await query.limit(100);

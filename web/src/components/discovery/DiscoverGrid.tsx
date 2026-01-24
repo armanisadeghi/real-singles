@@ -109,6 +109,7 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
     
     try {
       // Save filters to server
+      // Note: Gender is NOT included - it comes from user's profile "looking_for" field
       const saveRes = await fetch("/api/filters", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -118,7 +119,7 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
           min_height: filters.minHeight,
           max_height: filters.maxHeight,
           max_distance: filters.maxDistance,
-          gender: filters.gender,
+          // gender is intentionally excluded - it comes from profile.looking_for
           body_types: filters.bodyType,
           ethnicities: filters.ethnicity,
           religions: filters.religion,

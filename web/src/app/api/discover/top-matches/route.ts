@@ -46,10 +46,10 @@ export async function GET(request: Request) {
     max_distance: searchParams.get("max_distance"),
   };
 
-  // Get current user's location for distance calculation
+  // Get current user's profile for location and looking_for preference
   const { data: currentUserProfile } = await supabase
     .from("profiles")
-    .select("latitude, longitude")
+    .select("latitude, longitude, looking_for")
     .eq("user_id", user.id)
     .single();
 
@@ -91,23 +91,14 @@ export async function GET(request: Request) {
     query = query.not("user_id", "in", `(${Array.from(blockedIds).join(",")})`);
   }
 
-  // Apply filters
-  // Supports both legacy values (woman, man, woman2, man2) and new standardized values (male, female, non-binary, other)
-  if (filters.Gender && filters.Gender !== "both") {
-    const genderMap: Record<string, string> = {
-      // Legacy mobile values (deprecated)
-      woman: "female",
-      man: "male",
-      woman2: "non-binary",
-      man2: "other",
-      // New standardized values pass through as-is
-      male: "male",
-      female: "female",
-      "non-binary": "non-binary",
-      other: "other",
-    };
-    query = query.eq("gender", genderMap[filters.Gender] || filters.Gender);
+  // ALWAYS apply user's "looking_for" preference from their profile
+  // This is the core gender preference that determines who the user wants to see
+  // It takes precedence over any filter parameters
+  if (currentUserProfile?.looking_for && currentUserProfile.looking_for.length > 0) {
+    query = query.in("gender", currentUserProfile.looking_for);
   }
+  // Note: The Gender filter parameter is intentionally ignored
+  // Gender preference comes ONLY from the user's profile looking_for field
 
   if (filters.min_age || filters.max_age) {
     const today = new Date();

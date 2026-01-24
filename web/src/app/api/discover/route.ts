@@ -69,7 +69,13 @@ export async function GET() {
     `)
     .not("user_id", "in", `(${Array.from(blockedIds).join(",")})`);
 
-  // Apply filters if they exist
+  // ALWAYS apply user's "looking_for" preference from their profile
+  // This is the core gender preference that determines who the user wants to see
+  if (currentUserProfile?.looking_for && currentUserProfile.looking_for.length > 0) {
+    profilesQuery = profilesQuery.in("gender", currentUserProfile.looking_for);
+  }
+
+  // Apply additional filters if they exist (but NOT gender - that comes from profile)
   if (userFilters) {
     if (userFilters.min_age || userFilters.max_age) {
       const today = new Date();
@@ -82,9 +88,7 @@ export async function GET() {
         profilesQuery = profilesQuery.lte("date_of_birth", maxDate.toISOString().split("T")[0]);
       }
     }
-    if (userFilters.gender && userFilters.gender.length > 0) {
-      profilesQuery = profilesQuery.in("gender", userFilters.gender);
-    }
+    // Note: Gender filter removed - it comes from user's profile looking_for preference
     if (userFilters.min_height) {
       profilesQuery = profilesQuery.gte("height_inches", userFilters.min_height);
     }
@@ -131,7 +135,7 @@ export async function GET() {
   let NearBy: any[] = [];
   if (currentUserProfile?.latitude && currentUserProfile?.longitude) {
     // For now, just get profiles with location set (proper distance calculation would use PostGIS)
-    const { data: nearbyProfiles } = await supabase
+    let nearbyQuery = supabase
       .from("profiles")
       .select(`
         *,
@@ -139,8 +143,14 @@ export async function GET() {
       `)
       .not("user_id", "in", `(${Array.from(blockedIds).join(",")})`)
       .not("latitude", "is", null)
-      .not("longitude", "is", null)
-      .limit(10);
+      .not("longitude", "is", null);
+
+    // Apply looking_for preference to nearby profiles too
+    if (currentUserProfile?.looking_for && currentUserProfile.looking_for.length > 0) {
+      nearbyQuery = nearbyQuery.in("gender", currentUserProfile.looking_for);
+    }
+
+    const { data: nearbyProfiles } = await nearbyQuery.limit(10);
 
     NearBy = (nearbyProfiles || []).map((profile) => {
       const formatted = formatProfile(profile);

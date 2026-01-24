@@ -5,7 +5,6 @@ import { X, RotateCcw } from "lucide-react";
 import { BottomSheet, BottomSheetActions } from "@/components/ui/BottomSheet";
 import { cn } from "@/lib/utils";
 import {
-  GENDER_OPTIONS,
   BODY_TYPE_OPTIONS,
   EDUCATION_OPTIONS,
   RELIGION_OPTIONS,
@@ -28,7 +27,7 @@ export interface FilterValues {
   minHeight: number;
   maxHeight: number;
   maxDistance: number;
-  gender: string[];
+  // Note: Gender preference is NOT a filter - it comes from user's profile "looking_for" field
   bodyType: string[];
   education: string[];
   religion: string[];
@@ -51,7 +50,7 @@ const defaultFilters: FilterValues = {
   minHeight: 48, // 4'0"
   maxHeight: 84, // 7'0"
   maxDistance: 50,
-  gender: [],
+  // Note: Gender preference is NOT a filter - it comes from user's profile "looking_for" field
   bodyType: [],
   education: [],
   religion: [],
@@ -218,26 +217,7 @@ export function FilterPanel({
           </div>
         </section>
 
-        {/* Gender */}
-        <section>
-          <h3 className="font-medium text-gray-900 mb-3">Gender</h3>
-          <div className="flex flex-wrap gap-2">
-            {GENDER_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => toggleArrayValue("gender", option.value)}
-                className={cn(
-                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                  filters.gender.includes(option.value)
-                    ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </section>
+        {/* Note: Gender preference is not shown here - it's set in profile settings */}
 
         {/* Body Type */}
         <section>
