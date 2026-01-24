@@ -61,7 +61,8 @@ export default function EventDetail() {
   const fetchEventDetails = async () => {
     setLoading(true);
     try {
-      const res = await getEventDetails(id);
+      const eventId = Array.isArray(id) ? id[0] : id;
+      const res = await getEventDetails(eventId);
       console.log("Fetched event details:", res);
       
       if (res?.success) {
@@ -168,7 +169,7 @@ export default function EventDetail() {
         >
           <BottomSheetScrollView className="relative">
             <ScrollView>
-              <EventDetails event={data} fetchEventDetails={fetchEventDetails} />
+              {data && <EventDetails event={data} fetchEventDetails={fetchEventDetails} />}
             </ScrollView>
           </BottomSheetScrollView>
         </BottomSheet>

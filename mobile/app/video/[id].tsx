@@ -3,7 +3,7 @@ import { icons } from "@/constants/icons";
 import { VIDEO_URL } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
-import { Video } from "expo-av";
+import { Video, ResizeMode } from "expo-av";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
@@ -36,10 +36,10 @@ export default function VideoPage() {
   const togglePlay = async () => {
     if (!videoRef.current) return;
     const status = await videoRef.current.getStatusAsync();
-    if (status.isPlaying) {
+    if (status.isLoaded && status.isPlaying) {
       await videoRef.current.pauseAsync();
       setIsPlaying(false);
-    } else {
+    } else if (status.isLoaded) {
       await videoRef.current.playAsync();
       setIsPlaying(true);
     }
@@ -56,14 +56,18 @@ export default function VideoPage() {
   const skipForward = async () => {
     if (videoRef.current) {
       const status = await videoRef.current.getStatusAsync();
-      await videoRef.current.setPositionAsync(Math.min(status.positionMillis + 10000, status.durationMillis));
+      if (status.isLoaded) {
+        await videoRef.current.setPositionAsync(Math.min(status.positionMillis + 10000, status.durationMillis || 0));
+      }
     }
   };
 
   const skipBackward = async () => {
     if (videoRef.current) {
       const status = await videoRef.current.getStatusAsync();
-      await videoRef.current.setPositionAsync(Math.max(status.positionMillis - 10000, 0));
+      if (status.isLoaded) {
+        await videoRef.current.setPositionAsync(Math.max(status.positionMillis - 10000, 0));
+      }
     }
   };
 
@@ -95,7 +99,7 @@ export default function VideoPage() {
           ref={videoRef}
           source={{ uri: VIDEO_URL + videoData?.VideoURL }}
           style={{ width: "100%", height: "100%" }}
-          resizeMode="contain"
+          resizeMode={ResizeMode.CONTAIN}
           shouldPlay={false}
           isLooping
           rate={playbackRate}

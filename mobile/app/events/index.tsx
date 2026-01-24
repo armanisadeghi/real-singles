@@ -64,7 +64,7 @@ export default function Events() {
         contentContainerStyle={{ paddingRight: 20 }}
         renderItem={({ item }) => (
           <View style={{ marginRight: 16, marginBottom: 24 }}>
-            <CurrentEventCard currentEvent={item} currUserId={currentUserid} />
+            <CurrentEventCard currentEvent={item} currUserId={currentUserid || ""} />
           </View>
         )}
         ListEmptyComponent={() => (

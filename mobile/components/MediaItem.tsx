@@ -1,6 +1,6 @@
 import { IMAGE_URL } from "@/utils/token";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Video } from "expo-av";
+import { Video, ResizeMode } from "expo-av";
 import React, { useRef, useState } from "react";
 import { Image, Pressable, View } from "react-native";
 
@@ -47,7 +47,7 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
         <Image
           source={{ uri: IMAGE_URL + item }}
           style={{ width: "100%", height: "100%", borderRadius: 12, }}
-          resizeMode="cover"
+          resizeMode={ResizeMode.COVER}
         />
       </View>
     );
@@ -92,7 +92,7 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
           ref={videoRef}
           source={{ uri: mediaUri }}
           style={{ width: "100%", height: "100%", borderRadius: 12 }}
-          resizeMode="cover"
+          resizeMode={ResizeMode.COVER}
           isLooping
         />
 

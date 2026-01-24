@@ -57,7 +57,7 @@ export default function ShippingInfoForm({ productId, selectedUsers, redeemForYo
       data.append("State", formData.State);
       data.append("City", formData.City);
       data.append("Zipcode", formData.Zipcode);
-      data.append("ProductPoint", productPoints);
+      data.append("ProductPoint", Array.isArray(productPoints) ? productPoints[0] : productPoints);
       data.append("Address", formData.Street + ", " + formData.City + ", " + formData.Zipcode);
       data.append("InitialProductPoint", "0");
 

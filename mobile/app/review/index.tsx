@@ -28,6 +28,7 @@ export default function Review() {
   const [submittedComment, setSubmittedComment] = useState("");
 
   const { userId, userName, userImage, userRating } = useLocalSearchParams();
+  const userImageStr = Array.isArray(userImage) ? userImage[0] : userImage;
 
   console.log("userId:", userId);
   console.log("userName:", userName);
@@ -46,7 +47,8 @@ export default function Review() {
     }
     try {
       const data = new FormData();
-      data.append("OtherID", userId);
+      const userIdStr = Array.isArray(userId) ? userId[0] : userId;
+      data.append("OtherID", userIdStr);
       data.append("Rating", rating.toString());
       data.append("comment", comment);
       console.log("Submitting review with data:", data);
@@ -104,9 +106,10 @@ export default function Review() {
   }, [userId]);
 
   const getInitial = () => {
-    if (!userName) return "?";
+    const userNameStr = Array.isArray(userName) ? userName[0] : userName;
+    if (!userNameStr) return "?";
 
-    const nameParts = userName.split(" ");
+    const nameParts = userNameStr.split(" ");
     if (nameParts.length === 1) {
       return nameParts[0].charAt(0).toUpperCase();
     } else {
@@ -118,16 +121,16 @@ export default function Review() {
   };
 
   const displayContent = () => {
-    if (userImage) {
-      if (userImage?.startsWith("uploads/")) {
+    if (userImageStr) {
+      if (userImageStr.startsWith("uploads/")) {
         return {
           type: "image",
-          source: { uri: `${IMAGE_URL}${userImage}` },
+          source: { uri: `${IMAGE_URL}${userImageStr}` },
         };
       } else {
         return {
           type: "image",
-          source: { uri: `${VIDEO_URL}${userImage}` },
+          source: { uri: `${VIDEO_URL}${userImageStr}` },
         };
       }
     }
@@ -192,12 +195,12 @@ export default function Review() {
             >
               <View className="flex-row items-center gap-12 mb-6">
                 <View className="w-[75px] h-[75px] rounded-full overflow-hidden">
-                  {userImage ? (
+                  {userImageStr ? (
                     <Image
                       source={{
-                        uri: userImage?.startsWith("uploads/")
-                          ? IMAGE_URL + userImage
-                          : VIDEO_URL + userImage,
+                        uri: userImageStr.startsWith("uploads/")
+                          ? IMAGE_URL + userImageStr
+                          : VIDEO_URL + userImageStr,
                       }}
                       className="w-full h-full"
                       resizeMode="cover"
@@ -224,7 +227,7 @@ export default function Review() {
                         activeOpacity={0.7}
                       >
                         <AntDesign
-                          name={star <= rating ? "star" : "staro"}
+                          name={(star <= rating ? "star" : "star-o") as any}
                           size={28}
                           color={star <= rating ? "#B06D1E" : "#D1D1D1"}
                         />
@@ -295,7 +298,7 @@ export default function Review() {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <TouchableOpacity key={star} activeOpacity={1}>
                       <AntDesign
-                        name={star <= submittedRating ? "star" : "staro"}
+                        name={(star <= submittedRating ? "star" : "star-o") as any}
                         size={28}
                         color={star <= submittedRating ? "#B06D1E" : "#D1D1D1"}
                       />

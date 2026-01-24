@@ -60,7 +60,7 @@ export default function ProfileDetail() {
         console.log("Failed to fetch profile:", res?.msg);
       }
     } catch (error) {
-      console.error("Error fetching profile data:", error.response);
+      console.error("Error fetching profile data:", error instanceof Error ? error.message : String(error));
       setError(true);
       Toast.show({
         type: "error",

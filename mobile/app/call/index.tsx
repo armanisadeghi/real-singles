@@ -43,8 +43,8 @@ const Call = () => {
     const [isConfigured, setIsConfigured] = useState(false);
 
     // Agora engine reference
-    const agoraEngineRef = useRef<IRtcEngine>();
-    const eventHandler = useRef<IRtcEngineEventHandler>();
+    const agoraEngineRef = useRef<IRtcEngine | null>(null);
+    const eventHandler = useRef<IRtcEngineEventHandler | null>(null);
 
     useEffect(() => {
         const init = async () => {

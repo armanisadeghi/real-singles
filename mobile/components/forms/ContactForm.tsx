@@ -66,7 +66,7 @@ export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) 
 
       const res = await contactUs(data);
       if (res?.success) {
-        showMsg(res);
+        showMsg?.(res);
         console.log("Contact form submitted successfully:", res);
         // setFormData({
         //   Name: "",
@@ -75,12 +75,12 @@ export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) 
         //   Message: "",
         // });
       } else {
-        showMsg(res);
+        showMsg?.(res);
         console.log("Failed to submit contact form:", res.msg);
       }
     } catch (error) {
       console.error("Error submitting contact form:", error);
-      showMsg({ success: false, msg: "Something went wrong" });
+      showMsg?.({ success: false, msg: "Something went wrong" });
     }finally{
       setIsSubmitting(false);
     }

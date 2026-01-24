@@ -60,7 +60,7 @@ export default function ShippingInfo() {
                 <Text className="text-primary font-bold text-lg">Address:</Text>
                 <Text className="text-sm font-normal text-[#686A6F] leading-5">Please provide your shipping information</Text>
             </View>
-            <ShippingInfoForm productId={productId} productPoints={productPoints} selectedUsers={selectedUsers} redeemForYou={redeemForYou} onSubmitSuccess={handleFormSubmit}/>
+            <ShippingInfoForm productId={Array.isArray(productId) ? productId[0] : productId} productPoints={productPoints} selectedUsers={selectedUsers} redeemForYou={Array.isArray(redeemForYou) ? redeemForYou[0] : redeemForYou} onSubmitSuccess={handleFormSubmit}/>
         </ScrollView>
 
       </View>

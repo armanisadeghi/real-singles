@@ -136,12 +136,7 @@ export default function TopMatches() {
         return (
           <ProfileCard
             key={item.id}
-            id={item.id}
-            name={item.name}
-            age={item.age}
-            image={item.image}
-            location={item.location}
-            rating={item.rating}
+            profile={item}
           />
         );
     }

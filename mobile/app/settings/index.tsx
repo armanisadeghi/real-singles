@@ -319,7 +319,7 @@ export default function Settings() {
                 onPress={() =>
                   router.push({
                     pathname: "/editProfile",
-                    params: { profile: profile },
+                    params: { profile: profile ? JSON.stringify(profile) : "" },
                   })
                 }
               >

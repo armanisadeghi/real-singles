@@ -352,7 +352,7 @@ export const ensureGroupExists = async (groupId: string, groupName: string, owne
     // Try to fetch group info
     const groupInfo = await chatClient.groupManager.fetchGroupInfoFromServer(groupId);
     console.log(`✅ Group ${groupId} exists in Agora`);
-    console.log(`   Name: ${groupInfo.groupName}, Owner: ${groupInfo.owner}`);
+    console.log(`   Name: ${groupInfo?.groupName}, Owner: ${groupInfo?.owner}`);
 
     return { exists: true, groupInfo };
 

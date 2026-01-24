@@ -1,0 +1,15 @@
+{
+  "name": "realsingles-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RealSingles - Dating App Monorepo",
+  "scripts": {
+    "type-check": "pnpm -r --parallel type-check",
+    "type-check:web": "pnpm --filter realsingles-web type-check",
+    "type-check:mobile": "pnpm --filter realsingles-mobile type-check",
+    "lint": "pnpm -r --parallel lint",
+    "lint:web": "pnpm --filter realsingles-web lint",
+    "lint:mobile": "pnpm --filter realsingles-mobile lint"
+  },
+  "packageManager": "pnpm@10.28.1+sha512.7d7dbbca9e99447b7c3bf7a73286afaaf6be99251eb9498baefa7d406892f67b879adb3a1d7e687fc4ccc1a388c7175fbaae567a26ab44d1067b54fcb0d6a316"
+}

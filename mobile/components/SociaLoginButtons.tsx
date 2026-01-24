@@ -1,6 +1,6 @@
 import { icons } from "@/constants/icons";
 import { addCurrentUserId, getCurrentUserId, getToken, removeCurrentUserId, removeToken, storeToken } from "@/utils/token";
-import { AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as AppleAuthentication from 'expo-apple-authentication';
 // import * as AuthSession from "expo-auth-session";
@@ -37,7 +37,7 @@ async function signInWithApple() {
   const coords = await getLocation(); // ask for location here
    // stop if location not granted
    if (!coords) {
-    Alert.alert("Location Required", locationError || "Location permission is required to proceed.");``
+    Alert.alert("Location Required", locationError || "Location permission is required to proceed.");
    }
 
   try {
@@ -186,7 +186,7 @@ const getLocation = async () => {
      
       {Platform.OS === "ios" ? (
         <TouchableOpacity onPress={() => signInWithApple()} className="flex-row justify-center items-center gap-2 my-2 bg-light-200 py-4 rounded-[99] border-border">
-          <AntDesign name="apple1" size={24} color="black" />
+          <Ionicons name="logo-apple" size={24} color="black" />
           <Text className="text-gray font-medium text-xs">
             Continue with Apple
           </Text>

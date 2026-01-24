@@ -435,7 +435,7 @@ const Signup = () => {
         religion: signupData.Religion?.toLowerCase() || null,
         smoking: signupData.Smoking?.toLowerCase() || null,
         drinking: signupData.Drinks?.toLowerCase() || null,
-        has_kids: signupData.HaveChild === "Yes",
+        has_kids: signupData.HaveChild === "Yes" ? "yes" : signupData.HaveChild || null,
         wants_kids: signupData.WantChild?.toLowerCase().replace(" ", "_") || null,
         interests: signupData.Interest?.length > 0 ? signupData.Interest : null,
         bio: signupData.About || null,

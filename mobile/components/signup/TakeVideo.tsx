@@ -139,7 +139,7 @@ const TakeVideo = ({ data, updateData, onNext, error }: signupProps) => {
     if (!uri.startsWith("content://")) return uri;
 
     try {
-      const dest = `${FileSystem.cacheDirectory}video_${Date.now()}.mp4`;
+      const dest = `${(FileSystem as any).documentDirectory || ""}video_${Date.now()}.mp4`;
       console.log("Attempting to copy content:// URI to cache:", uri, "->", dest);
       await FileSystem.copyAsync({ from: uri, to: dest });
       // verify file exists
@@ -485,7 +485,7 @@ controls: {
   skipBtn: {
     position: "absolute",
     right: 20,
-    top: Platform.OS === "ios" ? 55 : StatusBar.currentHeight + 10,
+    top: Platform.OS === "ios" ? 55 : (StatusBar.currentHeight ?? 0) + 10,
   },
 
   skipText: {

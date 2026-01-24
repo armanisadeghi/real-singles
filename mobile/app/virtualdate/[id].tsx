@@ -62,7 +62,7 @@ export default function Review() {
     if (!dateString) return "Date TBD";
 
     const date = new Date(dateString);
-    const options = {
+    const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -105,7 +105,7 @@ export default function Review() {
         Toast.show({
           type: "success",
           text1: "Registered Successfully!",
-          text2: `You have registered for the virtual date on ${formatDate(selectedDate?.VirtualDate)} at ${formatTime(selectedDate?.StartTime)}.`,
+          text2: `You have registered for the virtual date on ${formatDate(selectedDate?.VirtualDate || "")} at ${formatTime(selectedDate?.StartTime || "")}.`,
           position: "bottom",
           autoHide: false,
         });

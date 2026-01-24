@@ -355,7 +355,7 @@ const VideoCall = () => {
           <View style={styles.remoteVideoContainer}>
             <RtcSurfaceView
               canvas={{
-                uid: remoteUid,
+                uid: remoteUid ?? undefined,
                 sourceType: VideoSourceType.VideoSourceCamera,
               }}
               style={styles.remoteVideo}

@@ -42,7 +42,7 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
   }, [currentEvent]);
 
   // Function to get user initials
-  const getUserInitials = (user) => {
+  const getUserInitials = (user: any) => {
     if (!user?.DisplayName) return "?";
     
     const nameParts = user.DisplayName.split(" ");
@@ -57,10 +57,10 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
   };
 
   // Function to generate background color for a user
-  const getUserBgColor = (user) => {
+  const getUserBgColor = (user: any) => {
     const seed = user?.ID || user?.DisplayName || "";
     const index = Math.abs(
-      seed.toString().split("").reduce((acc, char) => {
+      seed.toString().split("").reduce((acc: number, char: string) => {
         return acc + char.charCodeAt(0);
       }, 0) % BACKGROUND_COLORS.length
     );

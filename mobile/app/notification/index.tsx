@@ -8,9 +8,22 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 
+interface Notification {
+  ID: string;
+  senderID: string;
+  receiverID: string;
+  msg: string;
+  type: string;
+  CreatedDate: string;
+  Status: string;
+  senderFirstName: string;
+  senderLastname: string;
+  Image: string;
+}
+
 export default function Notification() {
   const router = useRouter();
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<Notification[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchNotiifications = async () => {

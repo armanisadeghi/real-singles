@@ -9,10 +9,10 @@ import { Camera, useCameraDevice, useCameraPermission, useMicrophonePermission }
 import GradientButton from '../ui/GradientButton';
 
 const TakeVideo2 = ({ updateData, onNext }: signupProps) => {
-  const camera = useRef(null);
-  const videoPathRef = useRef(null);
+  const camera = useRef<Camera | null>(null);
+  const videoPathRef = useRef<string | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0); 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [isRecording, setIsRecording] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -156,7 +156,7 @@ const TakeVideo2 = ({ updateData, onNext }: signupProps) => {
     if (!uri.startsWith("content://")) return uri;
 
     try {
-      const dest = `${FileSystem.cacheDirectory}video_${Date.now()}.mp4`;
+      const dest = `${(FileSystem as any).documentDirectory || ""}video_${Date.now()}.mp4`;
       console.log("Attempting to copy content:// URI to cache:", uri, "->", dest);
       await FileSystem.copyAsync({ from: uri, to: dest });
       // verify file exists

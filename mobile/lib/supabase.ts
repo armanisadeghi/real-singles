@@ -5,12 +5,15 @@
  * - AsyncStorage for session persistence
  * - Auto token refresh
  * - Persistent sessions across app restarts
+ * - Full TypeScript types from database schema
  * 
  * @see https://supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '../types/database.types';
+import type { TypedSupabaseClient, DbProfile, DbUser, DbProfileUpdate, DbUserUpdate } from '../types/db';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
@@ -23,7 +26,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase: TypedSupabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: AsyncStorage,
     autoRefreshToken: true,
@@ -147,7 +150,7 @@ export async function updatePassword(newPassword: string) {
 /**
  * Get current user's profile from the profiles table
  */
-export async function getProfile() {
+export async function getProfile(): Promise<DbProfile | null> {
   const user = await getCurrentUser();
   
   if (!user) {
@@ -170,7 +173,7 @@ export async function getProfile() {
 /**
  * Get current user's data from the users table
  */
-export async function getUserData() {
+export async function getUserData(): Promise<DbUser | null> {
   const user = await getCurrentUser();
   
   if (!user) {
@@ -193,7 +196,11 @@ export async function getUserData() {
 /**
  * Get combined user data (auth user + users table + profile)
  */
-export async function getFullUserData() {
+export async function getFullUserData(): Promise<{
+  auth: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>;
+  user: DbUser | null;
+  profile: DbProfile | null;
+} | null> {
   const user = await getCurrentUser();
   
   if (!user) {
@@ -215,7 +222,7 @@ export async function getFullUserData() {
 /**
  * Update user profile
  */
-export async function updateProfile(profileData: Record<string, unknown>) {
+export async function updateProfile(profileData: DbProfileUpdate): Promise<DbProfile> {
   const user = await getCurrentUser();
   
   if (!user) {
