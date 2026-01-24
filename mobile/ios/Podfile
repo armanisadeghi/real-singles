@@ -66,6 +66,9 @@ target 'RealSingles' do
   )
 
   pod 'HyphenateChat', '4.10.2'
+  
+  # Required by Reanimated's Babel plugin
+  pod 'RNWorklets', :path => '../node_modules/react-native-worklets'
 
   post_install do |installer|
     react_native_post_install(
