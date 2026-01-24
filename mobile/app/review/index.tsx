@@ -294,7 +294,7 @@ export default function Review() {
                 <View className="w-36 h-36 rounded-full mt-[-80px] border-2 border-white overflow-hidden">
                   <Image
                     source={
-                      userImage
+                      userImage && typeof userImage === 'string'
                         ? { uri: userImage.startsWith('http') ? userImage : VIDEO_URL + userImage }
                         : icons.ic_user
                     }

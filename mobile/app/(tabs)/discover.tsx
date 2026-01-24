@@ -37,10 +37,10 @@ export default function Discover() {
   const [filtersApplied, setFiltersApplied] = useState(false);
   
   // Filter state
+  // Note: gender preference is NOT a filter - it comes from user's profile "looking_for" field
   const [filters, setFilters] = useState<FilterData>({
     ageRange: { min: 18, max: 70 },
     heightRange: { min: 4.0, max: 10.0 },
-    gender: "",
     bodyType: "",
     maritalStatus: "",
     ethnicity: "",

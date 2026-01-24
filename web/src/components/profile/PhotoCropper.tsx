@@ -111,8 +111,8 @@ export function PhotoCropper({ imageUrl, onCropComplete, onCancel }: PhotoCroppe
       <div className="flex-1 flex items-center justify-center p-4 min-h-0">
         <ReactCrop
           crop={crop}
-          onChange={(c) => setCrop(c)}
-          onComplete={(c) => setCompletedCrop(c)}
+          onChange={(c: Crop) => setCrop(c)}
+          onComplete={(c: PixelCrop) => setCompletedCrop(c)}
           aspect={1}
           circularCrop={false}
           className="max-h-full"

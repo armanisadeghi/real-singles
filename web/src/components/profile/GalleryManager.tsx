@@ -187,7 +187,7 @@ export function GalleryManager({
       const newIndex = galleryItems.findIndex((item) => item.id === over.id);
 
       const reordered = arrayMove(galleryItems, oldIndex, newIndex).map(
-        (item, index) => ({
+        (item: GalleryItem, index: number) => ({
           ...item,
           display_order: index,
         })
