@@ -37,9 +37,11 @@ target 'TruSingle' do
     :hermes_enabled => podfile_properties['expo.jsEngine'] == nil || podfile_properties['expo.jsEngine'] == 'hermes',
     :app_path => "#{Pod::Config.instance.installation_root}/..",
     :privacy_file_aggregation_enabled => podfile_properties['apple.privacyManifestAggregationEnabled'] != 'false',
-    :fabric_enabled => false
+    :fabric_enabled => true
   )
     pod 'react-native-google-maps', :path => '../node_modules/react-native-maps'
+  pod 'RNWorklets', :path => '../node_modules/react-native-worklets'
+  pod 'react-native-worklets-core', :path => '../node_modules/react-native-worklets-core'
 
   pod 'HyphenateChat', '4.10.2'
 
