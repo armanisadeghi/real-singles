@@ -202,12 +202,14 @@ export async function POST(request: NextRequest) {
         ? (existingItems[0].display_order || 0) + 1 
         : 0;
       
+      // IMPORTANT: Database CHECK constraint only allows 'image' or 'video'
+      // Previously used 'photo' which violated the constraint and caused silent insert failures
       const { data: galleryData, error: galleryError } = await supabase
         .from("user_gallery")
         .insert({
           user_id: user.id,
           media_url: uploadData.path,
-          media_type: isVideo ? "video" : "photo",
+          media_type: isVideo ? "video" : "image",  // Must be 'image' not 'photo'!
           display_order: nextDisplayOrder,
         })
         .select()

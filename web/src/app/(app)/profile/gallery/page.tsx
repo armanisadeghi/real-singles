@@ -26,23 +26,35 @@ export default function GalleryPage() {
       const supabase = createClient();
       const {
         data: { user },
+        error: authError,
       } = await supabase.auth.getUser();
 
-      if (!user) {
+      console.log("[Gallery] Auth check - user:", user?.id, "error:", authError);
+
+      if (authError || !user) {
+        console.error("[Gallery] Auth error or no user:", authError);
         router.push("/login");
         return;
       }
 
-      const { data, error } = await supabase
+      console.log("[Gallery] Fetching gallery for user:", user.id);
+
+      const { data, error, count } = await supabase
         .from("user_gallery")
-        .select("*")
+        .select("*", { count: "exact" })
         .eq("user_id", user.id)
         .order("display_order", { ascending: true })
         .order("created_at", { ascending: false });
 
+      console.log("[Gallery] Query result - count:", count, "data length:", data?.length, "error:", error);
+      
+      if (data && data.length > 0) {
+        console.log("[Gallery] First item:", JSON.stringify(data[0], null, 2));
+      }
+
       if (error) {
-        console.error("Error loading gallery:", error);
-        showMessage("error", "Failed to load gallery");
+        console.error("[Gallery] Error loading gallery:", error);
+        showMessage("error", `Failed to load gallery: ${error.message}`);
         return;
       }
 
@@ -52,13 +64,12 @@ export default function GalleryPage() {
           ? item.media_url
           : getPublicUrl(STORAGE_BUCKETS.GALLERY, item.media_url);
         
-        // Normalize media_type: database stores "photo" but component expects "image"
-        const mediaType = item.media_type === "photo" ? "image" : item.media_type as "image" | "video";
+        console.log("[Gallery] Transformed item:", item.id, "url:", mediaUrl, "type:", item.media_type);
         
         return {
           id: item.id,
           media_url: mediaUrl,
-          media_type: mediaType,
+          media_type: item.media_type as "image" | "video",
           is_primary: item.is_primary || false,
           display_order: item.display_order || 0,
           thumbnail_url: item.thumbnail_url || null,
@@ -66,10 +77,11 @@ export default function GalleryPage() {
         };
       });
 
+      console.log("[Gallery] Setting gallery state with", galleryData.length, "items");
       setGallery(galleryData);
     } catch (error) {
-      console.error("Error:", error);
-      showMessage("error", "An error occurred");
+      console.error("[Gallery] Catch error:", error);
+      showMessage("error", "An error occurred loading gallery");
     } finally {
       setLoading(false);
     }
@@ -81,6 +93,7 @@ export default function GalleryPage() {
   };
 
   const handleUploadComplete = async (url: string, type: "image" | "video") => {
+    console.log("[Gallery] Upload complete callback - url:", url, "type:", type);
     // Refresh gallery to show new item
     await loadGallery();
     showMessage("success", `${type === "image" ? "Photo" : "Video"} uploaded successfully!`);

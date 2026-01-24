@@ -181,12 +181,10 @@ export async function GET() {
     PointsBalance: userData?.points_balance || 0,
     ReferralCode: userData?.referral_code || "",
     
-    // Gallery - transform paths to full URLs and normalize media_type
+    // Gallery - transform paths to full URLs
     gallery: (gallery || []).map((item) => ({
       ...item,
       media_url: getGalleryPublicUrl(item.media_url),
-      // Normalize: DB stores "photo" but clients expect "image"
-      media_type: item.media_type === "photo" ? "image" : item.media_type,
       thumbnail_url: item.thumbnail_url ? getGalleryPublicUrl(item.thumbnail_url) : null,
     })),
     

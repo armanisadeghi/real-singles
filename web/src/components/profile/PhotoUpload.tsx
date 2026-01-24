@@ -110,6 +110,8 @@ export function PhotoUpload({
     setUploadProgress(0);
     setError("");
 
+    console.log("[PhotoUpload] Starting upload for file:", file.name, "type:", file.type, "size:", file.size);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -120,23 +122,35 @@ export function PhotoUpload({
         body: formData,
       });
 
+      console.log("[PhotoUpload] Response status:", response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("[PhotoUpload] Upload failed:", errorData);
         throw new Error(errorData.error || "Upload failed");
       }
 
       const data = await response.json();
+      console.log("[PhotoUpload] Upload response data:", JSON.stringify(data, null, 2));
       
       if (data.success) {
         const type = file.type.startsWith("video/") ? "video" : "image";
         // Use publicUrl if available, otherwise use path
         const url = data.publicUrl || data.path;
+        console.log("[PhotoUpload] Calling onUploadComplete with url:", url, "type:", type);
+        
+        // Check if there was a warning about gallery entry
+        if (data.warning || data.galleryError) {
+          console.warn("[PhotoUpload] Gallery entry warning:", data.warning || data.galleryError);
+          setError(data.warning || `Gallery entry failed: ${data.galleryError}`);
+        }
+        
         onUploadComplete(url, type);
       } else {
         throw new Error(data.error || "Upload failed");
       }
     } catch (err) {
-      console.error("Upload error:", err);
+      console.error("[PhotoUpload] Catch error:", err);
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setIsUploading(false);

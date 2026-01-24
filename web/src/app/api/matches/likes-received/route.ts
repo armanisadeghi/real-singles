@@ -131,12 +131,12 @@ export async function GET(request: NextRequest) {
       .select("id, display_name, last_active_at")
       .in("id", unactedLikerIds);
 
-    // Get primary gallery photos (DB stores "photo", not "image")
+    // Get primary gallery photos
     const { data: galleries } = await supabase
       .from("user_gallery")
       .select("user_id, media_url")
       .in("user_id", unactedLikerIds)
-      .in("media_type", ["photo", "image"])
+      .eq("media_type", "image")
       .eq("is_primary", true);
 
     // Combine data

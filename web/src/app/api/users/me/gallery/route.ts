@@ -44,8 +44,7 @@ export async function GET(request: NextRequest) {
 
   const formattedGallery = (gallery || []).map((item) => ({
     GalleryID: item.id,
-    // Normalize media_type: DB stores "photo" but clients expect "image"
-    MediaType: item.media_type === "photo" ? "image" : item.media_type,
+    MediaType: item.media_type,
     MediaURL: getGalleryPublicUrl(item.media_url),
     ThumbnailURL: item.thumbnail_url ? getGalleryPublicUrl(item.thumbnail_url) : null,
     IsLivePhoto: item.is_live_photo,
@@ -123,8 +122,8 @@ export async function PUT(request: Request) {
         );
       }
 
-      // Update profile photo URL if it's an image (DB stores "photo", not "image")
-      if (primaryItem && (primaryItem.media_type === "photo" || primaryItem.media_type === "image")) {
+      // Update profile photo URL if it's an image
+      if (primaryItem && primaryItem.media_type === "image") {
         // Store the full public URL in profile
         const profileImageUrl = getGalleryPublicUrl(primaryItem.media_url);
         await supabase
@@ -208,12 +207,11 @@ export async function DELETE(request: NextRequest) {
 
   // If this was the primary, set next item as primary
   if (item.is_primary) {
-    // DB stores "photo", not "image"
     const { data: nextItem } = await supabase
       .from("user_gallery")
       .select("id, media_url, media_type")
       .eq("user_id", user.id)
-      .in("media_type", ["photo", "image"])
+      .eq("media_type", "image")
       .order("display_order", { ascending: true })
       .limit(1)
       .single();
