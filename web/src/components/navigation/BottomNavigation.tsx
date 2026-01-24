@@ -56,7 +56,7 @@ export function BottomNavigation() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/", icon: Home, label: "Home" },
+    { href: "/home", icon: Home, label: "Home" },
     { href: "/discover", icon: Compass, label: "Discover" },
     { href: "/chats", icon: MessageCircle, label: "Chats" },
     { href: "/favorites", icon: Heart, label: "Favorites" },
@@ -65,8 +65,8 @@ export function BottomNavigation() {
 
   // Determine active tab based on pathname
   const getIsActive = (href: string) => {
-    if (href === "/") {
-      return pathname === "/";
+    if (href === "/home") {
+      return pathname === "/home";
     }
     return pathname.startsWith(href);
   };

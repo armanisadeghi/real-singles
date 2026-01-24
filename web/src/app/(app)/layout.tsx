@@ -62,7 +62,10 @@ export default async function AppLayout({
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/" className="text-gray-600 hover:text-gray-900 font-medium">
+              <Link href="/home" className="text-gray-600 hover:text-gray-900 font-medium">
+                Home
+              </Link>
+              <Link href="/discover" className="text-gray-600 hover:text-gray-900 font-medium">
                 Discover
               </Link>
               <Link href="/matches" className="text-gray-600 hover:text-gray-900 font-medium">

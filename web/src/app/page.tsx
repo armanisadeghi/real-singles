@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   Heart,
   Shield,
@@ -14,6 +15,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { Header, Footer } from "@/components/layout";
+import { createClient } from "@/lib/supabase/server";
 
 const features = [
   {
@@ -118,7 +120,17 @@ const stats = [
   { value: "98%", label: "Verified Profiles" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Redirect authenticated users to the app home/dashboard
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/home");
+  }
+
   return (
     <div className="min-h-dvh flex flex-col">
       <Header />
