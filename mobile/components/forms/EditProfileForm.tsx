@@ -65,6 +65,21 @@ interface ProfileFormViewProps {
   onChangeField: (field: string, value: any) => void;
 }
 
+// Life goal types
+interface LifeGoal {
+  key: string;
+  label: string;
+  category: string;
+  description?: string;
+}
+
+const LIFE_GOAL_CATEGORIES = [
+  { key: "career", label: "Career & Achievement" },
+  { key: "adventure", label: "Adventure & Travel" },
+  { key: "personal", label: "Personal & Lifestyle" },
+  { key: "impact", label: "Impact & Legacy" },
+];
+
 const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showPersonalDetails, setShowPersonalDetails] = useState(false);
@@ -77,6 +92,8 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   const [religion, setReligion] = useState(false);
   const [political, setPolitical] = useState(false);
   const [fewWords, setFewWords] = useState(false);
+  const [showLifeGoals, setShowLifeGoals] = useState(false);
+  const [lifeGoalOptions, setLifeGoalOptions] = useState<LifeGoal[]>([]);
   const [imageUri, setImageUri] = useState("");
   const [uploading, setUploading] = useState(false);
 
@@ -115,6 +132,27 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
     // Animate height/layout
     LayoutAnimation.configureNext(animationConfig);
   }, [showPersonalDetails]);
+
+  // Fetch life goals on mount
+  useEffect(() => {
+    const fetchLifeGoals = async () => {
+      try {
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL || ''}/api/life-goals`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        const data = await response.json();
+        if (data.success && data.data?.goals) {
+          setLifeGoalOptions(data.data.goals);
+        }
+      } catch (error) {
+        console.log("Error fetching life goals:", error);
+      }
+    };
+    fetchLifeGoals();
+  }, []);
 
   const arrowRotation = rotateAnim.interpolate({
     inputRange: [0, 1],
