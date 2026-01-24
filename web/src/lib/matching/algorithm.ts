@@ -163,7 +163,7 @@ function calculateLifestyleScore(user: Profile, target: Profile): number {
     factors++;
     if (user.smoking === target.smoking) {
       score += 100;
-    } else if (user.smoking === "never" && target.smoking !== "never") {
+    } else if (user.smoking === "no" && target.smoking !== "no") {
       score += 20;
     } else {
       score += 60;
@@ -186,8 +186,8 @@ function calculateLifestyleScore(user: Profile, target: Profile): number {
     if (user.wants_kids === target.wants_kids) {
       score += 100;
     } else if (
-      (user.wants_kids === "yes" && target.wants_kids === "no") ||
-      (user.wants_kids === "no" && target.wants_kids === "yes")
+      (user.wants_kids === "definitely" && target.wants_kids === "no") ||
+      (user.wants_kids === "no" && target.wants_kids === "definitely")
     ) {
       score += 0;
     } else {
