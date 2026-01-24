@@ -526,6 +526,37 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
     onChangeField("Pets", selected);
   };
 
+  // Life Goals is MULTI-SELECT (max 10)
+  const toggleLifeGoal = (goalKey: string) => {
+    const currentGoals = formData?.LifeGoals
+      ? Array.isArray(formData.LifeGoals)
+        ? [...formData.LifeGoals]
+        : []
+      : [];
+
+    const isSelected = currentGoals.includes(goalKey);
+
+    if (isSelected) {
+      // Remove the goal
+      const newGoals = currentGoals.filter((g) => g !== goalKey);
+      onChangeField("LifeGoals", newGoals);
+    } else {
+      // Add the goal (max 10)
+      if (currentGoals.length < 10) {
+        onChangeField("LifeGoals", [...currentGoals, goalKey]);
+      } else {
+        Toast.show({
+          type: "info",
+          text1: "Maximum 10 life goals",
+          text2: "Remove one to add another",
+          position: "bottom",
+          visibilityTime: 2000,
+          bottomOffset: 100,
+        });
+      }
+    }
+  };
+
 
   // if (uploading) return (
   //   <View className="flex-row items-center">
@@ -1763,6 +1794,114 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 )}
               />
             </View>
+          </Animated.View>
+        )}
+      </View>
+
+      {/* Life Goals Section */}
+      <View
+        className="bg-white w-full rounded-[22px] px-[22px] py-[30px] flex-col gap-5 mb-5"
+        style={styles.shadow}
+      >
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => setShowLifeGoals((prev) => !prev)}
+          className="flex-row items-center justify-between"
+        >
+          <Text className="text-primary font-medium text-lg">Life Goals</Text>
+          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+            <Image source={icons.back} resizeMode="contain" />
+          </Animated.View>
+        </TouchableOpacity>
+
+        {showLifeGoals && (
+          <Animated.View className="mt-4 gap-5">
+            <Text className="text-xs text-gray mb-2">
+              Select up to 10 life goals to help find matches with shared ambitions.
+              ({(formData.LifeGoals || []).length}/10 selected)
+            </Text>
+            
+            {lifeGoalOptions.length > 0 ? (
+              <>
+                {LIFE_GOAL_CATEGORIES.map((category) => {
+                  const categoryGoals = lifeGoalOptions.filter(
+                    (g) => g.category === category.key
+                  );
+                  if (categoryGoals.length === 0) return null;
+                  
+                  return (
+                    <View key={category.key} className="mb-4">
+                      <Text className="text-sm font-medium text-dark mb-2">
+                        {category.label}
+                      </Text>
+                      <View className="flex-row gap-2 flex-wrap">
+                        {categoryGoals.map((goal) => {
+                          const currentGoals = formData.LifeGoals || [];
+                          const isSelected = currentGoals.includes(goal.key);
+                          const canSelect = currentGoals.length < 10 || isSelected;
+
+                          return (
+                            <TouchableOpacity
+                              key={goal.key}
+                              onPress={() => canSelect && toggleLifeGoal(goal.key)}
+                              activeOpacity={canSelect ? 0.9 : 1}
+                              style={{
+                                marginBottom: 8,
+                                borderRadius: 50,
+                                overflow: "hidden",
+                                borderWidth: 1,
+                                borderColor: isSelected
+                                  ? "transparent"
+                                  : canSelect
+                                  ? "lightgrey"
+                                  : "#e5e5e5",
+                                opacity: canSelect ? 1 : 0.5,
+                              }}
+                            >
+                              {isSelected ? (
+                                <LinearBg
+                                  style={{
+                                    paddingHorizontal: 12,
+                                    paddingVertical: 8,
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    gap: 6,
+                                    borderRadius: 50,
+                                  }}
+                                >
+                                  <Image
+                                    source={icons.check}
+                                    style={{ width: 16, height: 16 }}
+                                    resizeMode="contain"
+                                  />
+                                  <Text style={{ color: "#fff", fontSize: 12 }}>
+                                    {goal.label}
+                                  </Text>
+                                </LinearBg>
+                              ) : (
+                                <View
+                                  style={{
+                                    paddingHorizontal: 12,
+                                    paddingVertical: 8,
+                                    borderRadius: 50,
+                                  }}
+                                >
+                                  <Text style={{ color: "#333", fontSize: 12 }}>
+                                    {goal.label}
+                                  </Text>
+                                </View>
+                              )}
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  );
+                })}
+              </>
+            ) : (
+              <Text className="text-sm text-gray">Loading life goals...</Text>
+            )}
           </Animated.View>
         )}
       </View>

@@ -1,36 +1,28 @@
 # Documentation
 
-Reference documentation for RealSingles. For active development rules, see `.cursor/rules/`.
+Reference documentation for RealSingles.
+
+**For active development rules, see `.cursor/rules/`** — those are the authoritative source for coding standards.
 
 ---
 
-## Active Reference Docs
+## Documentation Index
 
-| File | Purpose | Use When |
-|------|---------|----------|
-| `business_logic.md` | Core business requirements and features | Understanding what the app should do |
-| `project_requirements.md` | Technical spec with API endpoints | Building new features |
-| `EXTERNAL_SERVICES_SETUP.md` | Third-party service credentials | Setting up Agora, Twilio, etc. |
-| `ui_patterns.md` | Native UI patterns per platform | Building forms and components |
-| `BOTTOM_NAVIGATION_SPEC.md` | Bottom nav implementation details | Modifying navigation |
-
-## Research & Inventory
-
-| File | Purpose | Notes |
-|------|---------|-------|
-| `competitor_analysis.md` | Industry research (League, Hinge, Bumble) | Feature decisions and standards |
-| `data_inventory.md` | Complete field inventory | Field types, validation, options |
-| `integration_tracker.md` | Field implementation status | May have outdated status info |
+| File | Purpose | When to Use |
+|------|---------|-------------|
+| **`data_inventory.md`** | Complete field inventory with DB/API/UI status | **Source of truth** for all data fields |
+| `project_requirements.md` | Tech stack, deployment guide, outstanding items | Setting up or deploying |
+| `business_logic.md` | Core business requirements and features | Understanding app functionality |
+| `competitor_analysis.md` | Industry research (League, Hinge, Bumble, Raya) | Feature decisions |
+| `ui_patterns.md` | Native UI component patterns per platform | Building forms and components |
+| `BOTTOM_NAVIGATION_SPEC.md` | Bottom navigation implementation | Modifying navigation |
+| `EXTERNAL_SERVICES_SETUP.md` | Third-party service credentials | Configuring Agora, Twilio, etc. |
 
 ---
 
-## Important Notes
+## Key Principles
 
-1. **Status info may be outdated** - `data_inventory.md` and `integration_tracker.md` contain status columns that may not reflect current state. Always check the actual code.
-
-2. **For development rules, use `.cursor/rules/`** - The rules files are the source of truth for:
-   - Cross-platform parity requirements
-   - Native-feel guidelines
-   - Project structure
-
-3. **Constants must be synced** - When you see field options in these docs, ensure `mobile/constants/options.ts` and `web/src/types/index.ts` match.
+1. **`.cursor/rules/` is authoritative** — Development rules live there, not in docs
+2. **`data_inventory.md` is the field source of truth** — All field definitions, options, and status
+3. **Constants must be synced** — `mobile/constants/options.ts` and `web/src/types/index.ts` must match
+4. **Cross-platform parity** — Every feature works on iOS, Android, Web Desktop, and Web Mobile

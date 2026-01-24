@@ -199,6 +199,9 @@ export interface EditProfileFormData {
   // Interests
   Interest?: string | string[]; // Multi-select
   
+  // Life Goals (max 10)
+  LifeGoals?: string[];
+  
   // Profile prompts
   IdeaDate?: string; // ideal_first_date
   NonNegotiable?: string; // non_negotiables

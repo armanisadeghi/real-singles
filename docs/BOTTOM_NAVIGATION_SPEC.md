@@ -1,6 +1,6 @@
 # Bottom Navigation Specification
 
-> See also: [NATIVE_FEEL_GUIDELINES.md](./NATIVE_FEEL_GUIDELINES.md) for general native implementation patterns.
+> See also: `.cursor/rules/mobile-native-ios-android-rules.mdc` for native implementation guidelines.
 
 ## Core Implementation
 
