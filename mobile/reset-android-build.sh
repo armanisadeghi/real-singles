@@ -51,7 +51,6 @@ echo ""
 echo "🧼 Step 6: Cleaning Gradle project..."
 cd android
 ./gradlew clean
-./gradlew cleanBuildCache
 
 echo ""
 echo "📦 Step 7: Building fresh Gradle dependencies..."
