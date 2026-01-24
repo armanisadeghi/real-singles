@@ -1,15 +1,17 @@
-import React from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import React, { useState } from 'react';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-    runOnJS,
-    useAnimatedProps,
-    useAnimatedStyle,
-    useSharedValue,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
 } from 'react-native-reanimated';
 
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const DEFAULT_SLIDER_WIDTH = SCREEN_WIDTH - 80; // 40px padding on each side
+
 interface RangeSliderProps {
-  sliderWidth: number;
+  sliderWidth?: number;
   min: number;
   max: number;
   step: number;
@@ -19,159 +21,147 @@ interface RangeSliderProps {
   onValueChange: (range: { min: number; max: number }) => void;
 }
 
-const RangeSlider = ({sliderWidth, min, max, step, label, initialMin, initialMax, onValueChange}: RangeSliderProps) => {
-  // Calculate initial positions based on initial values
+const RangeSlider = ({
+  sliderWidth = DEFAULT_SLIDER_WIDTH,
+  min,
+  max,
+  step,
+  label,
+  initialMin,
+  initialMax,
+  onValueChange,
+}: RangeSliderProps) => {
+  // State for displaying current values (updated via runOnJS)
+  const [displayMin, setDisplayMin] = useState(initialMin ?? min);
+  const [displayMax, setDisplayMax] = useState(initialMax ?? max);
+  const [isDragging1, setIsDragging1] = useState(false);
+  const [isDragging2, setIsDragging2] = useState(false);
+
+  // Calculate position from value
   const getPositionFromValue = (value: number) => {
     return ((value - min) / (max - min)) * sliderWidth;
   };
-  
-  const initialPos1 = initialMin !== undefined ? getPositionFromValue(initialMin) : 0;
-  const initialPos2 = initialMax !== undefined ? getPositionFromValue(initialMax) : sliderWidth;
-  
-  const position = useSharedValue(initialPos1);
-  const position2 = useSharedValue(initialPos2);
-  const opacity = useSharedValue(0);
-  const opacity2 = useSharedValue(0);
-  const zIndex = useSharedValue(0);
-  const zIndex2 = useSharedValue(0);
-  const context = useSharedValue(0);
-  const context2 = useSharedValue(0);
 
-  // Helper to calculate current values from position
-  const getValuesFromPositions = (pos1: number, pos2: number) => {
-    'worklet';
-    return {
-      min: min + Math.floor(pos1 / (sliderWidth / ((max - min) / step))) * step,
-      max: min + Math.floor(pos2 / (sliderWidth / ((max - min) / step))) * step,
-    };
+  // Calculate value from position
+  const getValueFromPosition = (pos: number) => {
+    const rawValue = min + (pos / sliderWidth) * (max - min);
+    // Round to nearest step
+    const steppedValue = Math.round(rawValue / step) * step;
+    // Clamp to min/max
+    return Math.max(min, Math.min(max, steppedValue));
   };
 
-  // Using new Gesture API with proper configuration for use inside BottomSheet
-  const pan = Gesture.Pan()
-    .activeOffsetX([-10, 10]) // Only activate after 10px horizontal movement
-    .failOffsetY([-5, 5]) // Fail if vertical movement detected first
+  // Initial positions
+  const initialPos1 = getPositionFromValue(initialMin ?? min);
+  const initialPos2 = getPositionFromValue(initialMax ?? max);
+
+  const position1 = useSharedValue(initialPos1);
+  const position2 = useSharedValue(initialPos2);
+  const context1 = useSharedValue(0);
+  const context2 = useSharedValue(0);
+
+  // Update display values and call callback
+  const updateValues = (pos1: number, pos2: number) => {
+    const val1 = getValueFromPosition(pos1);
+    const val2 = getValueFromPosition(pos2);
+    setDisplayMin(val1);
+    setDisplayMax(val2);
+    onValueChange({ min: val1, max: val2 });
+  };
+
+  // Gesture for left thumb
+  const pan1 = Gesture.Pan()
     .onBegin(() => {
-      context.value = position.value;
+      context1.value = position1.value;
+      runOnJS(setIsDragging1)(true);
     })
-    .onUpdate(e => {
-      opacity.value = 1;
-      if (context.value + e.translationX < 0) {
-        position.value = 0;
-      } else if (context.value + e.translationX > position2.value) {
-        position.value = position2.value;
-        zIndex.value = 1;
-        zIndex2.value = 0;
-      } else {
-        position.value = context.value + e.translationX;
-      }
-      // Update values in real-time during drag
-      const values = getValuesFromPositions(position.value, position2.value);
-      runOnJS(onValueChange)(values);
+    .onUpdate((e) => {
+      let newPos = context1.value + e.translationX;
+      // Constrain to valid range
+      newPos = Math.max(0, Math.min(newPos, position2.value - 10));
+      position1.value = newPos;
+      runOnJS(updateValues)(newPos, position2.value);
     })
     .onEnd(() => {
-      opacity.value = 0;
-      const values = getValuesFromPositions(position.value, position2.value);
-      runOnJS(onValueChange)(values);
-    });
+      runOnJS(setIsDragging1)(false);
+    })
+    .minDistance(0)
+    .activeOffsetX([-5, 5]);
 
+  // Gesture for right thumb
   const pan2 = Gesture.Pan()
-    .activeOffsetX([-10, 10]) // Only activate after 10px horizontal movement
-    .failOffsetY([-5, 5]) // Fail if vertical movement detected first
     .onBegin(() => {
       context2.value = position2.value;
+      runOnJS(setIsDragging2)(true);
     })
-    .onUpdate(e => {
-      opacity2.value = 1;
-      if (context2.value + e.translationX > sliderWidth) {
-        position2.value = sliderWidth;
-      } else if (context2.value + e.translationX < position.value) {
-        position2.value = position.value;
-        zIndex.value = 0;
-        zIndex2.value = 1;
-      } else {
-        position2.value = context2.value + e.translationX;
-      }
-      // Update values in real-time during drag
-      const values = getValuesFromPositions(position.value, position2.value);
-      runOnJS(onValueChange)(values);
+    .onUpdate((e) => {
+      let newPos = context2.value + e.translationX;
+      // Constrain to valid range
+      newPos = Math.max(position1.value + 10, Math.min(newPos, sliderWidth));
+      position2.value = newPos;
+      runOnJS(updateValues)(position1.value, newPos);
     })
     .onEnd(() => {
-      opacity2.value = 0;
-      const values = getValuesFromPositions(position.value, position2.value);
-      runOnJS(onValueChange)(values);
-    });
+      runOnJS(setIsDragging2)(false);
+    })
+    .minDistance(0)
+    .activeOffsetX([-5, 5]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{translateX: position.value}],
-    zIndex: zIndex.value,
+  // Animated styles
+  const thumb1Style = useAnimatedStyle(() => ({
+    transform: [{ translateX: position1.value }],
   }));
 
-  const animatedStyle2 = useAnimatedStyle(() => ({
-    transform: [{translateX: position2.value}],
-    zIndex: zIndex2.value,
+  const thumb2Style = useAnimatedStyle(() => ({
+    transform: [{ translateX: position2.value }],
   }));
 
-  const opacityStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
+  const trackStyle = useAnimatedStyle(() => ({
+    left: position1.value,
+    width: position2.value - position1.value,
   }));
 
-  const opacityStyle2 = useAnimatedStyle(() => ({
-    opacity: opacity2.value,
-  }));
-
-  const sliderStyle = useAnimatedStyle(() => ({
-    transform: [{translateX: position.value}],
-    width: position2.value - position.value,
-  }));
-
-  // Add this line for Reanimated from v3.5.0
-  Animated.addWhitelistedNativeProps({text: true});
-  const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
-
-  const minLabelText = useAnimatedProps(() => {
-    return {
-      value: `${
-        min +
-        Math.floor(position.value / (sliderWidth / ((max - min) / step))) * step
-      } ${label}`,
-    };
-  });
-  const maxLabelText = useAnimatedProps(() => {
-    return {
-      value: `${
-        min +
-        Math.floor(position2.value / (sliderWidth / ((max - min) / step))) *
-          step
-      } ${label}`,
-    };
-  });
+  // Format value for display
+  const formatValue = (value: number) => {
+    if (step < 1) {
+      return value.toFixed(1);
+    }
+    return Math.round(value).toString();
+  };
 
   return (
-    <View style={[styles.sliderContainer, {width: sliderWidth}]}>
-      <View style={[styles.sliderBack, {width: sliderWidth}]} />
-      <Animated.View style={[sliderStyle, styles.sliderFront]} />
-      <GestureDetector gesture={pan}>
-        <Animated.View style={[animatedStyle, styles.thumb]}>
-          <Animated.View style={[opacityStyle, styles.label]}>
-            <AnimatedTextInput
-              style={styles.labelText}
-              animatedProps={minLabelText}
-              editable={false}
-              textAlign="center"
-            />
-          </Animated.View>
+    <View style={[styles.container, { width: sliderWidth }]}>
+      {/* Background track */}
+      <View style={[styles.track, { width: sliderWidth }]} />
+      
+      {/* Active track (between thumbs) */}
+      <Animated.View style={[styles.activeTrack, trackStyle]} />
+      
+      {/* Left thumb */}
+      <GestureDetector gesture={pan1}>
+        <Animated.View style={[styles.thumbContainer, thumb1Style]}>
+          <View style={styles.thumb} />
+          {isDragging1 && (
+            <View style={styles.tooltip}>
+              <Text style={styles.tooltipText}>
+                {formatValue(displayMin)} {label}
+              </Text>
+            </View>
+          )}
         </Animated.View>
       </GestureDetector>
+      
+      {/* Right thumb */}
       <GestureDetector gesture={pan2}>
-        <Animated.View style={[animatedStyle2, styles.thumb]}>
-          <Animated.View style={[opacityStyle2, styles.label]}>
-            <AnimatedTextInput
-              style={styles.labelText}
-              animatedProps={maxLabelText}
-              editable={false}
-              textAlign="center"
-            />
-          </Animated.View>
+        <Animated.View style={[styles.thumbContainer, thumb2Style]}>
+          <View style={styles.thumb} />
+          {isDragging2 && (
+            <View style={styles.tooltip}>
+              <Text style={styles.tooltipText}>
+                {formatValue(displayMax)} {label}
+              </Text>
+            </View>
+          )}
         </Animated.View>
       </GestureDetector>
     </View>
@@ -181,48 +171,56 @@ const RangeSlider = ({sliderWidth, min, max, step, label, initialMin, initialMax
 export default RangeSlider;
 
 const styles = StyleSheet.create({
-  sliderContainer: {
+  container: {
+    height: 40,
     justifyContent: 'center',
     alignSelf: 'center',
   },
-  sliderBack: {
-    height: 20,
+  track: {
+    height: 8,
     backgroundColor: '#FFF0DC',
-    borderRadius: 20,
+    borderRadius: 4,
   },
-  sliderFront: {
-    height: 20,
+  activeTrack: {
+    position: 'absolute',
+    height: 8,
     backgroundColor: '#CF944E',
-    borderRadius: 20,
-    position: 'absolute',
+    borderRadius: 4,
   },
-  thumb: {
-    left: -10,
-    width: 20,
-    height: 20,
+  thumbContainer: {
     position: 'absolute',
-    backgroundColor: '#B06D1E',
-    borderColor: '#B06D1E',
-    borderWidth: 5,
-    borderRadius: 10,
-  },
-  label: {
-    position: 'absolute',
-    top: -40,
-    bottom: 20,
-    backgroundColor: 'black',
-    borderRadius: 5,
-    alignSelf: 'center',
+    width: 28,
+    height: 28,
+    marginLeft: -14, // Center the thumb on the position
     justifyContent: 'center',
     alignItems: 'center',
   },
-  labelText: {
-    color: 'white',
-    padding: 5,
-    fontWeight: 'bold',
-    fontSize: 16,
-    width: '100%',
-    marginHorizontal: 2,
-    textAlign: 'center',
+  thumb: {
+    width: 28,
+    height: 28,
+    backgroundColor: '#B06D1E',
+    borderRadius: 14,
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  tooltip: {
+    position: 'absolute',
+    bottom: 36,
+    backgroundColor: '#333',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  tooltipText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

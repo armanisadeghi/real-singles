@@ -379,7 +379,6 @@ export default function FilterOptions({
         </View>
         <RangeSlider
           key={`age-${filterData?.min_age}-${filterData?.max_age}`}
-          sliderWidth={300}
           min={18}
           max={70}
           step={1}
@@ -402,7 +401,6 @@ export default function FilterOptions({
         </View>
         <RangeSlider
           key={`height-${filterData?.min_height}-${filterData?.max_height}`}
-          sliderWidth={300}
           min={4}
           max={10}
           step={0.1}
@@ -635,10 +633,9 @@ export default function FilterOptions({
         </View>
         <RangeSlider
           key={`distance-${filterData?.min_distance}-${filterData?.max_distance}`}
-          sliderWidth={300}
           min={0}
           max={10000}
-          step={1}
+          step={100}
           label="mi"
           initialMin={minDistance}
           initialMax={maxDistance}
