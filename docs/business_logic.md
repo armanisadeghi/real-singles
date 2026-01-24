@@ -1,8 +1,8 @@
-# **RealSingles: Comprehensive Technical & Business Logic Requirements**
+# RealSingles - Business Requirements
 
-This document outlines the core functional requirements, business logic, and interface structures for the RealSingles platform, derived from the original technical specifications.
+Core functional requirements and business logic for the platform.
 
-NOTE: The client updated their requirements multiple times so some of these things have been expanded upon. If the app does less than this, then it must be updated to do this, but for anything where the app already does more, then we will update the business logic to show all that we do. We don't want to lose features, items, options, etc.
+> **For current implementation status**, see `data_inventory.md` which tracks what's actually built across DB/API/Web/Mobile.
 
 ## **1. Authentication & Onboarding**
 
