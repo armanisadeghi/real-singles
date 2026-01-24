@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 
+// Helper to convert storage path to public URL
+function getGalleryPublicUrl(path: string): string {
+  if (path.startsWith("http")) return path;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  return `${supabaseUrl}/storage/v1/object/public/gallery/${path}`;
+}
+
 /**
  * GET /api/users/[id]
  * Get another user's public profile
@@ -159,8 +166,14 @@ export async function GET(
     IsFavorite: isFavorite ? 1 : 0,
     FollowStatus: followStatus,
     
-    // Gallery
-    gallery: gallery || [],
+    // Gallery - transform paths to full URLs and normalize media_type
+    gallery: (gallery || []).map((item) => ({
+      ...item,
+      media_url: getGalleryPublicUrl(item.media_url),
+      // Normalize: DB stores "photo" but clients expect "image"
+      media_type: item.media_type === "photo" ? "image" : item.media_type,
+      thumbnail_url: item.thumbnail_url ? getGalleryPublicUrl(item.thumbnail_url) : null,
+    })),
   };
 
   return NextResponse.json({

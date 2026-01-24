@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 
+// Helper to convert storage path to public URL
+function getGalleryPublicUrl(path: string): string {
+  if (path.startsWith("http")) return path;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  return `${supabaseUrl}/storage/v1/object/public/gallery/${path}`;
+}
+
 /**
  * GET /api/users/me/gallery
  * Get current user's gallery items
@@ -37,9 +44,10 @@ export async function GET(request: NextRequest) {
 
   const formattedGallery = (gallery || []).map((item) => ({
     GalleryID: item.id,
-    MediaType: item.media_type,
-    MediaURL: item.media_url,
-    ThumbnailURL: item.thumbnail_url,
+    // Normalize media_type: DB stores "photo" but clients expect "image"
+    MediaType: item.media_type === "photo" ? "image" : item.media_type,
+    MediaURL: getGalleryPublicUrl(item.media_url),
+    ThumbnailURL: item.thumbnail_url ? getGalleryPublicUrl(item.thumbnail_url) : null,
     IsLivePhoto: item.is_live_photo,
     IsPrimary: item.is_primary,
     DisplayOrder: item.display_order,
@@ -115,11 +123,13 @@ export async function PUT(request: Request) {
         );
       }
 
-      // Update profile photo URL if it's an image
-      if (primaryItem && primaryItem.media_type === "image") {
+      // Update profile photo URL if it's an image (DB stores "photo", not "image")
+      if (primaryItem && (primaryItem.media_type === "photo" || primaryItem.media_type === "image")) {
+        // Store the full public URL in profile
+        const profileImageUrl = getGalleryPublicUrl(primaryItem.media_url);
         await supabase
           .from("profiles")
-          .update({ profile_image_url: primaryItem.media_url })
+          .update({ profile_image_url: profileImageUrl })
           .eq("user_id", user.id);
       }
     }
@@ -198,11 +208,12 @@ export async function DELETE(request: NextRequest) {
 
   // If this was the primary, set next item as primary
   if (item.is_primary) {
+    // DB stores "photo", not "image"
     const { data: nextItem } = await supabase
       .from("user_gallery")
       .select("id, media_url, media_type")
       .eq("user_id", user.id)
-      .eq("media_type", "image")
+      .in("media_type", ["photo", "image"])
       .order("display_order", { ascending: true })
       .limit(1)
       .single();
@@ -213,9 +224,11 @@ export async function DELETE(request: NextRequest) {
         .update({ is_primary: true })
         .eq("id", nextItem.id);
 
+      // Store the full public URL in profile
+      const profileImageUrl = getGalleryPublicUrl(nextItem.media_url);
       await supabase
         .from("profiles")
-        .update({ profile_image_url: nextItem.media_url })
+        .update({ profile_image_url: profileImageUrl })
         .eq("user_id", user.id);
     } else {
       // No more photos, clear profile image

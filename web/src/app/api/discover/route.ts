@@ -183,13 +183,21 @@ export async function GET() {
     .order("created_at", { ascending: false })
     .limit(10);
 
-  const Videos = (videoGallery || []).map((video: any) => ({
-    ID: video.id,
-    Name: video.profiles?.users?.display_name || video.profiles?.first_name || "User",
-    Link: video.media_url,
-    VideoURL: video.media_url,
-    CreatedDate: video.created_at,
-  }));
+  const baseImageUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + "/storage/v1/object/public/";
+  
+  const Videos = (videoGallery || []).map((video: any) => {
+    // Convert storage path to full URL
+    const videoUrl = video.media_url.startsWith("http")
+      ? video.media_url
+      : `${baseImageUrl}gallery/${video.media_url}`;
+    return {
+      ID: video.id,
+      Name: video.profiles?.users?.display_name || video.profiles?.first_name || "User",
+      Link: videoUrl,
+      VideoURL: videoUrl,
+      CreatedDate: video.created_at,
+    };
+  });
 
   // Get upcoming events
   const { data: events } = await supabase
@@ -253,7 +261,7 @@ export async function GET() {
     Videos,
     event: formattedEvents,
     Virtual,
-    baseImageUrl: process.env.NEXT_PUBLIC_SUPABASE_URL + "/storage/v1/object/public/",
+    baseImageUrl,
     msg: "Home data fetched successfully",
   });
 }

@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { PhotoUpload, GalleryManager, type GalleryItem } from "@/components/profile";
 import { cn } from "@/lib/utils";
+import { getPublicUrl, STORAGE_BUCKETS } from "@/lib/supabase/storage";
 
 export default function GalleryPage() {
   const router = useRouter();
@@ -45,15 +46,25 @@ export default function GalleryPage() {
         return;
       }
 
-      const galleryData: GalleryItem[] = (data || []).map(item => ({
-        id: item.id,
-        media_url: item.media_url,
-        media_type: item.media_type as "image" | "video",
-        is_primary: item.is_primary || false,
-        display_order: item.display_order || 0,
-        thumbnail_url: item.thumbnail_url || null,
-        created_at: item.created_at || new Date().toISOString(),
-      }));
+      const galleryData: GalleryItem[] = (data || []).map(item => {
+        // Convert storage path to public URL if it's not already a full URL
+        const mediaUrl = item.media_url.startsWith("http")
+          ? item.media_url
+          : getPublicUrl(STORAGE_BUCKETS.GALLERY, item.media_url);
+        
+        // Normalize media_type: database stores "photo" but component expects "image"
+        const mediaType = item.media_type === "photo" ? "image" : item.media_type as "image" | "video";
+        
+        return {
+          id: item.id,
+          media_url: mediaUrl,
+          media_type: mediaType,
+          is_primary: item.is_primary || false,
+          display_order: item.display_order || 0,
+          thumbnail_url: item.thumbnail_url || null,
+          created_at: item.created_at || new Date().toISOString(),
+        };
+      });
 
       setGallery(galleryData);
     } catch (error) {

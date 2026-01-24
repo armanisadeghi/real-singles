@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 
+// Helper to convert storage path to public URL
+function getGalleryPublicUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  return `${supabaseUrl}/storage/v1/object/public/gallery/${path}`;
+}
+
 /**
  * GET /api/matches/likes-received
  * Get users who have liked the current user (but haven't been matched yet)
@@ -123,12 +131,12 @@ export async function GET(request: NextRequest) {
       .select("id, display_name, last_active_at")
       .in("id", unactedLikerIds);
 
-    // Get primary gallery photos
+    // Get primary gallery photos (DB stores "photo", not "image")
     const { data: galleries } = await supabase
       .from("user_gallery")
       .select("user_id, media_url")
       .in("user_id", unactedLikerIds)
-      .eq("media_type", "image")
+      .in("media_type", ["photo", "image"])
       .eq("is_primary", true);
 
     // Combine data
@@ -149,6 +157,9 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      // Get profile image URL - might be a storage path, so convert if needed
+      const profileImageUrl = profile?.profile_image_url || gallery?.media_url;
+      
       return {
         id: like.id,
         user_id: like.user_id,
@@ -164,7 +175,7 @@ export async function GET(request: NextRequest) {
         occupation: profile?.occupation,
         bio: profile?.bio ? profile.bio.substring(0, 150) + "..." : null,
         is_verified: profile?.is_verified || false,
-        profile_image_url: profile?.profile_image_url || gallery?.media_url,
+        profile_image_url: getGalleryPublicUrl(profileImageUrl),
         last_active_at: userData?.last_active_at,
       };
     });

@@ -2,6 +2,13 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
+// Helper to convert storage path to public URL (works server-side)
+function getGalleryPublicUrl(path: string): string {
+  if (path.startsWith("http")) return path;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  return `${supabaseUrl}/storage/v1/object/public/gallery/${path}`;
+}
+
 async function getMyProfile() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -193,15 +200,19 @@ export default async function MyProfilePage() {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Gallery</h3>
               <div className="grid grid-cols-3 gap-4">
-                {gallery.map((item) => (
-                  <div key={item.id} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                    {item.media_type === "video" ? (
-                      <video src={item.media_url} className="w-full h-full object-cover" />
-                    ) : (
-                      <img src={item.media_url} alt="" className="w-full h-full object-cover" />
-                    )}
-                  </div>
-                ))}
+                {gallery.map((item) => {
+                  const mediaUrl = getGalleryPublicUrl(item.media_url);
+                  const isVideo = item.media_type === "video";
+                  return (
+                    <div key={item.id} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      {isVideo ? (
+                        <video src={mediaUrl} className="w-full h-full object-cover" muted playsInline />
+                      ) : (
+                        <img src={mediaUrl} alt="" className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
