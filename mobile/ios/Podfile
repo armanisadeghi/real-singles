@@ -64,9 +64,6 @@ target 'RealSingles' do
     :privacy_file_aggregation_enabled => podfile_properties['apple.privacyManifestAggregationEnabled'] != 'false',
     :fabric_enabled => true
   )
-  
-  pod 'RNWorklets', :path => '../node_modules/react-native-worklets'
-  # react-native-worklets-core will be auto-linked via use_native_modules
 
   pod 'HyphenateChat', '4.10.2'
 
@@ -77,5 +74,16 @@ target 'RealSingles' do
       :mac_catalyst_enabled => false,
       :ccache_enabled => ccache_enabled?(podfile_properties),
     )
+    
+    # Fix Agora Chat SDK trying to compile README.md
+    installer.pods_project.targets.each do |target|
+      if target.name == 'react-native-chat-sdk'
+        target.source_build_phase.files.each do |file|
+          if file.file_ref.path.end_with?('README.md')
+            target.source_build_phase.files.delete(file)
+          end
+        end
+      end
+    end
   end
 end
