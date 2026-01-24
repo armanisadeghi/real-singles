@@ -67,8 +67,8 @@ target 'RealSingles' do
 
   pod 'HyphenateChat', '4.10.2'
   
-  # Required by Reanimated's Babel plugin
-  pod 'RNWorklets', :path => '../node_modules/react-native-worklets'
+  # Note: react-native-worklets is only used for its Babel plugin (JS-side).
+  # The native worklets runtime is bundled with react-native-reanimated.
 
   post_install do |installer|
     react_native_post_install(
