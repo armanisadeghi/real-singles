@@ -70,7 +70,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   const [educationJobDetail, setEducationJobDetail] = useState(false);
   const [appearance, setAppearance] = useState(false);
   const [habit, setShowHabit] = useState(false);
-  const [ethinicity, setEthinicity] = useState(false);
+  const [showEthnicity, setShowEthnicity] = useState(false);
   const [language, setLanguage] = useState(false);
   const [religion, setReligion] = useState(false);
   const [political, setPolitical] = useState(false);
@@ -1363,16 +1363,16 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setEthinicity((prev) => !prev)}
+          onPress={() => setShowEthnicity((prev) => !prev)}
           className="flex-row items-center justify-between"
         >
-          <Text className="text-primary font-medium text-lg">Ethinicity</Text>
+          <Text className="text-primary font-medium text-lg">Ethnicity</Text>
           <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
 
-        {ethinicity && (
+        {showEthnicity && (
           <Animated.View className="mt-4 gap-5">
             <View className="flex-row gap-3 flex-wrap">
               {ETHNICITY_OPTIONS.map((option) => {

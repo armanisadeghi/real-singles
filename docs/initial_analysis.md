@@ -111,6 +111,7 @@ The mobile app references the following PHP endpoints that do not exist:
 
 **User Interactions (6 endpoints):**
 `AddFavourite.php`, `FavouriteList.php`, `FollowUser.php`, `BlockUser.php`, `UnblockUser.php`, `ReportUser.php`
+*(Note: The British spelling "Favourite" in the original code has been corrected to "Favorite" in the new implementation)*
 
 **Events & Groups (10 endpoints):**
 `EventList.php`, `EventDetails.php`, `CreateEvent.php`, `MarkAsInterested.php`, `VirtualSpeedDating.php`, `GetVirtualDateList.php`, `GetVirtualSpeedDetail.php`, `registerVirtualSlots.php`, `CreateGroup.php`, `GroupList.php`

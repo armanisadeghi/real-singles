@@ -85,7 +85,7 @@ Thumbs.db
 # Turbo
 .turbo
 
-# Archive folder (WordPress junk from previous devs)
+# Archive folder (old files not in use)
 archive/
 
 # Supabase

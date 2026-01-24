@@ -46,7 +46,7 @@ function NavItem({ href, icon: Icon, label, isActive }: NavItemProps) {
  * Mobile Bottom Navigation for Web
  *
  * Follows iOS/Android native patterns:
- * - 4 tabs matching native app (Home, Chats, Favourites, Profile)
+ * - 4 tabs matching native app (Home, Chats, Favorites, Profile)
  * - Always visible labels
  * - Active state with filled icons
  * - Safe area padding for notched devices
@@ -58,7 +58,7 @@ export function BottomNavigation() {
   const navItems = [
     { href: "/", icon: Home, label: "Home" },
     { href: "/chats", icon: MessageCircle, label: "Chats" },
-    { href: "/favorites", icon: Heart, label: "Favourites" },
+    { href: "/favorites", icon: Heart, label: "Favorites" },
     { href: "/profile", icon: User, label: "Profile" },
   ];
 

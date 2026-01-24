@@ -50,7 +50,6 @@ export async function GET() {
   }
 
   // Transform data to match expected format
-  // Field names are standardized: Ethnicity, Marijuana (legacy misspellings removed)
   // Arrays are returned as arrays, not comma-separated strings
   const responseData = {
     // Core user info
@@ -71,7 +70,7 @@ export async function GET() {
     Bio: profile?.bio || "",
     LookingForDescription: profile?.looking_for_description || "",
     
-    // Legacy field names for mobile compatibility (will be deprecated)
+    // Field aliases for mobile app compatibility
     About: profile?.bio || "",
     HSign: profile?.zodiac_sign || "",
     
@@ -104,7 +103,7 @@ export async function GET() {
     PoliticalViews: profile?.political_views || "",
     Education: profile?.education || "",
     Occupation: profile?.occupation || "",
-    JobTitle: profile?.occupation || "", // Legacy alias
+    JobTitle: profile?.occupation || "", // Alias for mobile
     Company: profile?.company || "",
     Schools: profile?.schools || [],
     Languages: profile?.languages || [],
@@ -112,7 +111,7 @@ export async function GET() {
     // Habits
     Smoking: profile?.smoking || "",
     Drinking: profile?.drinking || "",
-    Drinks: profile?.drinking || "", // Legacy alias
+    Drinks: profile?.drinking || "", // Alias for mobile
     
     // Marijuana
     Marijuana: profile?.marijuana || "",
@@ -121,14 +120,14 @@ export async function GET() {
     
     // Family
     HasKids: profile?.has_kids || "",
-    HaveChild: profile?.has_kids || "", // Legacy alias
+    HaveChild: profile?.has_kids || "", // Alias for mobile
     WantsKids: profile?.wants_kids || "",
-    WantChild: profile?.wants_kids || "", // Legacy alias
+    WantChild: profile?.wants_kids || "", // Alias for mobile
     Pets: profile?.pets || [],
     
     // Interests
     Interests: profile?.interests || [],
-    Interest: profile?.interests?.join(", ") || "", // Legacy comma-separated for mobile
+    Interest: profile?.interests?.join(", ") || "", // Comma-separated format for mobile
     
     // Profile Prompts (Structured Storytelling)
     IdealFirstDate: profile?.ideal_first_date || "",
@@ -171,9 +170,8 @@ export async function GET() {
     RATINGS: 0, // TODO: Calculate from reviews
     TotalRating: 0,
     WalletPoint: userData?.points_balance || 0,
-    ReedemPoints: userData?.points_balance || 0,
+    RedeemPoints: userData?.points_balance || 0,
     PointsBalance: userData?.points_balance || 0,
-    RefferalCode: userData?.referral_code || "",
     ReferralCode: userData?.referral_code || "",
     
     // Gallery
@@ -236,7 +234,6 @@ export async function PUT(request: Request) {
     const profileUpdates: Record<string, unknown> = {};
     
     // Map API field names to database field names
-    // Supports both new correct names and legacy names with typos
     const fieldMapping: Record<string, string> = {
       // Basic Info
       FirstName: "first_name",
@@ -244,9 +241,9 @@ export async function PUT(request: Request) {
       DOB: "date_of_birth",
       Gender: "gender",
       ZodiacSign: "zodiac_sign",
-      HSign: "zodiac_sign", // Legacy
+      HSign: "zodiac_sign", // Alias
       Bio: "bio",
-      About: "bio", // Legacy
+      About: "bio", // Alias
       LookingForDescription: "looking_for_description",
       
       // Media
@@ -277,13 +274,13 @@ export async function PUT(request: Request) {
       PoliticalViews: "political_views",
       Education: "education",
       Occupation: "occupation",
-      JobTitle: "occupation", // Legacy
+      JobTitle: "occupation", // Alias
       Company: "company",
       
       // Habits
       Smoking: "smoking",
       Drinking: "drinking",
-      Drinks: "drinking", // Legacy
+      Drinks: "drinking", // Alias
       
       // Marijuana
       Marijuana: "marijuana",
@@ -293,7 +290,7 @@ export async function PUT(request: Request) {
       // Family
       HasKids: "has_kids",
       WantsKids: "wants_kids",
-      WantChild: "wants_kids", // Legacy
+      WantChild: "wants_kids", // Alias
       
       // Profile Prompts
       IdealFirstDate: "ideal_first_date",
@@ -335,11 +332,11 @@ export async function PUT(request: Request) {
       }
     }
 
-    // Handle has_kids - support both new string values and legacy boolean
+    // Handle has_kids - support both new string values and boolean
     if (body.HaveChild !== undefined) {
       const val = body.HaveChild;
       if (val === "Yes" || val === true) {
-        profileUpdates.has_kids = "yes_live_at_home"; // Default for legacy
+        profileUpdates.has_kids = "yes_live_at_home";
       } else if (val === "No" || val === false) {
         profileUpdates.has_kids = "no";
       } else if (typeof val === "string") {

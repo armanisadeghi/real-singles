@@ -43,9 +43,9 @@ export default function TabLayout() {
         />
       </NativeTabs.Trigger>
 
-      {/* Favourites / Likes Tab */}
-      <NativeTabs.Trigger name="favourites">
-        <Label>Favourites</Label>
+      {/* Favorites / Likes Tab */}
+      <NativeTabs.Trigger name="git s">
+        <Label>Favorites</Label>
         <Icon
           sf={{ default: 'heart', selected: 'heart.fill' }}
           androidSrc={icons.heart}

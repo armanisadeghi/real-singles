@@ -70,7 +70,7 @@ const Languages = ({ data, updateData, onNext, error }: signupProps) => {
             width={114}
             height={76}
             resizeMode="contain"
-            alt="ethinicity"
+            alt="ethnicity"
           />
         </View>
       </View>

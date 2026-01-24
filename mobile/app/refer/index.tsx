@@ -99,7 +99,7 @@ export default function Refer() {
             </Text>
 
             <View className="bg-light-100 border border-light-200 rounded-xl items-center py-4 mb-3 w-3/4 mx-auto">
-              <Text className="text-[16px] font-medium text-dark">{user?.RefferalCode || 'Not Available'}</Text>
+              <Text className="text-[16px] font-medium text-dark">{user?.ReferralCode || 'Not Available'}</Text>
             </View>
 
             <GradientButton

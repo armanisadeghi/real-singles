@@ -170,7 +170,7 @@ const Login = () => {
   // Users will receive an email with a link to reset their password
   
   const handleVerifyOtp = async () => {
-    // Legacy OTP flow - Supabase uses magic link instead
+    // OTP flow replaced by Supabase magic link
     Toast.show({
       type: "info",
       text1: "Check your email",
@@ -180,7 +180,7 @@ const Login = () => {
   };
 
   const handleResetPassword = async () => {
-    // Legacy reset flow - Supabase uses magic link instead
+    // Reset flow uses Supabase magic link
     Toast.show({
       type: "info", 
       text1: "Check your email",

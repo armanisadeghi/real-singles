@@ -129,14 +129,14 @@ export interface User {
   RATINGS?: number;
   FollowStatus?: string;
   WalletPoint?: number | null;
-  ReedemPoints?: number | null;
-  RefferalCode: string;
-  RefferalCodeBy?: string;
+  RedeemPoints?: number | null;
+  ReferralCode: string;
+  ReferralCodeBy?: string;
   applicantID?: string;
   baseImageUrl?: string;
   social_link1?: string;
   social_link2?: string;
-  IsFavourite?: any;
+  IsFavorite?: any;
   livePicture?: string;
   distance_in_km?: number;
   TotalRating ?: number
@@ -157,7 +157,7 @@ export interface EditProfileFormData {
   About?: string;
   
   // Height - stored as total inches in DB, but displayed as feet/inches in UI
-  Height?: string; // Legacy: total inches as string
+  Height?: string; // Total inches as string
   HeightFeet?: number; // New: feet portion (4-7)
   HeightInches?: number; // New: inches portion (0-11)
   
@@ -206,8 +206,8 @@ export interface EditProfileFormData {
   FindMe?: string; // after_work
   WayToHeart?: string; // way_to_heart
   craziestTravelStory?: string; // craziest_travel_story
-  CraziestThings?: string; // Legacy duplicate of above
-  weiredestGift?: string; // weirdest_gift (keeping typo for compatibility)
+  CraziestThings?: string; // Alias for craziest_travel_story
+  weirdestGift?: string; // weirdest_gift
   PastEvent?: string; // past_event
   
   // Social and media

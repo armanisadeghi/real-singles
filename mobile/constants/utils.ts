@@ -61,7 +61,7 @@ export const languageOptions = [
   { label: "Armenian", value: "Armenian" },
   { label: "Other", value: "Other" },
 ];
-  // Legacy alias for backward compatibility during migration
+  // Alias for backward compatibility
   export const ethinicityOptions = ethnicityOptions;
 
 

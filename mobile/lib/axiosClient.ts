@@ -1,11 +1,8 @@
 /**
  * Axios Client for API requests
  * 
- * MIGRATION NOTE: This file now points to the Next.js backend.
- * The old PHP backend URL was: https://itinfonity.io/datingAPI/webservice/
- * 
- * For new code, prefer using lib/apiClient.ts which provides typed functions.
- * This axios client is maintained for backward compatibility during migration.
+ * This file configures axios to work with the Next.js backend API.
+ * For new code, prefer using lib/api.ts which provides typed functions.
  */
 
 import { getSession } from './supabase';

@@ -106,7 +106,7 @@ mobile/
 │   └── ui/               # UI primitives
 ├── lib/                   # Core libraries
 │   ├── supabase.ts       # Supabase client ⭐
-│   └── api.ts            # Legacy API functions
+│   └── api.ts            # API client for Next.js backend
 ├── utils/                 # Utilities
 │   ├── authContext.tsx   # Auth context ⭐
 │   └── token.ts          # Token utilities (deprecated)
@@ -117,19 +117,19 @@ mobile/
 
 ## Migration Notes
 
-### From PHP Backend to Supabase
+### Backend Architecture
 
-The app is being migrated from a PHP backend to Supabase. Here's the status:
+The app uses the Next.js API backend with Supabase for data storage:
 
-| Feature | Old (PHP) | New (Supabase) | Status |
-|---------|-----------|----------------|--------|
-| Login | `/login.php` | `supabase.auth.signInWithPassword()` | ✅ Done |
-| Register | `/register.php` | `supabase.auth.signUp()` | ✅ Done |
-| Profile | `/UpdateProfile.php` | `supabase.from('profiles').upsert()` | ✅ Done |
-| Token Storage | AsyncStorage (JWT) | Supabase session (auto) | ✅ Done |
-| Home Screen | `/HomeScreen.php` | Supabase queries | 🔄 Pending |
-| Favorites | `/FavouriteList.php` | Supabase queries | 🔄 Pending |
-| Chat | `/AgoraChatToken.php` | `/api/agora/chat-token` | 🔄 Pending |
+| Feature | Implementation | Status |
+|---------|----------------|--------|
+| Login | `supabase.auth.signInWithPassword()` | ✅ Done |
+| Register | `supabase.auth.signUp()` | ✅ Done |
+| Profile | `/api/users/me` (Next.js) | ✅ Done |
+| Token Storage | Supabase session (auto) | ✅ Done |
+| Home Screen | `/api/discover` (Next.js) | ✅ Done |
+| Favorites | `/api/favorites` (Next.js) | ✅ Done |
+| Chat | `/api/agora/chat-token` (Next.js) | ✅ Done |
 
 ### Deprecated Functions
 

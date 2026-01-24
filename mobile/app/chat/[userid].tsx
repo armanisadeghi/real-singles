@@ -38,13 +38,12 @@ export default function ChatDetail() {
       }
 
 
-      const res = await axios.post(
-        "https://itinfonity.io/datingAPI/webservice/UnblockUser.php",
-        formData,
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+      const res = await axios.delete(
+        `${apiUrl}/blocks/${peerId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -75,13 +74,14 @@ export default function ChatDetail() {
         return;
       }
 
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
       const res = await axios.post(
-        "https://itinfonity.io/datingAPI/webservice/BlockUser.php",
-        formData,
+        `${apiUrl}/blocks`,
+        { blocked_user_id: peerId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
           },
         }
       );
@@ -118,13 +118,17 @@ export default function ChatDetail() {
         return;
       }
 
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
       const res = await axios.post(
-        "https://itinfonity.io/datingAPI/webservice/ReportUser.php",
-        formData,
+        `${apiUrl}/reports`,
+        { 
+          reported_user_id: peerId,
+          reason: reportReason 
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
           },
         }
       );

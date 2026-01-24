@@ -70,7 +70,7 @@ export async function GET() {
         HSign: profile.zodiac_sign || "",
         Interest: profile.interests?.join(", ") || "",
         is_verified: profile.is_verified || false,
-        IsFavourite: 1, // Always 1 since it's in favorites
+        IsFavorite: 1, // Always 1 since it's in favorites
         RATINGS: 0,
         TotalRating: 0,
         favorited_at: fav.created_at,
@@ -110,11 +110,11 @@ export async function POST(request: Request) {
 
     try {
       const formData = await request.formData();
-      favoriteUserId = formData.get("FavouriteUserID") as string || formData.get("favorite_user_id") as string;
+      favoriteUserId = formData.get("FavoriteUserID") as string || formData.get("favorite_user_id") as string;
     } catch {
       // Try JSON if FormData fails
       const body = await request.json();
-      favoriteUserId = body.FavouriteUserID || body.favorite_user_id;
+      favoriteUserId = body.FavoriteUserID || body.favorite_user_id;
     }
 
     if (!favoriteUserId) {

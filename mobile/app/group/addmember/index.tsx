@@ -187,7 +187,8 @@ export default function Addmember() {
 
       console.log("🚀 Calling backend API...");
 
-      const response = await fetch('https://itinfonity.io/datingAPI/webservice/CreateGroup.php', {
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+      const response = await fetch(`${apiUrl}/groups`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

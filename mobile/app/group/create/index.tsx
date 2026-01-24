@@ -83,8 +83,9 @@ export default function CreateGroup() {
       console.log("formData=>>>>", JSON.stringify(formData));
 
 
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
       const response = await fetch(
-        "https://itinfonity.io/datingAPI/webservice/upload_image.php",
+        `${apiUrl}/upload`,
         {
           method: "POST",
           body: formData,

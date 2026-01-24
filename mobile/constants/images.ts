@@ -8,7 +8,7 @@ import dining from "../assets/images/dining.png";
 import educationJob from "../assets/images/educationJob.png";
 import ellipseEnd from "../assets/images/ellipse-end.png";
 import ellipseStart from "../assets/images/ellipse-start.png";
-import ethinicity from "../assets/images/ethinicity.png";
+import ethnicityImage from "../assets/images/ethnicity.png";
 import event1 from "../assets/images/event1.png";
 import eventImage from "../assets/images/eventImage.png";
 import gardening from "../assets/images/gardening.png";
@@ -34,7 +34,7 @@ import profile1 from "../assets/images/profile1.png";
 import profilePic from "../assets/images/profilePic.png";
 import qualification from "../assets/images/qualification.png";
 import religion from "../assets/images/religion.png";
-import samrtmatch from "../assets/images/samrtmatch.png";
+import smartmatch from "../assets/images/smartmatch.png";
 import signupSuccess from "../assets/images/signup-success.png";
 import samrtmatchModal from "../assets/images/smartmatch-modal.png";
 import splash1 from "../assets/images/splash-1.png";
@@ -58,8 +58,8 @@ export const images = {
   ellipseEnd,
   ellipseStart,
   heart,
-  ethinicity, // Legacy misspelled name
-  ethnicity: ethinicity, // Correct spelling (alias)
+  ethinicity: ethnicityImage, // Backward compatibility alias
+  ethnicity: ethnicityImage,
   gardening,
   gender,
   habit,
@@ -79,7 +79,8 @@ export const images = {
   avatar,
   qualification,
   religion,
-  samrtmatch,
+  samrtmatch: smartmatch, // Backward compatibility alias
+  smartmatch,
   hero,
   signupSuccess,
   checkedSuccess,

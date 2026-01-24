@@ -1,5 +1,5 @@
 import { icons } from "@/constants/icons";
-import { saveLink, toggleFavourite } from "@/lib/api";
+import { saveLink, toggleFavorite } from "@/lib/api";
 import { User } from "@/types";
 import { removeToken } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
@@ -65,26 +65,26 @@ console.log("profile?.Height",profile?.Height);
   const handleAddFav = async () => {
     const data = new FormData();
     data.append("OtherID", profile?.ID);
-    data.append("Status", profile?.IsFavourite === 1 ? "0" : "1");
+    data.append("Status", profile?.IsFavorite === 1 ? "0" : "1");
     try {
-      const res = await toggleFavourite(data);
-      console.log("Add to favourites response:", res);
+      const res = await toggleFavorite(data);
+      console.log("Add to favorites response:", res);
 
       if (res?.success) {
-        console.log(res?.msg || "Added to favourites");
+        console.log(res?.msg || "Added to favorites");
         fetchProfile();
       } else {
         Toast.show({
           type: "error",
-          text1: res?.msg || "Failed to add to favourites",
+          text1: res?.msg || "Failed to add to favorites",
           position: "bottom",
           visibilityTime: 2000,
           autoHide: true,
         });
-        console.log("Failed to add to favourites:", res?.msg);
+        console.log("Failed to add to favorites:", res?.msg);
       }
     } catch (error) {
-      console.log("Error adding to favourites:", error);
+      console.log("Error adding to favorites:", error);
     }
   };
 
@@ -151,7 +151,7 @@ console.log("profile?.Height",profile?.Height);
   const saveShareLinks =async (message: string)=>{
     try {
       const formData = new FormData();
-      formData.append("recieverID", '12');
+      formData.append("receiverID", '12');
       formData.append("msg", message);
       formData.append("type", 'ShareLink');
 
@@ -270,12 +270,12 @@ console.log("profile?.Height",profile?.Height);
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() =>
-              me ? router.push("/(tabs)/favourites") : handleAddFav()
+              me ? router.push("/(tabs)/favorites") : handleAddFav()
             }
-            className={`border border-[#C07618] rounded-lg overflow-hidden flex justify-center items-center w-8 h-8 ${profile?.IsFavourite === 1 ? "bg-primary" : ""
+            className={`border border-[#C07618] rounded-lg overflow-hidden flex justify-center items-center w-8 h-8 ${profile?.IsFavorite === 1 ? "bg-primary" : ""
               }`}
           >
-            {profile?.IsFavourite === 1 ? (
+            {profile?.IsFavorite === 1 ? (
               <LinearBg className="w-full h-full flex justify-center items-center">
                 <Image
                   source={icons.heart}

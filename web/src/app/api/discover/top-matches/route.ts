@@ -208,7 +208,7 @@ export async function GET(request: Request) {
       HSign: profile.zodiac_sign || "",
       Interest: profile.interests?.join(", ") || "",
       is_verified: profile.is_verified || false,
-      IsFavourite: favoriteIds.has(profile.user_id) ? 1 : 0,
+      IsFavorite: favoriteIds.has(profile.user_id) ? 1 : 0,
       RATINGS: 0,
       TotalRating: 0,
     };

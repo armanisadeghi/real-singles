@@ -15,7 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
 
 // ===========================================
-// LEGACY TOKEN FUNCTIONS (deprecated)
+// TOKEN FUNCTIONS (deprecated - use Supabase auth)
 // ===========================================
 
 const TOKEN_KEY = 'auth_token';
@@ -46,7 +46,7 @@ export const getToken = async () => {
     console.error('Error getting Supabase session:', error);
   }
   
-  // Fallback to legacy token (for backward compatibility during migration)
+  // Fallback to stored token (for backward compatibility)
   try {
     return await AsyncStorage.getItem(TOKEN_KEY);
   } catch (error) {
@@ -68,7 +68,7 @@ export const removeToken = async () => {
 };
 
 // ===========================================
-// LEGACY USER ID FUNCTIONS (deprecated)
+// USER ID FUNCTIONS (deprecated - use Supabase auth)
 // ===========================================
 
 /**
@@ -97,7 +97,7 @@ export const getCurrentUserId = async () => {
     console.error('Error getting Supabase user:', error);
   }
   
-  // Fallback to legacy storage (for backward compatibility during migration)
+  // Fallback to stored user ID (for backward compatibility)
   try {
     return await AsyncStorage.getItem('curr_userid');
   } catch (error) {
@@ -122,20 +122,20 @@ export const removeCurrentUserId = async () => {
 // MEDIA URL CONSTANTS
 // ===========================================
 
-// Legacy URLs (still pointing to old server during migration)
-export const IMAGE_URL = 'https://itinfonity.io/datingAPI/webservice/';
-export const VIDEO_URL = 'https://itinfonity.io/datingAPI/webservice/uploads/';
-export const MEDIA_BASE_URL = 'https://itinfonity.io/datingAPI/webservice/uploads/';
-
-// New Supabase Storage URL
-// TODO: Update when Supabase Storage is configured
+// Supabase Storage URL
 export const SUPABASE_STORAGE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL 
   ? `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public`
   : '';
 
+// These constants are provided for backward compatibility during migration
+// New code should use getImageUrl() and getVideoUrl() functions instead
+export const IMAGE_URL = SUPABASE_STORAGE_URL ? `${SUPABASE_STORAGE_URL}/` : '';
+export const VIDEO_URL = SUPABASE_STORAGE_URL ? `${SUPABASE_STORAGE_URL}/` : '';
+export const MEDIA_BASE_URL = SUPABASE_STORAGE_URL ? `${SUPABASE_STORAGE_URL}/` : '';
+
 /**
  * Get full URL for an image
- * Handles both legacy (PHP) and new (Supabase) storage paths
+ * Handles Supabase storage paths
  */
 export const getImageUrl = (path: string | null | undefined): string => {
   if (!path) return '';
@@ -150,8 +150,8 @@ export const getImageUrl = (path: string | null | undefined): string => {
     return `${SUPABASE_STORAGE_URL}/${path}`;
   }
   
-  // Legacy path (assume it's from old PHP server)
-  return `${IMAGE_URL}${path}`;
+  // Assume Supabase path without bucket prefix - default to avatars
+  return `${SUPABASE_STORAGE_URL}/avatars/${path}`;
 };
 
 /**
@@ -170,6 +170,6 @@ export const getVideoUrl = (path: string | null | undefined): string => {
     return `${SUPABASE_STORAGE_URL}/${path}`;
   }
   
-  // Legacy path
-  return `${VIDEO_URL}${path}`;
+  // Assume Supabase path without bucket prefix - default to gallery
+  return `${SUPABASE_STORAGE_URL}/gallery/${path}`;
 };

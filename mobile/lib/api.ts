@@ -2,9 +2,7 @@
  * API Client for Next.js Backend
  * 
  * This module provides all API functions that call the Next.js backend.
- * It replaces the old PHP API calls with the new Supabase-backed endpoints.
- * 
- * All functions maintain the same signatures as the old api.ts for easy migration.
+ * The backend uses Supabase for data storage and authentication.
  */
 
 import { EditProfileFormData } from "@/types";
@@ -325,16 +323,16 @@ export const clearFilter = async () => {
 /**
  * Get user's favorites list
  */
-export const getFavouriteList = async () => {
+  export const getFavoriteList = async () => {
   return apiRequest("/favorites");
 };
 
 /**
  * Toggle favorite status for a user
  */
-export const toggleFavourite = async (data: FormData) => {
-  const favoriteUserId = data.get("FavouriteUserID") as string || 
-                         data.get("favourite_user_id") as string ||
+export const toggleFavorite = async (data: FormData) => {
+  const favoriteUserId = data.get("FavoriteUserID") as string || 
+                         data.get("favorite_user_id") as string ||
                          data.get("user_id") as string;
   
   return apiRequest("/favorites", {
@@ -671,11 +669,3 @@ export const saveLink = async (linkData: FormData) => {
   return { success: true, msg: "Link saved" };
 };
 
-// ===========================================
-// LEGACY ALIASES (for backward compatibility)
-// ===========================================
-
-// These are duplicates/aliases that exist in the old API
-export const login2 = login;
-export const register2 = register;
-export const forgotPassword2 = forgotPassword;

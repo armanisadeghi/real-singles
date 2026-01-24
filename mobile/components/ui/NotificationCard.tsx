@@ -5,7 +5,7 @@ import { Image, Text, View } from "react-native";
 interface Notification {
   ID: string;
   senderID: string;
-  recieverID: string;
+  receiverID: string;
   msg: string;
   type: string;
   CreatedDate: string;

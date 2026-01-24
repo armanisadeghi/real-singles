@@ -1,7 +1,7 @@
 import NotificationBell from "@/components/NotificationBell";
 import ProfileCard from "@/components/ui/ProfileCard";
 import { icons } from "@/constants/icons";
-import { getFavouriteList } from "@/lib/api";
+import { getFavoriteList } from "@/lib/api";
 import { User } from "@/types";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -14,33 +14,33 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
-export default function Favourites() {
+export default function Favorites() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [favouriteProfiles, setFavouriteProfiles] = useState<User[]>([]);
+  const [favoriteProfiles, setFavoriteProfiles] = useState<User[]>([]);
 
-  const fetchFavourites = async () => {
+  const fetchFavorites = async () => {
     setLoading(true);
     try {
-      const res = await getFavouriteList();
-      console.log("Favourites fetched:", res);
+      const res = await getFavoriteList();
+      console.log("Favorites fetched:", res);
       if(res?.success){
-        setFavouriteProfiles(res?.data || []);
+        setFavoriteProfiles(res?.data || []);
       }else{
-        console.log("Failed to fetch favourites:", res?.msg);
+        console.log("Failed to fetch favorites:", res?.msg);
         Toast.show({
           type: "error",
-          text1: res?.msg || "Failed to fetch favourites",
+          text1: res?.msg || "Failed to fetch favorites",
           position: "bottom",
           visibilityTime: 2000,
           autoHide: true,
         });
       }
     } catch (error) {
-      console.error("Error fetching favourites:", error);
+      console.error("Error fetching favorites:", error);
       Toast.show({
         type: "error",
-        text1: "Failed to fetch favourites",
+        text1: "Failed to fetch favorites",
         position: "bottom",
         bottomOffset: 100,
         visibilityTime: 2000,
@@ -52,7 +52,7 @@ export default function Favourites() {
   }
 
   useEffect(() => {
-    fetchFavourites();
+    fetchFavorites();
   }, []);
   return (
     <>
@@ -80,7 +80,7 @@ export default function Favourites() {
               />
             </TouchableOpacity>
             <Text className="leading-[22px] text-base font-medium tracking-[-0.41px] text-black">
-              My Favourites
+              My Favorites
             </Text>
           </View>
 
@@ -88,7 +88,7 @@ export default function Favourites() {
         </View>
         <View className="mt-8 pb-56">
           <FlatList
-            data={favouriteProfiles}
+            data={favoriteProfiles}
             numColumns={2}
             columnWrapperStyle={{
               justifyContent: "space-between",
@@ -106,7 +106,7 @@ export default function Favourites() {
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
                 <View className="flex-1 items-center justify-center py-20" >
-                  <Text className="text-sm text-gray-500 text-black">No Favourites available</Text>
+                  <Text className="text-sm text-gray-500 text-black">No Favorites available</Text>
                 </View>
               }
           />

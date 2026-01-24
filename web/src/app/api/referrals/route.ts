@@ -120,11 +120,11 @@ export async function POST(request: Request) {
     const contentType = request.headers.get("content-type") || "";
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
-      referralCode = formData.get("referral_code") as string || formData.get("RefferalCode") as string;
+      referralCode = formData.get("referral_code") as string || formData.get("ReferralCode") as string;
       referredUserId = formData.get("referred_user_id") as string || formData.get("user_id") as string;
     } else {
       const body = await request.json();
-      referralCode = body.referral_code || body.RefferalCode;
+      referralCode = body.referral_code || body.ReferralCode;
       referredUserId = body.referred_user_id || body.user_id;
     }
 

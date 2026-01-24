@@ -14,12 +14,11 @@ real-singles/
 │   ├── components/          # Reusable UI components
 │   ├── lib/                 # API client, utilities
 │   └── services/            # Agora chat services
-├── web/                     # Next.js 16 backend API
-│   └── src/
-│       ├── app/api/         # API routes
-│       ├── lib/             # Server utilities (Supabase, Agora, Email)
-│       └── types/           # TypeScript types
-└── archive/                 # Old WordPress files (not used)
+└── web/                     # Next.js 16 backend API
+    └── src/
+        ├── app/api/         # API routes
+        ├── lib/             # Server utilities (Supabase, Agora, Email)
+        └── types/           # TypeScript types
 ```
 
 ## Tech Stack

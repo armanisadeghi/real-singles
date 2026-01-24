@@ -1,0 +1,39 @@
+diff --git a/android/src/main/java/com/reactnativefullscreennotificationincomingcall/IncomingCallActivity.java b/android/src/main/java/com/reactnativefullscreennotificationincomingcall/IncomingCallActivity.java
+index 3395f0042bc043fc3370940047afcd9c905ef0fb..922991fdb3f9af64df11a8719981bc93ad954415 100644
+--- a/android/src/main/java/com/reactnativefullscreennotificationincomingcall/IncomingCallActivity.java
++++ b/android/src/main/java/com/reactnativefullscreennotificationincomingcall/IncomingCallActivity.java
+@@ -15,9 +15,7 @@ import android.widget.TextView;
+ import com.airbnb.lottie.LottieAnimationView;
+ 
+ import androidx.appcompat.app.AppCompatActivity;
+-import androidx.fragment.app.Fragment;
+ 
+-import com.facebook.react.ReactFragment;
+ import com.facebook.react.bridge.Arguments;
+ import com.facebook.react.bridge.WritableMap;
+ import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler;
+@@ -90,22 +88,8 @@ public class IncomingCallActivity extends AppCompatActivity implements DefaultHa
+     if (bundle.containsKey("uuid")) {
+       uuid = bundle.getString("uuid");
+     }
+-    if (bundle.containsKey("mainComponent") && bundle.getString("mainComponent") != null) {
+-      String mainComponent = bundle.getString("mainComponent");
+-      setContentView(R.layout.custom_ingcoming_call_rn);
+-      Fragment reactNativeFragment = new ReactFragment.Builder()
+-        .setComponentName(mainComponent)
+-        .setLaunchOptions(bundle)
+-        .build();
+-
+-      getSupportFragmentManager()
+-        .beginTransaction()
+-        .add(R.id.reactNativeFragment, reactNativeFragment)
+-        .commit();
+-      return;
+-    } else {
+-      setContentView(R.layout.activity_call_incoming);
+-    }
++    // Custom mainComponent disabled for React Native compatibility
++    setContentView(R.layout.activity_call_incoming);
+ //    Access views
+     tvName = findViewById(R.id.tvName);
+     tvInfo = findViewById(R.id.tvInfo);

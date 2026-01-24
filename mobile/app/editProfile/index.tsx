@@ -140,7 +140,7 @@ const EditProfile = () => {
         after_work: formData.FindMe || null,
         way_to_heart: formData.WayToHeart || null,
         craziest_travel_story: formData.craziestTravelStory || formData.CraziestThings || null,
-        weirdest_gift: formData.weiredestGift || null,
+        weirdest_gift: formData.weirdestGift || null,
         past_event: formData.PastEvent || null,
         
         // Social links
@@ -292,7 +292,7 @@ const EditProfile = () => {
           WayToHeart: profile.way_to_heart || "",
           craziestTravelStory: profile.craziest_travel_story || "",
           CraziestThings: "",
-          weiredestGift: profile.weirdest_gift || "",
+          weirdestGift: profile.weirdest_gift || "",
           PastEvent: profile.past_event || "",
           
           // Social and media
@@ -326,7 +326,7 @@ const EditProfile = () => {
           NightAtHome: "",
           craziestTravelStory: "",
           CraziestThings: "",
-          weiredestGift: "",
+          weirdestGift: "",
           livePicture: "",
           HSign: "",
           DOB: "",

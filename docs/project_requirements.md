@@ -114,20 +114,20 @@
 
 ### **Mobile API Migration - Complete** ✅
 
-The mobile app has been migrated from the PHP backend to the Next.js API backend:
+The mobile app uses the Next.js API backend:
 
-| File | Change | Status |
-|------|--------|--------|
-| `lib/api.ts` | New API client calling Next.js `/api/*` routes | ✅ Complete |
-| `lib/axiosClient.ts` | Updated to use `EXPO_PUBLIC_API_URL` | ✅ Complete |
-| `lib/api.legacy.ts` | Old PHP API preserved as backup | ✅ Backed up |
-| 34 screen/component files | Auto-migrated via import path | ✅ Complete |
+| File | Description | Status |
+|------|-------------|--------|
+| `lib/api.ts` | API client calling Next.js `/api/*` routes | ✅ Complete |
+| `lib/axiosClient.ts` | Configured for Next.js API URL | ✅ Complete |
+| `lib/supabase.ts` | Supabase client for auth | ✅ Complete |
+| 34 screen/component files | Using new API client | ✅ Complete |
 
-**Key changes:**
-- All API calls now route to Next.js backend (`/api/*` endpoints)
+**Key features:**
+- All API calls route to Next.js backend (`/api/*` endpoints)
 - Authentication uses Supabase session tokens
-- FormData requests converted to JSON where appropriate
-- Same function signatures maintained for compatibility
+- FormData and JSON request support
+- Typed API functions for all endpoints
 
 ### **Web API - 100% Complete** ✅
 
@@ -876,27 +876,27 @@ CREATE TABLE contact_submissions (
 | Bottom Nav | Overlaps home indicator | Add `pb-safe` padding to bottom elements |
 | Header Height | Hardcoded values | Use CSS variable `--header-height` |
 
-### **4.2 API Integration Updates** 🔄 NEXT PRIORITY
+### **4.2 API Integration - Complete** ✅
 
-The mobile app currently uses the old PHP backend at `itinfonity.io`. We need to migrate to the new Supabase-based API.
+The mobile app uses the Next.js API backend with Supabase:
 
-| File | Change Required | Status |
-|------|-----------------|--------|
-| `lib/axiosClient.ts` | Replace with Supabase client | ⏳ Pending |
-| `lib/supabase.ts` | Create new Supabase client for mobile | ⏳ Pending |
-| `utils/token.ts` | Replace with Supabase session management | ⏳ Pending |
-| `lib/api.ts` | Rewrite all functions to use Supabase client | ⏳ Pending |
+| File | Description | Status |
+|------|-------------|--------|
+| `lib/axiosClient.ts` | Axios client configured for Next.js API | ✅ Complete |
+| `lib/supabase.ts` | Supabase client for mobile | ✅ Complete |
+| `utils/token.ts` | Session and URL utilities | ✅ Complete |
+| `lib/api.ts` | API functions for all endpoints | ✅ Complete |
 
-### **4.3 Authentication Updates** 🔄 NEXT PRIORITY
+### **4.3 Authentication - Complete** ✅
 
-| Feature | Current | New Implementation | Status |
-|---------|---------|-------------------|--------|
-| Login | Custom JWT + PHP | Supabase Auth | ⏳ Pending |
-| Register | Custom PHP | Supabase Auth | ⏳ Pending |
-| Social Login | Custom PHP | Supabase Auth (Apple, Google) | ⏳ Pending |
-| Token Storage | AsyncStorage | Supabase session (auto-managed) | ⏳ Pending |
-| Password Reset | OTP via PHP | Supabase Auth magic link/OTP | ⏳ Pending |
-| Profile Save | Manual save only | **Autosave** (mirror web) | ⏳ Pending |
+| Feature | Implementation | Status |
+|---------|----------------|--------|
+| Login | Supabase Auth | ✅ Complete |
+| Register | Supabase Auth | ✅ Complete |
+| Social Login | Supabase Auth (Apple, Google) | ✅ Complete |
+| Token Storage | Supabase session (auto-managed) | ✅ Complete |
+| Password Reset | Supabase Auth magic link | ✅ Complete |
+| Profile Save | Autosave (mirrors web) | ✅ Complete |
 
 ### **4.4 Environment Configuration**
 

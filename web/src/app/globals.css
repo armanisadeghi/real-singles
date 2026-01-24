@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand Colors - Matching WordPress Original */
+  /* Brand Colors */
   --brand-primary: #8F5924;
   --brand-primary-light: #A86B2D;
   --brand-primary-dark: #6B421B;

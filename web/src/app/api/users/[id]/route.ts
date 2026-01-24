@@ -55,7 +55,7 @@ export async function GET(
     .order("display_order", { ascending: true });
 
   // Check if current user has favorited this profile
-  let isFavourite = false;
+  let isFavorite = false;
   let followStatus = "not_following";
 
   if (currentUser) {
@@ -67,7 +67,7 @@ export async function GET(
       .eq("favorite_user_id", targetUserId)
       .single();
 
-    isFavourite = !!favorite;
+    isFavorite = !!favorite;
 
     // Check follow status
     const { data: follow } = await supabase
@@ -155,7 +155,7 @@ export async function GET(
     TotalRating: reviews?.length || 0,
     
     // Relationship to current user
-    IsFavourite: isFavourite ? 1 : 0,
+    IsFavorite: isFavorite ? 1 : 0,
     FollowStatus: followStatus,
     
     // Gallery

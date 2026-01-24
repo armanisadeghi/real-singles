@@ -82,8 +82,9 @@ async function signInWithApple() {
 
     console.log("Sending appleUser to backend:", appleUser);
 
-    // ✅ Call your backend API
-    const response = await fetch("https://itinfonity.io/datingAPI/webservice/socialLogin.php", {
+    // ✅ Call the Next.js API for social login
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+    const response = await fetch(`${apiUrl}/auth/social`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(appleUser),
