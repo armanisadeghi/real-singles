@@ -98,7 +98,7 @@ export default function Discover() {
             />
             <Text
               className="text-black font-medium"
-              style={TYPOGRAPHY.title2}
+              style={TYPOGRAPHY.h2}
             >
               Discover
             </Text>
