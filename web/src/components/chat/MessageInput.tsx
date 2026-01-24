@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 interface MessageInputProps {
   onSend: (content: string, type?: "text" | "image" | "video", mediaUrl?: string) => void;
-  onTyping?: () => void;
+  onTyping?: (isTyping: boolean) => void;
   disabled?: boolean;
   placeholder?: string;
 }
@@ -20,8 +20,10 @@ export function MessageInput({
   const [message, setMessage] = useState("");
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSubmit = useCallback(
     (e?: React.FormEvent) => {
@@ -36,10 +38,17 @@ export function MessageInput({
         setMessage("");
       }
 
+      // Stop typing indicator
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      setIsTyping(false);
+      onTyping?.(false);
+
       // Focus back on input
       inputRef.current?.focus();
     },
-    [message, attachedImage, onSend]
+    [message, attachedImage, onSend, onTyping]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -51,7 +60,23 @@ export function MessageInput({
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
-    onTyping?.();
+    
+    // Typing indicator logic
+    if (!isTyping) {
+      setIsTyping(true);
+      onTyping?.(true);
+    }
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Set timeout to stop typing after 3 seconds of no input
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      onTyping?.(false);
+    }, 3000);
 
     // Auto-resize textarea
     const textarea = e.target;

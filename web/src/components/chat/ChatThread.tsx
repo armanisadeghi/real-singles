@@ -39,6 +39,9 @@ export function ChatThread({
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [loading, setLoading] = useState(initialMessages.length === 0);
   const [sending, setSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUser, setTypingUser] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -184,13 +187,25 @@ export function ChatThread({
           )}
         </div>
 
-        {/* Name */}
+        {/* Name and Status */}
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-gray-900 truncate">{displayName}</h2>
-          {conversationType === "group" && (
+          {conversationType === "group" ? (
             <p className="text-xs text-gray-500">
               {participants.length} members
             </p>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              {isOnline && (
+                <>
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <p className="text-xs text-green-600 font-medium">Online</p>
+                </>
+              )}
+              {!isOnline && (
+                <p className="text-xs text-gray-500">Offline</p>
+              )}
+            </div>
           )}
         </div>
 
@@ -237,18 +252,48 @@ export function ChatThread({
             </p>
           </div>
         ) : (
-          <MessageGroup
-            messages={messages}
-            currentUserId={currentUserId}
-            showAvatars={conversationType === "group"}
-            participants={participantMap}
-          />
+          <>
+            <MessageGroup
+              messages={messages}
+              currentUserId={currentUserId}
+              showAvatars={conversationType === "group"}
+              participants={participantMap}
+            />
+            
+            {/* Typing Indicator */}
+            {isTyping && (
+              <div className="flex gap-2 max-w-[85%] animate-fade-in">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white text-xs font-semibold shrink-0">
+                  {otherParticipant?.profile?.profile_image_url ? (
+                    <img
+                      src={otherParticipant.profile.profile_image_url}
+                      alt=""
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    displayName.charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Message Input */}
-      <MessageInput onSend={handleSend} disabled={sending} />
+      <MessageInput 
+        onSend={handleSend} 
+        disabled={sending}
+        onTyping={(typing) => setIsTyping(typing)}
+      />
     </div>
   );
 }

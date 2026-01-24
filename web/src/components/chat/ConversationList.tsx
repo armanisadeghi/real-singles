@@ -17,6 +17,7 @@ export interface Conversation {
     user_id: string;
     user: {
       display_name?: string | null;
+      last_active_at?: string | null;
     } | null;
     profile?: {
       first_name?: string | null;
@@ -24,6 +25,15 @@ export interface Conversation {
     } | null;
   }>;
 }
+
+// Helper to check if user is online (active within last 5 minutes)
+const isUserOnline = (lastActiveAt?: string | null): boolean => {
+  if (!lastActiveAt) return false;
+  const lastActive = new Date(lastActiveAt);
+  const now = new Date();
+  const diffMinutes = (now.getTime() - lastActive.getTime()) / 1000 / 60;
+  return diffMinutes < 5;
+};
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -136,8 +146,15 @@ export function ConversationList({
                     display.initials
                   )}
                 </div>
-                {/* Online indicator - would need real-time data */}
-                {/* <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full" /> */}
+                {/* Online indicator for direct chats */}
+                {conversation.type === "direct" && (() => {
+                  const otherParticipant = conversation.participants.find(
+                    (p) => p.user_id !== currentUserId
+                  );
+                  return isUserOnline(otherParticipant?.user?.last_active_at) && (
+                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />
+                  );
+                })()}
               </div>
 
               {/* Content */}

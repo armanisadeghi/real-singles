@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import {
   GENDER_OPTIONS,
@@ -554,13 +555,21 @@ export default function EditProfilePage() {
             <SaveStatusIndicator />
           </div>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={saving || saveStatus === "saving"}
-          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-        >
-          {saving || saveStatus === "saving" ? "Saving..." : "Save Changes"}
-        </button>
+        <div className="flex gap-3">
+          <Link
+            href="/profile/gallery"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors"
+          >
+            Manage Gallery
+          </Link>
+          <button
+            onClick={handleSave}
+            disabled={saving || saveStatus === "saving"}
+            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {saving || saveStatus === "saving" ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
       </div>
 
       {error && (

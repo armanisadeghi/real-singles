@@ -2,6 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { 
+  Bell, 
+  Lock, 
+  UserX, 
+  Key, 
+  Trash2, 
+  FileText,
+  HelpCircle,
+  Shield,
+  ChevronRight 
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SettingsPage() {
@@ -68,6 +80,120 @@ export default function SettingsPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
 
       <div className="space-y-6">
+        {/* Quick Links */}
+        <div className="bg-white rounded-xl shadow-sm divide-y">
+          <Link
+            href="/settings/notifications"
+            className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                <Bell className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Notifications</h3>
+                <p className="text-sm text-gray-500">Manage notification preferences</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </Link>
+
+          <Link
+            href="/settings/privacy"
+            className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Privacy</h3>
+                <p className="text-sm text-gray-500">Control what others see</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </Link>
+
+          <Link
+            href="/settings/blocked"
+            className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <UserX className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Blocked Users</h3>
+                <p className="text-sm text-gray-500">Manage blocked accounts</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </Link>
+
+          <Link
+            href="/profile/gallery"
+            className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-pink-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Gallery</h3>
+                <p className="text-sm text-gray-500">Manage photos and videos</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </Link>
+
+          <Link
+            href="/terms"
+            className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-gray-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Terms of Service</h3>
+                <p className="text-sm text-gray-500">Read our terms</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </Link>
+
+          <Link
+            href="/privacy-policy"
+            className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <Lock className="w-5 h-5 text-gray-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Privacy Policy</h3>
+                <p className="text-sm text-gray-500">How we handle your data</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </Link>
+
+          <Link
+            href="/faq"
+            className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                <HelpCircle className="w-5 h-5 text-yellow-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">FAQ</h3>
+                <p className="text-sm text-gray-500">Frequently asked questions</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </Link>
+        </div>
         {/* Change Password */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h2>
@@ -131,49 +257,6 @@ export default function SettingsPage() {
           </form>
         </div>
 
-        {/* Notifications */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Notifications</h2>
-          
-          <div className="space-y-4">
-            <label className="flex items-center justify-between">
-              <span className="text-gray-700">Email notifications</span>
-              <input type="checkbox" defaultChecked className="h-4 w-4 text-indigo-600 rounded" />
-            </label>
-            <label className="flex items-center justify-between">
-              <span className="text-gray-700">Push notifications</span>
-              <input type="checkbox" defaultChecked className="h-4 w-4 text-indigo-600 rounded" />
-            </label>
-            <label className="flex items-center justify-between">
-              <span className="text-gray-700">Match notifications</span>
-              <input type="checkbox" defaultChecked className="h-4 w-4 text-indigo-600 rounded" />
-            </label>
-            <label className="flex items-center justify-between">
-              <span className="text-gray-700">Message notifications</span>
-              <input type="checkbox" defaultChecked className="h-4 w-4 text-indigo-600 rounded" />
-            </label>
-          </div>
-        </div>
-
-        {/* Privacy */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Privacy</h2>
-          
-          <div className="space-y-4">
-            <label className="flex items-center justify-between">
-              <span className="text-gray-700">Show my profile in discovery</span>
-              <input type="checkbox" defaultChecked className="h-4 w-4 text-indigo-600 rounded" />
-            </label>
-            <label className="flex items-center justify-between">
-              <span className="text-gray-700">Show online status</span>
-              <input type="checkbox" defaultChecked className="h-4 w-4 text-indigo-600 rounded" />
-            </label>
-            <label className="flex items-center justify-between">
-              <span className="text-gray-700">Show last active</span>
-              <input type="checkbox" defaultChecked className="h-4 w-4 text-indigo-600 rounded" />
-            </label>
-          </div>
-        </div>
 
         {/* Account Actions */}
         <div className="bg-white rounded-xl shadow-sm p-6">

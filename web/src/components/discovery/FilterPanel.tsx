@@ -4,47 +4,23 @@ import { useState } from "react";
 import { X, RotateCcw } from "lucide-react";
 import { BottomSheet, BottomSheetActions } from "@/components/ui/BottomSheet";
 import { cn } from "@/lib/utils";
-
-// Filter options matching mobile app and database
-const GENDER_OPTIONS = ["male", "female", "non_binary", "other"];
-const BODY_TYPE_OPTIONS = ["athletic", "average", "slim", "curvy", "muscular", "full_figured"];
-const EDUCATION_OPTIONS = [
-  "high_school",
-  "some_college",
-  "associates",
-  "bachelors",
-  "masters",
-  "doctorate",
-  "trade_school",
-];
-const RELIGION_OPTIONS = [
-  "christian",
-  "catholic",
-  "jewish",
-  "muslim",
-  "hindu",
-  "buddhist",
-  "spiritual",
-  "agnostic",
-  "atheist",
-  "other",
-];
-const SMOKING_OPTIONS = ["never", "sometimes", "regularly", "trying_to_quit"];
-const DRINKING_OPTIONS = ["never", "socially", "regularly"];
-const ZODIAC_OPTIONS = [
-  "aries",
-  "taurus",
-  "gemini",
-  "cancer",
-  "leo",
-  "virgo",
-  "libra",
-  "scorpio",
-  "sagittarius",
-  "capricorn",
-  "aquarius",
-  "pisces",
-];
+import {
+  GENDER_OPTIONS,
+  BODY_TYPE_OPTIONS,
+  EDUCATION_OPTIONS,
+  RELIGION_OPTIONS,
+  SMOKING_OPTIONS,
+  DRINKING_OPTIONS,
+  MARIJUANA_OPTIONS,
+  ZODIAC_OPTIONS,
+  ETHNICITY_OPTIONS,
+  HAS_KIDS_OPTIONS,
+  WANTS_KIDS_OPTIONS,
+  PETS_OPTIONS,
+  POLITICAL_OPTIONS,
+  MARITAL_STATUS_OPTIONS,
+  EXERCISE_OPTIONS,
+} from "@/types";
 
 export interface FilterValues {
   minAge: number;
@@ -59,6 +35,14 @@ export interface FilterValues {
   smoking: string[];
   drinking: string[];
   zodiac: string[];
+  marijuana: string[];
+  ethnicity: string[];
+  hasKids: string[];
+  wantsKids: string[];
+  pets: string[];
+  politicalViews: string[];
+  maritalStatus: string[];
+  exercise: string[];
 }
 
 const defaultFilters: FilterValues = {
@@ -74,6 +58,14 @@ const defaultFilters: FilterValues = {
   smoking: [],
   drinking: [],
   zodiac: [],
+  marijuana: [],
+  ethnicity: [],
+  hasKids: [],
+  wantsKids: [],
+  pets: [],
+  politicalViews: [],
+  maritalStatus: [],
+  exercise: [],
 };
 
 interface FilterPanelProps {
@@ -120,12 +112,13 @@ export function FilterPanel({
     return `${feet}'${remainingInches}"`;
   };
 
-  const formatLabel = (value: string) => {
-    return value
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
+  // No longer needed since we're using option.label directly
+  // const formatLabel = (value: string) => {
+  //   return value
+  //     .split("_")
+  //     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+  //     .join(" ");
+  // };
 
   return (
     <BottomSheet
@@ -231,16 +224,16 @@ export function FilterPanel({
           <div className="flex flex-wrap gap-2">
             {GENDER_OPTIONS.map((option) => (
               <button
-                key={option}
-                onClick={() => toggleArrayValue("gender", option)}
+                key={option.value}
+                onClick={() => toggleArrayValue("gender", option.value)}
                 className={cn(
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                  filters.gender.includes(option)
+                  filters.gender.includes(option.value)
                     ? "bg-pink-500 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 )}
               >
-                {formatLabel(option)}
+                {option.label}
               </button>
             ))}
           </div>
@@ -252,16 +245,37 @@ export function FilterPanel({
           <div className="flex flex-wrap gap-2">
             {BODY_TYPE_OPTIONS.map((option) => (
               <button
-                key={option}
-                onClick={() => toggleArrayValue("bodyType", option)}
+                key={option.value}
+                onClick={() => toggleArrayValue("bodyType", option.value)}
                 className={cn(
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                  filters.bodyType.includes(option)
+                  filters.bodyType.includes(option.value)
                     ? "bg-pink-500 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 )}
               >
-                {formatLabel(option)}
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Ethnicity */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Ethnicity</h3>
+          <div className="flex flex-wrap gap-2">
+            {ETHNICITY_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("ethnicity", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.ethnicity.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
               </button>
             ))}
           </div>
@@ -273,16 +287,16 @@ export function FilterPanel({
           <div className="flex flex-wrap gap-2">
             {EDUCATION_OPTIONS.map((option) => (
               <button
-                key={option}
-                onClick={() => toggleArrayValue("education", option)}
+                key={option.value}
+                onClick={() => toggleArrayValue("education", option.value)}
                 className={cn(
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                  filters.education.includes(option)
+                  filters.education.includes(option.value)
                     ? "bg-pink-500 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 )}
               >
-                {formatLabel(option)}
+                {option.label}
               </button>
             ))}
           </div>
@@ -294,16 +308,121 @@ export function FilterPanel({
           <div className="flex flex-wrap gap-2">
             {RELIGION_OPTIONS.map((option) => (
               <button
-                key={option}
-                onClick={() => toggleArrayValue("religion", option)}
+                key={option.value}
+                onClick={() => toggleArrayValue("religion", option.value)}
                 className={cn(
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                  filters.religion.includes(option)
+                  filters.religion.includes(option.value)
                     ? "bg-pink-500 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 )}
               >
-                {formatLabel(option)}
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Political Views */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Political Views</h3>
+          <div className="flex flex-wrap gap-2">
+            {POLITICAL_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("politicalViews", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.politicalViews.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Marital Status */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Marital Status</h3>
+          <div className="flex flex-wrap gap-2">
+            {MARITAL_STATUS_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("maritalStatus", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.maritalStatus.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Has Kids */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Has Kids</h3>
+          <div className="flex flex-wrap gap-2">
+            {HAS_KIDS_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("hasKids", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.hasKids.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Wants Kids */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Wants Kids</h3>
+          <div className="flex flex-wrap gap-2">
+            {WANTS_KIDS_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("wantsKids", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.wantsKids.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Pets */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Pets</h3>
+          <div className="flex flex-wrap gap-2">
+            {PETS_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("pets", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.pets.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
               </button>
             ))}
           </div>
@@ -315,16 +434,16 @@ export function FilterPanel({
           <div className="flex flex-wrap gap-2">
             {SMOKING_OPTIONS.map((option) => (
               <button
-                key={option}
-                onClick={() => toggleArrayValue("smoking", option)}
+                key={option.value}
+                onClick={() => toggleArrayValue("smoking", option.value)}
                 className={cn(
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                  filters.smoking.includes(option)
+                  filters.smoking.includes(option.value)
                     ? "bg-pink-500 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 )}
               >
-                {formatLabel(option)}
+                {option.label}
               </button>
             ))}
           </div>
@@ -336,16 +455,58 @@ export function FilterPanel({
           <div className="flex flex-wrap gap-2">
             {DRINKING_OPTIONS.map((option) => (
               <button
-                key={option}
-                onClick={() => toggleArrayValue("drinking", option)}
+                key={option.value}
+                onClick={() => toggleArrayValue("drinking", option.value)}
                 className={cn(
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                  filters.drinking.includes(option)
+                  filters.drinking.includes(option.value)
                     ? "bg-pink-500 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 )}
               >
-                {formatLabel(option)}
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Marijuana */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Marijuana</h3>
+          <div className="flex flex-wrap gap-2">
+            {MARIJUANA_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("marijuana", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.marijuana.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Exercise */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Exercise</h3>
+          <div className="flex flex-wrap gap-2">
+            {EXERCISE_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("exercise", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.exercise.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
               </button>
             ))}
           </div>
@@ -357,16 +518,205 @@ export function FilterPanel({
           <div className="flex flex-wrap gap-2">
             {ZODIAC_OPTIONS.map((option) => (
               <button
-                key={option}
-                onClick={() => toggleArrayValue("zodiac", option)}
+                key={option.value}
+                onClick={() => toggleArrayValue("zodiac", option.value)}
                 className={cn(
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                  filters.zodiac.includes(option)
+                  filters.zodiac.includes(option.value)
                     ? "bg-pink-500 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 )}
               >
-                {formatLabel(option)}
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Zodiac */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Zodiac Sign</h3>
+          <div className="flex flex-wrap gap-2">
+            {ZODIAC_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("zodiac", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.zodiac.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Marijuana */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Marijuana</h3>
+          <div className="flex flex-wrap gap-2">
+            {MARIJUANA_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("marijuana", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.marijuana.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Ethnicity */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Ethnicity</h3>
+          <div className="flex flex-wrap gap-2">
+            {ETHNICITY_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("ethnicity", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.ethnicity.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Marital Status */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Marital Status</h3>
+          <div className="flex flex-wrap gap-2">
+            {MARITAL_STATUS_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("maritalStatus", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.maritalStatus.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Has Kids */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Has Kids</h3>
+          <div className="flex flex-wrap gap-2">
+            {HAS_KIDS_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("hasKids", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.hasKids.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Wants Kids */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Wants Kids</h3>
+          <div className="flex flex-wrap gap-2">
+            {WANTS_KIDS_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("wantsKids", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.wantsKids.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Pets */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Pets</h3>
+          <div className="flex flex-wrap gap-2">
+            {PETS_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("pets", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.pets.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Political Views */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Political Views</h3>
+          <div className="flex flex-wrap gap-2">
+            {POLITICAL_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("politicalViews", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.politicalViews.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Exercise */}
+        <section>
+          <h3 className="font-medium text-gray-900 mb-3">Exercise</h3>
+          <div className="flex flex-wrap gap-2">
+            {EXERCISE_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => toggleArrayValue("exercise", option.value)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  filters.exercise.includes(option.value)
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                {option.label}
               </button>
             ))}
           </div>
