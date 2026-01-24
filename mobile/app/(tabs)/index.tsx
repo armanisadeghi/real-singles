@@ -1,5 +1,6 @@
 import SideMenu from "@/components/SidebarMenu";
 import EventCard from "@/components/ui/EventCard";
+import { PointsHeart } from "@/components/ui/PointsHeart";
 import ProfileCard from "@/components/ui/ProfileCard";
 import VideoCard from "@/components/ui/VideoCard";
 import VirtualDateCard from "@/components/ui/VirtualDateCard";
@@ -317,27 +318,8 @@ export default function Home() {
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.push("/redeem")}
-              className="items-end"
             >
-              <View className="relative">
-                <Image source={images.heart} />
-                <View 
-                  className="absolute flex flex-col justify-center items-center"
-                  style={{ 
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                  }}
-                >
-                  <Text className="font-bold text-white" style={TYPOGRAPHY.h3}>
-                    {redeemPoints}
-                  </Text>
-                  <Text className="font-medium text-white" style={TYPOGRAPHY.caption1}>
-                    Points
-                  </Text>
-                </View>
-              </View>
+              <PointsHeart points={redeemPoints} size="md" />
             </TouchableOpacity>
           </View>
         </ImageBackground>

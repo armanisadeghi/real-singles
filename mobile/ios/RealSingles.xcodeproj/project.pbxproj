@@ -21,7 +21,7 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = RealSingles/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = RealSingles/Info.plist; sourceTree = "<group>"; };
 		218B4F40B839ED5BBBA74D27 /* Pods-RealSingles.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RealSingles.release.xcconfig"; path = "Target Support Files/Pods-RealSingles/Pods-RealSingles.release.xcconfig"; sourceTree = "<group>"; };
-		2AA3F7ACEDC322721C781D6D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = RealSingles/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		2AA3F7ACEDC322721C781D6D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = RealSingles/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		355B4AC2320A8D686AD81BE4 /* Pods-RealSingles.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RealSingles.debug.xcconfig"; path = "Target Support Files/Pods-RealSingles/Pods-RealSingles.debug.xcconfig"; sourceTree = "<group>"; };
 		3DEF4B918F146128729B459B /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-RealSingles/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = RealSingles/SplashScreen.storyboard; sourceTree = "<group>"; };
@@ -81,7 +81,6 @@
 				355B4AC2320A8D686AD81BE4 /* Pods-RealSingles.debug.xcconfig */,
 				218B4F40B839ED5BBBA74D27 /* Pods-RealSingles.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -166,7 +165,6 @@
 				LastUpgradeCheck = 1130;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						DevelopmentTeam = JH83UH9P4D;
 						LastSwiftMigration = 1250;
 						ProvisioningStyle = Automatic;
 					};
@@ -419,7 +417,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = JH83UH9P4D;
+				DEVELOPMENT_TEAM = BFBLM8Z9WV;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -458,7 +456,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = JH83UH9P4D;
+				DEVELOPMENT_TEAM = BFBLM8Z9WV;
 				INFOPLIST_FILE = RealSingles/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
