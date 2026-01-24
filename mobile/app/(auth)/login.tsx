@@ -210,7 +210,7 @@ const Login = () => {
 
 
   return (
-    <SafeAreaView className="flex-1 bg-backgground">
+    <SafeAreaView className="flex-1 bg-background">
       <Toast />
 
       {/* WebView Modal */}

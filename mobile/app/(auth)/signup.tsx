@@ -498,7 +498,7 @@ const Signup = () => {
 
   if (loading) {
     return (
-      <ScrollView className="flex-1 bg-backgground">
+      <ScrollView className="flex-1 bg-background">
         <View className="flex-1 items-center justify-center h-screen">
           <ActivityIndicator size="large" color="#B06D1E" />
           <Text className="mt-4 text-gray-600">Creating your profile...</Text>

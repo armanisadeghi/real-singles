@@ -69,7 +69,7 @@ const Ethnicity = ({ data, updateData, onNext, error }: signupProps) => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-backgground">
+    <ScrollView className="flex-1 bg-background">
     <View className="mt-20 px-6 w-full">
       <View className="flex-row items-center justify-between px-2">
         <View className="">

@@ -500,7 +500,7 @@ const EditProfile = () => {
   }
 
   return (
-    <View className="flex-1 bg-backgground">
+    <View className="flex-1 bg-background">
       {/* Header */}
       <View
         className="bg-white flex-row justify-between items-center px-5 pt-8 pb-4 rounded-b-xl z-30"

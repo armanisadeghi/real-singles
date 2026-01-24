@@ -150,7 +150,7 @@ export default function Review() {
     <>
       {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
 
-      <SafeAreaView className="flex-1 bg-backgground">
+      <SafeAreaView className="flex-1 bg-background">
         <Toast />
         <View
           className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"

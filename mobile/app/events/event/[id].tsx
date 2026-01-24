@@ -83,7 +83,7 @@ export default function EventDetail() {
 
   if(loading){
     return (
-      <View className="flex-1 items-center justify-center bg-backgground">
+      <View className="flex-1 items-center justify-center bg-background">
         <ActivityIndicator size="large" color="#B06D1E" />
       </View>
     );
@@ -93,7 +93,7 @@ export default function EventDetail() {
     <>
       {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
 
-      <View className="flex-1 bg-backgground">
+      <View className="flex-1 bg-background">
         <View
           className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-[1]"
           style={{

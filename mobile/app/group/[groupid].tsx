@@ -1,6 +1,8 @@
 import ChatInput from "@/components/chat/ChatInput";
 import GroupConversation from "@/components/chat/GroupConversation";
+import { ScreenHeader, HeaderBackButton } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
+import { SPACING, TYPOGRAPHY, ICON_SIZES } from "@/constants/designTokens";
 import { fetchUserProfile } from "@/lib/api";
 import {
   chatClient,
@@ -529,83 +531,81 @@ export default function GroupChat() {
       </Modal>
 
       {/* Header */}
-      <View
-        className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
-        style={{
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0.1,
-          shadowRadius: 16,
-          elevation: 5,
-          paddingTop: Platform.OS == 'ios' ? 60 : 30
-        }}
-      >
-        <View className="flex-row items-center gap-3">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
-          >
-            <Image source={icons.back} className="size-4" resizeMode="contain" />
-          </TouchableOpacity>
-
-          {image ? (
-            <Image
-              source={{
-                uri: image.startsWith("http")
-                  ? image
-                  : (image.startsWith("uploads/")
-                      ? IMAGE_URL + image
-                      : VIDEO_URL + image)
-              }}
-              className="w-8 h-8 rounded-lg mr-2"
-              resizeMode="cover"
-            />
-          ) : (
-            <View
-              className="w-8 h-8 rounded-lg mr-2 justify-center items-center"
-              style={{
-                backgroundColor: BACKGROUND_COLORS[
-                  Math.abs(
-                    (name || "U")
-                      .split("")
-                      .reduce((acc, char) => acc + char.charCodeAt(0), 0) %
-                    BACKGROUND_COLORS.length
-                  )
-                ],
-              }}
-            >
-              <Text className="text-white font-bold text-xs">
-                {(name || "U")
-                  .split(" ")
-                  .map((part) => part?.charAt(0) || "")
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase()}
+      <ScreenHeader
+        leftContent={
+          <View style={{ flexDirection: "row", alignItems: "center", gap: SPACING.sm }}>
+            <HeaderBackButton onPress={() => router.back()} />
+            {image ? (
+              <Image
+                source={{
+                  uri: image.startsWith("http")
+                    ? image
+                    : (image.startsWith("uploads/")
+                        ? IMAGE_URL + image
+                        : VIDEO_URL + image)
+                }}
+                style={{ width: ICON_SIZES.xl, height: ICON_SIZES.xl, borderRadius: 8, marginRight: SPACING.xs }}
+                resizeMode="cover"
+              />
+            ) : (
+              <View
+                style={{
+                  width: ICON_SIZES.xl,
+                  height: ICON_SIZES.xl,
+                  borderRadius: 8,
+                  marginRight: SPACING.xs,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: BACKGROUND_COLORS[
+                    Math.abs(
+                      (name || "U")
+                        .split("")
+                        .reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+                      BACKGROUND_COLORS.length
+                    )
+                  ],
+                }}
+              >
+                <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 10 }}>
+                  {(name || "U")
+                    .split(" ")
+                    .map((part) => part?.charAt(0) || "")
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase()}
+                </Text>
+              </View>
+            )}
+            <View>
+              <Text style={[TYPOGRAPHY.subheadline, { color: "#000" }]}>
+                {name || groupid}
+              </Text>
+              <Text style={[TYPOGRAPHY.caption1, { color: "#6B7280" }]}>
+                {chatReady ? "Connected" : "Connecting..."}
               </Text>
             </View>
-          )}
-
-          <View>
-            <Text className="font-normal text-[13px] tracking-[-0.41px] text-black">
-              {name || groupid}
-            </Text>
-            <Text className="text-xs text-gray">
-              {chatReady ? "Connected" : "Connecting..."}
-            </Text>
           </View>
-        </View>
-
-        {/* Members Icon */}
-        <TouchableOpacity
-          onPress={() => {
-            console.log("Group members:", groupMembers);
-            setShowMembers(true);
-          }}
-          className="w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center"
-        >
-          <MaterialIcons name="group" size={22} color="#000" />
-        </TouchableOpacity>
-      </View>
+        }
+        rightContent={
+          <TouchableOpacity
+            onPress={() => {
+              console.log("Group members:", groupMembers);
+              setShowMembers(true);
+            }}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              borderWidth: 1,
+              borderColor: "#D1D5DB",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <MaterialIcons name="group" size={22} color="#000" />
+          </TouchableOpacity>
+        }
+      />
 
       {/* Loading or Messages */}
       {loading ? (

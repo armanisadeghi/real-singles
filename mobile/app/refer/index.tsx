@@ -51,7 +51,7 @@ export default function Refer() {
     <>
       {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
 
-      <View className="flex-1 bg-backgground">
+      <View className="flex-1 bg-background">
         <View
           className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
           style={{

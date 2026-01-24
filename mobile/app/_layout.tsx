@@ -8,6 +8,7 @@ import { Stack } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import { StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import "./globals.css";
 
@@ -82,7 +83,7 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <>
+    <SafeAreaProvider>
       <StatusBar backgroundColor="#FFFAF2" barStyle="dark-content" />
       <GestureHandlerRootView style={{ flex: 1 }}>
         <AuthProvider>
@@ -91,7 +92,7 @@ export default function RootLayout() {
           </CallProvider>
         </AuthProvider>
       </GestureHandlerRootView>
-    </>
+    </SafeAreaProvider>
   );
 }
 

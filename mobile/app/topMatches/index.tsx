@@ -152,7 +152,7 @@ export default function TopMatches() {
   return (
     <>
      
-      <View className="flex-1 bg-backgground">
+      <View className="flex-1 bg-background">
          <StatusBar style="dark" backgroundColor="#ffffff" />
 
         <View

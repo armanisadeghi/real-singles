@@ -1,10 +1,11 @@
 import NotificationBell from "@/components/NotificationBell";
 import NotificationCard from "@/components/ui/NotificationCard";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
 import { getAllNotifications } from "@/lib/api";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 
@@ -82,36 +83,14 @@ export default function Notification() {
   return (
     <>
       {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
-      <View className="flex-1 bg-backgground">
+      <View className="flex-1 bg-background">
         <Toast/>
-        <View
-          className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.1,
-            shadowRadius: 16,
-            elevation: 5,
-          }}
-        >
-          <View className="flex-row items-center gap-2">
-            <TouchableOpacity
-              onPress={router.back}
-              className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
-            >
-              <Image
-                source={icons.back}
-                className="size-4"
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <Text className="leading-[22px] text-dark text-base font-medium tracking-[-0.41px]">
-              Notification
-            </Text>
-          </View>
-
-          <NotificationBell />
-        </View>
+        <ScreenHeader
+          title="Notification"
+          showBackButton
+          onBackPress={router.back}
+          rightContent={<NotificationBell />}
+        />
         <View className="mt-4 px-2">
           <FlatList
             data={data}

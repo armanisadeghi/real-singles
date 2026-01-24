@@ -108,7 +108,7 @@ export default function VideoPage() {
 
   return (
     <>
-      <View className="flex-1 bg-backgground">
+      <View className="flex-1 bg-background">
         {/* Header */}
         <View className="absolute top-0 left-0 w-full flex-row justify-between items-center px-4 pt-10 pb-6 z-30 bg-black/50 rounded-b-xl">
           <View className="flex-row items-center gap-2">

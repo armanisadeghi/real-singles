@@ -52,7 +52,7 @@ const EducationJob = ({
   };
 
   return (
-    <ScrollView className="flex-1 bg-backgground">
+    <ScrollView className="flex-1 bg-background">
     <View className="mt-20 px-6 w-full">
       {/* Header section */}
       <View className="flex-row items-center justify-between px-2">

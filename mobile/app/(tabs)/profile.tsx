@@ -113,7 +113,7 @@ export default function Profile() {
 
 
   return (
-    <View className="flex-1 bg-backgground">
+    <View className="flex-1 bg-background">
       <SideMenu
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}

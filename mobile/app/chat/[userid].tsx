@@ -1,6 +1,8 @@
 import ChatInput from "@/components/chat/ChatInput";
 import Conversation from "@/components/chat/Conversation";
+import { ScreenHeader, HeaderBackButton } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
+import { SPACING, TYPOGRAPHY, ICON_SIZES } from "@/constants/designTokens";
 import { useCall } from "@/context/CallContext";
 import { getAgoraCallToken, getAgoraChatToken } from "@/lib/api";
 import { getUserHistoryMessages, initChat, isChatInitialized, isChatLoggedIn, loginToChat, sendMessage as sendAgoraMessage, setupMessageListener } from "@/services/agoraChatServices";
@@ -466,128 +468,111 @@ export default function ChatDetail() {
           </View>
         </Modal>
 
-        <View className="flex-1 bg-backgground">
-          <View
-            className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: 0.1,
-              shadowRadius: 16,
-              elevation: 5,
-              paddingTop:
-                Platform.OS === "android"
-                  ? (StatusBar.currentHeight || 0) + 6
-                  : 60,
-            }}
-          >
-            <View className="flex-row items-center gap-3">
-              <TouchableOpacity
-                onPress={router.back}
-                className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
-              >
-                <Image
-                  source={icons.back}
-                  className="size-4"
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/profiles/${contact.id}`)} className="flex-row items-center">
-                {/* <Image
-                  source={contact.image ? { uri: contact.image.startsWith('uploads/') ? IMAGE_URL + contact.image : VIDEO_URL + contact.image } : icons.ic_user}
-                  className="w-8 h-8 rounded-lg mr-2"
-                /> */}
-                {contact.image ? (
-                  <Image
-                    source={{
-                      uri: contact.image.startsWith('http')
-                        ? contact.image
-                        : (contact.image.startsWith('uploads/')
-                            ? IMAGE_URL + contact.image
-                            : VIDEO_URL + contact.image)
-                    }}
-                    className="w-8 h-8 rounded-lg mr-2"
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View
-                    className="w-8 h-8 rounded-lg mr-2 justify-center items-center"
-                    style={{
-                      backgroundColor: BACKGROUND_COLORS[
-                        Math.abs(
-                          (contact.name || "User")
-                            .split("")
-                            .reduce((acc, char) => acc + char.charCodeAt(0), 0) %
-                          BACKGROUND_COLORS.length
-                        )
-                      ],
-                    }}
-                  >
-                    <Text className="text-white font-bold text-xs">
-                      {(contact.name || "User")
-                        .split(" ")
-                        .map((part) => part.charAt(0))
-                        .slice(0, 2)
-                        .join("")
-                        .toUpperCase()}
+        <View className="flex-1 bg-background">
+          <ScreenHeader
+            leftContent={
+              <View style={{ flexDirection: "row", alignItems: "center", gap: SPACING.sm }}>
+                <HeaderBackButton onPress={router.back} />
+                <TouchableOpacity 
+                  onPress={() => router.push(`/profiles/${contact.id}`)} 
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                >
+                  {contact.image ? (
+                    <Image
+                      source={{
+                        uri: contact.image.startsWith('http')
+                          ? contact.image
+                          : (contact.image.startsWith('uploads/')
+                              ? IMAGE_URL + contact.image
+                              : VIDEO_URL + contact.image)
+                      }}
+                      style={{ width: ICON_SIZES.xl, height: ICON_SIZES.xl, borderRadius: 8, marginRight: SPACING.xs }}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View
+                      style={{
+                        width: ICON_SIZES.xl,
+                        height: ICON_SIZES.xl,
+                        borderRadius: 8,
+                        marginRight: SPACING.xs,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        backgroundColor: BACKGROUND_COLORS[
+                          Math.abs(
+                            (contact.name || "User")
+                              .split("")
+                              .reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+                            BACKGROUND_COLORS.length
+                          )
+                        ],
+                      }}
+                    >
+                      <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 10 }}>
+                        {(contact.name || "User")
+                          .split(" ")
+                          .map((part) => part.charAt(0))
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase()}
+                      </Text>
+                    </View>
+                  )}
+                  <View>
+                    <Text style={[TYPOGRAPHY.subheadline, { color: "#000" }]}>{contact.name}</Text>
+                    <Text style={[TYPOGRAPHY.caption1, { color: contact.online ? "#22C55E" : "#6B7280" }]}>
+                      {contact.online ? "Online" : `Last seen ${contact.lastSeen ? contact.lastSeen : 'Few sec ago'}`}
                     </Text>
                   </View>
-                )}
-
-                <View>
-                  <Text className="font-normal text-[13px] tracking-[-0.41px] text-dark">{contact.name}</Text>
-                  <Text className={`text-xs ${contact.online ? 'text-green-500' : 'text-gray-500'}`}>
-                    {contact.online ? "Online" : `Last seen ${contact.lastSeen ? contact.lastSeen : 'Few sec ago'}`}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-            <View className="flex-row items-center gap-2">
-
-
-              <TouchableOpacity
-                onPress={handleVoiceCall}
-                className="border border-[#C07618] rounded-lg flex justify-center items-center w-8 h-8 overflow-hidden"
-              >
-                <LinearGradient
-                  colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{ flex: 1, justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}
+                </TouchableOpacity>
+              </View>
+            }
+            rightContent={
+              <View style={{ flexDirection: "row", alignItems: "center", gap: SPACING.xs }}>
+                <TouchableOpacity
+                  onPress={handleVoiceCall}
+                  style={{ width: ICON_SIZES.xl, height: ICON_SIZES.xl, borderRadius: 8, overflow: "hidden", borderWidth: 1, borderColor: "#C07618" }}
                 >
-                  <Ionicons name="call" size={16} color="#ffffff" />
-                </LinearGradient>
-              </TouchableOpacity>
+                  <LinearGradient
+                    colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+                  >
+                    <Ionicons name="call" size={16} color="#ffffff" />
+                  </LinearGradient>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={handleVideoCall}
-                className="border border-[#C07618] rounded-lg flex justify-center items-center w-8 h-8 overflow-hidden"
-              >
-                <LinearGradient
-                  colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{ flex: 1, justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}
+                <TouchableOpacity
+                  onPress={handleVideoCall}
+                  style={{ width: ICON_SIZES.xl, height: ICON_SIZES.xl, borderRadius: 8, overflow: "hidden", borderWidth: 1, borderColor: "#C07618" }}
                 >
-                  <Ionicons name="videocam" size={16} color="#ffffff" />
-                </LinearGradient>
-              </TouchableOpacity>
+                  <LinearGradient
+                    colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+                  >
+                    <Ionicons name="videocam" size={16} color="#ffffff" />
+                  </LinearGradient>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => setVisible(true)}
-                className="border border-[#C07618] rounded-lg flex justify-center items-center w-8 h-8 overflow-hidden"
-              >
-                <LinearGradient
-                  colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{ flex: 1, justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}
+                <TouchableOpacity
+                  onPress={() => setVisible(true)}
+                  style={{ width: ICON_SIZES.xl, height: ICON_SIZES.xl, borderRadius: 8, overflow: "hidden", borderWidth: 1, borderColor: "#C07618" }}
                 >
-                  <Ionicons name="ellipsis-vertical" size={16} color="#ffffff" />
-                </LinearGradient>
-              </TouchableOpacity>
-            </View>
-          </View>
+                  <LinearGradient
+                    colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+                  >
+                    <Ionicons name="ellipsis-vertical" size={16} color="#ffffff" />
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            }
+          />
 
           {loading ? (
             <View className="flex-1 justify-center items-center">

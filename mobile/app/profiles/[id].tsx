@@ -276,7 +276,7 @@ export default function ProfileDetail() {
   }
 
   return (
-    <View className="flex-1 bg-backgground">
+    <View className="flex-1 bg-background">
       <Toast />
       {profile && profile?.Image ? (
         <ImageBackground

@@ -79,7 +79,7 @@ const ChooseInterests = ({ data, updateData, onNext, error }: signupProps) => {
   const cardWidth = (screenWidth - 60) / 2;
 
   return (
-    <ScrollView className="flex-1 bg-backgground">
+    <ScrollView className="flex-1 bg-background">
     <View className="mt-20 px-6 w-full">
       <View className="flex-row items-center justify-between gap-7 px-2">
         <View className="flex-1">

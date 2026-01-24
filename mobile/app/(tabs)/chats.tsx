@@ -1,5 +1,6 @@
 import LinearBg from "@/components/LinearBg";
 import NotificationBell from "@/components/NotificationBell";
+import { ScreenHeader, HeaderBackButton } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
 import { fetchUserProfile, getAgoraChatToken, getGroupList } from "@/lib/api";
@@ -19,7 +20,7 @@ import {
   View
 } from "react-native";
 import Toast from "react-native-toast-message";
-import { useSafeArea, useBottomSpacing } from "@/hooks/useResponsive";
+import { useBottomSpacing } from "@/hooks/useResponsive";
 import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES, COMPONENT_SIZES, BORDER_RADIUS, SHADOWS } from "@/constants/designTokens";
 
 interface MessageItem {
@@ -366,7 +367,6 @@ export default function Chats() {
   const [deletingGroups, setDeletingGroups] = useState(false);
 
   // Responsive hooks
-  const safeArea = useSafeArea();
   const { contentPadding: bottomTabPadding } = useBottomSpacing(true);
 
   // 🗑️ TEMPORARY: Delete all Agora groups function
@@ -726,45 +726,22 @@ export default function Chats() {
             </LinearBg>
           </View>
         </TouchableOpacity>
-        <View
-          className="bg-white flex-row justify-between items-center rounded-b-card z-30"
-          style={{
-            paddingHorizontal: SPACING.base,
-            paddingTop: safeArea.top + VERTICAL_SPACING.sm,
-            paddingBottom: VERTICAL_SPACING.md,
-            ...SHADOWS.md
-          }}
-        >
-          <View className="flex-row items-center" style={{ gap: SPACING.xs }}>
-            <TouchableOpacity
-              onPress={router.back}
-              className="border border-gray rounded-button flex justify-center items-center"
-              style={{
-                width: ICON_SIZES.xl,
-                height: ICON_SIZES.xl
-              }}
-            >
-              <Image
-                source={icons.back}
-                style={{ width: ICON_SIZES.sm * 0.8, height: ICON_SIZES.sm * 0.8 }}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <Text className="font-medium text-black" style={TYPOGRAPHY.body}>
-              {selectMode ? "Select Friends" : "Chats"}
-            </Text>
-          </View>
-
-          {selectMode ? (
-            selectedUsers.length && (
-              <TouchableOpacity onPress={handleNavigateShippingInfo}>
-                <Text className="text-primary font-medium" style={TYPOGRAPHY.body}>Send</Text>
-              </TouchableOpacity>
+        <ScreenHeader
+          title={selectMode ? "Select Friends" : "Chats"}
+          showBackButton
+          onBackPress={router.back}
+          rightContent={
+            selectMode ? (
+              selectedUsers.length > 0 && (
+                <TouchableOpacity onPress={handleNavigateShippingInfo}>
+                  <Text className="text-primary font-medium" style={TYPOGRAPHY.body}>Send</Text>
+                </TouchableOpacity>
+              )
+            ) : (
+              <NotificationBell />
             )
-          ) : (
-            <NotificationBell />
-          )}
-        </View>
+          }
+        />
 
         <View style={{ marginTop: VERTICAL_SPACING.lg }}>
           <View
