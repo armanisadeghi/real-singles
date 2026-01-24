@@ -205,7 +205,8 @@ const EditProfile = () => {
     const success = await performSave(false);
     if (success) {
       setTimeout(() => {
-        router.back();
+        // Navigate to profile view page after save
+        router.push("/profile");
       }, 1000);
     }
   }, [performSave, router]);

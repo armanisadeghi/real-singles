@@ -168,32 +168,67 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the public URL (for public buckets) or path (for private)
-    let publicUrl: string | null = null;
-    if (bucket === STORAGE_BUCKETS.AVATARS || bucket === STORAGE_BUCKETS.EVENTS) {
-      const { data: urlData } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(uploadData.path);
-      publicUrl = urlData.publicUrl;
-    }
+    // Get the public URL for all buckets (gallery is public too)
+    const { data: urlData } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(uploadData.path);
+    const publicUrl = urlData.publicUrl;
 
     // If uploading avatar, update the profile
     if (bucket === STORAGE_BUCKETS.AVATARS && publicUrl) {
-      await supabase
+      const { error: profileError } = await supabase
         .from("profiles")
         .update({ profile_image_url: publicUrl })
         .eq("user_id", user.id);
+      
+      if (profileError) {
+        console.error("Error updating profile image:", profileError);
+      }
     }
 
     // If uploading to gallery, create gallery entry
     if (bucket === STORAGE_BUCKETS.GALLERY) {
       const isVideo = file.type.startsWith("video/");
-      await supabase.from("user_gallery").insert({
-        user_id: user.id,
-        media_url: uploadData.path,
-        media_type: isVideo ? "video" : "photo",
-        display_order: 999, // Will be reordered by user
-      });
+      
+      // Get current max display_order to add new item at the end
+      const { data: existingItems } = await supabase
+        .from("user_gallery")
+        .select("display_order")
+        .eq("user_id", user.id)
+        .order("display_order", { ascending: false })
+        .limit(1);
+      
+      const nextDisplayOrder = existingItems && existingItems.length > 0 
+        ? (existingItems[0].display_order || 0) + 1 
+        : 0;
+      
+      const { data: galleryData, error: galleryError } = await supabase
+        .from("user_gallery")
+        .insert({
+          user_id: user.id,
+          media_url: uploadData.path,
+          media_type: isVideo ? "video" : "photo",
+          display_order: nextDisplayOrder,
+        })
+        .select()
+        .single();
+      
+      if (galleryError) {
+        console.error("Error creating gallery entry:", galleryError);
+        // Still return success since file was uploaded, but include error info
+        return NextResponse.json({
+          success: true,
+          path: uploadData.path,
+          publicUrl,
+          bucket,
+          size: file.size,
+          type: file.type,
+          warning: "File uploaded but gallery entry failed: " + galleryError.message,
+          galleryError: galleryError.message,
+        });
+      }
+      
+      console.log("Gallery entry created successfully:", galleryData);
     }
 
     return NextResponse.json({

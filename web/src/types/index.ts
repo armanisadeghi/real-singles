@@ -137,6 +137,85 @@ export const ZODIAC_OPTIONS = [
   { value: "pisces", label: "Pisces" },
 ] as const;
 
+/**
+ * Calculate zodiac sign from a date of birth
+ * @param dateString - Date string in any format parseable by Date constructor (YYYY-MM-DD or MM/DD/YYYY)
+ * @returns Lowercase zodiac sign string or null if invalid date
+ */
+export function getZodiacFromDate(dateString: string): string | null {
+  if (!dateString) return null;
+  
+  let month: number;
+  let day: number;
+  
+  // Handle MM/DD/YYYY format
+  if (dateString.includes('/')) {
+    const parts = dateString.split('/');
+    if (parts.length !== 3) return null;
+    month = parseInt(parts[0], 10);
+    day = parseInt(parts[1], 10);
+  } else {
+    // Handle YYYY-MM-DD format
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return null;
+    month = date.getMonth() + 1; // getMonth is 0-indexed
+    day = date.getDate();
+  }
+  
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  
+  // Zodiac date ranges (approximate)
+  const zodiacSigns: { sign: string; startMonth: number; startDay: number; endMonth: number; endDay: number }[] = [
+    { sign: "capricorn", startMonth: 12, startDay: 22, endMonth: 1, endDay: 19 },
+    { sign: "aquarius", startMonth: 1, startDay: 20, endMonth: 2, endDay: 18 },
+    { sign: "pisces", startMonth: 2, startDay: 19, endMonth: 3, endDay: 20 },
+    { sign: "aries", startMonth: 3, startDay: 21, endMonth: 4, endDay: 19 },
+    { sign: "taurus", startMonth: 4, startDay: 20, endMonth: 5, endDay: 20 },
+    { sign: "gemini", startMonth: 5, startDay: 21, endMonth: 6, endDay: 20 },
+    { sign: "cancer", startMonth: 6, startDay: 21, endMonth: 7, endDay: 22 },
+    { sign: "leo", startMonth: 7, startDay: 23, endMonth: 8, endDay: 22 },
+    { sign: "virgo", startMonth: 8, startDay: 23, endMonth: 9, endDay: 22 },
+    { sign: "libra", startMonth: 9, startDay: 23, endMonth: 10, endDay: 22 },
+    { sign: "scorpio", startMonth: 10, startDay: 23, endMonth: 11, endDay: 21 },
+    { sign: "sagittarius", startMonth: 11, startDay: 22, endMonth: 12, endDay: 21 },
+  ];
+  
+  for (const z of zodiacSigns) {
+    // Handle Capricorn which spans December-January
+    if (z.sign === "capricorn") {
+      if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) {
+        return z.sign;
+      }
+    } else {
+      if ((month === z.startMonth && day >= z.startDay) || 
+          (month === z.endMonth && day <= z.endDay)) {
+        return z.sign;
+      }
+    }
+  }
+  
+  return null;
+}
+
+// Top 15 Western countries for a luxury dating app (US-focused but international)
+export const COUNTRY_OPTIONS = [
+  { value: "US", label: "United States" },
+  { value: "CA", label: "Canada" },
+  { value: "GB", label: "United Kingdom" },
+  { value: "AU", label: "Australia" },
+  { value: "DE", label: "Germany" },
+  { value: "FR", label: "France" },
+  { value: "IT", label: "Italy" },
+  { value: "ES", label: "Spain" },
+  { value: "NL", label: "Netherlands" },
+  { value: "CH", label: "Switzerland" },
+  { value: "SE", label: "Sweden" },
+  { value: "NO", label: "Norway" },
+  { value: "DK", label: "Denmark" },
+  { value: "IE", label: "Ireland" },
+  { value: "NZ", label: "New Zealand" },
+] as const;
+
 export const PETS_OPTIONS = [
   { value: "none", label: "None" },
   { value: "dog", label: "Dog" },

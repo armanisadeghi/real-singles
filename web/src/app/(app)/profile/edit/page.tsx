@@ -22,6 +22,8 @@ import {
   PETS_OPTIONS,
   LANGUAGE_OPTIONS,
   INTEREST_OPTIONS,
+  COUNTRY_OPTIONS,
+  getZodiacFromDate,
 } from "@/types";
 
 const AUTOSAVE_DELAY = 5000; // 5 seconds
@@ -266,8 +268,11 @@ export default function EditProfilePage() {
     
     if (!isAutosave) {
       setSuccess("Profile saved successfully!");
-      setTimeout(() => setSuccess(""), 3000);
       setSaving(false);
+      // Redirect to profile view page after manual save
+      setTimeout(() => {
+        router.push("/profile");
+      }, 1000);
     }
 
     return true;
@@ -287,6 +292,16 @@ export default function EditProfilePage() {
     loadProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-calculate zodiac sign when date of birth changes
+  useEffect(() => {
+    if (profile.date_of_birth) {
+      const calculatedZodiac = getZodiacFromDate(profile.date_of_birth);
+      if (calculatedZodiac && calculatedZodiac !== profile.zodiac_sign) {
+        setProfile(prev => ({ ...prev, zodiac_sign: calculatedZodiac }));
+      }
+    }
+  }, [profile.date_of_birth]);
 
   const loadProfile = async () => {
     const supabase = createClient();
@@ -622,12 +637,16 @@ export default function EditProfilePage() {
               onChange={(value) => setProfile(prev => ({ ...prev, gender: value }))}
               options={GENDER_OPTIONS}
             />
-            <SelectField
-              label="Zodiac Sign"
-              value={profile.zodiac_sign}
-              onChange={(value) => setProfile(prev => ({ ...prev, zodiac_sign: value }))}
-              options={ZODIAC_OPTIONS}
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Zodiac Sign <span className="text-xs text-gray-400">(auto-calculated from DOB)</span>
+              </label>
+              <div className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700">
+                {profile.zodiac_sign 
+                  ? ZODIAC_OPTIONS.find(z => z.value === profile.zodiac_sign)?.label || profile.zodiac_sign
+                  : 'Enter date of birth to calculate'}
+              </div>
+            </div>
             <SelectField
               label="Marital Status"
               value={profile.marital_status}
@@ -714,15 +733,12 @@ export default function EditProfilePage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-              <input
-                type="text"
-                value={profile.country}
-                onChange={(e) => setProfile(prev => ({ ...prev, country: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-            </div>
+            <SelectField
+              label="Country"
+              value={profile.country}
+              onChange={(value) => setProfile(prev => ({ ...prev, country: value }))}
+              options={COUNTRY_OPTIONS}
+            />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
               <input

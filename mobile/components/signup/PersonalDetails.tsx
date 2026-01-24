@@ -1,51 +1,69 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Platform, ScrollView, Text, TextInput, View } from "react-native";
+import RNPickerSelect from "react-native-picker-select";
 import GradientButton from "../ui/GradientButton";
+import { countryOptions, getZodiacFromDate, zodiacOptions } from "@/constants/utils";
 
 const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
   const [validationError, setValidationError] = useState("");
 
-
-React.useEffect(() => {
-  let isMounted = true;
-
-  const loadAppleUserData = async () => {
-    try {
-      const keys = [
-        "appleUserFirstName",
-        "appleUserLastName",
-        "appleUserName",
-        "appleUserEmail",
-      ];
-      const values = await AsyncStorage.multiGet(keys);
-
-      if (!isMounted) return;
-
-      const dataMap = Object.fromEntries(values);
-      const updatedFields: any = {
-          FirstName: dataMap.appleUserFirstName || "",
-          LastName: dataMap.appleUserLastName || "",
-          DisplayName: dataMap.appleUserName || "",
-        };
-
-        // only set Email if Apple Sign-In email exists
-        if (dataMap.appleUserEmail) {
-          updatedFields.Email = dataMap.appleUserEmail;
-        }
-
-        updateData(updatedFields);
-    } catch (error) {
-      console.error("Error fetching Apple user data:", error);
+  // Initialize country to US if not set
+  useEffect(() => {
+    if (!data.Country) {
+      updateData({ Country: "US" });
     }
-  };
+  }, []);
 
-  loadAppleUserData();
+  // Auto-calculate zodiac sign when DOB changes
+  useEffect(() => {
+    if (data.DOB) {
+      const zodiac = getZodiacFromDate(data.DOB);
+      if (zodiac && zodiac !== data.HSign) {
+        updateData({ HSign: zodiac });
+      }
+    }
+  }, [data.DOB]);
 
-  return () => {
-    isMounted = false;
-  };
-}, []);
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadAppleUserData = async () => {
+      try {
+        const keys = [
+          "appleUserFirstName",
+          "appleUserLastName",
+          "appleUserName",
+          "appleUserEmail",
+        ];
+        const values = await AsyncStorage.multiGet(keys);
+
+        if (!isMounted) return;
+
+        const dataMap = Object.fromEntries(values);
+        const updatedFields: any = {
+            FirstName: dataMap.appleUserFirstName || "",
+            LastName: dataMap.appleUserLastName || "",
+            DisplayName: dataMap.appleUserName || "",
+          };
+
+          // only set Email if Apple Sign-In email exists
+          if (dataMap.appleUserEmail) {
+            updatedFields.Email = dataMap.appleUserEmail;
+          }
+
+          updateData(updatedFields);
+      } catch (error) {
+        console.error("Error fetching Apple user data:", error);
+      }
+    };
+
+    loadAppleUserData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
 
   const handleNext = () => {
@@ -147,11 +165,14 @@ React.useEffect(() => {
     return;
   }
 
-  // Horoscope sign validation
-  if (!data.HSign) {
-    setValidationError("Horoscope sign is required");
+  // Country validation
+  if (!data.Country) {
+    setValidationError("Country is required");
     return;
   }
+
+  // Zodiac sign is auto-calculated from DOB, so no validation needed
+  // If DOB is valid, zodiac will be calculated
 
   // If everything is valid
   onNext();
@@ -233,7 +254,7 @@ React.useEffect(() => {
           </View>
         </View>
 
-        {/* Zip Code and Horoscope Sign (side by side) */}
+        {/* Zip Code and Zodiac Sign (side by side) */}
         <View className="flex-row mb-4 gap-2">
           <View className="flex-1 border border-border rounded-[99] bg-light-200">
             <TextInput
@@ -246,15 +267,41 @@ React.useEffect(() => {
             />
           </View>
 
-          <View className="flex-1 border border-border rounded-[99] bg-light-200">
-            <TextInput
-              value={data.HSign}
-              onChangeText={(text) => updateData({ HSign: text })}
-              placeholder="Horoscope Sign"
-              placeholderTextColor="#B0B0B0"
-              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16 , color: 'black'}}
-            />
+          {/* Zodiac Sign - Auto-calculated from DOB (read-only display) */}
+          <View className="flex-1 border border-border rounded-[99] bg-gray-100">
+            <View style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16 }}>
+              <Text style={{ color: data.HSign ? 'black' : '#B0B0B0' }}>
+                {data.HSign 
+                  ? zodiacOptions.find(z => z.value === data.HSign)?.label || data.HSign
+                  : 'Zodiac (from DOB)'}
+              </Text>
+            </View>
           </View>
+        </View>
+
+        {/* Country dropdown */}
+        <View className="mb-4 border border-border rounded-[99] bg-light-200">
+          <RNPickerSelect
+            value={data.Country || "US"}
+            onValueChange={(value) => updateData({ Country: value })}
+            items={countryOptions}
+            placeholder={{ label: "Select Country", value: null }}
+            style={{
+              inputIOS: {
+                paddingVertical: 18,
+                paddingHorizontal: 16,
+                color: 'black',
+              },
+              inputAndroid: {
+                paddingVertical: 10,
+                paddingHorizontal: 16,
+                color: 'black',
+              },
+              placeholder: {
+                color: '#B0B0B0',
+              },
+            }}
+          />
         </View>
 
           <View className="flex-row mb-4 gap-2">

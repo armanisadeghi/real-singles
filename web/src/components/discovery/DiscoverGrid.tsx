@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { SlidersHorizontal, Heart, Sparkles, MapPin } from "lucide-react";
+import { SlidersHorizontal, Heart, Sparkles, MapPin, Loader2, X } from "lucide-react";
 import { ProfileCard } from "./ProfileCard";
 import { FilterPanel, FilterValues } from "./FilterPanel";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -37,6 +37,8 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
   const [profiles, setProfiles] = useState<Profile[]>(initialProfiles);
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
+  const [filtersApplied, setFiltersApplied] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [likedProfiles, setLikedProfiles] = useState<Set<string>>(new Set());
   const [passedProfiles, setPassedProfiles] = useState<Set<string>>(new Set());
@@ -103,10 +105,91 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
   }, []);
 
   const handleApplyFilters = useCallback(async (filters: FilterValues) => {
-    // In a real implementation, this would refetch profiles with filters
-    console.log("Applying filters:", filters);
-    // For now, just close the panel
+    setIsFiltering(true);
+    
+    try {
+      // Save filters to server
+      const saveRes = await fetch("/api/filters", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          min_age: filters.minAge,
+          max_age: filters.maxAge,
+          min_height: filters.minHeight,
+          max_height: filters.maxHeight,
+          max_distance: filters.maxDistance,
+          gender: filters.gender,
+          body_types: filters.bodyType,
+          ethnicities: filters.ethnicity,
+          religions: filters.religion,
+          education_levels: filters.education,
+          smoking: filters.smoking,
+          drinking: filters.drinking,
+          marijuana: filters.marijuana,
+          has_kids: filters.hasKids,
+          wants_kids: filters.wantsKids,
+          zodiac_signs: filters.zodiac,
+          marital_status: filters.maritalStatus,
+          exercise: filters.exercise,
+          political_views: filters.politicalViews,
+        }),
+      });
+
+      if (!saveRes.ok) {
+        console.error("Failed to save filters");
+      }
+
+      // Fetch filtered profiles from the discover API
+      const discoverRes = await fetch("/api/discover");
+      const data = await discoverRes.json();
+
+      if (data.success) {
+        // Transform the API response to match our Profile interface
+        const transformedProfiles: Profile[] = (data.TopMatch || []).map((p: any) => ({
+          id: p.ID || p.id,
+          user_id: p.ID || p.id,
+          first_name: p.FirstName || p.DisplayName?.split(' ')[0] || '',
+          last_name: p.LastName || '',
+          date_of_birth: p.DOB || null,
+          city: p.City || null,
+          state: p.State || null,
+          occupation: null,
+          bio: p.About || null,
+          profile_image_url: p.Image || p.livePicture || null,
+          is_verified: p.is_verified || false,
+          height_inches: p.Height ? parseInt(p.Height) : null,
+          interests: p.Interest ? p.Interest.split(', ') : null,
+          user: {
+            display_name: p.DisplayName || null,
+          },
+        }));
+        
+        setProfiles(transformedProfiles);
+        setFiltersApplied(true);
+      }
+    } catch (error) {
+      console.error("Error applying filters:", error);
+    } finally {
+      setIsFiltering(false);
+    }
   }, []);
+
+  const handleClearFilters = useCallback(async () => {
+    setIsFiltering(true);
+    
+    try {
+      // Clear filters on server
+      await fetch("/api/filters", { method: "DELETE" });
+      
+      // Reset to initial profiles
+      setProfiles(initialProfiles);
+      setFiltersApplied(false);
+    } catch (error) {
+      console.error("Error clearing filters:", error);
+    } finally {
+      setIsFiltering(false);
+    }
+  }, [initialProfiles]);
 
   const visibleProfiles = profiles.filter(
     (p) => p.user_id && !likedProfiles.has(p.user_id) && !passedProfiles.has(p.user_id)
@@ -168,11 +251,36 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
           {/* Filter button */}
           <button
             onClick={() => setIsFilterOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors shrink-0"
+            disabled={isFiltering}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-full transition-colors shrink-0",
+              filtersApplied
+                ? "bg-pink-500 text-white hover:bg-pink-600"
+                : "border border-gray-300 text-gray-700 hover:bg-gray-50",
+              isFiltering && "opacity-50 cursor-not-allowed"
+            )}
           >
-            <SlidersHorizontal className="w-4 h-4" />
-            <span className="hidden sm:inline">Filters</span>
+            {isFiltering ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <SlidersHorizontal className="w-4 h-4" />
+            )}
+            <span className="hidden sm:inline">
+              {filtersApplied ? "Filters Active" : "Filters"}
+            </span>
           </button>
+
+          {/* Clear Filters button */}
+          {filtersApplied && (
+            <button
+              onClick={handleClearFilters}
+              disabled={isFiltering}
+              className="flex items-center gap-1 px-3 py-2 text-gray-500 hover:text-gray-700 transition-colors shrink-0"
+            >
+              <X className="w-4 h-4" />
+              <span className="hidden sm:inline text-sm">Clear</span>
+            </button>
+          )}
         </div>
       </div>
 
