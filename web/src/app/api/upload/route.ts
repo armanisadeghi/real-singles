@@ -190,27 +190,29 @@ export async function POST(request: NextRequest) {
     if (bucket === STORAGE_BUCKETS.GALLERY) {
       const isVideo = file.type.startsWith("video/");
       
-      // Get current max display_order to add new item at the end
-      const { data: existingItems } = await supabase
+      // Check if user has any existing photos (not videos) - to determine if this should be primary
+      const { data: existingPhotos } = await supabase
         .from("user_gallery")
-        .select("display_order")
+        .select("id, display_order")
         .eq("user_id", user.id)
+        .eq("media_type", "image")
         .order("display_order", { ascending: false })
         .limit(1);
       
-      const nextDisplayOrder = existingItems && existingItems.length > 0 
-        ? (existingItems[0].display_order || 0) + 1 
+      const isFirstPhoto = !isVideo && (!existingPhotos || existingPhotos.length === 0);
+      const nextDisplayOrder = existingPhotos && existingPhotos.length > 0 
+        ? (existingPhotos[0].display_order || 0) + 1 
         : 0;
       
       // IMPORTANT: Database CHECK constraint only allows 'image' or 'video'
-      // Previously used 'photo' which violated the constraint and caused silent insert failures
       const { data: galleryData, error: galleryError } = await supabase
         .from("user_gallery")
         .insert({
           user_id: user.id,
           media_url: uploadData.path,
-          media_type: isVideo ? "video" : "image",  // Must be 'image' not 'photo'!
-          display_order: nextDisplayOrder,
+          media_type: isVideo ? "video" : "image",
+          display_order: isFirstPhoto ? 0 : nextDisplayOrder,
+          is_primary: isFirstPhoto, // Auto-set first photo as primary
         })
         .select()
         .single();
@@ -231,6 +233,23 @@ export async function POST(request: NextRequest) {
       }
       
       console.log("Gallery entry created successfully:", galleryData);
+      
+      // If this is the first photo (now primary), also update the profile image
+      if (isFirstPhoto && galleryData) {
+        // Generate a signed URL for the profile image
+        const { data: signedData } = await supabase.storage
+          .from(bucket)
+          .createSignedUrl(uploadData.path, 31536000); // 1 year expiry for profile
+        
+        const profileImageUrl = signedData?.signedUrl || publicUrl;
+        
+        await supabase
+          .from("profiles")
+          .update({ profile_image_url: profileImageUrl })
+          .eq("user_id", user.id);
+        
+        console.log("Profile image updated to:", profileImageUrl);
+      }
     }
 
     return NextResponse.json({
