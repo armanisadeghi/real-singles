@@ -15,9 +15,9 @@ import {
   SMOKING_OPTIONS,
   WANTS_KIDS_OPTIONS,
 } from "@/constants/options";
-import { clearFilter, getFilter } from "@/lib/api";
+import { clearFilter, getFilter, saveFilter } from "@/lib/api";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -28,8 +28,7 @@ import {
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import Toast from "react-native-toast-message";
-import LinearBg from "./LinearBg";
-import RangeSlider from "./ui/RangeSlider";
+import Slider from "@react-native-community/slider";
 
 export interface FilterData {
   ageRange: {
@@ -64,16 +63,13 @@ export interface FilterData {
 
 interface FilterOptionsProps {
   initialFilters?: FilterData;
-  onApplyFilters: (filters: FormData) => void;
+  onFiltersChanged?: () => void; // Called when filters are saved
 }
 
 export default function FilterOptions({
   initialFilters,
-  onApplyFilters,
+  onFiltersChanged,
 }: FilterOptionsProps) {
-  console.log("initialFilters?.ageRange",initialFilters?.ageRange);
-  
-
   const [ageMin, setAgeMin] = useState(initialFilters?.ageRange?.min || 18);
   const [ageMax, setAgeMax] = useState(initialFilters?.ageRange?.max || 70);
   const [heightMin, setHeightMin] = useState(
@@ -126,102 +122,137 @@ export default function FilterOptions({
     initialFilters?.wantKids || ""
   );
   const [pets, setPets] = useState<boolean>(initialFilters?.pets || false);
-  const [loadingclear, setLoadingClear] = useState<boolean>(false);
-  const [filterData, setFilterData] = useState<{
-    // Note: Gender removed - gender preference comes from user's profile "looking_for" field
-    min_age: number;
-    max_age: number;
-    min_height: number;
-    max_height: number;
-    BodyType: string;
-    Ethnicity: string;
-    Drinks: string;
-    Religion: string;
-    Education: string;
-    HaveChild: string;
-    WantChild: string;
-    Pets: boolean;
-    Hsign: string;
-    Marijuana: string;
-    min_distance: number;
-    max_distance: number;
-    exercise: string;
-    marital_status: string;
-    looking_for: string;
-    Smoke: string;
-    PoliticalView: string;
-  } | null>({
-    // Note: Gender removed - gender preference comes from user's profile "looking_for" field
-    min_age: 18,
-    max_age: 70,
-    min_height: 4,
-    max_height: 10,
-    BodyType: "",
-    Ethnicity: "",
-    Drinks: "",
-    Religion: "",
-    Education: "",
-    HaveChild: "",
-    WantChild: "",
-    Pets: false,
-    Hsign: "",
-    Marijuana: "",
-    min_distance: 0,
-    max_distance: 10000,
-    exercise: "",
-    marital_status: "",
-    looking_for: "",
-    Smoke: "",
-    PoliticalView: ""
-  });
+  const [loadingClear, setLoadingClear] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  
+  // Debounce timer ref
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const getFilterData = async () => {
+  // Load saved filters on mount
+  const getFilterData = useCallback(async () => {
     try {
       const res = await getFilter();
-      console.log("Filter Data:", res);
+      console.log("Filter Data loaded:", res);
 
-      if (res?.success) {
-        setFilterData(res?.data);
+      if (res?.success && res?.data) {
+        const data = res.data;
+        
+        // Sync loaded filter data with local state
+        if (data.min_age) setAgeMin(data.min_age);
+        if (data.max_age) setAgeMax(data.max_age);
+        if (data.min_height) setHeightMin(data.min_height);
+        if (data.max_height) setHeightMax(data.max_height);
+        if (data.min_distance !== undefined) setMinDistance(data.min_distance);
+        if (data.max_distance !== undefined) setMaxDistance(data.max_distance);
+        if (data.BodyType) setBodyType(data.BodyType);
+        if (data.marital_status) setMaritalStatus(data.marital_status);
+        if (data.Ethnicity) setEthnicity(data.Ethnicity);
+        if (data.Religion) setReligion(data.Religion);
+        if (data.Marijuana) setMarijuana(data.Marijuana);
+        if (data.Drinks) setDrinking(data.Drinks);
+        if (data.HaveChild) setHasKids(data.HaveChild);
+        if (data.WantChild) setWantKids(data.WantChild);
+        if (data.Pets !== undefined) setPets(data.Pets);
+        if (data.Hsign) setZodiac(data.Hsign.split(',').filter(Boolean));
+        if (data.Education) setEducation(data.Education);
+        if (data.Smoke) setSmoke(data.Smoke);
+        if (data.PoliticalView) setPoliticalView(data.PoliticalView);
+        if (data.looking_for) setLookingFor(data.looking_for);
       }
     } catch (error) {
       console.error("Error fetching filters:", error);
+    } finally {
+      // Mark as initialized after loading
+      setIsInitialized(true);
     }
-  };
+  }, []);
 
   useEffect(() => {
     getFilterData();
-  }, []);
+  }, [getFilterData]);
 
-  const handleApply = () => {
-    const formData = new FormData();
+  // Auto-save filters when any value changes (debounced)
+  const saveFilters = useCallback(async () => {
+    if (!isInitialized) return; // Don't save during initial load
+    
+    setSaving(true);
+    try {
+      const filterParams: Record<string, string> = {
+        min_age: ageMin.toString(),
+        max_age: ageMax.toString(),
+        min_height: heightMin.toString(),
+        max_height: heightMax.toString(),
+        BodyType: bodyType,
+        Ethnicity: ethnicity,
+        Drinks: drinking,
+        Religion: religion,
+        Education: education,
+        HaveChild: hasKids,
+        WantChild: wantKids,
+        Pets: pets ? "true" : "false",
+        Hsign: zodiac.join(","),
+        Marijuana: marijuana,
+        min_distance: minDistance.toString(),
+        max_distance: maxDistance.toString(),
+        marital_status: maritalStatus,
+        looking_for: lookingFor,
+        Smoke: smoke,
+        PoliticalView: politicalView,
+      };
 
-    // Add all filter values to FormData
-    // Note: Gender is intentionally excluded - it comes from user's profile "looking_for" field
-    formData.append("min_age", ageMin.toString());
-    formData.append("max_age", ageMax.toString());
-    formData.append("min_height", heightMin.toString());
-    formData.append("max_height", heightMax.toString());
-    formData.append("BodyType", bodyType);
-    formData.append("Ethnicity", ethnicity);
-    formData.append("Drinks", drinking);
-    formData.append("Religion", religion);
-    formData.append("Education", education);
-    formData.append("HaveChild", hasKids);
-    formData.append("WantChild", wantKids);
-    formData.append("Pets", pets ? "true" : "false");
-    formData.append("Hsign", zodiac.join(","));
-    formData.append("Marijuana", marijuana);
-    formData.append("min_distance", minDistance.toString());
-    formData.append("max_distance", maxDistance.toString());
-    // formData.append("exercise", exercise);
-    formData.append("marital_status", maritalStatus);
-    formData.append("looking_for", lookingFor);
-    formData.append("Smoke", smoke);
-    formData.append("PoliticalView", politicalView);
+      const formData = new FormData();
+      Object.entries(filterParams).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
 
-    onApplyFilters(formData);
-    // handleClearFilter();
-  };
+      console.log("Auto-saving filters:", filterParams);
+      const res = await saveFilter(formData);
+      
+      if (res?.success) {
+        console.log("Filters saved successfully");
+        onFiltersChanged?.();
+      } else {
+        console.error("Failed to save filters:", res?.msg);
+      }
+    } catch (error) {
+      console.error("Error saving filters:", error);
+    } finally {
+      setSaving(false);
+    }
+  }, [
+    isInitialized,
+    ageMin, ageMax, heightMin, heightMax, bodyType, ethnicity, drinking,
+    religion, education, hasKids, wantKids, pets, zodiac, marijuana,
+    minDistance, maxDistance, maritalStatus, lookingFor, smoke, politicalView,
+    onFiltersChanged
+  ]);
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    // Set new timeout for debounced save
+    saveTimeoutRef.current = setTimeout(() => {
+      saveFilters();
+    }, 500); // Save after 500ms of no changes
+    
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [
+    ageMin, ageMax, heightMin, heightMax, bodyType, ethnicity, drinking,
+    religion, education, hasKids, wantKids, pets, zodiac, marijuana,
+    minDistance, maxDistance, maritalStatus, lookingFor, smoke, politicalView,
+    isInitialized
+  ]);
 
   const pickerSelectStyles = {
     inputIOS: {
@@ -229,11 +260,11 @@ export default function FilterOptions({
       paddingVertical: 14,
       paddingHorizontal: 28,
       borderWidth: 1,
-      borderColor: "#E5E5E5", // gray border
+      borderColor: "#E5E5E5",
       borderRadius: 30,
-      backgroundColor: "#F5F5F5", // light background
+      backgroundColor: "#F5F5F5",
       color: "#333333",
-      paddingRight: 30, // to ensure the text is never behind the icon
+      paddingRight: 30,
       marginBottom: 10,
     },
     inputAndroid: {
@@ -241,11 +272,11 @@ export default function FilterOptions({
       paddingHorizontal: 28,
       paddingVertical: 14,
       borderWidth: 1,
-      borderColor: "#E5E5E5", // gray border
+      borderColor: "#E5E5E5",
       borderRadius: 99,
-      backgroundColor: "#F9F9FC", // light background
+      backgroundColor: "#F9F9FC",
       color: "#333333",
-      paddingRight: 30, // to ensure the text is never behind the icon
+      paddingRight: 30,
       marginBottom: 10,
     },
     placeholder: {
@@ -287,6 +318,7 @@ export default function FilterOptions({
       console.log("Clear Filter Response:", res);
 
       if (res?.success) {
+        // Reset all state to defaults
         setAgeMin(18);
         setAgeMax(70);
         setHeightMin(4);
@@ -299,7 +331,6 @@ export default function FilterOptions({
         setLookingFor("");
         setMinDistance(0);
         setMaxDistance(10000);
-        // Note: gender state removed - comes from profile
         setBodyType("");
         setMaritalStatus("");
         setEthnicity("");
@@ -309,74 +340,128 @@ export default function FilterOptions({
         setHasKids("");
         setWantKids("");
         setPets(false);
-        setFilterData(null);
+        
+        onFiltersChanged?.();
+        
+        Toast.show({
+          type: "success",
+          text1: "Filters reset to defaults",
+          position: "bottom",
+          visibilityTime: 2000,
+        });
       }
-      Toast.show({
-        type: "success",
-        text1: "Filters cleared successfully!",
-        position: "bottom",
-        visibilityTime: 2000,
-      })
     } catch (error) {
       console.error("Error clearing filters:", error);
+      Toast.show({
+        type: "error",
+        text1: "Failed to reset filters",
+        position: "bottom",
+        visibilityTime: 2000,
+      });
     } finally {
       setLoadingClear(false);
     }
   };
 
+  // Helper to format height display
+  const formatHeight = (ft: number) => {
+    return ft.toFixed(1);
+  };
+
   return (
     <View className="p-6">
       <Toast />
+      
+      {/* Saving indicator */}
+      {saving && (
+        <View className="absolute top-2 right-6 flex-row items-center z-50">
+          <ActivityIndicator size="small" color="#B06D1E" />
+          <Text className="text-xs text-gray ml-1">Saving...</Text>
+        </View>
+      )}
+      
       {/* Note: Gender filter removed - gender preference comes from user's profile "looking_for" field */}
       {/* Users can change their gender preference in Profile Settings */}
 
+      {/* Age Range Slider */}
       <View className="mb-6 pb-6 border-b border-b-border">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-base font-medium mb-3 text-dark">Age</Text>
-          <Text className="text-xs font-normal mb-3 text-gray">
-            18-70 years
-            {/* {filterData?.min_age || ageMin}-{filterData?.max_age || ageMax} */}
+        <View className="flex-row items-center justify-between mb-2">
+          <Text className="text-base font-medium text-dark">Age</Text>
+          <Text className="text-sm font-medium text-primary">
+            {ageMin}-{ageMax} years
           </Text>
         </View>
-        <RangeSlider
-          sliderWidth={300}
-          min={18}
-          max={70}
-          step={1}
-          label="Yrs"
-          onValueChange={(range) => {
-            setAgeMin(range.min);
-            setAgeMax(range.max);
-          }}
-        />
+        <View className="mb-2">
+          <Text className="text-xs text-gray mb-1">Minimum: {ageMin}</Text>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={18}
+            maximumValue={70}
+            step={1}
+            value={ageMin}
+            onValueChange={(value) => setAgeMin(Math.min(value, ageMax - 1))}
+            minimumTrackTintColor="#B06D1E"
+            maximumTrackTintColor="#FFF0DC"
+            thumbTintColor="#B06D1E"
+          />
+        </View>
+        <View>
+          <Text className="text-xs text-gray mb-1">Maximum: {ageMax}</Text>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={18}
+            maximumValue={70}
+            step={1}
+            value={ageMax}
+            onValueChange={(value) => setAgeMax(Math.max(value, ageMin + 1))}
+            minimumTrackTintColor="#B06D1E"
+            maximumTrackTintColor="#FFF0DC"
+            thumbTintColor="#B06D1E"
+          />
+        </View>
       </View>
+
+      {/* Height Range Slider */}
       <View className="mb-6 pb-6 border-b border-b-border">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-base font-medium mb-3 text-dark">Height</Text>
-          <Text className="text-xs font-normal mb-3 text-gray">
-            4.0-10.0 ft
+        <View className="flex-row items-center justify-between mb-2">
+          <Text className="text-base font-medium text-dark">Height</Text>
+          <Text className="text-sm font-medium text-primary">
+            {formatHeight(heightMin)}-{formatHeight(heightMax)} ft
           </Text>
-          {/* <Text className="text-xs font-normal mb-3 text-gray">
-            {filterData?.min_height || heightMin}-
-            {filterData?.max_height || heightMax}
-          </Text> */}
         </View>
-        <RangeSlider
-          sliderWidth={300}
-          min={4}
-          max={10}
-          step={0.1}
-          label="ft"
-          onValueChange={(range) => {
-            setHeightMin(range.min);
-            setHeightMax(range.max);
-          }}
-        />
+        <View className="mb-2">
+          <Text className="text-xs text-gray mb-1">Minimum: {formatHeight(heightMin)} ft</Text>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={4}
+            maximumValue={10}
+            step={0.1}
+            value={heightMin}
+            onValueChange={(value) => setHeightMin(Math.min(value, heightMax - 0.1))}
+            minimumTrackTintColor="#B06D1E"
+            maximumTrackTintColor="#FFF0DC"
+            thumbTintColor="#B06D1E"
+          />
+        </View>
+        <View>
+          <Text className="text-xs text-gray mb-1">Maximum: {formatHeight(heightMax)} ft</Text>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={4}
+            maximumValue={10}
+            step={0.1}
+            value={heightMax}
+            onValueChange={(value) => setHeightMax(Math.max(value, heightMin + 0.1))}
+            minimumTrackTintColor="#B06D1E"
+            maximumTrackTintColor="#FFF0DC"
+            thumbTintColor="#B06D1E"
+          />
+        </View>
       </View>
 
       <RNPickerSelect
-        value={filterData?.BodyType || bodyType}
-        onValueChange={(value) => setBodyType(value)}
+        value={bodyType}
+        onValueChange={(value) => setBodyType(value || "")}
         placeholder={{ label: "Body Type", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -391,8 +476,8 @@ export default function FilterOptions({
         items={BODY_TYPE_OPTIONS}
       />
       <RNPickerSelect
-        value={filterData?.marital_status || maritalStatus}
-        onValueChange={(value) => setMaritalStatus(value)}
+        value={maritalStatus}
+        onValueChange={(value) => setMaritalStatus(value || "")}
         placeholder={{ label: "Marital status", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -407,8 +492,8 @@ export default function FilterOptions({
         items={MARITAL_STATUS_OPTIONS}
       />
       <RNPickerSelect
-        value={filterData?.Ethnicity || ethnicity}
-        onValueChange={(value) => setEthnicity(value)}
+        value={ethnicity}
+        onValueChange={(value) => setEthnicity(value || "")}
         placeholder={{ label: "Ethnicity", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -423,8 +508,8 @@ export default function FilterOptions({
         items={ETHNICITY_OPTIONS}
       />
       <RNPickerSelect
-        value={filterData?.Religion || religion}
-        onValueChange={(value) => setReligion(value)}
+        value={religion}
+        onValueChange={(value) => setReligion(value || "")}
         placeholder={{ label: "Religion", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -439,8 +524,8 @@ export default function FilterOptions({
         items={RELIGION_OPTIONS}
       />
       <RNPickerSelect
-        value={filterData?.Marijuana || marijuana}
-        onValueChange={(value) => setMarijuana(value)}
+        value={marijuana}
+        onValueChange={(value) => setMarijuana(value || "")}
         placeholder={{ label: "Marijuana", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -455,8 +540,8 @@ export default function FilterOptions({
         items={MARIJUANA_OPTIONS}
       />
       <RNPickerSelect
-        value={filterData?.Drinks || drinking}
-        onValueChange={(value) => setDrinking(value)}
+        value={drinking}
+        onValueChange={(value) => setDrinking(value || "")}
         placeholder={{ label: "Drinking", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -471,8 +556,8 @@ export default function FilterOptions({
         items={DRINKING_OPTIONS}
       />
       <RNPickerSelect
-        value={filterData?.HaveChild || hasKids}
-        onValueChange={(value) => setHasKids(value)}
+        value={hasKids}
+        onValueChange={(value) => setHasKids(value || "")}
         placeholder={{ label: "Has Kids", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -487,8 +572,8 @@ export default function FilterOptions({
         items={HAS_KIDS_OPTIONS}
       />
       <RNPickerSelect
-        value={filterData?.WantChild || wantKids}
-        onValueChange={(value) => setWantKids(value)}
+        value={wantKids}
+        onValueChange={(value) => setWantKids(value || "")}
         placeholder={{ label: "Want Kids", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -503,8 +588,8 @@ export default function FilterOptions({
         items={WANTS_KIDS_OPTIONS}
       />
       <RNPickerSelect
-        value={filterData?.Education || education}
-        onValueChange={(value) => setEducation(value)}
+        value={education}
+        onValueChange={(value) => setEducation(value || "")}
         placeholder={{ label: "Education", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -519,8 +604,8 @@ export default function FilterOptions({
         items={EDUCATION_OPTIONS}
       />
       <RNPickerSelect
-        value={filterData?.Smoke || smoke}
-        onValueChange={(value) => setSmoke(value)}
+        value={smoke}
+        onValueChange={(value) => setSmoke(value || "")}
         placeholder={{ label: "Smoking", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -535,8 +620,8 @@ export default function FilterOptions({
         items={SMOKING_OPTIONS}
       />
       <RNPickerSelect
-        value={filterData?.PoliticalView || politicalView}
-        onValueChange={(value) => setPoliticalView(value)}
+        value={politicalView}
+        onValueChange={(value) => setPoliticalView(value || "")}
         placeholder={{ label: "Political View", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -550,25 +635,9 @@ export default function FilterOptions({
         )}
         items={POLITICAL_OPTIONS}
       />
-      {/* <RNPickerSelect
-        value={filterData?.exercise || exercise}
-        onValueChange={(value) => setExercise(value)}
-        placeholder={{ label: "Exercise", value: null, color: "#9EA0A4" }}
-        style={pickerSelectStyles}
-        useNativeAndroidPickerStyle={false}
-        key="exercise"
-        Icon={() => (
-          <Image
-            source={icons.down}
-            className="size-4 mr-4"
-            resizeMode="contain"
-          />
-        )}
-        items={exerciseOptions}
-      /> */}
       <RNPickerSelect
-        value={filterData?.looking_for || lookingFor}
-        onValueChange={(value) => setLookingFor(value)}
+        value={lookingFor}
+        onValueChange={(value) => setLookingFor(value || "")}
         placeholder={{ label: "Looking For", value: null, color: "#9EA0A4" }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={false}
@@ -583,25 +652,42 @@ export default function FilterOptions({
         items={LOOKING_FOR_OPTIONS}
       />
 
+      {/* Distance Range Slider */}
       <View className="mb-6 pb-6 border-b border-b-border">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-base font-medium mb-3 text-dark">Distance</Text>
-          <Text className="text-xs font-normal mb-3 text-gray">
-            {filterData?.min_distance || minDistance}-
-            {filterData?.max_distance || maxDistance} miles
+        <View className="flex-row items-center justify-between mb-2">
+          <Text className="text-base font-medium text-dark">Distance</Text>
+          <Text className="text-sm font-medium text-primary">
+            {minDistance}-{maxDistance} miles
           </Text>
         </View>
-        <RangeSlider
-          sliderWidth={300}
-          min={0}
-          max={10000}
-          step={1}
-          label="mi"
-          onValueChange={(range) => {
-            setMinDistance(range.min);
-            setMaxDistance(range.max);
-          }}
-        />
+        <View className="mb-2">
+          <Text className="text-xs text-gray mb-1">Minimum: {minDistance} mi</Text>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={0}
+            maximumValue={10000}
+            step={10}
+            value={minDistance}
+            onValueChange={(value) => setMinDistance(Math.min(value, maxDistance - 10))}
+            minimumTrackTintColor="#B06D1E"
+            maximumTrackTintColor="#FFF0DC"
+            thumbTintColor="#B06D1E"
+          />
+        </View>
+        <View>
+          <Text className="text-xs text-gray mb-1">Maximum: {maxDistance} mi</Text>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={0}
+            maximumValue={10000}
+            step={10}
+            value={maxDistance}
+            onValueChange={(value) => setMaxDistance(Math.max(value, minDistance + 10))}
+            minimumTrackTintColor="#B06D1E"
+            maximumTrackTintColor="#FFF0DC"
+            thumbTintColor="#B06D1E"
+          />
+        </View>
       </View>
 
       <TouchableOpacity
@@ -649,15 +735,15 @@ export default function FilterOptions({
             );
           })}
         </View>
-
       </View>
 
-      <View className="w-full gap-3 flex-row justify-between items-center my-5 -z-10">
+      {/* Reset Button Only */}
+      <View className="w-full my-5">
         <TouchableOpacity
           onPress={handleClearFilter}
-          className="w-[48%] border border-border bg-light-100 rounded-[50px] px-7 py-[14px]"
+          className="w-full border border-border bg-light-100 rounded-[50px] px-7 py-[14px]"
         >
-          {loadingclear ? (
+          {loadingClear ? (
             <ActivityIndicator
               size="small"
               color="#9A9CA0"
@@ -665,19 +751,9 @@ export default function FilterOptions({
             />
           ) : (
             <Text className="text-gray text-base text-center font-medium">
-              Clear Filter
+              Reset to Defaults
             </Text>
           )}
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleApply}
-          className="w-[48%] border border-border bg-primary rounded-[50px] overflow-hidden"
-        >
-          <LinearBg className="px-7 py-[14px]" style={{ paddingVertical: 13 }}>
-            <Text className="text-white text-base text-center font-medium">
-              Apply Filter
-            </Text>
-          </LinearBg>
         </TouchableOpacity>
       </View>
     </View>

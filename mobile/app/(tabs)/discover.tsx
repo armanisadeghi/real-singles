@@ -4,7 +4,7 @@ import NotificationBell from "@/components/NotificationBell";
 import ProfileCard from "@/components/ui/ProfileCard";
 import { icons } from "@/constants/icons";
 import { ICON_SIZES, SPACING, TYPOGRAPHY, VERTICAL_SPACING } from "@/constants/designTokens";
-import { applyFilters, getHomeScreenData, saveFilter } from "@/lib/api";
+import { getHomeScreenData } from "@/lib/api";
 import { User } from "@/types";
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -32,9 +32,8 @@ export default function Discover() {
   
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [applyingFilters, setApplyingFilters] = useState(false);
   const [discoverProfiles, setDiscoverProfiles] = useState<User[]>([]);
-  const [filtersApplied, setFiltersApplied] = useState(false);
+  const [filtersChanged, setFiltersChanged] = useState(false);
   
   // Filter state
   // Note: gender preference is NOT a filter - it comes from user's profile "looking_for" field
@@ -117,75 +116,24 @@ export default function Discover() {
     setBottomSheetIndex(0);
   }, []);
 
-  const handleApplyFilters = useCallback(async (newFilters: FormData) => {
-    console.log("Applying filters:", newFilters);
-    setApplyingFilters(true);
-    
-    try {
-      // First save the filters to the server
-      const saveRes = await saveFilter(newFilters);
-      console.log("Save filter response:", saveRes);
-
-      if (saveRes?.success) {
-        // Now apply filters to get updated results
-        const params: any = {};
-        
-        // Convert FormData to plain object
-        if (newFilters && (newFilters as any)._parts) {
-          (newFilters as any)._parts.forEach(([key, value]: [string, any]) => {
-            params[key] = value;
-          });
-        } else {
-          Object.assign(params, newFilters);
-        }
-
-        const filterRes = await applyFilters(params);
-        console.log("Apply filter response:", filterRes);
-
-        if (filterRes?.success) {
-          setDiscoverProfiles(filterRes?.data || []);
-          setFiltersApplied(true);
-          bottomSheetRef.current?.close();
-          
-          Toast.show({
-            type: "success",
-            text1: "Filters applied",
-            text2: `Found ${filterRes?.data?.length || 0} matches`,
-            position: "bottom",
-            visibilityTime: 2000,
-            autoHide: true,
-          });
-        } else {
-          Toast.show({
-            type: "error",
-            text1: "Failed to apply filters",
-            position: "bottom",
-            visibilityTime: 2000,
-            autoHide: true,
-          });
-        }
-      } else {
-        Toast.show({
-          type: "error",
-          text1: saveRes?.msg || "Failed to save filters",
-          position: "bottom",
-          visibilityTime: 2000,
-          autoHide: true,
-        });
-      }
-    } catch (error) {
-      console.error("Error applying filters:", error);
-      Toast.show({
-        type: "error",
-        text1: "Failed to apply filters",
-        position: "bottom",
-        visibilityTime: 2000,
-        autoHide: true,
-      });
-    } finally {
-      setApplyingFilters(false);
-    }
+  // Called when filters are changed in FilterOptions
+  const handleFiltersChanged = useCallback(() => {
+    console.log("Filters changed, will refresh on close");
+    setFiltersChanged(true);
   }, []);
+
+  // Handle bottom sheet close - refresh profiles if filters changed
+  const handleBottomSheetChange = useCallback((index: number) => {
+    if (index === -1) {
+      // Bottom sheet closed
+      setBottomSheetIndex(-1);
+      if (filtersChanged) {
+        console.log("Refreshing profiles after filter change");
+        fetchDiscoverProfiles();
+        setFiltersChanged(false);
+      }
+    }
+  }, [filtersChanged]);
 
   const renderBackdrop = useCallback(
     (props: any) => (
@@ -274,32 +222,6 @@ export default function Discover() {
           </View>
         </View>
 
-        {/* Filter Applied Badge */}
-        {filtersApplied && (
-          <View 
-            className="flex-row items-center justify-center bg-primary/10"
-            style={{ 
-              paddingVertical: SPACING.xs,
-              paddingHorizontal: SPACING.screenPadding,
-            }}
-          >
-            <Text className="text-primary font-medium" style={TYPOGRAPHY.caption1}>
-              Filters active
-            </Text>
-            <TouchableOpacity
-              onPress={() => {
-                setFiltersApplied(false);
-                fetchDiscoverProfiles();
-              }}
-              style={{ marginLeft: SPACING.sm }}
-            >
-              <Text className="text-primary font-semibold underline" style={TYPOGRAPHY.caption1}>
-                Clear
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
         {/* Content */}
         {loading && !refreshing ? (
           <View className="flex-1 items-center justify-center">
@@ -382,7 +304,7 @@ export default function Discover() {
         index={bottomSheetIndex}
         snapPoints={snapPoints}
         enablePanDownToClose={true}
-        onClose={() => setBottomSheetIndex(-1)}
+        onChange={handleBottomSheetChange}
         backdropComponent={renderBackdrop}
         handleIndicatorStyle={{ backgroundColor: '#CBD5E1' }}
       >
@@ -392,20 +314,9 @@ export default function Discover() {
             paddingBottom: 120,
           }}
         >
-          {applyingFilters && (
-            <View 
-              className="absolute inset-0 bg-white/80 z-50 items-center justify-center"
-              style={{ height: '100%' }}
-            >
-              <ActivityIndicator size="large" color="#B06D1E" />
-              <Text className="text-primary mt-2" style={TYPOGRAPHY.body}>
-                Applying filters...
-              </Text>
-            </View>
-          )}
           <FilterOptions
             initialFilters={filters}
-            onApplyFilters={handleApplyFilters}
+            onFiltersChanged={handleFiltersChanged}
           />
         </BottomSheetScrollView>
       </BottomSheet>

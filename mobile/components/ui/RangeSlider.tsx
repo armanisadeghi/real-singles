@@ -14,12 +14,22 @@ interface RangeSliderProps {
   max: number;
   step: number;
   label: string;
+  initialMin?: number;
+  initialMax?: number;
   onValueChange: (range: { min: number; max: number }) => void;
 }
 
-const RangeSlider = ({sliderWidth, min, max, step, label, onValueChange}: RangeSliderProps) => {
-  const position = useSharedValue(0);
-  const position2 = useSharedValue(sliderWidth);
+const RangeSlider = ({sliderWidth, min, max, step, label, initialMin, initialMax, onValueChange}: RangeSliderProps) => {
+  // Calculate initial positions based on initial values
+  const getPositionFromValue = (value: number) => {
+    return ((value - min) / (max - min)) * sliderWidth;
+  };
+  
+  const initialPos1 = initialMin !== undefined ? getPositionFromValue(initialMin) : 0;
+  const initialPos2 = initialMax !== undefined ? getPositionFromValue(initialMax) : sliderWidth;
+  
+  const position = useSharedValue(initialPos1);
+  const position2 = useSharedValue(initialPos2);
   const opacity = useSharedValue(0);
   const opacity2 = useSharedValue(0);
   const zIndex = useSharedValue(0);
@@ -27,8 +37,19 @@ const RangeSlider = ({sliderWidth, min, max, step, label, onValueChange}: RangeS
   const context = useSharedValue(0);
   const context2 = useSharedValue(0);
 
-  // Using new Gesture API
+  // Helper to calculate current values from position
+  const getValuesFromPositions = (pos1: number, pos2: number) => {
+    'worklet';
+    return {
+      min: min + Math.floor(pos1 / (sliderWidth / ((max - min) / step))) * step,
+      max: min + Math.floor(pos2 / (sliderWidth / ((max - min) / step))) * step,
+    };
+  };
+
+  // Using new Gesture API with proper configuration for use inside BottomSheet
   const pan = Gesture.Pan()
+    .activeOffsetX([-10, 10]) // Only activate after 10px horizontal movement
+    .failOffsetY([-5, 5]) // Fail if vertical movement detected first
     .onBegin(() => {
       context.value = position.value;
     })
@@ -43,22 +64,19 @@ const RangeSlider = ({sliderWidth, min, max, step, label, onValueChange}: RangeS
       } else {
         position.value = context.value + e.translationX;
       }
+      // Update values in real-time during drag
+      const values = getValuesFromPositions(position.value, position2.value);
+      runOnJS(onValueChange)(values);
     })
     .onEnd(() => {
       opacity.value = 0;
-      runOnJS(onValueChange)({
-        min:
-          min +
-          Math.floor(position.value / (sliderWidth / ((max - min) / step))) *
-            step,
-        max:
-          min +
-          Math.floor(position2.value / (sliderWidth / ((max - min) / step))) *
-            step,
-      });
+      const values = getValuesFromPositions(position.value, position2.value);
+      runOnJS(onValueChange)(values);
     });
 
   const pan2 = Gesture.Pan()
+    .activeOffsetX([-10, 10]) // Only activate after 10px horizontal movement
+    .failOffsetY([-5, 5]) // Fail if vertical movement detected first
     .onBegin(() => {
       context2.value = position2.value;
     })
@@ -73,19 +91,14 @@ const RangeSlider = ({sliderWidth, min, max, step, label, onValueChange}: RangeS
       } else {
         position2.value = context2.value + e.translationX;
       }
+      // Update values in real-time during drag
+      const values = getValuesFromPositions(position.value, position2.value);
+      runOnJS(onValueChange)(values);
     })
     .onEnd(() => {
       opacity2.value = 0;
-      runOnJS(onValueChange)({
-        min:
-          min +
-          Math.floor(position.value / (sliderWidth / ((max - min) / step))) *
-            step,
-        max:
-          min +
-          Math.floor(position2.value / (sliderWidth / ((max - min) / step))) *
-            step,
-      });
+      const values = getValuesFromPositions(position.value, position2.value);
+      runOnJS(onValueChange)(values);
     });
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -140,37 +153,24 @@ const RangeSlider = ({sliderWidth, min, max, step, label, onValueChange}: RangeS
       <GestureDetector gesture={pan}>
         <Animated.View style={[animatedStyle, styles.thumb]}>
           <Animated.View style={[opacityStyle, styles.label]}>
-            {/* <AnimatedTextInput
+            <AnimatedTextInput
               style={styles.labelText}
-            //   animatedProps={minLabelText}
+              animatedProps={minLabelText}
               editable={false}
-            //   defaultValue={`$${
-            //     min +
-            //     Math.floor(
-            //       position.value / (sliderWidth / ((max - min) / step)),
-            //     ) *
-            //       step
-            //   }`}
               textAlign="center"
-            /> */}
+            />
           </Animated.View>
         </Animated.View>
       </GestureDetector>
       <GestureDetector gesture={pan2}>
         <Animated.View style={[animatedStyle2, styles.thumb]}>
           <Animated.View style={[opacityStyle2, styles.label]}>
-            {/* <AnimatedTextInput
+            <AnimatedTextInput
               style={styles.labelText}
-            //   animatedProps={maxLabelText}
+              animatedProps={maxLabelText}
               editable={false}
-            //   defaultValue={`${
-            //     min +
-            //     Math.floor(
-            //       position2.value / (sliderWidth / ((max - min) / step)),
-            //     ) *
-            //       step
-            //   }${label}`}
-            /> */}
+              textAlign="center"
+            />
           </Animated.View>
         </Animated.View>
       </GestureDetector>
