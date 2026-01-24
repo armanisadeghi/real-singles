@@ -2329,7 +2329,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-worklets-core (1.6.2):
+  - react-native-worklets-core (2.0.0-beta.4):
     - boost
     - DoubleConversion
     - fast_float
@@ -3784,7 +3784,7 @@ SPEC CHECKSUMS:
   react-native-slider: 6201419b3e3f7c6b7cf2068e0c01274fa86a1da5
   react-native-video: 15a8286469ec8098852debb32ce6a32906695e1d
   react-native-webview: d73728424a0e24989d71ffdc6fcf15d5f74ff4a2
-  react-native-worklets-core: 2b8f8cd5c1fe549ae658a757e3d7b84eab21a6fb
+  react-native-worklets-core: be4907ae78a463bf951c4dd06d21bad057457bdf
   React-NativeModulesApple: cbceb3c4cb726838c461b13802a76cefa6f3476f
   React-oscompat: eb0626e8ba1a2c61673c991bf9dc21834898475d
   React-perflogger: 509e1f9a3ee28df71b0a66de806ac515ce951246
@@ -3832,6 +3832,6 @@ SPEC CHECKSUMS:
   Yoga: cc4a6600d61e4e9276e860d4d68eebb834a050ba
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
-PODFILE CHECKSUM: ea8145461969117335893612eca1d7ff6f4e3371
+PODFILE CHECKSUM: 88c58f6ce9c0a448ef9fcb21e49eb55ee2d567f5
 
 COCOAPODS: 1.16.2
