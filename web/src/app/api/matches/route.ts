@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
+// Helper to convert profile image URL to a proper URL
+async function getProfileImageUrl(
+  supabase: Awaited<ReturnType<typeof createApiClient>>,
+  imageUrl: string | null | undefined
+): Promise<string> {
+  if (!imageUrl) return "";
+  if (imageUrl.startsWith("http")) return imageUrl;
+  
+  const bucket = imageUrl.includes("/avatar") ? "avatars" : "gallery";
+  const { data } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(imageUrl, 3600);
+  
+  return data?.signedUrl || "";
+}
+
 // Validation schema for match action
 const matchActionSchema = z.object({
   target_user_id: z.string().uuid("Invalid user ID"),
@@ -373,45 +389,58 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Combine data
-    const matchesWithProfiles = matchedUserIds.map((matchedUserId) => {
-      const profile = profiles?.find((p) => p.user_id === matchedUserId);
-      const userData = users?.find((u) => u.id === matchedUserId);
-      const userGallery = galleries?.filter((g) => g.user_id === matchedUserId) || [];
-      const matchRecord = mutualMatches.find((m) => m.user_id === matchedUserId);
-      const conversationId = conversationMap[matchedUserId];
+    // Combine data (with async image URL conversion)
+    const matchesWithProfiles = await Promise.all(
+      matchedUserIds.map(async (matchedUserId) => {
+        const profile = profiles?.find((p) => p.user_id === matchedUserId);
+        const userData = users?.find((u) => u.id === matchedUserId);
+        const userGallery = galleries?.filter((g) => g.user_id === matchedUserId) || [];
+        const matchRecord = mutualMatches.find((m) => m.user_id === matchedUserId);
+        const conversationId = conversationMap[matchedUserId];
 
-      // Calculate age from date of birth
-      let age: number | null = null;
-      if (profile?.date_of_birth) {
-        const dob = new Date(profile.date_of_birth);
-        const today = new Date();
-        age = today.getFullYear() - dob.getFullYear();
-        const monthDiff = today.getMonth() - dob.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-          age--;
+        // Calculate age from date of birth
+        let age: number | null = null;
+        if (profile?.date_of_birth) {
+          const dob = new Date(profile.date_of_birth);
+          const today = new Date();
+          age = today.getFullYear() - dob.getFullYear();
+          const monthDiff = today.getMonth() - dob.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+          }
         }
-      }
 
-      return {
-        user_id: matchedUserId,
-        display_name: userData?.display_name,
-        first_name: profile?.first_name,
-        last_name: profile?.last_name,
-        age,
-        gender: profile?.gender,
-        city: profile?.city,
-        state: profile?.state,
-        occupation: profile?.occupation,
-        bio: profile?.bio,
-        is_verified: profile?.is_verified || false,
-        profile_image_url: profile?.profile_image_url,
-        gallery: userGallery.slice(0, 3), // First 3 photos
-        last_active_at: userData?.last_active_at,
-        matched_at: matchRecord?.created_at,
-        conversation_id: conversationId || null,
-      };
-    });
+        // Convert profile image URL
+        const profileImageUrl = await getProfileImageUrl(supabase, profile?.profile_image_url);
+        
+        // Convert gallery URLs
+        const galleryWithUrls = await Promise.all(
+          userGallery.slice(0, 3).map(async (g) => ({
+            ...g,
+            media_url: await getProfileImageUrl(supabase, g.media_url),
+          }))
+        );
+
+        return {
+          user_id: matchedUserId,
+          display_name: userData?.display_name,
+          first_name: profile?.first_name,
+          last_name: profile?.last_name,
+          age,
+          gender: profile?.gender,
+          city: profile?.city,
+          state: profile?.state,
+          occupation: profile?.occupation,
+          bio: profile?.bio,
+          is_verified: profile?.is_verified || false,
+          profile_image_url: profileImageUrl,
+          gallery: galleryWithUrls,
+          last_active_at: userData?.last_active_at,
+          matched_at: matchRecord?.created_at,
+          conversation_id: conversationId || null,
+        };
+      })
+    );
 
     // Get total count for pagination
     const { count } = await supabase

@@ -137,6 +137,20 @@ export async function GET(
     })
   );
 
+  // Convert profile image URL to signed URL
+  let profileImageUrl = "";
+  if (profile?.profile_image_url) {
+    if (profile.profile_image_url.startsWith("http")) {
+      profileImageUrl = profile.profile_image_url;
+    } else {
+      const bucket = profile.profile_image_url.includes("/avatar") ? "avatars" : "gallery";
+      const { data: imgData } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(profile.profile_image_url, 3600);
+      profileImageUrl = imgData?.signedUrl || "";
+    }
+  }
+
   // Transform data to match mobile app format
   const responseData = {
     ID: targetUserId,
@@ -149,8 +163,8 @@ export async function GET(
     // Profile details
     DOB: profile?.date_of_birth || "",
     Gender: profile?.gender || "",
-    Image: profile?.profile_image_url || "",
-    livePicture: profile?.profile_image_url || "",
+    Image: profileImageUrl,
+    livePicture: profileImageUrl,
     About: profile?.bio || "",
     
     // Location (limited for privacy)

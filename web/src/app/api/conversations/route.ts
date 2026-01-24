@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
+// Helper to convert profile image URL to a proper URL
+async function getProfileImageUrl(
+  supabase: Awaited<ReturnType<typeof createApiClient>>,
+  imageUrl: string | null | undefined
+): Promise<string> {
+  if (!imageUrl) return "";
+  if (imageUrl.startsWith("http")) return imageUrl;
+  
+  const bucket = imageUrl.includes("/avatar") ? "avatars" : "gallery";
+  const { data } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(imageUrl, 3600);
+  
+  return data?.signedUrl || "";
+}
+
 // Validation schema for creating a conversation
 const createConversationSchema = z.object({
   type: z.enum(["direct", "group"]).default("direct"),
@@ -113,63 +129,71 @@ export async function GET(request: NextRequest) {
     .select("id, display_name, last_active_at")
     .in("id", Array.from(allParticipantIds));
 
-  // Format conversations
-  const formattedConversations = (conversations || []).map((conv) => {
-    const participants = conv.conversation_participants || [];
-    const otherParticipants = participants.filter(
-      (p) => p.user_id && p.user_id !== user.id
-    );
-    const myParticipation = participants.find(
-      (p) => p.user_id === user.id
-    );
+  // Format conversations (with async image URL conversion)
+  const formattedConversations = await Promise.all(
+    (conversations || []).map(async (conv) => {
+      const participants = conv.conversation_participants || [];
+      const otherParticipants = participants.filter(
+        (p) => p.user_id && p.user_id !== user.id
+      );
+      const myParticipation = participants.find(
+        (p) => p.user_id === user.id
+      );
 
-    // Get other user info for direct chats
-    const otherUserIds = otherParticipants.map((p) => p.user_id).filter((id): id is string => id !== null);
-    const otherProfiles = profiles?.filter((p) => p.user_id && otherUserIds.includes(p.user_id)) || [];
-    const otherUsers = users?.filter((u) => otherUserIds.includes(u.id)) || [];
+      // Get other user info for direct chats
+      const otherUserIds = otherParticipants.map((p) => p.user_id).filter((id): id is string => id !== null);
+      const otherProfiles = profiles?.filter((p) => p.user_id && otherUserIds.includes(p.user_id)) || [];
+      const otherUsers = users?.filter((u) => otherUserIds.includes(u.id)) || [];
 
-    // Determine display name and image
-    let displayName = conv.group_name;
-    let displayImage = conv.group_image_url;
+      // Determine display name and image
+      let displayName = conv.group_name;
+      let displayImage = conv.group_image_url ? await getProfileImageUrl(supabase, conv.group_image_url) : "";
 
-    if (conv.type === "direct" && otherProfiles.length > 0) {
-      const otherProfile = otherProfiles[0];
-      const otherUser = otherUsers.find((u) => u.id === otherProfile?.user_id);
-      displayName = otherUser?.display_name || 
-        `${otherProfile?.first_name || ""} ${otherProfile?.last_name || ""}`.trim() || 
-        "User";
-      displayImage = otherProfile?.profile_image_url;
-    }
+      if (conv.type === "direct" && otherProfiles.length > 0) {
+        const otherProfile = otherProfiles[0];
+        const otherUser = otherUsers.find((u) => u.id === otherProfile?.user_id);
+        displayName = otherUser?.display_name || 
+          `${otherProfile?.first_name || ""} ${otherProfile?.last_name || ""}`.trim() || 
+          "User";
+        displayImage = await getProfileImageUrl(supabase, otherProfile?.profile_image_url);
+      }
 
-    return {
-      ConversationID: conv.id,
-      Type: conv.type,
-      DisplayName: displayName,
-      DisplayImage: displayImage || "",
-      GroupName: conv.group_name,
-      GroupImage: conv.group_image_url,
-      AgoraGroupID: conv.agora_group_id,
-      CreatedAt: conv.created_at,
-      UpdatedAt: conv.updated_at,
-      IsMuted: myParticipation?.is_muted || false,
-      LastReadAt: myParticipation?.last_read_at,
-      Participants: otherParticipants
-        .filter((p) => p.user_id !== null)
-        .map((p) => {
-          const profile = profiles?.find((pr) => pr.user_id === p.user_id);
-          const userData = users?.find((u) => u.id === p.user_id);
-          return {
-            UserID: p.user_id!,
-            DisplayName: userData?.display_name || profile?.first_name || "User",
-            FirstName: profile?.first_name || "",
-            LastName: profile?.last_name || "",
-            ProfileImage: profile?.profile_image_url || "",
-            LastActiveAt: userData?.last_active_at,
-            Role: p.role || "member",
-          };
-        }),
-    };
-  });
+      // Convert participant profile images
+      const formattedParticipants = await Promise.all(
+        otherParticipants
+          .filter((p) => p.user_id !== null)
+          .map(async (p) => {
+            const profile = profiles?.find((pr) => pr.user_id === p.user_id);
+            const userData = users?.find((u) => u.id === p.user_id);
+            const profileImage = await getProfileImageUrl(supabase, profile?.profile_image_url);
+            return {
+              UserID: p.user_id!,
+              DisplayName: userData?.display_name || profile?.first_name || "User",
+              FirstName: profile?.first_name || "",
+              LastName: profile?.last_name || "",
+              ProfileImage: profileImage,
+              LastActiveAt: userData?.last_active_at,
+              Role: p.role || "member",
+            };
+          })
+      );
+
+      return {
+        ConversationID: conv.id,
+        Type: conv.type,
+        DisplayName: displayName,
+        DisplayImage: displayImage,
+        GroupName: conv.group_name,
+        GroupImage: conv.group_image_url ? await getProfileImageUrl(supabase, conv.group_image_url) : "",
+        AgoraGroupID: conv.agora_group_id,
+        CreatedAt: conv.created_at,
+        UpdatedAt: conv.updated_at,
+        IsMuted: myParticipation?.is_muted || false,
+        LastReadAt: myParticipation?.last_read_at,
+        Participants: formattedParticipants,
+      };
+    })
+  );
 
   return NextResponse.json({
     success: true,

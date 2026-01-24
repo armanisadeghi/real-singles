@@ -1,6 +1,22 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 
+// Helper to convert profile image URL to a proper URL
+async function getProfileImageUrl(
+  supabase: Awaited<ReturnType<typeof createApiClient>>,
+  imageUrl: string | null | undefined
+): Promise<string> {
+  if (!imageUrl) return "";
+  if (imageUrl.startsWith("http")) return imageUrl;
+  
+  const bucket = imageUrl.includes("/avatar") ? "avatars" : "gallery";
+  const { data } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(imageUrl, 3600);
+  
+  return data?.signedUrl || "";
+}
+
 /**
  * GET /api/discover/nearby
  * POST /api/discover/nearby
@@ -142,8 +158,8 @@ async function handleNearbyRequest(request: Request) {
   }
 
   // Calculate distances and filter
-  const profilesWithDistance = (profiles || [])
-    .map((profile: any) => {
+  const profilesWithDistance = await Promise.all(
+    (profiles || []).map(async (profile: any) => {
       const R = 6371; // Earth's radius in km
       const dLat = ((profile.latitude - userLat!) * Math.PI) / 180;
       const dLon = ((profile.longitude - userLon!) * Math.PI) / 180;
@@ -155,6 +171,8 @@ async function handleNearbyRequest(request: Request) {
           Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       const distance = R * c;
+      
+      const imageUrl = await getProfileImageUrl(supabase, profile.profile_image_url);
 
       return {
         ID: profile.user_id,
@@ -165,8 +183,8 @@ async function handleNearbyRequest(request: Request) {
         Email: profile.users?.email || "",
         DOB: profile.date_of_birth || "",
         Gender: profile.gender || "",
-        Image: profile.profile_image_url || "",
-        livePicture: profile.profile_image_url || "",
+        Image: imageUrl,
+        livePicture: imageUrl,
         About: profile.bio || "",
         City: profile.city || "",
         State: profile.state || "",
@@ -183,12 +201,15 @@ async function handleNearbyRequest(request: Request) {
         distance_in_km: Math.round(distance * 10) / 10,
       };
     })
+  );
+  
+  const filteredProfiles = profilesWithDistance
     .filter((p: any) => p.distance_in_km <= maxDistance)
     .sort((a: any, b: any) => a.distance_in_km - b.distance_in_km);
 
   return NextResponse.json({
     success: true,
-    data: profilesWithDistance,
+    data: filteredProfiles,
     msg: "Nearby profiles fetched successfully",
   });
 }

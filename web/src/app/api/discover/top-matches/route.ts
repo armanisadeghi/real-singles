@@ -1,6 +1,23 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 
+// Helper to convert profile image URL to a proper URL
+async function getProfileImageUrl(
+  supabase: Awaited<ReturnType<typeof createApiClient>>,
+  imageUrl: string | null | undefined
+): Promise<string> {
+  if (!imageUrl) return "";
+  if (imageUrl.startsWith("http")) return imageUrl;
+  
+  // It's a storage path - generate a signed URL
+  const bucket = imageUrl.includes("/avatar") ? "avatars" : "gallery";
+  const { data } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(imageUrl, 3600);
+  
+  return data?.signedUrl || "";
+}
+
 /**
  * GET /api/discover/top-matches
  * Get all top matches with optional filter parameters
@@ -185,55 +202,58 @@ export async function GET(request: Request) {
   }
 
   // Format profiles and calculate distances
-  const formattedProfiles = (profiles || []).map((profile: any) => {
-    const formatted: any = {
-      ID: profile.user_id,
-      id: profile.user_id,
-      DisplayName: profile.users?.display_name || profile.first_name || "",
-      FirstName: profile.first_name || "",
-      LastName: profile.last_name || "",
-      Email: profile.users?.email || "",
-      DOB: profile.date_of_birth || "",
-      Gender: profile.gender || "",
-      Image: profile.profile_image_url || "",
-      livePicture: profile.profile_image_url || "",
-      About: profile.bio || "",
-      City: profile.city || "",
-      State: profile.state || "",
-      Height: profile.height_inches?.toString() || "",
-      BodyType: profile.body_type || "",
-      Ethnicity: profile.ethnicity || [],
-      Religion: profile.religion || "",
-      HSign: profile.zodiac_sign || "",
-      Interest: profile.interests?.join(", ") || "",
-      is_verified: profile.is_verified || false,
-      IsFavorite: favoriteIds.has(profile.user_id) ? 1 : 0,
-      RATINGS: 0,
-      TotalRating: 0,
-    };
+  const formattedProfiles = await Promise.all(
+    (profiles || []).map(async (profile: any) => {
+      const imageUrl = await getProfileImageUrl(supabase, profile.profile_image_url);
+      const formatted: any = {
+        ID: profile.user_id,
+        id: profile.user_id,
+        DisplayName: profile.users?.display_name || profile.first_name || "",
+        FirstName: profile.first_name || "",
+        LastName: profile.last_name || "",
+        Email: profile.users?.email || "",
+        DOB: profile.date_of_birth || "",
+        Gender: profile.gender || "",
+        Image: imageUrl,
+        livePicture: imageUrl,
+        About: profile.bio || "",
+        City: profile.city || "",
+        State: profile.state || "",
+        Height: profile.height_inches?.toString() || "",
+        BodyType: profile.body_type || "",
+        Ethnicity: profile.ethnicity || [],
+        Religion: profile.religion || "",
+        HSign: profile.zodiac_sign || "",
+        Interest: profile.interests?.join(", ") || "",
+        is_verified: profile.is_verified || false,
+        IsFavorite: favoriteIds.has(profile.user_id) ? 1 : 0,
+        RATINGS: 0,
+        TotalRating: 0,
+      };
 
-    // Calculate distance if both users have location
-    if (
-      currentUserProfile?.latitude &&
-      currentUserProfile?.longitude &&
-      profile.latitude &&
-      profile.longitude
-    ) {
-      const R = 6371; // Earth's radius in km
-      const dLat = ((profile.latitude - currentUserProfile.latitude) * Math.PI) / 180;
-      const dLon = ((profile.longitude - currentUserProfile.longitude) * Math.PI) / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos((currentUserProfile.latitude * Math.PI) / 180) *
-          Math.cos((profile.latitude * Math.PI) / 180) *
-          Math.sin(dLon / 2) *
-          Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      formatted.distance_in_km = Math.round(R * c * 10) / 10;
-    }
+      // Calculate distance if both users have location
+      if (
+        currentUserProfile?.latitude &&
+        currentUserProfile?.longitude &&
+        profile.latitude &&
+        profile.longitude
+      ) {
+        const R = 6371; // Earth's radius in km
+        const dLat = ((profile.latitude - currentUserProfile.latitude) * Math.PI) / 180;
+        const dLon = ((profile.longitude - currentUserProfile.longitude) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((currentUserProfile.latitude * Math.PI) / 180) *
+            Math.cos((profile.latitude * Math.PI) / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        formatted.distance_in_km = Math.round(R * c * 10) / 10;
+      }
 
-    return formatted;
-  });
+      return formatted;
+    })
+  );
 
   // Apply distance filter if specified
   let filteredProfiles = formattedProfiles;

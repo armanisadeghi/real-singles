@@ -1,6 +1,25 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 
+// Helper to convert profile image URL to a proper URL
+// Profile images can be: full URLs, storage paths, or null
+async function getProfileImageUrl(
+  supabase: Awaited<ReturnType<typeof createApiClient>>,
+  imageUrl: string | null | undefined
+): Promise<string> {
+  if (!imageUrl) return "";
+  if (imageUrl.startsWith("http")) return imageUrl;
+  
+  // It's a storage path - generate a signed URL
+  // Check if it's from gallery bucket or avatars bucket
+  const bucket = imageUrl.includes("/avatar") ? "avatars" : "gallery";
+  const { data } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(imageUrl, 3600); // 1 hour
+  
+  return data?.signedUrl || "";
+}
+
 /**
  * GET /api/discover
  * Home screen aggregated data - Top Matches, Nearby, Videos, Events, Virtual Dating
@@ -102,34 +121,37 @@ export async function GET() {
     .limit(10)
     .order("updated_at", { ascending: false });
 
-  // Format profiles for mobile app
-  const formatProfile = (profile: any): any => ({
-    ID: profile.user_id,
-    id: profile.user_id,
-    DisplayName: profile.users?.display_name || profile.first_name || "",
-    FirstName: profile.first_name || "",
-    LastName: profile.last_name || "",
-    Email: profile.users?.email || "",
-    DOB: profile.date_of_birth || "",
-    Gender: profile.gender || "",
-    Image: profile.profile_image_url || "",
-    livePicture: profile.profile_image_url || "",
-    About: profile.bio || "",
-    City: profile.city || "",
-    State: profile.state || "",
-    Height: profile.height_inches?.toString() || "",
-    BodyType: profile.body_type || "",
-    Ethnicity: profile.ethnicity || [],
-    Religion: profile.religion || "",
-    HSign: profile.zodiac_sign || "",
-    Interest: profile.interests?.join(", ") || "",
-    is_verified: profile.is_verified || false,
-    IsFavorite: favoriteIds.has(profile.user_id) ? 1 : 0,
-    RATINGS: 0, // TODO: Calculate from reviews
-    TotalRating: 0,
-  });
+  // Format profiles for mobile app (async to handle image URL conversion)
+  const formatProfile = async (profile: any): Promise<any> => {
+    const imageUrl = await getProfileImageUrl(supabase, profile.profile_image_url);
+    return {
+      ID: profile.user_id,
+      id: profile.user_id,
+      DisplayName: profile.users?.display_name || profile.first_name || "",
+      FirstName: profile.first_name || "",
+      LastName: profile.last_name || "",
+      Email: profile.users?.email || "",
+      DOB: profile.date_of_birth || "",
+      Gender: profile.gender || "",
+      Image: imageUrl,
+      livePicture: imageUrl,
+      About: profile.bio || "",
+      City: profile.city || "",
+      State: profile.state || "",
+      Height: profile.height_inches?.toString() || "",
+      BodyType: profile.body_type || "",
+      Ethnicity: profile.ethnicity || [],
+      Religion: profile.religion || "",
+      HSign: profile.zodiac_sign || "",
+      Interest: profile.interests?.join(", ") || "",
+      is_verified: profile.is_verified || false,
+      IsFavorite: favoriteIds.has(profile.user_id) ? 1 : 0,
+      RATINGS: 0, // TODO: Calculate from reviews
+      TotalRating: 0,
+    };
+  };
 
-  const TopMatch = (topMatchProfiles || []).map(formatProfile);
+  const TopMatch = await Promise.all((topMatchProfiles || []).map(formatProfile));
 
   // Get nearby profiles (if user has location)
   let NearBy: any[] = [];
@@ -152,25 +174,27 @@ export async function GET() {
 
     const { data: nearbyProfiles } = await nearbyQuery.limit(10);
 
-    NearBy = (nearbyProfiles || []).map((profile) => {
-      const formatted = formatProfile(profile);
-      // Simple distance calculation (for demo - real app would use PostGIS)
-      if (profile.latitude && profile.longitude && currentUserProfile.latitude && currentUserProfile.longitude) {
-        const R = 6371; // Earth's radius in km
-        const dLat = ((profile.latitude - currentUserProfile.latitude) * Math.PI) / 180;
-        const dLon = ((profile.longitude - currentUserProfile.longitude) * Math.PI) / 180;
-        const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos((currentUserProfile.latitude * Math.PI) / 180) *
-            Math.cos((profile.latitude * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c;
-        formatted.distance_in_km = Math.round(distance * 10) / 10;
-      }
-      return formatted;
-    });
+    NearBy = await Promise.all(
+      (nearbyProfiles || []).map(async (profile) => {
+        const formatted = await formatProfile(profile);
+        // Simple distance calculation (for demo - real app would use PostGIS)
+        if (profile.latitude && profile.longitude && currentUserProfile.latitude && currentUserProfile.longitude) {
+          const R = 6371; // Earth's radius in km
+          const dLat = ((profile.latitude - currentUserProfile.latitude) * Math.PI) / 180;
+          const dLon = ((profile.longitude - currentUserProfile.longitude) * Math.PI) / 180;
+          const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos((currentUserProfile.latitude * Math.PI) / 180) *
+              Math.cos((profile.latitude * Math.PI) / 180) *
+              Math.sin(dLon / 2) *
+              Math.sin(dLon / 2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          const distance = R * c;
+          formatted.distance_in_km = Math.round(distance * 10) / 10;
+        }
+        return formatted;
+      })
+    );
   }
 
   // Get featured videos (profiles with videos in gallery)

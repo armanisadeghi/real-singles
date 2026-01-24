@@ -1,6 +1,22 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 
+// Helper to convert profile image URL to a proper URL
+async function getProfileImageUrl(
+  supabase: Awaited<ReturnType<typeof createApiClient>>,
+  imageUrl: string | null | undefined
+): Promise<string> {
+  if (!imageUrl) return "";
+  if (imageUrl.startsWith("http")) return imageUrl;
+  
+  const bucket = imageUrl.includes("/avatar") ? "avatars" : "gallery";
+  const { data } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(imageUrl, 3600);
+  
+  return data?.signedUrl || "";
+}
+
 /**
  * GET /api/favorites
  * Get current user's favorites list
@@ -77,12 +93,15 @@ export async function GET() {
     profiles: profileMap.get(fav.favorite_user_id) || null,
   }));
 
-  // Format profiles for mobile app
+  // Format profiles for mobile app (with async image URL conversion)
   // Note: Include users with "active" or null status, exclude suspended/deleted
-  const formattedFavorites = favoritesWithProfiles
-    .filter((fav: any) => fav.profiles && fav.profiles.users?.status !== "suspended" && fav.profiles.users?.status !== "deleted")
-    .map((fav: any) => {
+  const validFavorites = favoritesWithProfiles
+    .filter((fav: any) => fav.profiles && fav.profiles.users?.status !== "suspended" && fav.profiles.users?.status !== "deleted");
+  
+  const formattedFavorites = await Promise.all(
+    validFavorites.map(async (fav: any) => {
       const profile = fav.profiles;
+      const imageUrl = await getProfileImageUrl(supabase, profile.profile_image_url);
       return {
         ID: profile.user_id,
         id: profile.user_id,
@@ -92,8 +111,8 @@ export async function GET() {
         Email: profile.users?.email || "",
         DOB: profile.date_of_birth || "",
         Gender: profile.gender || "",
-        Image: profile.profile_image_url || "",
-        livePicture: profile.profile_image_url || "",
+        Image: imageUrl,
+        livePicture: imageUrl,
         About: profile.bio || "",
         City: profile.city || "",
         State: profile.state || "",
@@ -109,7 +128,8 @@ export async function GET() {
         TotalRating: 0,
         favorited_at: fav.created_at,
       };
-    });
+    })
+  );
 
   return NextResponse.json({
     success: true,
