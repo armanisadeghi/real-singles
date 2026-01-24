@@ -27,6 +27,8 @@ async function getDiscoverProfiles() {
   // Get profiles excluding current user, blocked users, and already matched
   const excludeIds = [user.id, ...blockedIds, ...matchedIds];
 
+  // Note: Removed strict status="active" filter to include new users (null status)
+  // The join to users table ensures the user exists
   const { data: profiles } = await supabase
     .from("profiles")
     .select(`
@@ -46,7 +48,6 @@ async function getDiscoverProfiles() {
       user:user_id(display_name, status)
     `)
     .not("user_id", "in", `(${excludeIds.join(",")})`)
-    .eq("user.status", "active")
     .order("created_at", { ascending: false })
     .limit(40);
 

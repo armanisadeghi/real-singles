@@ -78,8 +78,9 @@ export async function GET() {
   }));
 
   // Format profiles for mobile app
+  // Note: Include users with "active" or null status, exclude suspended/deleted
   const formattedFavorites = favoritesWithProfiles
-    .filter((fav: any) => fav.profiles && fav.profiles.users?.status === "active")
+    .filter((fav: any) => fav.profiles && fav.profiles.users?.status !== "suspended" && fav.profiles.users?.status !== "deleted")
     .map((fav: any) => {
       const profile = fav.profiles;
       return {

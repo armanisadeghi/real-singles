@@ -110,13 +110,13 @@ async function handleNearbyRequest(request: Request) {
   const favoriteIds = new Set(favorites?.map((f) => f.favorite_user_id).filter((id): id is string => id !== null) || []);
 
   // Get profiles with location
+  // Note: Removed strict status="active" filter to include new users (null status)
   let query = supabase
     .from("profiles")
     .select(`
       *,
       users!inner(id, display_name, status, email)
     `)
-    .eq("users.status", "active")
     .not("latitude", "is", null)
     .not("longitude", "is", null);
 

@@ -7,7 +7,7 @@ import { ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { PhotoUpload, GalleryManager, type GalleryItem } from "@/components/profile";
 import { cn } from "@/lib/utils";
-import { getPublicUrl, STORAGE_BUCKETS } from "@/lib/supabase/storage";
+import { STORAGE_BUCKETS } from "@/lib/supabase/storage";
 
 export default function GalleryPage() {
   const router = useRouter();
@@ -58,24 +58,42 @@ export default function GalleryPage() {
         return;
       }
 
-      const galleryData: GalleryItem[] = (data || []).map(item => {
-        // Convert storage path to public URL if it's not already a full URL
-        const mediaUrl = item.media_url.startsWith("http")
-          ? item.media_url
-          : getPublicUrl(STORAGE_BUCKETS.GALLERY, item.media_url);
-        
-        console.log("[Gallery] Transformed item:", item.id, "url:", mediaUrl, "type:", item.media_type);
-        
-        return {
-          id: item.id,
-          media_url: mediaUrl,
-          media_type: item.media_type as "image" | "video",
-          is_primary: item.is_primary || false,
-          display_order: item.display_order || 0,
-          thumbnail_url: item.thumbnail_url || null,
-          created_at: item.created_at || new Date().toISOString(),
-        };
-      });
+      // Generate signed URLs for gallery items (gallery bucket may be private)
+      const galleryData: GalleryItem[] = await Promise.all(
+        (data || []).map(async (item) => {
+          let mediaUrl = item.media_url;
+          
+          // If it's not already a full URL, create a signed URL
+          if (!item.media_url.startsWith("http")) {
+            console.log("[Gallery] Creating signed URL for:", item.media_url);
+            
+            const { data: signedData, error: signedError } = await supabase.storage
+              .from(STORAGE_BUCKETS.GALLERY)
+              .createSignedUrl(item.media_url, 3600); // 1 hour expiry
+            
+            if (signedError) {
+              console.error("[Gallery] Signed URL error:", signedError);
+              // Fallback to public URL construction
+              const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+              mediaUrl = `${supabaseUrl}/storage/v1/object/public/gallery/${encodeURIComponent(item.media_url)}`;
+            } else {
+              mediaUrl = signedData.signedUrl;
+            }
+            
+            console.log("[Gallery] Generated URL:", mediaUrl);
+          }
+          
+          return {
+            id: item.id,
+            media_url: mediaUrl,
+            media_type: item.media_type as "image" | "video",
+            is_primary: item.is_primary || false,
+            display_order: item.display_order || 0,
+            thumbnail_url: item.thumbnail_url || null,
+            created_at: item.created_at || new Date().toISOString(),
+          };
+        })
+      );
 
       console.log("[Gallery] Setting gallery state with", galleryData.length, "items");
       setGallery(galleryData);

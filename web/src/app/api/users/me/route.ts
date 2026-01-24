@@ -49,6 +49,27 @@ export async function GET() {
     .eq("user_id", user.id)
     .order("display_order", { ascending: true });
 
+  // Generate signed URLs for gallery items
+  const galleryWithUrls = await Promise.all(
+    (gallery || []).map(async (item) => {
+      if (item.media_url.startsWith("http")) {
+        return item;
+      }
+      
+      const { data: signedData } = await supabase.storage
+        .from("gallery")
+        .createSignedUrl(item.media_url, 3600);
+      
+      return {
+        ...item,
+        media_url: signedData?.signedUrl || getGalleryPublicUrl(item.media_url),
+        thumbnail_url: item.thumbnail_url 
+          ? (await supabase.storage.from("gallery").createSignedUrl(item.thumbnail_url, 3600)).data?.signedUrl || null
+          : null,
+      };
+    })
+  );
+
   if (userError && userError.code !== "PGRST116") {
     return NextResponse.json(
       { success: false, msg: "Error fetching user data" },
@@ -181,12 +202,8 @@ export async function GET() {
     PointsBalance: userData?.points_balance || 0,
     ReferralCode: userData?.referral_code || "",
     
-    // Gallery - transform paths to full URLs
-    gallery: (gallery || []).map((item) => ({
-      ...item,
-      media_url: getGalleryPublicUrl(item.media_url),
-      thumbnail_url: item.thumbnail_url ? getGalleryPublicUrl(item.thumbnail_url) : null,
-    })),
+    // Gallery with signed URLs
+    gallery: galleryWithUrls,
     
     // Status
     status: userData?.status || "active",

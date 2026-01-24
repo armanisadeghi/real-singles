@@ -73,7 +73,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (targetUser.status !== "active") {
+    // Allow matching with users who are "active" or have null status (new users)
+    // Only reject suspended/deleted users
+    if (targetUser.status === "suspended" || targetUser.status === "deleted") {
       return NextResponse.json(
         { error: "User is not available" },
         { status: 400 }

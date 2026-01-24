@@ -59,13 +59,14 @@ export async function GET() {
   const favoriteIds = new Set(favorites?.map((f) => f.favorite_user_id).filter((id): id is string => id !== null) || []);
 
   // Build base query for profiles
+  // Note: Include users with "active" status OR null status (new users)
+  // This is more inclusive than requiring exactly "active"
   let profilesQuery = supabase
     .from("profiles")
     .select(`
       *,
       users!inner(id, display_name, status, email)
     `)
-    .eq("users.status", "active")
     .not("user_id", "in", `(${Array.from(blockedIds).join(",")})`);
 
   // Apply filters if they exist
@@ -136,7 +137,6 @@ export async function GET() {
         *,
         users!inner(id, display_name, status, email)
       `)
-      .eq("users.status", "active")
       .not("user_id", "in", `(${Array.from(blockedIds).join(",")})`)
       .not("latitude", "is", null)
       .not("longitude", "is", null)
@@ -185,19 +185,27 @@ export async function GET() {
 
   const baseImageUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + "/storage/v1/object/public/";
   
-  const Videos = (videoGallery || []).map((video: any) => {
-    // Convert storage path to full URL
-    const videoUrl = video.media_url.startsWith("http")
-      ? video.media_url
-      : `${baseImageUrl}gallery/${video.media_url}`;
-    return {
-      ID: video.id,
-      Name: video.profiles?.users?.display_name || video.profiles?.first_name || "User",
-      Link: videoUrl,
-      VideoURL: videoUrl,
-      CreatedDate: video.created_at,
-    };
-  });
+  // Generate signed URLs for videos
+  const Videos = await Promise.all(
+    (videoGallery || []).map(async (video: any) => {
+      let videoUrl = video.media_url;
+      
+      if (!video.media_url.startsWith("http")) {
+        const { data: signedData } = await supabase.storage
+          .from("gallery")
+          .createSignedUrl(video.media_url, 3600);
+        videoUrl = signedData?.signedUrl || `${baseImageUrl}gallery/${video.media_url}`;
+      }
+      
+      return {
+        ID: video.id,
+        Name: video.profiles?.users?.display_name || video.profiles?.first_name || "User",
+        Link: videoUrl,
+        VideoURL: videoUrl,
+        CreatedDate: video.created_at,
+      };
+    })
+  );
 
   // Get upcoming events
   const { data: events } = await supabase

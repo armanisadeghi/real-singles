@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
+import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { X, RotateCw, Check } from "lucide-react";
 
@@ -13,15 +13,41 @@ interface PhotoCropperProps {
 
 export function PhotoCropper({ imageUrl, onCropComplete, onCancel }: PhotoCropperProps) {
   const imgRef = useRef<HTMLImageElement>(null);
-  const [crop, setCrop] = useState<Crop>({
-    unit: "%",
-    width: 90,
-    height: 90,
-    x: 5,
-    y: 5,
-  });
+  const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const [processing, setProcessing] = useState(false);
+
+  // Initialize crop when image loads
+  const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    
+    // Create a centered square crop
+    const newCrop = centerCrop(
+      makeAspectCrop(
+        {
+          unit: "%",
+          width: 90,
+        },
+        1, // aspect ratio (square)
+        width,
+        height
+      ),
+      width,
+      height
+    );
+    
+    setCrop(newCrop);
+    
+    // Calculate the pixel crop for the initial state
+    const pixelCrop: PixelCrop = {
+      unit: "px",
+      x: (newCrop.x / 100) * width,
+      y: (newCrop.y / 100) * height,
+      width: (newCrop.width / 100) * width,
+      height: (newCrop.height / 100) * height,
+    };
+    setCompletedCrop(pixelCrop);
+  }, []);
 
   const handleCropComplete = useCallback(async () => {
     if (!completedCrop || !imgRef.current) return;
@@ -96,6 +122,7 @@ export function PhotoCropper({ imageUrl, onCropComplete, onCancel }: PhotoCroppe
               src={imageUrl}
               alt="Crop preview"
               className="max-w-full max-h-[60vh] object-contain"
+              onLoad={onImageLoad}
             />
           </ReactCrop>
         </div>

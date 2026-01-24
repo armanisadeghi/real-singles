@@ -42,16 +42,40 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const formattedGallery = (gallery || []).map((item) => ({
-    GalleryID: item.id,
-    MediaType: item.media_type,
-    MediaURL: getGalleryPublicUrl(item.media_url),
-    ThumbnailURL: item.thumbnail_url ? getGalleryPublicUrl(item.thumbnail_url) : null,
-    IsLivePhoto: item.is_live_photo,
-    IsPrimary: item.is_primary,
-    DisplayOrder: item.display_order,
-    CreatedAt: item.created_at,
-  }));
+  // Generate signed URLs for gallery items
+  const formattedGallery = await Promise.all(
+    (gallery || []).map(async (item) => {
+      let mediaUrl = item.media_url;
+      let thumbnailUrl = item.thumbnail_url;
+      
+      // Create signed URL for media
+      if (!item.media_url.startsWith("http")) {
+        const { data: signedData } = await supabase.storage
+          .from("gallery")
+          .createSignedUrl(item.media_url, 3600);
+        mediaUrl = signedData?.signedUrl || getGalleryPublicUrl(item.media_url);
+      }
+      
+      // Create signed URL for thumbnail if exists
+      if (item.thumbnail_url && !item.thumbnail_url.startsWith("http")) {
+        const { data: thumbData } = await supabase.storage
+          .from("gallery")
+          .createSignedUrl(item.thumbnail_url, 3600);
+        thumbnailUrl = thumbData?.signedUrl || null;
+      }
+      
+      return {
+        GalleryID: item.id,
+        MediaType: item.media_type,
+        MediaURL: mediaUrl,
+        ThumbnailURL: thumbnailUrl,
+        IsLivePhoto: item.is_live_photo,
+        IsPrimary: item.is_primary,
+        DisplayOrder: item.display_order,
+        CreatedAt: item.created_at,
+      };
+    })
+  );
 
   return NextResponse.json({
     success: true,

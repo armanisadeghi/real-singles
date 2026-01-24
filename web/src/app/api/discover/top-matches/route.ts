@@ -78,13 +78,13 @@ export async function GET(request: Request) {
   const favoriteIds = new Set(favorites?.map((f) => f.favorite_user_id).filter((id): id is string => id !== null) || []);
 
   // Build query with filters
+  // Note: Removed strict status="active" filter to include new users (null status)
   let query = supabase
     .from("profiles")
     .select(`
       *,
       users!inner(id, display_name, status, email)
-    `)
-    .eq("users.status", "active");
+    `);
 
   // Exclude blocked users (only if there are blocked users)
   if (blockedIds.size > 0) {

@@ -80,12 +80,19 @@ function SortableGalleryItem({
           className="w-full h-full object-cover"
           muted
           playsInline
+          onError={(e) => console.error("[GalleryManager] Video error for URL:", item.media_url, e)}
         />
       ) : (
         <img
           src={item.media_url}
           alt=""
           className="w-full h-full object-cover"
+          onError={(e) => {
+            console.error("[GalleryManager] Image error for URL:", item.media_url);
+            // Try to show what went wrong
+            const img = e.currentTarget;
+            console.error("[GalleryManager] Image naturalWidth:", img.naturalWidth, "naturalHeight:", img.naturalHeight);
+          }}
         />
       )}
 

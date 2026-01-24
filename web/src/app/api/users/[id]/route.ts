@@ -26,11 +26,12 @@ export async function GET(
   } = await supabase.auth.getUser();
 
   // Get the target user's data
+  // Note: Allow both "active" and null status (for new users), only exclude suspended/deleted
   const { data: userData, error: userError } = await supabase
     .from("users")
     .select("*")
     .eq("id", targetUserId)
-    .eq("status", "active")
+    .not("status", "in", "(suspended,deleted)")
     .single();
 
   if (userError || !userData) {
@@ -115,6 +116,27 @@ export async function GET(
       ? validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length
       : 0;
 
+  // Generate signed URLs for gallery items
+  const galleryWithUrls = await Promise.all(
+    (gallery || []).map(async (item) => {
+      if (item.media_url.startsWith("http")) {
+        return item;
+      }
+      
+      const { data: signedData } = await supabase.storage
+        .from("gallery")
+        .createSignedUrl(item.media_url, 3600);
+      
+      return {
+        ...item,
+        media_url: signedData?.signedUrl || getGalleryPublicUrl(item.media_url),
+        thumbnail_url: item.thumbnail_url 
+          ? (await supabase.storage.from("gallery").createSignedUrl(item.thumbnail_url, 3600)).data?.signedUrl || null
+          : null,
+      };
+    })
+  );
+
   // Transform data to match mobile app format
   const responseData = {
     ID: targetUserId,
@@ -166,12 +188,8 @@ export async function GET(
     IsFavorite: isFavorite ? 1 : 0,
     FollowStatus: followStatus,
     
-    // Gallery - transform paths to full URLs
-    gallery: (gallery || []).map((item) => ({
-      ...item,
-      media_url: getGalleryPublicUrl(item.media_url),
-      thumbnail_url: item.thumbnail_url ? getGalleryPublicUrl(item.thumbnail_url) : null,
-    })),
+    // Gallery with signed URLs (generated below)
+    gallery: galleryWithUrls,
   };
 
   return NextResponse.json({
