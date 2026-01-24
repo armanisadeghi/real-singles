@@ -1,9 +1,6 @@
 # Supabase Configuration for RealSingles
 # https://supabase.com/docs/guides/cli/config
 
-[project]
-id = "realsingles"
-
 [api]
 # Port to use for the API URL
 port = 54321
@@ -18,7 +15,7 @@ max_rows = 1000
 # Port to use for the local database URL
 port = 54322
 # The database major version to use
-major_version = 15
+major_version = 17
 
 [studio]
 # Port to use for Supabase Studio
@@ -56,14 +53,14 @@ enable_confirmations = true
 # smtp_pass = ""
 
 [auth.external.apple]
-enabled = true
-client_id = ""
-secret = ""
+enabled = false
+client_id = "env(SUPABASE_AUTH_APPLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_APPLE_SECRET)"
 
 [auth.external.google]
-enabled = true
-client_id = ""
-secret = ""
+enabled = false
+client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_GOOGLE_SECRET)"
 
 # Storage buckets
 [storage.buckets.avatars]
