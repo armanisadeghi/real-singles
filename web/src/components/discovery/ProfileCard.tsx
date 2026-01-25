@@ -47,7 +47,7 @@ interface ProfileCardProps {
   /** Loading state for actions */
   actionLoading?: boolean;
   /** Size variant */
-  size?: "normal" | "large";
+  size?: "compact" | "normal" | "large";
   /** Custom class name */
   className?: string;
 }
@@ -101,6 +101,58 @@ export function ProfileCard({
       );
     }
   };
+
+  // Compact card layout (for horizontal scrolling sections like mobile)
+  if (size === "compact") {
+    return (
+      <Link
+        href={profile.user_id ? `/profile/${profile.user_id}` : "#"}
+        className={cn(
+          "block relative bg-white rounded-xl shadow-sm overflow-hidden group",
+          "transition-all duration-200 hover:shadow-md",
+          className
+        )}
+      >
+        {/* Photo */}
+        <div className="relative aspect-[3/4] bg-gradient-to-br from-pink-100 to-purple-100">
+          {photos.length > 0 ? (
+            <img
+              src={photos[0]}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-4xl">👤</span>
+            </div>
+          )}
+          
+          {/* Verified Badge */}
+          {profile.is_verified && (
+            <div className="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-3 h-3 text-white" />
+            </div>
+          )}
+          
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          
+          {/* Info */}
+          <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+            <h3 className="text-sm font-bold truncate">
+              {name}
+              {age && <span className="font-normal">, {age}</span>}
+            </h3>
+            {location && (
+              <p className="text-xs text-white/80 truncate mt-0.5">
+                {location}
+              </p>
+            )}
+          </div>
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <div

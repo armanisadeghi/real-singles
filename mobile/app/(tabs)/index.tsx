@@ -1,6 +1,6 @@
 import SideMenu from "@/components/SidebarMenu";
 import EventCard from "@/components/ui/EventCard";
-import { PointsHeart } from "@/components/ui/PointsHeart";
+import { PointsBadge } from "@/components/ui/PointsBadge";
 import ProfileCard from "@/components/ui/ProfileCard";
 import VideoCard from "@/components/ui/VideoCard";
 import VirtualDateCard from "@/components/ui/VirtualDateCard";
@@ -315,12 +315,11 @@ export default function Home() {
                 Find Your Perfect Match
               </Text>
             </View>
-            <TouchableOpacity
-              activeOpacity={0.7}
+            <PointsBadge
+              points={redeemPoints}
+              size="md"
               onPress={() => router.push("/redeem")}
-            >
-              <PointsHeart points={redeemPoints} size="md" />
-            </TouchableOpacity>
+            />
           </View>
         </ImageBackground>
         <ScrollView

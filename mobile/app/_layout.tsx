@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
+import * as SplashScreen from 'expo-splash-screen';
 import IncomingCall from "@/components/IncomingCall";
 import { CallProvider, useCall } from "@/context/CallContext";
 import { AuthProvider, useAuth } from "@/utils/authContext";
@@ -11,6 +12,9 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import "./globals.css";
+
+// Prevent native splash from auto-hiding - we control when it hides
+SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const agoraLoginRef = useRef(false);

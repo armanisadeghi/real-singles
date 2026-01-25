@@ -1,0 +1,26 @@
+---
+alwaysApply: true
+---
+
+This project includes the following:
+
+next.js server and client
+expo, react native ios and android
+supbase database
+
+This project is for a highly modern, beautiful, elegant and high-end dating app.
+
+All core logic, types, constants and shared elemenets must be syncronized between the server, web client, android and ios.
+
+All logic must go through individual api endpoints that are shared by all clientside solutions so there is never a difference in logic.
+
+The UI/UX must have identical functionality for all platforms, but must be completely NATIVE for each one:
+
+Web: Both mobile and desktop
+Mobile: Both iOS and Android
+
+Example, an iOS user should always see and feel like they are using a pure ios app and not some custom solution. The same is true for Android.
+
+A feature should never be on one of these and not the rest. All features must be identical. The only exception is the admin portal which is web only. The user parts of the app cannot differ in anything other than user experience for a native feel. In all other ways, any change to one must be made to all.
+
+Write only high-quality, native-first code that is efficient and clean.

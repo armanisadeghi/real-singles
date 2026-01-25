@@ -78,16 +78,6 @@ export default async function AppLayout({
 
             {/* User Menu */}
             <div className="flex items-center space-x-3">
-              {/* Points */}
-              <Link
-                href="/rewards"
-                className="hidden sm:flex items-center px-3 py-1 bg-yellow-100 hover:bg-yellow-200 rounded-full transition-colors"
-              >
-                <span className="text-yellow-600 font-medium text-sm">
-                  ⭐ {user.points} pts
-                </span>
-              </Link>
-
               {/* Notifications */}
               <NotificationBell />
 

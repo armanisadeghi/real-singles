@@ -26,3 +26,4 @@ export { default as RangeSlider } from "./RangeSlider";
 
 // Badge components
 export { PointsHeart } from "./PointsHeart";
+export { PointsBadge } from "./PointsBadge";

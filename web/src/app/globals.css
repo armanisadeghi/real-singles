@@ -23,6 +23,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* Primary color alias (matches mobile's primary) */
+  --color-primary: var(--brand-primary);
   --color-brand-primary: var(--brand-primary);
   --color-brand-primary-light: var(--brand-primary-light);
   --color-brand-primary-dark: var(--brand-primary-dark);
