@@ -10,6 +10,10 @@ export type { ScreenProps } from "./Screen";
 export { ScreenHeader, HeaderBackButton, HeaderTitle } from "./ScreenHeader";
 export type { ScreenHeaderProps } from "./ScreenHeader";
 
+// Avatar component
+export { Avatar } from "./Avatar";
+export { default as AvatarDefault } from "./Avatar";
+
 // Card components
 export { default as ProfileCard } from "./ProfileCard";
 export { default as VideoCard } from "./VideoCard";

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { PointsBadge } from "@/components/rewards";
 import { ProfileCard } from "@/components/discovery";
-import { EmptyState } from "@/components/ui";
+import { Avatar, EmptyState } from "@/components/ui";
 
 interface HomeData {
   success: boolean;
@@ -167,17 +167,12 @@ export default function HomePage() {
           <div className="flex justify-between items-start">
             {/* Profile Avatar */}
             <Link href="/profile" className="block">
-              {userInfo.profileImage ? (
-                <img
-                  src={userInfo.profileImage}
-                  alt=""
-                  className="w-14 h-14 rounded-full border-2 border-white shadow-lg object-cover"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-full border-2 border-white shadow-lg bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
-                  {userInfo.displayName?.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <Avatar
+                src={userInfo.profileImage}
+                name={userInfo.displayName}
+                size="lg"
+                className="border-2 border-white shadow-lg"
+              />
             </Link>
 
             {/* Right Actions */}

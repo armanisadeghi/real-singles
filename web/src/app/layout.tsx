@@ -22,7 +22,18 @@ export const metadata: Metadata = {
     title: "Real Singles - Find Your Real Connection",
     description: "Join the dating community that prioritizes authenticity.",
     type: "website",
+    images: ["/images/logo.png"],
   },
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/images/icon.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      { url: "/images/app-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({

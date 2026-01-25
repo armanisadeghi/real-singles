@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLoginPage() {
@@ -59,8 +60,15 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">RealSingles Admin</h1>
-          <p className="text-gray-600 mt-2">Sign in to access the admin portal</p>
+          <Image
+            src="/images/logo.png"
+            alt="RealSingles"
+            width={160}
+            height={52}
+            className="h-12 w-auto mx-auto mb-4"
+          />
+          <h1 className="text-xl font-semibold text-gray-900">Admin Portal</h1>
+          <p className="text-gray-600 mt-1 text-sm">Sign in to access the admin dashboard</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">

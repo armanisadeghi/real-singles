@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNavigation } from "@/components/navigation/BottomNavigation";
 import { NotificationBell } from "@/components/notifications";
+import { Avatar } from "@/components/ui";
 
 async function getUser() {
   const supabase = await createClient();
@@ -22,11 +24,27 @@ async function getUser() {
     .eq("id", user.id)
     .single();
   
+  // Convert storage path to signed URL if needed
+  let profileImageUrl = "";
+  if (profile?.profile_image_url) {
+    if (profile.profile_image_url.startsWith("http")) {
+      // Already a full URL
+      profileImageUrl = profile.profile_image_url;
+    } else {
+      // It's a storage path - generate a signed URL
+      const bucket = profile.profile_image_url.includes("/avatar") ? "avatars" : "gallery";
+      const { data: signedData } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(profile.profile_image_url, 3600); // 1 hour expiry
+      profileImageUrl = signedData?.signedUrl || "";
+    }
+  }
+  
   return {
     id: user.id,
     email: user.email,
     displayName: userData?.display_name || profile?.first_name || user.email?.split("@")[0],
-    profileImage: profile?.profile_image_url,
+    profileImage: profileImageUrl,
     points: userData?.points_balance || 0,
   };
 }
@@ -56,8 +74,15 @@ export default async function AppLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              RealSingles
+            <Link href="/home" className="-m-1.5 p-1.5">
+              <Image
+                src="/images/logo.png"
+                alt="RealSingles"
+                width={140}
+                height={45}
+                className="h-9 w-auto"
+                priority
+              />
             </Link>
 
             {/* Navigation */}
@@ -84,13 +109,11 @@ export default async function AppLayout({
               {/* Profile Dropdown */}
               <div className="relative group">
                 <button className="flex items-center space-x-2 hover:bg-gray-100 rounded-full p-1 pr-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium">
-                    {user.profileImage ? (
-                      <img src={user.profileImage} alt="" className="w-8 h-8 rounded-full object-cover" />
-                    ) : (
-                      user.displayName?.charAt(0).toUpperCase()
-                    )}
-                  </div>
+                  <Avatar
+                    src={user.profileImage}
+                    name={user.displayName || "User"}
+                    size="sm"
+                  />
                   <span className="hidden sm:block text-sm font-medium text-gray-700">
                     {user.displayName}
                   </span>

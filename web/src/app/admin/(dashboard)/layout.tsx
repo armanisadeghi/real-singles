@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/admin-guard";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -24,8 +25,15 @@ export default async function AdminDashboardLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-8">
-              <Link href="/admin" className="text-xl font-bold text-indigo-600">
-                RealSingles Admin
+              <Link href="/admin" className="flex items-center gap-2">
+                <Image
+                  src="/images/logo.png"
+                  alt="RealSingles"
+                  width={120}
+                  height={40}
+                  className="h-8 w-auto"
+                />
+                <span className="text-sm font-medium text-gray-500">Admin</span>
               </Link>
               <nav className="flex space-x-4">
                 <Link

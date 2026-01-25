@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Phone, Video, MoreVertical, Info } from "lucide-react";
 import { MessageGroup, Message } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
+import { Avatar } from "@/components/ui/Avatar";
 import { MessageSkeleton } from "@/components/ui/LoadingSkeleton";
 import { cn } from "@/lib/utils";
 
@@ -175,17 +176,13 @@ export function ChatThread({
         </Link>
 
         {/* Avatar */}
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-semibold shrink-0">
-          {displayImage ? (
-            <img
-              src={displayImage}
-              alt=""
-              className="w-full h-full rounded-full object-cover"
-            />
-          ) : (
-            displayName.charAt(0).toUpperCase()
-          )}
-        </div>
+        <Avatar
+          src={displayImage}
+          name={displayName}
+          size="md"
+          showOnlineIndicator={conversationType === "direct"}
+          isOnline={isOnline}
+        />
 
         {/* Name and Status */}
         <div className="flex-1 min-w-0">
@@ -263,17 +260,11 @@ export function ChatThread({
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex gap-2 max-w-[85%] animate-fade-in">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white text-xs font-semibold shrink-0">
-                  {otherParticipant?.profile?.profile_image_url ? (
-                    <img
-                      src={otherParticipant.profile.profile_image_url}
-                      alt=""
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    displayName.charAt(0).toUpperCase()
-                  )}
-                </div>
+                <Avatar
+                  src={otherParticipant?.profile?.profile_image_url}
+                  name={displayName}
+                  size="sm"
+                />
                 <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
                   <div className="flex gap-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />

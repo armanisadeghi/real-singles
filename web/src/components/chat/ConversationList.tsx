@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { MessageCircle, Search } from "lucide-react";
 import { cn, formatRelativeTime, truncate } from "@/lib/utils";
+import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConversationSkeleton } from "@/components/ui/LoadingSkeleton";
 
@@ -134,28 +135,18 @@ export function ConversationList({
               )}
             >
               {/* Avatar */}
-              <div className="relative shrink-0">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-semibold">
-                  {display.image ? (
-                    <img
-                      src={display.image}
-                      alt=""
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    display.initials
-                  )}
-                </div>
-                {/* Online indicator for direct chats */}
-                {conversation.type === "direct" && (() => {
+              <Avatar
+                src={display.image}
+                name={display.name}
+                size="lg"
+                showOnlineIndicator={conversation.type === "direct"}
+                isOnline={conversation.type === "direct" && (() => {
                   const otherParticipant = conversation.participants.find(
                     (p) => p.user_id !== currentUserId
                   );
-                  return isUserOnline(otherParticipant?.user?.last_active_at) && (
-                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />
-                  );
+                  return isUserOnline(otherParticipant?.user?.last_active_at);
                 })()}
-              </div>
+              />
 
               {/* Content */}
               <div className="flex-1 min-w-0">

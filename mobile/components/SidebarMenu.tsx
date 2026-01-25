@@ -4,13 +4,13 @@ import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Dimensions,
-  Image,
   Share,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Avatar } from "@/components/ui/Avatar";
 
 const { width } = Dimensions.get("window");
 const MENU_WIDTH = width * 0.75; // Menu takes 75% of screen width
@@ -18,7 +18,8 @@ const MENU_WIDTH = width * 0.75; // Menu takes 75% of screen width
 interface SideMenuProps {
   visible: boolean;
   onClose: () => void;
-  userAvatar: any;
+  /** User avatar URL or image source */
+  userAvatar?: string | null;
   userName: string;
   direction?: "right" | "left";
 }
@@ -140,12 +141,6 @@ const SideMenu = ({
     return false;
   };
 
-  const BACKGROUND_COLORS = [
-  "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", 
-  "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50", 
-  "#8BC34A", "#FF9800", "#FF5722", "#795548", "#607D8B"
-];
-
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -186,46 +181,15 @@ const SideMenu = ({
         </View>
 
         <View style={styles.footer}>
-  <View style={styles.avatar}>
-    {userAvatar ? (
-      <Image
-        source={userAvatar}
-        style={styles.avatarImage}
-        resizeMode="cover"
-      />
-    ) : (
-      <View 
-        style={[
-          styles.avatarImage, 
-          { 
-            backgroundColor: BACKGROUND_COLORS[
-              Math.abs(
-                (userName || "User")
-                  .split("")
-                  .reduce((acc, char) => acc + char.charCodeAt(0), 0) % 
-                BACKGROUND_COLORS.length
-              )
-            ],
-            justifyContent: 'center',
-            alignItems: 'center'
-          }
-        ]}
-      >
-        <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold' }}>
-          {userName
-            ? userName.split(" ")
-                .map(part => part.charAt(0))
-                .slice(0, 2)
-                .join("")
-                .toUpperCase()
-            : "U"
-          }
-        </Text>
-      </View>
-    )}
-  </View>
-  <Text style={styles.userName}>{userName}</Text>
-</View>
+          <Avatar
+            src={userAvatar}
+            name={userName || "User"}
+            size="lg"
+            borderColor="#ffffff"
+            borderWidth={2}
+          />
+          <Text style={styles.userName}>{userName}</Text>
+        </View>
       </Animated.View>
     </View>
   );
@@ -291,18 +255,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "rgba(255,255,255,0.2)",
     marginBottom: 30,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  avatarImage: {
-    width: "100%",
-    height: "100%",
   },
   userName: {
     color: "#fff", // light-100

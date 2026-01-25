@@ -1,4 +1,5 @@
 import SideMenu from "@/components/SidebarMenu";
+import { Avatar } from "@/components/ui/Avatar";
 import EventCard from "@/components/ui/EventCard";
 import { PointsBadge } from "@/components/ui/PointsBadge";
 import ProfileCard from "@/components/ui/ProfileCard";
@@ -228,7 +229,7 @@ export default function Home() {
         <SideMenu
           visible={menuVisible}
           onClose={() => setMenuVisible(false)}
-          userAvatar={profile?.Image ? { uri: profile.Image.startsWith('http') ? profile.Image : VIDEO_URL + profile.Image } : null}
+          userAvatar={profile?.Image}
           userName={profile?.DisplayName || "User"}
         />
         <ImageBackground
@@ -241,42 +242,13 @@ export default function Home() {
             style={{ paddingHorizontal: SPACING.screenPadding, paddingTop: headerTopPadding }}
           >
             <TouchableOpacity onPress={() => router.push("/profile")}>
-              {profile?.Image ? (
-                <Image
-                  source={{ uri: profile.Image.startsWith('http') ? profile.Image : VIDEO_URL + profile.Image }}
-                  className="border-2 border-white rounded-full"
-                  style={{ width: ICON_SIZES['3xl'] * 1.25, height: ICON_SIZES['3xl'] * 1.25 }}
-                />
-              ) : (
-                <View
-                  className="border-2 border-white rounded-full justify-center items-center"
-                  style={{
-                    width: ICON_SIZES['3xl'] * 1.25,
-                    height: ICON_SIZES['3xl'] * 1.25,
-                    backgroundColor:
-                      BACKGROUND_COLORS[
-                      Math.abs(
-                        (profile?.DisplayName || "User")
-                          .split("")
-                          .reduce(
-                            (acc, char) => acc + char.charCodeAt(0),
-                            0
-                          ) % BACKGROUND_COLORS.length
-                      )
-                      ],
-                  }}
-                >
-                  <Text className="text-white font-bold" style={TYPOGRAPHY.h3}>
-                    {profile?.DisplayName
-                      ? profile.DisplayName.split(" ")
-                        .map((part) => part.charAt(0))
-                        .slice(0, 2)
-                        .join("")
-                        .toUpperCase()
-                      : "U"}
-                  </Text>
-                </View>
-              )}
+              <Avatar
+                src={profile?.Image}
+                name={profile?.DisplayName || "User"}
+                size="xl"
+                borderColor="#ffffff"
+                borderWidth={2}
+              />
             </TouchableOpacity>
             <View className="flex-row items-center" style={{ gap: SPACING.xs }}>
               <TouchableOpacity
