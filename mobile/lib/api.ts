@@ -352,6 +352,58 @@ export const followUser = async (userId: string) => {
 };
 
 // ===========================================
+// MATCHES ENDPOINTS (Like, Pass, Super Like)
+// ===========================================
+
+/**
+ * Send a match action (like, pass, or super_like)
+ */
+export const sendMatchAction = async (
+  targetUserId: string, 
+  action: "like" | "pass" | "super_like"
+) => {
+  return apiRequest("/matches", {
+    method: "POST",
+    body: JSON.stringify({ target_user_id: targetUserId, action }),
+  });
+};
+
+/**
+ * Like a user
+ */
+export const likeUser = async (targetUserId: string) => {
+  return sendMatchAction(targetUserId, "like");
+};
+
+/**
+ * Pass on a user
+ */
+export const passUser = async (targetUserId: string) => {
+  return sendMatchAction(targetUserId, "pass");
+};
+
+/**
+ * Super like a user
+ */
+export const superLikeUser = async (targetUserId: string) => {
+  return sendMatchAction(targetUserId, "super_like");
+};
+
+/**
+ * Get mutual matches
+ */
+export const getMatches = async () => {
+  return apiRequest("/matches");
+};
+
+/**
+ * Get users who have liked you (premium feature)
+ */
+export const getLikesReceived = async () => {
+  return apiRequest("/matches/likes-received");
+};
+
+// ===========================================
 // EVENTS ENDPOINTS
 // ===========================================
 

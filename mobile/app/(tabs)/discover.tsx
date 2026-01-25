@@ -1,7 +1,7 @@
 import FilterOptions, { FilterData } from "@/components/FilterOptions";
 import LinearBg from "@/components/LinearBg";
 import NotificationBell from "@/components/NotificationBell";
-import ProfileCard from "@/components/ui/ProfileCard";
+import ProfileListItem from "@/components/ui/ProfileListItem";
 import { icons } from "@/constants/icons";
 import { ICON_SIZES, SPACING, TYPOGRAPHY, VERTICAL_SPACING } from "@/constants/designTokens";
 import { applyFilters, clearFilter, getHomeScreenData, saveFilter } from "@/lib/api";
@@ -333,71 +333,65 @@ export default function Discover() {
           </View>
         ) : (
           <View className="flex-1" style={{ paddingTop: VERTICAL_SPACING.md }}>
-            <FlatList
-              data={discoverProfiles}
-              numColumns={2}
-              columnWrapperStyle={{
-                justifyContent: "space-between",
-                paddingHorizontal: SPACING.screenPadding,
-                gap: SPACING.md,
-                marginBottom: VERTICAL_SPACING.md,
-              }}
-              contentContainerStyle={{
-                paddingBottom: 100,
-              }}
-              renderItem={({ item }) => (
-                <ProfileCard key={item?.ID} profile={item} />
-              )}
-              keyExtractor={(item, index) => `${item?.ID}-${index}`}
-              showsVerticalScrollIndicator={false}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  colors={["#B06D1E"]}
-                  tintColor="#B06D1E"
+          <FlatList
+            data={discoverProfiles}
+            contentContainerStyle={{
+              paddingBottom: 100,
+              gap: VERTICAL_SPACING.xs,
+            }}
+            renderItem={({ item }) => (
+              <ProfileListItem key={item?.ID} profile={item} navigateToFocus={true} />
+            )}
+            keyExtractor={(item, index) => `${item?.ID}-${index}`}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={["#B06D1E"]}
+                tintColor="#B06D1E"
+              />
+            }
+            ListEmptyComponent={
+              <View className="flex-1 items-center justify-center py-20">
+                <Image
+                  source={icons.search}
+                  style={{ 
+                    width: ICON_SIZES['3xl'], 
+                    height: ICON_SIZES['3xl'],
+                    opacity: 0.3,
+                    marginBottom: VERTICAL_SPACING.md,
+                  }}
+                  resizeMode="contain"
                 />
-              }
-              ListEmptyComponent={
-                <View className="flex-1 items-center justify-center py-20">
-                  <Image
-                    source={icons.search}
-                    style={{ 
-                      width: ICON_SIZES['3xl'], 
-                      height: ICON_SIZES['3xl'],
-                      opacity: 0.3,
-                      marginBottom: VERTICAL_SPACING.md,
-                    }}
-                    resizeMode="contain"
-                  />
-                  <Text 
-                    className="text-gray-500 text-center"
-                    style={TYPOGRAPHY.body}
-                  >
-                    No profiles found
+                <Text 
+                  className="text-gray-500 text-center"
+                  style={TYPOGRAPHY.body}
+                >
+                  No profiles found
+                </Text>
+                <Text 
+                  className="text-gray-400 text-center"
+                  style={{ ...TYPOGRAPHY.caption1, marginTop: SPACING.xs }}
+                >
+                  Try adjusting your filters
+                </Text>
+                <TouchableOpacity
+                  onPress={handleFilterPress}
+                  className="mt-4 bg-primary rounded-full"
+                  style={{
+                    paddingHorizontal: SPACING.lg,
+                    paddingVertical: SPACING.sm,
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text className="text-white font-medium" style={TYPOGRAPHY.button}>
+                    Adjust Filters
                   </Text>
-                  <Text 
-                    className="text-gray-400 text-center"
-                    style={{ ...TYPOGRAPHY.caption1, marginTop: SPACING.xs }}
-                  >
-                    Try adjusting your filters
-                  </Text>
-                  <TouchableOpacity
-                    onPress={handleFilterPress}
-                    className="mt-4 bg-primary rounded-full"
-                    style={{
-                      paddingHorizontal: SPACING.lg,
-                      paddingVertical: SPACING.sm,
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <Text className="text-white font-medium" style={TYPOGRAPHY.button}>
-                      Adjust Filters
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              }
-            />
+                </TouchableOpacity>
+              </View>
+            }
+          />
           </View>
         )}
       </View>

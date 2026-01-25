@@ -224,7 +224,7 @@ export default function HomePage() {
       </section>
 
       {/* Quick Action Pills with Refresh */}
-      <section className="bg-white border-b sticky top-0 z-40 shadow-sm">
+      <section className="bg-white/95 backdrop-blur-sm sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center gap-2">
             {/* Scrollable Pills */}
@@ -281,7 +281,7 @@ export default function HomePage() {
       </section>
 
       {/* Main Content Sections */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 space-y-10">
         {/* Top Matches Section */}
         <section>
           <div className="flex justify-between items-center mb-4">

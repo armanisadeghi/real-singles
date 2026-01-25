@@ -1,6 +1,7 @@
 import NotificationBell from "@/components/NotificationBell";
-import ProfileCard from "@/components/ui/ProfileCard";
+import ProfileListItem from "@/components/ui/ProfileListItem";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { VERTICAL_SPACING } from "@/constants/designTokens";
 import { getFavoriteList } from "@/lib/api";
 import { User } from "@/types";
 import { useRouter } from "expo-router";
@@ -63,20 +64,17 @@ export default function Favorites() {
           onBackPress={router.back}
           rightContent={<NotificationBell />}
         />
-        <View className="mt-8 pb-56">
+        <View className="mt-4 pb-56">
           <FlatList
             data={favoriteProfiles}
-            numColumns={2}
-            columnWrapperStyle={{
-              justifyContent: "space-between",
-              marginBottom: 20,
-              paddingHorizontal: 20,
-              gap: 20,
+            contentContainerStyle={{
+              gap: VERTICAL_SPACING.xs,
             }}
             renderItem={({ item }) => (
-              <ProfileCard
+              <ProfileListItem
                 key={item?.ID}
                 profile={item}
+                navigateToFocus={true}
               />
             )}
             keyExtractor={(item, index) => `${index}`}

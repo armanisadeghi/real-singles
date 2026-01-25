@@ -16,6 +16,7 @@ export { default as AvatarDefault } from "./Avatar";
 
 // Card components
 export { default as ProfileCard } from "./ProfileCard";
+export { default as ProfileListItem } from "./ProfileListItem";
 export { default as VideoCard } from "./VideoCard";
 export { default as EventCard } from "./EventCard";
 export { default as VirtualDateCard } from "./VirtualDateCard";
