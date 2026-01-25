@@ -250,27 +250,35 @@ export default function Home() {
                 borderWidth={2}
               />
             </TouchableOpacity>
-            <View className="flex-row items-center" style={{ gap: SPACING.xs }}>
+            <View className="flex-row items-center" style={{ gap: SPACING.sm }}>
               <TouchableOpacity
                 onPress={() => router.push("/notification")}
-                className="border border-border rounded-button"
-                style={{ padding: SPACING.xs }}
+                className="rounded-full"
+                style={{ 
+                  padding: SPACING.sm,
+                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                }}
               >
                 <Image
                   source={icons.bell}
-                  style={{ width: ICON_SIZES.sm, height: ICON_SIZES.sm }}
+                  style={{ width: ICON_SIZES.md, height: ICON_SIZES.md }}
                   resizeMode="contain"
+                  tintColor="#ffffff"
                 />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setMenuVisible(true)}
-                className="border border-border rounded-button"
-                style={{ padding: SPACING.xs }}
+                className="rounded-full"
+                style={{ 
+                  padding: SPACING.sm,
+                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                }}
               >
                 <Image
                   source={icons.menu}
-                  style={{ width: ICON_SIZES.sm, height: ICON_SIZES.sm }}
+                  style={{ width: ICON_SIZES.md, height: ICON_SIZES.md }}
                   resizeMode="contain"
+                  tintColor="#ffffff"
                 />
               </TouchableOpacity>
             </View>

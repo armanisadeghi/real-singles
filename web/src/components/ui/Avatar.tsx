@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 interface AvatarProps {
-  /** Image URL - can be a full URL or null */
+  /** Image URL - can be a full URL, Supabase storage path, or null */
   src?: string | null;
   /** Name used for fallback initials */
   name: string;
@@ -34,13 +34,50 @@ const onlineIndicatorSizes = {
   xl: "w-4 h-4",
 };
 
+// Supabase storage base URL
+const SUPABASE_STORAGE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public`
+  : "";
+
+/**
+ * Convert a storage path or URL to a full image URL
+ * Handles:
+ * - Full URLs (http/https) - passed through as-is
+ * - Supabase storage paths (avatars/, gallery/, etc.) - converted to full URL
+ * - Empty/null values - returns empty string
+ */
+function getImageUrl(path: string | null | undefined): string {
+  if (!path) return "";
+
+  // Already a full URL
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+
+  // Supabase storage path (starts with bucket name)
+  if (
+    path.startsWith("avatars/") ||
+    path.startsWith("gallery/") ||
+    path.startsWith("events/")
+  ) {
+    return `${SUPABASE_STORAGE_URL}/${path}`;
+  }
+
+  // Assume Supabase path without bucket prefix - default to avatars
+  if (SUPABASE_STORAGE_URL) {
+    return `${SUPABASE_STORAGE_URL}/avatars/${path}`;
+  }
+
+  return path;
+}
+
 /**
  * Get initials from a name
  * Takes first letter of first and last name, or first two letters if single word
  */
 function getInitials(name: string): string {
   if (!name) return "?";
-  
+
   const parts = name.trim().split(/\s+/);
   if (parts.length >= 2) {
     return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
@@ -65,16 +102,17 @@ function getAvatarColor(name: string): string {
     "from-indigo-500 to-purple-500",
     "from-cyan-500 to-blue-500",
   ];
-  
+
   const hash = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return colors[hash % colors.length];
 }
 
 /**
  * Reusable Avatar component with consistent styling and error handling
- * 
+ *
  * Features:
  * - Displays user image with graceful fallback to initials
+ * - Automatically converts Supabase storage paths to full URLs
  * - Consistent gradient colors based on name
  * - Multiple size variants
  * - Optional online indicator
@@ -89,14 +127,17 @@ export function Avatar({
   isOnline = false,
 }: AvatarProps) {
   const [imageError, setImageError] = useState(false);
-  const [isLoading, setIsLoading] = useState(!!src);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const showImage = src && !imageError;
+  // Convert storage path to full URL
+  const imageUrl = useMemo(() => getImageUrl(src), [src]);
+
+  const showImage = imageUrl && !imageError;
   const initials = getInitials(name);
   const gradientColor = getAvatarColor(name);
 
   return (
-    <div className={cn("relative inline-flex shrink-0", className)}>
+    <div className={cn("relative inline-flex shrink-0 rounded-full", className)}>
       <div
         className={cn(
           "rounded-full flex items-center justify-center overflow-hidden",
@@ -106,7 +147,7 @@ export function Avatar({
       >
         {showImage ? (
           <img
-            src={src}
+            src={imageUrl}
             alt={`${name}'s avatar`}
             className={cn(
               "w-full h-full object-cover",
@@ -119,7 +160,7 @@ export function Avatar({
             }}
           />
         ) : null}
-        
+
         {/* Show initials when no image or image failed to load */}
         {(!showImage || isLoading) && (
           <span

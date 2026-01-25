@@ -148,11 +148,23 @@ export async function PUT(request: Request) {
 
       // Update profile photo URL if it's an image
       if (primaryItem && primaryItem.media_type === "image") {
-        // Store the full public URL in profile
-        const profileImageUrl = getGalleryPublicUrl(primaryItem.media_url);
+        // Store the storage path (not full URL) so /api/users/me can generate signed URLs
+        // The gallery bucket is private, so we need signed URLs for access
+        // If media_url is already a full URL, extract the path or use as-is
+        let profileImagePath = primaryItem.media_url;
+        
+        // If it's already a full URL with the storage path, extract just the path
+        if (profileImagePath.startsWith("http")) {
+          // Try to extract path from URL like: .../storage/v1/object/public/gallery/userId/file.jpg
+          const match = profileImagePath.match(/\/gallery\/(.+?)(?:\?|$)/);
+          if (match) {
+            profileImagePath = match[1];
+          }
+        }
+        
         await supabase
           .from("profiles")
-          .update({ profile_image_url: profileImageUrl })
+          .update({ profile_image_url: profileImagePath })
           .eq("user_id", user.id);
       }
     }
@@ -246,11 +258,17 @@ export async function DELETE(request: NextRequest) {
         .update({ is_primary: true })
         .eq("id", nextItem.id);
 
-      // Store the full public URL in profile
-      const profileImageUrl = getGalleryPublicUrl(nextItem.media_url);
+      // Store the storage path (not full URL) so /api/users/me can generate signed URLs
+      let profileImagePath = nextItem.media_url;
+      if (profileImagePath.startsWith("http")) {
+        const match = profileImagePath.match(/\/gallery\/(.+?)(?:\?|$)/);
+        if (match) {
+          profileImagePath = match[1];
+        }
+      }
       await supabase
         .from("profiles")
-        .update({ profile_image_url: profileImageUrl })
+        .update({ profile_image_url: profileImagePath })
         .eq("user_id", user.id);
     } else {
       // No more photos, clear profile image

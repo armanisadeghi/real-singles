@@ -19,6 +19,7 @@ import {
 import { PointsBadge } from "@/components/rewards";
 import { ProfileCard } from "@/components/discovery";
 import { Avatar, EmptyState } from "@/components/ui";
+import { SideMenu } from "@/components/navigation";
 
 interface HomeData {
   success: boolean;
@@ -67,6 +68,17 @@ export default function HomePage() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [homeData, setHomeData] = useState<HomeData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Sign out handler
+  const handleSignOut = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/login");
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
+  };
 
   const fetchData = useCallback(async (showRefresh = false) => {
     if (showRefresh) {
@@ -154,37 +166,41 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section - Matches Mobile */}
+      {/* Hero Section - Modern, Clean Design */}
       <section 
         className="relative bg-cover bg-center"
         style={{
-          backgroundImage: "linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('/images/hero/homepage-hero.jpg')",
-          minHeight: "240px",
+          backgroundImage: "linear-gradient(135deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%), url('/images/hero/homepage-hero.jpg')",
+          minHeight: "260px",
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-8">
           {/* Top Row - Profile, Notifications, Menu */}
-          <div className="flex justify-between items-start">
-            {/* Profile Avatar */}
-            <Link href="/profile" className="block">
+          <div className="flex justify-between items-center">
+            {/* Profile Avatar - Clean, no extra border styling */}
+            <Link 
+              href="/profile" 
+              className="block transform hover:scale-105 transition-transform duration-200"
+            >
               <Avatar
                 src={userInfo.profileImage}
                 name={userInfo.displayName}
-                size="lg"
-                className="border-2 border-white shadow-lg"
+                size="xl"
+                className="ring-2 ring-white/30 shadow-lg"
               />
             </Link>
 
-            {/* Right Actions */}
-            <div className="flex items-center gap-2">
+            {/* Right Actions - Modern pill buttons */}
+            <div className="flex items-center gap-3">
               <Link
                 href="/notifications"
-                className="p-2 border border-white/30 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors"
+                className="p-2.5 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 transition-all duration-200 shadow-lg"
               >
                 <Bell className="w-5 h-5 text-white" />
               </Link>
               <button
-                className="p-2 border border-white/30 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors"
+                onClick={() => setIsMenuOpen(true)}
+                className="p-2.5 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 transition-all duration-200 shadow-lg"
               >
                 <Menu className="w-5 h-5 text-white" />
               </button>
@@ -192,9 +208,9 @@ export default function HomePage() {
           </div>
 
           {/* Hero Content - Title and Points Badge */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mt-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mt-10">
             <div className="max-w-md">
-              <h1 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white leading-tight drop-shadow-lg">
                 Find Your Perfect Match
               </h1>
             </div>
@@ -208,7 +224,7 @@ export default function HomePage() {
       </section>
 
       {/* Quick Action Pills - Matches Mobile */}
-      <section className="bg-white border-b sticky top-16 z-40 shadow-sm">
+      <section className="bg-white border-b sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
             <Link
@@ -480,6 +496,19 @@ export default function HomePage() {
           )}
         </section>
       </div>
+
+      {/* Side Menu */}
+      {userInfo && (
+        <SideMenu
+          isOpen={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
+          user={{
+            displayName: userInfo.displayName,
+            profileImage: userInfo.profileImage,
+          }}
+          onSignOut={handleSignOut}
+        />
+      )}
     </div>
   );
 }
