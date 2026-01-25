@@ -223,61 +223,62 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Quick Action Pills - Matches Mobile */}
+      {/* Quick Action Pills with Refresh */}
       <section className="bg-white border-b sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-            <Link
-              href="/discover"
-              className="flex-shrink-0 px-4 py-2 bg-primary text-white rounded-full font-medium text-sm transition-colors"
+          <div className="flex items-center gap-2">
+            {/* Scrollable Pills */}
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 flex-1">
+              <Link
+                href="/discover"
+                className="flex-shrink-0 px-4 py-2 bg-primary text-white rounded-full font-medium text-sm transition-colors"
+              >
+                Discover
+              </Link>
+              <Link
+                href="/matches"
+                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
+              >
+                Top Matches
+              </Link>
+              <Link
+                href="/discover?filter=videos"
+                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
+              >
+                Videos
+              </Link>
+              <Link
+                href="/speed-dating"
+                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
+              >
+                Virtual Dates
+              </Link>
+              <Link
+                href="/discover?filter=nearby"
+                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
+              >
+                Nearby
+              </Link>
+              <Link
+                href="/events"
+                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
+              >
+                Events
+              </Link>
+            </div>
+            
+            {/* Refresh Button - Icon only */}
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex-shrink-0 p-2 text-gray-400 hover:text-primary hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
+              title="Refresh"
             >
-              Discover
-            </Link>
-            <Link
-              href="/matches"
-              className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
-            >
-              Top Matches
-            </Link>
-            <Link
-              href="/discover?filter=videos"
-              className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
-            >
-              Videos
-            </Link>
-            <Link
-              href="/speed-dating"
-              className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
-            >
-              Virtual Dates
-            </Link>
-            <Link
-              href="/discover?filter=nearby"
-              className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
-            >
-              Nearby
-            </Link>
-            <Link
-              href="/events"
-              className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
-            >
-              Events
-            </Link>
+              <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
       </section>
-
-      {/* Refresh Button */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-end">
-        <button
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors disabled:opacity-50"
-        >
-          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </div>
 
       {/* Main Content Sections */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-10">
