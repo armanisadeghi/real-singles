@@ -117,12 +117,8 @@ export default function Profile() {
       <SideMenu
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
-        userAvatar={
-          profile?.Image
-            ? { uri: profile.Image.startsWith("http") ? profile.Image : MEDIA_BASE_URL + profile.Image }
-            : icons.ic_user
-        }
-        userName={profile?.DisplayName || ""}
+        userAvatar={profile?.Image}
+        userName={profile?.DisplayName || "User"}
       />
       <ImageBackground
         className="h-[347px]"

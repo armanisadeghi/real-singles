@@ -1,6 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { 
+  Settings, 
+  Edit3, 
+  MapPin, 
+  Briefcase, 
+  CheckCircle,
+  Sparkles,
+  Share2,
+  Camera,
+  Gift,
+  Copy
+} from "lucide-react";
 
 async function getMyProfile() {
   const supabase = await createClient();
@@ -45,9 +57,19 @@ async function getMyProfile() {
     })
   );
 
+  // Generate signed URL for profile image
+  let profileImageUrl = profile?.profile_image_url || null;
+  if (profileImageUrl && !profileImageUrl.startsWith("http")) {
+    const bucket = profileImageUrl.includes("/avatar") ? "avatars" : "gallery";
+    const { data: signedData } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(profileImageUrl, 3600);
+    profileImageUrl = signedData?.signedUrl || profileImageUrl;
+  }
+
   return {
     user: { ...user, ...userData },
-    profile,
+    profile: profile ? { ...profile, profile_image_url: profileImageUrl } : null,
     gallery: galleryWithUrls,
   };
 }
@@ -73,246 +95,297 @@ export default async function MyProfilePage() {
   const { user, profile, gallery } = data;
   const hasProfile = profile !== null;
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-        <Link
-          href="/profile/edit"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-        >
-          Edit Profile
-        </Link>
-      </div>
+  // Format height helper
+  const formatHeight = (inches: number) => {
+    const feet = Math.floor(inches / 12);
+    const remainingInches = inches % 12;
+    return `${feet}'${remainingInches}"`;
+  };
 
+  return (
+    <div className="min-h-screen bg-gray-50">
       {!hasProfile ? (
-        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-          <div className="text-6xl mb-4">👋</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Complete Your Profile</h2>
-          <p className="text-gray-600 mb-6">
-            Add your details to start connecting with other singles.
-          </p>
-          <Link
-            href="/profile/edit"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700"
-          >
-            Get Started
-          </Link>
+        /* Empty State - No Profile Yet */
+        <div className="max-w-md mx-auto px-4 py-16">
+          <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Sparkles className="w-10 h-10 text-pink-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Complete Your Profile</h2>
+            <p className="text-gray-600 mb-8">
+              Add your details to start connecting with other singles.
+            </p>
+            <Link
+              href="/profile/edit"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-medium hover:from-pink-600 hover:to-rose-600 transition-all shadow-lg shadow-pink-500/25"
+            >
+              <Edit3 className="w-5 h-5" />
+              Get Started
+            </Link>
+          </div>
         </div>
       ) : (
-        <div className="space-y-6">
-          {/* Main Card */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="md:flex">
-              {/* Photo */}
-              <div className="md:w-1/3">
-                <div className="aspect-square bg-gradient-to-br from-indigo-100 to-purple-100 relative">
-                  {profile.profile_image_url ? (
-                    <img
-                      src={profile.profile_image_url}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-8xl">👤</span>
-                    </div>
-                  )}
+        <>
+          {/* Hero Header - Compact & Modern */}
+          <div className="bg-white border-b">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              <div className="flex items-center gap-6">
+                {/* Profile Photo - Constrained Size */}
+                <div className="relative shrink-0">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-100 to-purple-100 shadow-lg">
+                    {profile.profile_image_url ? (
+                      <img
+                        src={profile.profile_image_url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-4xl sm:text-5xl">👤</span>
+                      </div>
+                    )}
+                  </div>
                   {profile.is_verified && (
-                    <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      ✓ Verified
+                    <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center ring-2 ring-white">
+                      <CheckCircle className="w-4 h-4 text-white" />
                     </div>
                   )}
-                </div>
-              </div>
-
-              {/* Details */}
-              <div className="md:w-2/3 p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {profile.first_name || user.display_name || "Your Name"}
-                    {profile.last_name && ` ${profile.last_name}`}
-                  </h2>
-                  {profile.date_of_birth && (
-                    <span className="text-xl text-gray-500">
-                      {calculateAge(profile.date_of_birth)}
-                    </span>
-                  )}
+                  {/* Camera overlay for edit */}
+                  <Link
+                    href="/profile/gallery"
+                    className="absolute inset-0 bg-black/0 hover:bg-black/20 rounded-2xl flex items-center justify-center opacity-0 hover:opacity-100 transition-all"
+                  >
+                    <Camera className="w-6 h-6 text-white drop-shadow-lg" />
+                  </Link>
                 </div>
 
-                {profile.city && (
-                  <p className="text-gray-600 mb-2">
-                    📍 {profile.city}{profile.state ? `, ${profile.state}` : ""}
-                  </p>
-                )}
-
-                {profile.occupation && (
-                  <p className="text-gray-600 mb-4">
-                    💼 {profile.occupation}
-                  </p>
-                )}
-
-                {profile.bio && (
-                  <p className="text-gray-700 mb-4">{profile.bio}</p>
-                )}
-
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-4 py-4 border-t border-b">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-indigo-600">{user.points_balance || 0}</div>
-                    <div className="text-sm text-gray-500">Points</div>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 truncate">
+                      {profile.first_name || user.display_name || "Your Name"}
+                    </h1>
+                    {profile.date_of_birth && (
+                      <span className="text-xl sm:text-2xl text-gray-400 font-light">
+                        {calculateAge(profile.date_of_birth)}
+                      </span>
+                    )}
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-indigo-600">{gallery.length}</div>
-                    <div className="text-sm text-gray-500">Photos</div>
+
+                  <div className="flex flex-wrap items-center gap-3 text-gray-500 text-sm mb-3">
+                    {profile.city && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {profile.city}{profile.state ? `, ${profile.state}` : ""}
+                      </span>
+                    )}
+                    {profile.occupation && (
+                      <span className="flex items-center gap-1">
+                        <Briefcase className="w-4 h-4" />
+                        {profile.occupation}
+                      </span>
+                    )}
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-indigo-600">
-                      {profile.is_verified ? "Yes" : "No"}
-                    </div>
-                    <div className="text-sm text-gray-500">Verified</div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href="/profile/edit"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-medium rounded-full hover:from-pink-600 hover:to-rose-600 transition-all shadow-md"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                      Edit Profile
+                    </Link>
+                    <Link
+                      href="/settings"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-full hover:bg-gray-200 transition-all"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Settings
+                    </Link>
+                    <button className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-full hover:bg-gray-200 transition-all">
+                      <Share2 className="w-4 h-4" />
+                      Share
+                    </button>
                   </div>
                 </div>
-
-                {/* Referral Code */}
-                {user.referral_code && (
-                  <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-                    <p className="text-sm text-yellow-800">
-                      <strong>Your Referral Code:</strong> {user.referral_code}
-                    </p>
-                    <p className="text-xs text-yellow-600 mt-1">
-                      Share this code to earn points when friends sign up!
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
 
-          {/* Interests */}
-          {profile.interests && (profile.interests as string[]).length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Interests</h3>
-              <div className="flex flex-wrap gap-2">
-                {(profile.interests as string[]).map((interest) => (
-                  <span
-                    key={interest}
-                    className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm"
-                  >
-                    {interest}
-                  </span>
-                ))}
+          {/* Stats Bar */}
+          <div className="bg-white border-b">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-around py-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+                    {user.points_balance || 0}
+                  </div>
+                  <div className="text-xs text-gray-500 font-medium">Points</div>
+                </div>
+                <div className="w-px h-8 bg-gray-200" />
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{gallery.length}</div>
+                  <div className="text-xs text-gray-500 font-medium">Photos</div>
+                </div>
+                <div className="w-px h-8 bg-gray-200" />
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">
+                    {profile.is_verified ? (
+                      <CheckCircle className="w-6 h-6 text-blue-500 mx-auto" />
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500 font-medium">Verified</div>
+                </div>
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Life Goals */}
-          {profile.life_goals && profile.life_goals.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Life Goals</h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.life_goals.map((goal) => (
-                  <span
-                    key={goal}
-                    className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm capitalize"
-                  >
-                    {goal.replace(/_/g, " ")}
-                  </span>
-                ))}
+          {/* Main Content */}
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Left Column - Main Content */}
+              <div className="md:col-span-2 space-y-6">
+                {/* About */}
+                {profile.bio && (
+                  <section className="bg-white rounded-2xl p-5 shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">About</h3>
+                    <p className="text-gray-700 leading-relaxed">{profile.bio}</p>
+                  </section>
+                )}
+
+                {/* Gallery */}
+                {gallery.length > 0 && (
+                  <section className="bg-white rounded-2xl p-5 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Gallery</h3>
+                      <Link href="/profile/gallery" className="text-sm text-pink-500 font-medium hover:text-pink-600">
+                        Manage
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {gallery.slice(0, 6).map((item) => {
+                        const isVideo = item.media_type === "video";
+                        return (
+                          <div key={item.id} className="aspect-square rounded-xl overflow-hidden bg-gray-100">
+                            {isVideo ? (
+                              <video src={item.media_url} className="w-full h-full object-cover" muted playsInline />
+                            ) : (
+                              <img src={item.media_url} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {gallery.length > 6 && (
+                      <Link href="/profile/gallery" className="block text-center text-sm text-gray-500 mt-3 hover:text-pink-500">
+                        +{gallery.length - 6} more
+                      </Link>
+                    )}
+                  </section>
+                )}
+
+                {/* Interests */}
+                {profile.interests && (profile.interests as string[]).length > 0 && (
+                  <section className="bg-white rounded-2xl p-5 shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Interests</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {(profile.interests as string[]).map((interest) => (
+                        <span
+                          key={interest}
+                          className="px-3 py-1.5 bg-gradient-to-r from-pink-50 to-purple-50 text-pink-700 rounded-full text-sm font-medium border border-pink-100"
+                        >
+                          {interest}
+                        </span>
+                      ))}
+                    </div>
+                  </section>
+                )}
               </div>
-            </div>
-          )}
 
-          {/* Gallery */}
-          {gallery.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Gallery</h3>
-              <div className="grid grid-cols-3 gap-4">
-                {gallery.map((item) => {
-                  const isVideo = item.media_type === "video";
-                  return (
-                    <div key={item.id} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      {isVideo ? (
-                        <video src={item.media_url} className="w-full h-full object-cover" muted playsInline />
-                      ) : (
-                        <img src={item.media_url} alt="" className="w-full h-full object-cover" />
+              {/* Right Column - Sidebar */}
+              <div className="space-y-6">
+                {/* Referral Card */}
+                {user.referral_code && (
+                  <section className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Gift className="w-5 h-5 text-amber-600" />
+                      <h3 className="text-sm font-semibold text-amber-800">Referral Code</h3>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-amber-200">
+                      <code className="flex-1 font-mono text-amber-900 font-medium">{user.referral_code}</code>
+                      <button className="p-1 hover:bg-amber-50 rounded transition-colors">
+                        <Copy className="w-4 h-4 text-amber-600" />
+                      </button>
+                    </div>
+                    <p className="text-xs text-amber-700 mt-2">
+                      Share to earn points when friends sign up!
+                    </p>
+                  </section>
+                )}
+
+                {/* Details Card */}
+                <section className="bg-white rounded-2xl p-5 shadow-sm">
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Details</h3>
+                  <div className="space-y-3">
+                    {profile.height_inches && (
+                      <DetailRow label="Height" value={formatHeight(profile.height_inches)} />
+                    )}
+                    {profile.body_type && (
+                      <DetailRow label="Body Type" value={profile.body_type} />
+                    )}
+                    {profile.education && (
+                      <DetailRow label="Education" value={profile.education} />
+                    )}
+                    {profile.religion && (
+                      <DetailRow label="Religion" value={profile.religion} />
+                    )}
+                    {profile.zodiac_sign && (
+                      <DetailRow label="Zodiac" value={profile.zodiac_sign} />
+                    )}
+                    {profile.dating_intentions && (
+                      <DetailRow label="Looking For" value={profile.dating_intentions.replace(/_/g, " ")} />
+                    )}
+                  </div>
+                </section>
+
+                {/* Lifestyle Card */}
+                {(profile.smoking || profile.drinking || profile.exercise || profile.wants_kids) && (
+                  <section className="bg-white rounded-2xl p-5 shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Lifestyle</h3>
+                    <div className="space-y-3">
+                      {profile.smoking && (
+                        <DetailRow label="Smoking" value={profile.smoking} />
+                      )}
+                      {profile.drinking && (
+                        <DetailRow label="Drinking" value={profile.drinking} />
+                      )}
+                      {profile.exercise && (
+                        <DetailRow label="Exercise" value={profile.exercise} />
+                      )}
+                      {profile.wants_kids && (
+                        <DetailRow label="Wants Kids" value={profile.wants_kids.replace(/_/g, " ")} />
                       )}
                     </div>
-                  );
-                })}
+                  </section>
+                )}
               </div>
             </div>
-          )}
-
-          {/* Details */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Details</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {profile.height_inches && (
-                <div>
-                  <p className="text-sm text-gray-500">Height</p>
-                  <p className="font-medium">{Math.floor(profile.height_inches / 12)}'{profile.height_inches % 12}"</p>
-                </div>
-              )}
-              {profile.body_type && (
-                <div>
-                  <p className="text-sm text-gray-500">Body Type</p>
-                  <p className="font-medium capitalize">{profile.body_type}</p>
-                </div>
-              )}
-              {profile.education && (
-                <div>
-                  <p className="text-sm text-gray-500">Education</p>
-                  <p className="font-medium">{profile.education}</p>
-                </div>
-              )}
-              {profile.religion && (
-                <div>
-                  <p className="text-sm text-gray-500">Religion</p>
-                  <p className="font-medium">{profile.religion}</p>
-                </div>
-              )}
-              {profile.smoking && (
-                <div>
-                  <p className="text-sm text-gray-500">Smoking</p>
-                  <p className="font-medium capitalize">{profile.smoking}</p>
-                </div>
-              )}
-              {profile.drinking && (
-                <div>
-                  <p className="text-sm text-gray-500">Drinking</p>
-                  <p className="font-medium capitalize">{profile.drinking}</p>
-                </div>
-              )}
-              {profile.exercise && (
-                <div>
-                  <p className="text-sm text-gray-500">Exercise</p>
-                  <p className="font-medium capitalize">{profile.exercise}</p>
-                </div>
-              )}
-              {profile.wants_kids && (
-                <div>
-                  <p className="text-sm text-gray-500">Wants Kids</p>
-                  <p className="font-medium capitalize">{profile.wants_kids.replace(/_/g, " ")}</p>
-                </div>
-              )}
-              {profile.zodiac_sign && (
-                <div>
-                  <p className="text-sm text-gray-500">Zodiac</p>
-                  <p className="font-medium capitalize">{profile.zodiac_sign}</p>
-                </div>
-              )}
-              {profile.dating_intentions && (
-                <div>
-                  <p className="text-sm text-gray-500">Looking For</p>
-                  <p className="font-medium capitalize">{profile.dating_intentions.replace(/_/g, " ")}</p>
-                </div>
-              )}
-            </div>
           </div>
-        </div>
+        </>
       )}
+    </div>
+  );
+}
+
+// Helper component for detail rows
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-gray-500">{label}</span>
+      <span className="text-sm font-medium text-gray-900 capitalize">{value}</span>
     </div>
   );
 }
