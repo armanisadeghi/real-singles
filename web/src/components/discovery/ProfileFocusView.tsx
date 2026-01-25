@@ -121,7 +121,7 @@ export function ProfileFocusView({
     setActionLoading(action);
     
     try {
-      let result;
+      let result: { success: boolean; is_mutual?: boolean; msg?: string } | undefined;
       switch (action) {
         case "like":
           result = onLike ? await onLike(profile.user_id) : { success: true };
