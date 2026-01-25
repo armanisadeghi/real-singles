@@ -231,7 +231,7 @@ export default function HomePage() {
             <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 flex-1">
               <Link
                 href="/discover"
-                className="flex-shrink-0 px-4 py-2 bg-primary text-white rounded-full font-medium text-sm transition-colors"
+                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
               >
                 Discover
               </Link>
