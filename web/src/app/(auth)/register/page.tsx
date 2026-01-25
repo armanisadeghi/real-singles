@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { REFERRAL_COOKIE_NAME } from "@/app/join/page";
+import { REFERRAL_COOKIE_NAME } from "@/lib/config";
 
 // Helper to get cookie value
 function getCookie(name: string): string | null {

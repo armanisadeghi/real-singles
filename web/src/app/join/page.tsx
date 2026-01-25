@@ -1,10 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-
-// Cookie name for storing referral codes
-export const REFERRAL_COOKIE_NAME = "referral_code";
-// Cookie expiry in seconds (30 days)
-const COOKIE_MAX_AGE = 30 * 24 * 60 * 60;
+import { REFERRAL_COOKIE_NAME, REFERRAL_COOKIE_MAX_AGE } from "@/lib/config";
 
 interface JoinPageProps {
   searchParams: Promise<{ ref?: string }>;
@@ -26,7 +22,7 @@ export default async function JoinPage({ searchParams }: JoinPageProps) {
   if (referralCode && referralCode.trim()) {
     const cookieStore = await cookies();
     cookieStore.set(REFERRAL_COOKIE_NAME, referralCode.trim().toUpperCase(), {
-      maxAge: COOKIE_MAX_AGE,
+      maxAge: REFERRAL_COOKIE_MAX_AGE,
       path: "/",
       httpOnly: false, // Allow client-side access for pre-filling form
       secure: process.env.NODE_ENV === "production",

@@ -21,6 +21,11 @@ export const APP_DOMAIN = (() => {
 // App name for display
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'RealSingles';
 
+// Cookie name for storing referral codes (shared between server and client)
+export const REFERRAL_COOKIE_NAME = "referral_code";
+// Cookie expiry in seconds (30 days)
+export const REFERRAL_COOKIE_MAX_AGE = 30 * 24 * 60 * 60;
+
 /**
  * Generate a referral link for sharing
  * @param code - The user's referral code
