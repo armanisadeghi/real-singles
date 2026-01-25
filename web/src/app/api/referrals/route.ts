@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { getReferralLink } from "@/lib/config";
 
 /**
  * GET /api/referrals
@@ -92,7 +93,7 @@ export async function GET(request: NextRequest) {
     success: true,
     data: {
       referral_code: userData?.referral_code || "",
-      referral_link: `https://realsingles.com/join?ref=${userData?.referral_code || ""}`,
+      referral_link: userData?.referral_code ? getReferralLink(userData.referral_code) : "",
       stats: {
         total_referrals: totalReferrals || 0,
         completed_referrals: completedReferrals || 0,

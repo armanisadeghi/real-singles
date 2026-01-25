@@ -10,9 +10,8 @@ import {
   Sparkles,
   Share2,
   Camera,
-  Gift,
-  Copy
 } from "lucide-react";
+import { ReferralCard } from "@/components/profile/ReferralCard";
 
 async function getMyProfile() {
   const supabase = await createClient();
@@ -309,21 +308,7 @@ export default async function MyProfilePage() {
               <div className="space-y-6">
                 {/* Referral Card */}
                 {user.referral_code && (
-                  <section className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-100">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Gift className="w-5 h-5 text-amber-600" />
-                      <h3 className="text-sm font-semibold text-amber-800">Referral Code</h3>
-                    </div>
-                    <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-amber-200">
-                      <code className="flex-1 font-mono text-amber-900 font-medium">{user.referral_code}</code>
-                      <button className="p-1 hover:bg-amber-50 rounded transition-colors">
-                        <Copy className="w-4 h-4 text-amber-600" />
-                      </button>
-                    </div>
-                    <p className="text-xs text-amber-700 mt-2">
-                      Share to earn points when friends sign up!
-                    </p>
-                  </section>
+                  <ReferralCard referralCode={user.referral_code} />
                 )}
 
                 {/* Details Card */}

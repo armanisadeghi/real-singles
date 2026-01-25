@@ -721,3 +721,76 @@ export const saveLink = async (linkData: FormData) => {
   return { success: true, msg: "Link saved" };
 };
 
+// ===========================================
+// BLOCK & REPORT ENDPOINTS
+// ===========================================
+
+/**
+ * Block a user
+ */
+export const blockUser = async (blockedUserId: string) => {
+  return apiRequest("/blocks", {
+    method: "POST",
+    body: JSON.stringify({ blocked_user_id: blockedUserId }),
+  });
+};
+
+/**
+ * Unblock a user
+ */
+export const unblockUser = async (blockedUserId: string) => {
+  return apiRequest(`/blocks/${blockedUserId}`, {
+    method: "DELETE",
+  });
+};
+
+/**
+ * Report a user
+ */
+export const reportUser = async (reportedUserId: string, reason: string) => {
+  return apiRequest("/reports", {
+    method: "POST",
+    body: JSON.stringify({ 
+      reported_user_id: reportedUserId,
+      reason: reason,
+    }),
+  });
+};
+
+/**
+ * Get block status for a user
+ */
+export const getBlockStatus = async (userId: string) => {
+  return apiRequest(`/blocks/${userId}`);
+};
+
+// ===========================================
+// GROUP MEMBER ENDPOINTS
+// ===========================================
+
+/**
+ * Add member to a group
+ */
+export const addGroupMember = async (groupId: string, userId: string) => {
+  return apiRequest(`/groups/${groupId}/members`, {
+    method: "POST",
+    body: JSON.stringify({ user_id: userId }),
+  });
+};
+
+/**
+ * Remove member from a group
+ */
+export const removeGroupMember = async (groupId: string, userId: string) => {
+  return apiRequest(`/groups/${groupId}/members/${userId}`, {
+    method: "DELETE",
+  });
+};
+
+/**
+ * Get group members
+ */
+export const getGroupMembers = async (groupId: string) => {
+  return apiRequest(`/groups/${groupId}/members`);
+};
+

@@ -313,7 +313,7 @@ export default function Home() {
           <View className="flex-row" style={{ gap: SPACING.sm }}>
             <TouchableOpacity
               onPress={() => router.push("/discover")}
-              className="bg-primary rounded-full"
+              className="border border-primary bg-secondary rounded-full"
               style={{ 
                 paddingHorizontal: SPACING.base, 
                 paddingVertical: SPACING.sm,
@@ -322,7 +322,7 @@ export default function Home() {
               }}
               activeOpacity={0.7}
             >
-              <Text className="text-white font-medium" style={TYPOGRAPHY.subheadline}>Discover</Text>
+              <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>Discover</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() =>

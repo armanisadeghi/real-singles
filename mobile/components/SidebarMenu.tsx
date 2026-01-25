@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { Avatar } from "@/components/ui/Avatar";
+import { getReferralLink, APP_NAME } from "@/lib/config";
 
 const { width } = Dimensions.get("window");
 const MENU_WIDTH = width * 0.75; // Menu takes 75% of screen width
@@ -21,6 +22,8 @@ interface SideMenuProps {
   /** User avatar URL or image source */
   userAvatar?: string | null;
   userName: string;
+  /** User's referral code for sharing */
+  referralCode?: string;
   direction?: "right" | "left";
 }
 
@@ -29,6 +32,7 @@ const SideMenu = ({
   onClose,
   userAvatar,
   userName,
+  referralCode,
   direction = "left",
 }: SideMenuProps) => {
   const router = useRouter();
@@ -38,26 +42,28 @@ const SideMenu = ({
   ).current;
 
   const handleReferFriend = async () => {
+    if (!referralCode) {
+      // If no referral code, just navigate to the refer page
+      onClose();
+      router.push("/refer");
+      return;
+    }
+
     try {
+      const referralLink = getReferralLink(referralCode);
       const result = await Share.share({
-        title: "Join me on RealSinglesApp!",
+        title: `Join me on ${APP_NAME}!`,
         message:
-          "Hey! I've been using RealSingles to meet amazing people and connect with like-minded individuals. Join me using my referral link and get started today! https://truapp.com/refer?user=" +
-          encodeURIComponent(userName),
-        // You can add a URL when you have one
-        // url: 'https://truapp.com/download'
+          `Hey! I've been using ${APP_NAME} to meet amazing people and connect with like-minded individuals. Join me using my referral link and get started today! ${referralLink}`,
       });
 
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          // Shared with activity type of result.activityType
           console.log("Shared via:", result.activityType);
         } else {
-          // Shared
           console.log("Shared successfully");
         }
       } else if (result.action === Share.dismissedAction) {
-        // Dismissed
         console.log("Share dismissed");
       }
 

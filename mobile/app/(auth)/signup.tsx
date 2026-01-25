@@ -19,8 +19,10 @@ import TakePhoto from "@/components/signup/TakePhoto";
 import TakeVideo2 from "@/components/signup/TakeVideo2";
 import WantChildren from "@/components/signup/WantChildren";
 import { images } from "@/constants/images";
+import { REFERRAL_CODE_STORAGE_KEY } from "@/lib/config";
 import { signUpWithEmail, supabase, updateProfile } from "@/lib/supabase";
 import { SignupData } from "@/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -246,6 +248,7 @@ const Signup = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showReview, setShowReview] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
   const router = useRouter();
   const [signupData, setSignupData] = useState<SignupData>({
     Username: "",
@@ -353,6 +356,23 @@ const Signup = () => {
   const goBackFromReview = () => {
     setShowReview(false);
   };
+
+  // Check for stored referral code on mount
+  useEffect(() => {
+    const checkReferralCode = async () => {
+      try {
+        const storedReferralCode = await AsyncStorage.getItem(REFERRAL_CODE_STORAGE_KEY);
+        if (storedReferralCode) {
+          console.log("Found stored referral code:", storedReferralCode);
+          setReferralCode(storedReferralCode);
+        }
+      } catch (error) {
+        console.error("Error checking referral code:", error);
+      }
+    };
+
+    checkReferralCode();
+  }, []);
 
   useEffect(() => {
     const getLocation = async () => {
@@ -473,6 +493,37 @@ const Signup = () => {
         }
       } catch (userUpdateError) {
         console.warn("User update warning:", userUpdateError);
+      }
+
+      // Step 4: Track referral if user signed up with a referral code
+      if (referralCode) {
+        try {
+          const { data: session } = await supabase.auth.getSession();
+          const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/referrals`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session?.session?.access_token}`,
+            },
+            body: JSON.stringify({
+              referral_code: referralCode,
+              referred_user_id: authData.user.id,
+            }),
+          });
+          
+          const result = await response.json();
+          if (result.success) {
+            console.log("Referral tracked successfully");
+          } else {
+            console.warn("Referral tracking warning:", result.msg);
+          }
+          
+          // Clear the stored referral code
+          await AsyncStorage.removeItem(REFERRAL_CODE_STORAGE_KEY);
+        } catch (referralError) {
+          console.warn("Referral tracking warning:", referralError);
+          // Don't fail registration if referral tracking fails
+        }
       }
 
       console.log("Registration completed successfully!");

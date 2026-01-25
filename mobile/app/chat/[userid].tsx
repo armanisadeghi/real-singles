@@ -4,11 +4,10 @@ import { ScreenHeader, HeaderBackButton } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
 import { SPACING, TYPOGRAPHY, ICON_SIZES } from "@/constants/designTokens";
 import { useCall } from "@/context/CallContext";
-import { getAgoraCallToken, getAgoraChatToken } from "@/lib/api";
+import { getAgoraCallToken, getAgoraChatToken, blockUser, unblockUser, reportUser } from "@/lib/api";
 import { getUserHistoryMessages, initChat, isChatInitialized, isChatLoggedIn, loginToChat, sendMessage as sendAgoraMessage, setupMessageListener } from "@/services/agoraChatServices";
-import { getCurrentUserId, getToken, IMAGE_URL, VIDEO_URL } from "@/utils/token";
+import { getCurrentUserId, IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
-import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -29,72 +28,30 @@ export default function ChatDetail() {
 
 
   const handleUnBlockUser = async () => {
-    const formData = new FormData();
-    formData.append("BlockedUserID", peerId);
-
     try {
-      const token = await getToken(); // get token from AsyncStorage
-      if (!token) {
-        Alert.alert("Error", "Authentication token not found");
-        return;
-      }
+      const res = await unblockUser(peerId);
 
-
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
-      const res = await axios.delete(
-        `${apiUrl}/blocks/${peerId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (res.status === 200) {
-        setIsBlocked(false); // user is now unblocked
+      if (res.success) {
+        setIsBlocked(false);
         Alert.alert("Success", "User unblocked");
-
       } else {
-        Alert.alert("Error", "Failed to unblock user");
+        Alert.alert("Error", res.msg || "Failed to unblock user");
       }
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Something went wrong");
     }
-  }
+  };
 
-  const handleBlockUser = async (peerId: string, setIsBlocked: Function, isBlocked: boolean) => {
-
-
-    const formData = new FormData();
-    formData.append("BlockedUserID", peerId);
-
+  const handleBlockUser = async (targetPeerId: string, setBlockedState: Function, currentlyBlocked: boolean) => {
     try {
-      const token = await getToken(); // get token from AsyncStorage
-      if (!token) {
-        Alert.alert("Error", "Authentication token not found");
-        return;
-      }
+      const res = await blockUser(targetPeerId);
 
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
-      const res = await axios.post(
-        `${apiUrl}/blocks`,
-        { blocked_user_id: peerId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      console.log("response in block user", res);
-
-      if (res.status === 200) {
-        setIsBlocked(true); // user is now blocked
+      if (res.success) {
+        setBlockedState(true);
         Alert.alert("Success", "User blocked");
       } else {
-        Alert.alert("Error", "Failed to block user");
+        Alert.alert("Error", res.msg || "Failed to block user");
       }
     } catch (error) {
       console.error(error);
@@ -105,43 +62,18 @@ export default function ChatDetail() {
   const blankReport = () => {
     Alert.alert("Error", "Please enter a reason for reporting");
     return;
-  }
-
+  };
 
   const handleReportUser = async () => {
-    const formData = new FormData();
-    formData.append("ReportedUserID", peerId);
-    formData.append("Reason", reportReason);
-
     try {
-      const token = await getToken(); // get token from AsyncStorage
-      if (!token) {
-        Alert.alert("Error", "Authentication token not found");
-        return;
-      }
+      const res = await reportUser(peerId, reportReason);
 
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
-      const res = await axios.post(
-        `${apiUrl}/reports`,
-        { 
-          reported_user_id: peerId,
-          reason: reportReason 
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (res.status === 200) {
-        setReportReason(""); // clear input
-        setVisible(false); // close modal
+      if (res.success) {
+        setReportReason("");
+        setVisible(false);
         Alert.alert("Success", "User reported successfully");
-
       } else {
-        Alert.alert("Error", "Failed to report user");
+        Alert.alert("Error", res.msg || "Failed to report user");
       }
     } catch (error) {
       console.error(error);
