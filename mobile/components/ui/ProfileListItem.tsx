@@ -10,8 +10,8 @@
 import { icons } from "@/constants/icons";
 import { User } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
-import { Link } from "expo-router";
-import React, { useMemo } from "react";
+import { useRouter } from "expo-router";
+import React, { useCallback, useMemo } from "react";
 import {
   Image,
   Platform,
@@ -50,6 +50,8 @@ export default function ProfileListItem({
   navigateToFocus = true,
   onPress 
 }: ProfileListItemProps) {
+  const router = useRouter();
+  
   // Generate consistent background color based on user ID/name
   const bgColor = useMemo(() => {
     const seed = profile?.id || profile?.ID || profile?.DisplayName || "";
@@ -187,35 +189,28 @@ export default function ProfileListItem({
     </View>
   );
 
-  // If custom onPress provided, use Pressable
-  if (onPress) {
-    return (
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [
-          styles.pressable,
-          pressed && styles.pressed,
-        ]}
-        android_ripple={{ color: "rgba(0, 0, 0, 0.08)" }}
-      >
-        {content}
-      </Pressable>
-    );
-  }
+  // Handle navigation press
+  const handlePress = useCallback(() => {
+    if (onPress) {
+      onPress();
+    } else {
+      // Use programmatic navigation instead of Link
+      // This fixes Android touch issues inside FlatList
+      router.push(href as any);
+    }
+  }, [onPress, router, href]);
 
-  // Default: Link to profile/focus view
   return (
-    <Link asChild href={href as any}>
-      <Pressable
-        style={({ pressed }) => [
-          styles.pressable,
-          pressed && styles.pressed,
-        ]}
-        android_ripple={{ color: "rgba(0, 0, 0, 0.08)" }}
-      >
-        {content}
-      </Pressable>
-    </Link>
+    <Pressable
+      onPress={handlePress}
+      style={({ pressed }) => [
+        styles.pressable,
+        pressed && styles.pressed,
+      ]}
+      android_ripple={{ color: "rgba(0, 0, 0, 0.08)" }}
+    >
+      {content}
+    </Pressable>
   );
 }
 
