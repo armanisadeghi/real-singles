@@ -339,13 +339,8 @@ export default function ProfileFocusView() {
       {/* Action Bar */}
       <Animated.View
         entering={SlideInDown.springify()}
-        style={[styles.actionBar, { paddingBottom: insets.bottom + SPACING.md }]}
+        style={[styles.actionBar, { paddingBottom: Math.max(insets.bottom, 8) + 8 }]}
       >
-        <LinearGradient
-          colors={["transparent", "rgba(255,255,255,0.95)", "white"]}
-          style={StyleSheet.absoluteFill}
-        />
-
         <View style={styles.actionButtons}>
           {/* Pass Button */}
           <TouchableOpacity
@@ -357,7 +352,7 @@ export default function ProfileFocusView() {
             {actionLoading === "pass" ? (
               <ActivityIndicator size="small" color="#EF4444" />
             ) : (
-              <Ionicons name="close" size={32} color="#EF4444" />
+              <Ionicons name="close" size={24} color="#EF4444" />
             )}
           </TouchableOpacity>
 
@@ -371,7 +366,7 @@ export default function ProfileFocusView() {
             {actionLoading === "super_like" ? (
               <ActivityIndicator size="small" color="#3B82F6" />
             ) : (
-              <Ionicons name="star" size={24} color="#3B82F6" />
+              <Ionicons name="star" size={18} color="#3B82F6" />
             )}
           </TouchableOpacity>
 
@@ -385,7 +380,7 @@ export default function ProfileFocusView() {
             {actionLoading === "like" ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Ionicons name="heart" size={32} color="white" />
+              <Ionicons name="heart" size={24} color="white" />
             )}
           </TouchableOpacity>
         </View>
@@ -548,7 +543,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingTop: SPACING.lg,
+    paddingTop: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    backgroundColor: "rgba(255, 255, 255, 0.98)",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "rgba(0, 0, 0, 0.1)",
   },
   actionButtons: {
     flexDirection: "row",
@@ -562,35 +561,35 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
       },
       android: {
-        elevation: 4,
+        elevation: 2,
       },
     }),
   },
   passButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: "white",
-    borderWidth: 2,
-    borderColor: "#FEE2E2",
+    borderWidth: 1.5,
+    borderColor: "#FECACA",
   },
   superLikeButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "white",
-    borderWidth: 2,
-    borderColor: "#DBEAFE",
+    borderWidth: 1.5,
+    borderColor: "#BFDBFE",
   },
   likeButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: "#B06D1E",
   },
 });

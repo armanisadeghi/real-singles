@@ -300,12 +300,12 @@ export default function DiscoveryProfileView() {
         <ProfileSectionRenderer profile={profile} />
       </ScrollView>
       
-      {/* Fixed Action Bar */}
+      {/* Fixed Action Bar - Compact native-style */}
       <Animated.View
         entering={SlideInDown.springify()}
         style={[
           styles.actionBar,
-          { paddingBottom: Math.max(insets.bottom, 16) },
+          { paddingBottom: Math.max(insets.bottom, 8) + 8 },
         ]}
       >
         {/* Pass Button */}
@@ -318,7 +318,7 @@ export default function DiscoveryProfileView() {
             {actionLoading === "pass" ? (
               <ActivityIndicator size="small" color="#EF4444" />
             ) : (
-              <Ionicons name="close" size={32} color="#EF4444" />
+              <Ionicons name="close" size={24} color="#EF4444" />
             )}
           </Pressable>
         </Animated.View>
@@ -333,7 +333,7 @@ export default function DiscoveryProfileView() {
             {actionLoading === "super_like" ? (
               <ActivityIndicator size="small" color="#3B82F6" />
             ) : (
-              <Ionicons name="star" size={24} color="#3B82F6" />
+              <Ionicons name="star" size={18} color="#3B82F6" />
             )}
           </Pressable>
         </Animated.View>
@@ -348,7 +348,7 @@ export default function DiscoveryProfileView() {
             {actionLoading === "like" ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Ionicons name="heart" size={32} color="white" />
+              <Ionicons name="heart" size={24} color="white" />
             )}
           </Pressable>
         </Animated.View>
@@ -445,20 +445,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: SPACING.lg,
-    paddingTop: SPACING.lg,
-    paddingHorizontal: SPACING.xl,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
+    paddingTop: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    backgroundColor: "rgba(255, 255, 255, 0.98)",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "rgba(0, 0, 0, 0.1)",
   },
   actionButton: {
     justifyContent: "center",
@@ -466,35 +457,35 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
       },
       android: {
-        elevation: 4,
+        elevation: 2,
       },
     }),
   },
   passButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: "white",
-    borderWidth: 2,
-    borderColor: "#FEE2E2",
+    borderWidth: 1.5,
+    borderColor: "#FECACA",
   },
   superLikeButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "white",
-    borderWidth: 2,
-    borderColor: "#DBEAFE",
+    borderWidth: 1.5,
+    borderColor: "#BFDBFE",
   },
   likeButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: "#B06D1E",
   },
   reportOverlay: {

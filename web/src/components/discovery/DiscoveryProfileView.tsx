@@ -158,55 +158,127 @@ export function DiscoveryProfileView({
   );
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Photo Section */}
-      <div className="relative">
-        <PhotoCarousel images={images} height="55vh" showGradient={true} />
+    <div className="min-h-dvh bg-gray-50 flex flex-col">
+      {/* Centered container for desktop */}
+      <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-center md:py-8 md:px-4 md:gap-6 max-w-6xl mx-auto w-full">
+        
+        {/* Photo Section - constrained on desktop */}
+        <div className="relative md:sticky md:top-8 md:w-[400px] md:flex-shrink-0">
+          <div className="md:rounded-2xl md:overflow-hidden md:shadow-lg">
+            <PhotoCarousel 
+              images={images} 
+              height="55vh"
+              className="md:h-[500px]"
+              showGradient={true} 
+            />
+          </div>
 
-        {/* Header overlay */}
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-10">
-          {/* Close button */}
-          <button
-            onClick={handleClose}
-            className="w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
-          >
-            <X className="w-6 h-6 text-white" />
-          </button>
+          {/* Header overlay */}
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-10 md:p-3">
+            {/* Close button */}
+            <button
+              onClick={handleClose}
+              className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
 
-          {/* Report button */}
-          <button
-            onClick={() => setShowReportModal(true)}
-            className="w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
-          >
-            <Flag className="w-5 h-5 text-white" />
-          </button>
+            {/* Report button */}
+            <button
+              onClick={() => setShowReportModal(true)}
+              className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
+            >
+              <Flag className="w-4 h-4 text-white" />
+            </button>
+          </div>
+
+          {/* Desktop action bar - below photo */}
+          <div className="hidden md:flex items-center justify-center gap-4 py-4">
+            {/* Pass Button */}
+            <button
+              onClick={() => handleAction("pass")}
+              disabled={actionLoading !== null}
+              className={cn(
+                "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+                "bg-white border border-red-200 text-red-500",
+                "hover:border-red-400 hover:bg-red-50 hover:scale-105",
+                "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
+                "shadow-sm"
+              )}
+            >
+              {actionLoading === "pass" ? (
+                <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <X className="w-6 h-6" />
+              )}
+            </button>
+
+            {/* Super Like Button */}
+            <button
+              onClick={() => handleAction("super_like")}
+              disabled={actionLoading !== null}
+              className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+                "bg-white border border-blue-200 text-blue-500",
+                "hover:border-blue-400 hover:bg-blue-50 hover:scale-105",
+                "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
+                "shadow-sm"
+              )}
+            >
+              {actionLoading === "super_like" ? (
+                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Star className="w-5 h-5" />
+              )}
+            </button>
+
+            {/* Like Button */}
+            <button
+              onClick={() => handleAction("like")}
+              disabled={actionLoading !== null}
+              className={cn(
+                "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+                "bg-amber-500 text-white",
+                "hover:bg-amber-600 hover:scale-105",
+                "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
+                "shadow-sm"
+              )}
+            >
+              {actionLoading === "like" ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Heart className="w-6 h-6" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Profile Content - scrollable on desktop */}
+        <div className="flex-1 bg-white md:rounded-2xl md:shadow-lg md:max-w-xl">
+          <div className="p-5 md:p-6">
+            <ProfileSectionRenderer profile={profile} />
+          </div>
         </div>
       </div>
 
-      {/* Profile Content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <ProfileSectionRenderer profile={profile} />
-      </div>
-
-      {/* Action Bar */}
-      <div className="sticky bottom-0 bg-gradient-to-t from-white via-white to-transparent pt-10 pb-6 px-6">
-        <div className="flex items-center justify-center gap-6">
+      {/* Mobile Action Bar - fixed at bottom */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/98 border-t border-gray-200 pb-[env(safe-area-inset-bottom)]">
+        <div className="flex items-center justify-center gap-5 py-3 px-4">
           {/* Pass Button */}
           <button
             onClick={() => handleAction("pass")}
             disabled={actionLoading !== null}
             className={cn(
-              "w-16 h-16 rounded-full flex items-center justify-center transition-all",
-              "bg-white border-2 border-red-200 text-red-500",
-              "hover:border-red-400 hover:bg-red-50 hover:scale-105",
-              "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-              "shadow-lg"
+              "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+              "bg-white border border-red-200 text-red-500",
+              "active:scale-95 disabled:opacity-50",
+              "shadow-sm"
             )}
           >
             {actionLoading === "pass" ? (
-              <div className="w-6 h-6 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
             ) : (
-              <X className="w-8 h-8" />
+              <X className="w-6 h-6" />
             )}
           </button>
 
@@ -215,17 +287,16 @@ export function DiscoveryProfileView({
             onClick={() => handleAction("super_like")}
             disabled={actionLoading !== null}
             className={cn(
-              "w-14 h-14 rounded-full flex items-center justify-center transition-all",
-              "bg-white border-2 border-blue-200 text-blue-500",
-              "hover:border-blue-400 hover:bg-blue-50 hover:scale-105",
-              "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-              "shadow-lg"
+              "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+              "bg-white border border-blue-200 text-blue-500",
+              "active:scale-95 disabled:opacity-50",
+              "shadow-sm"
             )}
           >
             {actionLoading === "super_like" ? (
-              <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Star className="w-6 h-6" />
+              <Star className="w-5 h-5" />
             )}
           </button>
 
@@ -234,17 +305,16 @@ export function DiscoveryProfileView({
             onClick={() => handleAction("like")}
             disabled={actionLoading !== null}
             className={cn(
-              "w-16 h-16 rounded-full flex items-center justify-center transition-all",
-              "bg-gradient-to-br from-amber-500 to-amber-600 text-white",
-              "hover:from-amber-600 hover:to-amber-700 hover:scale-105",
-              "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-              "shadow-lg"
+              "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+              "bg-amber-500 text-white",
+              "active:scale-95 disabled:opacity-50",
+              "shadow-sm"
             )}
           >
             {actionLoading === "like" ? (
-              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Heart className="w-8 h-8" />
+              <Heart className="w-6 h-6" />
             )}
           </button>
         </div>

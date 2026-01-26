@@ -66,14 +66,17 @@ export function PhotoCarousel({
     setIsViewerOpen(true);
   }, []);
 
+  // Use CSS variable for height to allow className overrides
+  const heightStyle = { "--carousel-height": height } as React.CSSProperties;
+
   if (images.length === 0) {
     return (
       <div
         className={cn(
-          "bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center",
+          "bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center h-[var(--carousel-height)]",
           className
         )}
-        style={{ height }}
+        style={heightStyle}
       >
         <div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center">
           <span className="text-4xl text-gray-400">👤</span>
@@ -85,8 +88,8 @@ export function PhotoCarousel({
   return (
     <>
       <div
-        className={cn("relative overflow-hidden", className)}
-        style={{ height }}
+        className={cn("relative overflow-hidden h-[var(--carousel-height)]", className)}
+        style={heightStyle}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

@@ -330,26 +330,26 @@ export function ProfileFocusView({
         </div>
       </div>
 
-      {/* Action Bar */}
-      <div className="sticky bottom-0 bg-gradient-to-t from-white via-white to-transparent p-6 pt-10">
-        <div className="flex items-center justify-center gap-6">
+      {/* Action Bar - Compact native-style */}
+      <div className="sticky bottom-0 bg-white/98 border-t border-gray-200 py-3 px-4">
+        <div className="flex items-center justify-center gap-5">
           {/* Pass Button */}
           <button
             onClick={() => handleAction("pass")}
             disabled={actionLoading !== null}
             className={cn(
-              "w-16 h-16 rounded-full flex items-center justify-center transition-all",
-              "bg-white border-2 border-red-200 text-red-500",
+              "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+              "bg-white border border-red-200 text-red-500",
               "hover:border-red-400 hover:bg-red-50 hover:scale-105",
               "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-              "shadow-lg",
+              "shadow-sm",
               actionComplete === "pass" && "bg-red-100 border-red-400"
             )}
           >
             {actionLoading === "pass" ? (
-              <div className="w-6 h-6 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
             ) : (
-              <X className="w-8 h-8" />
+              <X className="w-6 h-6" />
             )}
           </button>
 
@@ -358,18 +358,18 @@ export function ProfileFocusView({
             onClick={() => handleAction("super_like")}
             disabled={actionLoading !== null}
             className={cn(
-              "w-14 h-14 rounded-full flex items-center justify-center transition-all",
-              "bg-white border-2 border-blue-200 text-blue-500",
+              "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+              "bg-white border border-blue-200 text-blue-500",
               "hover:border-blue-400 hover:bg-blue-50 hover:scale-105",
               "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-              "shadow-lg",
+              "shadow-sm",
               actionComplete === "super_like" && "bg-blue-100 border-blue-400"
             )}
           >
             {actionLoading === "super_like" ? (
-              <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Star className="w-6 h-6" />
+              <Star className="w-5 h-5" />
             )}
           </button>
 
@@ -378,18 +378,18 @@ export function ProfileFocusView({
             onClick={() => handleAction("like")}
             disabled={actionLoading !== null}
             className={cn(
-              "w-16 h-16 rounded-full flex items-center justify-center transition-all",
-              "bg-gradient-to-br from-amber-500 to-amber-600 text-white",
-              "hover:from-amber-600 hover:to-amber-700 hover:scale-105",
+              "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+              "bg-amber-500 text-white",
+              "hover:bg-amber-600 hover:scale-105",
               "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-              "shadow-lg",
-              actionComplete === "like" && "from-green-500 to-green-600"
+              "shadow-sm",
+              actionComplete === "like" && "bg-green-500"
             )}
           >
             {actionLoading === "like" ? (
-              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Heart className="w-8 h-8" />
+              <Heart className="w-6 h-6" />
             )}
           </button>
         </div>
