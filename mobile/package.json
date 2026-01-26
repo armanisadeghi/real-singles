@@ -17,7 +17,12 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "preflight": "node ./scripts/preflight.js",
+    "preflight:android": "node ./scripts/preflight.js --android",
+    "preflight:ios": "node ./scripts/preflight.js --ios",
+    "dev:android": "pnpm preflight:android && expo run:android",
+    "dev:ios": "pnpm preflight:ios && expo run:ios"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
