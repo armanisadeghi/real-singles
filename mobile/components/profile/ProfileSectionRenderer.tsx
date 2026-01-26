@@ -147,7 +147,7 @@ export default function ProfileSectionRenderer({
   }
   if (shouldDisplay(profile?.Ethnicity)) {
     const ethnicity = Array.isArray(profile.Ethnicity) 
-      ? profile.Ethnicity.map(e => capitalize(e)).join(", ")
+      ? profile.Ethnicity.map((e: string) => capitalize(e)).join(", ")
       : capitalize(profile.Ethnicity || "");
     if (ethnicity) {
       backgroundItems.push({ icon: "globe-outline", label: "Ethnicity", value: ethnicity });

@@ -139,7 +139,20 @@ export interface User {
   IsFavorite?: any;
   livePicture?: string;
   distance_in_km?: number;
-  TotalRating ?: number
+  TotalRating?: number;
+  // Profile details
+  BodyType?: string;
+  Education?: string;
+  JobTitle?: string;
+  Religion?: string;
+  Ethnicity?: string | string[];
+  HaveChild?: string;
+  WantChild?: string;
+  Pets?: string;
+  Smoking?: string;
+  Drinks?: string;
+  Marijuana?: string;
+  is_verified?: boolean;
 }
 
 export interface EditProfileFormData {

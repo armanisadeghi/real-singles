@@ -51,6 +51,11 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "supabase"
+    ],
+    "ignoredBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
     ]
   }
 }

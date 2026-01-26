@@ -61,7 +61,8 @@ export async function generateCallToken(
     channelName,
     uid,
     agoraRole,
-    expiresAt
+    expiresAt,
+    expiresAt // privilegeExpiredTs - using same expiration for token and privilege
   );
   
   return {
