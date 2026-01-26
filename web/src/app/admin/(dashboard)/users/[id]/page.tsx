@@ -51,6 +51,14 @@ interface ProfileDetail {
   is_photo_verified: boolean;
 }
 
+interface GalleryImage {
+  id: string;
+  user_id: string;
+  media_url: string;
+  display_order: number;
+  is_primary: boolean;
+}
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -59,14 +67,25 @@ export default function AdminUserDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const [user, setUser] = useState<UserDetail | null>(null);
   const [profile, setProfile] = useState<ProfileDetail | null>(null);
+  const [gallery, setGallery] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
   const [showSuspendConfirm, setShowSuspendConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPointsSheet, setShowPointsSheet] = useState(false);
+  const [showEditProfileSheet, setShowEditProfileSheet] = useState(false);
+  const [showEditImageSheet, setShowEditImageSheet] = useState(false);
+  const [editingImageIndex, setEditingImageIndex] = useState<number | null>(null);
   const [pointsAmount, setPointsAmount] = useState(0);
   const [pointsReason, setPointsReason] = useState("");
+  
+  // Edit profile form state
+  const [editFirstName, setEditFirstName] = useState("");
+  const [editLastName, setEditLastName] = useState("");
+  const [editGender, setEditGender] = useState("");
+  const [editProfileImageUrl, setEditProfileImageUrl] = useState("");
+  const [editGalleryImageUrl, setEditGalleryImageUrl] = useState("");
 
   const fetchData = useCallback(async () => {
     try {
@@ -76,6 +95,15 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         const data = await res.json();
         setUser(data.user);
         setProfile(data.profile);
+        setGallery(data.gallery || []);
+        
+        // Initialize edit form values
+        if (data.profile) {
+          setEditFirstName(data.profile.first_name || "");
+          setEditLastName(data.profile.last_name || "");
+          setEditGender(data.profile.gender || "");
+          setEditProfileImageUrl(data.profile.profile_image_url || "");
+        }
       }
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -165,6 +193,92 @@ export default function AdminUserDetailPage({ params }: PageProps) {
     }
   };
 
+  const handleUpdateProfile = async () => {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: editFirstName,
+          last_name: editLastName,
+          gender: editGender,
+          profile_image_url: editProfileImageUrl,
+        }),
+      });
+
+      if (res.ok) {
+        setProfile((prev) => prev ? {
+          ...prev,
+          first_name: editFirstName,
+          last_name: editLastName,
+          gender: editGender,
+          profile_image_url: editProfileImageUrl,
+        } : null);
+        setShowEditProfileSheet(false);
+        alert("Profile updated successfully");
+      } else {
+        alert("Failed to update profile");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleUpdateGalleryImage = async () => {
+    if (editingImageIndex === null || !editGalleryImageUrl) return;
+
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/admin/users/${id}/gallery`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          display_order: editingImageIndex,
+          media_url: editGalleryImageUrl,
+          is_primary: editingImageIndex === 0,
+        }),
+      });
+
+      if (res.ok) {
+        // Update local state
+        setGallery((prev) => prev.map((img) => 
+          img.display_order === editingImageIndex 
+            ? { ...img, media_url: editGalleryImageUrl }
+            : img
+        ));
+        
+        // If primary image, also update profile
+        if (editingImageIndex === 0) {
+          setProfile((prev) => prev ? { ...prev, profile_image_url: editGalleryImageUrl } : null);
+          setEditProfileImageUrl(editGalleryImageUrl);
+        }
+        
+        setShowEditImageSheet(false);
+        setEditingImageIndex(null);
+        setEditGalleryImageUrl("");
+        alert("Image updated successfully");
+      } else {
+        alert("Failed to update image");
+      }
+    } catch (error) {
+      console.error("Error updating image:", error);
+      alert("Failed to update image");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const openEditImageSheet = (index: number) => {
+    const image = gallery.find((img) => img.display_order === index);
+    setEditingImageIndex(index);
+    setEditGalleryImageUrl(image?.media_url || "");
+    setShowEditImageSheet(true);
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -225,6 +339,13 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
         {/* Quick actions */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowEditProfileSheet(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+          >
+            <User className="w-4 h-4" />
+            Edit Profile
+          </button>
           <button
             onClick={() => setShowPointsSheet(true)}
             className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors"
@@ -429,6 +550,43 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         </div>
       </div>
 
+      {/* Gallery Section */}
+      {gallery.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="font-semibold text-gray-900 mb-4">Gallery Images</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {gallery.map((img) => (
+              <div key={img.id} className="relative group">
+                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                  <img
+                    src={img.media_url}
+                    alt={`Gallery ${img.display_order}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/200?text=Error";
+                    }}
+                  />
+                </div>
+                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                  <button
+                    onClick={() => openEditImageSheet(img.display_order)}
+                    className="px-3 py-1 bg-white text-gray-900 rounded text-sm font-medium"
+                  >
+                    Edit
+                  </button>
+                </div>
+                <div className="absolute top-2 left-2">
+                  <span className="px-2 py-0.5 bg-black bg-opacity-50 text-white text-xs rounded">
+                    #{img.display_order}
+                    {img.is_primary && " (Primary)"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Suspend Confirmation */}
       <ConfirmModal
         isOpen={showSuspendConfirm}
@@ -531,6 +689,160 @@ export default function AdminUserDetailPage({ params }: PageProps) {
             )}
           >
             {actionLoading ? "Saving..." : "Save Changes"}
+          </button>
+        </BottomSheetActions>
+      </BottomSheet>
+
+      {/* Edit Profile Sheet */}
+      <BottomSheet
+        isOpen={showEditProfileSheet}
+        onClose={() => setShowEditProfileSheet(false)}
+        title="Edit Profile"
+      >
+        <div className="p-4 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                First Name
+              </label>
+              <input
+                type="text"
+                value={editFirstName}
+                onChange={(e) => setEditFirstName(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Last Name
+              </label>
+              <input
+                type="text"
+                value={editLastName}
+                onChange={(e) => setEditLastName(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Gender
+            </label>
+            <select
+              value={editGender}
+              onChange={(e) => setEditGender(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg"
+            >
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Profile Image URL
+            </label>
+            <input
+              type="url"
+              value={editProfileImageUrl}
+              onChange={(e) => setEditProfileImageUrl(e.target.value)}
+              placeholder="https://images.unsplash.com/photo-..."
+              className="w-full px-4 py-2 border rounded-lg text-sm"
+            />
+            {editProfileImageUrl && (
+              <div className="mt-2">
+                <img
+                  src={editProfileImageUrl}
+                  alt="Preview"
+                  className="w-24 h-24 rounded-lg object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "https://via.placeholder.com/100?text=Invalid";
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <BottomSheetActions>
+          <button
+            onClick={() => setShowEditProfileSheet(false)}
+            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleUpdateProfile}
+            disabled={actionLoading}
+            className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
+          >
+            {actionLoading ? "Saving..." : "Save Changes"}
+          </button>
+        </BottomSheetActions>
+      </BottomSheet>
+
+      {/* Edit Image Sheet */}
+      <BottomSheet
+        isOpen={showEditImageSheet}
+        onClose={() => {
+          setShowEditImageSheet(false);
+          setEditingImageIndex(null);
+          setEditGalleryImageUrl("");
+        }}
+        title={`Edit Image #${editingImageIndex}`}
+      >
+        <div className="p-4 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Image URL
+            </label>
+            <input
+              type="url"
+              value={editGalleryImageUrl}
+              onChange={(e) => setEditGalleryImageUrl(e.target.value)}
+              placeholder="https://images.unsplash.com/photo-..."
+              className="w-full px-4 py-2 border rounded-lg text-sm"
+            />
+          </div>
+
+          {editGalleryImageUrl && (
+            <div className="flex justify-center">
+              <img
+                src={editGalleryImageUrl}
+                alt="Preview"
+                className="max-w-full h-48 rounded-lg object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://via.placeholder.com/200?text=Invalid+URL";
+                }}
+              />
+            </div>
+          )}
+
+          <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-700">
+            <p className="font-medium mb-1">Tip: Use Unsplash URLs</p>
+            <p>Format: https://images.unsplash.com/photo-[ID]?w=800&h=800&fit=crop&crop=face</p>
+          </div>
+        </div>
+
+        <BottomSheetActions>
+          <button
+            onClick={() => {
+              setShowEditImageSheet(false);
+              setEditingImageIndex(null);
+              setEditGalleryImageUrl("");
+            }}
+            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleUpdateGalleryImage}
+            disabled={actionLoading || !editGalleryImageUrl}
+            className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
+          >
+            {actionLoading ? "Saving..." : "Update Image"}
           </button>
         </BottomSheetActions>
       </BottomSheet>
