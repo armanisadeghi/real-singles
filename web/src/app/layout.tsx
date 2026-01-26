@@ -15,6 +15,10 @@ const baskervville = Baskervville({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
+  ),
   title: "Real Singles - Find Your Real Connection",
   description: "Join the dating community that prioritizes authenticity. With verified profiles, video introductions, and curated events, find someone who's genuinely looking for what you are.",
   keywords: ["dating", "singles", "matchmaking", "events", "verified profiles", "video dating"],
