@@ -39,6 +39,8 @@ function RootLayoutNav() {
           headerShadowVisible: false, // Clean flat header (modern design)
           headerStyle: { backgroundColor: '#FFFFFF' },
           headerTitleStyle: { fontWeight: '600', color: '#000000' },
+          // Prevent "(tabs)" from showing as back button title
+          headerBackTitle: 'Back',
         }}
       >
         {/* Auth & Splash - No headers */}
@@ -170,6 +172,12 @@ function RootLayoutNav() {
           name="group/addmember/index" 
           options={{ 
             title: 'Add Members',
+          }} 
+        />
+        <Stack.Screen 
+          name="join/index" 
+          options={{ 
+            headerShown: false,
           }} 
         />
       </Stack>

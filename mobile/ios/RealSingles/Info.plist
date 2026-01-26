@@ -49,6 +49,16 @@
       <key>NSAllowsLocalNetworking</key>
       <true/>
     </dict>
+    <key>NSCalendarsFullAccessUsageDescription</key>
+    <string>RealSingles would like to add events to your calendar so you never miss a dating event.</string>
+    <key>NSCalendarsUsageDescription</key>
+    <string>RealSingles would like to add events to your calendar so you never miss a dating event.</string>
+    <key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+    <string>RealSingles would like to add events to your calendar so you never miss a dating event.</string>
+    <key>NSRemindersFullAccessUsageDescription</key>
+    <string>RealSingles can create reminders for your upcoming dates and events.</string>
+    <key>NSRemindersUsageDescription</key>
+    <string>RealSingles can create reminders for your upcoming dates and events.</string>
     <key>NSCameraUsageDescription</key>
     <string>RealSingles need access to your camera to record your video.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

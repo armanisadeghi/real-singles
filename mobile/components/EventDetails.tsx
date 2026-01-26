@@ -1,9 +1,9 @@
 import { icons } from "@/constants/icons";
 import { markEventAsInterested, cancelEventRegistration } from "@/lib/api";
 import { EventCardProps } from "@/types";
+import { addEventToCalendar } from "@/utils/permissions";
 import { VIDEO_URL } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
-import * as Calendar from "expo-calendar";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -157,41 +157,11 @@ export default function EventDetails({
     }
   };
 
-  // Add to Calendar
+  // Add to Calendar - Uses centralized permissions utility
   const handleAddToCalendar = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     try {
-      // Request calendar permissions
-      const { status } = await Calendar.requestCalendarPermissionsAsync();
-      
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Required",
-          "Calendar access is needed to add events. Please enable it in Settings.",
-          [
-            { text: "Cancel", style: "cancel" },
-            { text: "Open Settings", onPress: () => Linking.openSettings() },
-          ]
-        );
-        return;
-      }
-
-      // Get default calendar
-      const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
-      const defaultCalendar = calendars.find(
-        (cal) =>
-          cal.allowsModifications &&
-          (Platform.OS === "ios"
-            ? cal.source.name === "iCloud" || cal.source.name === "Default"
-            : cal.isPrimary)
-      ) || calendars.find((cal) => cal.allowsModifications);
-
-      if (!defaultCalendar) {
-        Alert.alert("Error", "No writable calendar found on this device.");
-        return;
-      }
-
       // Parse event date and time
       const startDate = new Date(event?.EventDate);
       if (event?.StartTime) {
@@ -220,20 +190,24 @@ export default function EventDetails({
         .filter(Boolean)
         .join(", ");
 
-      // Create calendar event
-      await Calendar.createEventAsync(defaultCalendar.id, {
+      // Use the centralized permissions utility
+      const result = await addEventToCalendar({
         title: event?.EventName || "RealSingles Event",
         notes: event?.Description || "",
         startDate,
         endDate,
         location,
-        timeZone: "America/New_York",
       });
 
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert("Success", "Event added to your calendar!");
+      if (result.success) {
+        Alert.alert("Success", "Event added to your calendar!");
+      } else if (result.error && result.error !== "Calendar permission not granted") {
+        // Only show error if it's not a permission denial (utility handles that)
+        Alert.alert("Error", result.error);
+      }
     } catch (error) {
       console.error("Error adding to calendar:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert("Error", "Failed to add event to calendar. Please try again.");
     }
   };

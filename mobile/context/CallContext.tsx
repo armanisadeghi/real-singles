@@ -61,6 +61,13 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
     const res = await getAgoraChatToken(userId);
     const tokenData = res.data;
 
+    // Handle case when Agora is not configured (development mode)
+    if (tokenData?.configured === false) {
+      console.log("Agora Chat not configured - skipping chat login");
+      setIsChatLoggedIn(false);
+      return;
+    }
+
     if (!tokenData?.userToken) {
       throw new Error("Failed to get chat token");
     }

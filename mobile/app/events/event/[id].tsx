@@ -6,11 +6,15 @@ import { EventCardProps } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import * as Haptics from "expo-haptics";
+import { SymbolView } from "expo-symbols";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
   ImageBackground,
+  Platform,
+  PlatformColor,
   Text,
   TouchableOpacity,
   View
@@ -81,10 +85,18 @@ export default function EventDetail() {
     fetchEventDetails();
   }, [id]);
 
+  const handleBack = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.back();
+  }, [router]);
+
   if(loading){
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color="#B06D1E" />
+        <ActivityIndicator 
+          size="large" 
+          color={Platform.OS === "ios" ? (PlatformColor("systemPink") as unknown as string) : "#E91E63"} 
+        />
       </View>
     );
   }
@@ -106,14 +118,23 @@ export default function EventDetail() {
         >
           <View className="flex-row items-center gap-2">
             <TouchableOpacity
-              onPress={router.back}
+              onPress={handleBack}
               className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
+              activeOpacity={0.7}
             >
-              <Image
-                source={icons.back}
-                className="size-4"
-                resizeMode="contain"
-              />
+              {Platform.OS === "ios" ? (
+                <SymbolView
+                  name="chevron.left"
+                  style={{ width: 16, height: 16 }}
+                  tintColor={Platform.select({ ios: PlatformColor("label") as unknown as string, default: "#000000" })}
+                />
+              ) : (
+                <Image
+                  source={icons.back}
+                  className="size-4"
+                  resizeMode="contain"
+                />
+              )}
             </TouchableOpacity>
             <Text className="leading-[22px] text-dark text-base font-medium tracking-[-0.41px]">
               Event Details
