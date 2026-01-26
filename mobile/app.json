@@ -5,11 +5,10 @@
     "version": "3.1",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon.png",
-    "scheme": "truSingle",
+    "scheme": "trusingle",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "deploymentTarget": "15.1",
       "supportsTablet": true,
       "bundleIdentifier": "com.nayannew9.truSingle",
       "config": {
@@ -85,7 +84,8 @@
       "react-native-vision-camera",
       "react-native-video",
       "@react-native-community/datetimepicker",
-      "expo-font"
+      "expo-font",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true
