@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/speed-dating/[id]
@@ -54,13 +55,15 @@ export async function GET(
       .select("user_id, first_name, gender, profile_image_url, is_verified")
       .in("user_id", participantIds);
 
-    participants = (profiles || []).map((p) => ({
-      UserID: p.user_id,
-      FirstName: p.first_name,
-      Gender: p.gender,
-      ProfileImage: p.profile_image_url,
-      IsVerified: p.is_verified,
-    }));
+    participants = await Promise.all(
+      (profiles || []).map(async (p) => ({
+        UserID: p.user_id,
+        FirstName: p.first_name,
+        Gender: p.gender,
+        ProfileImage: await resolveStorageUrl(supabase, p.profile_image_url),
+        IsVerified: p.is_verified,
+      }))
+    );
   }
 
   return NextResponse.json({

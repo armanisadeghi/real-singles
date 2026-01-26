@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveStorageUrl, resolveGalleryUrls } from "@/lib/supabase/url-utils";
 
 // Verify the current user is an admin
 async function verifyAdmin(): Promise<{ isAdmin: boolean; userId?: string }> {
@@ -62,7 +63,21 @@ export async function GET(
     .eq("user_id", id)
     .order("display_order");
 
-  return NextResponse.json({ user, profile, gallery });
+  // Resolve storage URLs for profile image
+  const resolvedProfileImageUrl = profile?.profile_image_url 
+    ? await resolveStorageUrl(supabase, profile.profile_image_url)
+    : null;
+
+  // Resolve storage URLs for gallery images
+  const resolvedGallery = gallery 
+    ? await resolveGalleryUrls(supabase, gallery)
+    : [];
+
+  return NextResponse.json({ 
+    user, 
+    profile: profile ? { ...profile, profile_image_url: resolvedProfileImageUrl } : null, 
+    gallery: resolvedGallery 
+  });
 }
 
 // PATCH /api/admin/users/[id] - Update user or profile

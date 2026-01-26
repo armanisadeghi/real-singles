@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/reviews
@@ -102,23 +103,25 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Format reviews
-  const formattedReviews = (reviews || []).map((review: any) => ({
-    ReviewID: review.id,
-    ReviewerID: review.reviewer_id,
-    ReviewerName: review.reviewer?.profiles?.users?.display_name || 
-                  review.reviewer?.profiles?.first_name || "Anonymous",
-    ReviewerImage: review.reviewer?.profiles?.profile_image_url || "",
-    ReviewedUserID: review.reviewed_user_id,
-    ReviewedUserName: review.reviewed_user?.profiles?.users?.display_name ||
-                      review.reviewed_user?.profiles?.first_name || "",
-    Relationship: review.relationship,
-    Rating: review.rating,
-    ReviewText: review.review_text,
-    IsApproved: review.is_approved,
-    PointsAwarded: review.points_awarded,
-    CreatedAt: review.created_at,
-  }));
+  // Format reviews with resolved profile image URLs
+  const formattedReviews = await Promise.all(
+    (reviews || []).map(async (review: any) => ({
+      ReviewID: review.id,
+      ReviewerID: review.reviewer_id,
+      ReviewerName: review.reviewer?.profiles?.users?.display_name || 
+                    review.reviewer?.profiles?.first_name || "Anonymous",
+      ReviewerImage: await resolveStorageUrl(supabase, review.reviewer?.profiles?.profile_image_url),
+      ReviewedUserID: review.reviewed_user_id,
+      ReviewedUserName: review.reviewed_user?.profiles?.users?.display_name ||
+                        review.reviewed_user?.profiles?.first_name || "",
+      Relationship: review.relationship,
+      Rating: review.rating,
+      ReviewText: review.review_text,
+      IsApproved: review.is_approved,
+      PointsAwarded: review.points_awarded,
+      CreatedAt: review.created_at,
+    }))
+  );
 
   return NextResponse.json({
     success: true,

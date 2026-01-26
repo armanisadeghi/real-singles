@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveGalleryUrls } from "@/lib/supabase/url-utils";
 
 // Verify the current user is an admin
 async function verifyAdmin(): Promise<boolean> {
@@ -42,10 +43,15 @@ export async function GET(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ gallery });
+  // Resolve storage URLs for gallery items
+  const resolvedGallery = gallery 
+    ? await resolveGalleryUrls(supabase, gallery)
+    : [];
+
+  return NextResponse.json({ gallery: resolvedGallery });
 }
 
-// PATCH /api/admin/users/[id]/gallery - Update a gallery image or set primary
+// PATCH /api/admin/users/[id]/gallery - Update a gallery image, set primary, or reorder
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -57,13 +63,28 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { gallery_id, display_order, media_url, is_primary, set_primary } = await request.json();
+  const body = await request.json();
+  const { gallery_id, display_order, media_url, is_primary, set_primary, order } = body;
+
+  const supabase = createAdminClient();
+
+  // Handle reordering (array of { id: string, display_order: number })
+  if (order && Array.isArray(order)) {
+    for (const item of order) {
+      if (item.id && typeof item.display_order === "number") {
+        await supabase
+          .from("user_gallery")
+          .update({ display_order: item.display_order })
+          .eq("id", item.id)
+          .eq("user_id", id);
+      }
+    }
+    return NextResponse.json({ success: true });
+  }
 
   if (!gallery_id && display_order === undefined) {
     return NextResponse.json({ error: "gallery_id or display_order required" }, { status: 400 });
   }
-
-  const supabase = createAdminClient();
 
   // Handle setting primary image with proper logic (matching client-side behavior)
   if (set_primary && gallery_id) {
@@ -202,18 +223,59 @@ export async function DELETE(
 
   const supabase = createAdminClient();
 
-  let query = supabase.from("user_gallery").delete();
-  
+  // First, get the item to check if it's primary
+  let itemQuery = supabase.from("user_gallery").select("*");
   if (galleryId) {
-    query = query.eq("id", galleryId);
+    itemQuery = itemQuery.eq("id", galleryId);
   } else {
-    query = query.eq("user_id", id).eq("display_order", Number(displayOrder));
+    itemQuery = itemQuery.eq("user_id", id).eq("display_order", Number(displayOrder));
+  }
+  const { data: item } = await itemQuery.single();
+
+  // Delete the item
+  let deleteQuery = supabase.from("user_gallery").delete();
+  if (galleryId) {
+    deleteQuery = deleteQuery.eq("id", galleryId);
+  } else {
+    deleteQuery = deleteQuery.eq("user_id", id).eq("display_order", Number(displayOrder));
   }
 
-  const { error } = await query;
+  const { error } = await deleteQuery;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // If this was the primary image, auto-assign a new primary
+  if (item?.is_primary) {
+    const { data: nextItem } = await supabase
+      .from("user_gallery")
+      .select("id, media_url, media_type")
+      .eq("user_id", id)
+      .eq("media_type", "image")
+      .order("display_order", { ascending: true })
+      .limit(1)
+      .single();
+
+    if (nextItem) {
+      // Set the next image as primary
+      await supabase
+        .from("user_gallery")
+        .update({ is_primary: true })
+        .eq("id", nextItem.id);
+
+      // Update profile image URL
+      await supabase
+        .from("profiles")
+        .update({ profile_image_url: nextItem.media_url })
+        .eq("user_id", id);
+    } else {
+      // No more images, clear profile image
+      await supabase
+        .from("profiles")
+        .update({ profile_image_url: null })
+        .eq("user_id", id);
+    }
   }
 
   return NextResponse.json({ success: true });

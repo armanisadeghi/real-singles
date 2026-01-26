@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/users/[id]/reviews
@@ -65,18 +66,20 @@ export async function GET(
     ? Math.round((totalRating / reviews.length) * 10) / 10 
     : null;
 
-  // Format reviews
-  const formattedReviews = (reviews || []).map((review: any) => ({
-    id: review.id,
-    reviewer_id: review.reviewer_id,
-    reviewer_name: review.profiles?.users?.display_name || review.profiles?.first_name || "Anonymous",
-    reviewer_image: review.profiles?.profile_image_url || "",
-    reviewer_verified: review.profiles?.is_verified || false,
-    relationship: review.relationship,
-    rating: review.rating,
-    review_text: review.review_text,
-    created_at: review.created_at,
-  }));
+  // Format reviews with resolved profile image URLs
+  const formattedReviews = await Promise.all(
+    (reviews || []).map(async (review: any) => ({
+      id: review.id,
+      reviewer_id: review.reviewer_id,
+      reviewer_name: review.profiles?.users?.display_name || review.profiles?.first_name || "Anonymous",
+      reviewer_image: await resolveStorageUrl(supabase, review.profiles?.profile_image_url),
+      reviewer_verified: review.profiles?.is_verified || false,
+      relationship: review.relationship,
+      rating: review.rating,
+      review_text: review.review_text,
+      created_at: review.created_at,
+    }))
+  );
 
   return NextResponse.json({
     success: true,

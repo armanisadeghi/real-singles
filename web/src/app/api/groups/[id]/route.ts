@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/groups/[id]
@@ -64,20 +65,26 @@ export async function GET(
 
   const participants = group.conversation_participants || [];
 
-  const formattedGroup = {
-    GroupID: group.id,
-    GroupName: group.group_name || "Unnamed Group",
-    GroupImage: group.group_image_url || "",
-    MemberCount: participants.length,
-    Members: participants.map((p: any) => ({
+  // Resolve profile image URLs
+  const groupImageUrl = await resolveStorageUrl(supabase, group.group_image_url);
+  const membersWithUrls = await Promise.all(
+    participants.map(async (p: any) => ({
       user_id: p.user_id,
       display_name: p.profiles?.users?.display_name || p.profiles?.first_name || "User",
       first_name: p.profiles?.first_name || "",
       last_name: p.profiles?.last_name || "",
-      profile_image_url: p.profiles?.profile_image_url || "",
+      profile_image_url: await resolveStorageUrl(supabase, p.profiles?.profile_image_url),
       role: p.role,
       joined_at: p.joined_at,
-    })),
+    }))
+  );
+
+  const formattedGroup = {
+    GroupID: group.id,
+    GroupName: group.group_name || "Unnamed Group",
+    GroupImage: groupImageUrl,
+    MemberCount: participants.length,
+    Members: membersWithUrls,
     CreatedBy: group.created_by,
     AgoraGroupID: group.agora_group_id,
     UserRole: membership.role,

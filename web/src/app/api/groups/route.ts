@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/groups
@@ -74,30 +75,38 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Format groups for mobile app
-  const formattedGroups = (groups || []).map((group: any) => {
-    const participants = group.conversation_participants || [];
-    const memberCount = participants.length;
-    const userRole = participants.find((p: any) => p.user_id === user.id)?.role || "member";
+  // Format groups for mobile app with resolved profile image URLs
+  const formattedGroups = await Promise.all(
+    (groups || []).map(async (group: any) => {
+      const participants = group.conversation_participants || [];
+      const memberCount = participants.length;
+      const userRole = participants.find((p: any) => p.user_id === user.id)?.role || "member";
 
-    return {
-      GroupID: group.id,
-      GroupName: group.group_name || "Unnamed Group",
-      GroupImage: group.group_image_url || "",
-      MemberCount: memberCount,
-      Members: participants.slice(0, 5).map((p: any) => ({
-        user_id: p.user_id,
-        display_name: p.profiles?.users?.display_name || p.profiles?.first_name || "User",
-        profile_image_url: p.profiles?.profile_image_url || "",
-        role: p.role,
-      })),
-      CreatedBy: group.created_by,
-      AgoraGroupID: group.agora_group_id,
-      UserRole: userRole,
-      CreatedAt: group.created_at,
-      UpdatedAt: group.updated_at,
-    };
-  });
+      // Resolve profile image URLs for group image and members
+      const groupImageUrl = await resolveStorageUrl(supabase, group.group_image_url);
+      const membersWithUrls = await Promise.all(
+        participants.slice(0, 5).map(async (p: any) => ({
+          user_id: p.user_id,
+          display_name: p.profiles?.users?.display_name || p.profiles?.first_name || "User",
+          profile_image_url: await resolveStorageUrl(supabase, p.profiles?.profile_image_url),
+          role: p.role,
+        }))
+      );
+
+      return {
+        GroupID: group.id,
+        GroupName: group.group_name || "Unnamed Group",
+        GroupImage: groupImageUrl,
+        MemberCount: memberCount,
+        Members: membersWithUrls,
+        CreatedBy: group.created_by,
+        AgoraGroupID: group.agora_group_id,
+        UserRole: userRole,
+        CreatedAt: group.created_at,
+        UpdatedAt: group.updated_at,
+      };
+    })
+  );
 
   return NextResponse.json({
     success: true,

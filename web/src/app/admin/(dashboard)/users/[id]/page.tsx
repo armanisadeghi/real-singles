@@ -18,11 +18,29 @@ import {
   Plus,
   Minus,
   Image,
+  GripVertical,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/LoadingSkeleton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { BottomSheet, BottomSheetActions } from "@/components/ui/BottomSheet";
 import { cn, formatPoints, calculateAge } from "@/lib/utils";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface UserDetail {
   id: string;
@@ -63,6 +81,91 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+// Sortable Gallery Item Component
+function SortableGalleryItem({
+  image,
+  onEdit,
+  onDelete,
+  onSetPrimary,
+  actionLoading,
+}: {
+  image: GalleryImage;
+  onEdit: (displayOrder: number) => void;
+  onDelete: (id: string) => void;
+  onSetPrimary: (id: string) => void;
+  actionLoading: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: image.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group">
+      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+        <img
+          src={image.media_url}
+          alt={`Gallery ${image.display_order + 1}`}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "https://via.placeholder.com/200?text=Error";
+          }}
+        />
+      </div>
+      <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-2">
+        <div className="flex gap-2">
+          <button
+            onClick={() => onEdit(image.display_order)}
+            className="px-3 py-1 bg-white text-gray-900 rounded text-sm font-medium hover:bg-gray-100"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => onDelete(image.id)}
+            className="px-3 py-1 bg-red-500 text-white rounded text-sm font-medium hover:bg-red-600"
+          >
+            Delete
+          </button>
+        </div>
+        {!image.is_primary && (
+          <button
+            onClick={() => onSetPrimary(image.id)}
+            disabled={actionLoading}
+            className="px-3 py-1 bg-blue-500 text-white rounded text-sm font-medium hover:bg-blue-600 disabled:opacity-50"
+          >
+            Set as Primary
+          </button>
+        )}
+      </div>
+      {/* Drag handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-2 right-2 p-1 bg-white rounded shadow cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <GripVertical className="w-4 h-4 text-gray-500" />
+      </div>
+      {/* Order badge */}
+      <div className="absolute top-2 left-2">
+        <span className="px-2 py-0.5 bg-black bg-opacity-50 text-white text-xs rounded">
+          #{image.display_order + 1}
+          {image.is_primary && " (Primary)"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminUserDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const [user, setUser] = useState<UserDetail | null>(null);
@@ -88,6 +191,60 @@ export default function AdminUserDetailPage({ params }: PageProps) {
   const [editGender, setEditGender] = useState("");
   const [editProfileImageUrl, setEditProfileImageUrl] = useState("");
   const [editGalleryImageUrl, setEditGalleryImageUrl] = useState("");
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = gallery.findIndex((img) => img.id === active.id);
+      const newIndex = gallery.findIndex((img) => img.id === over.id);
+
+      // Optimistically update local state
+      const newGallery = arrayMove(gallery, oldIndex, newIndex);
+      // Update display_order for each item
+      const updatedGallery = newGallery.map((img, index) => ({
+        ...img,
+        display_order: index,
+      }));
+      setGallery(updatedGallery);
+
+      // Send reorder request to API
+      try {
+        const orderPayload = updatedGallery.map((img) => ({
+          id: img.id,
+          display_order: img.display_order,
+        }));
+
+        const res = await fetch(`/api/admin/users/${id}/gallery`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order: orderPayload }),
+        });
+
+        if (!res.ok) {
+          // Revert on failure
+          await fetchData();
+          alert("Failed to reorder images");
+        }
+      } catch (error) {
+        console.error("Error reordering images:", error);
+        await fetchData();
+        alert("Failed to reorder images");
+      }
+    }
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -246,23 +403,11 @@ export default function AdminUserDetailPage({ params }: PageProps) {
       });
 
       if (res.ok) {
-        // Update local state
-        setGallery((prev) => prev.map((img) => 
-          img.display_order === editingImageIndex 
-            ? { ...img, media_url: editGalleryImageUrl }
-            : img
-        ));
-        
-        // If primary image, also update profile
-        if (editingImageIndex === 0) {
-          setProfile((prev) => prev ? { ...prev, profile_image_url: editGalleryImageUrl } : null);
-          setEditProfileImageUrl(editGalleryImageUrl);
-        }
-        
+        // Refetch all data to ensure consistency
+        await fetchData();
         setShowEditImageSheet(false);
         setEditingImageIndex(null);
         setEditGalleryImageUrl("");
-        alert("Image updated successfully");
       } else {
         alert("Failed to update image");
       }
@@ -291,8 +436,8 @@ export default function AdminUserDetailPage({ params }: PageProps) {
       });
 
       if (res.ok) {
-        // Remove from local state
-        setGallery((prev) => prev.filter((img) => img.id !== deletingImageId));
+        // Refetch all data to ensure consistency (handles auto-primary assignment)
+        await fetchData();
         setShowDeleteImageConfirm(false);
         setDeletingImageId(null);
       } else {
@@ -324,21 +469,8 @@ export default function AdminUserDetailPage({ params }: PageProps) {
       });
 
       if (res.ok) {
-        const data = await res.json();
-        // Update gallery state - unset all primary flags, set new primary
-        setGallery((prev) =>
-          prev.map((img) => ({
-            ...img,
-            is_primary: img.id === imageId,
-          }))
-        );
-        // Update profile image URL
-        if (data.gallery?.media_url) {
-          setProfile((prev) =>
-            prev ? { ...prev, profile_image_url: data.gallery.media_url } : null
-          );
-          setEditProfileImageUrl(data.gallery.media_url);
-        }
+        // Refetch all data to ensure consistency
+        await fetchData();
       } else {
         alert("Failed to set primary image");
       }
@@ -624,54 +756,33 @@ export default function AdminUserDetailPage({ params }: PageProps) {
       {/* Gallery Section */}
       {gallery.length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="font-semibold text-gray-900 mb-4">Gallery Images</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            {gallery.map((img) => (
-              <div key={img.id} className="relative group">
-                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                  <img
-                    src={img.media_url}
-                    alt={`Gallery ${img.display_order}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/200?text=Error";
-                    }}
-                  />
-                </div>
-                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-2">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => openEditImageSheet(img.display_order)}
-                      className="px-3 py-1 bg-white text-gray-900 rounded text-sm font-medium hover:bg-gray-100"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => openDeleteImageConfirm(img.id)}
-                      className="px-3 py-1 bg-red-500 text-white rounded text-sm font-medium hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                  {!img.is_primary && (
-                    <button
-                      onClick={() => handleSetPrimary(img.id)}
-                      disabled={actionLoading}
-                      className="px-3 py-1 bg-blue-500 text-white rounded text-sm font-medium hover:bg-blue-600 disabled:opacity-50"
-                    >
-                      Set as Primary
-                    </button>
-                  )}
-                </div>
-                <div className="absolute top-2 left-2">
-                  <span className="px-2 py-0.5 bg-black bg-opacity-50 text-white text-xs rounded">
-                    #{img.display_order + 1}
-                    {img.is_primary && " (Primary)"}
-                  </span>
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-900">Gallery Images</h3>
+            <span className="text-xs text-gray-500">Drag to reorder</span>
           </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={gallery.map((img) => img.id)}
+              strategy={rectSortingStrategy}
+            >
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {gallery.map((img) => (
+                  <SortableGalleryItem
+                    key={img.id}
+                    image={img}
+                    onEdit={openEditImageSheet}
+                    onDelete={openDeleteImageConfirm}
+                    onSetPrimary={handleSetPrimary}
+                    actionLoading={actionLoading}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         </div>
       )}
 

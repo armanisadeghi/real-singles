@@ -1,24 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-
-// Helper to convert profile image URL to a proper URL
-// Profile images can be: full URLs, storage paths, or null
-async function getProfileImageUrl(
-  supabase: Awaited<ReturnType<typeof createApiClient>>,
-  imageUrl: string | null | undefined
-): Promise<string> {
-  if (!imageUrl) return "";
-  if (imageUrl.startsWith("http")) return imageUrl;
-  
-  // It's a storage path - generate a signed URL
-  // Check if it's from gallery bucket or avatars bucket
-  const bucket = imageUrl.includes("/avatar") ? "avatars" : "gallery";
-  const { data } = await supabase.storage
-    .from(bucket)
-    .createSignedUrl(imageUrl, 3600); // 1 hour
-  
-  return data?.signedUrl || "";
-}
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/discover
@@ -123,7 +105,7 @@ export async function GET() {
 
   // Format profiles for mobile app (async to handle image URL conversion)
   const formatProfile = async (profile: any): Promise<any> => {
-    const imageUrl = await getProfileImageUrl(supabase, profile.profile_image_url);
+    const imageUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
     return {
       ID: profile.user_id,
       id: profile.user_id,

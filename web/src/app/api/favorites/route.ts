@@ -1,21 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-
-// Helper to convert profile image URL to a proper URL
-async function getProfileImageUrl(
-  supabase: Awaited<ReturnType<typeof createApiClient>>,
-  imageUrl: string | null | undefined
-): Promise<string> {
-  if (!imageUrl) return "";
-  if (imageUrl.startsWith("http")) return imageUrl;
-  
-  const bucket = imageUrl.includes("/avatar") ? "avatars" : "gallery";
-  const { data } = await supabase.storage
-    .from(bucket)
-    .createSignedUrl(imageUrl, 3600);
-  
-  return data?.signedUrl || "";
-}
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/favorites
@@ -101,7 +86,7 @@ export async function GET() {
   const formattedFavorites = await Promise.all(
     validFavorites.map(async (fav: any) => {
       const profile = fav.profiles;
-      const imageUrl = await getProfileImageUrl(supabase, profile.profile_image_url);
+      const imageUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
       return {
         ID: profile.user_id,
         id: profile.user_id,

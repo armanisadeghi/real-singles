@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/conversations/[id]
@@ -85,37 +86,40 @@ export async function GET(
     .select("id, display_name, last_active_at")
     .in("id", participantIds);
 
-  // Format participants
-  const formattedParticipants = conversation.conversation_participants
-    .filter((p) => p.user_id !== null)
-    .map((p) => {
-      const user_id = p.user_id!; // Already filtered nulls above
-      const profile = profiles?.find((pr) => pr.user_id === user_id);
-      const userData = users?.find((u) => u.id === user_id);
-      const isMe = user_id === user.id;
+  // Format participants with resolved profile image URLs
+  const formattedParticipants = await Promise.all(
+    conversation.conversation_participants
+      .filter((p) => p.user_id !== null)
+      .map(async (p) => {
+        const user_id = p.user_id!; // Already filtered nulls above
+        const profile = profiles?.find((pr) => pr.user_id === user_id);
+        const userData = users?.find((u) => u.id === user_id);
+        const isMe = user_id === user.id;
+        const profileImageUrl = await resolveStorageUrl(supabase, profile?.profile_image_url);
 
-      return {
-        UserID: user_id,
-        IsMe: isMe,
-        DisplayName: userData?.display_name || 
-          `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || 
-          "User",
-        FirstName: profile?.first_name || "",
-        LastName: profile?.last_name || "",
-        ProfileImage: profile?.profile_image_url || "",
-        IsVerified: profile?.is_verified || false,
-        LastActiveAt: userData?.last_active_at,
-        Role: p.role || "",
-        JoinedAt: p.joined_at || "",
-        LastReadAt: p.last_read_at,
-        IsMuted: p.is_muted || false,
-      };
-    });
+        return {
+          UserID: user_id,
+          IsMe: isMe,
+          DisplayName: userData?.display_name || 
+            `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || 
+            "User",
+          FirstName: profile?.first_name || "",
+          LastName: profile?.last_name || "",
+          ProfileImage: profileImageUrl,
+          IsVerified: profile?.is_verified || false,
+          LastActiveAt: userData?.last_active_at,
+          Role: p.role || "",
+          JoinedAt: p.joined_at || "",
+          LastReadAt: p.last_read_at,
+          IsMuted: p.is_muted || false,
+        };
+      })
+  );
 
   // Determine display info for direct chats
   const otherParticipants = formattedParticipants.filter((p: { IsMe: boolean }) => !p.IsMe);
   let displayName = conversation.group_name;
-  let displayImage = conversation.group_image_url;
+  let displayImage = await resolveStorageUrl(supabase, conversation.group_image_url);
 
   if (conversation.type === "direct" && otherParticipants.length > 0) {
     displayName = otherParticipants[0].DisplayName;

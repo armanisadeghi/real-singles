@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-
-// Helper to convert storage path to public URL
-function getGalleryPublicUrl(path: string | null | undefined): string | null {
-  if (!path) return null;
-  if (path.startsWith("http")) return path;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  return `${supabaseUrl}/storage/v1/object/public/gallery/${path}`;
-}
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/matches/likes-received
@@ -139,46 +132,48 @@ export async function GET(request: NextRequest) {
       .eq("media_type", "image")
       .eq("is_primary", true);
 
-    // Combine data
-    const likesWithProfiles = unactedLikes.map((like) => {
-      const profile = profiles?.find((p) => p.user_id === like.user_id);
-      const userData = users?.find((u) => u.id === like.user_id);
-      const gallery = galleries?.find((g) => g.user_id === like.user_id);
+    // Combine data with resolved profile image URLs
+    const likesWithProfiles = await Promise.all(
+      unactedLikes.map(async (like) => {
+        const profile = profiles?.find((p) => p.user_id === like.user_id);
+        const userData = users?.find((u) => u.id === like.user_id);
+        const gallery = galleries?.find((g) => g.user_id === like.user_id);
 
-      // Calculate age
-      let age: number | null = null;
-      if (profile?.date_of_birth) {
-        const dob = new Date(profile.date_of_birth);
-        const today = new Date();
-        age = today.getFullYear() - dob.getFullYear();
-        const monthDiff = today.getMonth() - dob.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-          age--;
+        // Calculate age
+        let age: number | null = null;
+        if (profile?.date_of_birth) {
+          const dob = new Date(profile.date_of_birth);
+          const today = new Date();
+          age = today.getFullYear() - dob.getFullYear();
+          const monthDiff = today.getMonth() - dob.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+          }
         }
-      }
 
-      // Get profile image URL - might be a storage path, so convert if needed
-      const profileImageUrl = profile?.profile_image_url || gallery?.media_url;
-      
-      return {
-        id: like.id,
-        user_id: like.user_id,
-        action: like.action, // "like" or "super_like"
-        is_super_like: like.action === "super_like",
-        liked_at: like.created_at,
-        display_name: userData?.display_name,
-        first_name: profile?.first_name,
-        age,
-        gender: profile?.gender,
-        city: profile?.city,
-        state: profile?.state,
-        occupation: profile?.occupation,
-        bio: profile?.bio ? profile.bio.substring(0, 150) + "..." : null,
-        is_verified: profile?.is_verified || false,
-        profile_image_url: getGalleryPublicUrl(profileImageUrl),
-        last_active_at: userData?.last_active_at,
-      };
-    });
+        // Get profile image URL - might be a storage path, so convert if needed
+        const profileImageUrl = profile?.profile_image_url || gallery?.media_url;
+        
+        return {
+          id: like.id,
+          user_id: like.user_id,
+          action: like.action, // "like" or "super_like"
+          is_super_like: like.action === "super_like",
+          liked_at: like.created_at,
+          display_name: userData?.display_name,
+          first_name: profile?.first_name,
+          age,
+          gender: profile?.gender,
+          city: profile?.city,
+          state: profile?.state,
+          occupation: profile?.occupation,
+          bio: profile?.bio ? profile.bio.substring(0, 150) + "..." : null,
+          is_verified: profile?.is_verified || false,
+          profile_image_url: await resolveStorageUrl(supabase, profileImageUrl),
+          last_active_at: userData?.last_active_at,
+        };
+      })
+    );
 
     // Sort super-likes first, then by date
     likesWithProfiles.sort((a, b) => {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/events/[id]
@@ -46,6 +47,26 @@ export async function GET(
   const interestedUsers = attendees.filter((a: any) => a.status === "interested" || a.status === "registered");
   const isUserInterested = user ? attendees.some((a: any) => a.user_id === user.id) : false;
 
+  // Resolve event image URL
+  const eventImageUrl = await resolveStorageUrl(supabase, event.image_url);
+
+  // Resolve interested user images
+  const interestedUserImages = await Promise.all(
+    interestedUsers.slice(0, 10).map((a: any) => 
+      resolveStorageUrl(supabase, a.profiles?.profile_image_url)
+    )
+  );
+
+  // Resolve interested users with profile images
+  const formattedInterestedUsers = await Promise.all(
+    interestedUsers.map(async (a: any) => ({
+      user_id: a.user_id,
+      display_name: a.profiles?.users?.display_name || a.profiles?.first_name || "User",
+      profile_image_url: await resolveStorageUrl(supabase, a.profiles?.profile_image_url),
+      status: a.status,
+    }))
+  );
+
   const formattedEvent = {
     EventID: event.id,
     EventName: event.title,
@@ -63,19 +84,14 @@ export async function GET(
     City: event.city || "",
     State: event.state || "",
     PostalCode: "",
-    EventImage: event.image_url || "",
+    EventImage: eventImageUrl,
     Link: "",
     Latitude: event.latitude?.toString() || "",
     Longitude: event.longitude?.toString() || "",
     UserID: event.created_by || "",
     CreateDate: event.created_at,
-    interestedUserImage: interestedUsers.slice(0, 10).map((a: any) => a.profiles?.profile_image_url || ""),
-    interestedUsers: interestedUsers.map((a: any) => ({
-      user_id: a.user_id,
-      display_name: a.profiles?.users?.display_name || a.profiles?.first_name || "User",
-      profile_image_url: a.profiles?.profile_image_url || "",
-      status: a.status,
-    })),
+    interestedUserImage: interestedUserImages,
+    interestedUsers: formattedInterestedUsers,
     HostedBy: event.users?.display_name || "RealSingles",
     HostedID: event.created_by || "",
     isMarkInterested: isUserInterested ? 1 : 0,

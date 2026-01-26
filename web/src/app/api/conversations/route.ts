@@ -1,22 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import { z } from "zod";
-
-// Helper to convert profile image URL to a proper URL
-async function getProfileImageUrl(
-  supabase: Awaited<ReturnType<typeof createApiClient>>,
-  imageUrl: string | null | undefined
-): Promise<string> {
-  if (!imageUrl) return "";
-  if (imageUrl.startsWith("http")) return imageUrl;
-  
-  const bucket = imageUrl.includes("/avatar") ? "avatars" : "gallery";
-  const { data } = await supabase.storage
-    .from(bucket)
-    .createSignedUrl(imageUrl, 3600);
-  
-  return data?.signedUrl || "";
-}
 
 // Validation schema for creating a conversation
 const createConversationSchema = z.object({
@@ -147,7 +132,7 @@ export async function GET(request: NextRequest) {
 
       // Determine display name and image
       let displayName = conv.group_name;
-      let displayImage = conv.group_image_url ? await getProfileImageUrl(supabase, conv.group_image_url) : "";
+      let displayImage = conv.group_image_url ? await resolveStorageUrl(supabase, conv.group_image_url) : "";
 
       if (conv.type === "direct" && otherProfiles.length > 0) {
         const otherProfile = otherProfiles[0];
@@ -155,7 +140,7 @@ export async function GET(request: NextRequest) {
         displayName = otherUser?.display_name || 
           `${otherProfile?.first_name || ""} ${otherProfile?.last_name || ""}`.trim() || 
           "User";
-        displayImage = await getProfileImageUrl(supabase, otherProfile?.profile_image_url);
+        displayImage = await resolveStorageUrl(supabase, otherProfile?.profile_image_url);
       }
 
       // Convert participant profile images
@@ -165,7 +150,7 @@ export async function GET(request: NextRequest) {
           .map(async (p) => {
             const profile = profiles?.find((pr) => pr.user_id === p.user_id);
             const userData = users?.find((u) => u.id === p.user_id);
-            const profileImage = await getProfileImageUrl(supabase, profile?.profile_image_url);
+            const profileImage = await resolveStorageUrl(supabase, profile?.profile_image_url);
             return {
               UserID: p.user_id!,
               DisplayName: userData?.display_name || profile?.first_name || "User",
@@ -184,7 +169,7 @@ export async function GET(request: NextRequest) {
         DisplayName: displayName,
         DisplayImage: displayImage,
         GroupName: conv.group_name,
-        GroupImage: conv.group_image_url ? await getProfileImageUrl(supabase, conv.group_image_url) : "",
+        GroupImage: conv.group_image_url ? await resolveStorageUrl(supabase, conv.group_image_url) : "",
         AgoraGroupID: conv.agora_group_id,
         CreatedAt: conv.created_at,
         UpdatedAt: conv.updated_at,

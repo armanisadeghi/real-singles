@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import { getReferralLink } from "@/lib/config";
 
 /**
@@ -76,18 +77,20 @@ export async function GET(request: NextRequest) {
 
   const totalPointsEarned = pointsEarned?.reduce((sum, r) => sum + (r.points_awarded || 0), 0) || 0;
 
-  // Format referrals
-  const formattedReferrals = (referrals || []).map((ref: any) => ({
-    ReferralID: ref.id,
-    ReferredUserID: ref.referred_user_id,
-    ReferredUserName: ref.referred_user?.display_name || 
-                      ref.referred_user?.profiles?.first_name || "User",
-    ReferredUserImage: ref.referred_user?.profiles?.profile_image_url || "",
-    Status: ref.status,
-    PointsAwarded: ref.points_awarded,
-    CreatedAt: ref.created_at,
-    CompletedAt: ref.completed_at,
-  }));
+  // Format referrals with resolved profile image URLs
+  const formattedReferrals = await Promise.all(
+    (referrals || []).map(async (ref: any) => ({
+      ReferralID: ref.id,
+      ReferredUserID: ref.referred_user_id,
+      ReferredUserName: ref.referred_user?.display_name || 
+                        ref.referred_user?.profiles?.first_name || "User",
+      ReferredUserImage: await resolveStorageUrl(supabase, ref.referred_user?.profiles?.profile_image_url),
+      Status: ref.status,
+      PointsAwarded: ref.points_awarded,
+      CreatedAt: ref.created_at,
+      CompletedAt: ref.completed_at,
+    }))
+  );
 
   return NextResponse.json({
     success: true,

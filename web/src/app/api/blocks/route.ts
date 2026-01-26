@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/blocks
@@ -45,15 +46,17 @@ export async function GET() {
     );
   }
 
-  const formattedBlocks = (blocks || []).map((block: any) => ({
-    id: block.id,
-    blocked_user_id: block.blocked_id,
-    display_name: block.profiles?.users?.display_name || block.profiles?.first_name || "User",
-    first_name: block.profiles?.first_name || "",
-    last_name: block.profiles?.last_name || "",
-    profile_image_url: block.profiles?.profile_image_url || "",
-    blocked_at: block.created_at,
-  }));
+  const formattedBlocks = await Promise.all(
+    (blocks || []).map(async (block: any) => ({
+      id: block.id,
+      blocked_user_id: block.blocked_id,
+      display_name: block.profiles?.users?.display_name || block.profiles?.first_name || "User",
+      first_name: block.profiles?.first_name || "",
+      last_name: block.profiles?.last_name || "",
+      profile_image_url: await resolveStorageUrl(supabase, block.profiles?.profile_image_url),
+      blocked_at: block.created_at,
+    }))
+  );
 
   return NextResponse.json({
     success: true,

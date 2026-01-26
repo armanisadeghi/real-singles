@@ -1,22 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import { z } from "zod";
-
-// Helper to convert profile image URL to a proper URL
-async function getProfileImageUrl(
-  supabase: Awaited<ReturnType<typeof createApiClient>>,
-  imageUrl: string | null | undefined
-): Promise<string> {
-  if (!imageUrl) return "";
-  if (imageUrl.startsWith("http")) return imageUrl;
-  
-  const bucket = imageUrl.includes("/avatar") ? "avatars" : "gallery";
-  const { data } = await supabase.storage
-    .from(bucket)
-    .createSignedUrl(imageUrl, 3600);
-  
-  return data?.signedUrl || "";
-}
 
 // Validation schema for match action
 const matchActionSchema = z.object({
@@ -411,13 +396,13 @@ export async function GET(request: NextRequest) {
         }
 
         // Convert profile image URL
-        const profileImageUrl = await getProfileImageUrl(supabase, profile?.profile_image_url);
+        const profileImageUrl = await resolveStorageUrl(supabase, profile?.profile_image_url);
         
         // Convert gallery URLs
         const galleryWithUrls = await Promise.all(
           userGallery.slice(0, 3).map(async (g) => ({
             ...g,
-            media_url: await getProfileImageUrl(supabase, g.media_url),
+            media_url: await resolveStorageUrl(supabase, g.media_url),
           }))
         );
 
