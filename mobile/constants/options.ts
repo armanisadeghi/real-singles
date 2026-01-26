@@ -309,6 +309,30 @@ export const DATING_INTENTIONS_OPTIONS = [
   { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
+// Event type options - matches database CHECK constraint
+export const EVENT_TYPE_OPTIONS = [
+  { label: "In Person", value: "in_person" },
+  { label: "Virtual", value: "virtual" },
+  { label: "Speed Dating", value: "speed_dating" },
+];
+
+// Event status options - matches database CHECK constraint
+export const EVENT_STATUS_OPTIONS = [
+  { label: "Draft", value: "draft" },
+  { label: "Upcoming", value: "upcoming" },
+  { label: "Ongoing", value: "ongoing" },
+  { label: "Completed", value: "completed" },
+  { label: "Cancelled", value: "cancelled" },
+];
+
+// Event attendee status options - matches database CHECK constraint
+export const EVENT_ATTENDEE_STATUS_OPTIONS = [
+  { label: "Interested", value: "interested" },
+  { label: "Registered", value: "registered" },
+  { label: "Attended", value: "attended" },
+  { label: "Cancelled", value: "cancelled" },
+];
+
 /**
  * Calculate zodiac sign from a date of birth
  * @param dateString - Date string in MM/DD/YYYY or YYYY-MM-DD format

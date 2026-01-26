@@ -1,17 +1,23 @@
 import { icons } from "@/constants/icons";
-import { markEventAsInterested } from "@/lib/api";
+import { markEventAsInterested, cancelEventRegistration } from "@/lib/api";
 import { EventCardProps } from "@/types";
 import { VIDEO_URL } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
+import * as Calendar from "expo-calendar";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Image,
   Linking,
   Modal,
+  Platform,
+  Share,
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import GradientButton from "./ui/GradientButton";
@@ -67,16 +73,17 @@ export default function EventDetails({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [mapModalVisible, setMapModalVisible] = useState(false);
+  const [isRsvpLoading, setIsRsvpLoading] = useState(false);
   const router = useRouter();
 
   const mapRegion = {
-    latitude: 37.78825,
-    longitude: -122.4324,
+    latitude: parseFloat(event?.Latitude) || 37.78825,
+    longitude: parseFloat(event?.Longitude) || -122.4324,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   };
 
-   const getUserInitials = (user: any) => {
+  const getUserInitials = (user: any) => {
     if (!user?.DisplayName) return "?";
     
     const nameParts = user.DisplayName.split(" ");
@@ -91,7 +98,7 @@ export default function EventDetails({
   };
 
   // Function to generate background color for a user
-  const getUserBgColor = (user : any) => {
+  const getUserBgColor = (user: any) => {
     const seed = user?.ID || user?.DisplayName || "";
     const index = Math.abs(
       seed.toString().split("").reduce((acc: any, char: any) => {
@@ -100,7 +107,6 @@ export default function EventDetails({
     );
     return BACKGROUND_COLORS[index];
   };
-
 
   const handleOpenLink = async (url: string) => {
     // Make sure the link has proper protocol
@@ -113,35 +119,192 @@ export default function EventDetails({
       await Linking.openURL(formattedUrl);
     } else {
       console.error(`Cannot open URL: ${formattedUrl}`);
-      // Optionally show an error message to the user
-      // Alert.alert("Cannot open this link");
     }
   };
-  
 
-  const handleEventInterested = async () => {
-    const formData = new FormData();
-    formData.append("EventID", event?.EventID);
-    formData.append("Status", event?.isMarkInterested === 1 ? "0" : "1");
+  // RSVP handler - single button flow
+  const handleRsvp = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsRsvpLoading(true);
+
+    const isRegistered = event?.isMarkInterested === 1;
 
     try {
-      const res = await markEventAsInterested(formData);
-      if (res?.success) {
-        console.log(res?.msg);
-        // setSuccessMsg(res?.msg);
-        fetchEventDetails();
-        // Optionally update local state to reflect change
+      if (isRegistered) {
+        // Cancel RSVP - use DELETE endpoint
+        const res = await cancelEventRegistration(event?.EventID);
+        if (res?.success) {
+          fetchEventDetails();
+        } else {
+          Alert.alert("Error", res?.msg || "Failed to cancel RSVP");
+        }
       } else {
-        console.log(res?.msg || "Failed to mark event as interested");
+        // Register - use POST endpoint
+        const formData = new FormData();
+        formData.append("EventID", event?.EventID);
+        const res = await markEventAsInterested(formData);
+        if (res?.success) {
+          fetchEventDetails();
+        } else {
+          Alert.alert("Error", res?.msg || "Failed to RSVP");
+        }
       }
     } catch (error) {
-      console.error("Error marking event as interested:", error);
+      console.error("Error updating RSVP:", error);
+      Alert.alert("Error", "Failed to update RSVP. Please try again.");
+    } finally {
+      setIsRsvpLoading(false);
     }
   };
+
+  // Add to Calendar
+  const handleAddToCalendar = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    try {
+      // Request calendar permissions
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Calendar access is needed to add events. Please enable it in Settings.",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Open Settings", onPress: () => Linking.openSettings() },
+          ]
+        );
+        return;
+      }
+
+      // Get default calendar
+      const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+      const defaultCalendar = calendars.find(
+        (cal) =>
+          cal.allowsModifications &&
+          (Platform.OS === "ios"
+            ? cal.source.name === "iCloud" || cal.source.name === "Default"
+            : cal.isPrimary)
+      ) || calendars.find((cal) => cal.allowsModifications);
+
+      if (!defaultCalendar) {
+        Alert.alert("Error", "No writable calendar found on this device.");
+        return;
+      }
+
+      // Parse event date and time
+      const startDate = new Date(event?.EventDate);
+      if (event?.StartTime) {
+        const [time, period] = event.StartTime.split(" ");
+        const [hours, minutes] = time.split(":");
+        let hour = parseInt(hours);
+        if (period === "PM" && hour !== 12) hour += 12;
+        if (period === "AM" && hour === 12) hour = 0;
+        startDate.setHours(hour, parseInt(minutes));
+      }
+
+      const endDate = new Date(startDate);
+      if (event?.EndTime) {
+        const [time, period] = event.EndTime.split(" ");
+        const [hours, minutes] = time.split(":");
+        let hour = parseInt(hours);
+        if (period === "PM" && hour !== 12) hour += 12;
+        if (period === "AM" && hour === 12) hour = 0;
+        endDate.setHours(hour, parseInt(minutes));
+      } else {
+        // Default to 2 hours if no end time
+        endDate.setHours(endDate.getHours() + 2);
+      }
+
+      const location = [event?.VenueName, event?.Street, event?.City, event?.State]
+        .filter(Boolean)
+        .join(", ");
+
+      // Create calendar event
+      await Calendar.createEventAsync(defaultCalendar.id, {
+        title: event?.EventName || "RealSingles Event",
+        notes: event?.Description || "",
+        startDate,
+        endDate,
+        location,
+        timeZone: "America/New_York",
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert("Success", "Event added to your calendar!");
+    } catch (error) {
+      console.error("Error adding to calendar:", error);
+      Alert.alert("Error", "Failed to add event to calendar. Please try again.");
+    }
+  };
+
+  // Share Event
+  const handleShare = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    const location = [event?.Street, event?.City, event?.State].filter(Boolean).join(", ");
+    const eventDate = event?.EventDate ? formatEventDate(event.EventDate) : "";
+    const deepLink = `trusingle://events/${event?.EventID}`;
+
+    const shareMessage = `Check out this event on RealSingles!\n\n${event?.EventName}\n${eventDate}${event?.StartTime ? ` at ${event.StartTime}` : ""}\n${location ? `Location: ${location}` : ""}`;
+
+    try {
+      const result = await Share.share(
+        Platform.OS === "ios"
+          ? {
+              message: shareMessage,
+              url: deepLink,
+            }
+          : {
+              message: `${shareMessage}\n\n${deepLink}`,
+            }
+      );
+
+      if (result.action === Share.sharedAction) {
+        console.log("Event shared successfully");
+      }
+    } catch (error) {
+      console.error("Error sharing event:", error);
+    }
+  };
+
+  // Open in Maps
+  const handleOpenInMaps = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    const lat = parseFloat(event?.Latitude) || 37.78825;
+    const lng = parseFloat(event?.Longitude) || -122.4324;
+    const address = [event?.Street, event?.City, event?.State].filter(Boolean).join(", ");
+    const label = encodeURIComponent(event?.EventName || "Event Location");
+    const addressEncoded = encodeURIComponent(address);
+
+    let url: string;
+
+    if (Platform.OS === "ios") {
+      // Apple Maps
+      url = `maps:0,0?q=${label}@${lat},${lng}`;
+    } else {
+      // Google Maps on Android
+      url = `geo:${lat},${lng}?q=${lat},${lng}(${label})`;
+    }
+
+    Linking.canOpenURL(url).then((supported) => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        // Fallback to Google Maps web
+        const webUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+        Linking.openURL(webUrl);
+      }
+    });
+  };
+
+  const isRegistered = event?.isMarkInterested === 1;
+
   return (
     <View className="px-4 mt-2">
       <View className="flex-row items-start justify-between py-2">
-        <View className="space-y-2">
+        <View className="space-y-2 flex-1 mr-4">
           <Text className="font-bold text-[20px] text-dark">
             {event?.EventName}
           </Text>
@@ -152,7 +315,24 @@ export default function EventDetails({
             </Text>
           </View>
         </View>
+        
+        {/* Action buttons */}
+        <View className="flex-row gap-2">
+          <TouchableOpacity
+            onPress={handleShare}
+            className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center"
+          >
+            <Ionicons name="share-outline" size={20} color="#B06D1E" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleAddToCalendar}
+            className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center"
+          >
+            <Ionicons name="calendar-outline" size={20} color="#B06D1E" />
+          </TouchableOpacity>
+        </View>
       </View>
+
       <View className="mt-2 flex-row items-start justify-between">
         <View className="flex-row">
           {event?.interestedUserImage &&
@@ -203,13 +383,21 @@ export default function EventDetails({
           )}
         </View>
         <TouchableOpacity
-          onPress={handleEventInterested}
-          className="py-[10px] px-[12px] bg-white border border-primary rounded-lg"
+          onPress={handleRsvp}
+          disabled={isRsvpLoading}
+          className={`py-[10px] px-[16px] rounded-lg flex-row items-center gap-2 ${
+            isRegistered
+              ? "bg-gray-100 border border-gray-300"
+              : "bg-primary"
+          }`}
         >
-          <Text className="text-xs font-medium text-dark text-center">
-            {event?.isMarkInterested === 1
-              ? "Interested"
-              : "Mark as Interested"}
+          {isRsvpLoading ? (
+            <ActivityIndicator size="small" color={isRegistered ? "#666" : "#fff"} />
+          ) : null}
+          <Text className={`text-xs font-semibold text-center ${
+            isRegistered ? "text-gray-700" : "text-white"
+          }`}>
+            {isRegistered ? "Cancel RSVP" : "RSVP"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -240,7 +428,7 @@ export default function EventDetails({
       </View>
 
       <View className="mt-[18px] border border-border rounded-[15px] p-[14px] flex-row justify-between items-center">
-        <View>
+        <View className="flex-1 mr-4">
           <Text className="text-base font-medium text-primary">
             Event Info:
           </Text>
@@ -287,51 +475,41 @@ export default function EventDetails({
           <MapView
             className="w-full h-full"
             style={{ width: "100%", height: "100%" }}
-            initialRegion={{
-              latitude: 37.78825,
-              longitude: -122.4324,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
+            initialRegion={mapRegion}
           >
             <Marker
-              coordinate={{ latitude: 37.78825, longitude: -122.4324 }}
-              // title="Event Location"
+              coordinate={{
+                latitude: parseFloat(event?.Latitude) || 37.78825,
+                longitude: parseFloat(event?.Longitude) || -122.4324,
+              }}
               pinColor="#B06D1E"
             />
           </MapView>
         </TouchableOpacity>
       </View>
-      {/* <View className="mt-4">
-        <Text className="text-base text-primary font-bold">Past Events</Text>
-        {pastEventData.map((item) => (
-          <View key={item.id.toString()} className="mb-3">
-            <PastEventCard
-              id={item.id}
-              image={item.image}
-              title={item.title}
-              location={item.location}
-              price={item.price}
-              time={item.time}
-              onPress={() => {
-                console.log(`Viewing past event: ${item.title}`);
-              }}
-            />
-          </View>
-        ))}
-      </View> */}
+
+      {/* Main RSVP Button */}
       <GradientButton
-        text={
-          event?.isMarkInterested === 1 ? "Interested" : "Mark as Interested"
-        }
-        onPress={handleEventInterested}
+        text={isRegistered ? "Cancel RSVP" : "RSVP to Event"}
+        onPress={handleRsvp}
+        disabled={isRsvpLoading}
         containerStyle={{
           marginTop: 20,
-          marginBottom: 120,
           width: "80%",
           marginHorizontal: "auto",
+          opacity: isRsvpLoading ? 0.7 : 1,
         }}
       />
+
+      {/* Open in Maps Button */}
+      <TouchableOpacity
+        onPress={handleOpenInMaps}
+        className="mt-4 mb-[120px] py-3 px-6 border border-primary rounded-full self-center flex-row items-center gap-2"
+      >
+        <Ionicons name="navigate-outline" size={18} color="#B06D1E" />
+        <Text className="text-primary font-medium">Get Directions</Text>
+      </TouchableOpacity>
+
       <Modal
         animationType="slide"
         transparent={false}
@@ -375,12 +553,19 @@ export default function EventDetails({
 
           {/* Footer with location info */}
           <View className="bg-white p-4">
-            <View className="flex-row items-center">
+            <View className="flex-row items-center mb-2">
               <Ionicons name="location-sharp" size={16} color="#B06D1E" />
               <Text className="text-sm ml-2">
                 {event?.Street}, {event?.City}
               </Text>
             </View>
+            <TouchableOpacity
+              onPress={handleOpenInMaps}
+              className="py-3 px-6 bg-primary rounded-full self-center flex-row items-center gap-2 mb-2"
+            >
+              <Ionicons name="navigate-outline" size={18} color="#fff" />
+              <Text className="text-white font-medium">Get Directions</Text>
+            </TouchableOpacity>
             <GradientButton
               text="Close Map"
               onPress={() => setMapModalVisible(false)}

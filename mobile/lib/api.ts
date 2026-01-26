@@ -443,15 +443,22 @@ export const createEvent = async (data: FormData) => {
 };
 
 /**
- * Mark event as interested / register
+ * Mark event as interested / register (RSVP)
  */
 export const markEventAsInterested = async (data: FormData) => {
   const eventId = data.get("EventID") as string || data.get("event_id") as string;
-  const status = data.get("Status") as string || "interested";
   
   return apiRequest(`/events/${eventId}/register`, {
     method: "POST",
-    body: JSON.stringify({ status }),
+  });
+};
+
+/**
+ * Cancel event registration (Cancel RSVP)
+ */
+export const cancelEventRegistration = async (eventId: string) => {
+  return apiRequest(`/events/${eventId}/register`, {
+    method: "DELETE",
   });
 };
 

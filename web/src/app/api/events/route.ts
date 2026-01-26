@@ -1,5 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+
+// Verify the current user is an admin
+async function verifyAdmin(supabase: any, userId: string): Promise<boolean> {
+  const { data: userData } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", userId)
+    .single();
+
+  return userData?.role === "admin" || userData?.role === "moderator";
+}
+
+// Get start of today in ISO format (for filtering events)
+function getStartOfToday(): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today.toISOString();
+}
 
 /**
  * GET /api/events
@@ -32,13 +51,14 @@ export async function GET(request: NextRequest) {
 
   // Filter by status
   if (status === "upcoming") {
+    // Use start of today to include today's events
     query = query
       .in("status", ["upcoming", "ongoing"])
-      .gte("start_datetime", new Date().toISOString());
+      .gte("start_datetime", getStartOfToday());
   } else if (status === "past") {
     query = query
       .eq("status", "completed")
-      .lt("start_datetime", new Date().toISOString());
+      .lt("start_datetime", getStartOfToday());
   }
 
   // Filter by city
@@ -56,44 +76,49 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Format events for mobile app
-  const formattedEvents = (events || []).map((event: any) => {
-    const attendees = event.event_attendees || [];
-    const interestedUsers = attendees.filter((a: any) => a.status === "interested" || a.status === "registered");
-    const isUserInterested = user ? attendees.some((a: any) => a.user_id === user.id) : false;
+  // Format events for mobile app (with image URL resolution)
+  const formattedEvents = await Promise.all(
+    (events || []).map(async (event: any) => {
+      const attendees = event.event_attendees || [];
+      const interestedUsers = attendees.filter((a: any) => a.status === "interested" || a.status === "registered");
+      const isUserInterested = user ? attendees.some((a: any) => a.user_id === user.id) : false;
 
-    return {
-      EventID: event.id,
-      EventName: event.title,
-      EventDate: event.start_datetime?.split("T")[0] || "",
-      EventPrice: "0",
-      StartTime: event.start_datetime
-        ? new Date(event.start_datetime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-        : "",
-      EndTime: event.end_datetime
-        ? new Date(event.end_datetime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-        : "",
-      Description: event.description || "",
-      Street: event.address || "",
-      City: event.city || "",
-      State: event.state || "",
-      PostalCode: "",
-      EventImage: event.image_url || "",
-      Link: "",
-      Latitude: event.latitude?.toString() || "",
-      Longitude: event.longitude?.toString() || "",
-      UserID: event.created_by || "",
-      CreateDate: event.created_at,
-      interestedUserImage: interestedUsers.slice(0, 5).map(() => ""), // Placeholder
-      HostedBy: event.users?.display_name || "RealSingles",
-      HostedID: event.created_by || "",
-      isMarkInterested: isUserInterested ? 1 : 0,
-      MaxAttendees: event.max_attendees,
-      CurrentAttendees: event.current_attendees || interestedUsers.length,
-      EventType: event.event_type,
-      Status: event.status,
-    };
-  });
+      // Resolve storage URL for event image
+      const eventImageUrl = await resolveStorageUrl(supabase, event.image_url);
+
+      return {
+        EventID: event.id,
+        EventName: event.title,
+        EventDate: event.start_datetime?.split("T")[0] || "",
+        EventPrice: "0",
+        StartTime: event.start_datetime
+          ? new Date(event.start_datetime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+          : "",
+        EndTime: event.end_datetime
+          ? new Date(event.end_datetime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+          : "",
+        Description: event.description || "",
+        Street: event.address || "",
+        City: event.city || "",
+        State: event.state || "",
+        PostalCode: "",
+        EventImage: eventImageUrl || "",
+        Link: "",
+        Latitude: event.latitude?.toString() || "",
+        Longitude: event.longitude?.toString() || "",
+        UserID: event.created_by || "",
+        CreateDate: event.created_at,
+        interestedUserImage: interestedUsers.slice(0, 5).map(() => ""), // Placeholder
+        HostedBy: event.users?.display_name || "RealSingles",
+        HostedID: event.created_by || "",
+        isMarkInterested: isUserInterested ? 1 : 0,
+        MaxAttendees: event.max_attendees,
+        CurrentAttendees: event.current_attendees || interestedUsers.length,
+        EventType: event.event_type,
+        Status: event.status,
+      };
+    })
+  );
 
   return NextResponse.json({
     success: true,
@@ -104,7 +129,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/events
- * Create a new event
+ * Create a new event (Admin only)
  * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function POST(request: Request) {
@@ -119,6 +144,15 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { success: false, msg: "Not authenticated" },
       { status: 401 }
+    );
+  }
+
+  // Check if user is admin
+  const isAdmin = await verifyAdmin(supabase, user.id);
+  if (!isAdmin) {
+    return NextResponse.json(
+      { success: false, msg: "Only administrators can create events" },
+      { status: 403 }
     );
   }
 

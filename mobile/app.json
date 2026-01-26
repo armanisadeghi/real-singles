@@ -16,7 +16,9 @@
       },
       "infoPlist": {
         "NSCameraUsageDescription": "RealSingles need access to your camera to record your video.",
-        "NSMicrophoneUsageDescription": "RealSingles need access to your microphone to record audio in your video."
+        "NSMicrophoneUsageDescription": "RealSingles need access to your microphone to record audio in your video.",
+        "NSCalendarsUsageDescription": "RealSingles would like to add events to your calendar.",
+        "NSCalendarsFullAccessUsageDescription": "RealSingles would like to add events to your calendar."
       }
     },
     "android": {
@@ -30,7 +32,9 @@
         "CAMERA",
         "RECORD_AUDIO",
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "READ_CALENDAR",
+        "WRITE_CALENDAR"
       ],
       "package": "com.nayannew9.truSingle",
       "config": {
@@ -85,7 +89,13 @@
       "react-native-video",
       "@react-native-community/datetimepicker",
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "RealSingles would like to add events to your calendar."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

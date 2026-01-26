@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -61,12 +61,16 @@ const menuItems = [
  */
 export function SideMenu({ isOpen, onClose, user, onSignOut }: SideMenuProps) {
   const pathname = usePathname();
+  
+  // Store onClose in a ref so effects don't re-run when it changes
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   // Close menu on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
       }
     };
 
@@ -80,12 +84,17 @@ export function SideMenu({ isOpen, onClose, user, onSignOut }: SideMenuProps) {
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
-  // Close menu when route changes
+  // Close menu when route actually changes (not just on re-renders)
+  const previousPathname = useRef(pathname);
   useEffect(() => {
-    onClose();
-  }, [pathname, onClose]);
+    // Only close if pathname actually changed (user navigated)
+    if (previousPathname.current !== pathname) {
+      previousPathname.current = pathname;
+      onCloseRef.current();
+    }
+  }, [pathname]);
 
   if (!isOpen) return null;
 

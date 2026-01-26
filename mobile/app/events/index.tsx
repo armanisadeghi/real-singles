@@ -45,11 +45,6 @@ export default function Events() {
     <>
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-lg font-bold text-primary">Current Events</Text>
-        <TouchableOpacity onPress={() => router.push("/events/create")}>
-          <Text className="text-xs font-medium underline text-dark">
-            Create Event
-          </Text>
-        </TouchableOpacity>
       </View>
 
       <FlatList

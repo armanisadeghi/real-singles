@@ -24,23 +24,55 @@ export async function GET(
       event_attendees(
         user_id,
         status,
-        registered_at,
-        profiles:user_id(
-          first_name,
-          profile_image_url,
-          users:user_id(display_name)
-        )
+        registered_at
       ),
       users:created_by(display_name)
     `)
     .eq("id", eventId)
     .single();
 
-  if (error || !event) {
+  if (error) {
+    console.error("Error fetching event:", error);
+    return NextResponse.json(
+      { success: false, msg: "Event not found", error: error.message },
+      { status: 404 }
+    );
+  }
+
+  if (!event) {
     return NextResponse.json(
       { success: false, msg: "Event not found" },
       { status: 404 }
     );
+  }
+
+  // Fetch attendee profiles separately to avoid complex nested joins
+  const attendeeUserIds = (event.event_attendees || []).map((a: any) => a.user_id);
+  let attendeeProfiles: Record<string, any> = {};
+  
+  if (attendeeUserIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, first_name, profile_image_url")
+      .in("user_id", attendeeUserIds);
+    
+    const { data: users } = await supabase
+      .from("users")
+      .select("id, display_name")
+      .in("id", attendeeUserIds);
+    
+    // Create lookup maps
+    const profileMap = (profiles || []).reduce((acc: any, p: any) => {
+      acc[p.user_id] = p;
+      return acc;
+    }, {});
+    
+    const userMap = (users || []).reduce((acc: any, u: any) => {
+      acc[u.id] = u;
+      return acc;
+    }, {});
+    
+    attendeeProfiles = { profileMap, userMap };
   }
 
   const attendees = event.event_attendees || [];
@@ -52,19 +84,24 @@ export async function GET(
 
   // Resolve interested user images
   const interestedUserImages = await Promise.all(
-    interestedUsers.slice(0, 10).map((a: any) => 
-      resolveStorageUrl(supabase, a.profiles?.profile_image_url)
-    )
+    interestedUsers.slice(0, 10).map((a: any) => {
+      const profile = attendeeProfiles.profileMap?.[a.user_id];
+      return resolveStorageUrl(supabase, profile?.profile_image_url);
+    })
   );
 
   // Resolve interested users with profile images
   const formattedInterestedUsers = await Promise.all(
-    interestedUsers.map(async (a: any) => ({
-      user_id: a.user_id,
-      display_name: a.profiles?.users?.display_name || a.profiles?.first_name || "User",
-      profile_image_url: await resolveStorageUrl(supabase, a.profiles?.profile_image_url),
-      status: a.status,
-    }))
+    interestedUsers.map(async (a: any) => {
+      const profile = attendeeProfiles.profileMap?.[a.user_id];
+      const userData = attendeeProfiles.userMap?.[a.user_id];
+      return {
+        user_id: a.user_id,
+        display_name: userData?.display_name || profile?.first_name || "User",
+        profile_image_url: await resolveStorageUrl(supabase, profile?.profile_image_url),
+        status: a.status,
+      };
+    })
   );
 
   const formattedEvent = {

@@ -62,12 +62,19 @@ export async function POST(
     .single();
 
   if (existing) {
-    // Toggle registration - if already registered, mark as interested; if interested, register
-    const newStatus = existing.status === "registered" ? "interested" : "registered";
+    // User is already registered - return current status
+    if (existing.status === "registered") {
+      return NextResponse.json({
+        success: true,
+        status: "registered",
+        msg: "You are already registered for this event",
+      });
+    }
     
+    // Update to registered status
     const { error: updateError } = await supabase
       .from("event_attendees")
-      .update({ status: newStatus })
+      .update({ status: "registered" })
       .eq("id", existing.id);
 
     if (updateError) {
@@ -80,18 +87,18 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      status: newStatus,
-      msg: newStatus === "registered" ? "You are now registered for this event" : "You are now interested in this event",
+      status: "registered",
+      msg: "You are now registered for this event",
     });
   }
 
-  // Create new registration
+  // Create new registration with 'registered' status directly
   const { error: insertError } = await supabase
     .from("event_attendees")
     .insert({
       event_id: eventId,
       user_id: user.id,
-      status: "interested",
+      status: "registered",
     });
 
   if (insertError) {
@@ -110,8 +117,8 @@ export async function POST(
 
   return NextResponse.json({
     success: true,
-    status: "interested",
-    msg: "You have marked interest in this event",
+    status: "registered",
+    msg: "You are now registered for this event",
   });
 }
 

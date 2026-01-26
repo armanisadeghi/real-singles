@@ -75,15 +75,17 @@ export interface VideoCardProps {
 }
 
 export interface EventCardProps {
-   EventID: string;
+  EventID: string;
   EventName: string;
   EventDate: string;
   EventPrice: string;
   StartTime: string;
   EndTime: string;
   Description: string;
+  VenueName?: string;
   Street: string;
   City: string;
+  State?: string;
   PostalCode: string;
   EventImage: string;
   Link: string;
@@ -95,7 +97,6 @@ export interface EventCardProps {
   HostedBy: string;
   HostedID: string;
   isMarkInterested?: number;
-  State?: string;
 }
 
 export interface ProductCardProps {

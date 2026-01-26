@@ -223,38 +223,47 @@ export async function GET() {
     })
   );
 
-  // Get upcoming events
+  // Get upcoming events (use start of today to include today's events)
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  
   const { data: events } = await supabase
     .from("events")
     .select("*")
     .eq("status", "upcoming")
     .eq("is_public", true)
-    .gte("start_datetime", new Date().toISOString())
+    .gte("start_datetime", startOfToday.toISOString())
     .order("start_datetime", { ascending: true })
     .limit(5);
 
-  const formattedEvents = (events || []).map((event) => ({
-    EventID: event.id,
-    EventName: event.title,
-    EventDate: event.start_datetime?.split("T")[0] || "",
-    EventPrice: "0", // TODO: Add pricing to events
-    StartTime: event.start_datetime ? new Date(event.start_datetime).toLocaleTimeString() : "",
-    EndTime: event.end_datetime ? new Date(event.end_datetime).toLocaleTimeString() : "",
-    Description: event.description || "",
-    Street: event.address || "",
-    City: event.city || "",
-    State: event.state || "",
-    PostalCode: "",
-    EventImage: event.image_url || "",
-    Link: "",
-    Latitude: event.latitude?.toString() || "",
-    Longitude: event.longitude?.toString() || "",
-    UserID: event.created_by || "",
-    CreateDate: event.created_at,
-    interestedUserImage: [],
-    HostedBy: "",
-    HostedID: event.created_by || "",
-  }));
+  // Resolve event image URLs
+  const formattedEvents = await Promise.all(
+    (events || []).map(async (event) => {
+      const eventImageUrl = await resolveStorageUrl(supabase, event.image_url);
+      return {
+        EventID: event.id,
+        EventName: event.title,
+        EventDate: event.start_datetime?.split("T")[0] || "",
+        EventPrice: "0", // TODO: Add pricing to events
+        StartTime: event.start_datetime ? new Date(event.start_datetime).toLocaleTimeString() : "",
+        EndTime: event.end_datetime ? new Date(event.end_datetime).toLocaleTimeString() : "",
+        Description: event.description || "",
+        Street: event.address || "",
+        City: event.city || "",
+        State: event.state || "",
+        PostalCode: "",
+        EventImage: eventImageUrl,
+        Link: "",
+        Latitude: event.latitude?.toString() || "",
+        Longitude: event.longitude?.toString() || "",
+        UserID: event.created_by || "",
+        CreateDate: event.created_at,
+        interestedUserImage: [],
+        HostedBy: "",
+        HostedID: event.created_by || "",
+      };
+    })
+  );
 
   // Get virtual speed dating sessions
   const { data: virtualDating } = await supabase
