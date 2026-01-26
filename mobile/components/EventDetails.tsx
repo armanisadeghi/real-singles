@@ -200,7 +200,50 @@ export default function EventDetails({
       });
 
       if (result.success) {
-        Alert.alert("Success", "Event added to your calendar!");
+        // Format date for display
+        const formattedDate = startDate.toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+        });
+        const formattedTime = startDate.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        });
+
+        // Build clean, native-style message
+        const eventName = event?.EventName || "Event";
+        let message = `${formattedDate} at ${formattedTime}`;
+        if (location) {
+          message += `\n${location}`;
+        }
+
+        // Native iOS alert style: clean text, no emojis, action button on right
+        Alert.alert(
+          `"${eventName}" Added`,
+          message,
+          [
+            {
+              text: "OK",
+              style: "cancel",
+            },
+            {
+              text: "View in Calendar",
+              style: "default",
+              onPress: () => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                // Open native Calendar app
+                const calendarUrl = Platform.OS === "ios" 
+                  ? "calshow:" 
+                  : "content://com.android.calendar/time/";
+                Linking.openURL(calendarUrl).catch(() => {
+                  console.log("Could not open calendar app");
+                });
+              },
+            },
+          ]
+        );
       } else if (result.error && result.error !== "Calendar permission not granted") {
         // Only show error if it's not a permission denial (utility handles that)
         Alert.alert("Error", result.error);

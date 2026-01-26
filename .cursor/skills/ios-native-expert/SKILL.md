@@ -167,6 +167,69 @@ Use `react-native-ios-context-menu` with SF Symbol icons (`iconType: 'SYSTEM'`, 
 
 ---
 
+## Native Alerts & Confirmations
+
+**iOS alerts must be clean, professional, and informative.** Never use emojis or casual language.
+
+### Alert Style Guidelines
+
+| ✅ Native iOS | ❌ Avoid |
+|---------------|----------|
+| Clean, concise text | Emojis in alerts |
+| Specific details (what, when, where) | Generic "Success!" messages |
+| Actionable button labels | Vague buttons like "OK" alone |
+| Title describes the action completed | Titles like "Done" or "Success" |
+
+### Confirmation Alert Pattern
+
+When an action completes (e.g., adding to calendar, saving data), provide:
+1. **Title**: What was done (e.g., `"Event Name" Added`)
+2. **Message**: Relevant details (date, time, location)
+3. **Buttons**: Dismissive + actionable option
+
+```tsx
+// ✅ Good: Native iOS confirmation
+Alert.alert(
+  `"${eventName}" Added`,
+  `${formattedDate} at ${formattedTime}\n${location}`,
+  [
+    { text: "OK", style: "cancel" },
+    { 
+      text: "View in Calendar", 
+      style: "default",
+      onPress: () => Linking.openURL("calshow:")
+    },
+  ]
+);
+
+// ❌ Bad: Generic, uninformative
+Alert.alert("Success", "Event added to your calendar!");
+
+// ❌ Bad: Emojis aren't native iOS style
+Alert.alert("Added ✓", "📅 Event saved! 🎉");
+```
+
+### Error Alert Pattern
+
+```tsx
+Alert.alert(
+  "Unable to Save Event",
+  "Please check your calendar permissions in Settings.",
+  [
+    { text: "Cancel", style: "cancel" },
+    { text: "Open Settings", onPress: () => Linking.openSettings() },
+  ]
+);
+```
+
+### Button Order (iOS Convention)
+
+- **Cancel/dismiss** button: LEFT (style: "cancel")
+- **Primary action** button: RIGHT (style: "default")
+- **Destructive action**: RIGHT with `style: "destructive"`
+
+---
+
 ## Forms
 
 ### TextInput iOS Props
@@ -301,6 +364,7 @@ cd mobile/ios && pod install && cd .. && pnpm ios
 - [ ] Accessibility: respect `isReduceTransparencyEnabled`
 - [ ] **Permissions: Info.plist has ALL required keys** (legacy + iOS 17+)
 - [ ] **Permissions: Use `utils/permissions.ts` utility** (not inline requests)
+- [ ] **Alerts: Clean, specific, no emojis** (include relevant details)
 - [ ] Android unchanged, Web untouched
 
 ---
