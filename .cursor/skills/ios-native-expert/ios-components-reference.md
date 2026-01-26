@@ -1,20 +1,17 @@
 # iOS Native Components Quick Reference
 
-Quick lookup for native iOS component implementations in React Native/Expo.
+**Quick lookups for iOS 26 development.** All packages pre-installed.
 
 ---
 
-## SF Symbols Cheat Sheet
+## SF Symbols 7 (6,900+ symbols)
 
-Common symbols used in dating/social apps:
-
-| Purpose | Symbol Name | Filled Variant |
-|---------|-------------|----------------|
+| Purpose | Symbol | Filled |
+|---------|--------|--------|
 | Home | `house` | `house.fill` |
 | Search | `magnifyingglass` | - |
 | Heart/Like | `heart` | `heart.fill` |
 | Chat | `bubble.left` | `bubble.left.fill` |
-| Chat (dual) | `bubble.left.and.bubble.right` | `bubble.left.and.bubble.right.fill` |
 | Profile | `person` | `person.fill` |
 | Settings | `gearshape` | `gearshape.fill` |
 | Camera | `camera` | `camera.fill` |
@@ -27,8 +24,7 @@ Common symbols used in dating/social apps:
 | Share | `square.and.arrow.up` | - |
 | More | `ellipsis` | `ellipsis.circle.fill` |
 | Close | `xmark` | `xmark.circle.fill` |
-| Back | `chevron.left` | - |
-| Forward | `chevron.right` | - |
+| Back/Forward | `chevron.left` / `chevron.right` | - |
 | Check | `checkmark` | `checkmark.circle.fill` |
 | Add | `plus` | `plus.circle.fill` |
 | Edit | `pencil` | `square.and.pencil` |
@@ -38,106 +34,182 @@ Common symbols used in dating/social apps:
 | Phone | `phone` | `phone.fill` |
 | Block | `hand.raised` | `hand.raised.fill` |
 | Report | `exclamationmark.triangle` | `exclamationmark.triangle.fill` |
+| AI/Sparkle | `sparkles` | - |
+| Premium | `crown` | `crown.fill` |
+
+---
+
+## Symbol Animations (expo-symbols)
+
+| Type | Use For | Example |
+|------|---------|---------|
+| `bounce` | Attention, feedback | Like tap |
+| `pulse` | Loading, progress | Audio levels |
+| `scale` | Emphasis | Selection |
+
+**Basic:** `animationSpec={{ effect: { type: 'bounce', wholeSymbol: true }, repeating: false }}`
+
+**Variable (progress):** Add `variableAnimationSpec: { cumulative: true, dimInactiveLayers: true }`
+
+### SF Symbols 7 Features (iOS 26)
+
+| Feature | Status in expo-symbols |
+|---------|------------------------|
+| Bounce/Pulse/Scale | ✅ Supported |
+| Draw animations | ❌ Not yet (native SwiftUI only) |
+| Gradients | ❌ Not yet |
+| Magic Replace | ❌ Not yet |
 
 ---
 
 ## System Colors (PlatformColor)
 
-| Color Name | Use Case |
-|------------|----------|
+| Color | Use |
+|-------|-----|
 | `systemBackground` | Primary background |
-| `secondarySystemBackground` | Cards, grouped content |
-| `tertiarySystemBackground` | Nested groups |
+| `secondarySystemBackground` | Cards |
 | `label` | Primary text |
 | `secondaryLabel` | Secondary text |
-| `tertiaryLabel` | Placeholder text |
-| `systemBlue` | Primary action, links |
-| `systemRed` | Destructive, errors |
-| `systemGreen` | Success, online |
-| `systemOrange` | Warnings |
-| `systemPink` | Dating app accent |
-| `systemGray` | Disabled states |
-| `separator` | Divider lines |
+| `systemBlue` | Primary action |
+| `systemRed` | Destructive |
+| `systemGreen` | Success |
+| `systemPink` | Dating accent |
+| `separator` | Dividers |
 
 ---
 
-## Haptic Patterns
+## Haptics (expo-haptics)
 
-| User Action | Haptic Type | Code |
-|-------------|-------------|------|
-| Toggle switch | Selection | `Haptics.selectionAsync()` |
-| Button tap | Light Impact | `Haptics.impactAsync(Light)` |
-| Card press | Medium Impact | `Haptics.impactAsync(Medium)` |
-| Drag threshold | Heavy Impact | `Haptics.impactAsync(Heavy)` |
-| Success | Success Notification | `Haptics.notificationAsync(Success)` |
-| Error | Error Notification | `Haptics.notificationAsync(Error)` |
-| Warning | Warning Notification | `Haptics.notificationAsync(Warning)` |
+| Action | Code |
+|--------|------|
+| Toggle | `selectionAsync()` |
+| Button tap | `impactAsync(ImpactFeedbackStyle.Light)` |
+| Card press | `impactAsync(ImpactFeedbackStyle.Medium)` |
+| Success | `notificationAsync(NotificationFeedbackType.Success)` |
+| Error | `notificationAsync(NotificationFeedbackType.Error)` |
 
 ---
 
-## Library Matrix
+## Native Library Selection
 
-| Feature | Native Library | Fallback | Notes |
-|---------|---------------|----------|-------|
-| Tab Bar | `expo-router/unstable-native-tabs` | - | Actual UITabBarController |
-| Bottom Sheet | `@gorhom/bottom-sheet` | - | Native gesture driver |
-| Icons | `expo-symbols` | PNG per icon | SF Symbols |
-| Date Picker | `@react-native-community/datetimepicker` | - | Native UIDatePicker |
-| Slider | `@react-native-community/slider` | - | Native UISlider |
-| Switch | React Native `Switch` | - | Native UISwitch |
-| Blur | `expo-blur` | - | Native UIVisualEffectView |
-| Haptics | `expo-haptics` | - | Native UIFeedbackGenerator |
-| Segmented | `@react-native-segmented-control/segmented-control` | Custom | Native UISegmentedControl |
-| Action Sheet | `ActionSheetIOS` (RN core) | Custom modal | Native UIAlertController |
-| Context Menu | `react-native-ios-context-menu` | Long press menu | Native UIContextMenuInteraction |
-| Share | `react-native-share` or `expo-sharing` | - | Native UIActivityViewController |
+| Need | Use |
+|------|-----|
+| Tab Bar | `expo-router/unstable-native-tabs` |
+| Liquid Glass | `expo-glass-effect` |
+| Bottom Sheet | `@gorhom/bottom-sheet` |
+| Icons | `expo-symbols` |
+| Date Picker | `@react-native-community/datetimepicker` |
+| Blur | `expo-blur` |
+| Haptics | `expo-haptics` |
+| Segmented Control | `@react-native-segmented-control/segmented-control` |
+| Action Sheet | `ActionSheetIOS` (built-in) |
+| Context Menu | `react-native-ios-context-menu` |
 
 ---
 
-## Spring Animation Presets
+## Liquid Glass (expo-glass-effect)
+
+### Props
+
+| Prop | Type | Default |
+|------|------|---------|
+| `glassEffectStyle` | `'regular'` \| `'clear'` | `'regular'` |
+| `isInteractive` | `boolean` | `false` |
+| `tintColor` | `string` | - |
+| `spacing` (GlassContainer) | `number` | - |
+
+### Availability Check (REQUIRED)
 
 ```tsx
-// Snappy (button feedback)
-{ damping: 20, stiffness: 300 }
+import { isLiquidGlassAvailable, isGlassEffectAPIAvailable } from 'expo-glass-effect';
+import { AccessibilityInfo } from 'react-native';
 
-// Bouncy (card expand)
-{ damping: 12, stiffness: 180 }
+// Full check (prevents crashes on iOS 26 betas)
+const hasGlass = Platform.OS === 'ios' && isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
 
-// Gentle (page transitions)
-{ damping: 18, stiffness: 120 }
-
-// iOS default-like
-{ damping: 15, stiffness: 150 }
+// Respect accessibility (optional but recommended)
+const [reduceTransparency, setReduceTransparency] = useState(false);
+AccessibilityInfo.isReduceTransparencyEnabled().then(setReduceTransparency);
+const showGlass = hasGlass && !reduceTransparency;
 ```
 
----
+### Rules
 
-## iOS Form Field Patterns
-
-| Field Type | iOS Pattern |
-|------------|------------|
-| Email | `keyboardType="email-address"` + `textContentType="emailAddress"` |
-| Password | `secureTextEntry` + `textContentType="password"` |
-| New Password | `secureTextEntry` + `textContentType="newPassword"` |
-| Phone | `keyboardType="phone-pad"` + `textContentType="telephoneNumber"` |
-| Name | `textContentType="name"` + `autoCapitalize="words"` |
-| Address | `textContentType="fullStreetAddress"` |
-| One-time Code | `keyboardType="number-pad"` + `textContentType="oneTimeCode"` |
+- `isInteractive` immutable on mount (use `key` prop to remount)
+- Never `opacity < 1` on GlassView or parents
+- ONLY for navigation/floating elements
 
 ---
 
-## Spacing & Sizing (iOS 18)
+## Spring Presets (react-native-reanimated)
+
+| Use | Config |
+|-----|--------|
+| Button feedback | `{ damping: 20, stiffness: 300 }` |
+| Card expand | `{ damping: 12, stiffness: 180 }` |
+| Page transition | `{ damping: 18, stiffness: 120 }` |
+| Default | `{ damping: 15, stiffness: 150 }` |
+
+---
+
+## Form Field Props (iOS)
+
+| Field | Props |
+|-------|-------|
+| Email | `keyboardType="email-address" textContentType="emailAddress"` |
+| Password | `secureTextEntry textContentType="password"` |
+| Phone | `keyboardType="phone-pad" textContentType="telephoneNumber"` |
+| Name | `textContentType="name" autoCapitalize="words"` |
+| OTP | `keyboardType="number-pad" textContentType="oneTimeCode"` |
+
+Always add: `clearButtonMode="while-editing"` `enablesReturnKeyAutomatically`
+
+---
+
+## Sizing (HIG-compliant)
 
 | Element | Size |
 |---------|------|
 | Standard margin | 16pt |
-| Card padding | 16pt |
-| Button height (large) | 50pt |
-| Button height (regular) | 44pt |
-| Button corner radius | 12pt |
-| Card corner radius | 16-20pt |
-| Touch target minimum | 44x44pt |
-| Icon size (tab bar) | 24-28pt |
-| Icon size (inline) | 20-24pt |
-| List row height (standard) | 44pt |
-| List row height (subtitle) | 60pt |
+| Button height | 44-50pt |
+| Button radius | 12pt |
+| Card radius | 16-20pt |
+| Liquid Glass radius | 20-24pt |
+| Touch target min | 44x44pt |
+| Tab bar icon | 24-28pt |
+| Inline icon | 20-24pt |
+| Liquid Glass FAB | 56x56pt |
+
+---
+
+## Liquid Glass: Where to Use
+
+| ✅ Use | ❌ Never |
+|--------|----------|
+| Tab bars (automatic) | List cells |
+| Toolbars | Card backgrounds |
+| Navigation bars (automatic) | Page content |
+| Floating action buttons | Media |
+| Sheet headers | Text containers |
+
+---
+
+## Imports
+
+```tsx
+import { SymbolView } from 'expo-symbols';
+import { GlassView, GlassContainer, isLiquidGlassAvailable, isGlassEffectAPIAvailable } from 'expo-glass-effect';
+import * as Haptics from 'expo-haptics';
+import { BlurView } from 'expo-blur';
+import { Platform, PlatformColor, AccessibilityInfo } from 'react-native';
+```
+
+---
+
+## Links
+
+- SF Symbols 7: https://developer.apple.com/sf-symbols/
+- expo-glass-effect: https://docs.expo.dev/versions/latest/sdk/glass-effect/
+- expo-symbols: https://docs.expo.dev/versions/latest/sdk/symbols/
+- Apple HIG: https://developer.apple.com/design/human-interface-guidelines/
+- WWDC 2025 Design: https://developer.apple.com/videos/play/wwdc2025/356

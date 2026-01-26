@@ -5,492 +5,256 @@ description: Ensures iOS implementations use truly native components, latest iOS
 
 # iOS Native Expert
 
-Ensures iOS implementations are authentically native using the latest iOS 26 design patterns, Liquid Glass, and Human Interface Guidelines.
+**Your job:** Make iOS implementations authentically native using iOS 26 design patterns, Liquid Glass, and Human Interface Guidelines.
 
-## Scope Restrictions
+---
 
-**CRITICAL: This skill is iOS-ONLY.**
+## Rules You Must Follow
+
+### Scope: iOS-ONLY
 
 | Action | Allowed |
 |--------|---------|
 | Modify `/mobile` iOS-specific code | ✅ Yes |
 | Use `Platform.OS === 'ios'` conditionals | ✅ Yes |
-| Add iOS-only libraries/features | ✅ Yes |
+| Add iOS-only features | ✅ Yes |
 | Modify `/web` in any way | ❌ NEVER |
 | Change shared logic that affects Android | ❌ NEVER |
 | Remove Android implementations | ❌ NEVER |
 
-When making iOS improvements, use platform conditionals to isolate changes:
+### When Unsure: Research First
 
-```tsx
-import { Platform } from 'react-native';
-
-// iOS-specific implementation
-{Platform.OS === 'ios' && <IOSOnlyComponent />}
-
-// Platform-specific props
-style={Platform.select({
-  ios: { /* iOS styles */ },
-  android: { /* keep Android unchanged */ },
-})}
-```
+Search for latest patterns: `"iOS 26 [component] Liquid Glass"` or `"SwiftUI [component] iOS 26"`
 
 ---
 
-## Research First
+## Liquid Glass (iOS 26)
 
-Before implementing any iOS component, **research the latest iOS patterns**:
+Apple's translucent design language that reflects/refracts surroundings with real-time rendering. **Use for navigation and floating elements only.**
 
-1. **Check current iOS version** (iOS 26 as of 2025-2026)
-2. **Search for latest HIG updates**: "iOS 26 Human Interface Guidelines [component]"
-3. **Look up native equivalents**: "SwiftUI [component] iOS 26" or "UIKit [component]"
-4. **Verify Expo/RN support**: Check if native-backed libraries exist (Expo SDK 54+)
+### Where to Apply
 
-### Key Research Queries
+| ✅ Use Liquid Glass | ❌ Never Use |
+|---------------------|--------------|
+| Tab bars (automatic) | Lists/tables |
+| Toolbars | Card backgrounds |
+| Navigation bars (automatic) | Page content |
+| Floating action buttons | Media content |
+| Sheet headers | Text containers |
 
-| Component Type | Search For |
-|----------------|-----------|
-| Navigation | "iOS 26 tab bar Liquid Glass", "UITabBarController iOS 26" |
-| Controls | "iOS 26 Liquid Glass controls", "glassEffect SwiftUI" |
-| Lists | "iOS 26 list styles", "UICollectionView compositional layout" |
-| Forms | "iOS form patterns 2026", "SwiftUI Form" |
-| Sheets | "iOS 26 sheet Liquid Glass", "UISheetPresentationController" |
-| Buttons | "iOS 26 glass buttons", "bordered prominent button" |
-| Pickers | "iOS wheel picker vs menu picker", "UIDatePicker styles" |
+### Implementation
+
+```tsx
+import { GlassView, GlassContainer, isLiquidGlassAvailable, isGlassEffectAPIAvailable } from 'expo-glass-effect';
+import { AccessibilityInfo, Platform } from 'react-native';
+
+// Full availability check (includes iOS 26 beta edge cases)
+const hasLiquidGlass = Platform.OS === 'ios' && isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
+
+// Respect user accessibility preferences
+const [reduceTransparency, setReduceTransparency] = useState(false);
+useEffect(() => {
+  AccessibilityInfo.isReduceTransparencyEnabled().then(setReduceTransparency);
+}, []);
+const showGlass = hasLiquidGlass && !reduceTransparency;
+```
+
+### Critical Rules
+
+1. **`isInteractive` is immutable** — set once on mount, remount with different `key` to change
+2. **Never `opacity < 1`** on GlassView or parents (causes rendering bugs per Apple docs)
+3. **Always use `isGlassEffectAPIAvailable()`** — prevents crashes on some iOS 26 betas
+
+### System Colors
+
+**Always use `PlatformColor`** — adapts to light/dark mode and Liquid Glass:
+
+```tsx
+backgroundColor: Platform.OS === 'ios' ? PlatformColor('systemBackground') : '#FFFFFF'
+```
+
+Common: `systemBackground`, `secondarySystemBackground`, `label`, `secondaryLabel`, `systemBlue`, `systemRed`, `systemGreen`, `systemPink`, `separator`
 
 ---
 
-## iOS 26 Design Language: Liquid Glass
+## Component Selection
 
-**Liquid Glass** is Apple's most significant design evolution since iOS 7, introduced at WWDC 2025.
+**Use native-backed components. Never JS approximations.**
 
-### Core Characteristics
-
-| Property | Description |
-|----------|-------------|
-| **Lensing** | Real-time light bending that concentrates light (not blur) |
-| **Materialization** | Elements appear by gradually modulating light bending |
-| **Fluidity** | Gel-like flexibility with instant touch responsiveness |
-| **Morphing** | Dynamic transformation between control states |
-| **Adaptivity** | Multi-layer composition adjusting to content and lighting |
-
-### Where Liquid Glass Applies
-
-**✅ NAVIGATION LAYER ONLY:**
-- Tab bars
-- Toolbars
-- Navigation bars
-- Floating action buttons
-- Sheets and alerts
-- System controls (toggles, segmented pickers, sliders)
-
-**❌ NEVER ON CONTENT:**
-- Lists and tables
-- Media content
-- Card backgrounds
-- Page content areas
-
-### Visual Characteristics
-
-| Element | iOS 26 Pattern |
-|---------|---------------|
-| Corners | Large radius (continuous corners, ~16-20pt for cards) |
-| Materials | Liquid Glass for navigation, traditional blur for content overlays |
-| Typography | SF Pro with Dynamic Type support |
-| Colors | System colors that adapt to appearance and Liquid Glass |
-| Depth | Specular highlights, adaptive shadows responding to device motion |
-| Motion | Spring animations with iOS-native feel |
-
-### Expo Liquid Glass Support (SDK 54+)
-
-```tsx
-import { GlassView, GlassContainer, isLiquidGlassAvailable } from 'expo-glass-effect';
-import { Platform } from 'react-native';
-
-// Check availability before using
-const hasLiquidGlass = Platform.OS === 'ios' && isLiquidGlassAvailable();
-
-// Basic GlassView
-{hasLiquidGlass && (
-  <GlassView 
-    style={styles.floatingButton}
-    glassEffectStyle="regular" // 'regular' | 'clear'
-    isInteractive={true}
-  >
-    <SymbolView name="plus" tintColor="label" />
-  </GlassView>
-)}
-
-// GlassContainer for grouped glass elements
-{hasLiquidGlass && (
-  <GlassContainer spacing={10} style={styles.toolbar}>
-    <GlassView style={styles.toolbarButton} isInteractive />
-    <GlassView style={styles.toolbarButton} isInteractive />
-    <GlassView style={styles.toolbarButton} isInteractive />
-  </GlassContainer>
-)}
-```
-
-**Important Limitations:**
-- `isInteractive` can only be set once on mount (use `key` prop to remount)
-- Avoid `opacity < 1` on GlassView or parent views (causes rendering issues)
-- Falls back to regular `View` on iOS < 26 and other platforms
-
-### System Colors (Always Use)
-
-```tsx
-// In React Native, use PlatformColor for iOS system colors
-import { PlatformColor, Platform } from 'react-native';
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Platform.OS === 'ios' 
-      ? PlatformColor('systemBackground')
-      : '#FFFFFF',
-  },
-  text: {
-    color: Platform.OS === 'ios'
-      ? PlatformColor('label')
-      : '#000000',
-  },
-  accent: {
-    color: Platform.OS === 'ios'
-      ? PlatformColor('systemBlue')
-      : '#007AFF',
-  },
-});
-```
-
----
-
-## Native Component Mapping
-
-### Use These (Native-Backed)
-
-| Need | Use | NOT |
-|------|-----|-----|
+| Need | ✅ Use | ❌ Not |
+|------|--------|--------|
 | Tab bar | `expo-router/unstable-native-tabs` | `@react-navigation/bottom-tabs` |
 | Liquid Glass | `expo-glass-effect` | Custom blur overlays |
 | Bottom sheet | `@gorhom/bottom-sheet` | Custom `Animated.View` |
-| Icons | `expo-symbols` (SF Symbols 7) | Icon fonts, PNGs |
-| Date picker | `@react-native-community/datetimepicker` | Custom date pickers |
+| Icons | `expo-symbols` | Icon fonts, PNGs |
+| Date picker | `@react-native-community/datetimepicker` | Custom pickers |
 | Haptics | `expo-haptics` | Vibration API |
 | Blur | `expo-blur` | Custom opacity overlays |
 | Gestures | `react-native-gesture-handler` | PanResponder |
 | Animations | `react-native-reanimated` | Animated API |
 
-### SF Symbols 7 (expo-symbols)
+---
 
-SF Symbols 7 includes **6,900+ symbols** with new animation capabilities:
+## SF Symbols 7
 
-- **Draw/Draw Off**: Calligraphic handwriting-inspired animations
-- **Variable Draw**: Progress indicators using symbol layers
-- **Gradients**: Automatic linear gradients from source colors
-- **Enhanced Magic Replace**: Smoother transitions between related symbols
+**All iOS icons must use SF Symbols.** Never use icon fonts or PNGs on iOS.
+
+### Basic Usage
 
 ```tsx
-import { Icon } from 'expo-router/unstable-native-tabs';
-
-// Tab icons - use fill variants for selected
-<Icon
-  sf={{ default: 'heart', selected: 'heart.fill' }}
-  androidSrc={icons.heart} // Keep Android separate
-/>
-
-// Standalone SF Symbols with animations
-import { SymbolView } from 'expo-symbols';
-
-{Platform.OS === 'ios' && (
-  <SymbolView
-    name="heart.fill"
-    style={{ width: 24, height: 24 }}
-    tintColor="systemRed"
-    type="hierarchical" // 'monochrome' | 'hierarchical' | 'palette' | 'multicolor'
-    animationSpec={{
-      effect: { type: 'bounce', wholeSymbol: true },
-      repeating: false,
-    }}
-  />
-)}
-
-// Variable animation (for progress indicators)
 <SymbolView
-  name="speaker.wave.3"
-  animationSpec={{
-    effect: { type: 'pulse' },
-    variableAnimationSpec: {
-      cumulative: true,
-      dimInactiveLayers: true,
-    },
-    repeating: true,
-  }}
+  name="heart.fill"
+  style={{ width: 24, height: 24 }}
+  tintColor="systemRed"
+  type="hierarchical" // 'monochrome' | 'hierarchical' | 'palette' | 'multicolor'
 />
 ```
 
-**Animation Types:** `'bounce'` | `'pulse'` | `'scale'`
+### Tab Bar Icons
 
-**Finding symbols**: SF Symbols 7 app or https://developer.apple.com/sf-symbols/
+```tsx
+<Icon sf={{ default: 'heart', selected: 'heart.fill' }} androidSrc={icons.heart} />
+```
+
+### Symbol Animations
+
+| Type | Use For | Example |
+|------|---------|---------|
+| `bounce` | Attention/feedback | Like button tap |
+| `pulse` | Loading/progress | Audio levels |
+| `scale` | Emphasis | Selection |
+
+```tsx
+<SymbolView
+  name="heart.fill"
+  animationSpec={{ effect: { type: 'bounce', wholeSymbol: true }, repeating: false }}
+/>
+```
+
+**Variable animations** for progress: add `variableAnimationSpec: { cumulative: true, dimInactiveLayers: true }`
+
+### SF Symbols 7 New Features (iOS 26)
+
+- **Draw animations**: Handwriting-style stroke animations (not yet in expo-symbols)
+- **Gradients**: Automatic linear gradients from single source colors
+- **6,900+ symbols**: Expanded library with new localized variants
+
+**Find symbols:** SF Symbols 7 app or https://developer.apple.com/sf-symbols/
 
 ---
 
-## iOS-Specific Patterns
-
-### Action Sheets (iOS Style)
-
-Use native `ActionSheetIOS` for iOS:
-
-```tsx
-import { ActionSheetIOS, Platform } from 'react-native';
-
-const showOptions = () => {
-  if (Platform.OS === 'ios') {
-    ActionSheetIOS.showActionSheetWithOptions(
-      {
-        options: ['Cancel', 'Delete', 'Save'],
-        destructiveButtonIndex: 1,
-        cancelButtonIndex: 0,
-        title: 'Choose an action',
-      },
-      (buttonIndex) => {
-        // Handle selection
-      }
-    );
-  } else {
-    // Android: Use bottom sheet or modal
-  }
-};
-```
+## Common iOS Patterns
 
 ### Haptic Feedback
 
-iOS users expect haptic feedback for interactions:
+**Add haptics to all interactive elements:**
 
-```tsx
-import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
+| Action | Code |
+|--------|------|
+| Toggle/select | `Haptics.selectionAsync()` |
+| Button tap | `Haptics.impactAsync(ImpactFeedbackStyle.Light)` |
+| Card press | `Haptics.impactAsync(ImpactFeedbackStyle.Medium)` |
+| Success | `Haptics.notificationAsync(NotificationFeedbackType.Success)` |
+| Error | `Haptics.notificationAsync(NotificationFeedbackType.Error)` |
 
-// Selection feedback (light tap)
-const onSelect = () => {
-  if (Platform.OS === 'ios') {
-    Haptics.selectionAsync();
-  }
-  // ... rest of handler
-};
+### Action Sheets
 
-// Impact feedback (button press)
-const onPress = () => {
-  if (Platform.OS === 'ios') {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  }
-  // ... rest of handler
-};
+Use `ActionSheetIOS.showActionSheetWithOptions()` on iOS, bottom sheet on Android.
 
-// Notification feedback (success/error/warning)
-const onSuccess = () => {
-  if (Platform.OS === 'ios') {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }
-};
-```
+### Context Menus
 
-### Context Menus (Long Press)
-
-iOS 13+ context menus for long-press actions:
-
-```tsx
-import { ContextMenuView } from 'react-native-ios-context-menu';
-// Only render on iOS, fallback for Android
-
-{Platform.OS === 'ios' ? (
-  <ContextMenuView
-    menuConfig={{
-      menuTitle: '',
-      menuItems: [
-        { actionKey: 'share', actionTitle: 'Share', icon: { iconType: 'SYSTEM', iconValue: 'square.and.arrow.up' }},
-        { actionKey: 'delete', actionTitle: 'Delete', icon: { iconType: 'SYSTEM', iconValue: 'trash' }, menuAttributes: ['destructive'] },
-      ],
-    }}
-    onPressMenuItem={({ nativeEvent }) => handleAction(nativeEvent.actionKey)}
-  >
-    <YourComponent />
-  </ContextMenuView>
-) : (
-  <YourComponent onLongPress={showAndroidMenu} />
-)}
-```
-
-### Pull to Refresh
-
-Use native refresh control:
-
-```tsx
-import { RefreshControl, Platform } from 'react-native';
-
-<ScrollView
-  refreshControl={
-    <RefreshControl
-      refreshing={refreshing}
-      onRefresh={onRefresh}
-      tintColor={Platform.OS === 'ios' ? '#E91E63' : undefined}
-      // iOS automatically uses system styling
-    />
-  }
->
-```
+Use `react-native-ios-context-menu` with SF Symbol icons (`iconType: 'SYSTEM'`, `iconValue: 'trash'`). Use `menuAttributes: ['destructive']` for delete actions.
 
 ---
 
-## Form Components
+## Forms
 
-### Pickers
+### TextInput iOS Props
 
-iOS has specific picker UX expectations:
+Always add on iOS: `clearButtonMode="while-editing"`, `enablesReturnKeyAutomatically`, `keyboardAppearance="light"`
 
-```tsx
-import { Platform } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+### Picker Selection
 
-// Date picker - iOS uses inline/wheel, Android uses modal
-<DateTimePicker
-  value={date}
-  mode="date"
-  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-  onChange={onChange}
-/>
-```
-
-For selection pickers, iOS prefers:
-- **Wheel picker** for short lists (3-10 items)
-- **Menu/dropdown** for longer lists
-- **Segmented control** for 2-5 mutually exclusive options
-
-### Segmented Control
-
-Use native segmented control for iOS:
-
-```tsx
-import SegmentedControl from '@react-native-segmented-control/segmented-control';
-
-{Platform.OS === 'ios' ? (
-  <SegmentedControl
-    values={['Day', 'Week', 'Month']}
-    selectedIndex={selectedIndex}
-    onChange={(event) => setSelectedIndex(event.nativeEvent.selectedSegmentIndex)}
-  />
-) : (
-  <AndroidTabSelector {...props} />
-)}
-```
-
-### Text Input
-
-iOS-specific input considerations:
-
-```tsx
-<TextInput
-  // iOS-specific props
-  clearButtonMode={Platform.OS === 'ios' ? 'while-editing' : undefined}
-  enablesReturnKeyAutomatically={Platform.OS === 'ios'}
-  keyboardAppearance={Platform.OS === 'ios' ? 'light' : undefined}
-  // Shared props
-  placeholder="Email"
-  autoCapitalize="none"
-  autoCorrect={false}
-/>
-```
+| Items | Use |
+|-------|-----|
+| 2-5 | `@react-native-segmented-control/segmented-control` |
+| 3-10 | Wheel picker |
+| 10+ | Menu/dropdown |
 
 ---
 
-## Navigation Patterns
+## Navigation
 
-### Large Titles
-
-iOS navigation bars support large titles:
+### Large Titles + Liquid Glass
 
 ```tsx
-// In expo-router, configure in layout
-<Stack.Screen
-  options={{
-    headerLargeTitle: Platform.OS === 'ios',
-    headerLargeTitleShadowVisible: false,
-    headerBlurEffect: Platform.OS === 'ios' ? 'regular' : undefined,
-  }}
-/>
+<Stack.Screen options={{
+  headerLargeTitle: Platform.OS === 'ios',
+  headerLargeTitleShadowVisible: false,
+  headerBlurEffect: Platform.OS === 'ios' ? 'regular' : undefined,
+  headerTransparent: Platform.OS === 'ios', // Enables Liquid Glass
+}} />
 ```
 
-### Search Bar
+### Native Search Bar
 
-Native search bar integration:
+Use `headerSearchBarOptions` with `hideWhenScrolling: true`. **iOS 26 pattern:** Search in TabView replaces tab bar with full-width search bar (like Apple News).
 
-```tsx
-<Stack.Screen
-  options={{
-    headerSearchBarOptions: Platform.OS === 'ios' ? {
-      placeholder: 'Search',
-      hideWhenScrolling: true,
-      onChangeText: (event) => setSearch(event.nativeEvent.text),
-    } : undefined,
-  }}
-/>
-```
+### Tab Bar
+
+Native tabs get Liquid Glass automatically via `expo-router/unstable-native-tabs`.
 
 ---
 
-## Animation Guidelines
+## Animations
 
-iOS animations should feel natural with spring physics:
+**Always use spring physics** with `react-native-reanimated`:
 
-```tsx
-import Animated, { 
-  withSpring, 
-  withTiming,
-  Easing 
-} from 'react-native-reanimated';
-
-// iOS-style spring (bouncy, natural)
-const animatedStyle = useAnimatedStyle(() => ({
-  transform: [{
-    scale: withSpring(pressed.value ? 0.95 : 1, {
-      damping: 15,
-      stiffness: 150,
-    }),
-  }],
-}));
-
-// iOS timing curve
-const fadeIn = withTiming(1, {
-  duration: 250,
-  easing: Easing.out(Easing.cubic),
-});
-```
+| Use Case | Config |
+|----------|--------|
+| Button feedback | `{ damping: 20, stiffness: 300 }` |
+| Card expand | `{ damping: 12, stiffness: 180 }` |
+| Page transitions | `{ damping: 18, stiffness: 120 }` |
+| Default | `{ damping: 15, stiffness: 150 }` |
 
 ---
 
-## Checklist
+## Pre-Completion Checklist
 
-Before completing any iOS implementation:
-
-- [ ] Uses native-backed components (not JS approximations)
-- [ ] SF Symbols used for all icons (not icon fonts)
-- [ ] Haptic feedback on interactions where appropriate
-- [ ] System colors via `PlatformColor` where applicable
-- [ ] Platform conditionals isolate iOS code (`Platform.OS === 'ios'`)
-- [ ] Android implementation unchanged
-- [ ] Web code untouched
-- [ ] Follows iOS 18 Human Interface Guidelines
-- [ ] Tested on actual iOS device (simulator acceptable for layout)
+- [ ] Native-backed components (not JS approximations)
+- [ ] SF Symbols for all icons
+- [ ] Haptic feedback on interactive elements
+- [ ] `PlatformColor` for system colors
+- [ ] `Platform.OS === 'ios'` isolates all iOS code
+- [ ] Liquid Glass on floating/navigation elements (with `isGlassEffectAPIAvailable` check)
+- [ ] Accessibility: respect `isReduceTransparencyEnabled`
+- [ ] Android unchanged, Web untouched
 
 ---
 
-## Reference Implementation
+## Reference
 
-See `mobile/app/(tabs)/_layout.tsx` for the gold standard of native iOS implementation in this codebase—minimal code, fully native.
+**Best example:** `mobile/app/(tabs)/_layout.tsx` — minimal code, fully native, Liquid Glass tab bar.
 
 ---
 
-## Additional Resources
+## Installed Packages
 
-For deep dives on specific patterns, research:
-- Apple Human Interface Guidelines: https://developer.apple.com/design/human-interface-guidelines/
-- SF Symbols: https://developer.apple.com/sf-symbols/
-- iOS 18 design updates: Search "iOS 18 design changes WWDC"
+| Package | Purpose |
+|---------|---------|
+| `expo-symbols` | SF Symbols 7 |
+| `expo-glass-effect` | Liquid Glass (iOS 26) - includes `isLiquidGlassAvailable`, `isGlassEffectAPIAvailable` |
+| `expo-haptics` | Haptic feedback |
+| `expo-blur` | Native blur effects |
+| `@react-native-segmented-control/segmented-control` | Native segmented control |
+| `react-native-ios-context-menu` | Native context menus |
+
+---
+
+## Quick Reference
+
+- Apple HIG: https://developer.apple.com/design/human-interface-guidelines/
+- SF Symbols 7: https://developer.apple.com/sf-symbols/
+- expo-glass-effect: https://docs.expo.dev/versions/latest/sdk/glass-effect/
+- expo-symbols: https://docs.expo.dev/versions/latest/sdk/symbols/
+- WWDC 2025 Design System: https://developer.apple.com/videos/play/wwdc2025/356
