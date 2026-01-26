@@ -1,0 +1,109 @@
+---
+description: Platform-native UI principles for iOS, Android, and Web
+alwaysApply: true
+---
+
+# Platform-Native Guidelines
+
+All platforms must feel authentically native—iOS apps should feel like iOS, Android like Android, web like modern web.
+
+---
+
+## Core Principles
+
+1. **Native components, not JS approximations.** Use actual platform components, not JS that mimics their appearance.
+
+2. **Don't override platform defaults.** If the platform handles something automatically (colors, spacing, animations, safe areas), don't fight it.
+
+3. **Less code = more native.** Extensive styling usually means you're overriding native behavior.
+
+---
+
+## Platform Icons
+
+| Platform | Library | Never Use |
+|----------|---------|-----------|
+| iOS | SF Symbols (`expo-symbols`) | Icon fonts, PNGs, emoji |
+| Android | Material Icons (`@expo/vector-icons/MaterialIcons`) | Icon fonts, emoji |
+| Web | `lucide-react` | Emoji |
+
+---
+
+## Native-Backed Libraries (Mobile)
+
+| ✅ Use | ❌ Not |
+|--------|--------|
+| `expo-router/unstable-native-tabs` | `@react-navigation/bottom-tabs` (JS-drawn) |
+| `@gorhom/bottom-sheet` with native driver | Custom `Animated.View` sheets |
+| `react-native-gesture-handler` + `react-native-reanimated` | JS touch handlers, Animated API |
+| Native pickers (`@react-native-community/datetimepicker`) | Custom picker implementations |
+
+---
+
+## Design Languages (2026)
+
+| Platform | Pattern | Key Characteristics |
+|----------|---------|---------------------|
+| iOS 26 | Liquid Glass | Translucent nav/tab bars, `PlatformColor` for system colors |
+| Android 16 | Material 3 Expressive | Edge-to-edge mandatory, dynamic Material You colors |
+| Web | Modern CSS | Container queries, `@starting-style`, native `<dialog>`/`popover` |
+
+---
+
+## Animations: Spring Physics
+
+All platforms use spring-based motion. Never use linear or basic ease curves for interactive elements.
+
+| Use Case | Spring Config (damping/stiffness) |
+|----------|-----------------------------------|
+| Button feedback | 20 / 300 |
+| Card expand | 12 / 180 |
+| Sheet/page transition | 18 / 120–200 |
+| Default | 15 / 150 |
+
+**Mobile:** `react-native-reanimated` with `withSpring()`
+**Web:** `cubic-bezier(0.34, 1.56, 0.64, 1)` or similar spring curves
+
+---
+
+## Accessibility
+
+All platforms must respect user preferences:
+
+- **Reduced motion:** Disable/minimize animations when `prefers-reduced-motion` (web) or `AccessibilityInfo.isReduceMotionEnabled` (mobile)
+- **Reduced transparency:** Fall back from glass effects when enabled
+- **High contrast:** Increase border weights, avoid low-contrast colors
+- **Touch targets:** Minimum 44×44px on all platforms
+
+---
+
+## Safe Areas
+
+| Platform | Approach |
+|----------|----------|
+| iOS | Native components handle it; don't add manual padding |
+| Android | `useSafeAreaInsets()` from `react-native-safe-area-context` |
+| Web | `env(safe-area-inset-*)` CSS, `pb-safe` Tailwind class |
+
+---
+
+## Quick Tests
+
+- **Mobile:** "Would this look identical if built in Swift/Kotlin?" If no, you're overriding native behavior.
+- **Web:** "Am I using modern CSS features instead of JS workarounds?" If no, check for native browser APIs.
+
+---
+
+## Detailed Platform Skills
+
+For implementation details, use the specialized skills:
+- `.cursor/skills/ios-native-expert/` — SF Symbols 7, Liquid Glass, haptics
+- `.cursor/skills/android-native-expert/` — M3 Expressive, edge-to-edge, Material You
+- `.cursor/skills/modern-web-design-expert/` — 2026 CSS, responsive patterns, performance
+- `.cursor/skills/feature-parity-check/` — Cross-platform verification workflow
+
+---
+
+## Reference Implementation
+
+`mobile/app/(tabs)/_layout.tsx` — Minimal code, fully native tabs, platform icons

@@ -1,26 +1,33 @@
 ---
+description: RealSingles project overview and tech stack
 alwaysApply: true
 ---
 
-This project includes the following:
+# RealSingles
 
-next.js server and client
-expo, react native ios and android
-supbase database
+A modern, elegant dating app targeting discerning users who value authenticity.
 
-This project is for a highly modern, beautiful, elegant and high-end dating app.
+## Tech Stack
 
-All core logic, types, constants and shared elemenets must be syncronized between the server, web client, android and ios.
+| Layer | Technology |
+|-------|------------|
+| Web | Next.js 16 (App Router) on Vercel |
+| Mobile | Expo (React Native) — iOS + Android |
+| Backend | Supabase (PostgreSQL, Auth, Storage) |
+| Styling | Tailwind CSS (web), platform-native (mobile) |
 
-All logic must go through individual api endpoints that are shared by all clientside solutions so there is never a difference in logic.
+## Core Philosophy
 
-The UI/UX must have identical functionality for all platforms, but must be completely NATIVE for each one:
+1. **Identical functionality, native feel.** Every feature works on all platforms, but each platform uses its native UI patterns.
+2. **Single source of truth.** All business logic lives in API endpoints—clients never implement logic locally.
+3. **High-quality, native-first code.** Clean, efficient implementations that respect platform conventions.
 
-Web: Both mobile and desktop
-Mobile: Both iOS and Android
+## Exception
 
-Example, an iOS user should always see and feel like they are using a pure ios app and not some custom solution. The same is true for Android.
+Admin portal is web-only. All user-facing features must exist on all platforms.
 
-A feature should never be on one of these and not the rest. All features must be identical. The only exception is the admin portal which is web only. The user parts of the app cannot differ in anything other than user experience for a native feel. In all other ways, any change to one must be made to all.
+## Related Rules
 
-Write only high-quality, native-first code that is efficient and clean.
+- **cross-platform-parity** — SSOT enforcement and functionality checklist
+- **platform-native-guidelines** — Native UI patterns per platform
+- **project-context** — Codebase structure and key files

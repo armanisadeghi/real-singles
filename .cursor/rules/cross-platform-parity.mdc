@@ -77,12 +77,10 @@ Small violations compound into major technical debt.
 
 ---
 
-## Exceptions
+## What Can Differ
 
-Platform-specific capabilities only:
-- Push notifications (native vs browser)
-- Camera/gallery access patterns
-- Haptic feedback
-- Native UI components (pickers, sheets)
+UI/UX implementation can (and should) differ per platform—see **platform-native-guidelines**.
 
-Even these must share underlying business logic via API.
+Examples: icons, pickers, sheets, haptics, navigation patterns, animations.
+
+**But:** The underlying business logic and API calls must be identical. A "like" action calls the same endpoint everywhere.

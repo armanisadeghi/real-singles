@@ -47,18 +47,6 @@ alwaysApply: true
 
 ---
 
-## Icons
-
-**Never use emoji as icons.** Use proper icon libraries:
-
-| Platform | Library |
-|----------|---------|
-| Web | `lucide-react` |
-| iOS | SF Symbols (`expo-symbols`) |
-| Android | Material Icons or PNGs |
-
----
-
 ## API Structure
 
 - All API routes live in `web/src/app/api/`
@@ -85,8 +73,8 @@ alwaysApply: true
 
 ---
 
-## Cross-References
+## Related Rules
 
-- **CRITICAL - Cross-platform parity:** See `cross-platform-parity.mdc` (all features on all platforms)
-- **Mobile native-feel rules:** See `mobile-native-ios-android-rules.mdc`
-- **General coding standards:** See user rules (tech stack, layout essentials, file organization)
+- **cross-platform-parity** — SSOT and functionality requirements
+- **platform-native-guidelines** — Native UI patterns per platform
+- **real-singles-basics** — Project overview and philosophy
