@@ -126,19 +126,27 @@ console.log("profile?.Height",profile?.Height);
       // Build the deep link URL
       const deepLinkUrl = getProfileLink(profile?.ID || '');
 
-      // Share message text
-      const message = `Hi there! ${APP_NAME} has helped me meet some wonderful people. Here’s a profile I thought you might like. You can connect with it directly on the ${APP_NAME} App by using the link below!\n${deepLinkUrl}`;
+      // Share message text (without URL for iOS, with URL for Android)
+      const shareMessage = `Hi there! ${APP_NAME} has helped me meet some wonderful people. Here's a profile I thought you might like. You can connect with it directly on the ${APP_NAME} App!`;
 
-      // Use Share API
-      const result = await Share.share({
-        title: `Join the ${APP_NAME} App!`,
-        message,
-        url: Platform.OS === "ios" ? deepLinkUrl : undefined, // iOS supports URL separately
-      });
+      // On iOS, pass URL separately for better link preview support
+      // On Android, include URL in the message
+      const result = await Share.share(
+        Platform.OS === 'ios'
+          ? {
+              message: shareMessage,
+              url: deepLinkUrl,
+            }
+          : {
+              title: `Join the ${APP_NAME} App!`,
+              message: `${shareMessage}\n${deepLinkUrl}`,
+            }
+      );
 
       if (result.action === Share.sharedAction) {
         console.log(result.activityType ? `Shared via: ${result.activityType}` : "Shared successfully");
-        saveShareLinks(message); // Call the function to save share links
+        // Save the share with full message including URL
+        saveShareLinks(`${shareMessage}\n${deepLinkUrl}`);
 
       } else if (result.action === Share.dismissedAction) {
         console.log("Share dismissed");

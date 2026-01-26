@@ -403,6 +403,20 @@ export const getLikesReceived = async () => {
   return apiRequest("/matches/likes-received");
 };
 
+/**
+ * Unmatch a user
+ */
+export const unmatchUser = async (userId: string) => {
+  return apiRequest(`/matches/${userId}`, { method: "DELETE" });
+};
+
+/**
+ * Get match status with a specific user
+ */
+export const getMatchStatus = async (userId: string) => {
+  return apiRequest(`/matches/${userId}`);
+};
+
 // ===========================================
 // EVENTS ENDPOINTS
 // ===========================================

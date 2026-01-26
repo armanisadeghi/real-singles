@@ -9,7 +9,7 @@ import {
   ChatOptions,
 } from "react-native-agora-chat";
 
-const appKey = "611349722#1555844";
+const appKey = process.env.EXPO_PUBLIC_AGORA_CHAT_APP_KEY!;
 export const chatClient = ChatClient.getInstance();
 
 // Track initialization and login state

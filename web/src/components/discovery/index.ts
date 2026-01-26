@@ -3,3 +3,7 @@ export * from "./ProfileListItem";
 export * from "./ProfileFocusView";
 export * from "./FilterPanel";
 export * from "./DiscoverGrid";
+export * from "./FullScreenImageViewer";
+export * from "./PhotoCarousel";
+export * from "./ProfileSectionRenderer";
+export * from "./DiscoveryProfileView";

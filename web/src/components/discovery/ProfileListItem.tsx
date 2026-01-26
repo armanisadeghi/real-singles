@@ -75,8 +75,9 @@ export function ProfileListItem({
   const bgColor = getBgColor(profile.id || profile.user_id || name);
   const initials = getInitials(name);
   
+  // Navigate to the discovery profile view for matching flow
   const href = navigateToFocus 
-    ? `/profile/${profile.user_id}/focus`
+    ? `/discover/profile/${profile.user_id}`
     : `/profile/${profile.user_id}`;
 
   const distanceString = profile.distance_km 

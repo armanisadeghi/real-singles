@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import {
   Animated,
   Dimensions,
+  Platform,
   Share,
   StyleSheet,
   Text,
@@ -55,11 +56,21 @@ const SideMenu = ({
 
     try {
       const referralLink = getReferralLink(referralCode);
-      const result = await Share.share({
-        title: `Join me on ${APP_NAME}!`,
-        message:
-          `Hey! I've been using ${APP_NAME} to meet amazing people and connect with like-minded individuals. Join me using my referral link and get started today! ${referralLink}`,
-      });
+      const shareMessage = `Hey! I've been using ${APP_NAME} to meet amazing people and connect with like-minded individuals. Join me using my referral link!`;
+      
+      // On iOS, pass URL separately for better link preview support
+      // On Android, include URL in the message
+      const result = await Share.share(
+        Platform.OS === 'ios'
+          ? {
+              message: shareMessage,
+              url: referralLink,
+            }
+          : {
+              title: `Join me on ${APP_NAME}!`,
+              message: `${shareMessage} ${referralLink}`,
+            }
+      );
 
       if (result.action === Share.sharedAction) {
         if (result.activityType) {

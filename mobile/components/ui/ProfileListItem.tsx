@@ -89,8 +89,9 @@ export default function ProfileListItem({
 
   const imageSource = getImageSource();
   const userId = profile?.id || profile?.ID;
+  // Navigate to the discovery profile view for matching flow
   const href = navigateToFocus 
-    ? `/profiles/focus/${userId}` 
+    ? `/discover/profile/${userId}` 
     : `/profiles/${userId}`;
 
   // Format location string

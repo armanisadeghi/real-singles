@@ -75,7 +75,7 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       data: {
-        token: tokenData.token,
+        userToken: tokenData.token,
         expiresAt: tokenData.expiresAt,
         agoraUserId,
         appId: config.appId,

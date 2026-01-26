@@ -25,6 +25,10 @@ export { default as NotificationCard } from "./NotificationCard";
 export { default as CurrentEventCard } from "./CurrentEventCard";
 export { default as PastEventCard } from "./PastEventCard";
 
+// Image/Gallery components
+export { default as FullScreenImageViewer } from "./FullScreenImageViewer";
+export { default as PhotoCarousel } from "./PhotoCarousel";
+
 // Form components
 export { default as GradientButton } from "./GradientButton";
 
