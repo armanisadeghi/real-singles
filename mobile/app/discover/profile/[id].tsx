@@ -51,12 +51,12 @@ const getProfileImages = (profile: User, gallery?: any[]): string[] => {
     images.push(profile.livePicture);
   }
   
-  // Add gallery images
+  // Add gallery images - filter out primary since it's already added as profile.Image
   if (gallery && gallery.length > 0) {
     gallery
-      .filter((item) => item.media_type === "image")
+      .filter((item) => item.media_type === "image" && !item.is_primary)
       .forEach((item) => {
-        if (item.media_url && !images.includes(item.media_url)) {
+        if (item.media_url) {
           images.push(item.media_url);
         }
       });

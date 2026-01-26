@@ -61,6 +61,7 @@ interface Profile {
 interface GalleryItem {
   media_url: string;
   media_type: string;
+  is_primary?: boolean;
 }
 
 interface DiscoveryProfileViewProps {
@@ -94,10 +95,12 @@ export function DiscoveryProfileView({
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
 
-  // Get all images
+  // Get all images - filter out primary from gallery since it's already added as profile_image_url
   const images = [
     profile.profile_image_url,
-    ...gallery.filter((g) => g.media_type === "image").map((g) => g.media_url),
+    ...gallery
+      .filter((g) => g.media_type === "image" && !g.is_primary)
+      .map((g) => g.media_url),
   ].filter(Boolean) as string[];
 
   const handleClose = useCallback(() => {
