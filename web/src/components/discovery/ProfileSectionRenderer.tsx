@@ -121,11 +121,14 @@ interface Profile {
 interface ProfileSectionRendererProps {
   profile: Profile;
   className?: string;
+  /** When true, excludes the basic info (name, location, occupation) and about section */
+  excludeBasicsAndAbout?: boolean;
 }
 
 export function ProfileSectionRenderer({
   profile,
   className,
+  excludeBasicsAndAbout = false,
 }: ProfileSectionRendererProps) {
   const name = profile.first_name || profile.user?.display_name || "Anonymous";
   const age = profile.date_of_birth ? calculateAge(profile.date_of_birth) : null;
@@ -203,40 +206,42 @@ export function ProfileSectionRenderer({
 
   return (
     <div className={cn("space-y-6", className)}>
-      {/* Basic Info */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold text-gray-900">
-            {name}
-            {age && <span className="font-normal">, {age}</span>}
-          </h1>
-          {profile.is_verified && (
-            <CheckCircle className="w-5 h-5 text-blue-500" />
-          )}
-        </div>
-
-        {location && (
-          <div className="flex items-center gap-1.5 text-gray-600">
-            <MapPin className="w-4 h-4" />
-            <span>{location}</span>
-            {profile.distance_km && (
-              <span className="text-gray-400 ml-2">
-                • {profile.distance_km.toFixed(1)} km away
-              </span>
+      {/* Basic Info - hidden when excludeBasicsAndAbout is true */}
+      {!excludeBasicsAndAbout && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-gray-900">
+              {name}
+              {age && <span className="font-normal">, {age}</span>}
+            </h1>
+            {profile.is_verified && (
+              <CheckCircle className="w-5 h-5 text-blue-500" />
             )}
           </div>
-        )}
 
-        {shouldDisplay(profile.occupation) && (
-          <div className="flex items-center gap-1.5 text-gray-600">
-            <Briefcase className="w-4 h-4" />
-            <span>{profile.occupation}</span>
-          </div>
-        )}
-      </div>
+          {location && (
+            <div className="flex items-center gap-1.5 text-gray-600">
+              <MapPin className="w-4 h-4" />
+              <span>{location}</span>
+              {profile.distance_km && (
+                <span className="text-gray-400 ml-2">
+                  • {profile.distance_km.toFixed(1)} km away
+                </span>
+              )}
+            </div>
+          )}
 
-      {/* About */}
-      {shouldDisplay(profile.bio) && (
+          {shouldDisplay(profile.occupation) && (
+            <div className="flex items-center gap-1.5 text-gray-600">
+              <Briefcase className="w-4 h-4" />
+              <span>{profile.occupation}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* About - hidden when excludeBasicsAndAbout is true */}
+      {!excludeBasicsAndAbout && shouldDisplay(profile.bio) && (
         <div className="space-y-2">
           <h2 className="text-sm font-semibold text-amber-700">About Me</h2>
           <p className="text-gray-700 leading-relaxed">{profile.bio}</p>

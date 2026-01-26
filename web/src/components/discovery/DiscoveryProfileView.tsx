@@ -9,8 +9,8 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { X, Flag, Heart, Star } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { X, Flag, Heart, Star, MapPin, Briefcase, CheckCircle } from "lucide-react";
+import { cn, calculateAge } from "@/lib/utils";
 import { PhotoCarousel } from "./PhotoCarousel";
 import { ProfileSectionRenderer } from "./ProfileSectionRenderer";
 
@@ -157,18 +157,24 @@ export function DiscoveryProfileView({
     [profile.user_id, onReport]
   );
 
+  // Derived values for display
+  const name = profile.first_name || profile.user?.display_name || "Anonymous";
+  const age = profile.date_of_birth ? calculateAge(profile.date_of_birth) : null;
+  const location = [profile.city, profile.state].filter(Boolean).join(", ");
+
   return (
     <div className="min-h-dvh bg-gray-50 flex flex-col">
       {/* Centered container for desktop */}
       <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-center md:py-8 md:px-4 md:gap-6 max-w-6xl mx-auto w-full">
         
-        {/* Photo Section - constrained on desktop */}
+        {/* Left Column - Photo, Actions, Basic Info (desktop) */}
         <div className="relative md:sticky md:top-8 md:w-[400px] md:flex-shrink-0">
+          {/* Photo Section */}
           <div className="md:rounded-2xl md:overflow-hidden md:shadow-lg">
             <PhotoCarousel 
               images={images} 
               height="55vh"
-              className="md:h-[500px]"
+              className="md:h-[450px]"
               showGradient={true} 
             />
           </div>
@@ -192,7 +198,7 @@ export function DiscoveryProfileView({
             </button>
           </div>
 
-          {/* Desktop action bar - below photo */}
+          {/* Desktop: Action bar below photo */}
           <div className="hidden md:flex items-center justify-center gap-4 py-4">
             {/* Pass Button */}
             <button
@@ -251,12 +257,62 @@ export function DiscoveryProfileView({
               )}
             </button>
           </div>
+
+          {/* Desktop: Basic Info & About below actions */}
+          <div className="hidden md:block bg-white rounded-2xl shadow-lg mt-4 p-5">
+            {/* Name & Age */}
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-gray-900">
+                {name}
+                {age && <span className="font-normal">, {age}</span>}
+              </h1>
+              {profile.is_verified && (
+                <CheckCircle className="w-5 h-5 text-blue-500" />
+              )}
+            </div>
+
+            {/* Location */}
+            {location && (
+              <div className="flex items-center gap-1.5 mt-2 text-gray-600">
+                <MapPin className="w-4 h-4" />
+                <span className="text-sm">{location}</span>
+                {profile.distance_km && (
+                  <span className="text-gray-400 ml-1 text-sm">
+                    • {profile.distance_km.toFixed(1)} km away
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Occupation */}
+            {profile.occupation && (
+              <div className="flex items-center gap-1.5 mt-1 text-gray-600">
+                <Briefcase className="w-4 h-4" />
+                <span className="text-sm">{profile.occupation}</span>
+              </div>
+            )}
+
+            {/* About Me */}
+            {profile.bio && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <h2 className="text-sm font-semibold text-amber-700 mb-2">About Me</h2>
+                <p className="text-gray-700 text-sm leading-relaxed">{profile.bio}</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Profile Content - scrollable on desktop */}
+        {/* Right Column - Profile Details */}
         <div className="flex-1 bg-white md:rounded-2xl md:shadow-lg md:max-w-xl">
           <div className="p-5 md:p-6">
-            <ProfileSectionRenderer profile={profile} />
+            {/* Mobile: Show full profile including basic info */}
+            <div className="md:hidden">
+              <ProfileSectionRenderer profile={profile} />
+            </div>
+            {/* Desktop: Show profile without basic info and about (they're on the left) */}
+            <div className="hidden md:block">
+              <ProfileSectionRenderer profile={profile} excludeBasicsAndAbout />
+            </div>
           </div>
         </div>
       </div>
