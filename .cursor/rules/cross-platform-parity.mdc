@@ -36,7 +36,42 @@ If the user says "add feature X to the discovery page", that means:
 
 ---
 
-## Single Source of Truth
+## Single Source of Truth (SSOT)
+
+### One Operation = One Implementation
+
+**Every discrete operation MUST have exactly one authoritative implementation.**
+
+This applies to:
+- Database mutations (create, update, delete)
+- Business logic (matching algorithms, scoring, validation)
+- State transitions (marking photos as primary, changing user status)
+- Calculations (profile completion, points balance)
+
+```
+CORRECT (Centralized):
+  Mobile user sets primary photo → POST /api/users/me/gallery/primary
+  Web user sets primary photo   → POST /api/users/me/gallery/primary
+  Admin sets user's primary     → POST /api/admin/users/[id]/gallery/primary
+                                  (calls same underlying service function)
+
+WRONG (Fragmented):
+  Mobile → custom setPrimary() with local logic
+  Web    → different setPrimary() implementation
+  Admin  → third implementation in admin panel
+```
+
+**Why this matters:** When logic changes (e.g., "primary photo must be verified"), you change ONE place. Fragmented implementations drift apart, creating bugs that only appear in some contexts.
+
+### Where Shared Logic Lives
+
+| Logic Type | Location | Called By |
+|------------|----------|-----------|
+| Business logic | `web/src/lib/services/` | API routes |
+| Database operations | `web/src/lib/services/` | API routes |
+| Validation rules | `web/src/lib/validation/` | API routes, forms |
+| API endpoints | `web/src/app/api/` | Mobile, Web, Admin |
+| Constants/options | See below | All platforms |
 
 ### API Logic
 
@@ -66,10 +101,26 @@ Dropdown options, filter values, and other constants MUST be identical across pl
 
 **CRITICAL:** When modifying constants in one file, you MUST update the other to match.
 
-Before completing any task that touches constants:
-1. Check both files
-2. Ensure values are identical
-3. If they differ, fix the discrepancy
+---
+
+## Proactive Violation Reporting
+
+**If you notice ANY violation of these principles—even while working on an unrelated task—report it.**
+
+When you encounter:
+- Duplicated business logic across platforms
+- Inconsistent constants or options
+- Direct database access bypassing the API layer
+- Platform-specific implementations of shared operations
+- Any pattern that creates maintenance risk
+
+**Do this:**
+1. Note the violation in your response
+2. Describe what's wrong and where
+3. Suggest the fix (or implement it if scope permits)
+4. Continue with your original task
+
+This isn't scope creep—it's engineering hygiene. Small violations compound into major technical debt.
 
 ---
 
@@ -82,7 +133,9 @@ For ANY feature work, confirm:
 - [ ] Works on Web Desktop
 - [ ] Works on Web Mobile (responsive, touch-friendly)
 - [ ] Uses shared API endpoint (not local logic)
+- [ ] Business logic is centralized (not duplicated per platform)
 - [ ] Constants are synced between mobile and web
+- [ ] No orphaned or fragmented implementations introduced
 
 ---
 
@@ -93,5 +146,8 @@ The ONLY acceptable exceptions are platform-specific capabilities that genuinely
 - Push notifications (native mobile only, browser notifications on web)
 - Camera/gallery access patterns (different APIs, same outcome)
 - Haptic feedback (mobile only)
+- Platform-native UI components (pickers, sheets)
 
-Even these should have equivalent UX on other platforms where possible.
+Even these should:
+- Have equivalent UX on other platforms where possible
+- Share any underlying business logic via API

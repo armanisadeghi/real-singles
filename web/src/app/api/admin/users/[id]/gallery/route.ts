@@ -45,7 +45,7 @@ export async function GET(
   return NextResponse.json({ gallery });
 }
 
-// PATCH /api/admin/users/[id]/gallery - Update a gallery image
+// PATCH /api/admin/users/[id]/gallery - Update a gallery image or set primary
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -57,7 +57,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { gallery_id, display_order, media_url, is_primary } = await request.json();
+  const { gallery_id, display_order, media_url, is_primary, set_primary } = await request.json();
 
   if (!gallery_id && display_order === undefined) {
     return NextResponse.json({ error: "gallery_id or display_order required" }, { status: 400 });
@@ -65,6 +65,43 @@ export async function PATCH(
 
   const supabase = createAdminClient();
 
+  // Handle setting primary image with proper logic (matching client-side behavior)
+  if (set_primary && gallery_id) {
+    // First, unset all primary flags for this user
+    const { error: unsetError } = await supabase
+      .from("user_gallery")
+      .update({ is_primary: false })
+      .eq("user_id", id);
+
+    if (unsetError) {
+      return NextResponse.json({ error: unsetError.message }, { status: 500 });
+    }
+
+    // Set the new primary
+    const { data: primaryItem, error: setPrimaryError } = await supabase
+      .from("user_gallery")
+      .update({ is_primary: true })
+      .eq("id", gallery_id)
+      .eq("user_id", id)
+      .select()
+      .single();
+
+    if (setPrimaryError) {
+      return NextResponse.json({ error: setPrimaryError.message }, { status: 500 });
+    }
+
+    // Update profile image URL
+    if (primaryItem && primaryItem.media_type === "image") {
+      await supabase
+        .from("profiles")
+        .update({ profile_image_url: primaryItem.media_url })
+        .eq("user_id", id);
+    }
+
+    return NextResponse.json({ success: true, gallery: primaryItem });
+  }
+
+  // Standard update logic for editing image URL or other fields
   const updates: Record<string, unknown> = {};
   if (media_url) updates.media_url = media_url;
   if (is_primary !== undefined) updates.is_primary = is_primary;
@@ -83,7 +120,7 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // If updating to primary, also update the profile image
+  // If updating to primary with media_url, also update the profile image
   if (is_primary && media_url) {
     await supabase
       .from("profiles")

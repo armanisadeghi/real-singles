@@ -73,6 +73,8 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
   const [showSuspendConfirm, setShowSuspendConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteImageConfirm, setShowDeleteImageConfirm] = useState(false);
+  const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
   const [showPointsSheet, setShowPointsSheet] = useState(false);
   const [showEditProfileSheet, setShowEditProfileSheet] = useState(false);
   const [showEditImageSheet, setShowEditImageSheet] = useState(false);
@@ -277,6 +279,75 @@ export default function AdminUserDetailPage({ params }: PageProps) {
     setEditingImageIndex(index);
     setEditGalleryImageUrl(image?.media_url || "");
     setShowEditImageSheet(true);
+  };
+
+  const handleDeleteImage = async () => {
+    if (!deletingImageId) return;
+
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/admin/users/${id}/gallery?gallery_id=${deletingImageId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        // Remove from local state
+        setGallery((prev) => prev.filter((img) => img.id !== deletingImageId));
+        setShowDeleteImageConfirm(false);
+        setDeletingImageId(null);
+      } else {
+        alert("Failed to delete image");
+      }
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      alert("Failed to delete image");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const openDeleteImageConfirm = (imageId: string) => {
+    setDeletingImageId(imageId);
+    setShowDeleteImageConfirm(true);
+  };
+
+  const handleSetPrimary = async (imageId: string) => {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/admin/users/${id}/gallery`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gallery_id: imageId,
+          set_primary: true,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Update gallery state - unset all primary flags, set new primary
+        setGallery((prev) =>
+          prev.map((img) => ({
+            ...img,
+            is_primary: img.id === imageId,
+          }))
+        );
+        // Update profile image URL
+        if (data.gallery?.media_url) {
+          setProfile((prev) =>
+            prev ? { ...prev, profile_image_url: data.gallery.media_url } : null
+          );
+          setEditProfileImageUrl(data.gallery.media_url);
+        }
+      } else {
+        alert("Failed to set primary image");
+      }
+    } catch (error) {
+      console.error("Error setting primary image:", error);
+      alert("Failed to set primary image");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   if (loading) {
@@ -567,17 +638,34 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                     }}
                   />
                 </div>
-                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                  <button
-                    onClick={() => openEditImageSheet(img.display_order)}
-                    className="px-3 py-1 bg-white text-gray-900 rounded text-sm font-medium"
-                  >
-                    Edit
-                  </button>
+                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-2">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openEditImageSheet(img.display_order)}
+                      className="px-3 py-1 bg-white text-gray-900 rounded text-sm font-medium hover:bg-gray-100"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => openDeleteImageConfirm(img.id)}
+                      className="px-3 py-1 bg-red-500 text-white rounded text-sm font-medium hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  {!img.is_primary && (
+                    <button
+                      onClick={() => handleSetPrimary(img.id)}
+                      disabled={actionLoading}
+                      className="px-3 py-1 bg-blue-500 text-white rounded text-sm font-medium hover:bg-blue-600 disabled:opacity-50"
+                    >
+                      Set as Primary
+                    </button>
+                  )}
                 </div>
                 <div className="absolute top-2 left-2">
                   <span className="px-2 py-0.5 bg-black bg-opacity-50 text-white text-xs rounded">
-                    #{img.display_order}
+                    #{img.display_order + 1}
                     {img.is_primary && " (Primary)"}
                   </span>
                 </div>
@@ -606,6 +694,21 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         onConfirm={handleDelete}
         title="Delete User"
         message={`Are you sure you want to permanently delete this user? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+        loading={actionLoading}
+      />
+
+      {/* Delete Image Confirmation */}
+      <ConfirmModal
+        isOpen={showDeleteImageConfirm}
+        onClose={() => {
+          setShowDeleteImageConfirm(false);
+          setDeletingImageId(null);
+        }}
+        onConfirm={handleDeleteImage}
+        title="Delete Image"
+        message="Are you sure you want to delete this image? This action cannot be undone."
         confirmLabel="Delete"
         variant="danger"
         loading={actionLoading}
@@ -791,7 +894,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
           setEditingImageIndex(null);
           setEditGalleryImageUrl("");
         }}
-        title={`Edit Image #${editingImageIndex}`}
+        title={`Edit Image #${(editingImageIndex ?? 0) + 1}`}
       >
         <div className="p-4 space-y-4">
           <div>

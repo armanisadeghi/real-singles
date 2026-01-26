@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { AdminUserDropdown } from "@/components/admin/AdminUserDropdown";
 
 async function signOut() {
   "use server";
@@ -23,8 +24,8 @@ export default async function AdminDashboardLayout({
       {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-8">
+          <div className="flex justify-between items-center py-3">
+            <div className="flex items-center space-x-6">
               <Link href="/admin" className="flex items-center gap-2">
                 <Image
                   src="/images/logo.png"
@@ -35,64 +36,50 @@ export default async function AdminDashboardLayout({
                 />
                 <span className="text-sm font-medium text-gray-500">Admin</span>
               </Link>
-              <nav className="flex space-x-4">
+              <nav className="flex space-x-1">
                 <Link
                   href="/admin"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors"
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/admin/users"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors"
                 >
                   Users
                 </Link>
                 <Link
                   href="/admin/events"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors"
                 >
                   Events
                 </Link>
                 <Link
                   href="/admin/reports"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors"
                 >
                   Reports
                 </Link>
                 <Link
                   href="/admin/products"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors"
                 >
                   Products
                 </Link>
                 <Link
-                  href="/admin/prompts"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  href="/admin/settings"
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors"
                 >
-                  Prompts
-                </Link>
-                <Link
-                  href="/admin/life-goals"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Life Goals
+                  Settings
                 </Link>
               </nav>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                {user.email} ({user.role})
-              </span>
-              <form action={signOut}>
-                <button
-                  type="submit"
-                  className="text-sm text-red-600 hover:text-red-800"
-                >
-                  Sign Out
-                </button>
-              </form>
-            </div>
+            <AdminUserDropdown
+              email={user.email}
+              role={user.role}
+              onSignOut={signOut}
+            />
           </div>
         </div>
       </header>

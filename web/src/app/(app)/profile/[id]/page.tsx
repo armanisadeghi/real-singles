@@ -105,6 +105,10 @@ export default function OtherProfilePage() {
   const [reviewRelationship, setReviewRelationship] = useState("other");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
+  // Touch/swipe state for mobile photo navigation
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
   // Fetch profile data
   useEffect(() => {
     if (!userId) return;
@@ -134,27 +138,78 @@ export default function OtherProfilePage() {
     fetchProfile();
   }, [userId]);
 
-  // Build photo array
+  // Build photo array (deduplicated to avoid showing primary image twice)
   const photos = profile
     ? [
         profile.Image,
         ...(profile.gallery
           ?.filter((g) => g.media_type === "image")
           .map((g) => g.media_url) || []),
-      ].filter(Boolean)
+      ]
+      .filter(Boolean)
+      .filter((url, index, arr) => arr.indexOf(url) === index) // Deduplicate by URL
     : [];
 
-  const nextPhoto = () => {
+  const nextPhoto = useCallback(() => {
     if (photos.length > 1) {
       setCurrentPhotoIndex((prev) => (prev + 1) % photos.length);
     }
-  };
+  }, [photos.length]);
 
-  const prevPhoto = () => {
+  const prevPhoto = useCallback(() => {
     if (photos.length > 1) {
       setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length);
     }
-  };
+  }, [photos.length]);
+
+  // Minimum swipe distance threshold (in pixels)
+  const minSwipeDistance = 50;
+
+  // Touch handlers for swipe navigation
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  }, []);
+
+  const onTouchEnd = useCallback(() => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) nextPhoto();
+    if (isRightSwipe) prevPhoto();
+    
+    // Reset touch state
+    setTouchStart(null);
+    setTouchEnd(null);
+  }, [touchStart, touchEnd, nextPhoto, prevPhoto]);
+
+  // Keyboard navigation for accessibility
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle if no modal is open and not in an input/textarea
+      if (showReviewModal) return;
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT") return;
+
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        prevPhoto();
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        nextPhoto();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [prevPhoto, nextPhoto, showReviewModal]);
 
   // Handle favorite toggle
   const handleToggleFavorite = async () => {
@@ -331,12 +386,18 @@ export default function OtherProfilePage() {
         </button>
 
         {/* Photo Gallery */}
-        <div className="relative aspect-[3/4] sm:aspect-[4/3] md:aspect-[16/9] lg:aspect-[21/9] max-h-[500px] bg-gradient-to-br from-pink-100 to-purple-100">
+        <div 
+          className="relative aspect-[3/4] sm:aspect-[4/3] md:aspect-[16/9] lg:aspect-[21/9] max-h-[500px] bg-gradient-to-br from-pink-100 to-purple-100"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           {photos.length > 0 ? (
             <img
               src={photos[currentPhotoIndex]}
               alt=""
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover select-none"
+              draggable={false}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -349,11 +410,30 @@ export default function OtherProfilePage() {
             </div>
           )}
 
-          {/* Photo navigation */}
+          {/* Gradient overlay - rendered first with lower z-index and pointer-events-none */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-[1] pointer-events-none" />
+
+          {/* Tap zones for mobile navigation (hidden on md+) */}
+          {photos.length > 1 && (
+            <>
+              <button
+                onClick={prevPhoto}
+                className="absolute left-0 top-0 w-1/3 h-full md:hidden z-20 focus:outline-none"
+                aria-label="Previous photo"
+              />
+              <button
+                onClick={nextPhoto}
+                className="absolute right-0 top-0 w-1/3 h-full md:hidden z-20 focus:outline-none"
+                aria-label="Next photo"
+              />
+            </>
+          )}
+
+          {/* Photo navigation - always render structure, let CSS handle visibility */}
           {photos.length > 1 && (
             <>
               {/* Dots indicator */}
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
                 {photos.map((_, i) => (
                   <button
                     key={i}
@@ -368,35 +448,32 @@ export default function OtherProfilePage() {
                 ))}
               </div>
 
-              {/* Arrow buttons */}
+              {/* Arrow buttons - visible on md+ screens */}
               <button
                 onClick={prevPhoto}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/95 backdrop-blur rounded-full items-center justify-center shadow-lg ring-1 ring-black/10 hover:bg-white transition-colors hidden md:flex z-20"
               >
-                <ChevronLeft className="w-5 h-5 text-gray-700" />
+                <ChevronLeft className="w-5 h-5 text-gray-800" />
               </button>
               <button
                 onClick={nextPhoto}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/95 backdrop-blur rounded-full items-center justify-center shadow-lg ring-1 ring-black/10 hover:bg-white transition-colors hidden md:flex z-20"
               >
-                <ChevronRight className="w-5 h-5 text-gray-700" />
+                <ChevronRight className="w-5 h-5 text-gray-800" />
               </button>
             </>
           )}
 
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
           {/* Verified badge */}
           {profile.is_verified && (
-            <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 z-10">
+            <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 z-20">
               <CheckCircle className="w-4 h-4" />
               Verified
             </div>
           )}
 
           {/* Basic info overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+          <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-[5]">
             <div className="max-w-4xl mx-auto">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-3xl md:text-4xl font-bold">
