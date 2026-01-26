@@ -276,13 +276,13 @@ export default function DiscoveryProfileView() {
           
           {/* Header overlay */}
           <View style={[styles.headerOverlay, { paddingTop: insets.top + 10 }]}>
-            {/* Close button */}
+            {/* Back button */}
             <Pressable
               onPress={() => router.back()}
               style={styles.headerButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Ionicons name="close" size={24} color="white" />
+              <Ionicons name="chevron-back" size={24} color="white" />
             </Pressable>
             
             {/* Report button */}

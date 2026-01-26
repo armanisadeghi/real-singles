@@ -1,5 +1,5 @@
 ---
-description: 
+description: Mobile must use actual native components, not JS approximations
 alwaysApply: true
 ---
 

@@ -20,7 +20,7 @@ alwaysApply: true
 ```
 /mobile    → Expo app (iOS + Android)
 /web       → Next.js app (API routes + Web UI)
-/docs      → Legacy documentation (mostly outdated, reference only)
+/docs      → Reference documentation (data_inventory.md is source of truth)
 ```
 
 ---
@@ -44,6 +44,18 @@ alwaysApply: true
 | `web/src/app/(app)/layout.tsx` | Authenticated app layout |
 | `web/src/app/(app)/profile/edit/page.tsx` | Form page pattern |
 | `web/src/components/ui/` | Shared UI components (ShadCN/Radix) |
+
+---
+
+## Icons
+
+**Never use emoji as icons.** Use proper icon libraries:
+
+| Platform | Library |
+|----------|---------|
+| Web | `lucide-react` |
+| iOS | SF Symbols (`expo-symbols`) |
+| Android | Material Icons or PNGs |
 
 ---
 

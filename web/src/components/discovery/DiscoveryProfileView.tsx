@@ -9,7 +9,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { X, Flag, Heart, Star, MapPin, Briefcase, CheckCircle } from "lucide-react";
+import { X, Flag, Heart, Star, MapPin, Briefcase, CheckCircle, ArrowLeft } from "lucide-react";
 import { cn, calculateAge } from "@/lib/utils";
 import { PhotoCarousel } from "./PhotoCarousel";
 import { ProfileSectionRenderer } from "./ProfileSectionRenderer";
@@ -184,12 +184,12 @@ export function DiscoveryProfileView({
 
           {/* Header overlay */}
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-10 md:p-3">
-            {/* Close button */}
+            {/* Back button */}
             <button
               onClick={handleClose}
               className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
             >
-              <X className="w-5 h-5 text-white" />
+              <ArrowLeft className="w-5 h-5 text-white" />
             </button>
 
             {/* Report button */}

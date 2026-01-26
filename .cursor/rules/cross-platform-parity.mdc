@@ -1,5 +1,5 @@
 ---
-description: CRITICAL - All features must exist on ALL platforms
+description: CRITICAL - All features must work on ALL platforms with centralized logic
 alwaysApply: true
 ---
 
@@ -15,22 +15,10 @@ Every feature must work on ALL of these:
 
 | Platform | Location |
 |----------|----------|
-| **Mobile iOS** | `/mobile` (Expo) |
-| **Mobile Android** | `/mobile` (Expo) |
-| **Web Desktop** | `/web` (Next.js) |
-| **Web Mobile** | `/web` (Next.js, responsive) |
-
----
-
-## The Rule
-
-**When you implement or modify ANY feature, you MUST implement it on ALL platforms.**
-
-If the user says "add feature X to the discovery page", that means:
-1. Mobile iOS - with native-feel implementation
-2. Mobile Android - with native-feel implementation  
-3. Web Desktop - fully functional
-4. Web Mobile - fully functional and touch-friendly
+| Mobile iOS | `/mobile` (Expo) |
+| Mobile Android | `/mobile` (Expo) |
+| Web Desktop | `/web` (Next.js) |
+| Web Mobile | `/web` (Next.js, responsive) |
 
 **Do NOT consider a task complete until all platforms are addressed.**
 
@@ -40,114 +28,61 @@ If the user says "add feature X to the discovery page", that means:
 
 ### One Operation = One Implementation
 
-**Every discrete operation MUST have exactly one authoritative implementation.**
-
-This applies to:
-- Database mutations (create, update, delete)
-- Business logic (matching algorithms, scoring, validation)
-- State transitions (marking photos as primary, changing user status)
-- Calculations (profile completion, points balance)
-
-```
-CORRECT (Centralized):
-  Mobile user sets primary photo → POST /api/users/me/gallery/primary
-  Web user sets primary photo   → POST /api/users/me/gallery/primary
-  Admin sets user's primary     → POST /api/admin/users/[id]/gallery/primary
-                                  (calls same underlying service function)
-
-WRONG (Fragmented):
-  Mobile → custom setPrimary() with local logic
-  Web    → different setPrimary() implementation
-  Admin  → third implementation in admin panel
-```
-
-**Why this matters:** When logic changes (e.g., "primary photo must be verified"), you change ONE place. Fragmented implementations drift apart, creating bugs that only appear in some contexts.
-
-### Where Shared Logic Lives
-
-| Logic Type | Location | Called By |
-|------------|----------|-----------|
-| Business logic | `web/src/lib/services/` | API routes |
-| Database operations | `web/src/lib/services/` | API routes |
-| Validation rules | `web/src/lib/validation/` | API routes, forms |
-| API endpoints | `web/src/app/api/` | Mobile, Web, Admin |
-| Constants/options | See below | All platforms |
-
-### API Logic
-
-All business logic (search, filters, matching, etc.) MUST go through shared API endpoints.
+Every discrete operation (database mutations, business logic, state transitions, calculations) MUST have exactly one authoritative implementation.
 
 ```
 CORRECT:
-  Mobile → /api/discover/top-matches → returns filtered users
-  Web    → /api/discover/top-matches → returns filtered users
+  Mobile, Web, Admin all call → POST /api/users/me/gallery/primary
+                                (same underlying service function)
 
 WRONG:
-  Mobile → local filtering logic
-  Web    → different local filtering logic
+  Mobile → custom setPrimary() with local logic
+  Web    → different implementation
+  Admin  → third implementation
 ```
 
-**API routes live in:** `web/src/app/api/`
-**Mobile calls them via:** `mobile/lib/api.ts`
+When logic changes, you change ONE place. Fragmented implementations drift and create context-specific bugs.
 
-### Constants & Options
+### Where Logic Lives
 
-Dropdown options, filter values, and other constants MUST be identical across platforms.
+| Type | Location |
+|------|----------|
+| Business logic / DB ops | `web/src/lib/services/` |
+| Validation | `web/src/lib/validation/` |
+| API endpoints | `web/src/app/api/` |
+| Constants | `mobile/constants/options.ts` + `web/src/types/index.ts` |
 
-| Platform | Constants File |
-|----------|----------------|
-| Mobile | `mobile/constants/options.ts` |
-| Web | `web/src/types/index.ts` (or dedicated constants file) |
-
-**CRITICAL:** When modifying constants in one file, you MUST update the other to match.
+**Constants must be identical across both files.** When modifying one, update the other.
 
 ---
 
 ## Proactive Violation Reporting
 
-**If you notice ANY violation of these principles—even while working on an unrelated task—report it.**
+**Report ANY violation you notice—even while working on unrelated tasks.**
 
-When you encounter:
-- Duplicated business logic across platforms
-- Inconsistent constants or options
-- Direct database access bypassing the API layer
-- Platform-specific implementations of shared operations
-- Any pattern that creates maintenance risk
+1. Note what's wrong and where
+2. Suggest the fix (or implement if scope permits)
+3. Continue with your original task
 
-**Do this:**
-1. Note the violation in your response
-2. Describe what's wrong and where
-3. Suggest the fix (or implement it if scope permits)
-4. Continue with your original task
-
-This isn't scope creep—it's engineering hygiene. Small violations compound into major technical debt.
+Small violations compound into major technical debt.
 
 ---
 
-## Checklist Before Marking Complete
+## Completion Checklist
 
-For ANY feature work, confirm:
-
-- [ ] Works on iOS (native feel)
-- [ ] Works on Android (native feel)
-- [ ] Works on Web Desktop
-- [ ] Works on Web Mobile (responsive, touch-friendly)
-- [ ] Uses shared API endpoint (not local logic)
-- [ ] Business logic is centralized (not duplicated per platform)
-- [ ] Constants are synced between mobile and web
-- [ ] No orphaned or fragmented implementations introduced
+- [ ] Works on iOS, Android, Web Desktop, Web Mobile
+- [ ] Uses shared API endpoint (no local business logic)
+- [ ] Constants synced between mobile and web
+- [ ] No fragmented implementations introduced
 
 ---
 
 ## Exceptions
 
-The ONLY acceptable exceptions are platform-specific capabilities that genuinely cannot exist elsewhere:
+Platform-specific capabilities only:
+- Push notifications (native vs browser)
+- Camera/gallery access patterns
+- Haptic feedback
+- Native UI components (pickers, sheets)
 
-- Push notifications (native mobile only, browser notifications on web)
-- Camera/gallery access patterns (different APIs, same outcome)
-- Haptic feedback (mobile only)
-- Platform-native UI components (pickers, sheets)
-
-Even these should:
-- Have equivalent UX on other platforms where possible
-- Share any underlying business logic via API
+Even these must share underlying business logic via API.
