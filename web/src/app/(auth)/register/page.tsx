@@ -1,9 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { REFERRAL_COOKIE_NAME } from "@/lib/config";
+
+// Helper to get cookie value
+function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+}
+
+// Helper to delete cookie
+function deleteCookie(name: string) {
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+}
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -14,7 +28,17 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [referralFromLink, setReferralFromLink] = useState(false);
   const router = useRouter();
+
+  // Check for referral code in cookie on mount
+  useEffect(() => {
+    const savedReferralCode = getCookie(REFERRAL_COOKIE_NAME);
+    if (savedReferralCode && !referralCode) {
+      setReferralCode(savedReferralCode);
+      setReferralFromLink(true);
+    }
+  }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +77,9 @@ export default function RegisterPage() {
         setLoading(false);
         return;
       }
+
+      // Clear the referral cookie after successful registration
+      deleteCookie(REFERRAL_COOKIE_NAME);
 
       // Auto-login after registration
       const supabase = createClient();
@@ -168,10 +195,20 @@ export default function RegisterPage() {
             id="referralCode"
             type="text"
             value={referralCode}
-            onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+            onChange={(e) => {
+              setReferralCode(e.target.value.toUpperCase());
+              setReferralFromLink(false);
+            }}
             placeholder="Enter code if you have one"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+              referralFromLink ? "border-green-300 bg-green-50" : "border-gray-300"
+            }`}
           />
+          {referralFromLink && (
+            <p className="mt-1 text-sm text-green-600">
+              Referral code applied from your invite link!
+            </p>
+          )}
         </div>
 
         <button

@@ -1,19 +1,20 @@
 import NotificationBell from "@/components/NotificationBell";
-import ProfileCard from "@/components/ui/ProfileCard";
+import ProfileListItem from "@/components/ui/ProfileListItem";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { VERTICAL_SPACING } from "@/constants/designTokens";
 import { getFavoriteList } from "@/lib/api";
 import { User } from "@/types";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
-  Platform,
   Text,
   View
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 export default function Favorites() {
-  const insets = useSafeAreaInsets();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [favoriteProfiles, setFavoriteProfiles] = useState<User[]>([]);
 
@@ -52,50 +53,28 @@ export default function Favorites() {
   useEffect(() => {
     fetchFavorites();
   }, []);
-  // Native header height: iOS 44pt, Android 56dp
-  const headerHeight = Platform.OS === 'ios' ? 44 : 56;
   
   return (
     <>
       <View className="flex-1 bg-background">
         <Toast/>
-        {/* Native-style header for tab screen */}
-        <View 
-          style={{ 
-            paddingTop: insets.top,
-            backgroundColor: '#FFFFFF',
-          }}
-        >
-          <View 
-            style={{ 
-              height: headerHeight,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingHorizontal: 16,
-            }}
-          >
-            <View style={{ width: 40 }} />
-            <Text style={{ fontSize: 17, fontWeight: '600', color: '#000' }}>
-              My Favorites
-            </Text>
-            <NotificationBell />
-          </View>
-        </View>
-        <View className="pb-56">
+        <ScreenHeader
+          title="My Favorites"
+          showBackButton
+          onBackPress={router.back}
+          rightContent={<NotificationBell />}
+        />
+        <View className="mt-4 pb-56">
           <FlatList
             data={favoriteProfiles}
-            numColumns={2}
-            columnWrapperStyle={{
-              justifyContent: "space-between",
-              marginBottom: 20,
-              paddingHorizontal: 20,
-              gap: 20,
+            contentContainerStyle={{
+              gap: VERTICAL_SPACING.xs,
             }}
             renderItem={({ item }) => (
-              <ProfileCard
+              <ProfileListItem
                 key={item?.ID}
                 profile={item}
+                navigateToFocus={true}
               />
             )}
             keyExtractor={(item, index) => `${index}`}

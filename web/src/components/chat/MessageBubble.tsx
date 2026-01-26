@@ -2,6 +2,7 @@
 
 import { Check, CheckCheck, Image as ImageIcon, Video } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
+import { Avatar } from "@/components/ui/Avatar";
 
 export interface Message {
   id: string;
@@ -66,17 +67,11 @@ export function MessageBubble({
     >
       {/* Avatar (for group chats) */}
       {showAvatar && !isOwn && (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white text-xs font-semibold shrink-0">
-          {senderImage ? (
-            <img
-              src={senderImage}
-              alt=""
-              className="w-full h-full rounded-full object-cover"
-            />
-          ) : (
-            senderName?.charAt(0).toUpperCase() || "?"
-          )}
-        </div>
+        <Avatar
+          src={senderImage}
+          name={senderName || "?"}
+          size="sm"
+        />
       )}
 
       <div className={cn("flex flex-col", isOwn ? "items-end" : "items-start")}>

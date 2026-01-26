@@ -352,6 +352,58 @@ export const followUser = async (userId: string) => {
 };
 
 // ===========================================
+// MATCHES ENDPOINTS (Like, Pass, Super Like)
+// ===========================================
+
+/**
+ * Send a match action (like, pass, or super_like)
+ */
+export const sendMatchAction = async (
+  targetUserId: string, 
+  action: "like" | "pass" | "super_like"
+) => {
+  return apiRequest("/matches", {
+    method: "POST",
+    body: JSON.stringify({ target_user_id: targetUserId, action }),
+  });
+};
+
+/**
+ * Like a user
+ */
+export const likeUser = async (targetUserId: string) => {
+  return sendMatchAction(targetUserId, "like");
+};
+
+/**
+ * Pass on a user
+ */
+export const passUser = async (targetUserId: string) => {
+  return sendMatchAction(targetUserId, "pass");
+};
+
+/**
+ * Super like a user
+ */
+export const superLikeUser = async (targetUserId: string) => {
+  return sendMatchAction(targetUserId, "super_like");
+};
+
+/**
+ * Get mutual matches
+ */
+export const getMatches = async () => {
+  return apiRequest("/matches");
+};
+
+/**
+ * Get users who have liked you (premium feature)
+ */
+export const getLikesReceived = async () => {
+  return apiRequest("/matches/likes-received");
+};
+
+// ===========================================
 // EVENTS ENDPOINTS
 // ===========================================
 
@@ -667,5 +719,78 @@ export const contactUs = async (data: FormData) => {
 export const saveLink = async (linkData: FormData) => {
   // This functionality can be handled by notifications endpoint
   return { success: true, msg: "Link saved" };
+};
+
+// ===========================================
+// BLOCK & REPORT ENDPOINTS
+// ===========================================
+
+/**
+ * Block a user
+ */
+export const blockUser = async (blockedUserId: string) => {
+  return apiRequest("/blocks", {
+    method: "POST",
+    body: JSON.stringify({ blocked_user_id: blockedUserId }),
+  });
+};
+
+/**
+ * Unblock a user
+ */
+export const unblockUser = async (blockedUserId: string) => {
+  return apiRequest(`/blocks/${blockedUserId}`, {
+    method: "DELETE",
+  });
+};
+
+/**
+ * Report a user
+ */
+export const reportUser = async (reportedUserId: string, reason: string) => {
+  return apiRequest("/reports", {
+    method: "POST",
+    body: JSON.stringify({ 
+      reported_user_id: reportedUserId,
+      reason: reason,
+    }),
+  });
+};
+
+/**
+ * Get block status for a user
+ */
+export const getBlockStatus = async (userId: string) => {
+  return apiRequest(`/blocks/${userId}`);
+};
+
+// ===========================================
+// GROUP MEMBER ENDPOINTS
+// ===========================================
+
+/**
+ * Add member to a group
+ */
+export const addGroupMember = async (groupId: string, userId: string) => {
+  return apiRequest(`/groups/${groupId}/members`, {
+    method: "POST",
+    body: JSON.stringify({ user_id: userId }),
+  });
+};
+
+/**
+ * Remove member from a group
+ */
+export const removeGroupMember = async (groupId: string, userId: string) => {
+  return apiRequest(`/groups/${groupId}/members/${userId}`, {
+    method: "DELETE",
+  });
+};
+
+/**
+ * Get group members
+ */
+export const getGroupMembers = async (groupId: string) => {
+  return apiRequest(`/groups/${groupId}/members`);
 };
 

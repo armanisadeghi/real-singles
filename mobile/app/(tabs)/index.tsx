@@ -1,6 +1,7 @@
 import SideMenu from "@/components/SidebarMenu";
+import { Avatar } from "@/components/ui/Avatar";
 import EventCard from "@/components/ui/EventCard";
-import { PointsHeart } from "@/components/ui/PointsHeart";
+import { PointsBadge } from "@/components/ui/PointsBadge";
 import ProfileCard from "@/components/ui/ProfileCard";
 import VideoCard from "@/components/ui/VideoCard";
 import VirtualDateCard from "@/components/ui/VirtualDateCard";
@@ -228,7 +229,7 @@ export default function Home() {
         <SideMenu
           visible={menuVisible}
           onClose={() => setMenuVisible(false)}
-          userAvatar={profile?.Image ? { uri: profile.Image.startsWith('http') ? profile.Image : VIDEO_URL + profile.Image } : null}
+          userAvatar={profile?.Image}
           userName={profile?.DisplayName || "User"}
         />
         <ImageBackground
@@ -241,64 +242,43 @@ export default function Home() {
             style={{ paddingHorizontal: SPACING.screenPadding, paddingTop: headerTopPadding }}
           >
             <TouchableOpacity onPress={() => router.push("/profile")}>
-              {profile?.Image ? (
-                <Image
-                  source={{ uri: profile.Image.startsWith('http') ? profile.Image : VIDEO_URL + profile.Image }}
-                  className="border-2 border-white rounded-full"
-                  style={{ width: ICON_SIZES['3xl'] * 1.25, height: ICON_SIZES['3xl'] * 1.25 }}
-                />
-              ) : (
-                <View
-                  className="border-2 border-white rounded-full justify-center items-center"
-                  style={{
-                    width: ICON_SIZES['3xl'] * 1.25,
-                    height: ICON_SIZES['3xl'] * 1.25,
-                    backgroundColor:
-                      BACKGROUND_COLORS[
-                      Math.abs(
-                        (profile?.DisplayName || "User")
-                          .split("")
-                          .reduce(
-                            (acc, char) => acc + char.charCodeAt(0),
-                            0
-                          ) % BACKGROUND_COLORS.length
-                      )
-                      ],
-                  }}
-                >
-                  <Text className="text-white font-bold" style={TYPOGRAPHY.h3}>
-                    {profile?.DisplayName
-                      ? profile.DisplayName.split(" ")
-                        .map((part) => part.charAt(0))
-                        .slice(0, 2)
-                        .join("")
-                        .toUpperCase()
-                      : "U"}
-                  </Text>
-                </View>
-              )}
+              <Avatar
+                src={profile?.Image}
+                name={profile?.DisplayName || "User"}
+                size="xl"
+                borderColor="#ffffff"
+                borderWidth={2}
+              />
             </TouchableOpacity>
-            <View className="flex-row items-center" style={{ gap: SPACING.xs }}>
+            <View className="flex-row items-center" style={{ gap: SPACING.sm }}>
               <TouchableOpacity
                 onPress={() => router.push("/notification")}
-                className="border border-border rounded-button"
-                style={{ padding: SPACING.xs }}
+                className="rounded-full"
+                style={{ 
+                  padding: SPACING.sm,
+                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                }}
               >
                 <Image
                   source={icons.bell}
-                  style={{ width: ICON_SIZES.sm, height: ICON_SIZES.sm }}
+                  style={{ width: ICON_SIZES.md, height: ICON_SIZES.md }}
                   resizeMode="contain"
+                  tintColor="#ffffff"
                 />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setMenuVisible(true)}
-                className="border border-border rounded-button"
-                style={{ padding: SPACING.xs }}
+                className="rounded-full"
+                style={{ 
+                  padding: SPACING.sm,
+                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                }}
               >
                 <Image
                   source={icons.menu}
-                  style={{ width: ICON_SIZES.sm, height: ICON_SIZES.sm }}
+                  style={{ width: ICON_SIZES.md, height: ICON_SIZES.md }}
                   resizeMode="contain"
+                  tintColor="#ffffff"
                 />
               </TouchableOpacity>
             </View>
@@ -315,12 +295,11 @@ export default function Home() {
                 Find Your Perfect Match
               </Text>
             </View>
-            <TouchableOpacity
-              activeOpacity={0.7}
+            <PointsBadge
+              points={redeemPoints}
+              size="md"
               onPress={() => router.push("/redeem")}
-            >
-              <PointsHeart points={redeemPoints} size="md" />
-            </TouchableOpacity>
+            />
           </View>
         </ImageBackground>
         <ScrollView
@@ -334,7 +313,7 @@ export default function Home() {
           <View className="flex-row" style={{ gap: SPACING.sm }}>
             <TouchableOpacity
               onPress={() => router.push("/discover")}
-              className="bg-primary rounded-full"
+              className="border border-primary bg-secondary rounded-full"
               style={{ 
                 paddingHorizontal: SPACING.base, 
                 paddingVertical: SPACING.sm,
@@ -343,7 +322,7 @@ export default function Home() {
               }}
               activeOpacity={0.7}
             >
-              <Text className="text-white font-medium" style={TYPOGRAPHY.subheadline}>Discover</Text>
+              <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>Discover</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() =>

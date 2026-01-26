@@ -2,10 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { SlidersHorizontal, Heart, Sparkles, MapPin, Loader2, X } from "lucide-react";
-import { ProfileCard } from "./ProfileCard";
+import { ProfileListItem } from "./ProfileListItem";
 import { FilterPanel, FilterValues } from "./FilterPanel";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ProfileCardSkeleton } from "@/components/ui/LoadingSkeleton";
 import { cn } from "@/lib/utils";
 
 interface Profile {
@@ -285,7 +284,7 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
         </div>
       </div>
 
-      {/* Profile Grid */}
+      {/* Profile List */}
       {visibleProfiles.length === 0 ? (
         <EmptyState
           type="matches"
@@ -295,16 +294,12 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
           onAction={() => setIsFilterOpen(true)}
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="max-w-2xl mx-auto space-y-3">
           {visibleProfiles.map((profile) => (
-            <ProfileCard
+            <ProfileListItem
               key={profile.id}
               profile={profile}
-              showActions={true}
-              onLike={handleLike}
-              onPass={handlePass}
-              onSuperLike={handleSuperLike}
-              actionLoading={!!profile.user_id && actionLoading === profile.user_id}
+              navigateToFocus={true}
             />
           ))}
         </div>
@@ -327,9 +322,19 @@ export function DiscoverGridSkeleton() {
         <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
         <div className="h-10 w-24 bg-gray-200 rounded-full animate-pulse" />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="max-w-2xl mx-auto space-y-3">
         {Array.from({ length: 8 }).map((_, i) => (
-          <ProfileCardSkeleton key={i} />
+          <div key={i} className="flex items-center gap-4 p-3 bg-white rounded-xl shadow-sm">
+            <div className="w-[72px] h-[72px] bg-gray-200 rounded-lg animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+              <div className="flex gap-2">
+                <div className="h-5 w-16 bg-gray-200 rounded-full animate-pulse" />
+                <div className="h-5 w-12 bg-gray-200 rounded-full animate-pulse" />
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </div>

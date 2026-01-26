@@ -1,8 +1,9 @@
 import NotificationBell from "@/components/NotificationBell";
-import ProfileCard from "@/components/ui/ProfileCard";
+import ProfileListItem from "@/components/ui/ProfileListItem";
 import VideoCard from "@/components/ui/VideoCard";
 import VirtualDateCard from "@/components/ui/VirtualDateCard";
 import { icons } from "@/constants/icons";
+import { VERTICAL_SPACING } from "@/constants/designTokens";
 import {
   getAllFeaturedVideos,
   getAllTopMatches,
@@ -126,17 +127,19 @@ export default function TopMatches() {
         );
       case "topMatches":
         return (
-          <ProfileCard
+          <ProfileListItem
             key={item.id}
             profile={item}
+            navigateToFocus={true}
           />
         );
 
       default:
         return (
-          <ProfileCard
+          <ProfileListItem
             key={item.id}
             profile={item}
+            navigateToFocus={true}
           />
         );
     }
@@ -184,27 +187,48 @@ export default function TopMatches() {
           <NotificationBell />
         </View>
         <View className="mt-4">
-          <FlatList
-            data={data}
-            numColumns={2}
-            columnWrapperStyle={{
-              justifyContent: "space-between",
-              marginBottom: 20,
-              paddingHorizontal: 20,
-              gap: 20,
-            }}
-            contentContainerStyle={{ paddingBottom: 150 }}
-            renderItem={renderItem}
-            keyExtractor={(item, idx) => item.id ? item.id.toString() : idx.toString()}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={() => (
-              <View className="flex-1 justify-center items-center">
-                <Text className="text-gray">
-                  No {getCategoryTitle()} available
-                </Text>
-              </View>
-            )}
-          />
+          {/* Use single-column for topMatches profiles, 2-column for videos/virtualDates */}
+          {category === "topMatches" ? (
+            <FlatList
+              data={data}
+              contentContainerStyle={{ 
+                paddingBottom: 150,
+                gap: VERTICAL_SPACING.xs,
+              }}
+              renderItem={renderItem}
+              keyExtractor={(item, idx) => item.id ? item.id.toString() : idx.toString()}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={() => (
+                <View className="flex-1 justify-center items-center py-20">
+                  <Text className="text-gray">
+                    No {getCategoryTitle()} available
+                  </Text>
+                </View>
+              )}
+            />
+          ) : (
+            <FlatList
+              data={data}
+              numColumns={2}
+              columnWrapperStyle={{
+                justifyContent: "space-between",
+                marginBottom: 20,
+                paddingHorizontal: 20,
+                gap: 20,
+              }}
+              contentContainerStyle={{ paddingBottom: 150 }}
+              renderItem={renderItem}
+              keyExtractor={(item, idx) => item.id ? item.id.toString() : idx.toString()}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={() => (
+                <View className="flex-1 justify-center items-center">
+                  <Text className="text-gray">
+                    No {getCategoryTitle()} available
+                  </Text>
+                </View>
+              )}
+            />
+          )}
         </View>
       </View>
     </>

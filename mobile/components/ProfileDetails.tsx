@@ -1,5 +1,6 @@
 import { icons } from "@/constants/icons";
 import { saveLink, toggleFavorite } from "@/lib/api";
+import { getProfileLink, APP_NAME } from "@/lib/config";
 import { User } from "@/types";
 import { removeToken } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
@@ -123,14 +124,14 @@ console.log("profile?.Height",profile?.Height);
   const handleReferFriend = async () => {
     try {
       // Build the deep link URL
-      const deepLinkUrl = `https://truSingle.com/profiles/${profile?.ID}`;
+      const deepLinkUrl = getProfileLink(profile?.ID || '');
 
       // Share message text
-      const message = `Hi there! RealSingles has helped me meet some wonderful people. Here’s a profile I thought you might like. You can connect with it directly on the RealSingles App by using the link below!\n${deepLinkUrl}`;
+      const message = `Hi there! ${APP_NAME} has helped me meet some wonderful people. Here’s a profile I thought you might like. You can connect with it directly on the ${APP_NAME} App by using the link below!\n${deepLinkUrl}`;
 
       // Use Share API
       const result = await Share.share({
-        title: "Join the RealSingles App!",
+        title: `Join the ${APP_NAME} App!`,
         message,
         url: Platform.OS === "ios" ? deepLinkUrl : undefined, // iOS supports URL separately
       });

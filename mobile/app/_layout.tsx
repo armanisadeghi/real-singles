@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
+import * as SplashScreen from 'expo-splash-screen';
 import IncomingCall from "@/components/IncomingCall";
 import NotificationBell from "@/components/NotificationBell";
 import { CallProvider, useCall } from "@/context/CallContext";
@@ -13,18 +14,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import "./globals.css";
 
-/**
- * Native Navigation Headers
- * 
- * Uses platform-native components:
- * - iOS: UINavigationBar
- * - Android: Material AppBar
- * 
- * DO NOT override platform defaults unless absolutely necessary.
- * Native headers provide automatic back button handling, haptics, and accessibility.
- * 
- * @see /docs/NATIVE_FEEL_GUIDELINES.md
- */
+// Prevent native splash from auto-hiding - we control when it hides
+SplashScreen.preventAutoHideAsync();
+
 function RootLayoutNav() {
   const agoraLoginRef = useRef(false);
 

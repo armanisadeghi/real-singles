@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { ProfileListItem } from "@/components/discovery/ProfileListItem";
 
 async function getMatches() {
   const supabase = await createClient();
@@ -35,8 +36,9 @@ export default async function MatchesPage() {
   const matches = await getMatches();
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Your Matches</h1>
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Your Matches</h1>
+      <p className="text-gray-500 mb-6">People you've matched with</p>
 
       {matches.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl shadow-sm">
@@ -46,49 +48,43 @@ export default async function MatchesPage() {
             Start liking profiles to find your matches!
           </p>
           <a
-            href="/"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700"
+            href="/discover"
+            className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700"
           >
             Discover Profiles
           </a>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="space-y-3">
           {matches.map((match) => {
             const profile = match.profiles as {
+              id?: string;
               first_name?: string;
+              last_name?: string;
+              date_of_birth?: string;
               profile_image_url?: string;
               city?: string;
+              state?: string;
+              is_verified?: boolean;
               user?: { display_name?: string };
             };
             return (
-              <a
+              <ProfileListItem
                 key={match.target_user_id}
-                href={`/profile/${match.target_user_id}`}
-                className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
-              >
-                <div className="aspect-square bg-gradient-to-br from-indigo-100 to-purple-100">
-                  {profile?.profile_image_url ? (
-                    <img
-                      src={profile.profile_image_url}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-4xl">👤</span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-gray-900">
-                    {profile?.first_name || profile?.user?.display_name || "Someone"}
-                  </h3>
-                  {profile?.city && (
-                    <p className="text-sm text-gray-500">📍 {profile.city}</p>
-                  )}
-                </div>
-              </a>
+                profile={{
+                  id: match.target_user_id || "",
+                  user_id: match.target_user_id,
+                  first_name: profile?.first_name,
+                  last_name: profile?.last_name,
+                  date_of_birth: profile?.date_of_birth,
+                  city: profile?.city,
+                  state: profile?.state,
+                  profile_image_url: profile?.profile_image_url,
+                  is_verified: profile?.is_verified,
+                  user: profile?.user,
+                }}
+                navigateToFocus={false}
+              />
             );
           })}
         </div>

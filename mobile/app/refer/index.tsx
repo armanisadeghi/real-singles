@@ -1,10 +1,13 @@
 import NotificationBell from "@/components/NotificationBell";
 import GradientButton from "@/components/ui/GradientButton";
 import { icons } from "@/constants/icons";
+import { getReferralLink, APP_NAME } from "@/lib/config";
 import { useAuth } from "@/utils/authContext";
+import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
+  Alert,
   Image,
   Share,
   StyleSheet,
@@ -15,32 +18,50 @@ import {
 
 export default function Refer() {
   const router = useRouter();
-  const {user, refreshUser} = useAuth();
+  const { user } = useAuth();
 
-  console.log("User in refer:", user);
-  
-  const userName = "ABCG45"; // Replace with actual user name or fetch from context or API
+  // Get the user's referral code from auth context
+  const referralCode = user?.referral_code || '';
+  const referralLink = referralCode ? getReferralLink(referralCode) : '';
+
+  const handleCopyCode = async () => {
+    if (!referralCode) {
+      Alert.alert("Error", "Referral code not available");
+      return;
+    }
+    await Clipboard.setStringAsync(referralCode);
+    Alert.alert("Copied!", "Referral code copied to clipboard");
+  };
+
+  const handleCopyLink = async () => {
+    if (!referralLink) {
+      Alert.alert("Error", "Referral link not available");
+      return;
+    }
+    await Clipboard.setStringAsync(referralLink);
+    Alert.alert("Copied!", "Referral link copied to clipboard");
+  };
 
   const handleReferFriend = async () => {
+    if (!referralCode) {
+      Alert.alert("Error", "Referral code not available. Please try again later.");
+      return;
+    }
+
     try {
       const result = await Share.share({
-        title: "Join me on RealSinglesApp!",
+        title: `Join me on ${APP_NAME}!`,
         message:
-          "Hey! I've been using RealSingles to meet amazing people and connect with like-minded individuals. Join me using my referral link and get started today! https://truapp.com/refer?user=" +
-          encodeURIComponent(userName),
-        // url: 'https://truapp.com/download'
+          `Hey! I've been using ${APP_NAME} to meet amazing people and connect with like-minded individuals. Join me using my referral link and get started today! ${referralLink}`,
       });
 
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          // Shared with activity type of result.activityType
           console.log("Shared via:", result.activityType);
         } else {
-          // Shared
           console.log("Shared successfully");
         }
       } else if (result.action === Share.dismissedAction) {
-        // Dismissed
         console.log("Share dismissed");
       }
     } catch (error) {
@@ -98,14 +119,31 @@ export default function Refer() {
               Your Referral Code
             </Text>
 
-            <View className="bg-light-100 border border-light-200 rounded-xl items-center py-4 mb-3 w-3/4 mx-auto">
-              <Text className="text-[16px] font-medium text-dark">{user?.referral_code || 'Not Available'}</Text>
-            </View>
+            <TouchableOpacity 
+              onPress={handleCopyCode}
+              className="bg-light-100 border border-light-200 rounded-xl items-center py-4 mb-3 w-3/4 mx-auto flex-row justify-center gap-2"
+            >
+              <Text className="text-[16px] font-medium text-dark">{referralCode || 'Not Available'}</Text>
+              <Image
+                source={icons.link}
+                className="size-4"
+                resizeMode="contain"
+                tintColor="#686A6E"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              onPress={handleCopyLink}
+              className="bg-light-100 border border-light-200 rounded-xl items-center py-3 mb-3 w-3/4 mx-auto"
+            >
+              <Text className="text-[12px] text-[#686A6E] mb-1">Tap to copy link</Text>
+              <Text className="text-[11px] font-medium text-dark" numberOfLines={1}>{referralLink || 'Not Available'}</Text>
+            </TouchableOpacity>
 
             <GradientButton
-              text="Refer Now"
+              text="Share with Friends"
               containerStyle={{
-                marginVertical: 40,
+                marginVertical: 30,
                 width: "80%",
                 marginHorizontal: "auto",
                 paddingVertical: 15

@@ -1,0 +1,23 @@
+{
+  "name": "RealSingles",
+  "short_name": "RealSingles",
+  "description": "Find your real connection with verified profiles, video introductions, and curated events.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFAF2",
+  "theme_color": "#8F5924",
+  "icons": [
+    {
+      "src": "/images/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
