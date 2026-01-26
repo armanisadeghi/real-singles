@@ -34,6 +34,8 @@ Search for latest patterns: `"Android 16 [component] Material 3"` or `"Material 
 
 Starting with Expo SDK 54 / React Native 0.81, edge-to-edge is mandatory on Android. Your app draws under system bars.
 
+**React Native 0.81+ Note:** Edge-to-edge is built directly into React Native. The `react-native-edge-to-edge` library is no longer needed. Use `react-native-safe-area-context` (the built-in `SafeAreaView` is deprecated).
+
 ```tsx
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -63,14 +65,16 @@ const insets = useSafeAreaInsets();
 
 ### Predictive Back Gesture
 
-Android 16 no longer calls `onBackPressed()`. React Navigation doesn't yet support predictive back, so disable it:
+React Native 0.81+ supports Android 16's predictive back gesture. The `BackHandler` API works as before.
 
-**app.json:**
+**Test thoroughly after upgrading.** If your app uses custom native back handling (overriding `onBackPressed()`), migrate to supported back APIs.
+
+**Temporary opt-out (only if needed):**
 ```json
 {
   "expo": {
     "android": {
-      "predictiveBackGestureEnabled": false
+      "enableOnBackInvokedCallback": false
     }
   }
 }
@@ -124,6 +128,31 @@ The new design language emphasizing natural motion, visual depth, and expressive
 | Sheet headers | Surface with subtle depth |
 | FABs and toolbars | New `FloatingToolbar` patterns |
 | Notifications | Grouped with dynamic progress |
+
+### FloatingToolbar Pattern (M3 Expressive)
+
+Two toolbar types replace the deprecated bottom app bar:
+
+| Type | Use Case |
+|------|----------|
+| **Docked** | Full-width, global actions consistent across pages |
+| **Floating** | Contextual actions for current page, pairs with FAB |
+
+**Color modes:**
+- **Standard**: Low-emphasis, focus on content
+- **Vibrant**: High-emphasis, indicates mode changes (e.g., edit mode)
+
+*Note: No React Native library exists yet. Implement manually with proper M3 styling.*
+
+### Live Updates / Progress Notifications (Android 16)
+
+For ongoing activities (delivery tracking, navigation, rideshare), use Android 16's progress-centric notification style:
+
+- Appears as chips in status bar with real-time info
+- Prominent on lock screen and always-on display
+- Uses `Notification.ProgressStyle` with segments and milestones
+
+*Implementation requires native code. Expo Notifications does not yet expose this API.*
 
 ---
 
@@ -196,6 +225,8 @@ const DISMISSAL_SPRING = { damping: 20, stiffness: 200, mass: 0.8 };
 // Usage
 sv.value = withSpring(targetValue, M3_SPRING);
 ```
+
+**Note:** React Native Reanimated uses `damping`/`stiffness`/`mass`. Android native uses `dampingRatio` (0-1) / `stiffness`. The configs above are RN Reanimated values that approximate M3 feel.
 
 **Note:** `stiffness/damping` (physics) and `duration/dampingRatio` (duration) cannot be mixed.
 

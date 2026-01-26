@@ -140,7 +140,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 | Medium | 600-840dp | Small tablets, foldables |
 | Expanded | 840-1200dp | Tablets |
 | Large | 1200-1600dp | Large tablets |
-| Extra-Large | ≥1600dp | Desktop |
+| Extra-Large | ≥1600dp | Desktop, external displays |
 
 ```tsx
 const useWindowSizeClass = () => {
@@ -148,7 +148,8 @@ const useWindowSizeClass = () => {
   if (width < 600) return 'compact';
   if (width < 840) return 'medium';
   if (width < 1200) return 'expanded';
-  return 'large';
+  if (width < 1600) return 'large';
+  return 'extraLarge';
 };
 ```
 
@@ -192,11 +193,12 @@ const insets = useSafeAreaInsets();
 ```json
 {
   "expo": {
-    "androidNavigationBar": { "enforceContrast": false },
-    "android": { "predictiveBackGestureEnabled": false }
+    "androidNavigationBar": { "enforceContrast": false }
   }
 }
 ```
+
+**Important:** React Native's built-in `SafeAreaView` is deprecated as of RN 0.81. Always use `react-native-safe-area-context` instead.
 
 ---
 
