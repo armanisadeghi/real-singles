@@ -71,6 +71,14 @@ export function BottomNavigation() {
     return pathname.startsWith(href);
   };
 
+  // Hide bottom nav on full-screen profile views (discovery, focus)
+  const isFullScreenProfile = pathname.startsWith("/discover/profile/") || 
+                               (pathname.startsWith("/profile/") && pathname.includes("/focus"));
+  
+  if (isFullScreenProfile) {
+    return null;
+  }
+
   return (
     <nav
       className={cn(

@@ -28,7 +28,11 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
   // This matches the mobile app behavior
   const isHomePage = pathname === "/home" || pathname === "/";
   
-  if (isHomePage) {
+  // Hide header on full-screen profile views (discovery, focus)
+  const isFullScreenProfile = pathname.startsWith("/discover/profile/") || 
+                               pathname.startsWith("/profile/") && pathname.includes("/focus");
+  
+  if (isHomePage || isFullScreenProfile) {
     return null;
   }
 

@@ -56,6 +56,8 @@ function RootLayoutNav() {
         
         {/* Full-screen media - No headers */}
         <Stack.Screen name="profiles/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="profiles/focus/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="discover/profile/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="video/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="call/index" options={{ headerShown: false }} />
         <Stack.Screen name="videocall/index" options={{ headerShown: false }} />
