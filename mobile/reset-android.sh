@@ -4,7 +4,14 @@
 # Android Build Reset (Light)
 # =============================================================================
 # Quick, safe cleanup of common cache issues. Non-destructive.
-# For a full nuclear reset, use: ./reset-android-build.sh --hard
+# For a full nuclear reset, use: ./reset-android.sh --hard
+#
+# ⚠️  NEVER RUN THESE COMMANDS (they will break the build):
+#   - expo prebuild --clean    (wipes custom native configurations)
+#
+# This script is safe because it preserves:
+#   - android/ native project files
+#   - react-native.config.js (contains autolinking settings)
 # =============================================================================
 
 HARD_RESET=false
@@ -102,7 +109,9 @@ echo "  pnpm android"
 echo ""
 if ! $HARD_RESET; then
     echo "If issues persist, try the hard reset:"
-    echo "  ./reset-android-build.sh --hard"
+    echo "  ./reset-android.sh --hard"
     echo ""
 fi
+echo "⚠️  NEVER run 'expo prebuild --clean' - it will break the build!"
+echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

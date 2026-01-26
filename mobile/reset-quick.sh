@@ -1,7 +1,20 @@
 #!/bin/bash
 
+# =============================================================================
 # Quick Reset Script for React Native Development
-# Kills processes and clears caches without full rebuild
+# =============================================================================
+# Kills processes and clears caches without full rebuild.
+# This is the FASTEST and SAFEST reset option.
+#
+# ⚠️  NEVER RUN THESE COMMANDS (they will break the build):
+#   - expo prebuild --clean    (wipes custom Podfile/native configurations)
+#   - rm ios/Podfile           (removes critical native settings)
+#
+# This script is safe because it ONLY clears:
+#   - Running processes
+#   - Metro bundler cache
+#   - Build artifacts (not source files or configs)
+# =============================================================================
 
 echo "🚀 Quick Reset - Preparing for fresh development session..."
 echo ""
@@ -88,6 +101,8 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "💡 Tip: If you still have issues, run the full reset scripts:"
-echo "   ./reset-android-build.sh  (for Android)"
-echo "   ./reset-ios-build.sh      (for iOS)"
+echo "   ./reset-android.sh  (for Android)"
+echo "   ./reset-ios.sh      (for iOS)"
+echo ""
+echo "⚠️  NEVER run 'expo prebuild --clean' - it will break the build!"
 echo ""

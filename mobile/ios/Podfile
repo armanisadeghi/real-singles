@@ -1,3 +1,28 @@
+# =============================================================================
+# RealSingles iOS Podfile
+# =============================================================================
+#
+# ⚠️  WARNING: DO NOT RUN `expo prebuild --clean` ⚠️
+#
+# This Podfile contains critical custom configurations for:
+#   1. Agora Chat SDK (HyphenateChat) - requires building RN from source
+#   2. VisionCamera - Frame Processors disabled (we don't use them)
+#   3. react-native-worklets + react-native-reanimated v4 compatibility
+#
+# Running `expo prebuild --clean` will WIPE OUT these configurations and
+# cause build failures. Instead, use these commands for troubleshooting:
+#
+#   # Clean pods only (preserves Podfile):
+#   rm -rf ios/Pods ios/Podfile.lock ios/build
+#   cd ios && pod install --repo-update
+#
+#   # Full reset (also in reset-ios.sh --hard):
+#   rm -rf node_modules ios/Pods ios/Podfile.lock ios/build
+#   pnpm install
+#   cd ios && pod install --repo-update
+#
+# =============================================================================
+
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
 
@@ -17,11 +42,28 @@ ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] = podfile_properties['EX_DEV_CLIENT_NETWO
 
 ENV['RCT_NEW_ARCH_ENABLED'] ||= '0' if podfile_properties['newArchEnabled'] == 'false'
 ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] ||= podfile_properties['EX_DEV_CLIENT_NETWORK_INSPECTOR']
-# Disable prebuilt binaries to make RCT-Folly available for Agora Chat
+
+# =============================================================================
+# CRITICAL: Agora Chat SDK Compatibility
+# =============================================================================
+# The react-native-agora-chat (HyphenateChat) SDK depends on RCT-Folly.
+# When using prebuilt React Native binaries, RCT-Folly is not available.
+# We MUST disable prebuilt binaries to build from source.
+#
+# DO NOT REMOVE THESE LINES or Agora Chat will fail with:
+#   "Unable to find a specification for `RCT-Folly` depended upon by `react-native-chat-sdk`"
+# =============================================================================
 ENV['RCT_USE_RN_DEP'] = '0'
 ENV['RCT_USE_PREBUILT_RNCORE'] = '0'
-# Disable VisionCamera Frame Processors (not used in app, beta worklets-core incompatible with New Arch)
+
+# =============================================================================
+# CRITICAL: VisionCamera Frame Processors
+# =============================================================================
+# Frame Processors require react-native-worklets-core (different from react-native-worklets).
+# We don't use Frame Processors, so disable them to avoid conflicts.
+# =============================================================================
 ENV['VCEnableFrameProcessors'] = '0'
+
 platform :ios, podfile_properties['ios.deploymentTarget'] || '15.1'
 
 # Explicitly specify the Xcode project to avoid ambiguity
@@ -65,10 +107,21 @@ target 'RealSingles' do
     :fabric_enabled => true
   )
 
+  # =============================================================================
+  # Agora Chat SDK (HyphenateChat)
+  # =============================================================================
+  # This is required for the react-native-agora-chat package to work properly.
+  # The version must match what react-native-agora-chat expects.
+  # =============================================================================
   pod 'HyphenateChat', '4.10.2'
   
-  # Note: react-native-reanimated v4 requires react-native-worklets for its
-  # native worklets runtime (RNWorklets pod). Both packages must be installed.
+  # =============================================================================
+  # Worklets Configuration Note
+  # =============================================================================
+  # react-native-reanimated v4 requires react-native-worklets for its native
+  # worklets runtime (RNWorklets pod). Both packages must be installed and
+  # native linking must NOT be disabled in react-native.config.js.
+  # =============================================================================
 
   post_install do |installer|
     react_native_post_install(
@@ -78,7 +131,12 @@ target 'RealSingles' do
       :ccache_enabled => ccache_enabled?(podfile_properties),
     )
     
-    # Fix Agora Chat SDK trying to compile README.md
+    # =============================================================================
+    # Fix: Agora Chat SDK README.md Compilation Error
+    # =============================================================================
+    # The react-native-chat-sdk pod incorrectly includes README.md in its
+    # source files, causing Xcode to try to compile it. This removes it.
+    # =============================================================================
     installer.pods_project.targets.each do |target|
       if target.name == 'react-native-chat-sdk'
         target.source_build_phase.files.each do |file|

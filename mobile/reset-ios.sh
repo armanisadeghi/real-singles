@@ -4,7 +4,15 @@
 # iOS Build Reset (Light)
 # =============================================================================
 # Quick, safe cleanup of common cache issues. Non-destructive.
-# For a full nuclear reset, use: ./reset-ios-build.sh --hard
+# For a full nuclear reset, use: ./reset-ios.sh --hard
+#
+# ⚠️  NEVER RUN THESE COMMANDS (they will break the build):
+#   - expo prebuild --clean    (wipes custom Podfile configurations)
+#   - rm ios/Podfile           (removes critical native settings)
+#
+# This script is safe because it preserves:
+#   - ios/Podfile (contains Agora Chat, Worklets, and other critical configs)
+#   - react-native.config.js (contains autolinking settings)
 # =============================================================================
 
 HARD_RESET=false
@@ -109,7 +117,9 @@ echo "  open ios/TruSingle.xcworkspace"
 echo ""
 if ! $HARD_RESET; then
     echo "If issues persist, try the hard reset:"
-    echo "  ./reset-ios-build.sh --hard"
+    echo "  ./reset-ios.sh --hard"
     echo ""
 fi
+echo "⚠️  NEVER run 'expo prebuild --clean' - it will break the build!"
+echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
