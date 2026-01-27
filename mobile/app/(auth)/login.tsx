@@ -4,6 +4,7 @@ import GradientButton from "@/components/ui/GradientButton";
 import { icons } from "@/constants/icons";
 import { signInWithEmail, resetPassword as supabaseResetPassword } from "@/lib/supabase";
 import { useRouter } from "expo-router";
+import * as Haptics from 'expo-haptics';
 import React, { useEffect, useState } from "react";
 import {
   BackHandler,
@@ -86,6 +87,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     Keyboard.dismiss();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setEmailError("");
     setPasswordError("");
     setGeneralError("");
@@ -117,6 +119,7 @@ const Login = () => {
       if (data?.session) {
         // Session is automatically stored by Supabase
         // Auth context will pick up the change via onAuthStateChange
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Toast.show({
           type: "success",
           text1: "Welcome back!",
@@ -125,10 +128,12 @@ const Login = () => {
         });
         router.replace("/(tabs)");
       } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setGeneralError("Login failed. Please try again.");
       }
     } catch (error: any) {
       console.error("Login error:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       
       // Handle specific Supabase auth errors
       if (error?.message?.includes("Invalid login credentials")) {
@@ -239,7 +244,10 @@ const Login = () => {
                 ? "Privacy Policy"
                 : "Terms & Conditions"}
             </Text>
-            <TouchableOpacity onPress={() => setVisible(false)}>
+            <TouchableOpacity onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setVisible(false);
+            }}>
               <Text className="text-xl text-gray-600">✕</Text>
             </TouchableOpacity>
           </View>
@@ -263,7 +271,10 @@ const Login = () => {
       <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
         <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-300">
           <Text className="text-lg font-semibold">{webViewTitle}</Text>
-          <TouchableOpacity onPress={() => setShowWebView(false)}>
+          <TouchableOpacity onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowWebView(false);
+          }}>
             <Text className="text-black-500 font-bold text-lg">✕</Text>
           </TouchableOpacity>
         </View>
@@ -349,7 +360,10 @@ const Login = () => {
                   fontSize: 16,
                 }}
               />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <TouchableOpacity onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowPassword(!showPassword);
+              }}>
                 <Image
                   source={showPassword ? icons.eyeClosed : icons.eyeOpen}
                   resizeMode="contain"
@@ -370,7 +384,10 @@ const Login = () => {
                 Remember me
               </Text> */}
             </View>
-            <TouchableOpacity onPress={() => setShowForgotPasswordModal(true)}>
+            <TouchableOpacity onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowForgotPasswordModal(true);
+            }}>
               <Text className="text-dark text-xs font-normal text-end mb-5 px-8">
                 Forgot Password?
               </Text>
@@ -405,7 +422,10 @@ const Login = () => {
           <Text className="text-dark font-medium text-xs">
             Don&apos;t have an account?
           </Text>
-          <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
+          <TouchableOpacity onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/(auth)/signup");
+          }}>
             <Text className="text-primary font-medium text-base"> Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -413,15 +433,17 @@ const Login = () => {
       {Platform.OS == 'ios' ?
         <View className="w-full flex-row justify-center items-center mt-4 space-x-4">
         <TouchableOpacity style={{marginRight: 30}}
-         onPress={() =>
-            openModal(require("../../assets/docs/PrivacyPolicy.pdf"))
-          }>
+         onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            openModal(require("../../assets/docs/PrivacyPolicy.pdf"));
+          }}>
           <Text className="text-dark underline text-[12px] text-blue-400">Privacy Policy</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity  onPress={() =>
-            openModal(require("../../assets/docs/TermsConditions.pdf"))
-          }>
+        <TouchableOpacity  onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            openModal(require("../../assets/docs/TermsConditions.pdf"));
+          }}>
           <Text className="text-dark underline text-[12px] text-blue-400">Terms & Conditions</Text>
         </TouchableOpacity>
       </View> 
@@ -429,11 +451,17 @@ const Login = () => {
       
         <View className="w-full flex-row justify-center items-center mt-4 space-x-4">
         <TouchableOpacity style={{marginRight: 30}}
-         onPress={goToPrivacy}>
+         onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            goToPrivacy();
+          }}>
           <Text className="text-dark underline text-[12px] text-blue-400">Privacy Policy</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity  onPress={goToTerms}>
+        <TouchableOpacity  onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            goToTerms();
+          }}>
           <Text className="text-dark underline text-[12px] text-blue-400">Terms & Conditions</Text>
         </TouchableOpacity>
       </View>
@@ -457,6 +485,7 @@ const Login = () => {
               </Text>
               <TouchableOpacity
                 onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setShowForgotPasswordModal(false);
                   setOtpSent(false);
                   setShowResetPassword(false);
@@ -507,7 +536,10 @@ const Login = () => {
                 <View className="flex-row gap-4 mt-2">
                   <TouchableOpacity
                     className="flex-1 py-3 bg-light-100 rounded-full"
-                    onPress={() => setShowForgotPasswordModal(false)}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setShowForgotPasswordModal(false);
+                    }}
                   >
                     <Text className="text-center text-gray-700 font-medium">
                       Cancel
@@ -515,7 +547,10 @@ const Login = () => {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={handleForgotPassword}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      handleForgotPassword();
+                    }}
                     className="flex-1 shadow-lg shadow-white rounded-3xl overflow-hidden"
                     disabled={sendingEmail}
                   >
@@ -567,6 +602,7 @@ const Login = () => {
                   <TouchableOpacity
                     className="flex-1 py-3 bg-light-100 rounded-full"
                     onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setOtpSent(false);
                       setOtp("");
                     }}
@@ -577,7 +613,10 @@ const Login = () => {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={handleVerifyOtp}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      handleVerifyOtp();
+                    }}
                     className="flex-1 shadow-lg shadow-white rounded-3xl overflow-hidden"
                     disabled={verifyingOtp}
                   >
@@ -621,7 +660,10 @@ const Login = () => {
                       }}
                     />
                     <TouchableOpacity
-                      onPress={() => setShowPassword(!showPassword)}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setShowPassword(!showPassword);
+                      }}
                     >
                       <Image
                         source={showPassword ? icons.eyeClosed : icons.eyeOpen}
@@ -636,6 +678,7 @@ const Login = () => {
                   <TouchableOpacity
                     className="flex-1 py-3 bg-light-100 rounded-full"
                     onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setShowResetPassword(false);
                       setNewPassword("");
                     }}
@@ -646,7 +689,10 @@ const Login = () => {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={handleResetPassword}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      handleResetPassword();
+                    }}
                     className="flex-1 shadow-lg shadow-white rounded-3xl overflow-hidden"
                     disabled={resettingPassword}
                   >

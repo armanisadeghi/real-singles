@@ -2,6 +2,7 @@ import { icons } from "@/constants/icons";
 import { requestPermissionWithExplanation } from "@/utils/permissions";
 import { addCurrentUserId, getCurrentUserId, getToken, removeCurrentUserId, removeToken, storeToken } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as AppleAuthentication from 'expo-apple-authentication';
 // import * as AuthSession from "expo-auth-session";
@@ -9,6 +10,7 @@ import * as Google from 'expo-auth-session/providers/google';
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import * as WebBrowser from 'expo-web-browser';
+import * as Haptics from 'expo-haptics';
 import React from "react";
 import { Alert, Image, Platform, Text, TouchableOpacity } from "react-native";
 
@@ -108,18 +110,21 @@ async function signInWithApple() {
         }
        await addCurrentUserId(res?.data?.ID);
 
-
       // Navigate to home
       // router.replace("/(tabs)");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace({ pathname: "/signup", params: { startSection: 1 } });
 
     } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert("Login Failed", res.msg || "Something went wrong");
     }
   } catch (e: any) {
     if (e.code === "ERR_CANCELED") {
+      // User cancelled - no haptic needed
       Alert.alert("Cancelled", "User cancelled Apple sign in");
     } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error("Apple Sign In Error:", e);
       Alert.alert("Error", "Something went wrong with Apple sign in");
     }
@@ -191,7 +196,10 @@ const getLocation = async () => {
     <>
      
       {Platform.OS === "ios" ? (
-        <TouchableOpacity onPress={() => signInWithApple()} className="flex-row justify-center items-center gap-2 my-2 bg-light-200 py-4 rounded-[99] border-border">
+        <TouchableOpacity onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          signInWithApple();
+        }} className="flex-row justify-center items-center gap-2 my-2 bg-light-200 py-4 rounded-[99] border-border">
           <Ionicons name="logo-apple" size={24} color="black" />
           <Text className="text-gray font-medium text-xs">
             Continue with Apple
@@ -201,6 +209,7 @@ const getLocation = async () => {
       <TouchableOpacity
         // onPress={() => promptAsync()}
         onPress={async () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             const coords = await getLocation(); // ask for location here
             if (!coords) return;
 

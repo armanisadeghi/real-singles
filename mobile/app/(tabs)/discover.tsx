@@ -10,6 +10,7 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
+import * as Haptics from 'expo-haptics';
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -118,6 +119,7 @@ export default function Discover() {
   }, []);
 
   const handleFilterPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     // Reset change tracking when opening the sheet
     filtersChangedRef.current = false;
     setBottomSheetIndex(0);
@@ -179,6 +181,7 @@ export default function Discover() {
         if (filterRes?.success) {
           setDiscoverProfiles(filterRes?.data || []);
           setFiltersApplied(true);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           
           Toast.show({
             type: "success",
@@ -190,6 +193,7 @@ export default function Discover() {
           });
         }
       } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Toast.show({
           type: "error",
           text1: saveRes?.msg || "Failed to save filters",
@@ -200,6 +204,7 @@ export default function Discover() {
       }
     } catch (error) {
       console.error("Error saving filters:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({
         type: "error",
         text1: "Failed to save filters",
@@ -314,6 +319,7 @@ export default function Discover() {
             </Text>
             <TouchableOpacity
               onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setFiltersApplied(false);
                 fetchDiscoverProfiles();
               }}

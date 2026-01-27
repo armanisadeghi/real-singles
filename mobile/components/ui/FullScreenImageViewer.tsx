@@ -35,7 +35,7 @@ import {
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -254,7 +254,7 @@ export default function FullScreenImageViewer({
             style={styles.closeButton}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name="close" size={28} color="white" />
+            <MaterialIcons name="close" size={28} color="white" />
           </Pressable>
           
           {/* Photo counter */}

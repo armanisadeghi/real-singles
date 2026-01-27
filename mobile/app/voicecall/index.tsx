@@ -1,7 +1,8 @@
 // Import React Hooks
 import { getAgoraCallRefreshToken } from "@/lib/api";
 import { getCurrentUserId } from "@/utils/token";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 // Import user interface elements
@@ -265,6 +266,7 @@ const VoiceCall = () => {
 
   const leave = () => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       agoraEngineRef.current?.leaveChannel();
       setRemoteUid(0);
       setIsJoined(false);
@@ -286,6 +288,7 @@ const VoiceCall = () => {
 
   const toggleMute = () => {
     try {
+      Haptics.selectionAsync();
       if (isMuted) {
         agoraEngineRef.current?.enableLocalAudio(true);
       } else {
@@ -312,6 +315,7 @@ const VoiceCall = () => {
 
   const toggleSpeaker = () => {
     try {
+      Haptics.selectionAsync();
       agoraEngineRef.current?.setEnableSpeakerphone(!isSpeakerEnabled);
       setIsSpeakerEnabled(!isSpeakerEnabled);
     } catch (e) {
@@ -382,7 +386,7 @@ const VoiceCall = () => {
     <SafeAreaView style={styles.main}>
       <StatusBar barStyle="light-content" backgroundColor="#181C23" />
       <View style={styles.ongoingCallContainer}>
-        <Ionicons name="call" size={48} color="#E38F28" style={{ marginBottom: 24 }} />
+        <MaterialIcons name="call" size={48} color="#E38F28" style={{ marginBottom: 24 }} />
         <Text style={styles.ongoingCallTitle}>Voice Call</Text>
         <Text style={styles.ongoingCallStatus}>
           {isJoined && remoteUid !== 0
@@ -399,7 +403,7 @@ const VoiceCall = () => {
             style={styles.controlButton}
             onPress={toggleMute}
           >
-            <Ionicons
+            <MaterialIcons
               name={isMuted ? "mic-off" : "mic"}
               size={28}
               color="#ffffff"
@@ -409,14 +413,14 @@ const VoiceCall = () => {
             style={styles.endCallButton}
             onPress={leave}
           >
-            <Ionicons name="call" size={36} color="#ffffff" />
+            <MaterialIcons name="call" size={36} color="#ffffff" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.controlButton}
             onPress={toggleSpeaker}
           >
-            <Ionicons
-              name={isSpeakerEnabled ? "volume-high" : "volume-mute"}
+            <MaterialIcons
+              name={isSpeakerEnabled ? "volume-up" : "volume-off"}
               size={28}
               color="#ffffff"
             />

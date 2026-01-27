@@ -8,7 +8,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import {
   BORDER_RADIUS,
   SPACING,
@@ -121,10 +121,10 @@ export default function ProfileSectionRenderer({
   const lifestyleItems: Array<{ icon: string; label: string; value: string }> = [];
   
   if (height) {
-    lifestyleItems.push({ icon: "resize-outline", label: "Height", value: height });
+    lifestyleItems.push({ icon: "straighten", label: "Height", value: height });
   }
   if (shouldDisplay(profile?.BodyType)) {
-    lifestyleItems.push({ icon: "body-outline", label: "Body Type", value: formatOptionValue(profile.BodyType) || "" });
+    lifestyleItems.push({ icon: "accessibility-new", label: "Body Type", value: formatOptionValue(profile.BodyType) || "" });
   }
   if (shouldDisplay(profile?.Gender)) {
     lifestyleItems.push({ icon: "person-outline", label: "Gender", value: capitalize(profile.Gender || "") });
@@ -137,20 +137,20 @@ export default function ProfileSectionRenderer({
   const backgroundItems: Array<{ icon: string; label: string; value: string }> = [];
   
   if (shouldDisplay(profile?.Education)) {
-    backgroundItems.push({ icon: "school-outline", label: "Education", value: formatOptionValue(profile.Education) || "" });
+    backgroundItems.push({ icon: "school", label: "Education", value: formatOptionValue(profile.Education) || "" });
   }
   if (shouldDisplay(profile?.JobTitle)) {
-    backgroundItems.push({ icon: "briefcase-outline", label: "Work", value: profile.JobTitle || "" });
+    backgroundItems.push({ icon: "work", label: "Work", value: profile.JobTitle || "" });
   }
   if (shouldDisplay(profile?.Religion)) {
-    backgroundItems.push({ icon: "heart-outline", label: "Religion", value: capitalize(profile.Religion || "") });
+    backgroundItems.push({ icon: "favorite-border", label: "Religion", value: capitalize(profile.Religion || "") });
   }
   if (shouldDisplay(profile?.Ethnicity)) {
     const ethnicity = Array.isArray(profile.Ethnicity) 
       ? profile.Ethnicity.map((e: string) => capitalize(e)).join(", ")
       : capitalize(profile.Ethnicity || "");
     if (ethnicity) {
-      backgroundItems.push({ icon: "globe-outline", label: "Ethnicity", value: ethnicity });
+      backgroundItems.push({ icon: "public", label: "Ethnicity", value: ethnicity });
     }
   }
   
@@ -158,26 +158,26 @@ export default function ProfileSectionRenderer({
   const familyItems: Array<{ icon: string; label: string; value: string }> = [];
   
   if (shouldDisplay(profile?.HaveChild) && profile.HaveChild !== "No") {
-    familyItems.push({ icon: "people-outline", label: "Has Kids", value: formatOptionValue(profile.HaveChild) || "" });
+    familyItems.push({ icon: "people", label: "Has Kids", value: formatOptionValue(profile.HaveChild) || "" });
   }
   if (shouldDisplay(profile?.WantChild)) {
-    familyItems.push({ icon: "heart-circle-outline", label: "Wants Kids", value: formatOptionValue(profile.WantChild) || "" });
+    familyItems.push({ icon: "favorite", label: "Wants Kids", value: formatOptionValue(profile.WantChild) || "" });
   }
   if (shouldDisplay(profile?.Pets)) {
-    familyItems.push({ icon: "paw-outline", label: "Pets", value: profile.Pets || "" });
+    familyItems.push({ icon: "pets", label: "Pets", value: profile.Pets || "" });
   }
   
   // Build vices items
   const vicesItems: Array<{ icon: string; label: string; value: string }> = [];
   
   if (shouldDisplay(profile?.Smoking)) {
-    vicesItems.push({ icon: "flame-outline", label: "Smoking", value: formatOptionValue(profile.Smoking) || "" });
+    vicesItems.push({ icon: "whatshot", label: "Smoking", value: formatOptionValue(profile.Smoking) || "" });
   }
   if (shouldDisplay(profile?.Drinks)) {
-    vicesItems.push({ icon: "wine-outline", label: "Drinking", value: formatOptionValue(profile.Drinks) || "" });
+    vicesItems.push({ icon: "local-bar", label: "Drinking", value: formatOptionValue(profile.Drinks) || "" });
   }
   if (shouldDisplay(profile?.Marijuana)) {
-    vicesItems.push({ icon: "leaf-outline", label: "Marijuana", value: formatOptionValue(profile.Marijuana) || "" });
+    vicesItems.push({ icon: "eco", label: "Marijuana", value: formatOptionValue(profile.Marijuana) || "" });
   }
   
   return (
@@ -191,14 +191,14 @@ export default function ProfileSectionRenderer({
           </Text>
           {profile?.is_verified && (
             <View style={styles.verifiedBadge}>
-              <Ionicons name="checkmark-circle" size={20} color="#3B82F6" />
+              <MaterialIcons name="check-circle" size={20} color="#3B82F6" />
             </View>
           )}
         </View>
         
         {location && (
           <View style={styles.locationRow}>
-            <Ionicons name="location-outline" size={16} color="#6B7280" />
+            <MaterialIcons name="location-on" size={16} color="#6B7280" />
             <Text style={styles.locationText}>{location}</Text>
             {profile?.distance_in_km && (
               <Text style={styles.distanceText}>
@@ -210,7 +210,7 @@ export default function ProfileSectionRenderer({
         
         {shouldDisplay(profile?.JobTitle) && (
           <View style={styles.jobRow}>
-            <Ionicons name="briefcase-outline" size={16} color="#6B7280" />
+            <MaterialIcons name="work" size={16} color="#6B7280" />
             <Text style={styles.jobText}>{profile.JobTitle}</Text>
           </View>
         )}
@@ -260,7 +260,7 @@ export default function ProfileSectionRenderer({
           <View style={styles.detailsGrid}>
             {lifestyleItems.map((item, index) => (
               <View key={index} style={styles.detailItem}>
-                <Ionicons name={item.icon as any} size={18} color="#B06D1E" />
+                <MaterialIcons name={item.icon as any} size={18} color="#B06D1E" />
                 <View style={styles.detailTextContainer}>
                   <Text style={styles.detailLabel}>{item.label}</Text>
                   <Text style={styles.detailValue}>{item.value}</Text>
@@ -278,7 +278,7 @@ export default function ProfileSectionRenderer({
           <View style={styles.detailsGrid}>
             {backgroundItems.map((item, index) => (
               <View key={index} style={styles.detailItem}>
-                <Ionicons name={item.icon as any} size={18} color="#B06D1E" />
+                <MaterialIcons name={item.icon as any} size={18} color="#B06D1E" />
                 <View style={styles.detailTextContainer}>
                   <Text style={styles.detailLabel}>{item.label}</Text>
                   <Text style={styles.detailValue}>{item.value}</Text>
@@ -296,7 +296,7 @@ export default function ProfileSectionRenderer({
           <View style={styles.detailsGrid}>
             {familyItems.map((item, index) => (
               <View key={index} style={styles.detailItem}>
-                <Ionicons name={item.icon as any} size={18} color="#B06D1E" />
+                <MaterialIcons name={item.icon as any} size={18} color="#B06D1E" />
                 <View style={styles.detailTextContainer}>
                   <Text style={styles.detailLabel}>{item.label}</Text>
                   <Text style={styles.detailValue}>{item.value}</Text>
@@ -314,7 +314,7 @@ export default function ProfileSectionRenderer({
           <View style={styles.detailsGrid}>
             {vicesItems.map((item, index) => (
               <View key={index} style={styles.detailItem}>
-                <Ionicons name={item.icon as any} size={18} color="#B06D1E" />
+                <MaterialIcons name={item.icon as any} size={18} color="#B06D1E" />
                 <View style={styles.detailTextContainer}>
                   <Text style={styles.detailLabel}>{item.label}</Text>
                   <Text style={styles.detailValue}>{item.value}</Text>

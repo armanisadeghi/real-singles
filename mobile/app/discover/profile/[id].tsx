@@ -20,7 +20,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Haptics from "expo-haptics";
 import Animated, {
   FadeIn,
@@ -292,7 +292,7 @@ export default function DiscoveryProfileView() {
               style={styles.headerButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Ionicons name="chevron-back" size={24} color="white" />
+              <MaterialIcons name="chevron-left" size={24} color="white" />
             </Pressable>
             
             {/* Report button */}
@@ -301,7 +301,7 @@ export default function DiscoveryProfileView() {
               style={styles.headerButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Ionicons name="flag-outline" size={22} color="white" />
+              <MaterialIcons name="flag" size={22} color="white" />
             </Pressable>
           </View>
         </View>
@@ -328,7 +328,7 @@ export default function DiscoveryProfileView() {
             {actionLoading === "pass" ? (
               <ActivityIndicator size="small" color="#EF4444" />
             ) : (
-              <Ionicons name="close" size={24} color="#EF4444" />
+              <MaterialIcons name="close" size={24} color="#EF4444" />
             )}
           </Pressable>
         </Animated.View>
@@ -343,7 +343,7 @@ export default function DiscoveryProfileView() {
             {actionLoading === "super_like" ? (
               <ActivityIndicator size="small" color="#3B82F6" />
             ) : (
-              <Ionicons name="star" size={18} color="#3B82F6" />
+              <MaterialIcons name="star" size={18} color="#3B82F6" />
             )}
           </Pressable>
         </Animated.View>
@@ -358,7 +358,7 @@ export default function DiscoveryProfileView() {
             {actionLoading === "like" ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Ionicons name="heart" size={24} color="white" />
+              <MaterialIcons name="favorite" size={24} color="white" />
             )}
           </Pressable>
         </Animated.View>
@@ -391,7 +391,7 @@ export default function DiscoveryProfileView() {
                 style={styles.reportOption}
               >
                 <Text style={styles.reportOptionText}>{reason}</Text>
-                <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                <MaterialIcons name="chevron-right" size={20} color="#9CA3AF" />
               </Pressable>
             ))}
             

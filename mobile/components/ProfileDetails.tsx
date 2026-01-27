@@ -3,7 +3,7 @@ import { saveLink, toggleFavorite } from "@/lib/api";
 import { getProfileLink, APP_NAME } from "@/lib/config";
 import { User } from "@/types";
 import { removeToken } from "@/utils/token";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -253,8 +253,8 @@ console.log("profile?.Height",profile?.Height);
             }}
             className={`border border-[#C07618] rounded-lg overflow-hidden flex justify-center items-center w-8 h-8 bg-primary`}
           >
-            <Ionicons
-              name="image-outline"
+            <MaterialIcons
+              name="image"
               size={18}
               color="white"
             />

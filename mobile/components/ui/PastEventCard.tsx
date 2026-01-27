@@ -1,6 +1,6 @@
 import { icons } from "@/constants/icons";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
@@ -121,7 +121,7 @@ const PastEventCard = (
             </Text>
 
             <View className="flex-row items-center mt-1">
-              <Ionicons name="location-sharp" size={14} color="#B06D1E" />
+              <MaterialIcons name="location-on" size={14} color="#B06D1E" />
               <Text
                 className="text-[12px] text-gray-600 ml-1"
                 numberOfLines={1}

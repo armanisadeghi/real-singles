@@ -4,8 +4,9 @@ import { icons } from "@/constants/icons";
 import { getProfile } from "@/lib/api";
 import { User } from "@/types";
 import { IMAGE_URL, MEDIA_BASE_URL } from "@/utils/token";
-import { AntDesign } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import * as Haptics from 'expo-haptics';
 import { useFocusEffect, useRouter } from "expo-router";
 import React, {
   useCallback,
@@ -132,30 +133,36 @@ export default function Profile() {
           className="flex-row justify-between items-start px-3"
           style={{ marginTop: insets.top + 8 }}
         >
-           <TouchableOpacity onPress={() => setMenuVisible(true)}
+           <TouchableOpacity 
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setMenuVisible(true);
+            }}
             className="border border-white rounded-lg p-2 bg-black/45"
           >
             <Image source={icons.menu} className="size-[15px]" />
           </TouchableOpacity>
           <View className="flex-row gap-2 items-center">
             <TouchableOpacity
-              onPress={() =>
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push({
                   pathname: "/settings",
                   params: { profile: JSON.stringify(profile) },
-                })
-              }
+                });
+              }}
               className="border border-border rounded-lg p-1"
             >
-              <AntDesign name="setting" size={20} color="white" />
+              <MaterialIcons name="settings" size={20} color="white" />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() =>
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push({
                   pathname: "/editProfile",
                   params: { profile: JSON.stringify(profile) },
-                })
-              }
+                });
+              }}
               className="border border-border rounded-lg p-2"
             >
               <Image source={icons.edit} />

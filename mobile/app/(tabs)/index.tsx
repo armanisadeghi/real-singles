@@ -11,6 +11,7 @@ import { checkRedeemPoints, fetchUserProfile, getHomeScreenData } from "@/lib/ap
 import { EventCardProps, User } from "@/types";
 import { useAuth } from "@/utils/authContext";
 import { getCurrentUserId, VIDEO_URL } from "@/utils/token";
+import * as Haptics from 'expo-haptics';
 import { useFocusEffect, useRouter } from "expo-router";
 import React, {
   useCallback,
@@ -112,6 +113,7 @@ export default function Home() {
     setRefreshing(true);
     try {
       await Promise.all([fetchHomeData(), getRedeemPoints()]);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({
         type: "success",
         text1: "Content refreshed",
@@ -121,6 +123,7 @@ export default function Home() {
       });
     } catch (error) {
       console.error("Error refreshing data:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({
         type: "error",
         text1: "Failed to refresh content",
@@ -241,7 +244,12 @@ export default function Home() {
             className="flex-row justify-between items-start"
             style={{ paddingHorizontal: SPACING.screenPadding, paddingTop: headerTopPadding }}
           >
-            <TouchableOpacity onPress={() => router.push("/profile")}>
+            <TouchableOpacity 
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push("/profile");
+              }}
+            >
               <Avatar
                 src={profile?.Image}
                 name={profile?.DisplayName || "User"}
@@ -252,7 +260,10 @@ export default function Home() {
             </TouchableOpacity>
             <View className="flex-row items-center" style={{ gap: SPACING.sm }}>
               <TouchableOpacity
-                onPress={() => router.push("/notification")}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push("/notification");
+                }}
                 className="rounded-full"
                 style={{ 
                   padding: SPACING.sm,
@@ -267,7 +278,10 @@ export default function Home() {
                 />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => setMenuVisible(true)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setMenuVisible(true);
+                }}
                 className="rounded-full"
                 style={{ 
                   padding: SPACING.sm,
@@ -298,7 +312,10 @@ export default function Home() {
             <PointsBadge
               points={redeemPoints}
               size="md"
-              onPress={() => router.push("/redeem")}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/redeem");
+              }}
             />
           </View>
         </ImageBackground>
@@ -312,7 +329,10 @@ export default function Home() {
         >
           <View className="flex-row" style={{ gap: SPACING.sm }}>
             <TouchableOpacity
-              onPress={() => router.push("/discover")}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/discover");
+              }}
               className="border border-primary bg-secondary rounded-full"
               style={{ 
                 paddingHorizontal: SPACING.base, 
@@ -325,12 +345,13 @@ export default function Home() {
               <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>Discover</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() =>
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push({
                   pathname: "/topMatches",
                   params: { category: "topMatches" },
-                })
-              }
+                });
+              }}
               className="border border-primary bg-secondary rounded-full"
               style={{ 
                 paddingHorizontal: SPACING.base, 
@@ -345,12 +366,13 @@ export default function Home() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() =>
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push({
                   pathname: "/topMatches",
                   params: { category: "featuredVideos" },
-                })
-              }
+                });
+              }}
               className="border border-primary bg-secondary rounded-full"
               style={{ 
                 paddingHorizontal: SPACING.base, 
@@ -365,12 +387,13 @@ export default function Home() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() =>
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push({
                   pathname: "/topMatches",
                   params: { category: "virtualDates" },
-                })
-              }
+                });
+              }}
               className="border border-primary bg-secondary rounded-full"
               style={{ 
                 paddingHorizontal: SPACING.base, 
@@ -385,7 +408,10 @@ export default function Home() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => router.push("/nearbyprofile")}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/nearbyprofile");
+              }}
               className="border border-primary bg-secondary rounded-full"
               style={{ 
                 paddingHorizontal: SPACING.base, 
@@ -400,7 +426,10 @@ export default function Home() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => router.push("/events")}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/events");
+              }}
               className="border border-primary bg-secondary rounded-full"
               style={{ 
                 paddingHorizontal: SPACING.base, 
@@ -427,12 +456,13 @@ export default function Home() {
           >
             <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>Top Matches</Text>
             <TouchableOpacity
-              onPress={() =>
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push({
                   pathname: "/topMatches",
                   params: { category: "topMatches" },
-                })
-              }
+                });
+              }}
               className="z-20"
             >
               <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
@@ -474,12 +504,13 @@ export default function Home() {
               Featured Videos
             </Text>
             <TouchableOpacity
-              onPress={() =>
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push({
                   pathname: "/topMatches",
                   params: { category: "featuredVideos" },
-                })
-              }
+                });
+              }}
               className="z-20"
             >
               <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
@@ -522,12 +553,13 @@ export default function Home() {
             </Text>
             <TouchableOpacity
               className="z-20"
-              onPress={() =>
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push({
                   pathname: "/topMatches",
                   params: { category: "virtualDates" },
-                })
-              }
+                });
+              }}
             >
               <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
                 View All
@@ -568,7 +600,10 @@ export default function Home() {
               Nearby Profile
             </Text>
             <TouchableOpacity
-              onPress={() => router.push("/nearbyprofile")}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/nearbyprofile");
+              }}
               className="z-20"
             >
               <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
@@ -608,7 +643,10 @@ export default function Home() {
           >
             <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>Events</Text>
             <TouchableOpacity
-              onPress={() => router.push("/events")}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/events");
+              }}
               className="z-20"
             >
               <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>

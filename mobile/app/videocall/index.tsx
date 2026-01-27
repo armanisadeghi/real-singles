@@ -1,7 +1,8 @@
 // Import React Hooks
 import { getAgoraCallRefreshToken } from "@/lib/api";
 import { getCurrentUserId } from "@/utils/token";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 // Import user interface elements
@@ -268,6 +269,7 @@ const VideoCall = () => {
 
   const leave = () => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       agoraEngineRef.current?.leaveChannel();
       setRemoteUid(0);
       setIsJoined(false);
@@ -289,6 +291,7 @@ const VideoCall = () => {
 
   const toggleMute = () => {
     try {
+      Haptics.selectionAsync();
       if (isMuted) {
         agoraEngineRef.current?.enableLocalAudio(true);
       } else {
@@ -315,6 +318,7 @@ const VideoCall = () => {
 
   const toggleSpeaker = () => {
     try {
+      Haptics.selectionAsync();
       agoraEngineRef.current?.setEnableSpeakerphone(!isSpeakerEnabled);
       setIsSpeakerEnabled(!isSpeakerEnabled);
     } catch (e) {
@@ -402,7 +406,7 @@ const VideoCall = () => {
               />
             ) : (
               <View style={styles.videoDisabledContainer}>
-                <Ionicons
+                <MaterialIcons
                   name="videocam-off"
                   size={remoteUid !== 0 ? 24 : 48}
                   color="#ffffff"
@@ -424,7 +428,7 @@ const VideoCall = () => {
               ]}
               onPress={toggleMute}
             >
-              <Ionicons
+              <MaterialIcons
                 name={isMuted ? "mic-off" : "mic"}
                 size={24}
                 color="#ffffff"
@@ -449,7 +453,7 @@ const VideoCall = () => {
               style={styles.endCallButton}
               onPress={leave}
             >
-              <Ionicons name="call" size={32} color="#ffffff" />
+              <MaterialIcons name="call" size={32} color="#ffffff" />
             </TouchableOpacity>
 
             {/* <TouchableOpacity
@@ -466,8 +470,8 @@ const VideoCall = () => {
               ]}
               onPress={toggleSpeaker}
             >
-              <Ionicons
-                name={isSpeakerEnabled ? "volume-high" : "volume-mute"}
+              <MaterialIcons
+                name={isSpeakerEnabled ? "volume-up" : "volume-off"}
                 size={24}
                 color="#ffffff"
               />

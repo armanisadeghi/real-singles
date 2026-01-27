@@ -20,7 +20,7 @@ import {
 import { fetchOtherProfile, likeUser, passUser, superLikeUser } from "@/lib/api";
 import { User } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -265,7 +265,7 @@ export default function ProfileFocusView() {
           }}
           activeOpacity={0.7}
         >
-          <Ionicons name="close" size={24} color="white" />
+          <MaterialIcons name="close" size={24} color="white" />
         </TouchableOpacity>
 
         {/* Profile info overlay */}
@@ -277,7 +277,7 @@ export default function ProfileFocusView() {
             </Text>
             {profile.livePicture && (
               <View style={styles.verifiedBadge}>
-                <Ionicons name="checkmark-circle" size={20} color="#3B82F6" />
+                <MaterialIcons name="check-circle" size={20} color="#3B82F6" />
               </View>
             )}
           </View>
@@ -380,7 +380,7 @@ export default function ProfileFocusView() {
             {actionLoading === "pass" ? (
               <ActivityIndicator size="small" color="#EF4444" />
             ) : (
-              <Ionicons name="close" size={24} color="#EF4444" />
+              <MaterialIcons name="close" size={24} color="#EF4444" />
             )}
           </TouchableOpacity>
 
@@ -394,7 +394,7 @@ export default function ProfileFocusView() {
             {actionLoading === "super_like" ? (
               <ActivityIndicator size="small" color="#3B82F6" />
             ) : (
-              <Ionicons name="star" size={18} color="#3B82F6" />
+              <MaterialIcons name="star" size={18} color="#3B82F6" />
             )}
           </TouchableOpacity>
 
@@ -408,7 +408,7 @@ export default function ProfileFocusView() {
             {actionLoading === "like" ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Ionicons name="heart" size={24} color="white" />
+              <MaterialIcons name="favorite" size={24} color="white" />
             )}
           </TouchableOpacity>
         </View>

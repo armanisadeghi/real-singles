@@ -1,7 +1,7 @@
 import NotificationBell from "@/components/NotificationBell";
 import { icons } from "@/constants/icons";
 import { VIDEO_URL } from "@/utils/token";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Slider from "@react-native-community/slider";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -174,22 +174,22 @@ export default function VideoPage() {
             </TouchableOpacity>
 
             <TouchableOpacity onPress={skipBackward}>
-              <Ionicons name="play-back" size={28} color="white" />
+              <MaterialIcons name="replay-10" size={28} color="white" />
             </TouchableOpacity>
 
             <TouchableOpacity
               className="bg-white p-3 rounded-full"
               onPress={togglePlay}
             >
-              <Ionicons
-                name={isPlaying ? "pause" : "play"}
+              <MaterialIcons
+                name={isPlaying ? "pause" : "play-arrow"}
                 size={20}
                 color="black"
               />
             </TouchableOpacity>
 
             <TouchableOpacity onPress={skipForward}>
-              <Ionicons name="play-forward" size={28} color="white" />
+              <MaterialIcons name="forward-10" size={28} color="white" />
             </TouchableOpacity>
 
             <View>

@@ -1,5 +1,5 @@
 import { useCall } from '@/context/CallContext';
-import { Ionicons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useAudioPlayer, AudioPlayer } from "expo-audio";
 import React, { useEffect, useRef } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -105,7 +105,7 @@ const IncomingCall = () => {
                 <Animated.View
                   style={[styles.sliderButton, animatedSliderStyle]}
                 >
-                  <Ionicons name="call" size={32} color="#4CAF50" />
+                  <MaterialIcons name="call" size={32} color="#4CAF50" />
                 </Animated.View>
               </GestureDetector>
               <Text style={styles.sliderText}>Slide to Answer</Text>
@@ -116,7 +116,7 @@ const IncomingCall = () => {
               style={styles.rejectButton}
               onPress={handleReject}
             >
-              <Ionicons name="close" size={32} color="#ffffff" />
+              <MaterialIcons name="close" size={32} color="#ffffff" />
             </TouchableOpacity>
           </View>
         </View>

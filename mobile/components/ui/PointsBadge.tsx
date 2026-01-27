@@ -10,7 +10,7 @@ import React from "react";
 import { View, Text, StyleSheet, ViewStyle, Pressable } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { moderateScale } from "react-native-size-matters";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 type BadgeSize = "sm" | "md" | "lg";
 
@@ -90,8 +90,8 @@ export function PointsBadge({
         style,
       ]}
     >
-      <Ionicons
-        name="heart"
+      <MaterialIcons
+        name="favorite"
         size={config.iconSize}
         color="rgba(255, 255, 255, 0.95)"
       />

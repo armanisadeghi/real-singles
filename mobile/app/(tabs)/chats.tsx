@@ -6,7 +6,8 @@ import { fetchUserProfile, getAgoraChatToken, getGroupList } from "@/lib/api";
 import { chatClient, deleteAllMyGroups, getAllConversations, getAllJoinedGroupsDetailed, getUserHistoryMessages, initChat, loginToChat } from "@/services/agoraChatServices";
 import { User } from "@/types";
 import { getCurrentUserId, IMAGE_URL, VIDEO_URL } from "@/utils/token";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import * as Haptics from 'expo-haptics';
 import { Link, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -127,6 +128,7 @@ const renderMessageItem = ({ item }: { item: MessageItem }) => (
     asChild
   >
     <TouchableOpacity
+      onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
       className="flex-row items-center border border-border rounded-input"
       style={{
         marginHorizontal: SPACING.screenPadding,
@@ -256,6 +258,7 @@ const renderGroupItem = ({ item }: { item: GroupItem }) => (
     }
   }} asChild>
     <TouchableOpacity
+      onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
       className="flex-row items-center border border-border rounded-input"
       style={{
         marginHorizontal: SPACING.screenPadding,
@@ -323,7 +326,10 @@ const renderUserItem = ({
 }) => (
   <TouchableOpacity
     activeOpacity={0.7}
-    onPress={() => handleSelectFriend(item?.id)}
+    onPress={() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      handleSelectFriend(item?.id);
+    }}
     className={`flex-row items-center mx-6 py-3 px-3 border mb-4 rounded-[10px] ${selectedUsers.includes(item.id)
       ? "bg-[#F3961D1F] border-primary"
       : "bg-light-100 border-border"
@@ -338,7 +344,7 @@ const renderUserItem = ({
       <View className="flex-row justify-between items-center">
         <Text className="font-medium text-base">{item.name}</Text>
         {selectedUsers.includes(item.id) && (
-          <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+          <MaterialIcons name="check-circle" size={24} color="#4CAF50" />
         )}
         {/* <Text className="text-gray-500 text-xs">{item.time}</Text> */}
       </View>
@@ -589,6 +595,7 @@ export default function Chats() {
   }
 
   const handleCreate = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (activeTab === "messages") {
       console.log("Create new message");
     } else {
@@ -728,7 +735,7 @@ export default function Chats() {
                 borderRadius: BORDER_RADIUS.full
               }}
             >
-              <Ionicons name="add-sharp" size={ICON_SIZES.lg} color="white" />
+              <MaterialIcons name="add" size={ICON_SIZES.lg} color="white" />
             </LinearBg>
           </View>
         </TouchableOpacity>
@@ -749,8 +756,14 @@ export default function Chats() {
             }}
           >
             {selectMode ? (
-              <TouchableOpacity onPress={router.back} style={{ width: 40 }}>
-                <Ionicons name="arrow-back" size={24} color="#E91E63" />
+              <TouchableOpacity 
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.back();
+                }} 
+                style={{ width: 40 }}
+              >
+                <MaterialIcons name="arrow-back" size={24} color="#E91E63" />
               </TouchableOpacity>
             ) : (
               <View style={{ width: 40 }} />
@@ -760,7 +773,13 @@ export default function Chats() {
             </Text>
             {selectMode ? (
               selectedUsers.length > 0 ? (
-                <TouchableOpacity onPress={handleNavigateShippingInfo} style={{ width: 40 }}>
+                <TouchableOpacity 
+                  onPress={() => {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    handleNavigateShippingInfo();
+                  }} 
+                  style={{ width: 40 }}
+                >
                   <Text className="text-primary font-medium" style={TYPOGRAPHY.body}>Send</Text>
                 </TouchableOpacity>
               ) : (
@@ -789,7 +808,10 @@ export default function Chats() {
                 : "bg-light-100"
                 }`}
               style={{ paddingVertical: SPACING.sm }}
-              onPress={() => setActiveTab("messages")}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setActiveTab("messages");
+              }}
             >
               <Text
                 className={activeTab === "messages" ? "text-primary" : "text-black"}
@@ -806,7 +828,10 @@ export default function Chats() {
                 : "bg-light-100"
                 }`}
               style={{ paddingVertical: SPACING.sm }}
-              onPress={() => setActiveTab("groups")}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setActiveTab("groups");
+              }}
             >
               <Text
                 className={activeTab === "groups" ? "text-primary" : "text-black"}

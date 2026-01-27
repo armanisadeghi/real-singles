@@ -4,7 +4,7 @@ import { getProfile } from "@/lib/api";
 import { User } from "@/types";
 import { authenticateForAccountDeletion, shouldUseBiometrics } from "@/utils/biometrics";
 import { IMAGE_URL, MEDIA_BASE_URL, removeToken } from "@/utils/token";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
@@ -327,7 +327,7 @@ export default function Settings() {
                   })
                 }
               >
-                <Ionicons name="person-outline" size={20} color="#333" />
+                <MaterialIcons name="person-outline" size={20} color="#333" />
                 <Text className="ml-3 flex-1 text-dark">Edit Profile</Text>
                 <MaterialIcons
                   name="keyboard-arrow-right"
@@ -342,8 +342,8 @@ export default function Settings() {
                 }}
                 className="flex-row items-center bg-light-100 mb-4 px-4 py-4 border border-border rounded-full"
               >
-                <Ionicons
-                  name="information-circle-outline"
+                <MaterialIcons
+                  name="info-outline"
                   size={22}
                   color="#333"
                 />

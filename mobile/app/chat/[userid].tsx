@@ -7,7 +7,7 @@ import { useCall } from "@/context/CallContext";
 import { getAgoraCallToken, getAgoraChatToken, blockUser, unblockUser, reportUser } from "@/lib/api";
 import { getUserHistoryMessages, initChat, isChatInitialized, isChatLoggedIn, loginToChat, sendMessage as sendAgoraMessage, setupMessageListener } from "@/services/agoraChatServices";
 import { getCurrentUserId, IMAGE_URL, VIDEO_URL } from "@/utils/token";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -404,7 +404,7 @@ export default function ChatDetail() {
                 }}
                 style={styles.closeButton}
               >
-                <Ionicons name="close" size={22} color="#000" />
+                <MaterialIcons name="close" size={22} color="#000" />
               </TouchableOpacity>
 
               <Text style={styles.modalTitle}>
@@ -534,7 +534,7 @@ export default function ChatDetail() {
                     end={{ x: 1, y: 1 }}
                     style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
                   >
-                    <Ionicons name="call" size={16} color="#ffffff" />
+                    <MaterialIcons name="call" size={16} color="#ffffff" />
                   </LinearGradient>
                 </TouchableOpacity>
 
@@ -548,7 +548,7 @@ export default function ChatDetail() {
                     end={{ x: 1, y: 1 }}
                     style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
                   >
-                    <Ionicons name="videocam" size={16} color="#ffffff" />
+                    <MaterialIcons name="videocam" size={16} color="#ffffff" />
                   </LinearGradient>
                 </TouchableOpacity>
 
@@ -562,7 +562,7 @@ export default function ChatDetail() {
                     end={{ x: 1, y: 1 }}
                     style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
                   >
-                    <Ionicons name="ellipsis-vertical" size={16} color="#ffffff" />
+                    <MaterialIcons name="more-vert" size={16} color="#ffffff" />
                   </LinearGradient>
                 </TouchableOpacity>
               </View>

@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Haptics from "expo-haptics";
 import { usePathname, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef } from "react";
@@ -118,7 +118,7 @@ const SideMenu = ({
     },
     {
       title: "Notifications",
-      icon: "notifications-outline" as const,
+      icon: "notifications-none" as const,
       path: "/notification",
       onPress: () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -185,7 +185,7 @@ const SideMenu = ({
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#fff" />
+            <MaterialIcons name="close" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
 
@@ -199,7 +199,7 @@ const SideMenu = ({
               ]}
               onPress={item.onPress}
             >
-              <Ionicons name={item.icon} size={24} color="#fff" />
+              <MaterialIcons name={item.icon} size={24} color="#fff" />
               <Text style={styles.menuText}>{item.title}</Text>
             </TouchableOpacity>
           ))}

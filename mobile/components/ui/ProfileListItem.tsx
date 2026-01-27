@@ -11,6 +11,7 @@ import { icons } from "@/constants/icons";
 import { User } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { useRouter } from "expo-router";
+import * as Haptics from 'expo-haptics';
 import React, { useCallback, useMemo } from "react";
 import {
   Image,
@@ -191,6 +192,7 @@ export default function ProfileListItem({
 
   // Handle navigation press
   const handlePress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (onPress) {
       onPress();
     } else {

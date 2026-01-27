@@ -1,5 +1,5 @@
 import { icons } from "@/constants/icons";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -128,7 +128,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           onPress={handleSend}
         >
           <LinearBg className="w-full h-full flex justify-center items-center" style={{padding: 10}}>
-            <Ionicons 
+            <MaterialIcons 
               name="send" 
               size={20} 
               color="#FFFFFF" 
