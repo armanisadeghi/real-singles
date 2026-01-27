@@ -1,11 +1,12 @@
+import { HomeHeaderMenu } from "@/components/home";
 import SideMenu from "@/components/SidebarMenu";
 import { Avatar } from "@/components/ui/Avatar";
 import EventCard from "@/components/ui/EventCard";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { PointsBadge } from "@/components/ui/PointsBadge";
 import ProfileCard from "@/components/ui/ProfileCard";
 import VideoCard from "@/components/ui/VideoCard";
 import VirtualDateCard from "@/components/ui/VirtualDateCard";
-import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
 import { checkRedeemPoints, fetchUserProfile, getHomeScreenData } from "@/lib/api";
 import { EventCardProps, User } from "@/types";
@@ -22,6 +23,7 @@ import {
   ActivityIndicator,
   Image,
   ImageBackground,
+  Platform,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -229,12 +231,15 @@ export default function Home() {
         }
       >
         <Toast />
-        <SideMenu
-          visible={menuVisible}
-          onClose={() => setMenuVisible(false)}
-          userAvatar={profile?.Image}
-          userName={profile?.DisplayName || "User"}
-        />
+        {/* Android only: Side drawer menu */}
+        {Platform.OS === 'android' && (
+          <SideMenu
+            visible={menuVisible}
+            onClose={() => setMenuVisible(false)}
+            userAvatar={profile?.Image}
+            userName={profile?.DisplayName || "User"}
+          />
+        )}
         <ImageBackground
           source={images.hero}
           resizeMode="cover"
@@ -270,31 +275,17 @@ export default function Home() {
                   backgroundColor: 'rgba(255, 255, 255, 0.15)',
                 }}
               >
-                <Image
-                  source={icons.bell}
-                  style={{ width: ICON_SIZES.md, height: ICON_SIZES.md }}
-                  resizeMode="contain"
-                  tintColor="#ffffff"
+                <PlatformIcon
+                  name="notifications"
+                  size={ICON_SIZES.md}
+                  color="#ffffff"
                 />
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setMenuVisible(true);
-                }}
-                className="rounded-full"
-                style={{ 
-                  padding: SPACING.sm,
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                }}
-              >
-                <Image
-                  source={icons.menu}
-                  style={{ width: ICON_SIZES.md, height: ICON_SIZES.md }}
-                  resizeMode="contain"
-                  tintColor="#ffffff"
-                />
-              </TouchableOpacity>
+              <HomeHeaderMenu
+                onShowMenu={() => setMenuVisible(true)}
+                iconColor="#ffffff"
+                backgroundColor="rgba(255, 255, 255, 0.15)"
+              />
             </View>
           </View>
           <View
