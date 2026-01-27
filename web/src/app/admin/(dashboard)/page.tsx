@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Users, CalendarDays, AlertTriangle, Gift, UserCheck, FileWarning, Package } from "lucide-react";
+import { Users, CalendarDays, AlertTriangle, Gift, UserCheck, FileWarning, Package, ShieldCheck } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 async function getStats() {
@@ -67,7 +67,7 @@ export default async function AdminDashboardPage() {
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <a
             href="/admin/users"
             className="p-4 border rounded-lg hover:bg-gray-50 text-center transition-colors"
@@ -103,6 +103,15 @@ export default async function AdminDashboardPage() {
               <Gift className="w-6 h-6 text-amber-600" />
             </div>
             <span className="text-sm text-gray-600">Manage Products</span>
+          </a>
+          <a
+            href="/admin/data-integrity"
+            className="p-4 border rounded-lg hover:bg-gray-50 text-center transition-colors"
+          >
+            <div className="flex justify-center mb-2">
+              <ShieldCheck className="w-6 h-6 text-green-600" />
+            </div>
+            <span className="text-sm text-gray-600">Data Integrity</span>
           </a>
         </div>
       </div>

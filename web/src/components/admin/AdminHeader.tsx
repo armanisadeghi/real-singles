@@ -21,6 +21,7 @@ const navItems = [
   { href: "/admin/events", label: "Events" },
   { href: "/admin/reports", label: "Reports" },
   { href: "/admin/products", label: "Products" },
+  { href: "/admin/data-integrity", label: "Data Integrity" },
   { href: "/admin/settings", label: "Settings" },
 ];
 
