@@ -308,7 +308,7 @@ export async function PUT(request: Request) {
         { 
           success: false, 
           msg: validation.error,
-          validationErrors: validation.details.errors.map(e => ({
+          validationErrors: validation.details.issues.map(e => ({
             field: e.path.join("."),
             message: e.message,
           })),

@@ -202,7 +202,7 @@ export function validateProfileUpdate(data: unknown):
   }
   
   // Format error message with field names
-  const errorMessages = result.error.errors.map((e) => {
+  const errorMessages = result.error.issues.map((e) => {
     const path = e.path.join(".");
     return `${path}: ${e.message}`;
   });
