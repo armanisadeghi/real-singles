@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ProfileListItem } from "@/components/discovery/ProfileListItem";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 async function getFavorites() {
   const supabase = await createClient();
@@ -17,7 +18,22 @@ async function getFavorites() {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  return favorites || [];
+  // Resolve storage URLs for profile images
+  const favoritesWithUrls = await Promise.all(
+    (favorites || []).map(async (fav) => {
+      const profile = fav.profiles as { profile_image_url?: string } | null;
+      if (profile?.profile_image_url) {
+        const resolvedUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
+        return {
+          ...fav,
+          profiles: { ...profile, profile_image_url: resolvedUrl },
+        };
+      }
+      return fav;
+    })
+  );
+
+  return favoritesWithUrls;
 }
 
 export default async function FavoritesPage() {

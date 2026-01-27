@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { ConversationList, Conversation } from "@/components/chat";
 import { ConversationSkeleton } from "@/components/ui/LoadingSkeleton";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 async function getConversations(): Promise<{
   conversations: Conversation[];
@@ -65,6 +66,25 @@ async function getConversations(): Promise<{
       // Get unread count (simplified - would need proper message tracking)
       const unreadCount = 0; // TODO: Implement proper unread tracking
 
+      // Resolve profile image URLs for participants
+      const participantsWithUrls = await Promise.all(
+        (participants || [])
+          .filter((p) => p.user_id !== null)
+          .map(async (p) => {
+            const profile = p.profile as { first_name?: string | null; profile_image_url?: string | null } | null;
+            const resolvedUrl = profile?.profile_image_url
+              ? await resolveStorageUrl(supabase, profile.profile_image_url)
+              : null;
+            return {
+              user_id: p.user_id!,
+              user: p.user as { display_name?: string | null } | null,
+              profile: profile
+                ? { ...profile, profile_image_url: resolvedUrl }
+                : null,
+            };
+          })
+      );
+
       return {
         id: conv.id,
         type: (conv.type || "direct") as "direct" | "group",
@@ -72,16 +92,7 @@ async function getConversations(): Promise<{
         last_message: null, // TODO: Implement message fetching
         last_message_at: conv.updated_at,
         unread_count: unreadCount,
-        participants: (participants || [])
-          .filter((p) => p.user_id !== null)
-          .map((p) => ({
-            user_id: p.user_id!,
-            user: p.user as { display_name?: string | null } | null,
-            profile: p.profile as {
-              first_name?: string | null;
-              profile_image_url?: string | null;
-            } | null,
-          })),
+        participants: participantsWithUrls,
       };
     })
   );

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ProfileListItem } from "@/components/discovery/ProfileListItem";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 async function getMatches() {
   const supabase = await createClient();
@@ -29,7 +30,22 @@ async function getMatches() {
     .in("user_id", likedUserIds)
     .in("action", ["like", "super_like"]);
 
-  return mutualMatches || [];
+  // Resolve storage URLs for profile images
+  const matchesWithUrls = await Promise.all(
+    (mutualMatches || []).map(async (match) => {
+      const profile = match.profiles as { profile_image_url?: string } | null;
+      if (profile?.profile_image_url) {
+        const resolvedUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
+        return {
+          ...match,
+          profiles: { ...profile, profile_image_url: resolvedUrl },
+        };
+      }
+      return match;
+    })
+  );
+
+  return matchesWithUrls;
 }
 
 export default async function MatchesPage() {

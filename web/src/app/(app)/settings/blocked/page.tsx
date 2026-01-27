@@ -61,7 +61,28 @@ export default function BlockedUsersPage() {
         return;
       }
 
-      setBlockedUsers((data as any) || []);
+      // Resolve storage URLs for profile images
+      const blockedWithUrls = await Promise.all(
+        ((data as any) || []).map(async (block: any) => {
+          const profileImageUrl = block.blocked_profile?.profile_image_url;
+          if (profileImageUrl && !profileImageUrl.startsWith("http")) {
+            const bucket = profileImageUrl.includes("/avatar") ? "avatars" : "gallery";
+            const { data: signedData } = await supabase.storage
+              .from(bucket)
+              .createSignedUrl(profileImageUrl, 3600);
+            return {
+              ...block,
+              blocked_profile: {
+                ...block.blocked_profile,
+                profile_image_url: signedData?.signedUrl || profileImageUrl,
+              },
+            };
+          }
+          return block;
+        })
+      );
+
+      setBlockedUsers(blockedWithUrls);
     } catch (error) {
       console.error("Error:", error);
     } finally {

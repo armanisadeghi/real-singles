@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ChatThread, Message } from "@/components/chat";
 import { MessageSkeleton } from "@/components/ui/LoadingSkeleton";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -56,22 +57,32 @@ async function getConversation(conversationId: string) {
   // For now, we'll load messages client-side via the ChatThread component
   // In production, you might want to use Agora Chat SDK or real-time subscriptions
 
+  // Resolve profile image URLs for participants
+  const participantsWithUrls = await Promise.all(
+    (participants || [])
+      .filter((p) => p.user_id !== null)
+      .map(async (p) => {
+        const profile = p.profile as { first_name?: string | null; profile_image_url?: string | null } | null;
+        const resolvedUrl = profile?.profile_image_url
+          ? await resolveStorageUrl(supabase, profile.profile_image_url)
+          : null;
+        return {
+          user_id: p.user_id!,
+          user: p.user as { display_name?: string | null } | null,
+          profile: profile
+            ? { ...profile, profile_image_url: resolvedUrl }
+            : null,
+        };
+      })
+  );
+
   return {
     conversation: {
       id: conversation.id,
       type: (conversation.type || "direct") as "direct" | "group",
       name: conversation.group_name,
     },
-    participants: (participants || [])
-      .filter((p) => p.user_id !== null)
-      .map((p) => ({
-        user_id: p.user_id!,
-        user: p.user as { display_name?: string | null } | null,
-        profile: p.profile as {
-          first_name?: string | null;
-          profile_image_url?: string | null;
-        } | null,
-      })),
+    participants: participantsWithUrls,
     currentUserId: user.id,
   };
 }
