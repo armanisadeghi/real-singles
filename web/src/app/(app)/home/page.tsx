@@ -228,7 +228,14 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center gap-2">
             {/* Scrollable Pills */}
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 flex-1">
+            <div
+              className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 flex-1"
+              style={{
+                touchAction: 'pan-x',
+                overscrollBehaviorX: 'contain',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
               <Link
                 href="/discover"
                 className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
@@ -295,7 +302,14 @@ export default function HomePage() {
           </div>
 
           {topMatches.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+              style={{
+                touchAction: 'pan-x',
+                overscrollBehaviorX: 'contain',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
               {topMatches.slice(0, 10).map((profile: any) => (
                 <div key={profile.ID || profile.id} className="flex-shrink-0 w-44">
                   <ProfileCard
@@ -324,7 +338,14 @@ export default function HomePage() {
           </div>
 
           {videos.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+              style={{
+                touchAction: 'pan-x',
+                overscrollBehaviorX: 'contain',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
               {videos.slice(0, 10).map((video: any) => (
                 <Link
                   key={video.ID}
@@ -372,7 +393,14 @@ export default function HomePage() {
           </div>
 
           {speedDating.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+              style={{
+                touchAction: 'pan-x',
+                overscrollBehaviorX: 'contain',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
               {speedDating.slice(0, 10).map((session: any) => (
                 <Link
                   key={session.ID}
@@ -422,7 +450,14 @@ export default function HomePage() {
           </div>
 
           {nearbyProfiles.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+              style={{
+                touchAction: 'pan-x',
+                overscrollBehaviorX: 'contain',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
               {nearbyProfiles.slice(0, 10).map((profile: any) => (
                 <div key={profile.ID || profile.id} className="flex-shrink-0 w-44">
                   <ProfileCard
@@ -451,7 +486,14 @@ export default function HomePage() {
           </div>
 
           {events.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+              style={{
+                touchAction: 'pan-x',
+                overscrollBehaviorX: 'contain',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
               {events.slice(0, 10).map((event: any) => (
                 <Link
                   key={event.EventID}

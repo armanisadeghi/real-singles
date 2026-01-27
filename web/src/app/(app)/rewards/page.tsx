@@ -159,7 +159,14 @@ export default function RewardsPage() {
         /* Shop View */
         <>
           {/* Category Tabs */}
-          <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+          <div
+            className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide"
+            style={{
+              touchAction: 'pan-x',
+              overscrollBehaviorX: 'contain',
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
             {categories.map((cat) => {
               const Icon = cat.icon;
               const isActive = selectedCategory === cat.value;
