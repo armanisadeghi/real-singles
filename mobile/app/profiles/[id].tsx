@@ -1,7 +1,9 @@
 import NotificationBell from "@/components/NotificationBell";
 import ProfileDetails from "@/components/ProfileDetails";
 import { PlatformIcon } from "@/components/ui";
+import ProfileImageHeader from "@/components/ui/ProfileImageHeader";
 import { BACKGROUND_COLORS } from "@/components/ui/ProfileCard";
+import { icons } from "@/constants/icons";
 import { fetchOtherProfile } from "@/lib/api";
 import { User } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
@@ -14,8 +16,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
-  Image,
-  ImageBackground,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -295,74 +295,69 @@ export default function ProfileDetail() {
     );
   }
 
+  // Get image URI for ProfileImageHeader
+  const getImageUri = () => {
+    if (!profile?.Image) return null;
+    const img = profile.Image.trim();
+    if (img.startsWith('http://') || img.startsWith('https://')) return img;
+    if (img.startsWith('uploads/')) return IMAGE_URL + img;
+    return VIDEO_URL + img;
+  };
+
+  const imageUri = getImageUri();
+
+  // Header buttons component (shared between image and initials views)
+  const headerButtons = (
+    <>
+      <View className="flex-row gap-2 items-center">
+        <TouchableOpacity
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            if (canGoBack) {
+              router.back();
+            } else {
+              router.replace("/(tabs)");
+            }
+          }}
+          className="border border-white rounded-lg p-2 px-3 bg-white"
+        >
+          <PlatformIcon name="chevron-left" size={16} color="#1D2733" />
+        </TouchableOpacity>
+        <Text className="text-base tracking-[-0.41px] font-medium text-white drop-shadow-sm">
+          Profile
+        </Text>
+      </View>
+      <NotificationBell />
+    </>
+  );
+
   return (
     <View className="flex-1 bg-background">
       <Toast />
-      {profile && profile?.Image ? (
-        <ImageBackground
-          className="h-[347px]"
-          source={{ uri: profile.Image?.startsWith('http') ? profile.Image : (profile.Image?.startsWith('uploads/') ? IMAGE_URL + profile.Image : VIDEO_URL + profile.Image) }}
-          resizeMode="cover"
-        >
-          <View 
-            className="flex-row justify-between items-start px-3"
-            style={{ marginTop: insets.top + 8 }}
-          >
-            <View className="flex-row gap-2 items-center">
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  if (canGoBack) {
-                    router.back();
-                  } else {
-                    router.replace("/(tabs)"); // fallback
-                  }
-                }}
-                className="border border-white rounded-lg p-2 px-3 bg-white"
-              >
-                <PlatformIcon name="chevron-left" size={16} color="#1D2733" />
-              </TouchableOpacity>
-              <Text className="text-base tracking-[-0.41px] font-medium text-white">
-                Profile
-              </Text>
-            </View>
-            <NotificationBell />
-          </View>
-        </ImageBackground>
+      {profile && imageUri ? (
+        <ProfileImageHeader
+          source={{ uri: imageUri }}
+          visibleHeight={300}
+          overlayOpacity={0.1}
+          topContent={headerButtons}
+        />
       ) : (
-        <View
-          style={{
-            height: 347,
-            backgroundColor: content.bgColor,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
+        <ProfileImageHeader
+          source={icons.placeholder}
+          visibleHeight={300}
+          showTopGradient={false}
+          showBottomGradient={false}
+          overlayOpacity={0}
+          topContent={headerButtons}
+          style={{ backgroundColor: content.bgColor }}
         >
-          <View style={styles.initialsCircle}>
-            <Text style={styles.initialsText}>{content.initials}</Text>
-          </View>
-
-          <View 
-            className="flex-row justify-between items-start px-3 absolute left-0 right-0"
-            style={{ top: insets.top + 8 }}
-          >
-            <View className="flex-row gap-2 items-center">
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.back();
-                }}
-                className="border border-white rounded-lg p-2 px-3 bg-white"
-              >
-                <PlatformIcon name="chevron-left" size={16} color="#1D2733" />
-              </TouchableOpacity>
-              <Text className="text-base tracking-[-0.41px] font-medium text-white">
-                Profile
-              </Text>
+          {/* Initials overlay */}
+          <View style={styles.initialsOverlay}>
+            <View style={styles.initialsCircle}>
+              <Text style={styles.initialsText}>{content.initials}</Text>
             </View>
-            <NotificationBell />
           </View>
-        </View>
+        </ProfileImageHeader>
       )}
       <BottomSheet
         ref={bottomSheetRef}
@@ -470,6 +465,11 @@ const styles = StyleSheet.create({
   goBackText: {
     color: "#666666",
     fontSize: 14,
+  },
+  initialsOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
   },
   initialsCircle: {
     width: 150,

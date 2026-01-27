@@ -6,6 +6,7 @@
  * - Dot indicators below photos
  * - Tap to open FullScreenImageViewer
  * - Smooth snap scrolling
+ * - Safe area compensation for edge-to-edge display
  */
 
 import React, { useCallback, useRef, useState, useMemo } from "react";
@@ -22,18 +23,27 @@ import {
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import FullScreenImageViewer from "./FullScreenImageViewer";
 
 interface PhotoCarouselProps {
   /** Array of image URLs */
   images: string[];
-  /** Height of the carousel */
+  /** Height of the carousel (visible portion below safe area when compensateSafeArea is true) */
   height?: number;
   /** Show gradient overlay at bottom */
   showGradient?: boolean;
+  /** Show gradient overlay at top for status bar readability */
+  showTopGradient?: boolean;
   /** Optional callback when photo index changes */
   onIndexChange?: (index: number) => void;
+  /** 
+   * When true, the specified height becomes the visible height BELOW the safe area,
+   * and the total carousel height is increased by the top safe area inset.
+   * This allows edge-to-edge display while ensuring content isn't obscured.
+   */
+  compensateSafeArea?: boolean;
 }
 
 // Helper to get proper image URI
@@ -49,13 +59,21 @@ export default function PhotoCarousel({
   images,
   height = 400,
   showGradient = true,
+  showTopGradient = true,
   onIndexChange,
+  compensateSafeArea = false,
 }: PhotoCarouselProps) {
   const { width: screenWidth } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isViewerVisible, setIsViewerVisible] = useState(false);
   const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
+
+  // Calculate total height including safe area compensation
+  const totalHeight = useMemo(() => {
+    return compensateSafeArea ? height + insets.top : height;
+  }, [height, insets.top, compensateSafeArea]);
   
   // Handle scroll end to update current index
   const handleMomentumScrollEnd = useCallback(
@@ -111,7 +129,7 @@ export default function PhotoCarousel({
     ({ item, index }: { item: string; index: number }) => (
       <Pressable
         onPress={() => openFullScreen(index)}
-        style={[styles.imageContainer, { height, width: screenWidth }]}
+        style={[styles.imageContainer, { height: totalHeight, width: screenWidth }]}
       >
         <Image
           source={{ uri: getImageUri(item) }}
@@ -121,7 +139,7 @@ export default function PhotoCarousel({
         />
       </Pressable>
     ),
-    [height, openFullScreen, screenWidth]
+    [totalHeight, openFullScreen, screenWidth]
   );
   
   // Key extractor
@@ -142,14 +160,14 @@ export default function PhotoCarousel({
   
   if (images.length === 0) {
     return (
-      <View style={[styles.placeholder, { height, width: screenWidth }]}>
+      <View style={[styles.placeholder, { height: totalHeight, width: screenWidth }]}>
         <View style={styles.placeholderInner} />
       </View>
     );
   }
   
   return (
-    <View style={[styles.container, { height, width: screenWidth }]}>
+    <View style={[styles.container, { height: totalHeight, width: screenWidth }]}>
       {/* Photo list */}
       <FlatList
         ref={flatListRef}
@@ -172,7 +190,22 @@ export default function PhotoCarousel({
         snapToAlignment="center"
       />
       
-      {/* Gradient overlay */}
+      {/* Top gradient for status bar readability */}
+      {showTopGradient && (
+        <LinearGradient
+          colors={[
+            "rgba(0, 0, 0, 0.5)",
+            "rgba(0, 0, 0, 0.3)",
+            "rgba(0, 0, 0, 0.1)",
+            "transparent",
+          ]}
+          locations={[0, 0.3, 0.6, 1]}
+          style={styles.topGradient}
+          pointerEvents="none"
+        />
+      )}
+      
+      {/* Bottom gradient overlay */}
       {showGradient && (
         <LinearGradient
           colors={["transparent", "rgba(0,0,0,0.3)", "rgba(0,0,0,0.6)"]}
@@ -223,6 +256,13 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
+  },
+  topGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100,
   },
   gradient: {
     position: "absolute",

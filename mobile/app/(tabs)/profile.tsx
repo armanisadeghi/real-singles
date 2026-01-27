@@ -1,5 +1,6 @@
 import ProfileDetails from "@/components/ProfileDetails";
 import SideMenu from "@/components/SidebarMenu";
+import ProfileImageHeader from "@/components/ui/ProfileImageHeader";
 import { icons } from "@/constants/icons";
 import { getProfile } from "@/lib/api";
 import { User } from "@/types";
@@ -17,17 +18,13 @@ import React, {
 import {
   ActivityIndicator,
   Alert,
-  Image,
-  ImageBackground,
   TouchableOpacity,
   View
 } from "react-native";
 import CircularProgress from "react-native-circular-progress-indicator";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Profile() {
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const insets = useSafeAreaInsets();
   const [menuVisible, setMenuVisible] = useState(false);
   const [profile, setProfile] = useState<User | null>();
   const [currentSnapPointIndex, setCurrentSnapPointIndex] = useState(0);
@@ -123,56 +120,52 @@ export default function Profile() {
         userAvatar={profile?.Image}
         userName={profile?.DisplayName || "User"}
       />
-      <ImageBackground
-        className="h-[347px]"
+      <ProfileImageHeader
         source={getProfileImage()}
-        resizeMode="cover"
-      >
-        <View className={`absolute inset-0 bg-black/20`} />
-        <View 
-          className="flex-row justify-between items-start px-3"
-          style={{ marginTop: insets.top + 8 }}
-        >
-           <TouchableOpacity 
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setMenuVisible(true);
-            }}
-            className="border border-white rounded-lg p-2 bg-black/45"
-          >
-            <PlatformIcon name="menu" size={15} color="white" />
-          </TouchableOpacity>
-          <View className="flex-row gap-2 items-center">
-            <TouchableOpacity
+        visibleHeight={300}
+        overlayOpacity={0.2}
+        topContent={
+          <>
+            <TouchableOpacity 
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push({
-                  pathname: "/settings",
-                  params: { profile: JSON.stringify(profile) },
-                });
+                setMenuVisible(true);
               }}
-              className="border border-border rounded-lg p-1"
+              className="border border-white rounded-lg p-2 bg-black/45"
             >
-              <PlatformIcon name="settings" size={20} color="white" />
+              <PlatformIcon name="menu" size={15} color="white" />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push({
-                  pathname: "/editProfile",
-                  params: { profile: JSON.stringify(profile) },
-                });
-              }}
-              className="border border-border rounded-lg p-2"
-            >
-              <PlatformIcon name="edit" size={18} color="white" />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View className="flex-row justify-between items-start px-3 mt-40">
-          <View className="flex-1"></View>
-          <View className="">
-            <View className="p-3 w-[60px] h-[60px] flex justify-center items-center border border-white rounded-[15px]">
+            <View className="flex-row gap-2 items-center">
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push({
+                    pathname: "/settings",
+                    params: { profile: JSON.stringify(profile) },
+                  });
+                }}
+                className="border border-white/50 rounded-lg p-1 bg-black/30"
+              >
+                <PlatformIcon name="settings" size={20} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push({
+                    pathname: "/editProfile",
+                    params: { profile: JSON.stringify(profile) },
+                  });
+                }}
+                className="border border-white/50 rounded-lg p-2 bg-black/30"
+              >
+                <PlatformIcon name="edit" size={18} color="white" />
+              </TouchableOpacity>
+            </View>
+          </>
+        }
+        bottomContent={
+          <View className="flex-row justify-end">
+            <View className="p-3 w-[60px] h-[60px] flex justify-center items-center border border-white rounded-[15px] bg-black/30">
               <CircularProgress
                 value={85}
                 radius={20}
@@ -186,8 +179,8 @@ export default function Profile() {
               />
             </View>
           </View>
-        </View>
-      </ImageBackground>
+        }
+      />
       <BottomSheet
         ref={bottomSheetRef}
         snapPoints={snapPoints}

@@ -69,8 +69,9 @@ export default function DiscoveryProfileView() {
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   
-  // Calculate photo height based on screen height (reactive to orientation changes)
-  const photoHeight = useMemo(() => screenHeight * 0.55, [screenHeight]);
+  // Calculate visible photo height (below safe area)
+  // PhotoCarousel will add safe area inset to this for total height
+  const visiblePhotoHeight = useMemo(() => screenHeight * 0.50, [screenHeight]);
   
   const [profile, setProfile] = useState<User | null>(null);
   const [gallery, setGallery] = useState<any[]>([]);
@@ -281,8 +282,10 @@ export default function DiscoveryProfileView() {
         <View style={styles.photoSection}>
           <PhotoCarousel
             images={images}
-            height={photoHeight}
+            height={visiblePhotoHeight}
             showGradient={true}
+            showTopGradient={true}
+            compensateSafeArea={true}
           />
           
           {/* Header overlay */}

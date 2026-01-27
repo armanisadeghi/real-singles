@@ -28,6 +28,7 @@ export { default as PastEventCard } from "./PastEventCard";
 // Image/Gallery components
 export { default as FullScreenImageViewer } from "./FullScreenImageViewer";
 export { default as PhotoCarousel } from "./PhotoCarousel";
+export { default as ProfileImageHeader, HeaderButtonArea } from "./ProfileImageHeader";
 
 // Form components
 export { default as GradientButton } from "./GradientButton";

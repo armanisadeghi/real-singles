@@ -56,8 +56,10 @@ export default function ProfileFocusView() {
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   
-  // Calculate photo height based on screen height (reactive to orientation changes)
-  const photoHeight = useMemo(() => screenHeight * 0.55, [screenHeight]);
+  // Calculate visible photo height (below safe area)
+  // We add insets.top to get the total height for edge-to-edge display
+  const visiblePhotoHeight = useMemo(() => screenHeight * 0.50, [screenHeight]);
+  const totalPhotoHeight = useMemo(() => visiblePhotoHeight + insets.top, [visiblePhotoHeight, insets.top]);
 
   const [profile, setProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -242,7 +244,7 @@ export default function ProfileFocusView() {
       <Toast />
 
       {/* Photo Section */}
-      <View style={[styles.photoSection, { height: photoHeight }]}>
+      <View style={[styles.photoSection, { height: totalPhotoHeight }]}>
         {imageSource ? (
           <Image source={imageSource} style={styles.photo} resizeMode="cover" />
         ) : (
@@ -251,7 +253,20 @@ export default function ProfileFocusView() {
           </View>
         )}
 
-        {/* Gradient overlay */}
+        {/* Top gradient for status bar readability */}
+        <LinearGradient
+          colors={[
+            "rgba(0, 0, 0, 0.5)",
+            "rgba(0, 0, 0, 0.3)",
+            "rgba(0, 0, 0, 0.1)",
+            "transparent",
+          ]}
+          locations={[0, 0.3, 0.6, 1]}
+          style={styles.topGradient}
+          pointerEvents="none"
+        />
+
+        {/* Bottom gradient overlay */}
         <LinearGradient
           colors={["transparent", "rgba(0,0,0,0.3)", "rgba(0,0,0,0.7)"]}
           style={styles.photoGradient}
@@ -447,6 +462,13 @@ const styles = StyleSheet.create({
     fontSize: 80,
     fontWeight: "bold",
     color: "white",
+  },
+  topGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100,
   },
   photoGradient: {
     position: "absolute",
