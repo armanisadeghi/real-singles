@@ -1,6 +1,14 @@
-// Database Types
-// These types should be generated from Supabase once the database is set up
-// For now, these are based on the schema defined in project_requirements.md
+/**
+ * Types Index
+ * 
+ * This file exports:
+ * - Standardized UI constants (OPTIONS arrays) - shared across all platforms
+ * - Database types (re-exported from db.ts) - SSOT from Supabase
+ * - API response types
+ * - Profile completion types
+ * 
+ * For entity types, prefer importing directly from @/types/db
+ */
 
 // ============================================
 // STANDARDIZED OPTIONS (Must match across all platforms)
@@ -300,382 +308,63 @@ export const INTEREST_OPTIONS = [
 ] as const;
 
 // ============================================
-// ENTITY INTERFACES
+// RE-EXPORT DATABASE TYPES (SSOT)
+// ============================================
+// Entity types should be imported from @/types/db instead of defining here.
+// This re-export maintains backwards compatibility during migration.
+
+export type {
+  // Database row types (snake_case - for internal/API use)
+  DbUser,
+  DbProfile,
+  DbUserGallery,
+  DbUserFilters,
+  DbMatch,
+  DbFavorite,
+  DbFollow,
+  DbBlock,
+  DbConversation,
+  DbConversationParticipant,
+  DbEvent,
+  DbEventAttendee,
+  DbVirtualSpeedDating,
+  DbSpeedDatingRegistration,
+  DbProduct,
+  DbOrder,
+  DbPointTransaction,
+  DbReferral,
+  DbReview,
+  DbReport,
+  DbNotification,
+  DbContactSubmission,
+  DbLifeGoalDefinition,
+  DbPromptDefinition,
+  DbUserProfilePrompt,
+  // Application types (camelCase - for frontend use)
+  AppUser,
+  AppProfile,
+  AppUserGallery,
+  AppEvent,
+  AppNotification,
+  AppConversation,
+  AppProduct,
+  AppMatch,
+  AppReview,
+  AppOrder,
+  AppReferral,
+  AppBlock,
+  AppFavorite,
+  AppSpeedDatingSession,
+  AppEventAttendee,
+  AppLifeGoalDefinition,
+  AppPromptDefinition,
+  AppUserProfilePrompt,
+} from "./db";
+
+// ============================================
+// API RESPONSE TYPES
 // ============================================
 
-export interface User {
-  id: string;
-  email: string;
-  phone?: string;
-  phone_verified: boolean;
-  display_name?: string;
-  username?: string;
-  created_at: string;
-  updated_at: string;
-  last_active_at?: string;
-  status: "active" | "suspended" | "deleted";
-  role: "user" | "admin" | "moderator";
-  agora_user_id?: string;
-  points_balance: number;
-  referral_code?: string;
-  referred_by?: string;
-}
-
-export interface Profile {
-  id: string;
-  user_id: string;
-  
-  // Basic Info
-  first_name?: string;
-  last_name?: string;
-  date_of_birth?: string;
-  gender?: "male" | "female" | "non-binary" | "other";
-  looking_for?: string[];
-  zodiac_sign?: string;
-  bio?: string;
-  looking_for_description?: string;
-  dating_intentions?: "life_partner" | "long_term" | "long_term_open" | "figuring_out" | "prefer_not_to_say";
-  
-  // Physical Attributes
-  height_inches?: number;
-  body_type?: "slim" | "athletic" | "average" | "muscular" | "curvy" | "plus_size";
-  ethnicity?: string[]; // Array for mixed heritage
-  
-  // Location
-  city?: string;
-  state?: string;
-  country?: string;
-  zip_code?: string;
-  latitude?: number;
-  longitude?: number;
-  
-  // Lifestyle
-  marital_status?: "never_married" | "separated" | "divorced" | "widowed" | "prefer_not_to_say";
-  religion?: string;
-  political_views?: string;
-  education?: string;
-  occupation?: string;
-  company?: string;
-  schools?: string[];
-  languages?: string[];
-  smoking?: "no" | "occasionally" | "daily" | "trying_to_quit";
-  drinking?: "never" | "social" | "moderate" | "regular";
-  marijuana?: "no" | "yes" | "occasionally";
-  exercise?: "never" | "sometimes" | "regularly" | "daily";
-  
-  // Family
-  has_kids?: "no" | "yes_live_at_home" | "yes_live_away";
-  wants_kids?: "no" | "definitely" | "someday" | "ok_if_partner_has";
-  pets?: string[];
-  
-  // Interests
-  interests?: string[];
-  
-  // Profile Prompts (Structured Storytelling per business logic)
-  ideal_first_date?: string;
-  non_negotiables?: string;
-  worst_job?: string;
-  dream_job?: string;
-  nightclub_or_home?: string;
-  pet_peeves?: string;
-  after_work?: string;
-  way_to_heart?: string;
-  craziest_travel_story?: string;
-  weirdest_gift?: string;
-  past_event?: string;
-  
-  // Social Links
-  social_link_1?: string;
-  social_link_2?: string;
-  
-  // Media
-  profile_image_url?: string;
-  voice_prompt_url?: string;
-  video_intro_url?: string;
-  voice_prompt_duration_seconds?: number;
-  video_intro_duration_seconds?: number;
-  
-  // Life Goals (The League model)
-  life_goals?: string[];
-  
-  // Verification (Basic - selfie)
-  is_verified: boolean;
-  verified_at?: string;
-  verification_selfie_url?: string;
-  
-  // Photo Verification (Required for matching)
-  is_photo_verified?: boolean;
-  photo_verified_at?: string;
-  
-  // ID Verification (Premium tier)
-  is_id_verified?: boolean;
-  id_verified_at?: string;
-  id_document_url?: string;
-  
-  // Profile Completion Tracking
-  profile_completion_step?: number;
-  profile_completion_skipped?: string[];
-  profile_completion_prefer_not?: string[];
-  profile_completed_at?: string;
-  
-  // Timestamps
-  created_at: string;
-  updated_at: string;
-}
-
-export interface UserGallery {
-  id: string;
-  user_id: string;
-  media_type: "image" | "video";
-  media_url: string;
-  thumbnail_url?: string;
-  is_live_photo: boolean;
-  is_primary: boolean;
-  display_order?: number;
-  created_at: string;
-}
-
-export interface UserFilters {
-  id: string;
-  user_id: string;
-  min_age: number;
-  max_age: number;
-  min_height?: number;
-  max_height?: number;
-  max_distance_miles: number;
-  gender?: string[];
-  body_types?: string[];
-  ethnicities?: string[];
-  religions?: string[];
-  education_levels?: string[];
-  has_kids?: "any" | "yes" | "no";
-  wants_kids?: "any" | "yes" | "no" | "maybe";
-  smoking?: "any" | "never" | "occasionally" | "regularly";
-  drinking?: string;
-  marijuana?: string;
-  zodiac_signs?: string[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Match {
-  id: string;
-  user_id: string;
-  target_user_id: string;
-  action: "like" | "pass" | "super_like";
-  created_at: string;
-}
-
-export interface Conversation {
-  id: string;
-  type: "direct" | "group";
-  group_name?: string;
-  group_image_url?: string;
-  created_by?: string;
-  agora_group_id?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ConversationParticipant {
-  id: string;
-  conversation_id: string;
-  user_id: string;
-  role: "owner" | "admin" | "member";
-  joined_at: string;
-  last_read_at?: string;
-  is_muted: boolean;
-}
-
-export interface Favorite {
-  id: string;
-  user_id: string;
-  favorite_user_id: string;
-  created_at: string;
-}
-
-export interface Follow {
-  id: string;
-  follower_id: string;
-  following_id: string;
-  created_at: string;
-}
-
-export interface Block {
-  id: string;
-  blocker_id: string;
-  blocked_id: string;
-  created_at: string;
-}
-
-export interface Report {
-  id: string;
-  reporter_id: string;
-  reported_user_id: string;
-  reason: string;
-  description?: string;
-  status: "pending" | "reviewed" | "resolved" | "dismissed";
-  reviewed_by?: string;
-  reviewed_at?: string;
-  created_at: string;
-}
-
-export interface Event {
-  id: string;
-  created_by?: string;
-  title: string;
-  description?: string;
-  event_type: "in_person" | "virtual" | "speed_dating";
-  image_url?: string;
-  venue_name?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  latitude?: number;
-  longitude?: number;
-  start_datetime: string;
-  end_datetime?: string;
-  timezone: string;
-  max_attendees?: number;
-  current_attendees: number;
-  is_public: boolean;
-  requires_approval: boolean;
-  status: "draft" | "upcoming" | "ongoing" | "completed" | "cancelled";
-  created_at: string;
-  updated_at: string;
-}
-
-export interface EventAttendee {
-  id: string;
-  event_id: string;
-  user_id: string;
-  status: "interested" | "registered" | "attended" | "cancelled";
-  registered_at: string;
-}
-
-export interface VirtualSpeedDating {
-  id: string;
-  title: string;
-  description?: string;
-  image_url?: string;
-  scheduled_datetime: string;
-  duration_minutes: number;
-  round_duration_seconds: number;
-  min_participants: number;
-  max_participants: number;
-  gender_preference?: "mixed" | "men_only" | "women_only";
-  age_min?: number;
-  age_max?: number;
-  status: "scheduled" | "in_progress" | "completed" | "cancelled";
-  agora_channel_prefix?: string;
-  created_at: string;
-}
-
-export interface SpeedDatingRegistration {
-  id: string;
-  session_id: string;
-  user_id: string;
-  status: "registered" | "checked_in" | "completed" | "no_show";
-  registered_at: string;
-}
-
-export interface PointTransaction {
-  id: string;
-  user_id: string;
-  amount: number;
-  balance_after: number;
-  transaction_type:
-    | "referral"
-    | "review"
-    | "event_attendance"
-    | "redemption"
-    | "admin_adjustment";
-  description?: string;
-  reference_id?: string;
-  reference_type?: string;
-  created_at: string;
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  description?: string;
-  image_url?: string;
-  points_cost: number;
-  retail_value?: number;
-  category?: "gift_card" | "merchandise" | "experience" | "subscription";
-  stock_quantity?: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Order {
-  id: string;
-  user_id?: string;
-  product_id?: string;
-  points_spent: number;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  shipping_name?: string;
-  shipping_address?: string;
-  shipping_city?: string;
-  shipping_state?: string;
-  shipping_zip?: string;
-  shipping_country?: string;
-  tracking_number?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Review {
-  id: string;
-  reviewer_id?: string;
-  reviewed_user_id: string;
-  relationship?: "friend" | "coworker" | "met_on_app" | "family" | "other";
-  rating: number;
-  review_text?: string;
-  is_approved: boolean;
-  approved_by?: string;
-  approved_at?: string;
-  points_awarded: number;
-  created_at: string;
-}
-
-export interface Referral {
-  id: string;
-  referrer_id?: string;
-  referred_user_id: string;
-  status: "pending" | "completed" | "rewarded";
-  points_awarded: number;
-  created_at: string;
-  completed_at?: string;
-}
-
-export interface Notification {
-  id: string;
-  user_id: string;
-  type: "match" | "message" | "event" | "system" | "points";
-  title: string;
-  body?: string;
-  data?: Record<string, unknown>;
-  is_read: boolean;
-  read_at?: string;
-  created_at: string;
-}
-
-export interface ContactSubmission {
-  id: string;
-  user_id?: string;
-  name?: string;
-  email: string;
-  subject?: string;
-  message: string;
-  status: "new" | "in_progress" | "resolved";
-  responded_at?: string;
-  created_at: string;
-}
-
-// API Response Types
 export interface ApiResponse<T> {
   data?: T;
   error?: string;
@@ -729,18 +418,8 @@ export type ProfileCompletionAction =
 // LIFE GOALS (The League model)
 // ============================================
 
-export interface LifeGoalDefinition {
-  id: string;
-  key: string;
-  label: string;
-  category: string;
-  description: string | null;
-  icon: string | null;
-  is_active: boolean | null;
-  display_order: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-}
+// Type aliases for backwards compatibility (prefer importing from db.ts directly)
+export type LifeGoalDefinition = import("./db").DbLifeGoalDefinition;
 
 export const LIFE_GOAL_CATEGORIES = [
   { value: "career", label: "Career & Achievement" },
@@ -753,30 +432,9 @@ export const LIFE_GOAL_CATEGORIES = [
 // PROFILE PROMPTS SYSTEM
 // ============================================
 
-export interface PromptDefinition {
-  id: string;
-  key: string;
-  prompt_text: string;
-  placeholder_text: string | null;
-  category: string;
-  max_length: number | null;
-  is_active: boolean | null;
-  is_required: boolean | null;
-  display_order: number | null;
-  icon: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-}
-
-export interface UserProfilePrompt {
-  id: string;
-  user_id: string;
-  prompt_key: string;
-  response: string;
-  display_order: number;
-  created_at: string;
-  updated_at: string;
-}
+// Type aliases for backwards compatibility (prefer importing from db.ts directly)
+export type PromptDefinition = import("./db").DbPromptDefinition;
+export type UserProfilePrompt = import("./db").DbUserProfilePrompt;
 
 export const PROMPT_CATEGORIES = [
   { value: "about_me", label: "About Me" },

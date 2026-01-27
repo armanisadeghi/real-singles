@@ -1,6 +1,22 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import type { DbProfile, DbUser } from "@/types/db";
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+interface ProfileWithUser extends DbProfile {
+  users: Pick<DbUser, "id" | "display_name" | "email" | "status"> | null;
+}
+
+interface FavoriteWithProfile {
+  id: string;
+  created_at: string | null;
+  favorite_user_id: string | null;
+  profiles: ProfileWithUser | null;
+}
 
 /**
  * GET /api/favorites
@@ -68,23 +84,29 @@ export async function GET() {
   }
 
   // Create a map of profiles by user_id
-  const profileMap = new Map(
-    (profiles || []).map((p: any) => [p.user_id, p])
-  );
+  const profileMap = new Map<string, ProfileWithUser>();
+  for (const p of (profiles || []) as ProfileWithUser[]) {
+    if (p.user_id) profileMap.set(p.user_id, p);
+  }
 
   // Merge favorites with profiles
-  const favoritesWithProfiles = favorites.map((fav) => ({
+  const favoritesWithProfiles: FavoriteWithProfile[] = favorites.map((fav) => ({
     ...fav,
-    profiles: profileMap.get(fav.favorite_user_id) || null,
+    profiles: fav.favorite_user_id ? profileMap.get(fav.favorite_user_id) ?? null : null,
   }));
 
   // Format profiles for mobile app (with async image URL conversion)
   // Note: Include users with "active" or null status, exclude suspended/deleted
-  const validFavorites = favoritesWithProfiles
-    .filter((fav: any) => fav.profiles && fav.profiles.users?.status !== "suspended" && fav.profiles.users?.status !== "deleted");
+  // Filter and extract profiles that are not null
+  const validFavoritesWithProfiles = favoritesWithProfiles
+    .filter((fav): fav is FavoriteWithProfile & { profiles: ProfileWithUser } => 
+      fav.profiles !== null && 
+      fav.profiles.users?.status !== "suspended" && 
+      fav.profiles.users?.status !== "deleted"
+    );
   
   const formattedFavorites = await Promise.all(
-    validFavorites.map(async (fav: any) => {
+    validFavoritesWithProfiles.map(async (fav) => {
       const profile = fav.profiles;
       const imageUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
       return {

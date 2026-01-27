@@ -1,6 +1,33 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import type { DbEventUpdate } from "@/types/db";
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+interface EventAttendeeRow {
+  user_id: string | null;
+  status: string | null;
+  registered_at: string | null;
+}
+
+interface ProfileRow {
+  user_id: string | null;
+  first_name: string | null;
+  profile_image_url: string | null;
+}
+
+interface UserRow {
+  id: string;
+  display_name: string | null;
+}
+
+interface AttendeeProfiles {
+  profileMap: Record<string, ProfileRow>;
+  userMap: Record<string, UserRow>;
+}
 
 /**
  * GET /api/events/[id]
@@ -47,8 +74,12 @@ export async function GET(
   }
 
   // Fetch attendee profiles separately to avoid complex nested joins
-  const attendeeUserIds = (event.event_attendees || []).map((a: any) => a.user_id);
-  let attendeeProfiles: Record<string, any> = {};
+  const attendees = (event.event_attendees || []) as EventAttendeeRow[];
+  const attendeeUserIds = attendees
+    .map((a) => a.user_id)
+    .filter((id): id is string => id !== null);
+  
+  let attendeeProfiles: AttendeeProfiles = { profileMap: {}, userMap: {} };
   
   if (attendeeUserIds.length > 0) {
     const { data: profiles } = await supabase
@@ -62,43 +93,42 @@ export async function GET(
       .in("id", attendeeUserIds);
     
     // Create lookup maps
-    const profileMap = (profiles || []).reduce((acc: any, p: any) => {
-      acc[p.user_id] = p;
-      return acc;
-    }, {});
+    const profileMap: Record<string, ProfileRow> = {};
+    for (const p of profiles || []) {
+      if (p.user_id) profileMap[p.user_id] = p as ProfileRow;
+    }
     
-    const userMap = (users || []).reduce((acc: any, u: any) => {
-      acc[u.id] = u;
-      return acc;
-    }, {});
+    const userMap: Record<string, UserRow> = {};
+    for (const u of users || []) {
+      userMap[u.id] = u as UserRow;
+    }
     
     attendeeProfiles = { profileMap, userMap };
   }
 
-  const attendees = event.event_attendees || [];
-  const interestedUsers = attendees.filter((a: any) => a.status === "interested" || a.status === "registered");
-  const isUserInterested = user ? attendees.some((a: any) => a.user_id === user.id) : false;
+  const interestedUsers = attendees.filter((a) => a.status === "interested" || a.status === "registered");
+  const isUserInterested = user ? attendees.some((a) => a.user_id === user.id) : false;
 
   // Resolve event image URL
   const eventImageUrl = await resolveStorageUrl(supabase, event.image_url);
 
   // Resolve interested user images
   const interestedUserImages = await Promise.all(
-    interestedUsers.slice(0, 10).map((a: any) => {
-      const profile = attendeeProfiles.profileMap?.[a.user_id];
-      return resolveStorageUrl(supabase, profile?.profile_image_url);
+    interestedUsers.slice(0, 10).map((a) => {
+      const profile = a.user_id ? attendeeProfiles.profileMap[a.user_id] : null;
+      return resolveStorageUrl(supabase, profile?.profile_image_url ?? null);
     })
   );
 
   // Resolve interested users with profile images
   const formattedInterestedUsers = await Promise.all(
-    interestedUsers.map(async (a: any) => {
-      const profile = attendeeProfiles.profileMap?.[a.user_id];
-      const userData = attendeeProfiles.userMap?.[a.user_id];
+    interestedUsers.map(async (a) => {
+      const profile = a.user_id ? attendeeProfiles.profileMap[a.user_id] : null;
+      const userData = a.user_id ? attendeeProfiles.userMap[a.user_id] : null;
       return {
         user_id: a.user_id,
         display_name: userData?.display_name || profile?.first_name || "User",
-        profile_image_url: await resolveStorageUrl(supabase, profile?.profile_image_url),
+        profile_image_url: await resolveStorageUrl(supabase, profile?.profile_image_url ?? null),
         status: a.status,
       };
     })
@@ -183,42 +213,49 @@ export async function PUT(
   }
 
   try {
-    const body = await request.json();
-    const updates: Record<string, any> = {};
+    const body = await request.json() as Record<string, unknown>;
+    const updates: DbEventUpdate = {};
 
-    const fieldMap: Record<string, string> = {
-      EventName: "title",
-      title: "title",
-      Description: "description",
-      description: "description",
-      EventImage: "image_url",
-      image_url: "image_url",
-      VenueName: "venue_name",
-      venue_name: "venue_name",
-      Street: "address",
-      address: "address",
-      City: "city",
-      city: "city",
-      State: "state",
-      state: "state",
-      StartDateTime: "start_datetime",
-      start_datetime: "start_datetime",
-      EndDateTime: "end_datetime",
-      end_datetime: "end_datetime",
-      MaxAttendees: "max_attendees",
-      max_attendees: "max_attendees",
-      Status: "status",
-      status: "status",
-    };
-
-    for (const [inputField, dbField] of Object.entries(fieldMap)) {
-      if (body[inputField] !== undefined) {
-        updates[dbField] = body[inputField];
-      }
+    // Map input fields to database fields
+    if (body.EventName !== undefined || body.title !== undefined) {
+      updates.title = (body.EventName ?? body.title) as string;
     }
-
-    if (body.Latitude) updates.latitude = parseFloat(body.Latitude);
-    if (body.Longitude) updates.longitude = parseFloat(body.Longitude);
+    if (body.Description !== undefined || body.description !== undefined) {
+      updates.description = (body.Description ?? body.description) as string | null;
+    }
+    if (body.EventImage !== undefined || body.image_url !== undefined) {
+      updates.image_url = (body.EventImage ?? body.image_url) as string | null;
+    }
+    if (body.VenueName !== undefined || body.venue_name !== undefined) {
+      updates.venue_name = (body.VenueName ?? body.venue_name) as string | null;
+    }
+    if (body.Street !== undefined || body.address !== undefined) {
+      updates.address = (body.Street ?? body.address) as string | null;
+    }
+    if (body.City !== undefined || body.city !== undefined) {
+      updates.city = (body.City ?? body.city) as string | null;
+    }
+    if (body.State !== undefined || body.state !== undefined) {
+      updates.state = (body.State ?? body.state) as string | null;
+    }
+    if (body.StartDateTime !== undefined || body.start_datetime !== undefined) {
+      updates.start_datetime = (body.StartDateTime ?? body.start_datetime) as string;
+    }
+    if (body.EndDateTime !== undefined || body.end_datetime !== undefined) {
+      updates.end_datetime = (body.EndDateTime ?? body.end_datetime) as string | null;
+    }
+    if (body.MaxAttendees !== undefined || body.max_attendees !== undefined) {
+      updates.max_attendees = (body.MaxAttendees ?? body.max_attendees) as number | null;
+    }
+    if (body.Status !== undefined || body.status !== undefined) {
+      updates.status = (body.Status ?? body.status) as string | null;
+    }
+    if (body.Latitude) {
+      updates.latitude = parseFloat(body.Latitude as string);
+    }
+    if (body.Longitude) {
+      updates.longitude = parseFloat(body.Longitude as string);
+    }
 
     updates.updated_at = new Date().toISOString();
 

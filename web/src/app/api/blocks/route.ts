@@ -21,20 +21,10 @@ export async function GET() {
     );
   }
 
+  // First get the blocks
   const { data: blocks, error } = await supabase
     .from("blocks")
-    .select(`
-      id,
-      blocked_id,
-      created_at,
-      profiles:blocked_id(
-        user_id,
-        first_name,
-        last_name,
-        profile_image_url,
-        users:user_id(display_name)
-      )
-    `)
+    .select("id, blocked_id, created_at")
     .eq("blocker_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -46,16 +36,48 @@ export async function GET() {
     );
   }
 
+  // Get blocked user IDs
+  const blockedUserIds = (blocks || [])
+    .map((b) => b.blocked_id)
+    .filter((id): id is string => id !== null);
+
+  // Get profile and user info for blocked users
+  const profileMap: Record<string, { first_name: string | null; last_name: string | null; profile_image_url: string | null }> = {};
+  const userMap: Record<string, { display_name: string | null }> = {};
+
+  if (blockedUserIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, first_name, last_name, profile_image_url")
+      .in("user_id", blockedUserIds);
+    
+    const { data: users } = await supabase
+      .from("users")
+      .select("id, display_name")
+      .in("id", blockedUserIds);
+    
+    for (const p of profiles || []) {
+      if (p.user_id) profileMap[p.user_id] = p;
+    }
+    for (const u of users || []) {
+      userMap[u.id] = u;
+    }
+  }
+
   const formattedBlocks = await Promise.all(
-    (blocks || []).map(async (block: any) => ({
-      id: block.id,
-      blocked_user_id: block.blocked_id,
-      display_name: block.profiles?.users?.display_name || block.profiles?.first_name || "User",
-      first_name: block.profiles?.first_name || "",
-      last_name: block.profiles?.last_name || "",
-      profile_image_url: await resolveStorageUrl(supabase, block.profiles?.profile_image_url),
-      blocked_at: block.created_at,
-    }))
+    (blocks || []).map(async (block) => {
+      const profile = block.blocked_id ? profileMap[block.blocked_id] : null;
+      const userData = block.blocked_id ? userMap[block.blocked_id] : null;
+      return {
+        id: block.id,
+        blocked_user_id: block.blocked_id,
+        display_name: userData?.display_name || profile?.first_name || "User",
+        first_name: profile?.first_name || "",
+        last_name: profile?.last_name || "",
+        profile_image_url: await resolveStorageUrl(supabase, profile?.profile_image_url ?? null),
+        blocked_at: block.created_at,
+      };
+    })
   );
 
   return NextResponse.json({

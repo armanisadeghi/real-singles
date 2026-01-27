@@ -634,6 +634,324 @@ export function dbProductToApp(dbProduct: DbProduct): AppProduct {
 }
 
 // =============================================================================
+// ADDITIONAL DATABASE TYPES
+// =============================================================================
+
+export type DbLifeGoalDefinition = Tables<"life_goal_definitions">;
+export type DbPromptDefinition = Tables<"prompt_definitions">;
+export type DbUserProfilePrompt = Tables<"user_profile_prompts">;
+
+// =============================================================================
+// ADDITIONAL APPLICATION-LEVEL TYPES
+// =============================================================================
+
+/**
+ * Match type for application use (camelCase)
+ */
+export interface AppMatch {
+  id: string;
+  userId: string | null;
+  targetUserId: string | null;
+  action: string;
+  createdAt: string | null;
+}
+
+/**
+ * Review type for application use (camelCase)
+ */
+export interface AppReview {
+  id: string;
+  reviewerId: string | null;
+  reviewedUserId: string | null;
+  relationship: string | null;
+  rating: number | null;
+  reviewText: string | null;
+  isApproved: boolean | null;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  pointsAwarded: number | null;
+  createdAt: string | null;
+}
+
+/**
+ * Order type for application use (camelCase)
+ */
+export interface AppOrder {
+  id: string;
+  userId: string | null;
+  productId: string | null;
+  pointsSpent: number;
+  status: string | null;
+  shippingName: string | null;
+  shippingAddress: string | null;
+  shippingCity: string | null;
+  shippingState: string | null;
+  shippingZip: string | null;
+  shippingCountry: string | null;
+  trackingNumber: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+/**
+ * Referral type for application use (camelCase)
+ */
+export interface AppReferral {
+  id: string;
+  referrerId: string | null;
+  referredUserId: string | null;
+  status: string | null;
+  pointsAwarded: number | null;
+  createdAt: string | null;
+  completedAt: string | null;
+}
+
+/**
+ * Block type for application use (camelCase)
+ */
+export interface AppBlock {
+  id: string;
+  blockerId: string | null;
+  blockedId: string | null;
+  createdAt: string | null;
+}
+
+/**
+ * Favorite type for application use (camelCase)
+ */
+export interface AppFavorite {
+  id: string;
+  userId: string | null;
+  favoriteUserId: string | null;
+  createdAt: string | null;
+}
+
+/**
+ * Speed Dating Session type for application use (camelCase)
+ */
+export interface AppSpeedDatingSession {
+  id: string;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  scheduledDatetime: string;
+  durationMinutes: number | null;
+  roundDurationSeconds: number | null;
+  minParticipants: number | null;
+  maxParticipants: number | null;
+  genderPreference: string | null;
+  ageMin: number | null;
+  ageMax: number | null;
+  status: string | null;
+  agoraChannelPrefix: string | null;
+  createdAt: string | null;
+}
+
+/**
+ * Event Attendee type for application use (camelCase)
+ */
+export interface AppEventAttendee {
+  id: string;
+  eventId: string | null;
+  userId: string | null;
+  status: string | null;
+  registeredAt: string | null;
+}
+
+/**
+ * Life Goal Definition type for application use (camelCase)
+ */
+export interface AppLifeGoalDefinition {
+  id: string;
+  key: string;
+  label: string;
+  category: string;
+  description: string | null;
+  icon: string | null;
+  isActive: boolean | null;
+  displayOrder: number | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+/**
+ * Prompt Definition type for application use (camelCase)
+ */
+export interface AppPromptDefinition {
+  id: string;
+  key: string;
+  promptText: string;
+  placeholderText: string | null;
+  category: string;
+  maxLength: number | null;
+  isActive: boolean | null;
+  isRequired: boolean | null;
+  displayOrder: number | null;
+  icon: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+/**
+ * User Profile Prompt type for application use (camelCase)
+ */
+export interface AppUserProfilePrompt {
+  id: string;
+  userId: string;
+  promptKey: string;
+  response: string;
+  displayOrder: number | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+// =============================================================================
+// ADDITIONAL CONVERSION FUNCTIONS
+// =============================================================================
+
+/**
+ * Convert DbMatch to AppMatch
+ */
+export function dbMatchToApp(dbMatch: DbMatch): AppMatch {
+  return {
+    id: dbMatch.id,
+    userId: dbMatch.user_id,
+    targetUserId: dbMatch.target_user_id,
+    action: dbMatch.action,
+    createdAt: dbMatch.created_at,
+  };
+}
+
+/**
+ * Convert DbReview to AppReview
+ */
+export function dbReviewToApp(dbReview: DbReview): AppReview {
+  return {
+    id: dbReview.id,
+    reviewerId: dbReview.reviewer_id,
+    reviewedUserId: dbReview.reviewed_user_id,
+    relationship: dbReview.relationship,
+    rating: dbReview.rating,
+    reviewText: dbReview.review_text,
+    isApproved: dbReview.is_approved,
+    approvedBy: dbReview.approved_by,
+    approvedAt: dbReview.approved_at,
+    pointsAwarded: dbReview.points_awarded,
+    createdAt: dbReview.created_at,
+  };
+}
+
+/**
+ * Convert DbOrder to AppOrder
+ */
+export function dbOrderToApp(dbOrder: DbOrder): AppOrder {
+  return {
+    id: dbOrder.id,
+    userId: dbOrder.user_id,
+    productId: dbOrder.product_id,
+    pointsSpent: dbOrder.points_spent,
+    status: dbOrder.status,
+    shippingName: dbOrder.shipping_name,
+    shippingAddress: dbOrder.shipping_address,
+    shippingCity: dbOrder.shipping_city,
+    shippingState: dbOrder.shipping_state,
+    shippingZip: dbOrder.shipping_zip,
+    shippingCountry: dbOrder.shipping_country,
+    trackingNumber: dbOrder.tracking_number,
+    createdAt: dbOrder.created_at,
+    updatedAt: dbOrder.updated_at,
+  };
+}
+
+/**
+ * Convert DbReferral to AppReferral
+ */
+export function dbReferralToApp(dbReferral: DbReferral): AppReferral {
+  return {
+    id: dbReferral.id,
+    referrerId: dbReferral.referrer_id,
+    referredUserId: dbReferral.referred_user_id,
+    status: dbReferral.status,
+    pointsAwarded: dbReferral.points_awarded,
+    createdAt: dbReferral.created_at,
+    completedAt: dbReferral.completed_at,
+  };
+}
+
+/**
+ * Convert DbBlock to AppBlock
+ */
+export function dbBlockToApp(dbBlock: DbBlock): AppBlock {
+  return {
+    id: dbBlock.id,
+    blockerId: dbBlock.blocker_id,
+    blockedId: dbBlock.blocked_id,
+    createdAt: dbBlock.created_at,
+  };
+}
+
+/**
+ * Convert DbVirtualSpeedDating to AppSpeedDatingSession
+ */
+export function dbSpeedDatingToApp(dbSession: DbVirtualSpeedDating): AppSpeedDatingSession {
+  return {
+    id: dbSession.id,
+    title: dbSession.title,
+    description: dbSession.description,
+    imageUrl: dbSession.image_url,
+    scheduledDatetime: dbSession.scheduled_datetime,
+    durationMinutes: dbSession.duration_minutes,
+    roundDurationSeconds: dbSession.round_duration_seconds,
+    minParticipants: dbSession.min_participants,
+    maxParticipants: dbSession.max_participants,
+    genderPreference: dbSession.gender_preference,
+    ageMin: dbSession.age_min,
+    ageMax: dbSession.age_max,
+    status: dbSession.status,
+    agoraChannelPrefix: dbSession.agora_channel_prefix,
+    createdAt: dbSession.created_at,
+  };
+}
+
+/**
+ * Convert DbLifeGoalDefinition to AppLifeGoalDefinition
+ */
+export function dbLifeGoalToApp(dbGoal: DbLifeGoalDefinition): AppLifeGoalDefinition {
+  return {
+    id: dbGoal.id,
+    key: dbGoal.key,
+    label: dbGoal.label,
+    category: dbGoal.category,
+    description: dbGoal.description,
+    icon: dbGoal.icon,
+    isActive: dbGoal.is_active,
+    displayOrder: dbGoal.display_order,
+    createdAt: dbGoal.created_at,
+    updatedAt: dbGoal.updated_at,
+  };
+}
+
+/**
+ * Convert DbPromptDefinition to AppPromptDefinition
+ */
+export function dbPromptToApp(dbPrompt: DbPromptDefinition): AppPromptDefinition {
+  return {
+    id: dbPrompt.id,
+    key: dbPrompt.key,
+    promptText: dbPrompt.prompt_text,
+    placeholderText: dbPrompt.placeholder_text,
+    category: dbPrompt.category,
+    maxLength: dbPrompt.max_length,
+    isActive: dbPrompt.is_active,
+    isRequired: dbPrompt.is_required,
+    displayOrder: dbPrompt.display_order,
+    icon: dbPrompt.icon,
+    createdAt: dbPrompt.created_at,
+    updatedAt: dbPrompt.updated_at,
+  };
+}
+
+// =============================================================================
 // RE-EXPORT DATABASE TYPES FOR CONVENIENCE
 // =============================================================================
 

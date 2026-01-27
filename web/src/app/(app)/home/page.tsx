@@ -4,12 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Compass,
   Video,
   Calendar,
   MapPin,
-  Heart,
-  ArrowRight,
   Users,
   RefreshCw,
   Menu,
@@ -21,13 +18,76 @@ import { ProfileCard } from "@/components/discovery";
 import { Avatar, EmptyState } from "@/components/ui";
 import { SideMenu } from "@/components/navigation";
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/** Profile data as returned from the API */
+interface ApiProfile {
+  ID: string | null;
+  id: string | null;
+  DisplayName: string;
+  FirstName: string;
+  LastName: string;
+  DOB: string;
+  City: string;
+  State: string;
+  Occupation?: string;
+  About: string;
+  Image: string | null;
+  livePicture: string | null;
+  Height: string;
+  Interest: string;
+  is_verified: boolean;
+  IsFavorite: number;
+  distance_in_km?: number;
+}
+
+/** Video data as returned from the API */
+interface ApiVideo {
+  ID: string;
+  Name: string;
+  Link: string;
+  VideoURL: string;
+  CreatedDate: string | null;
+}
+
+/** Event data as returned from the API */
+interface ApiEvent {
+  EventID: string;
+  EventName: string;
+  EventDate: string;
+  EventPrice: string;
+  StartTime: string;
+  EndTime: string;
+  Description: string;
+  Street: string;
+  City: string;
+  State: string;
+  EventImage: string | null;
+  HostedBy: string;
+}
+
+/** Speed dating session data as returned from the API */
+interface ApiSpeedDating {
+  ID: string;
+  Title: string;
+  Description: string;
+  Image: string;
+  ScheduledDate: string;
+  ScheduledTime: string;
+  Duration: number | null;
+  MaxParticipants: number | null;
+  Status: string | null;
+}
+
 interface HomeData {
   success: boolean;
-  TopMatch: any[];
-  NearBy: any[];
-  Videos: any[];
-  event: any[];
-  Virtual: any[];
+  TopMatch: ApiProfile[];
+  NearBy: ApiProfile[];
+  Videos: ApiVideo[];
+  event: ApiEvent[];
+  Virtual: ApiSpeedDating[];
   baseImageUrl: string;
   msg: string;
 }
@@ -40,10 +100,11 @@ interface UserInfo {
 }
 
 // Format profile data from API to component format
-function formatProfileForCard(profile: any) {
+function formatProfileForCard(profile: ApiProfile) {
+  const id = profile.ID || profile.id || "";
   return {
-    id: profile.ID || profile.id,
-    user_id: profile.ID || profile.id,
+    id,
+    user_id: id,
     first_name: profile.FirstName || profile.DisplayName?.split(" ")[0],
     last_name: profile.LastName || profile.DisplayName?.split(" ").slice(1).join(" "),
     date_of_birth: profile.DOB,
@@ -296,7 +357,7 @@ export default function HomePage() {
 
           {topMatches.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {topMatches.slice(0, 10).map((profile: any) => (
+              {topMatches.slice(0, 10).map((profile) => (
                 <div key={profile.ID || profile.id} className="flex-shrink-0 w-44">
                   <ProfileCard
                     profile={formatProfileForCard(profile)}
@@ -325,7 +386,7 @@ export default function HomePage() {
 
           {videos.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {videos.slice(0, 10).map((video: any) => (
+              {videos.slice(0, 10).map((video) => (
                 <Link
                   key={video.ID}
                   href={`/profile/${video.ID}`}
@@ -373,7 +434,7 @@ export default function HomePage() {
 
           {speedDating.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {speedDating.slice(0, 10).map((session: any) => (
+              {speedDating.slice(0, 10).map((session) => (
                 <Link
                   key={session.ID}
                   href={`/speed-dating/${session.ID}`}
@@ -423,7 +484,7 @@ export default function HomePage() {
 
           {nearbyProfiles.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {nearbyProfiles.slice(0, 10).map((profile: any) => (
+              {nearbyProfiles.slice(0, 10).map((profile) => (
                 <div key={profile.ID || profile.id} className="flex-shrink-0 w-44">
                   <ProfileCard
                     profile={formatProfileForCard(profile)}
@@ -452,7 +513,7 @@ export default function HomePage() {
 
           {events.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {events.slice(0, 10).map((event: any) => (
+              {events.slice(0, 10).map((event) => (
                 <Link
                   key={event.EventID}
                   href={`/events/${event.EventID}`}

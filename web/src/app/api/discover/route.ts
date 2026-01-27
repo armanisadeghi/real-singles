@@ -1,6 +1,53 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import type { DbProfile, DbUser } from "@/types/db";
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/** Profile with joined user data from Supabase query */
+interface ProfileWithUser extends DbProfile {
+  users: Pick<DbUser, "id" | "display_name" | "status" | "email"> | null;
+}
+
+/** Formatted profile for mobile API response */
+interface FormattedProfile {
+  ID: string | null;
+  id: string | null;
+  DisplayName: string;
+  FirstName: string;
+  LastName: string;
+  Email: string;
+  DOB: string;
+  Gender: string;
+  Image: string | null;
+  livePicture: string | null;
+  About: string;
+  City: string;
+  State: string;
+  Height: string;
+  BodyType: string;
+  Ethnicity: string[];
+  Religion: string;
+  HSign: string;
+  Interest: string;
+  is_verified: boolean;
+  IsFavorite: number;
+  RATINGS: number;
+  TotalRating: number;
+  distance_in_km?: number;
+}
+
+/** Video gallery item from database */
+interface VideoGalleryRow {
+  id: string;
+  user_id: string | null;
+  media_url: string;
+  thumbnail_url: string | null;
+  created_at: string | null;
+}
 
 /**
  * GET /api/discover
@@ -104,7 +151,7 @@ export async function GET() {
     .order("updated_at", { ascending: false });
 
   // Format profiles for mobile app (async to handle image URL conversion)
-  const formatProfile = async (profile: any): Promise<any> => {
+  const formatProfile = async (profile: ProfileWithUser): Promise<FormattedProfile> => {
     const imageUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
     return {
       ID: profile.user_id,
@@ -127,16 +174,18 @@ export async function GET() {
       HSign: profile.zodiac_sign || "",
       Interest: profile.interests?.join(", ") || "",
       is_verified: profile.is_verified || false,
-      IsFavorite: favoriteIds.has(profile.user_id) ? 1 : 0,
+      IsFavorite: profile.user_id && favoriteIds.has(profile.user_id) ? 1 : 0,
       RATINGS: 0, // TODO: Calculate from reviews
       TotalRating: 0,
     };
   };
 
-  const TopMatch = await Promise.all((topMatchProfiles || []).map(formatProfile));
+  const TopMatch = await Promise.all(
+    ((topMatchProfiles || []) as ProfileWithUser[]).map(formatProfile)
+  );
 
   // Get nearby profiles (if user has location)
-  let NearBy: any[] = [];
+  let NearBy: FormattedProfile[] = [];
   if (currentUserProfile?.latitude && currentUserProfile?.longitude) {
     // For now, just get profiles with location set (proper distance calculation would use PostGIS)
     let nearbyQuery = supabase
@@ -157,7 +206,7 @@ export async function GET() {
     const { data: nearbyProfiles } = await nearbyQuery.limit(10);
 
     NearBy = await Promise.all(
-      (nearbyProfiles || []).map(async (profile) => {
+      ((nearbyProfiles || []) as ProfileWithUser[]).map(async (profile) => {
         const formatted = await formatProfile(profile);
         // Simple distance calculation (for demo - real app would use PostGIS)
         if (profile.latitude && profile.longitude && currentUserProfile.latitude && currentUserProfile.longitude) {
@@ -182,28 +231,43 @@ export async function GET() {
   // Get featured videos (profiles with videos in gallery)
   const { data: videoGallery } = await supabase
     .from("user_gallery")
-    .select(`
-      id,
-      user_id,
-      media_url,
-      thumbnail_url,
-      created_at,
-      profiles!inner(
-        first_name,
-        last_name,
-        users!inner(display_name)
-      )
-    `)
+    .select("id, user_id, media_url, thumbnail_url, created_at")
     .eq("media_type", "video")
     .not("user_id", "in", `(${Array.from(blockedIds).join(",")})`)
     .order("created_at", { ascending: false })
     .limit(10);
 
+  // Get user info for video owners
+  const videoUserIds = (videoGallery || [])
+    .map((v) => v.user_id)
+    .filter((id): id is string => id !== null);
+  
+  const videoUserMap: Record<string, { display_name: string | null; first_name: string | null }> = {};
+  if (videoUserIds.length > 0) {
+    const { data: videoUsers } = await supabase
+      .from("users")
+      .select("id, display_name")
+      .in("id", videoUserIds);
+    
+    const { data: videoProfiles } = await supabase
+      .from("profiles")
+      .select("user_id, first_name")
+      .in("user_id", videoUserIds);
+    
+    for (const u of videoUsers || []) {
+      const profile = (videoProfiles || []).find((p) => p.user_id === u.id);
+      videoUserMap[u.id] = {
+        display_name: u.display_name,
+        first_name: profile?.first_name ?? null,
+      };
+    }
+  }
+
   const baseImageUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + "/storage/v1/object/public/";
   
   // Generate signed URLs for videos
   const Videos = await Promise.all(
-    (videoGallery || []).map(async (video: any) => {
+    ((videoGallery || []) as VideoGalleryRow[]).map(async (video) => {
       let videoUrl = video.media_url;
       
       if (!video.media_url.startsWith("http")) {
@@ -213,9 +277,11 @@ export async function GET() {
         videoUrl = signedData?.signedUrl || `${baseImageUrl}gallery/${video.media_url}`;
       }
       
+      const userInfo = video.user_id ? videoUserMap[video.user_id] : null;
+      
       return {
         ID: video.id,
-        Name: video.profiles?.users?.display_name || video.profiles?.first_name || "User",
+        Name: userInfo?.display_name || userInfo?.first_name || "User",
         Link: videoUrl,
         VideoURL: videoUrl,
         CreatedDate: video.created_at,

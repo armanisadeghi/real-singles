@@ -1,4 +1,4 @@
-import type { Profile, UserFilters } from "@/types";
+import type { DbProfile, DbUserFilters } from "@/types/db";
 
 interface CompatibilityScores {
   location: number;
@@ -24,9 +24,9 @@ const WEIGHTS = {
  * Score ranges from 0-100
  */
 export function calculateCompatibility(
-  userProfile: Profile,
-  targetProfile: Profile,
-  userFilters?: UserFilters
+  userProfile: DbProfile,
+  targetProfile: DbProfile,
+  userFilters?: DbUserFilters | null
 ): CompatibilityScores {
   const locationScore = calculateLocationScore(userProfile, targetProfile, userFilters);
   const ageScore = calculateAgeScore(userProfile, targetProfile, userFilters);
@@ -81,9 +81,9 @@ function toRad(deg: number): number {
 }
 
 function calculateLocationScore(
-  user: Profile,
-  target: Profile,
-  filters?: UserFilters
+  user: DbProfile,
+  target: DbProfile,
+  filters?: DbUserFilters | null
 ): number {
   if (!user.latitude || !user.longitude || !target.latitude || !target.longitude) {
     return 50; // Default score if location not available
@@ -107,9 +107,9 @@ function calculateLocationScore(
 }
 
 function calculateAgeScore(
-  user: Profile,
-  target: Profile,
-  filters?: UserFilters
+  _user: DbProfile,
+  target: DbProfile,
+  filters?: DbUserFilters | null
 ): number {
   if (!target.date_of_birth) {
     return 50;
@@ -138,7 +138,7 @@ function calculateAge(dateOfBirth: string): number {
   return age;
 }
 
-function calculateInterestsScore(user: Profile, target: Profile): number {
+function calculateInterestsScore(user: DbProfile, target: DbProfile): number {
   const userInterests = user.interests || [];
   const targetInterests = target.interests || [];
 
@@ -154,7 +154,7 @@ function calculateInterestsScore(user: Profile, target: Profile): number {
   return (commonInterests.length / totalUnique) * 100;
 }
 
-function calculateLifestyleScore(user: Profile, target: Profile): number {
+function calculateLifestyleScore(user: DbProfile, target: DbProfile): number {
   let score = 0;
   let factors = 0;
 
@@ -208,11 +208,11 @@ function calculateLifestyleScore(user: Profile, target: Profile): number {
   return factors > 0 ? score / factors : 50;
 }
 
-function calculateVerificationScore(target: Profile): number {
+function calculateVerificationScore(target: DbProfile): number {
   return target.is_verified ? 100 : 0;
 }
 
-function calculateActivityScore(target: Profile): number {
+function calculateActivityScore(_target: DbProfile): number {
   // This would typically check last_active_at from the users table
   // For now, return a default score
   // In actual implementation, recent activity would score higher
@@ -224,11 +224,11 @@ function calculateActivityScore(target: Profile): number {
  */
 export async function getTopMatches(
   userId: string,
-  userProfile: Profile,
-  candidates: Profile[],
-  userFilters?: UserFilters,
+  userProfile: DbProfile,
+  candidates: DbProfile[],
+  userFilters?: DbUserFilters | null,
   limit: number = 20
-): Promise<Array<Profile & { compatibility: number }>> {
+): Promise<Array<DbProfile & { compatibility: number }>> {
   const scoredCandidates = candidates
     .filter((c) => c.user_id !== userId)
     .map((candidate) => ({

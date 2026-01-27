@@ -1,9 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import type { TypedSupabaseClient, DbEventInsert } from "@/types/db";
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+interface EventAttendeeRow {
+  user_id: string | null;
+  status: string | null;
+}
+
+interface EventWithRelations {
+  id: string;
+  title: string;
+  description: string | null;
+  event_type: string;
+  image_url: string | null;
+  venue_name: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  start_datetime: string;
+  end_datetime: string | null;
+  max_attendees: number | null;
+  current_attendees: number | null;
+  created_by: string | null;
+  created_at: string | null;
+  status: string | null;
+  event_attendees: EventAttendeeRow[] | null;
+  users: { display_name: string | null } | null;
+}
+
+interface EventFormData {
+  title: string | null;
+  description: string | null;
+  event_type: string;
+  image_url: string | null;
+  venue_name: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  start_datetime: string | null;
+  end_datetime: string | null;
+  max_attendees: number | null;
+}
 
 // Verify the current user is an admin
-async function verifyAdmin(supabase: any, userId: string): Promise<boolean> {
+async function verifyAdmin(supabase: TypedSupabaseClient, userId: string): Promise<boolean> {
   const { data: userData } = await supabase
     .from("users")
     .select("role")
@@ -78,10 +127,10 @@ export async function GET(request: NextRequest) {
 
   // Format events for mobile app (with image URL resolution)
   const formattedEvents = await Promise.all(
-    (events || []).map(async (event: any) => {
+    ((events || []) as EventWithRelations[]).map(async (event) => {
       const attendees = event.event_attendees || [];
-      const interestedUsers = attendees.filter((a: any) => a.status === "interested" || a.status === "registered");
-      const isUserInterested = user ? attendees.some((a: any) => a.user_id === user.id) : false;
+      const interestedUsers = attendees.filter((a) => a.status === "interested" || a.status === "registered");
+      const isUserInterested = user ? attendees.some((a) => a.user_id === user.id) : false;
 
       // Resolve storage URL for event image
       const eventImageUrl = await resolveStorageUrl(supabase, event.image_url);
@@ -157,42 +206,46 @@ export async function POST(request: Request) {
   }
 
   try {
-    let eventData: Record<string, any> = {};
+    let eventData: EventFormData;
 
     const contentType = request.headers.get("content-type") || "";
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
+      const getStringValue = (key1: string, key2: string): string | null => {
+        const value = formData.get(key1) || formData.get(key2);
+        return value ? String(value) : null;
+      };
       eventData = {
-        title: formData.get("EventName") || formData.get("title"),
-        description: formData.get("Description") || formData.get("description"),
-        event_type: formData.get("EventType") || formData.get("event_type") || "in_person",
-        image_url: formData.get("EventImage") || formData.get("image_url"),
-        venue_name: formData.get("VenueName") || formData.get("venue_name"),
-        address: formData.get("Street") || formData.get("address"),
-        city: formData.get("City") || formData.get("city"),
-        state: formData.get("State") || formData.get("state"),
+        title: getStringValue("EventName", "title"),
+        description: getStringValue("Description", "description"),
+        event_type: getStringValue("EventType", "event_type") || "in_person",
+        image_url: getStringValue("EventImage", "image_url"),
+        venue_name: getStringValue("VenueName", "venue_name"),
+        address: getStringValue("Street", "address"),
+        city: getStringValue("City", "city"),
+        state: getStringValue("State", "state"),
         latitude: formData.get("Latitude") ? parseFloat(formData.get("Latitude") as string) : null,
         longitude: formData.get("Longitude") ? parseFloat(formData.get("Longitude") as string) : null,
-        start_datetime: formData.get("StartDateTime") || formData.get("start_datetime"),
-        end_datetime: formData.get("EndDateTime") || formData.get("end_datetime"),
+        start_datetime: getStringValue("StartDateTime", "start_datetime"),
+        end_datetime: getStringValue("EndDateTime", "end_datetime"),
         max_attendees: formData.get("MaxAttendees") ? parseInt(formData.get("MaxAttendees") as string) : null,
       };
     } else {
-      const body = await request.json();
+      const body = await request.json() as Record<string, unknown>;
       eventData = {
-        title: body.EventName || body.title,
-        description: body.Description || body.description,
-        event_type: body.EventType || body.event_type || "in_person",
-        image_url: body.EventImage || body.image_url,
-        venue_name: body.VenueName || body.venue_name,
-        address: body.Street || body.address,
-        city: body.City || body.city,
-        state: body.State || body.state,
-        latitude: body.Latitude ? parseFloat(body.Latitude) : null,
-        longitude: body.Longitude ? parseFloat(body.Longitude) : null,
-        start_datetime: body.StartDateTime || body.start_datetime,
-        end_datetime: body.EndDateTime || body.end_datetime,
-        max_attendees: body.MaxAttendees ? parseInt(body.MaxAttendees) : null,
+        title: (body.EventName || body.title || null) as string | null,
+        description: (body.Description || body.description || null) as string | null,
+        event_type: ((body.EventType || body.event_type || "in_person") as string),
+        image_url: (body.EventImage || body.image_url || null) as string | null,
+        venue_name: (body.VenueName || body.venue_name || null) as string | null,
+        address: (body.Street || body.address || null) as string | null,
+        city: (body.City || body.city || null) as string | null,
+        state: (body.State || body.state || null) as string | null,
+        latitude: body.Latitude ? parseFloat(body.Latitude as string) : null,
+        longitude: body.Longitude ? parseFloat(body.Longitude as string) : null,
+        start_datetime: (body.StartDateTime || body.start_datetime || null) as string | null,
+        end_datetime: (body.EndDateTime || body.end_datetime || null) as string | null,
+        max_attendees: body.MaxAttendees ? parseInt(body.MaxAttendees as string) : null,
       };
     }
 
