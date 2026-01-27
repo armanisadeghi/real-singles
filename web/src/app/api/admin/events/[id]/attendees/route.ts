@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import type { DbEventAttendee } from "@/types/db";
+
+// Type for attendee with JOIN data
+interface AttendeeWithDetails extends DbEventAttendee {
+  users: {
+    id: string;
+    email: string;
+    display_name: string | null;
+  } | null;
+  profiles: {
+    first_name: string | null;
+    last_name: string | null;
+    profile_image_url: string | null;
+  } | null;
+}
 
 // Verify the current user is an admin
 async function verifyAdmin(): Promise<{ isAdmin: boolean; userId?: string }> {
@@ -80,8 +95,9 @@ export async function GET(
   }
 
   // Format and resolve profile image URLs
+  const typedAttendees = (attendees || []) as AttendeeWithDetails[];
   const formattedAttendees = await Promise.all(
-    (attendees || []).map(async (attendee: any) => {
+    typedAttendees.map(async (attendee) => {
       const profileImageUrl = attendee.profiles?.profile_image_url
         ? await resolveStorageUrl(supabase, attendee.profiles.profile_image_url)
         : null;

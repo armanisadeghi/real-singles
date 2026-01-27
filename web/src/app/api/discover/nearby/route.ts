@@ -1,6 +1,45 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import type { DbProfile } from "@/types/db";
+
+// Type for profile with JOIN data
+interface ProfileWithUser extends DbProfile {
+  users: {
+    id: string;
+    display_name: string | null;
+    status: string | null;
+    email: string;
+  } | null;
+}
+
+// Type for formatted profile with distance
+interface FormattedProfileWithDistance {
+  ID: string | null;
+  id: string | null;
+  DisplayName: string;
+  FirstName: string;
+  LastName: string;
+  Email: string;
+  DOB: string;
+  Gender: string;
+  Image: string | null;
+  livePicture: string | null;
+  About: string;
+  City: string;
+  State: string;
+  Height: string;
+  BodyType: string;
+  Ethnicity: string[];
+  Religion: string;
+  HSign: string;
+  Interest: string;
+  is_verified: boolean;
+  IsFavorite: number;
+  RATINGS: number;
+  TotalRating: number;
+  distance_in_km: number;
+}
 
 /**
  * GET /api/discover/nearby
@@ -143,15 +182,16 @@ async function handleNearbyRequest(request: Request) {
   }
 
   // Calculate distances and filter
-  const profilesWithDistance = await Promise.all(
-    (profiles || []).map(async (profile: any) => {
+  const typedProfiles = (profiles || []) as ProfileWithUser[];
+  const profilesWithDistance: FormattedProfileWithDistance[] = await Promise.all(
+    typedProfiles.map(async (profile) => {
       const R = 6371; // Earth's radius in km
-      const dLat = ((profile.latitude - userLat!) * Math.PI) / 180;
-      const dLon = ((profile.longitude - userLon!) * Math.PI) / 180;
+      const dLat = ((profile.latitude! - userLat!) * Math.PI) / 180;
+      const dLon = ((profile.longitude! - userLon!) * Math.PI) / 180;
       const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos((userLat! * Math.PI) / 180) *
-          Math.cos((profile.latitude * Math.PI) / 180) *
+          Math.cos((profile.latitude! * Math.PI) / 180) *
           Math.sin(dLon / 2) *
           Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -180,7 +220,7 @@ async function handleNearbyRequest(request: Request) {
         HSign: profile.zodiac_sign || "",
         Interest: profile.interests?.join(", ") || "",
         is_verified: profile.is_verified || false,
-        IsFavorite: favoriteIds.has(profile.user_id) ? 1 : 0,
+        IsFavorite: favoriteIds.has(profile.user_id!) ? 1 : 0,
         RATINGS: 0,
         TotalRating: 0,
         distance_in_km: Math.round(distance * 10) / 10,
@@ -189,8 +229,8 @@ async function handleNearbyRequest(request: Request) {
   );
   
   const filteredProfiles = profilesWithDistance
-    .filter((p: any) => p.distance_in_km <= maxDistance)
-    .sort((a: any, b: any) => a.distance_in_km - b.distance_in_km);
+    .filter((p) => p.distance_in_km <= maxDistance)
+    .sort((a, b) => a.distance_in_km - b.distance_in_km);
 
   return NextResponse.json({
     success: true,

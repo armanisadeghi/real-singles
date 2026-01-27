@@ -1,6 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import type { DbReview } from "@/types/db";
+
+// Type for nested profile data from JOIN
+interface ProfileWithUser {
+  first_name: string | null;
+  profile_image_url: string | null;
+  users: {
+    display_name: string | null;
+  } | null;
+}
+
+// Type for review with JOIN data
+interface ReviewWithRelations extends DbReview {
+  reviewer?: {
+    profiles: ProfileWithUser | null;
+  } | null;
+  reviewed_user?: {
+    profiles: ProfileWithUser | null;
+  } | null;
+}
 
 /**
  * GET /api/reviews
@@ -104,8 +124,10 @@ export async function GET(request: NextRequest) {
   }
 
   // Format reviews with resolved profile image URLs
+  // Cast through unknown due to Supabase's complex JOIN type inference
+  const typedReviews = (reviews || []) as unknown as ReviewWithRelations[];
   const formattedReviews = await Promise.all(
-    (reviews || []).map(async (review: any) => ({
+    typedReviews.map(async (review) => ({
       ReviewID: review.id,
       ReviewerID: review.reviewer_id,
       ReviewerName: review.reviewer?.profiles?.users?.display_name || 

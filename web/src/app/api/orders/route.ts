@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import type { DbOrder } from "@/types/db";
+
+// Type for order with JOIN data
+interface OrderWithProduct extends DbOrder {
+  products: {
+    name: string;
+    image_url: string | null;
+    points_cost: number;
+  } | null;
+}
 
 /**
  * GET /api/orders
@@ -49,7 +59,8 @@ export async function GET(request: NextRequest) {
     .eq("user_id", user.id);
 
   // Format orders
-  const formattedOrders = (orders || []).map((order: any) => ({
+  const typedOrders = (orders || []) as OrderWithProduct[];
+  const formattedOrders = typedOrders.map((order) => ({
     OrderID: order.id,
     ProductName: order.products?.name || "Unknown Product",
     ProductImage: order.products?.image_url || "",

@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
+// Type for review with JOIN data
+interface ReviewWithProfile {
+  id: string;
+  reviewer_id: string | null;
+  relationship: string | null;
+  rating: number | null;
+  review_text: string | null;
+  created_at: string | null;
+  profiles: {
+    first_name: string | null;
+    profile_image_url: string | null;
+    is_verified: boolean | null;
+    users: {
+      display_name: string | null;
+    } | null;
+  } | null;
+}
+
 /**
  * GET /api/users/[id]/reviews
  * Get approved reviews for a specific user
@@ -61,14 +79,16 @@ export async function GET(
   }
 
   // Calculate average rating
-  const totalRating = (reviews || []).reduce((sum: number, r: any) => sum + r.rating, 0);
-  const averageRating = reviews && reviews.length > 0 
-    ? Math.round((totalRating / reviews.length) * 10) / 10 
+  // Cast through unknown due to Supabase's complex JOIN type inference
+  const typedReviews = (reviews || []) as unknown as ReviewWithProfile[];
+  const totalRating = typedReviews.reduce((sum: number, r) => sum + (r.rating || 0), 0);
+  const averageRating = typedReviews.length > 0 
+    ? Math.round((totalRating / typedReviews.length) * 10) / 10 
     : null;
 
   // Format reviews with resolved profile image URLs
   const formattedReviews = await Promise.all(
-    (reviews || []).map(async (review: any) => ({
+    typedReviews.map(async (review) => ({
       id: review.id,
       reviewer_id: review.reviewer_id,
       reviewer_name: review.profiles?.users?.display_name || review.profiles?.first_name || "Anonymous",

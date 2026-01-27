@@ -1,6 +1,27 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import type { DbConversation, DbConversationUpdate } from "@/types/db";
+
+// Type for participant with JOIN data
+interface ConversationParticipantWithDetails {
+  user_id: string | null;
+  role: string | null;
+  joined_at: string | null;
+  profiles: {
+    first_name: string | null;
+    last_name: string | null;
+    profile_image_url: string | null;
+    users: {
+      display_name: string | null;
+    } | null;
+  } | null;
+}
+
+// Type for group with participants JOIN
+interface GroupWithParticipantDetails extends DbConversation {
+  conversation_participants: ConversationParticipantWithDetails[];
+}
 
 /**
  * GET /api/groups/[id]
@@ -63,12 +84,13 @@ export async function GET(
     );
   }
 
-  const participants = group.conversation_participants || [];
+  const typedGroup = group as GroupWithParticipantDetails;
+  const participants = typedGroup.conversation_participants || [];
 
   // Resolve profile image URLs
-  const groupImageUrl = await resolveStorageUrl(supabase, group.group_image_url);
+  const groupImageUrl = await resolveStorageUrl(supabase, typedGroup.group_image_url);
   const membersWithUrls = await Promise.all(
-    participants.map(async (p: any) => ({
+    participants.map(async (p) => ({
       user_id: p.user_id,
       display_name: p.profiles?.users?.display_name || p.profiles?.first_name || "User",
       first_name: p.profiles?.first_name || "",
@@ -80,16 +102,16 @@ export async function GET(
   );
 
   const formattedGroup = {
-    GroupID: group.id,
-    GroupName: group.group_name || "Unnamed Group",
+    GroupID: typedGroup.id,
+    GroupName: typedGroup.group_name || "Unnamed Group",
     GroupImage: groupImageUrl,
     MemberCount: participants.length,
     Members: membersWithUrls,
-    CreatedBy: group.created_by,
-    AgoraGroupID: group.agora_group_id,
+    CreatedBy: typedGroup.created_by,
+    AgoraGroupID: typedGroup.agora_group_id,
     UserRole: membership.role,
-    CreatedAt: group.created_at,
-    UpdatedAt: group.updated_at,
+    CreatedAt: typedGroup.created_at,
+    UpdatedAt: typedGroup.updated_at,
   };
 
   return NextResponse.json({
@@ -139,7 +161,7 @@ export async function PUT(
 
   try {
     const body = await request.json();
-    const updates: Record<string, any> = {};
+    const updates: DbConversationUpdate = {};
 
     if (body.GroupName !== undefined || body.group_name !== undefined) {
       updates.group_name = body.GroupName || body.group_name;

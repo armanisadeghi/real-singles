@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import type { DbVirtualSpeedDating } from "@/types/db";
+
+// Type for registration from JOIN query
+interface SpeedDatingRegistration {
+  user_id: string | null;
+  status: string | null;
+}
+
+// Type for session with registrations JOIN
+interface SessionWithRegistrations extends DbVirtualSpeedDating {
+  speed_dating_registrations: SpeedDatingRegistration[];
+}
 
 /**
  * GET /api/speed-dating
@@ -50,13 +62,14 @@ export async function GET(request: NextRequest) {
   }
 
   // Format sessions
-  const formattedSessions = (sessions || []).map((session: any) => {
+  const typedSessions = (sessions || []) as SessionWithRegistrations[];
+  const formattedSessions = typedSessions.map((session) => {
     const registrations = session.speed_dating_registrations || [];
     const isUserRegistered = user 
-      ? registrations.some((r: any) => r.user_id === user.id)
+      ? registrations.some((r) => r.user_id === user.id)
       : false;
     const registeredCount = registrations.length;
-    const spotsAvailable = session.max_participants - registeredCount;
+    const spotsAvailable = (session.max_participants ?? 0) - registeredCount;
 
     return {
       SessionID: session.id,

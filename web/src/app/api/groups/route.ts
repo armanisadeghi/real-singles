@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import type { DbConversation } from "@/types/db";
+
+// Type for participant with JOIN data
+interface ConversationParticipant {
+  user_id: string | null;
+  role: string | null;
+  profiles: {
+    first_name: string | null;
+    profile_image_url: string | null;
+    users: {
+      display_name: string | null;
+    } | null;
+  } | null;
+}
+
+// Type for group with participants JOIN
+interface GroupWithParticipants extends DbConversation {
+  conversation_participants: ConversationParticipant[];
+}
 
 /**
  * GET /api/groups
@@ -76,16 +95,17 @@ export async function GET(request: NextRequest) {
   }
 
   // Format groups for mobile app with resolved profile image URLs
+  const typedGroups = (groups || []) as GroupWithParticipants[];
   const formattedGroups = await Promise.all(
-    (groups || []).map(async (group: any) => {
+    typedGroups.map(async (group) => {
       const participants = group.conversation_participants || [];
       const memberCount = participants.length;
-      const userRole = participants.find((p: any) => p.user_id === user.id)?.role || "member";
+      const userRole = participants.find((p) => p.user_id === user.id)?.role || "member";
 
       // Resolve profile image URLs for group image and members
       const groupImageUrl = await resolveStorageUrl(supabase, group.group_image_url);
       const membersWithUrls = await Promise.all(
-        participants.slice(0, 5).map(async (p: any) => ({
+        participants.slice(0, 5).map(async (p) => ({
           user_id: p.user_id,
           display_name: p.profiles?.users?.display_name || p.profiles?.first_name || "User",
           profile_image_url: await resolveStorageUrl(supabase, p.profiles?.profile_image_url),

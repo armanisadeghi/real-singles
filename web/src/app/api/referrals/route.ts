@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import { getReferralLink } from "@/lib/config";
+import type { DbReferral } from "@/types/db";
+
+// Type for referral with JOIN data
+interface ReferralWithUser extends DbReferral {
+  referred_user: {
+    id: string;
+    display_name: string | null;
+    created_at: string | null;
+    profiles: {
+      first_name: string | null;
+      profile_image_url: string | null;
+    } | null;
+  } | null;
+}
 
 /**
  * GET /api/referrals
@@ -78,8 +92,10 @@ export async function GET(request: NextRequest) {
   const totalPointsEarned = pointsEarned?.reduce((sum, r) => sum + (r.points_awarded || 0), 0) || 0;
 
   // Format referrals with resolved profile image URLs
+  // Cast through unknown due to Supabase's complex JOIN type inference
+  const typedReferrals = (referrals || []) as unknown as ReferralWithUser[];
   const formattedReferrals = await Promise.all(
-    (referrals || []).map(async (ref: any) => ({
+    typedReferrals.map(async (ref) => ({
       ReferralID: ref.id,
       ReferredUserID: ref.referred_user_id,
       ReferredUserName: ref.referred_user?.display_name || 

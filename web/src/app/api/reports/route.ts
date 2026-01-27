@@ -1,6 +1,23 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 
+// Type for report with JOIN data
+interface ReportWithProfile {
+  id: string;
+  reason: string | null;
+  description: string | null;
+  status: string | null;
+  created_at: string | null;
+  reported_user_id: string | null;
+  profiles: {
+    first_name: string | null;
+    profile_image_url: string | null;
+    users: {
+      display_name: string | null;
+    } | null;
+  } | null;
+}
+
 /**
  * POST /api/reports
  * Report a user for inappropriate behavior
@@ -172,7 +189,9 @@ export async function GET() {
     );
   }
 
-  const formattedReports = (reports || []).map((report: any) => ({
+  // Cast through unknown due to Supabase's complex JOIN type inference
+  const typedReports = (reports || []) as unknown as ReportWithProfile[];
+  const formattedReports = typedReports.map((report) => ({
     id: report.id,
     reported_user_id: report.reported_user_id,
     reported_user_name: report.profiles?.users?.display_name || report.profiles?.first_name || "User",

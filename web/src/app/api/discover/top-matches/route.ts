@@ -1,6 +1,45 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import type { DbProfile } from "@/types/db";
+
+// Type for profile with JOIN data
+interface ProfileWithUser extends DbProfile {
+  users: {
+    id: string;
+    display_name: string | null;
+    status: string | null;
+    email: string;
+  } | null;
+}
+
+// Type for formatted profile with distance
+interface FormattedProfile {
+  ID: string | null;
+  id: string | null;
+  DisplayName: string;
+  FirstName: string;
+  LastName: string;
+  Email: string;
+  DOB: string;
+  Gender: string;
+  Image: string | null;
+  livePicture: string | null;
+  About: string;
+  City: string;
+  State: string;
+  Height: string;
+  BodyType: string;
+  Ethnicity: string[];
+  Religion: string;
+  HSign: string;
+  Interest: string;
+  is_verified: boolean;
+  IsFavorite: number;
+  RATINGS: number;
+  TotalRating: number;
+  distance_in_km?: number;
+}
 
 /**
  * GET /api/discover/top-matches
@@ -186,10 +225,11 @@ export async function GET(request: Request) {
   }
 
   // Format profiles and calculate distances
-  const formattedProfiles = await Promise.all(
-    (profiles || []).map(async (profile: any) => {
+  const typedProfiles = (profiles || []) as ProfileWithUser[];
+  const formattedProfiles: FormattedProfile[] = await Promise.all(
+    typedProfiles.map(async (profile) => {
       const imageUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
-      const formatted: any = {
+      const formatted: FormattedProfile = {
         ID: profile.user_id,
         id: profile.user_id,
         DisplayName: profile.users?.display_name || profile.first_name || "",
@@ -210,7 +250,7 @@ export async function GET(request: Request) {
         HSign: profile.zodiac_sign || "",
         Interest: profile.interests?.join(", ") || "",
         is_verified: profile.is_verified || false,
-        IsFavorite: favoriteIds.has(profile.user_id) ? 1 : 0,
+        IsFavorite: favoriteIds.has(profile.user_id!) ? 1 : 0,
         RATINGS: 0,
         TotalRating: 0,
       };
@@ -244,7 +284,7 @@ export async function GET(request: Request) {
   if (filters.max_distance) {
     const maxDistanceKm = parseFloat(filters.max_distance) * 1.60934; // Convert miles to km
     filteredProfiles = formattedProfiles.filter(
-      (p: any) => !p.distance_in_km || p.distance_in_km <= maxDistanceKm
+      (p) => !p.distance_in_km || p.distance_in_km <= maxDistanceKm
     );
   }
 

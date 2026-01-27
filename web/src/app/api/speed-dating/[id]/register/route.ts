@@ -1,5 +1,16 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import type { DbVirtualSpeedDating } from "@/types/db";
+
+// Type for registration from JOIN query
+interface SpeedDatingRegistrationBasic {
+  user_id: string | null;
+}
+
+// Type for session with registrations JOIN
+interface SessionWithBasicRegistrations extends DbVirtualSpeedDating {
+  speed_dating_registrations: SpeedDatingRegistrationBasic[];
+}
 
 /**
  * POST /api/speed-dating/[id]/register
@@ -41,8 +52,10 @@ export async function POST(
     );
   }
 
+  const typedSession = session as SessionWithBasicRegistrations;
+
   // Check if session is still open for registration
-  if (session.status !== "scheduled") {
+  if (typedSession.status !== "scheduled") {
     return NextResponse.json(
       { success: false, msg: "This session is no longer open for registration" },
       { status: 400 }
@@ -50,7 +63,7 @@ export async function POST(
   }
 
   // Check if session is in the future
-  if (new Date(session.scheduled_datetime) < new Date()) {
+  if (new Date(typedSession.scheduled_datetime) < new Date()) {
     return NextResponse.json(
       { success: false, msg: "This session has already started" },
       { status: 400 }
@@ -58,8 +71,8 @@ export async function POST(
   }
 
   // Check if user is already registered
-  const registrations = session.speed_dating_registrations || [];
-  if (registrations.some((r: any) => r.user_id === user.id)) {
+  const registrations = typedSession.speed_dating_registrations || [];
+  if (registrations.some((r) => r.user_id === user.id)) {
     return NextResponse.json({
       success: true,
       msg: "You are already registered for this session",
@@ -67,7 +80,7 @@ export async function POST(
   }
 
   // Check if session is full
-  if (session.max_participants !== null && registrations.length >= session.max_participants) {
+  if (typedSession.max_participants !== null && registrations.length >= typedSession.max_participants) {
     return NextResponse.json(
       { success: false, msg: "This session is full" },
       { status: 400 }
@@ -82,18 +95,18 @@ export async function POST(
     .single();
 
   // Check gender preference
-  if (session.gender_preference && session.gender_preference !== "mixed") {
-    const requiredGender = session.gender_preference === "men_only" ? "male" : "female";
+  if (typedSession.gender_preference && typedSession.gender_preference !== "mixed") {
+    const requiredGender = typedSession.gender_preference === "men_only" ? "male" : "female";
     if (profile?.gender !== requiredGender) {
       return NextResponse.json(
-        { success: false, msg: `This session is for ${session.gender_preference.replace("_", " ")}` },
+        { success: false, msg: `This session is for ${typedSession.gender_preference.replace("_", " ")}` },
         { status: 400 }
       );
     }
   }
 
   // Check age range
-  if (profile?.date_of_birth && (session.age_min || session.age_max)) {
+  if (profile?.date_of_birth && (typedSession.age_min || typedSession.age_max)) {
     const dob = new Date(profile.date_of_birth);
     const today = new Date();
     let age = today.getFullYear() - dob.getFullYear();
@@ -102,15 +115,15 @@ export async function POST(
       age--;
     }
 
-    if (session.age_min && age < session.age_min) {
+    if (typedSession.age_min && age < typedSession.age_min) {
       return NextResponse.json(
-        { success: false, msg: `You must be at least ${session.age_min} years old for this session` },
+        { success: false, msg: `You must be at least ${typedSession.age_min} years old for this session` },
         { status: 400 }
       );
     }
-    if (session.age_max && age > session.age_max) {
+    if (typedSession.age_max && age > typedSession.age_max) {
       return NextResponse.json(
-        { success: false, msg: `You must be ${session.age_max} years old or younger for this session` },
+        { success: false, msg: `You must be ${typedSession.age_max} years old or younger for this session` },
         { status: 400 }
       );
     }
@@ -138,10 +151,10 @@ export async function POST(
     user_id: user.id,
     type: "event",
     title: "Speed Dating Registration",
-    body: `You're registered for "${session.title}"!`,
+    body: `You're registered for "${typedSession.title}"!`,
     data: {
       session_id: sessionId,
-      scheduled_datetime: session.scheduled_datetime,
+      scheduled_datetime: typedSession.scheduled_datetime,
     },
   });
 

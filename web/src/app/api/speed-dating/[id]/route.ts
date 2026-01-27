@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import type { DbVirtualSpeedDating, DbProfile } from "@/types/db";
+
+// Type for registration from JOIN query
+interface SpeedDatingRegistration {
+  user_id: string | null;
+  status: string | null;
+  registered_at: string | null;
+}
+
+// Type for session with registrations JOIN
+interface SessionWithRegistrations extends DbVirtualSpeedDating {
+  speed_dating_registrations: SpeedDatingRegistration[];
+}
+
+// Type for participant profile
+interface ParticipantProfile extends Pick<DbProfile, "user_id" | "first_name" | "gender" | "profile_image_url" | "is_verified"> {}
 
 /**
  * GET /api/speed-dating/[id]
@@ -37,17 +53,24 @@ export async function GET(
     );
   }
 
-  const registrations = session.speed_dating_registrations || [];
+  const typedSession = session as SessionWithRegistrations;
+  const registrations = typedSession.speed_dating_registrations || [];
   const isUserRegistered = user 
-    ? registrations.some((r: any) => r.user_id === user.id)
+    ? registrations.some((r) => r.user_id === user.id)
     : false;
   const userRegistration = user
-    ? registrations.find((r: any) => r.user_id === user.id)
+    ? registrations.find((r) => r.user_id === user.id)
     : null;
 
   // Get participant profiles (limited info for privacy)
-  const participantIds = registrations.map((r: any) => r.user_id);
-  let participants: any[] = [];
+  const participantIds = registrations.map((r) => r.user_id).filter((id): id is string => id !== null);
+  let participants: Array<{
+    UserID: string | null;
+    FirstName: string | null;
+    Gender: string | null;
+    ProfileImage: string | null;
+    IsVerified: boolean | null;
+  }> = [];
 
   if (participantIds.length > 0) {
     const { data: profiles } = await supabase
@@ -55,8 +78,9 @@ export async function GET(
       .select("user_id, first_name, gender, profile_image_url, is_verified")
       .in("user_id", participantIds);
 
+    const typedProfiles = (profiles || []) as ParticipantProfile[];
     participants = await Promise.all(
-      (profiles || []).map(async (p) => ({
+      typedProfiles.map(async (p) => ({
         UserID: p.user_id,
         FirstName: p.first_name,
         Gender: p.gender,
