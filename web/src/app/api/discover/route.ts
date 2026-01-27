@@ -305,7 +305,7 @@ export async function GET() {
   // Resolve event image URLs
   const formattedEvents = await Promise.all(
     (events || []).map(async (event) => {
-      const eventImageUrl = await resolveStorageUrl(supabase, event.image_url);
+      const eventImageUrl = await resolveStorageUrl(supabase, event.image_url, { bucket: "events" });
       return {
         EventID: event.id,
         EventName: event.title,

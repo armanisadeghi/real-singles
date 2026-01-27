@@ -110,7 +110,7 @@ export async function GET(
   const isUserInterested = user ? attendees.some((a) => a.user_id === user.id) : false;
 
   // Resolve event image URL
-  const eventImageUrl = await resolveStorageUrl(supabase, event.image_url);
+  const eventImageUrl = await resolveStorageUrl(supabase, event.image_url, { bucket: "events" });
 
   // Resolve interested user images
   const interestedUserImages = await Promise.all(

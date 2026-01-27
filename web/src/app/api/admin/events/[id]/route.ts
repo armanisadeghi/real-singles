@@ -60,7 +60,7 @@ export async function GET(
 
   // Resolve image URL
   const resolvedImageUrl = event.image_url
-    ? await resolveStorageUrl(supabase, event.image_url)
+    ? await resolveStorageUrl(supabase, event.image_url, { bucket: "events" })
     : null;
 
   // Get attendee counts
