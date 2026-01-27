@@ -3,7 +3,6 @@ import * as Haptics from "expo-haptics";
 import { usePathname, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
-  Animated,
   Dimensions,
   Platform,
   Share,
@@ -12,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Animated, { useSharedValue, withSpring, useAnimatedStyle } from "react-native-reanimated";
 import { Avatar } from "@/components/ui/Avatar";
 import { getReferralLink, APP_NAME } from "@/lib/config";
 
@@ -39,9 +39,7 @@ const SideMenu = ({
 }: SideMenuProps) => {
   const router = useRouter();
   const currentPath = usePathname();
-  const translateX = useRef(
-    new Animated.Value(direction === "left" ? -MENU_WIDTH : width)
-  ).current;
+  const translateX = useSharedValue(direction === "left" ? -MENU_WIDTH : width);
 
   const handleReferFriend = async () => {
     // Haptic feedback for share action
@@ -90,20 +88,15 @@ const SideMenu = ({
   };
 
   useEffect(() => {
-    if (visible) {
-      Animated.timing(translateX, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(translateX, {
-        toValue: direction === "left" ? -MENU_WIDTH : width,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
+    translateX.value = withSpring(
+      visible ? 0 : (direction === "left" ? -MENU_WIDTH : width),
+      { damping: 18, stiffness: 200 }
+    );
   }, [visible, direction]);
+
+  const menuAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
 
   const menuItems = [
     {
@@ -176,8 +169,8 @@ const SideMenu = ({
       <Animated.View
         style={[
           styles.menu,
+          menuAnimatedStyle,
           {
-            transform: [{ translateX }],
             left: direction === "left" ? 0 : undefined,
             right: direction === "right" ? 0 : undefined,
           },

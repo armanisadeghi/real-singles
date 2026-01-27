@@ -12,7 +12,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Animated,
   BackHandler,
   Image,
   ImageBackground,
@@ -21,6 +20,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
+import Animated, { useSharedValue, withSpring, useAnimatedStyle, withSequence } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
@@ -35,7 +35,7 @@ export default function ProfileDetail() {
   const [profile, setProfile] = useState<User>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [retryAnimation] = useState(new Animated.Value(1));
+  const retryScale = useSharedValue(1);
 
   // Android hardware back button handling
   useEffect(() => {
@@ -165,22 +165,18 @@ export default function ProfileDetail() {
 
   const handleRetry = () => {
     // Animate the retry button
-    Animated.sequence([
-      Animated.timing(retryAnimation, {
-        toValue: 0.8,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(retryAnimation, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    retryScale.value = withSequence(
+      withSpring(0.8, { damping: 10 }),
+      withSpring(1, { damping: 10 })
+    );
 
     // Fetch the profile again
     fetchProfile(id as string);
   };
+
+  const retryAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: retryScale.value }],
+  }));
 
   //change this function
   // const handleFollow = async () => {
@@ -270,7 +266,7 @@ export default function ProfileDetail() {
           <Animated.View
             style={[
               styles.retryButtonContainer,
-              { transform: [{ scale: retryAnimation }] },
+              retryAnimatedStyle,
             ]}
           >
             <TouchableOpacity

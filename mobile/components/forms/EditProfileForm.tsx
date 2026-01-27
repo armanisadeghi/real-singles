@@ -31,7 +31,6 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Animated,
   Image,
   LayoutAnimation,
   Modal,
@@ -43,6 +42,7 @@ import {
   UIManager,
   View,
 } from "react-native";
+import Animated, { useSharedValue, withSpring, useAnimatedStyle, interpolate } from "react-native-reanimated";
 import RNPickerSelect from "react-native-picker-select";
 import Toast from "react-native-toast-message";
 import LinearBg from "../LinearBg";
@@ -106,7 +106,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   const [passwordError, setPasswordError] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
 
-  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const arrowRotation = useSharedValue(0);
 
   useEffect(() => {
     // Custom animation config
@@ -123,11 +123,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         type: LayoutAnimation.Types.easeInEaseOut,
       },
     };
-    Animated.timing(rotateAnim, {
-      toValue: showPersonalDetails ? 1 : 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+    arrowRotation.value = withSpring(showPersonalDetails ? 1 : 0, {
+      damping: 15,
+      stiffness: 200,
+    });
 
     // Animate height/layout
     LayoutAnimation.configureNext(animationConfig);
@@ -154,10 +153,13 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
     fetchLifeGoals();
   }, []);
 
-  const arrowRotation = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["180deg", "90deg"],
-  });
+  const arrowAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        rotate: `${interpolate(arrowRotation.value, [0, 1], [180, 90])}deg`,
+      },
+    ],
+  }));
 
   const pickerSelectStyles = {
     inputIOS: {
@@ -778,7 +780,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           <Text className="text-primary font-medium text-lg">
             Personal Details
           </Text>
-          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+          <Animated.View style={arrowAnimatedStyle}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
@@ -1021,7 +1023,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           <Text className="text-primary font-medium text-lg">
             Pick your Interest
           </Text>
-          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+          <Animated.View style={arrowAnimatedStyle}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
@@ -1102,7 +1104,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           <Text className="text-primary font-medium text-lg">
             Education and Job Details
           </Text>
-          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+          <Animated.View style={arrowAnimatedStyle}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
@@ -1231,7 +1233,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">Appearance</Text>
-          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+          <Animated.View style={arrowAnimatedStyle}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
@@ -1362,7 +1364,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           <Text className="text-primary font-medium text-lg">
             Habit & Interests
           </Text>
-          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+          <Animated.View style={arrowAnimatedStyle}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
@@ -1528,7 +1530,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">Ethnicity</Text>
-          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+          <Animated.View style={arrowAnimatedStyle}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
@@ -1604,7 +1606,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">Language</Text>
-          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+          <Animated.View style={arrowAnimatedStyle}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
@@ -1688,7 +1690,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">Religion</Text>
-          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+          <Animated.View style={arrowAnimatedStyle}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
@@ -1766,7 +1768,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           <Text className="text-primary font-medium text-lg">
             Poltical Views
           </Text>
-          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+          <Animated.View style={arrowAnimatedStyle}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
@@ -1809,7 +1811,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">Life Goals</Text>
-          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+          <Animated.View style={arrowAnimatedStyle}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
@@ -1918,7 +1920,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           <Text className="text-primary font-medium text-lg">
             In a few Words
           </Text>
-          <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+          <Animated.View style={arrowAnimatedStyle}>
             <Image source={icons.back} resizeMode="contain" />
           </Animated.View>
         </TouchableOpacity>
