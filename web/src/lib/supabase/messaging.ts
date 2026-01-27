@@ -16,6 +16,7 @@
 
 import { createClient } from "./client";
 import type { RealtimeChannel, RealtimePresenceState } from "@supabase/supabase-js";
+import type { Json } from "@/types/database.types";
 
 // ============================================
 // TYPES
@@ -29,7 +30,7 @@ export interface Message {
   message_type: "text" | "image" | "video" | "audio" | "file" | "system";
   media_url?: string | null;
   media_thumbnail_url?: string | null;
-  media_metadata?: Record<string, unknown> | null;
+  media_metadata?: Json | null;
   status: "sending" | "sent" | "delivered" | "read" | "failed";
   reply_to_id?: string | null;
   deleted_at?: string | null;
@@ -46,7 +47,7 @@ export interface MessageInsert {
   message_type?: Message["message_type"];
   media_url?: string;
   media_thumbnail_url?: string;
-  media_metadata?: Record<string, unknown>;
+  media_metadata?: Json;
   reply_to_id?: string;
   client_message_id?: string;
 }
@@ -150,7 +151,7 @@ export class MessagingService {
       messageType?: Message["message_type"];
       mediaUrl?: string;
       mediaThumbnailUrl?: string;
-      mediaMetadata?: Record<string, unknown>;
+      mediaMetadata?: Json;
       replyToId?: string;
     }
   ): Promise<Message> {
@@ -252,7 +253,11 @@ export class MessagingService {
    * Delete a message (soft delete)
    */
   async deleteMessage(messageId: string, forEveryone: boolean = false): Promise<void> {
-    const updateData: Partial<Message> = {
+    const updateData: {
+      deleted_at: string;
+      deleted_for_everyone: boolean;
+      content?: string;
+    } = {
       deleted_at: new Date().toISOString(),
       deleted_for_everyone: forEveryone,
     };
@@ -492,28 +497,36 @@ export class MessagingService {
       .eq("user_id", currentUserId);
 
     if (myConversations && myConversations.length > 0) {
-      const conversationIds = myConversations.map((c) => c.conversation_id);
+      const conversationIds = myConversations
+        .map((c) => c.conversation_id)
+        .filter((id): id is string => id !== null);
 
-      // Check which of these have the other user
-      const { data: sharedConversations } = await this.supabase
-        .from("conversation_participants")
-        .select("conversation_id")
-        .eq("user_id", otherUserId)
-        .in("conversation_id", conversationIds);
+      if (conversationIds.length === 0) {
+        // No valid conversations found, will create new one below
+      } else {
+        // Check which of these have the other user
+        const { data: sharedConversations } = await this.supabase
+          .from("conversation_participants")
+          .select("conversation_id")
+          .eq("user_id", otherUserId)
+          .in("conversation_id", conversationIds);
 
-      if (sharedConversations && sharedConversations.length > 0) {
-        // Verify it's a direct conversation with exactly 2 participants
-        for (const conv of sharedConversations) {
-          const { data: conversation } = await this.supabase
-            .from("conversations")
-            .select("id, type")
-            .eq("id", conv.conversation_id)
-            .eq("type", "direct")
-            .single();
+        if (sharedConversations && sharedConversations.length > 0) {
+          // Verify it's a direct conversation with exactly 2 participants
+          for (const conv of sharedConversations) {
+            if (!conv.conversation_id) continue;
+            
+            const { data: conversation } = await this.supabase
+              .from("conversations")
+              .select("id, type")
+              .eq("id", conv.conversation_id)
+              .eq("type", "direct")
+              .single();
 
-          if (conversation) {
-            console.log(`[Messaging] Found existing conversation: ${conversation.id}`);
-            return conversation.id;
+            if (conversation) {
+              console.log(`[Messaging] Found existing conversation: ${conversation.id}`);
+              return conversation.id;
+            }
           }
         }
       }

@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { z } from "zod";
+import type { Json } from "@/types/database.types";
+
+// JSON schema that matches Supabase's Json type
+const jsonSchema: z.ZodType<Json> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(jsonSchema),
+    z.record(z.string(), jsonSchema),
+  ])
+);
 
 // Validation schema for sending a message
 const sendMessageSchema = z.object({
@@ -9,7 +22,7 @@ const sendMessageSchema = z.object({
   message_type: z.enum(["text", "image", "video", "audio", "file", "system"]).default("text"),
   media_url: z.string().url().optional(),
   media_thumbnail_url: z.string().url().optional(),
-  media_metadata: z.record(z.unknown()).optional(),
+  media_metadata: jsonSchema.optional(),
   reply_to_id: z.string().uuid().optional(),
   client_message_id: z.string().optional(),
 });

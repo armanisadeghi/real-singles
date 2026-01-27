@@ -377,6 +377,45 @@ export type Database = {
           },
         ]
       }
+      life_goal_definitions: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          key: string
+          label: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          key: string
+          label: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          key?: string
+          label?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           action: string
@@ -410,6 +449,157 @@ export type Database = {
           {
             foreignKeyName: "matches_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_reactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          message_id: string
+          reaction: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message_id: string
+          reaction: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message_id?: string
+          reaction?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_read_receipts: {
+        Row: {
+          id: string
+          message_id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          message_id: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          message_id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_read_receipts_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_read_receipts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          client_message_id: string | null
+          content: string
+          conversation_id: string
+          created_at: string | null
+          deleted_at: string | null
+          deleted_for_everyone: boolean | null
+          edited_at: string | null
+          id: string
+          media_metadata: Json | null
+          media_thumbnail_url: string | null
+          media_url: string | null
+          message_type: string | null
+          reply_to_id: string | null
+          sender_id: string
+          status: string | null
+        }
+        Insert: {
+          client_message_id?: string | null
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          deleted_at?: string | null
+          deleted_for_everyone?: boolean | null
+          edited_at?: string | null
+          id?: string
+          media_metadata?: Json | null
+          media_thumbnail_url?: string | null
+          media_url?: string | null
+          message_type?: string | null
+          reply_to_id?: string | null
+          sender_id: string
+          status?: string | null
+        }
+        Update: {
+          client_message_id?: string | null
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          deleted_at?: string | null
+          deleted_for_everyone?: boolean | null
+          edited_at?: string | null
+          id?: string
+          media_metadata?: Json | null
+          media_thumbnail_url?: string | null
+          media_url?: string | null
+          message_type?: string | null
+          reply_to_id?: string | null
+          sender_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -526,6 +716,47 @@ export type Database = {
           },
         ]
       }
+      phone_verification_otps: {
+        Row: {
+          attempts: number | null
+          created_at: string | null
+          expires_at: string
+          id: string
+          otp_code: string
+          phone: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          otp_code: string
+          phone: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          otp_code?: string
+          phone?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phone_verification_otps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       point_transactions: {
         Row: {
           amount: number
@@ -623,6 +854,7 @@ export type Database = {
           craziest_travel_story: string | null
           created_at: string | null
           date_of_birth: string | null
+          dating_intentions: string | null
           dream_job: string | null
           drinking: string | null
           education: string | null
@@ -643,6 +875,7 @@ export type Database = {
           languages: string[] | null
           last_name: string | null
           latitude: number | null
+          life_goals: string[] | null
           location: unknown
           longitude: number | null
           looking_for: string[] | null
@@ -657,6 +890,7 @@ export type Database = {
           pets: string[] | null
           photo_verified_at: string | null
           political_views: string | null
+          privacy_settings: Json | null
           profile_completed_at: string | null
           profile_completion_prefer_not: string[] | null
           profile_completion_skipped: string[] | null
@@ -672,6 +906,10 @@ export type Database = {
           user_id: string | null
           verification_selfie_url: string | null
           verified_at: string | null
+          video_intro_duration_seconds: number | null
+          video_intro_url: string | null
+          voice_prompt_duration_seconds: number | null
+          voice_prompt_url: string | null
           wants_kids: string | null
           way_to_heart: string | null
           weirdest_gift: string | null
@@ -689,6 +927,7 @@ export type Database = {
           craziest_travel_story?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          dating_intentions?: string | null
           dream_job?: string | null
           drinking?: string | null
           education?: string | null
@@ -709,6 +948,7 @@ export type Database = {
           languages?: string[] | null
           last_name?: string | null
           latitude?: number | null
+          life_goals?: string[] | null
           location?: unknown
           longitude?: number | null
           looking_for?: string[] | null
@@ -723,6 +963,7 @@ export type Database = {
           pets?: string[] | null
           photo_verified_at?: string | null
           political_views?: string | null
+          privacy_settings?: Json | null
           profile_completed_at?: string | null
           profile_completion_prefer_not?: string[] | null
           profile_completion_skipped?: string[] | null
@@ -738,6 +979,10 @@ export type Database = {
           user_id?: string | null
           verification_selfie_url?: string | null
           verified_at?: string | null
+          video_intro_duration_seconds?: number | null
+          video_intro_url?: string | null
+          voice_prompt_duration_seconds?: number | null
+          voice_prompt_url?: string | null
           wants_kids?: string | null
           way_to_heart?: string | null
           weirdest_gift?: string | null
@@ -755,6 +1000,7 @@ export type Database = {
           craziest_travel_story?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          dating_intentions?: string | null
           dream_job?: string | null
           drinking?: string | null
           education?: string | null
@@ -775,6 +1021,7 @@ export type Database = {
           languages?: string[] | null
           last_name?: string | null
           latitude?: number | null
+          life_goals?: string[] | null
           location?: unknown
           longitude?: number | null
           looking_for?: string[] | null
@@ -789,6 +1036,7 @@ export type Database = {
           pets?: string[] | null
           photo_verified_at?: string | null
           political_views?: string | null
+          privacy_settings?: Json | null
           profile_completed_at?: string | null
           profile_completion_prefer_not?: string[] | null
           profile_completion_skipped?: string[] | null
@@ -804,6 +1052,10 @@ export type Database = {
           user_id?: string | null
           verification_selfie_url?: string | null
           verified_at?: string | null
+          video_intro_duration_seconds?: number | null
+          video_intro_url?: string | null
+          voice_prompt_duration_seconds?: number | null
+          voice_prompt_url?: string | null
           wants_kids?: string | null
           way_to_heart?: string | null
           weirdest_gift?: string | null
@@ -820,6 +1072,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      prompt_definitions: {
+        Row: {
+          category: string
+          created_at: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_required: boolean | null
+          key: string
+          max_length: number | null
+          placeholder_text: string | null
+          prompt_text: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          key: string
+          max_length?: number | null
+          placeholder_text?: string | null
+          prompt_text: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          key?: string
+          max_length?: number | null
+          placeholder_text?: string | null
+          prompt_text?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       referrals: {
         Row: {
@@ -1172,6 +1469,44 @@ export type Database = {
           },
         ]
       }
+      user_profile_prompts: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string
+          prompt_key: string
+          response: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          prompt_key: string
+          response: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          prompt_key?: string
+          response?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profile_prompts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           agora_user_id: string | null
@@ -1180,6 +1515,7 @@ export type Database = {
           email: string
           id: string
           last_active_at: string | null
+          notification_preferences: Json | null
           phone: string | null
           phone_verified: boolean | null
           points_balance: number | null
@@ -1197,6 +1533,7 @@ export type Database = {
           email: string
           id: string
           last_active_at?: string | null
+          notification_preferences?: Json | null
           phone?: string | null
           phone_verified?: boolean | null
           points_balance?: number | null
@@ -1214,6 +1551,7 @@ export type Database = {
           email?: string
           id?: string
           last_active_at?: string | null
+          notification_preferences?: Json | null
           phone?: string | null
           phone_verified?: boolean | null
           points_balance?: number | null
@@ -1592,6 +1930,25 @@ export type Database = {
         Returns: boolean
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
+      get_conversations_with_details: {
+        Args: { p_user_id: string }
+        Returns: {
+          conversation_id: string
+          conversation_type: string
+          created_at: string
+          group_image_url: string
+          group_name: string
+          last_message_at: string
+          last_message_content: string
+          last_message_sender_id: string
+          unread_count: number
+          updated_at: string
+        }[]
+      }
+      get_unread_count: {
+        Args: { p_conversation_id: string; p_user_id: string }
+        Returns: number
+      }
       gettransactionid: { Args: never; Returns: unknown }
       longtransactionsenabled: { Args: never; Returns: boolean }
       populate_geometry_columns:
