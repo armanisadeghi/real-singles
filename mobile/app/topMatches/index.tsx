@@ -152,7 +152,7 @@ export default function TopMatches() {
   return (
     <>
       <View className="flex-1 bg-background">
-        <StatusBar style="dark" backgroundColor="#ffffff" />
+        <StatusBar style="dark" backgroundColor="transparent" translucent />
         {/* Native header is configured in _layout.tsx - no custom header needed */}
         <View className="mt-4">
           {/* Use single-column for topMatches profiles, 2-column for videos/virtualDates */}

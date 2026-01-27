@@ -374,7 +374,7 @@ const VoiceCall = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <StatusBar barStyle="light-content" backgroundColor="#181C23" />
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
         <ActivityIndicator size="large" color="#ffffff" />
         <Text style={styles.loadingText}>Setting up your call...</Text>
       </SafeAreaView>
@@ -384,7 +384,7 @@ const VoiceCall = () => {
   // Ongoing call UI
   return (
     <SafeAreaView style={styles.main}>
-      <StatusBar barStyle="light-content" backgroundColor="#181C23" />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <View style={styles.ongoingCallContainer}>
         <PlatformIcon name="call" size={48} color="#E38F28" style={{ marginBottom: 24 }} />
         <Text style={styles.ongoingCallTitle}>Voice Call</Text>

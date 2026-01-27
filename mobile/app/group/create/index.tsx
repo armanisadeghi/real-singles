@@ -2,6 +2,7 @@ import { styles } from "@/components/forms/ContactForm";
 import LinearBg from "@/components/LinearBg";
 import GradientButton from "@/components/ui/GradientButton";
 import { icons } from "@/constants/icons";
+import * as Haptics from "expo-haptics";
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -27,6 +28,7 @@ export default function CreateGroup() {
   const [isUploading, setIsUploading] = useState(false);
 
   const pickImage = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     console.log("Picking image...");
 
     try {
@@ -181,7 +183,10 @@ export default function CreateGroup() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={uploadImage}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                uploadImage();
+              }}
               className="mt-3 bg-[#F5F5F5] px-4 py-2 rounded-full"
               disabled={isUploading || !localImage}
             >
@@ -221,7 +226,10 @@ export default function CreateGroup() {
               }}
             /> :
             <TouchableOpacity
-              onPress={navigateToAddMembers}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                navigateToAddMembers();
+              }}
               className="border border-[#C07618] rounded-full overflow-hidden bg-primary mx-6"
             >
               <LinearBg className="w-full py-3 flex-row justify-center gap-4 items-center">

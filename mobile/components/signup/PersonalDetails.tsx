@@ -204,6 +204,8 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               onChangeText={(text) => updateData({ FirstName: text })}
               placeholder="First Name"
               placeholderTextColor="#B0B0B0"
+              autoComplete="given-name"
+              textContentType="givenName"
               style={{paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, flex: 1, color: 'black' }}
             />
           </View>
@@ -214,6 +216,8 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               onChangeText={(text) => updateData({ LastName: text })}
               placeholder="Last Name"
               placeholderTextColor="#B0B0B0"
+              autoComplete="family-name"
+              textContentType="familyName"
               style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: 'black' }}
             />
           </View>
@@ -226,6 +230,8 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
             onChangeText={(text) => updateData({ DisplayName: text })}
             placeholder="Display Name"
             placeholderTextColor="#B0B0B0"
+            autoComplete="name"
+            textContentType="name"
             style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: 'black' }}
           />
         </View>
@@ -249,6 +255,8 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               placeholder="Phone Number"
               keyboardType="phone-pad"
               placeholderTextColor="#B0B0B0"
+              autoComplete="tel"
+              textContentType="telephoneNumber"
               style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: 'black' }}
             />
           </View>
@@ -263,6 +271,8 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               placeholder="Zip Code"
               placeholderTextColor="#B0B0B0"
               keyboardType="numeric"
+              autoComplete="postal-code"
+              textContentType="postalCode"
               style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: 'black' }}
             />
           </View>
@@ -311,6 +321,8 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               onChangeText={(text) => updateData({ City: text })}
               placeholder="City"
               placeholderTextColor="#B0B0B0"
+autoComplete="off"
+              textContentType="addressCity"
               style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: 'black' }}
             />
           </View>
@@ -321,6 +333,8 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               onChangeText={(text) => updateData({ State: text })}
               placeholder="State"
               placeholderTextColor="#B0B0B0"
+autoComplete="off"
+              textContentType="addressState"
               style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16 , color: 'black'}}
             />
           </View>

@@ -346,7 +346,7 @@ const VideoCall = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
         <ActivityIndicator size="large" color="#ffffff" />
         <Text style={styles.loadingText}>Setting up your call...</Text>
       </SafeAreaView>
@@ -356,7 +356,7 @@ const VideoCall = () => {
   // Call UI (after configuration)
   return (
     <SafeAreaView style={styles.main}>
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       {/* Video Container - Touch to show/hide controls */}
       <TouchableOpacity

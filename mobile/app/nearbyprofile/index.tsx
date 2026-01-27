@@ -1,9 +1,11 @@
 import NotificationBell from "@/components/NotificationBell";
+import { PlatformIcon } from "@/components/ui";
 import { icons } from "@/constants/icons";
 import { fetchUserProfile, getAllNearBy } from "@/lib/api";
 import { User } from "@/types";
 import { requestPermissionWithExplanation } from "@/utils/permissions";
 import { getCurrentUserId, VIDEO_URL } from "@/utils/token";
+import * as Haptics from "expo-haptics";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
@@ -370,7 +372,10 @@ export default function NearBy() {
         className="absolute right-4 bottom-40 z-10"
       >
         <TouchableOpacity
-          onPress={goToMyLocation}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            goToMyLocation();
+          }}
           style={styles.mapControlButton}
           className="bg-white rounded-full shadow-md  mb-2"
         >
@@ -382,7 +387,10 @@ export default function NearBy() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={zoomIn}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            zoomIn();
+          }}
           style={styles.mapControlButton}
           className="bg-white rounded-full shadow-md mb-2"
         >
@@ -390,7 +398,10 @@ export default function NearBy() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={zoomOut}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            zoomOut();
+          }}
           style={styles.mapControlButton}
           className="bg-white rounded-full shadow-md mb-2"
         >
@@ -405,14 +416,13 @@ export default function NearBy() {
       >
         <View className="flex-row items-center gap-2">
           <TouchableOpacity
-            onPress={router.back}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.back();
+            }}
             className="bg-white border border-gray rounded-lg flex justify-center items-center w-8 h-8 shadow-sm"
           >
-            <Image
-              source={icons.back}
-              className="w-4 h-4"
-              resizeMode="contain"
-            />
+            <PlatformIcon name="chevron-left" size={16} color="#000" />
           </TouchableOpacity>
           <View className="bg-white px-3 py-1 rounded-lg shadow-sm">
             <Text className="text-base font-medium tracking-[-0.41px] text-black">
@@ -474,6 +484,7 @@ export default function NearBy() {
                   <TouchableOpacity
                     style={styles.closeButton}
                     onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setShowUserModal(false);
                       setSelectedUser(null);
                     }}
@@ -499,6 +510,7 @@ export default function NearBy() {
                     <TouchableOpacity
                       style={styles.profileButton}
                       onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         setShowUserModal(false);
                         router.push(`/profiles/${selectedUser?.id}`);
                       }}
@@ -518,6 +530,7 @@ export default function NearBy() {
                     <TouchableOpacity
                       className="flex-1 py-3 bg-gray-100 rounded-full items-center border border-gray-400"
                       onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         setShowUserModal(false);
                         setSelectedUser(null);
                       }}
@@ -546,7 +559,10 @@ export default function NearBy() {
           </Text>
           <TouchableOpacity
             className="mt-4 bg-primary px-4 py-2 rounded-lg"
-            onPress={fetchAllNearby}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              fetchAllNearby();
+            }}
           >
             <Text className="text-white">Refresh</Text>
           </TouchableOpacity>

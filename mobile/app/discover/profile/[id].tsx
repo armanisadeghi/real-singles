@@ -149,11 +149,11 @@ export default function DiscoveryProfileView() {
       );
     }
     
-    // Animate button
+    // Animate button with M3 Expressive spring config
     const scaleRef = action === "like" ? likeScale : action === "pass" ? passScale : superLikeScale;
-    scaleRef.value = withSpring(0.8, { damping: 10 });
+    scaleRef.value = withSpring(0.8, { damping: 20, stiffness: 300 });
     setTimeout(() => {
-      scaleRef.value = withSpring(1, { damping: 10 });
+      scaleRef.value = withSpring(1, { damping: 20, stiffness: 300 });
     }, 100);
     
     try {
@@ -289,7 +289,10 @@ export default function DiscoveryProfileView() {
           <View style={[styles.headerOverlay, { paddingTop: insets.top + 10 }]}>
             {/* Back button */}
             <Pressable
-              onPress={() => router.back()}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.back();
+              }}
               style={styles.headerButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
@@ -298,7 +301,10 @@ export default function DiscoveryProfileView() {
             
             {/* Report button */}
             <Pressable
-              onPress={() => setShowReportSheet(true)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowReportSheet(true);
+              }}
               style={styles.headerButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
@@ -388,7 +394,10 @@ export default function DiscoveryProfileView() {
             ].map((reason) => (
               <Pressable
                 key={reason}
-                onPress={() => handleReport(reason)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  handleReport(reason);
+                }}
                 style={styles.reportOption}
               >
                 <Text style={styles.reportOptionText}>{reason}</Text>
@@ -397,7 +406,10 @@ export default function DiscoveryProfileView() {
             ))}
             
             <Pressable
-              onPress={() => setShowReportSheet(false)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowReportSheet(false);
+              }}
               style={styles.reportCancel}
             >
               <Text style={styles.reportCancelText}>Cancel</Text>

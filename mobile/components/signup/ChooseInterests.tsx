@@ -1,6 +1,7 @@
 import { images } from "@/constants/images";
 import { useDeviceSize } from "@/hooks/useResponsive";
 import { signupProps } from "@/types";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Image, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
@@ -60,6 +61,7 @@ const ChooseInterests = ({ data, updateData, onNext, error }: signupProps) => {
   ];
 
   const toggleInterest = (value: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedInterests(prev => {
       if (prev.includes(value)) {
         return prev.filter(item => item !== value);

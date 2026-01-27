@@ -26,23 +26,30 @@ import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import * as FileSystem from "expo-file-system";
+import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
-  LayoutAnimation,
   Modal,
   Platform,
   Pressable,
   Text,
   TextInput,
   TouchableOpacity,
-  UIManager,
   View,
 } from "react-native";
-import Animated, { useSharedValue, withSpring, useAnimatedStyle, interpolate } from "react-native-reanimated";
+import Animated, { 
+  useSharedValue, 
+  withSpring, 
+  useAnimatedStyle, 
+  interpolate,
+  LinearTransition,
+  FadeIn,
+  FadeOut,
+} from "react-native-reanimated";
 import RNPickerSelect from "react-native-picker-select";
 import Toast from "react-native-toast-message";
 import LinearBg from "../LinearBg";
@@ -53,12 +60,11 @@ const FS = FileSystem as unknown as {
   copyAsync: typeof FileSystem.copyAsync;
 };
 
-
-if (Platform.OS === "android") {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
+// M3 Expressive spring config for layout animations
+const SPRING_CONFIG = {
+  damping: 15,
+  stiffness: 200,
+};
 
 interface ProfileFormViewProps {
   formData: EditProfileFormData;
@@ -109,27 +115,8 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   const arrowRotation = useSharedValue(0);
 
   useEffect(() => {
-    // Custom animation config
-    const animationConfig = {
-      duration: 300,
-      update: {
-        duration: 300,
-        property: LayoutAnimation.Properties.opacity,
-        type: LayoutAnimation.Types.easeInEaseOut,
-      },
-      delete: {
-        duration: 200,
-        property: LayoutAnimation.Properties.opacity,
-        type: LayoutAnimation.Types.easeInEaseOut,
-      },
-    };
-    arrowRotation.value = withSpring(showPersonalDetails ? 1 : 0, {
-      damping: 15,
-      stiffness: 200,
-    });
-
-    // Animate height/layout
-    LayoutAnimation.configureNext(animationConfig);
+    // Animate arrow rotation with M3 Expressive spring
+    arrowRotation.value = withSpring(showPersonalDetails ? 1 : 0, SPRING_CONFIG);
   }, [showPersonalDetails]);
 
   // Fetch life goals on mount
@@ -196,6 +183,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   };
 
   const toggleInterest = (interestValue: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const currentInterests = formData.Interest
       ? Array.isArray(formData.Interest)
         ? formData.Interest
@@ -445,6 +433,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   }
 
   const toggleEthnicity = (ethValue: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const currentEths = Array.isArray(formData.Ethnicity)
       ? formData.Ethnicity
       : formData.Ethnicity
@@ -469,6 +458,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
 
   // Body type is SINGLE SELECT (database TEXT, not array)
   const selectBodyType = (bodyValue: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     // If already selected, deselect (set to empty)
     if (formData.BodyType === bodyValue) {
       onChangeField("BodyType", "");
@@ -479,6 +469,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   };
 
   const toggleLanguage = (value: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     let selected: string[] = formData?.Language
       ? Array.isArray(formData.Language)
         ? [...formData.Language]
@@ -498,6 +489,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
 
   // Religion is SINGLE SELECT (database TEXT, not array)
   const selectReligion = (value: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     // If already selected, deselect (set to empty)
     if (formData.Religion === value) {
       onChangeField("Religion", "");
@@ -509,6 +501,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
 
   // Pets is MULTI-SELECT (database TEXT[] array)
   const togglePets = (value: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     let selected: string[] = formData?.Pets
       ? Array.isArray(formData.Pets)
         ? [...formData.Pets]
@@ -530,6 +523,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
 
   // Life Goals is MULTI-SELECT (max 10)
   const toggleLifeGoal = (goalKey: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const currentGoals = formData?.LifeGoals
       ? Array.isArray(formData.LifeGoals)
         ? [...formData.LifeGoals]
@@ -789,7 +783,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setShowPersonalDetails((prev) => !prev)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowPersonalDetails((prev) => !prev);
+          }}
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">
@@ -801,7 +798,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         </TouchableOpacity>
 
         {showPersonalDetails && (
-          <Animated.View className="mt-4 gap-5">
+          <Animated.View 
+            className="mt-4 gap-5"
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+          >
             <View>
               <Label text="I am a..." marginLeft="" />
 
@@ -1032,7 +1033,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setPickInterest((prev) => !prev)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setPickInterest((prev) => !prev);
+          }}
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">
@@ -1044,7 +1048,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         </TouchableOpacity>
 
         {pickInterest && (
-          <Animated.View className="mt-4 gap-5">
+          <Animated.View 
+            className="mt-4 gap-5"
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+          >
             <View className="flex-row gap-3 flex-wrap">
               {INTEREST_OPTIONS.map((option) => {
                 const isSelected = formData.Interest
@@ -1113,7 +1121,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setEducationJobDetail((prev) => !prev)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setEducationJobDetail((prev) => !prev);
+          }}
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">
@@ -1125,7 +1136,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         </TouchableOpacity>
 
         {educationJobDetail && (
-          <Animated.View className="mt-4 gap-5">
+          <Animated.View 
+            className="mt-4 gap-5"
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+          >
             {/* School section */}
             <View className="bg-white rounded-2xl py-4">
               <Text className="text-dark font-medium text-sm mb-4">
@@ -1244,7 +1259,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setAppearance((prev) => !prev)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setAppearance((prev) => !prev);
+          }}
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">Appearance</Text>
@@ -1254,7 +1272,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         </TouchableOpacity>
 
         {appearance && (
-          <Animated.View className="mt-4 gap-5">
+          <Animated.View 
+            className="mt-4 gap-5"
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+          >
             {/* Height Picker - Two-column for feet and inches (native feel) */}
             <View className="mb-6 pb-6 border-b border-b-border">
               <View className="flex-row items-center justify-between">
@@ -1373,7 +1395,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setShowHabit((prev) => !prev)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowHabit((prev) => !prev);
+          }}
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">
@@ -1385,7 +1410,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         </TouchableOpacity>
 
         {habit && (
-          <Animated.View className="mt-4 gap-5">
+          <Animated.View 
+            className="mt-4 gap-5"
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+          >
             <View>
               <Label text="Smoking" marginLeft="" />
               <RNPickerSelect
@@ -1541,7 +1570,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setShowEthnicity((prev) => !prev)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowEthnicity((prev) => !prev);
+          }}
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">Ethnicity</Text>
@@ -1551,7 +1583,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         </TouchableOpacity>
 
         {showEthnicity && (
-          <Animated.View className="mt-4 gap-5">
+          <Animated.View 
+            className="mt-4 gap-5"
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+          >
             <View className="flex-row gap-3 flex-wrap">
               {ETHNICITY_OPTIONS.map((option) => {
                 const isSelected = Array.isArray(formData.Ethnicity)
@@ -1617,7 +1653,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setLanguage((prev) => !prev)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setLanguage((prev) => !prev);
+          }}
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">Language</Text>
@@ -1626,7 +1665,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           </Animated.View>
         </TouchableOpacity>
         {language && (
-          <Animated.View className="mt-4 gap-5">
+          <Animated.View 
+            className="mt-4 gap-5"
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+          >
             <View className="flex-row gap-3 flex-wrap">
               {LANGUAGE_OPTIONS.map((option) => {
                 // ✅ Put this here — inside the map
@@ -1701,7 +1744,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setReligion((prev) => !prev)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setReligion((prev) => !prev);
+          }}
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">Religion</Text>
@@ -1710,7 +1756,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           </Animated.View>
         </TouchableOpacity>
         {religion && (
-          <Animated.View className="mt-4 gap-5">
+          <Animated.View 
+            className="mt-4 gap-5"
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+          >
             <View className="flex-row gap-3 flex-wrap">
               {RELIGION_OPTIONS.map((option) => {
                 // Single select - just compare directly (case-insensitive)
@@ -1777,7 +1827,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setPolitical((prev) => !prev)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setPolitical((prev) => !prev);
+          }}
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">
@@ -1789,7 +1842,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         </TouchableOpacity>
 
         {political && (
-          <Animated.View className="mt-4 gap-5">
+          <Animated.View 
+            className="mt-4 gap-5"
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+          >
             <View>
               <RNPickerSelect
                 onValueChange={(value) => onChangeField("Political", value)}
@@ -1822,7 +1879,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setShowLifeGoals((prev) => !prev)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowLifeGoals((prev) => !prev);
+          }}
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">Life Goals</Text>
@@ -1832,7 +1892,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         </TouchableOpacity>
 
         {showLifeGoals && (
-          <Animated.View className="mt-4 gap-5">
+          <Animated.View 
+            className="mt-4 gap-5"
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+          >
             <Text className="text-xs text-gray mb-2">
               Select up to 10 life goals to help find matches with shared ambitions.
               ({(formData.LifeGoals || []).length}/10 selected)
@@ -1929,7 +1993,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       >
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => setFewWords((prev) => !prev)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setFewWords((prev) => !prev);
+          }}
           className="flex-row items-center justify-between"
         >
           <Text className="text-primary font-medium text-lg">
@@ -1941,7 +2008,11 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         </TouchableOpacity>
 
         {fewWords && (
-          <Animated.View className="mt-4 gap-5">
+          <Animated.View 
+            className="mt-4 gap-5"
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(150)}
+          >
             <View className="relative py-[13px] px-[15px] border border-border rounded-2xl bg-light-100">
               <TextInput
                 multiline={true}

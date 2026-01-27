@@ -2,6 +2,7 @@ import MediaItem from "@/components/MediaItem";
 import { useDeviceSize } from "@/hooks/useResponsive";
 import { fetchUserProfile, getProfile, saveGalleryImage, uploadImage } from "@/lib/api";
 import { Camera, CameraView, useCameraPermissions } from "expo-camera";
+import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
@@ -253,6 +254,7 @@ export default function AppGallery() {
               {cameraMode === "photo" ? (
                 <TouchableOpacity
                   onPress={async () => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     await takePicture();
                     setShowCamera(false); // close camera after capture
                   }}
@@ -266,6 +268,7 @@ export default function AppGallery() {
                     <TouchableOpacity
                       onPress={() => {
                         if (!cameraReady) return; // prevent starting too early
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         startRecording();
                       }}
                       style={{ backgroundColor: '#B06D1E', padding: 15, borderRadius: 50, marginBottom: 50 }}
@@ -279,6 +282,7 @@ export default function AppGallery() {
                       </Text>
                       <TouchableOpacity
                         onPress={() => {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                           stopRecording();
                           setShowCamera(false); // close after stop
                         }}

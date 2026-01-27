@@ -14,7 +14,7 @@ interface SuccessProps {
 export default function Success({image, title, subTitle, desc, onPress} : SuccessProps) {
   return (
     <View className='relative flex-1 mt-20'>
-        <StatusBar barStyle='dark-content' backgroundColor='#FFFAF2'/>
+        <StatusBar barStyle='dark-content' backgroundColor='transparent' translucent />
         <View className='flex-row-reverse'>
                 <Image source={images.ellipseEnd} resizeMode='contain' className='-mb-3' />
             </View>

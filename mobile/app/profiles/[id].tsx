@@ -1,10 +1,11 @@
 import NotificationBell from "@/components/NotificationBell";
 import ProfileDetails from "@/components/ProfileDetails";
+import { PlatformIcon } from "@/components/ui";
 import { BACKGROUND_COLORS } from "@/components/ui/ProfileCard";
-import { icons } from "@/constants/icons";
 import { fetchOtherProfile } from "@/lib/api";
 import { User } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
+import * as Haptics from "expo-haptics";
 import { MaterialIcons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useNavigationState } from "@react-navigation/native";
@@ -164,10 +165,12 @@ export default function ProfileDetail() {
 
 
   const handleRetry = () => {
-    // Animate the retry button
+    // Haptic feedback for retry action
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // Animate the retry button with M3 Expressive spring config
     retryScale.value = withSequence(
-      withSpring(0.8, { damping: 10 }),
-      withSpring(1, { damping: 10 })
+      withSpring(0.8, { damping: 20, stiffness: 300 }),
+      withSpring(1, { damping: 20, stiffness: 300 })
     );
 
     // Fetch the profile again
@@ -241,14 +244,13 @@ export default function ProfileDetail() {
         >
           <View className="flex-row items-center gap-2">
             <TouchableOpacity
-              onPress={router.back}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.back();
+              }}
               className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
             >
-              <Image
-                source={icons.back}
-                className="size-4"
-                resizeMode="contain"
-              />
+              <PlatformIcon name="chevron-left" size={16} color="#000" />
             </TouchableOpacity>
             <Text className="leading-[22px] text-dark text-base font-medium tracking-[-0.41px]">
               Profile
@@ -279,7 +281,13 @@ export default function ProfileDetail() {
             </TouchableOpacity>
           </Animated.View>
 
-          <TouchableOpacity style={styles.goBackButton} onPress={router.back}>
+          <TouchableOpacity 
+            style={styles.goBackButton} 
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.back();
+            }}
+          >
             <Text style={styles.goBackText}>Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -303,6 +311,7 @@ export default function ProfileDetail() {
             <View className="flex-row gap-2 items-center">
               <TouchableOpacity
                 onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   if (canGoBack) {
                     router.back();
                   } else {
@@ -311,7 +320,7 @@ export default function ProfileDetail() {
                 }}
                 className="border border-white rounded-lg p-2 px-3 bg-white"
               >
-                <Image source={icons.back} tintColor={"#1D2733"} />
+                <PlatformIcon name="chevron-left" size={16} color="#1D2733" />
               </TouchableOpacity>
               <Text className="text-base tracking-[-0.41px] font-medium text-white">
                 Profile
@@ -339,10 +348,13 @@ export default function ProfileDetail() {
           >
             <View className="flex-row gap-2 items-center">
               <TouchableOpacity
-                onPress={router.back}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.back();
+                }}
                 className="border border-white rounded-lg p-2 px-3 bg-white"
               >
-                <Image source={icons.back} tintColor={"#1D2733"} />
+                <PlatformIcon name="chevron-left" size={16} color="#1D2733" />
               </TouchableOpacity>
               <Text className="text-base tracking-[-0.41px] font-medium text-white">
                 Profile

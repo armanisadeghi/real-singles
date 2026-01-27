@@ -1,14 +1,13 @@
 import NotificationBell from "@/components/NotificationBell";
-import { icons } from "@/constants/icons";
 import { VIDEO_URL } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui";
+import * as Haptics from "expo-haptics";
 import Slider from "@react-native-community/slider";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState, useEffect, useRef } from "react";
 import {
   BackHandler,
-  Image,
   Text,
   TouchableOpacity,
   View
@@ -128,10 +127,13 @@ export default function VideoPage() {
         >
           <View className="flex-row items-center gap-2">
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.back();
+              }}
               className="bg-white border border-gray-300 rounded-lg justify-center items-center w-8 h-8"
             >
-              <Image source={icons.back} className="w-4 h-4" resizeMode="contain" />
+              <PlatformIcon name="chevron-left" size={16} color="#000" />
             </TouchableOpacity>
             <Text className="text-white text-base font-medium">Profile</Text>
           </View>
@@ -169,17 +171,26 @@ export default function VideoPage() {
 
           {/* Buttons */}
           <View className="flex-row justify-between items-center mt-2 pb-10">
-            <TouchableOpacity onPress={changeSpeed}>
+            <TouchableOpacity onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              changeSpeed();
+            }}>
               <Text className="text-white font-medium text-base">{playbackRate}x</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={skipBackward}>
+            <TouchableOpacity onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              skipBackward();
+            }}>
               <PlatformIcon name="replay-10" size={28} color="white" />
             </TouchableOpacity>
 
             <TouchableOpacity
               className="bg-white p-3 rounded-full"
-              onPress={togglePlay}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                togglePlay();
+              }}
             >
               <PlatformIcon
                 name={isPlaying ? "pause" : "play-arrow"}
@@ -188,7 +199,10 @@ export default function VideoPage() {
               />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={skipForward}>
+            <TouchableOpacity onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              skipForward();
+            }}>
               <PlatformIcon name="forward-10" size={28} color="white" />
             </TouchableOpacity>
 

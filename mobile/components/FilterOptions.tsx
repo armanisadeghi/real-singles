@@ -388,6 +388,7 @@ export default function FilterOptions({
             onValueChange={(value) => {
               if (value < ageMax) setAgeMin(Math.round(value));
             }}
+            onSlidingComplete={() => Haptics.selectionAsync()}
             minimumTrackTintColor="#E91E63"
             // Let platform handle other colors natively
           />
@@ -403,6 +404,7 @@ export default function FilterOptions({
             onValueChange={(value) => {
               if (value > ageMin) setAgeMax(Math.round(value));
             }}
+            onSlidingComplete={() => Haptics.selectionAsync()}
             minimumTrackTintColor="#E91E63"
           />
         </View>
@@ -425,6 +427,7 @@ export default function FilterOptions({
             onValueChange={(value) => {
               if (value < heightMax) setHeightMin(Math.round(value * 10) / 10);
             }}
+            onSlidingComplete={() => Haptics.selectionAsync()}
             minimumTrackTintColor="#E91E63"
           />
         </View>
@@ -439,6 +442,7 @@ export default function FilterOptions({
             onValueChange={(value) => {
               if (value > heightMin) setHeightMax(Math.round(value * 10) / 10);
             }}
+            onSlidingComplete={() => Haptics.selectionAsync()}
             minimumTrackTintColor="#E91E63"
           />
         </View>
@@ -670,6 +674,7 @@ export default function FilterOptions({
             onValueChange={(value) => {
               if (value < maxDistance) setMinDistance(Math.round(value / 100) * 100);
             }}
+            onSlidingComplete={() => Haptics.selectionAsync()}
             minimumTrackTintColor="#E91E63"
           />
         </View>
@@ -684,6 +689,7 @@ export default function FilterOptions({
             onValueChange={(value) => {
               if (value > minDistance) setMaxDistance(Math.round(value / 100) * 100);
             }}
+            onSlidingComplete={() => Haptics.selectionAsync()}
             minimumTrackTintColor="#E91E63"
           />
         </View>

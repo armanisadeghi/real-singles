@@ -2,6 +2,7 @@ import { styles } from "@/components/forms/ContactForm";
 import { icons } from "@/constants/icons";
 import { fetchUserProfile, getAgoraChatToken } from "@/lib/api";
 import { chatClient, getAllConversations, initChat, loginToChat } from "@/services/agoraChatServices";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -62,6 +63,7 @@ export default function Addmember() {
   }, []);
 
   const handleSelectUser = (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setMembers((prev) =>
       prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
     );
@@ -263,7 +265,10 @@ export default function Addmember() {
       <Toast />
       {/* Native header is configured in _layout.tsx - Done button below */}
       <View className="flex-row justify-end px-4 py-2">
-        <TouchableOpacity onPress={handleCreateGroup}>
+        <TouchableOpacity onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          handleCreateGroup();
+        }}>
           <Text className="text-primary font-medium text-base">
             Done
           </Text>

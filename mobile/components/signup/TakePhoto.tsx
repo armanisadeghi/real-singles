@@ -32,7 +32,7 @@
 //   if (!permission.granted) {
 //     return (
 //       <>
-//         <StatusBar barStyle="light-content" backgroundColor="#1D2733" />
+//         <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 //         <View className="bg-[#1D2733] py-12 flex flex-col items-center justify-center">
 //           <Text className="text-2xl text-white text-center mb-2 font-normal">
 //             Upload Live Pictures
@@ -135,7 +135,7 @@
 //     <View className="flex-1 bg-black">
 //       {capturedPhoto ? (
 //         <>
-//           <StatusBar barStyle="light-content" backgroundColor="#1D2733" />
+//           <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 //           <View className="bg-[#1D2733] py-12 flex flex-col items-center justify-center">
 //             <Text className="text-2xl text-white text-center mb-2 font-normal">
 //               Upload Live Pictures
@@ -177,7 +177,7 @@
 //         </>
 //       ) : (
 //         <>
-//           <StatusBar barStyle="light-content" backgroundColor="#1D2733" />
+//           <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 //           <View className="bg-[#1D2733] py-12 flex flex-col items-center justify-center">
 //             <Text className="text-2xl text-white text-center mb-2 font-normal">
 //               Upload Live Pictures
@@ -272,7 +272,7 @@
 //   if (!permission.granted) {
 //     return (
 //       <>
-//         <StatusBar barStyle="light-content" backgroundColor="#1D2733" />
+//         <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 //         <View className="bg-[#1D2733] py-12 flex flex-col items-center justify-center">
 //           <Text className="text-2xl text-white text-center mb-2 font-normal">
 //             Upload Live Pictures
@@ -459,7 +459,7 @@
 
 //   return (
 //     <View className="flex-1 bg-black">
-//       <StatusBar barStyle="light-content" backgroundColor="#1D2733" />
+//       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
 //       {modalVisible && selectedPhoto && (
 //         <View className="absolute top-0 left-0 right-0 bottom-0 bg-white/100 z-30 items-center justify-center">
@@ -847,7 +847,7 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
 
   return (
     <SafeAreaView style={[styles.safeArea]}>
-      <StatusBar barStyle="light-content" backgroundColor="#1D2733" />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       <View style={styles.container}>
         {/* HEADER */}

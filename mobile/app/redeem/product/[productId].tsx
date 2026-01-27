@@ -4,6 +4,7 @@ import { images } from "@/constants/images";
 import { getProductsGiftDetail } from "@/lib/api";
 import { ProductCardProps } from "@/types";
 import { VIDEO_URL } from "@/utils/token";
+import * as Haptics from "expo-haptics";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -62,6 +63,7 @@ export default function ProductDetail() {
   const router = useRouter();
 
   const handleRedeemForFriend = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
       pathname: "/(tabs)/chats",
       params: {
@@ -73,6 +75,7 @@ export default function ProductDetail() {
   };
 
   const handleRedeemForYou = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
       pathname: "/shipping",
       params: {

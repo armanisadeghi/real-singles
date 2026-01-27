@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 // Import Agora SDK
 import {
     ChannelProfileType,
@@ -250,7 +251,10 @@ const Call = () => {
                                 <View style={styles.switchContainer}>
                                     <Text>Audience</Text>
                                     <Switch
-                                        onValueChange={setIsHost}
+                                        onValueChange={(value) => {
+                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                            setIsHost(value);
+                                        }}
                                         value={isHost}
                                         trackColor={{ false: "#767577", true: "#81b0ff" }}
                                         thumbColor={isHost ? "#0055cc" : "#f4f3f4"}
@@ -261,7 +265,10 @@ const Call = () => {
 
                             <TouchableOpacity
                                 style={styles.configButton}
-                                onPress={configureCall}
+                                onPress={() => {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                    configureCall();
+                                }}
                             >
                                 <Text style={styles.buttonText}>Configure Call</Text>
                             </TouchableOpacity>
@@ -283,15 +290,24 @@ const Call = () => {
             </View>
             <View style={styles.btnContainer}>
                 {!isJoined ? (
-                    <TouchableOpacity style={styles.joinButton} onPress={join}>
+                    <TouchableOpacity style={styles.joinButton} onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        join();
+                    }}>
                         <Text style={styles.buttonText}>Join Call</Text>
                     </TouchableOpacity>
                 ) : (
-                    <TouchableOpacity style={styles.leaveButton} onPress={leave}>
+                    <TouchableOpacity style={styles.leaveButton} onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        leave();
+                    }}>
                         <Text style={styles.buttonText}>Leave Call</Text>
                     </TouchableOpacity>
                 )}
-                <TouchableOpacity style={styles.resetButton} onPress={resetConfiguration}>
+                <TouchableOpacity style={styles.resetButton} onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    resetConfiguration();
+                }}>
                     <Text style={styles.resetButtonText}>Reset</Text>
                 </TouchableOpacity>
             </View>

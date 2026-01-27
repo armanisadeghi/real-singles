@@ -1,6 +1,6 @@
 import LinearBg from "@/components/LinearBg";
 import NotificationBell from "@/components/NotificationBell";
-import { icons } from "@/constants/icons";
+import { PlatformIcon } from "@/components/ui";
 import { getVirtualSpeedDetails, registerVirtualSlot } from "@/lib/api";
 import { VirtualDataListItem, VirtualDateSpeedDetails } from "@/types";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -8,7 +8,6 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
-  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -179,11 +178,7 @@ export default function Review() {
               onPress={router.back}
               className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
             >
-              <Image
-                source={icons.back}
-                className="size-4"
-                resizeMode="contain"
-              />
+              <PlatformIcon name="chevron-left" size={16} color="#000" />
             </TouchableOpacity>
             <Text className="leading-[22px] text-dark text-base font-medium tracking-[-0.41px]">
               Virtual Date
