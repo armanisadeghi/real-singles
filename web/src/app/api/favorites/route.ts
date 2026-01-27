@@ -62,7 +62,7 @@ export async function GET() {
     });
   }
 
-  // Get profile data for each favorite
+  // Get profile data for each favorite (exclude hidden profiles)
   const favoriteUserIds = favorites.map((f) => f.favorite_user_id).filter(Boolean);
   
   const { data: profiles, error: profileError } = await supabase
@@ -71,7 +71,8 @@ export async function GET() {
       *,
       users:user_id(id, display_name, email, status)
     `)
-    .in("user_id", favoriteUserIds);
+    .in("user_id", favoriteUserIds)
+    .eq("profile_hidden", false);
 
   if (profileError) {
     console.error("Error fetching profiles for favorites:", profileError);
@@ -97,6 +98,7 @@ export async function GET() {
 
   // Format profiles for mobile app (with async image URL conversion)
   // Note: Include users with "active" or null status, exclude suspended/deleted
+  // Note: Hidden profiles are already filtered out at the query level
   // Filter and extract profiles that are not null
   const validFavoritesWithProfiles = favoritesWithProfiles
     .filter((fav): fav is FavoriteWithProfile & { profiles: ProfileWithUser } => 

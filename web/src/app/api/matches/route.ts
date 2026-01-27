@@ -307,7 +307,7 @@ export async function GET(request: NextRequest) {
       .map((m) => m.user_id)
       .filter((id): id is string => id !== null);
 
-    // Get profiles for matched users
+    // Get profiles for matched users (exclude hidden profiles)
     const { data: profiles, error: profileError } = await supabase
       .from("profiles")
       .select(
@@ -322,10 +322,12 @@ export async function GET(request: NextRequest) {
         occupation,
         bio,
         is_verified,
-        profile_image_url
+        profile_image_url,
+        profile_hidden
       `
       )
-      .in("user_id", matchedUserIds);
+      .in("user_id", matchedUserIds)
+      .eq("profile_hidden", false);
 
     if (profileError) {
       console.error("Profile query error:", profileError);

@@ -89,7 +89,10 @@ export default async function DataIntegrityPage() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-5">
+        <Link
+          href="/admin/users"
+          className="bg-white rounded-lg shadow p-5 hover:shadow-md transition-shadow"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Users</p>
@@ -101,9 +104,12 @@ export default async function DataIntegrityPage() {
               <User className="w-5 h-5 text-blue-600" />
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="bg-white rounded-lg shadow p-5">
+        <Link
+          href="/admin/data-integrity/all?severity=critical"
+          className="bg-white rounded-lg shadow p-5 hover:shadow-md transition-shadow"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Critical Issues</p>
@@ -115,9 +121,12 @@ export default async function DataIntegrityPage() {
               <AlertTriangle className="w-5 h-5 text-red-600" />
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="bg-white rounded-lg shadow p-5">
+        <Link
+          href="/admin/data-integrity/all?severity=warning"
+          className="bg-white rounded-lg shadow p-5 hover:shadow-md transition-shadow"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Warnings</p>
@@ -129,9 +138,12 @@ export default async function DataIntegrityPage() {
               <AlertCircle className="w-5 h-5 text-amber-600" />
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="bg-white rounded-lg shadow p-5">
+        <Link
+          href="/admin/data-integrity/all?severity=info"
+          className="bg-white rounded-lg shadow p-5 hover:shadow-md transition-shadow"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Info</p>
@@ -143,7 +155,7 @@ export default async function DataIntegrityPage() {
               <Info className="w-5 h-5 text-blue-600" />
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Health Status Banner */}

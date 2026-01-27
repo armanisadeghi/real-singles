@@ -1,6 +1,6 @@
 import LinearBg from "@/components/LinearBg";
 import { icons } from "@/constants/icons";
-import { getProfile } from "@/lib/api";
+import { getProfile, updateUser } from "@/lib/api";
 import { User } from "@/types";
 import { authenticateForAccountDeletion, shouldUseBiometrics } from "@/utils/biometrics";
 import { IMAGE_URL, MEDIA_BASE_URL, removeToken } from "@/utils/token";
@@ -16,6 +16,7 @@ import {
   Image,
   Modal,
   Platform,
+  Switch,
   Text,
   TouchableOpacity,
   View
@@ -30,6 +31,8 @@ export default function Settings() {
   const [appleUserInfo, setAppleUserInfo] = React.useState<any>()
   const [profile, setProfile] = useState<User>();
   const [loading, setLoading] = useState(false);
+  const [profileHidden, setProfileHidden] = useState(false);
+  const [pauseLoading, setPauseLoading] = useState(false);
   const router = useRouter();
   // const { profile } = useLocalSearchParams();
   // const profileData = JSON.parse(profile as string);
@@ -72,6 +75,7 @@ export default function Settings() {
       console.log("Profile data in settings screen:", res);
       if (res?.success) {
         setProfile(res?.data || {});
+        setProfileHidden(res?.data?.profile_hidden || false);
       } else {
         Toast.show({
           type: "error",
@@ -120,6 +124,52 @@ export default function Settings() {
 
 
   const appVersion = Constants.expoConfig?.version || "1.0.0";
+
+  const handlePauseToggle = async (newValue: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setPauseLoading(true);
+    
+    try {
+      const res = await updateUser({ profile_hidden: newValue } as any);
+      if (res?.success) {
+        setProfileHidden(newValue);
+        Toast.show({
+          type: "success",
+          text1: newValue 
+            ? "Account paused" 
+            : "Account active",
+          text2: newValue 
+            ? "Your profile is hidden from discovery" 
+            : "You'll appear in discovery again",
+          position: "bottom",
+          visibilityTime: 2000,
+          bottomOffset: 100,
+          autoHide: true,
+        });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Failed to update account status",
+          position: "bottom",
+          visibilityTime: 2000,
+          bottomOffset: 100,
+          autoHide: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error updating profile_hidden:", error);
+      Toast.show({
+        type: "error",
+        text1: "Failed to update account status",
+        position: "bottom",
+        visibilityTime: 2000,
+        bottomOffset: 100,
+        autoHide: true,
+      });
+    } finally {
+      setPauseLoading(false);
+    }
+  };
 
   const handleDeleteAccount = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -336,6 +386,32 @@ export default function Settings() {
                   color="#999"
                 />
               </TouchableOpacity>
+              <View
+                className="flex-row items-center bg-light-100 mb-4 px-4 py-4 border border-border rounded-full"
+              >
+                <PlatformIcon
+                  name={profileHidden ? "pause-circle-outline" : "play-circle-outline"}
+                  size={22}
+                  color={profileHidden ? "#F97316" : "#333"}
+                />
+                <View className="ml-3 flex-1">
+                  <Text className="text-dark">Pause Account</Text>
+                  <Text className="text-xs text-gray-500">
+                    {profileHidden 
+                      ? "Your profile is hidden" 
+                      : "Hide from discovery"}
+                  </Text>
+                </View>
+                <Switch
+                  value={profileHidden}
+                  onValueChange={handlePauseToggle}
+                  disabled={pauseLoading}
+                  trackColor={{ false: "#E5E7EB", true: "#FDBA74" }}
+                  thumbColor={profileHidden ? "#F97316" : "#f4f3f4"}
+                  ios_backgroundColor="#E5E7EB"
+                />
+              </View>
+
               <TouchableOpacity
                 // onPress={gotoPrivacy}
                 onPress={() => {

@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
     // Get profiles for the users in history
     const targetUserIds = history.map((h) => h.target_user_id);
 
+    // Get profiles (exclude hidden profiles - show null for hidden users)
     const { data: profiles } = await supabase
       .from("profiles")
       .select(
@@ -84,10 +85,12 @@ export async function GET(request: NextRequest) {
         city,
         state,
         is_verified,
-        profile_image_url
+        profile_image_url,
+        profile_hidden
       `
       )
-      .in("user_id", targetUserIds);
+      .in("user_id", targetUserIds)
+      .eq("profile_hidden", false);
 
     // Combine data
     const historyWithProfiles = history.map((record) => {

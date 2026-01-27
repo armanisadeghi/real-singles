@@ -9,8 +9,15 @@ async function getAllIssues() {
   return runFullIntegrityCheck(supabase);
 }
 
-export default async function AllIssuesPage() {
+interface PageProps {
+  searchParams: Promise<{ severity?: string; type?: string }>;
+}
+
+export default async function AllIssuesPage({ searchParams }: PageProps) {
   const data = await getAllIssues();
+  const params = await searchParams;
+  const initialSeverity = params.severity as "all" | "critical" | "warning" | "info" | undefined;
+  const initialType = params.type;
 
   return (
     <div className="space-y-6">
@@ -85,7 +92,12 @@ export default async function AllIssuesPage() {
       </div>
 
       {/* Issues List */}
-      <AllIssuesList issues={data.issues} summary={data.summary} />
+      <AllIssuesList 
+        issues={data.issues} 
+        summary={data.summary}
+        initialSeverity={initialSeverity}
+        initialType={initialType}
+      />
     </div>
   );
 }

@@ -268,6 +268,10 @@ export async function GET() {
     // Status
     status: userData?.status || "active",
     role: userData?.role || "user",
+    
+    // Account Visibility
+    ProfileHidden: profile?.profile_hidden || false,
+    profile_hidden: profile?.profile_hidden || false,
   };
 
   return NextResponse.json({
@@ -532,6 +536,12 @@ export async function PUT(request: Request) {
       profileUpdates.life_goals = Array.isArray(lifeGoalsValue)
         ? lifeGoalsValue.filter(Boolean)
         : null;
+    }
+
+    // Handle profile_hidden (pause account)
+    if (body.ProfileHidden !== undefined || body.profile_hidden !== undefined) {
+      const hiddenValue = body.ProfileHidden ?? body.profile_hidden;
+      profileUpdates.profile_hidden = typeof hiddenValue === "boolean" ? hiddenValue : hiddenValue === "true";
     }
 
     // Handle profile completion arrays

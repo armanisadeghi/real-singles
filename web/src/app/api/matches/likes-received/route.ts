@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
       .map((l) => l.user_id)
       .filter((id): id is string => id !== null);
 
-    // Get profiles for users who liked
+    // Get profiles for users who liked (exclude hidden profiles)
     const { data: profiles } = await supabase
       .from("profiles")
       .select(
@@ -113,10 +113,12 @@ export async function GET(request: NextRequest) {
         occupation,
         bio,
         is_verified,
-        profile_image_url
+        profile_image_url,
+        profile_hidden
       `
       )
-      .in("user_id", unactedLikerIds);
+      .in("user_id", unactedLikerIds)
+      .eq("profile_hidden", false);
 
     // Get user data
     const { data: users } = await supabase

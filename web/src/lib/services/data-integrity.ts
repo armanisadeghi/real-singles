@@ -166,7 +166,7 @@ export async function runFullIntegrityCheck(
   const issues: DataIntegrityIssue[] = [];
   const checkedAt = new Date().toISOString();
 
-  // Fetch all users with their profiles
+  // Fetch all users with their profiles (excluding hidden profiles)
   const { data: users, error: usersError } = await supabase
     .from("users")
     .select(
@@ -180,10 +180,12 @@ export async function runFullIntegrityCheck(
         gender,
         looking_for,
         date_of_birth,
-        profile_image_url
+        profile_image_url,
+        profile_hidden
       )
     `
     )
+    .eq("profiles.profile_hidden", false)
     .order("created_at", { ascending: false });
 
   if (usersError) {

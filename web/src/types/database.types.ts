@@ -895,6 +895,7 @@ export type Database = {
           profile_completion_prefer_not: string[] | null
           profile_completion_skipped: string[] | null
           profile_completion_step: number | null
+          profile_hidden: boolean | null
           profile_image_url: string | null
           religion: string | null
           schools: string[] | null
@@ -968,6 +969,7 @@ export type Database = {
           profile_completion_prefer_not?: string[] | null
           profile_completion_skipped?: string[] | null
           profile_completion_step?: number | null
+          profile_hidden?: boolean | null
           profile_image_url?: string | null
           religion?: string | null
           schools?: string[] | null
@@ -1041,6 +1043,7 @@ export type Database = {
           profile_completion_prefer_not?: string[] | null
           profile_completion_skipped?: string[] | null
           profile_completion_step?: number | null
+          profile_hidden?: boolean | null
           profile_image_url?: string | null
           religion?: string | null
           schools?: string[] | null

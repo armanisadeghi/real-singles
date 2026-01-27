@@ -2,16 +2,21 @@
  * Seed Test Users Script
  * 
  * Creates diverse test users for testing the matching algorithm, search, and filters.
+ * Images are downloaded from Unsplash and uploaded to Supabase Storage to match
+ * the real user upload flow (storage paths, not external URLs).
  * 
  * Usage:
  *   pnpm tsx scripts/seed-test-users.ts
+ *   pnpm seed:users
  * 
  * Prerequisites:
  *   - Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local
  *   - Install tsx: pnpm add -D tsx
+ * 
+ * Note: This script takes longer than before (~5-10 min) due to image downloads/uploads.
  */
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { config } from "dotenv";
 import { resolve } from "path";
 
@@ -34,6 +39,87 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     persistSession: false,
   },
 });
+
+// ============================================
+// IMAGE UPLOAD UTILITIES
+// ============================================
+
+/**
+ * Download an image from Unsplash and return as ArrayBuffer
+ */
+async function downloadImage(photoId: string, width: number, height: number): Promise<ArrayBuffer | null> {
+  const url = `https://images.unsplash.com/photo-${photoId}?w=${width}&h=${height}&fit=crop&crop=face&auto=format&q=80`;
+  
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error(`    Failed to download image ${photoId}: ${response.status}`);
+      return null;
+    }
+    return await response.arrayBuffer();
+  } catch (error) {
+    console.error(`    Error downloading image ${photoId}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Upload an image to Supabase Storage and return the storage path
+ */
+async function uploadImageToStorage(
+  client: SupabaseClient,
+  userId: string,
+  imageBuffer: ArrayBuffer,
+  index: number
+): Promise<string | null> {
+  const timestamp = Date.now();
+  const storagePath = `${userId}/${timestamp}_photo_${index}.jpg`;
+  
+  try {
+    const { error: uploadError } = await client.storage
+      .from("gallery")
+      .upload(storagePath, imageBuffer, {
+        contentType: "image/jpeg",
+        cacheControl: "3600",
+      });
+    
+    if (uploadError) {
+      console.error(`    Storage upload error: ${uploadError.message}`);
+      return null;
+    }
+    
+    return storagePath;
+  } catch (error) {
+    console.error(`    Unexpected upload error:`, error);
+    return null;
+  }
+}
+
+/**
+ * Download from Unsplash and upload to Supabase Storage
+ * Returns the storage path (NOT full URL)
+ */
+async function downloadAndUploadImage(
+  client: SupabaseClient,
+  userId: string,
+  photoId: string,
+  index: number,
+  width: number,
+  height: number
+): Promise<string | null> {
+  // Download from Unsplash
+  const imageBuffer = await downloadImage(photoId, width, height);
+  if (!imageBuffer) {
+    return null;
+  }
+  
+  // Small delay to avoid rate limiting
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  
+  // Upload to Supabase Storage
+  const storagePath = await uploadImageToStorage(client, userId, imageBuffer, index);
+  return storagePath;
+}
 
 // ============================================
 // TEST DATA CONFIGURATION
@@ -112,8 +198,13 @@ const ZODIAC_SIGNS = ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "li
 
 // Verified Unsplash photo IDs extracted from search results
 // Format: https://images.unsplash.com/photo-{ID}?w=800&h=800&fit=crop&crop=face
+//
+// IMPORTANT: When adding new IDs, verify the gender matches the array!
+// To find timestamp IDs: curl the Unsplash photo page and grep for 'photo-[0-9]*-[a-f0-9]*'
+// Example: curl -s "https://unsplash.com/photos/{slug}" | grep -o 'photo-[0-9]*-[a-f0-9]*' | head -1
 
 // MALE PORTRAITS - Verified working IDs from Unsplash search
+// Note: All images verified to show males. IDs follow format: timestamp-hash
 const MALE_PORTRAIT_IDS = [
   "1560250097-0b93528c311a", // Man standing beside wall (professional)
   "1568602471122-7832951cc4c5", // Man blue button-up
@@ -122,7 +213,7 @@ const MALE_PORTRAIT_IDS = [
   "1623366302587-b38b1ddaefd9", // Man in black crew neck
   "1618077360395-f3068be8e001", // Man with glasses denim jacket
   "1583195763986-0231686dcd43", // Man in black hoodie
-  "1522556189639-b150ed9c4330", // Person blue top smiling
+  "1651684215020-f7a5b6610f23", // Man smiling for camera (replaced: was incorrectly female)
   "1615572359976-1fe39507ed7b", // Man gray shirt near bridge
   "1594672830234-ba4cfe1202dc", // Man teal shirt glasses
   "1656338997878-279d71d48f6e", // Man with beard
@@ -133,12 +224,9 @@ const MALE_PORTRAIT_IDS = [
   "1519085360753-af0119f7cbe7", // Man in suit
   "1570295999919-56ceb5ecca61", // Young professional man
   "1544723795-3fb6469f5b39", // Man casual portrait
-  "1552058544-f2738f47c233", // Man outdoor casual
   "1557862921-37829c790f19", // Man in t-shirt
   "1542909168-82c3e7fdca5c", // Man professional
-  "1540569014546-b6bef7a64272", // Man casual outdoor
   "1492562080023-ab3db95bfbce", // Professional headshot
-  "1605406575413-1c5fd98c6b9a", // Man smiling casual
 ];
 
 // FEMALE PORTRAITS - Verified working IDs from Unsplash search
@@ -146,7 +234,6 @@ const FEMALE_PORTRAIT_IDS = [
   "1494790108377-be9c29b29330", // Woman smiling yellow
   "1438761681033-6461ffad8d80", // Professional woman
   "1517841905240-472988babdf9", // Woman casual portrait
-  "1488426862320-fb2fc92b3b79", // Woman smiling natural
   "1531746020798-e6953c6e8e04", // Woman portrait casual
   "1573496359142-b8d87734a5a2", // Professional woman
   "1580489944761-15a19d654956", // Woman casual
@@ -155,11 +242,9 @@ const FEMALE_PORTRAIT_IDS = [
   "1487412720507-e7ab37603c6f", // Casual female portrait
   "1529626455594-4ff0802cfb7e", // Woman smiling
   "1542596768-5d1d21f1cf98", // Young woman portrait
-  "1546961342-ea1f9f95fc5e", // Professional woman
   "1489424731084-a5d8b219a5bb", // Woman portrait clean
   "1534528741775-53994a69daeb", // Woman close up
   "1524504388940-b1c1722653e1", // Woman looking
-  "1508243529287-e21febc83aca", // Professional woman
   "1499887142886-791eca5918cd", // Woman outdoor
   "1509967419530-da38b4704bc6", // Professional headshot
   "1499155286265-79a9dc9c6380", // Woman outdoor casual
@@ -320,27 +405,17 @@ function randomHeight(gender: "male" | "female"): number {
   return randomInt(60, 72); // 5'0" to 6'0"
 }
 
-// Generate high-quality Unsplash image URL
-function getUnsplashUrl(photoId: string, width = 800, height = 800): string {
-  return `https://images.unsplash.com/photo-${photoId}?w=${width}&h=${height}&fit=crop&crop=face&auto=format&q=80`;
+// Get gallery image specifications for a user (primary + additional portraits + lifestyle)
+// Returns photo IDs and dimensions, not URLs - images will be downloaded and uploaded to storage
+interface GalleryImageSpec {
+  photoId: string;
+  width: number;
+  height: number;
+  isPrimary: boolean;
+  order: number;
 }
 
-// Profile image URL using curated Unsplash portraits (HD quality)
-// Gender-specific arrays ensure correct gender matching
-function getProfileImageUrl(gender: "male" | "female", index: number): string {
-  // Use separate arrays to guarantee gender-appropriate images
-  if (gender === "male") {
-    const photoId = MALE_PORTRAIT_IDS[index % MALE_PORTRAIT_IDS.length];
-    return getUnsplashUrl(photoId);
-  } else {
-    const photoId = FEMALE_PORTRAIT_IDS[index % FEMALE_PORTRAIT_IDS.length];
-    return getUnsplashUrl(photoId);
-  }
-}
-
-// Get gallery images for a user (primary + additional portraits + lifestyle)
-// Explicitly uses gender-specific arrays to prevent mix-ups
-function getGalleryImages(gender: "male" | "female", index: number): { url: string; isPrimary: boolean; order: number }[] {
+function getGalleryImageSpecs(gender: "male" | "female", index: number): GalleryImageSpec[] {
   // Explicitly select arrays based on gender
   const portraitIds = gender === "male" ? MALE_PORTRAIT_IDS : FEMALE_PORTRAIT_IDS;
   const lifestyleIds = gender === "male" ? MALE_LIFESTYLE_IDS : FEMALE_LIFESTYLE_IDS;
@@ -358,11 +433,11 @@ function getGalleryImages(gender: "male" | "female", index: number): { url: stri
   const lifestyle2Idx = (index + 1) % lifestyleIds.length;
   
   return [
-    { url: getUnsplashUrl(primaryId), isPrimary: true, order: 0 },
-    { url: getUnsplashUrl(portraitIds[portrait2Idx]), isPrimary: false, order: 1 },
-    { url: getUnsplashUrl(portraitIds[portrait3Idx]), isPrimary: false, order: 2 },
-    { url: getUnsplashUrl(lifestyleIds[lifestyle1Idx], 1200, 800), isPrimary: false, order: 3 },
-    { url: getUnsplashUrl(lifestyleIds[lifestyle2Idx], 1200, 800), isPrimary: false, order: 4 },
+    { photoId: primaryId, width: 800, height: 800, isPrimary: true, order: 0 },
+    { photoId: portraitIds[portrait2Idx], width: 800, height: 800, isPrimary: false, order: 1 },
+    { photoId: portraitIds[portrait3Idx], width: 800, height: 800, isPrimary: false, order: 2 },
+    { photoId: lifestyleIds[lifestyle1Idx], width: 1200, height: 800, isPrimary: false, order: 3 },
+    { photoId: lifestyleIds[lifestyle2Idx], width: 1200, height: 800, isPrimary: false, order: 4 },
   ];
 }
 
@@ -417,7 +492,9 @@ function generateTestUser(gender: "male" | "female", index: number): TestUserDat
   };
 }
 
-async function createTestUser(userData: TestUserData): Promise<string | null> {
+async function createTestUser(userData: TestUserData, userNumber: number, totalUsers: number): Promise<string | null> {
+  const progress = `[${userNumber}/${totalUsers}]`;
+  
   try {
     // 1. Create auth user
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
@@ -430,14 +507,54 @@ async function createTestUser(userData: TestUserData): Promise<string | null> {
     });
 
     if (authError) {
-      console.error(`Error creating auth user ${userData.email}:`, authError.message);
+      console.error(`${progress} Error creating auth user ${userData.email}:`, authError.message);
       return null;
     }
 
     const userId = authData.user.id;
-    console.log(`Created auth user: ${userData.email} (${userId})`);
+    console.log(`${progress} Created auth user: ${userData.email}`);
 
-    // 2. Create profile
+    // 2. Download and upload gallery images to Supabase Storage
+    const imageSpecs = getGalleryImageSpecs(userData.gender, userData.profileImageIndex);
+    const galleryEntries: { user_id: string; media_type: string; media_url: string; is_primary: boolean; display_order: number }[] = [];
+    let primaryImagePath: string | null = null;
+    
+    console.log(`${progress}   Uploading ${imageSpecs.length} images to storage...`);
+    
+    for (let i = 0; i < imageSpecs.length; i++) {
+      const spec = imageSpecs[i];
+      const storagePath = await downloadAndUploadImage(
+        supabase,
+        userId,
+        spec.photoId,
+        i,
+        spec.width,
+        spec.height
+      );
+      
+      if (storagePath) {
+        galleryEntries.push({
+          user_id: userId,
+          media_type: "image",
+          media_url: storagePath, // Storage path, NOT full URL
+          is_primary: spec.isPrimary,
+          display_order: spec.order,
+        });
+        
+        if (spec.isPrimary) {
+          primaryImagePath = storagePath;
+        }
+        
+        console.log(`${progress}   ✓ Image ${i + 1}/${imageSpecs.length} uploaded`);
+      } else {
+        console.log(`${progress}   ✗ Image ${i + 1}/${imageSpecs.length} failed`);
+      }
+      
+      // Small delay between uploads
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+
+    // 3. Create profile with storage path for profile_image_url
     const lookingFor = userData.gender === "male" ? ["female"] : ["male"];
     const { lat, lng } = addLocationJitter(userData.location.lat, userData.location.lng);
     const occupation = randomElement(OCCUPATIONS);
@@ -491,8 +608,8 @@ async function createTestUser(userData: TestUserData): Promise<string | null> {
       profile_completion_step: 10,
       profile_completed_at: new Date().toISOString(),
       
-      // Profile image
-      profile_image_url: getProfileImageUrl(userData.gender, userData.profileImageIndex),
+      // Profile image - use storage path (NOT full URL)
+      profile_image_url: primaryImagePath,
     };
 
     const { error: profileError } = await supabase
@@ -500,12 +617,12 @@ async function createTestUser(userData: TestUserData): Promise<string | null> {
       .upsert(profileData);
 
     if (profileError) {
-      console.error(`Error creating profile for ${userData.email}:`, profileError.message);
+      console.error(`${progress}   Error creating profile:`, profileError.message);
     } else {
-      console.log(`  ✓ Profile created for ${userData.firstName} ${userData.lastName}`);
+      console.log(`${progress}   ✓ Profile created`);
     }
 
-    // 3. Create user_filters with varied preferences
+    // 4. Create user_filters with varied preferences
     const ageRange = {
       min: Math.max(18, randomInt(22, 35)),
       max: randomInt(40, 60),
@@ -533,34 +650,29 @@ async function createTestUser(userData: TestUserData): Promise<string | null> {
       .upsert(filterData);
 
     if (filterError) {
-      console.error(`Error creating filters for ${userData.email}:`, filterError.message);
+      console.error(`${progress}   Error creating filters:`, filterError.message);
     } else {
-      console.log(`  ✓ Filters created`);
+      console.log(`${progress}   ✓ Filters created`);
     }
 
-    // 4. Create gallery entries with multiple HD images
-    const galleryImages = getGalleryImages(userData.gender, userData.profileImageIndex);
-    const galleryEntries = galleryImages.map((img) => ({
-      user_id: userId,
-      media_type: "image",
-      media_url: img.url,
-      is_primary: img.isPrimary,
-      display_order: img.order,
-    }));
+    // 5. Insert gallery entries (with storage paths)
+    if (galleryEntries.length > 0) {
+      const { error: galleryError } = await supabase
+        .from("user_gallery")
+        .insert(galleryEntries);
 
-    const { error: galleryError } = await supabase
-      .from("user_gallery")
-      .insert(galleryEntries);
-
-    if (galleryError) {
-      console.error(`Error creating gallery for ${userData.email}:`, galleryError.message);
+      if (galleryError) {
+        console.error(`${progress}   Error creating gallery:`, galleryError.message);
+      } else {
+        console.log(`${progress}   ✓ Gallery created with ${galleryEntries.length} images`);
+      }
     } else {
-      console.log(`  ✓ Gallery created with ${galleryEntries.length} HD images`);
+      console.log(`${progress}   ⚠ No gallery images uploaded`);
     }
 
     return userId;
   } catch (error) {
-    console.error(`Unexpected error creating user ${userData.email}:`, error);
+    console.error(`${progress} Unexpected error creating user ${userData.email}:`, error);
     return null;
   }
 }
@@ -571,41 +683,52 @@ async function createTestUser(userData: TestUserData): Promise<string | null> {
 
 async function main() {
   console.log("🌱 Starting test user seed script...\n");
+  console.log("Note: This script downloads images from Unsplash and uploads to Supabase Storage.");
+  console.log("Expected runtime: 5-10 minutes for 48 users.\n");
   
   const totalUsers = 48; // 24 male, 24 female
   const usersPerGender = totalUsers / 2;
   
   const createdUsers: string[] = [];
+  let userNumber = 0;
   
   console.log(`Creating ${totalUsers} test users (${usersPerGender} male, ${usersPerGender} female)...\n`);
+  
+  const startTime = Date.now();
   
   // Create male users
   console.log("👨 Creating male users...\n");
   for (let i = 0; i < usersPerGender; i++) {
+    userNumber++;
     const userData = generateTestUser("male", i);
-    const userId = await createTestUser(userData);
+    const userId = await createTestUser(userData, userNumber, totalUsers);
     if (userId) {
       createdUsers.push(userId);
     }
-    // Small delay to avoid rate limiting
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    console.log(""); // Empty line between users
   }
   
   // Create female users
-  console.log("\n👩 Creating female users...\n");
+  console.log("👩 Creating female users...\n");
   for (let i = 0; i < usersPerGender; i++) {
+    userNumber++;
     const userData = generateTestUser("female", i);
-    const userId = await createTestUser(userData);
+    const userId = await createTestUser(userData, userNumber, totalUsers);
     if (userId) {
       createdUsers.push(userId);
     }
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    console.log(""); // Empty line between users
   }
   
-  console.log("\n" + "=".repeat(50));
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const minutes = Math.floor(elapsed / 60);
+  const seconds = elapsed % 60;
+  
+  console.log("=".repeat(50));
   console.log(`✅ Seed complete!`);
   console.log(`   Total users created: ${createdUsers.length}/${totalUsers}`);
-  console.log(`   Each user has 5 high-quality Unsplash images`);
+  console.log(`   Images uploaded: ${createdUsers.length * 5} to Supabase Storage`);
+  console.log(`   Time elapsed: ${minutes}m ${seconds}s`);
   console.log(`   Test user password: TestPassword123!`);
   console.log(`   Email format: firstname.lastnameN@testuser.realsingles.com`);
   console.log("=".repeat(50));

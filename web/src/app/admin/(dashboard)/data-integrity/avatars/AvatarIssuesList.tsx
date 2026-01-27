@@ -14,11 +14,27 @@ import {
   AlertCircle,
   Search,
   Filter,
+  Copy,
+  ClipboardList,
+  Check,
 } from "lucide-react";
 import type { DataIntegrityIssue } from "@/lib/services/data-integrity";
 
 interface AvatarIssuesListProps {
   issues: DataIntegrityIssue[];
+}
+
+// Helper to copy text to clipboard with feedback
+function useCopyToClipboard() {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const copy = async (text: string, id: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  return { copy, copiedId };
 }
 
 export function AvatarIssuesList({ issues }: AvatarIssuesListProps) {
@@ -32,6 +48,42 @@ export function AvatarIssuesList({ issues }: AvatarIssuesListProps) {
   const [filterType, setFilterType] = useState<"all" | "missing" | "broken">(
     "all"
   );
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const { copy, copiedId } = useCopyToClipboard();
+
+  const toggleRowExpand = (id: string) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  // Format issue for clipboard (JSON)
+  const formatIssueForCopy = (issue: DataIntegrityIssue) => ({
+    userId: issue.userId,
+    email: issue.userEmail,
+    name: `${issue.firstName || ""} ${issue.lastName || ""}`.trim() || "Unknown",
+    issueType: issue.issueType,
+    description: issue.description,
+    profileImageUrl: issue.details?.profileImageUrl || null,
+    autoFixable: issue.autoFixable,
+    hasGalleryImages: issue.details?.hasGalleryImages ?? null,
+    createdAt: issue.createdAt,
+  });
+
+  const copyAllToClipboard = async () => {
+    const data = filteredIssues.map(formatIssueForCopy);
+    await copy(JSON.stringify(data, null, 2), "all");
+  };
+
+  const copyRowToClipboard = async (issue: DataIntegrityIssue) => {
+    await copy(JSON.stringify(formatIssueForCopy(issue), null, 2), issue.userId);
+  };
 
   // Filter and search issues
   const filteredIssues = issues.filter((issue) => {
@@ -205,26 +257,46 @@ export function AvatarIssuesList({ issues }: AvatarIssuesListProps) {
           </div>
         </div>
 
-        {/* Batch Fix Button */}
-        {autoFixableCount > 0 && (
+        <div className="flex items-center gap-2">
+          {/* Copy All Button */}
           <button
-            onClick={handleBatchFix}
-            disabled={batchFixing}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={copyAllToClipboard}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
           >
-            {batchFixing ? (
+            {copiedId === "all" ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Fixing...
+                <Check className="w-4 h-4 text-green-600" />
+                Copied!
               </>
             ) : (
               <>
-                <Wrench className="w-4 h-4" />
-                Fix All Visible ({autoFixableCount})
+                <ClipboardList className="w-4 h-4" />
+                Copy All ({filteredIssues.length})
               </>
             )}
           </button>
-        )}
+
+          {/* Batch Fix Button */}
+          {autoFixableCount > 0 && (
+            <button
+              onClick={handleBatchFix}
+              disabled={batchFixing}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {batchFixing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Fixing...
+                </>
+              ) : (
+                <>
+                  <Wrench className="w-4 h-4" />
+                  Fix All Visible ({autoFixableCount})
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Results Table */}
@@ -297,13 +369,33 @@ export function AvatarIssuesList({ issues }: AvatarIssuesListProps) {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600 max-w-xs">
+                      <p className="text-sm text-gray-600 max-w-md">
                         {issue.description}
                       </p>
                       {typeof issue.details?.profileImageUrl === "string" && (
-                        <p className="text-xs text-gray-400 mt-1 font-mono truncate max-w-xs">
-                          {issue.details.profileImageUrl.substring(0, 50)}...
-                        </p>
+                        <div className="mt-1">
+                          <button
+                            onClick={() => toggleRowExpand(`url-${issue.userId}`)}
+                            className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            {expandedRows.has(`url-${issue.userId}`) ? "Hide URL" : "Show URL"}
+                          </button>
+                          {expandedRows.has(`url-${issue.userId}`) && (
+                            <div className="mt-1 p-2 bg-gray-50 rounded border text-xs font-mono break-all">
+                              {issue.details.profileImageUrl}
+                              <button
+                                onClick={() => copy(issue.details!.profileImageUrl as string, `url-copy-${issue.userId}`)}
+                                className="ml-2 text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                              >
+                                {copiedId === `url-copy-${issue.userId}` ? (
+                                  <Check className="w-3 h-3 text-green-600" />
+                                ) : (
+                                  <Copy className="w-3 h-3" />
+                                )}
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -341,6 +433,17 @@ export function AvatarIssuesList({ issues }: AvatarIssuesListProps) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => copyRowToClipboard(issue)}
+                          className="p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100"
+                          title="Copy row data"
+                        >
+                          {copiedId === issue.userId ? (
+                            <Check className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </button>
                         {issue.autoFixable && !result?.success && (
                           <button
                             onClick={() =>

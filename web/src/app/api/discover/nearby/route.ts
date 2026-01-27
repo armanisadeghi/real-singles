@@ -152,12 +152,14 @@ async function handleNearbyRequest(request: Request) {
 
   // Get profiles with location
   // Note: Removed strict status="active" filter to include new users (null status)
+  // Exclude hidden profiles (paused accounts, admin/moderator accounts)
   let query = supabase
     .from("profiles")
     .select(`
       *,
       users!inner(id, display_name, status, email)
     `)
+    .eq("profile_hidden", false)
     .not("latitude", "is", null)
     .not("longitude", "is", null);
 

@@ -109,13 +109,15 @@ export async function GET() {
   // Build base query for profiles
   // Note: Include users with "active" status OR null status (new users)
   // This is more inclusive than requiring exactly "active"
+  // Exclude hidden profiles (paused accounts, admin/moderator accounts)
   let profilesQuery = supabase
     .from("profiles")
     .select(`
       *,
       users!inner(id, display_name, status, email)
     `)
-    .not("user_id", "in", `(${Array.from(blockedIds).join(",")})`);
+    .not("user_id", "in", `(${Array.from(blockedIds).join(",")})`)
+    .eq("profile_hidden", false);
 
   // ALWAYS apply user's "looking_for" preference from their profile
   // This is the core gender preference that determines who the user wants to see
@@ -188,6 +190,7 @@ export async function GET() {
   let NearBy: FormattedProfile[] = [];
   if (currentUserProfile?.latitude && currentUserProfile?.longitude) {
     // For now, just get profiles with location set (proper distance calculation would use PostGIS)
+    // Exclude hidden profiles (paused accounts, admin/moderator accounts)
     let nearbyQuery = supabase
       .from("profiles")
       .select(`
@@ -195,6 +198,7 @@ export async function GET() {
         users!inner(id, display_name, status, email)
       `)
       .not("user_id", "in", `(${Array.from(blockedIds).join(",")})`)
+      .eq("profile_hidden", false)
       .not("latitude", "is", null)
       .not("longitude", "is", null);
 

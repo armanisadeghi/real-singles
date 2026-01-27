@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { 
@@ -14,6 +14,7 @@ import {
   Shield,
   ChevronRight,
   BadgeCheck,
+  PauseCircle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -25,6 +26,54 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [profileHidden, setProfileHidden] = useState(false);
+  const [pauseLoading, setPauseLoading] = useState(false);
+
+  // Fetch current profile_hidden state on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch("/api/users/me");
+        const data = await response.json();
+        if (data.success && data.data) {
+          setProfileHidden(data.data.profile_hidden || false);
+        }
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handlePauseToggle = async () => {
+    setPauseLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await fetch("/api/users/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile_hidden: !profileHidden }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setProfileHidden(!profileHidden);
+        setSuccess(
+          !profileHidden
+            ? "Your account is now paused. You won't appear in discovery or matches."
+            : "Your account is active again. You'll appear in discovery and matches."
+        );
+      } else {
+        setError(data.msg || "Failed to update account status");
+      }
+    } catch (err) {
+      setError("Failed to update account status");
+    } finally {
+      setPauseLoading(false);
+    }
+  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,6 +195,39 @@ export default function SettingsPage() {
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400" />
           </Link>
+
+          <div className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+            <div className="flex items-center gap-4">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                profileHidden ? "bg-orange-100" : "bg-gray-100"
+              }`}>
+                <PauseCircle className={`w-5 h-5 ${
+                  profileHidden ? "text-orange-600" : "text-gray-600"
+                }`} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Pause Account</h3>
+                <p className="text-sm text-gray-500">
+                  {profileHidden 
+                    ? "Your profile is hidden from discovery" 
+                    : "Hide from discovery and matches"}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handlePauseToggle}
+              disabled={pauseLoading}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                profileHidden ? "bg-orange-500" : "bg-gray-200"
+              } ${pauseLoading ? "opacity-50" : ""}`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  profileHidden ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
 
           <Link
             href="/profile/gallery"

@@ -16,6 +16,9 @@ import {
   AlertTriangle,
   AlertCircle,
   Info,
+  Copy,
+  ClipboardList,
+  Check,
 } from "lucide-react";
 import type {
   DataIntegrityIssue,
@@ -26,9 +29,29 @@ import type {
 interface AllIssuesListProps {
   issues: DataIntegrityIssue[];
   summary: IntegrityCheckResult["summary"];
+  initialSeverity?: "all" | "critical" | "warning" | "info";
+  initialType?: string;
 }
 
-export function AllIssuesList({ issues, summary }: AllIssuesListProps) {
+// Helper to copy text to clipboard with feedback
+function useCopyToClipboard() {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const copy = async (text: string, id: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  return { copy, copiedId };
+}
+
+export function AllIssuesList({ 
+  issues, 
+  summary,
+  initialSeverity,
+  initialType,
+}: AllIssuesListProps) {
   const router = useRouter();
   const [fixingId, setFixingId] = useState<string | null>(null);
   const [fixResults, setFixResults] = useState<
@@ -37,8 +60,46 @@ export function AllIssuesList({ issues, summary }: AllIssuesListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterSeverity, setFilterSeverity] = useState<
     "all" | "critical" | "warning" | "info"
-  >("all");
-  const [filterType, setFilterType] = useState<"all" | IssueType>("all");
+  >(initialSeverity || "all");
+  const [filterType, setFilterType] = useState<"all" | IssueType>(
+    (initialType as IssueType) || "all"
+  );
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const { copy, copiedId } = useCopyToClipboard();
+
+  const toggleRowExpand = (id: string) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  // Format issue for clipboard
+  const formatIssueForCopy = (issue: DataIntegrityIssue) => ({
+    userId: issue.userId,
+    email: issue.userEmail,
+    name: `${issue.firstName || ""} ${issue.lastName || ""}`.trim() || "Unknown",
+    issueType: issue.issueType,
+    severity: issue.severity,
+    description: issue.description,
+    details: issue.details || null,
+    autoFixable: issue.autoFixable,
+    createdAt: issue.createdAt,
+  });
+
+  const copyAllToClipboard = async () => {
+    const data = filteredIssues.map(formatIssueForCopy);
+    await copy(JSON.stringify(data, null, 2), "all");
+  };
+
+  const copyRowToClipboard = async (issue: DataIntegrityIssue, idx: number) => {
+    await copy(JSON.stringify(formatIssueForCopy(issue), null, 2), `row-${idx}`);
+  };
 
   // Get unique issue types from the data
   const issueTypes = useMemo(() => {
@@ -243,14 +304,34 @@ export function AllIssuesList({ issues, summary }: AllIssuesListProps) {
           ))}
         </select>
 
-        {/* Export Button */}
-        <button
-          onClick={exportToCSV}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 ml-auto"
-        >
-          <Download className="w-4 h-4" />
-          Export ({filteredIssues.length})
-        </button>
+        <div className="flex items-center gap-2 ml-auto">
+          {/* Copy All Button */}
+          <button
+            onClick={copyAllToClipboard}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+          >
+            {copiedId === "all" ? (
+              <>
+                <Check className="w-4 h-4 text-green-600" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <ClipboardList className="w-4 h-4" />
+                Copy JSON
+              </>
+            )}
+          </button>
+
+          {/* Export Button */}
+          <button
+            onClick={exportToCSV}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Results count */}
@@ -334,9 +415,36 @@ export function AllIssuesList({ issues, summary }: AllIssuesListProps) {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600 max-w-xs truncate">
-                        {issue.description}
-                      </p>
+                      <div>
+                        <p 
+                          className={`text-sm text-gray-600 ${
+                            expandedRows.has(`desc-${idx}`) ? "" : "max-w-xs truncate"
+                          }`}
+                        >
+                          {issue.description}
+                        </p>
+                        {issue.description.length > 50 && (
+                          <button
+                            onClick={() => toggleRowExpand(`desc-${idx}`)}
+                            className="text-xs text-blue-600 hover:text-blue-800 mt-1"
+                          >
+                            {expandedRows.has(`desc-${idx}`) ? "Show less" : "Show more"}
+                          </button>
+                        )}
+                        {issue.details && Object.keys(issue.details).length > 0 && (
+                          <button
+                            onClick={() => toggleRowExpand(`details-${idx}`)}
+                            className="text-xs text-blue-600 hover:text-blue-800 mt-1 ml-2"
+                          >
+                            {expandedRows.has(`details-${idx}`) ? "Hide details" : "View details"}
+                          </button>
+                        )}
+                        {expandedRows.has(`details-${idx}`) && issue.details && (
+                          <pre className="mt-2 p-2 bg-gray-50 rounded border text-xs font-mono overflow-x-auto max-w-md">
+                            {JSON.stringify(issue.details, null, 2)}
+                          </pre>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {result ? (
@@ -364,6 +472,17 @@ export function AllIssuesList({ issues, summary }: AllIssuesListProps) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => copyRowToClipboard(issue, idx)}
+                          className="p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100"
+                          title="Copy row data"
+                        >
+                          {copiedId === `row-${idx}` ? (
+                            <Check className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </button>
                         {issue.autoFixable && !result?.success && (
                           <button
                             onClick={() =>

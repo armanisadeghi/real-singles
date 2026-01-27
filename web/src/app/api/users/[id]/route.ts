@@ -48,6 +48,15 @@ export async function GET(
     .eq("user_id", targetUserId)
     .single();
 
+  // Check if profile is hidden (paused account or admin)
+  // Hidden profiles should show "Profile unavailable" unless viewing your own profile
+  if (profile?.profile_hidden && currentUser?.id !== targetUserId) {
+    return NextResponse.json(
+      { success: false, msg: "Profile unavailable" },
+      { status: 404 }
+    );
+  }
+
   if (profileError && profileError.code !== "PGRST116") {
     return NextResponse.json(
       { success: false, msg: "Error fetching profile" },
