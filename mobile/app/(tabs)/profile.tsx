@@ -18,12 +18,15 @@ import React, {
 import {
   ActivityIndicator,
   Alert,
+  Text,
   TouchableOpacity,
   View
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CircularProgress from "react-native-circular-progress-indicator";
 
 export default function Profile() {
+  const insets = useSafeAreaInsets();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [profile, setProfile] = useState<User | null>();
@@ -112,6 +115,9 @@ export default function Profile() {
 
 
 
+  // Check if profile is paused (hidden)
+  const isProfilePaused = profile?.profile_hidden || profile?.ProfileHidden;
+
   return (
     <View className="flex-1 bg-background">
       <SideMenu
@@ -120,6 +126,20 @@ export default function Profile() {
         userAvatar={profile?.Image}
         userName={profile?.DisplayName || "User"}
       />
+      
+      {/* Profile Paused Banner */}
+      {isProfilePaused && (
+        <View 
+          className="bg-orange-500 absolute top-0 left-0 right-0 z-40 flex-row items-center justify-center px-4"
+          style={{ paddingTop: insets.top + 4, paddingBottom: 8 }}
+        >
+          <PlatformIcon name="pause-circle-outline" size={16} color="#fff" />
+          <Text className="text-white font-medium ml-2 text-sm">
+            Profile paused — hidden from discovery
+          </Text>
+        </View>
+      )}
+      
       <ProfileImageHeader
         source={getProfileImage()}
         visibleHeight={300}

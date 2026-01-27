@@ -35,7 +35,7 @@ export default function ProfileDetail() {
 
   const [profile, setProfile] = useState<User>();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const retryScale = useSharedValue(1);
 
   // Android hardware back button handling
@@ -57,7 +57,7 @@ export default function ProfileDetail() {
 
   const fetchProfile = async (id: string) => {
     // setLoading(true);
-     setError(false);
+     setError(null);
     try {
       console.log("id: ", id);
 
@@ -66,22 +66,24 @@ export default function ProfileDetail() {
       if (res?.success) {
         setProfile(res?.data);
       } else {
-        setError(true);
+        const errorMsg = res?.msg || "Profile unavailable";
+        setError(errorMsg);
         Toast.show({
           type: "error",
-          text1: res?.msg || "Failed to fetch profile",
+          text1: errorMsg,
           position: "bottom",
           visibilityTime: 2000,
           autoHide: true,
         });
         console.log("Failed to fetch profile:", res?.msg);
       }
-    } catch (error) {
-      console.error("Error fetching profile data:", error instanceof Error ? error.message : String(error));
-      setError(true);
+    } catch (err) {
+      console.error("Error fetching profile data:", err instanceof Error ? err.message : String(err));
+      const errorMsg = "An error occurred while fetching profile data";
+      setError(errorMsg);
       Toast.show({
         type: "error",
-        text1: "An error occurred while fetching profile data",
+        text1: errorMsg,
         position: "top",
         swipeable: true,
         visibilityTime: 4000,

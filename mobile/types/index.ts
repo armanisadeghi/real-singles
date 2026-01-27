@@ -154,6 +154,9 @@ export interface User {
   Drinks?: string;
   Marijuana?: string;
   is_verified?: boolean;
+  // Account visibility
+  profile_hidden?: boolean;
+  ProfileHidden?: boolean;
 }
 
 export interface EditProfileFormData {

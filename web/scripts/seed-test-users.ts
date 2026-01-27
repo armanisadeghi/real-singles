@@ -255,12 +255,12 @@ const FEMALE_PORTRAIT_IDS = [
 ];
 
 // Additional photos for gallery variety (lifestyle shots - less strict on face)
+// Note: Some original IDs were removed due to 404 errors
 const MALE_LIFESTYLE_IDS = [
   "1552374196-c4e7ffc6e126", // Man hiking outdoors
   "1571019613454-1cb2f99b2d8b", // Man outdoors nature
   "1517836357463-d25dfeac3438", // Man fitness
   "1518609878373-06d740f60d8b", // Man coffee shop
-  "1502823403499-180fef132f67", // Man city walking
   "1507679799987-c73779587ccf", // Man in suit full body
   "1519058082700-08a0b56da9b4", // Man casual lifestyle
   "1516914943479-89db7d9ae7f2", // Man casual activity
@@ -268,6 +268,7 @@ const MALE_LIFESTYLE_IDS = [
   "1496345875659-11f7dd282d1d", // Man reading
   "1525134479668-1bee5c7c6845", // Man nature
   "1528892952291-009c663ce843", // Man casual
+  "1556157382-97eda2d62296", // Man casual outdoors (replacement for broken ID)
 ];
 
 const FEMALE_LIFESTYLE_IDS = [
@@ -279,10 +280,10 @@ const FEMALE_LIFESTYLE_IDS = [
   "1491438590914-bc09fcaaf77a", // Woman social friends
   "1518459031867-a89b944bffe4", // Woman fitness
   "1524502397800-2eeaad7c3fe5", // Woman hiking
-  "1445384763658-0400939a13f9", // Woman lifestyle
   "1475503572774-15a45e5d60b9", // Woman adventure
-  "1486403704522-4edfe7b4e6e2", // Woman city
   "1483721310020-03333e577078", // Woman traveling
+  "1544005313-94ddf0286df2", // Woman lifestyle (replacement for broken ID)
+  "1529626455594-4ff0802cfb7e", // Woman smiling outdoor (replacement for broken ID)
 ];
 
 const INTERESTS = [
