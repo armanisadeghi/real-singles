@@ -39,6 +39,12 @@ export function PhotoCarousel({
   const [isHovered, setIsHovered] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
 
+  // Touch/swipe state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   const goNext = useCallback(() => {
     if (currentIndex < images.length - 1) {
       const newIndex = currentIndex + 1;
@@ -66,6 +72,61 @@ export function PhotoCarousel({
     setIsViewerOpen(true);
   }, []);
 
+  // Minimum swipe distance threshold (in pixels)
+  const minSwipeDistance = 50;
+
+  // Touch handlers for swipe navigation
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (isTransitioning) return;
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setSwipeOffset(0);
+  }, [isTransitioning]);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (isTransitioning || touchStart === null) return;
+    const currentX = e.targetTouches[0].clientX;
+    setTouchEnd(currentX);
+    // Calculate swipe offset with resistance at edges
+    const rawOffset = currentX - touchStart;
+    const isAtStart = currentIndex === 0 && rawOffset > 0;
+    const isAtEnd = currentIndex === images.length - 1 && rawOffset < 0;
+    const resistance = isAtStart || isAtEnd ? 0.3 : 1;
+    setSwipeOffset(rawOffset * resistance);
+  }, [isTransitioning, touchStart, currentIndex, images.length]);
+
+  const onTouchEnd = useCallback(() => {
+    if (isTransitioning || touchStart === null) return;
+
+    const distance = touchStart - (touchEnd ?? touchStart);
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    // Only trigger navigation if we actually swiped, not just tapped
+    const didSwipe = Math.abs(distance) > 10;
+
+    setIsTransitioning(true);
+
+    if (isLeftSwipe && currentIndex < images.length - 1) {
+      goNext();
+    } else if (isRightSwipe && currentIndex > 0) {
+      goPrevious();
+    } else if (!didSwipe) {
+      // If it was a tap (not a swipe), open full screen
+      openFullScreen();
+    }
+
+    // Reset swipe offset with animation
+    setSwipeOffset(0);
+
+    // Reset touch state after transition
+    setTimeout(() => {
+      setTouchStart(null);
+      setTouchEnd(null);
+      setIsTransitioning(false);
+    }, 300);
+  }, [isTransitioning, touchStart, touchEnd, goNext, goPrevious, currentIndex, images.length, openFullScreen]);
+
   // Use CSS variable for height to allow className overrides
   const heightStyle = { "--carousel-height": height } as React.CSSProperties;
 
@@ -88,23 +149,30 @@ export function PhotoCarousel({
   return (
     <>
       <div
-        className={cn("relative overflow-hidden h-[var(--carousel-height)]", className)}
+        className={cn("relative overflow-hidden h-[var(--carousel-height)] touch-none select-none", className)}
         style={heightStyle}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
         {/* Main image */}
-        <button
-          onClick={openFullScreen}
+        <div
           className="w-full h-full cursor-pointer"
           aria-label="View full-screen"
         >
           <img
             src={images[currentIndex]}
             alt=""
-            className="w-full h-full object-cover transition-transform duration-300"
+            className="w-full h-full object-cover"
+            draggable={false}
+            style={{
+              transform: `translateX(${swipeOffset}px)`,
+              transition: isTransitioning ? 'transform 0.3s ease-out' : 'none',
+            }}
           />
-        </button>
+        </div>
 
         {/* Gradient overlay */}
         {showGradient && (

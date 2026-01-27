@@ -100,3 +100,34 @@ input, select, textarea {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--foreground);
 }
+
+/* Horizontal swipeable container utilities */
+.swipe-container-x {
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent parent scroll when swiping on touch devices */
+.touch-pan-x {
+  touch-action: pan-x;
+}
+
+/* Contain overscroll to prevent parent scrolling */
+.overscroll-x-contain {
+  overscroll-behavior-x: contain;
+}
+
+/* Smooth touch scrolling on iOS */
+.scroll-smooth-touch {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar but allow scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

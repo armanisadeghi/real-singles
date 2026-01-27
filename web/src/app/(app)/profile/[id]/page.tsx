@@ -108,6 +108,8 @@ export default function OtherProfilePage() {
   // Touch/swipe state for mobile photo navigation
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Fetch profile data
   useEffect(() => {
@@ -167,27 +169,49 @@ export default function OtherProfilePage() {
 
   // Touch handlers for swipe navigation
   const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (isTransitioning) return;
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
-  }, []);
+    setSwipeOffset(0);
+  }, [isTransitioning]);
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  }, []);
+    if (isTransitioning || touchStart === null) return;
+    const currentX = e.targetTouches[0].clientX;
+    setTouchEnd(currentX);
+    // Calculate swipe offset with resistance at edges
+    const rawOffset = currentX - touchStart;
+    const isAtStart = currentPhotoIndex === 0 && rawOffset > 0;
+    const isAtEnd = currentPhotoIndex === photos.length - 1 && rawOffset < 0;
+    const resistance = isAtStart || isAtEnd ? 0.3 : 1;
+    setSwipeOffset(rawOffset * resistance);
+  }, [isTransitioning, touchStart, currentPhotoIndex, photos.length]);
 
   const onTouchEnd = useCallback(() => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
+    if (isTransitioning || touchStart === null) return;
+
+    const distance = touchStart - (touchEnd ?? touchStart);
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
-    if (isLeftSwipe) nextPhoto();
-    if (isRightSwipe) prevPhoto();
-    
-    // Reset touch state
-    setTouchStart(null);
-    setTouchEnd(null);
-  }, [touchStart, touchEnd, nextPhoto, prevPhoto]);
+    setIsTransitioning(true);
+
+    if (isLeftSwipe && currentPhotoIndex < photos.length - 1) {
+      nextPhoto();
+    } else if (isRightSwipe && currentPhotoIndex > 0) {
+      prevPhoto();
+    }
+
+    // Reset swipe offset with animation
+    setSwipeOffset(0);
+
+    // Reset touch state after transition
+    setTimeout(() => {
+      setTouchStart(null);
+      setTouchEnd(null);
+      setIsTransitioning(false);
+    }, 300);
+  }, [isTransitioning, touchStart, touchEnd, nextPhoto, prevPhoto, currentPhotoIndex, photos.length]);
 
   // Keyboard navigation for accessibility
   useEffect(() => {
@@ -386,8 +410,8 @@ export default function OtherProfilePage() {
         </button>
 
         {/* Photo Gallery */}
-        <div 
-          className="relative aspect-[3/4] sm:aspect-[4/3] md:aspect-[16/9] lg:aspect-[21/9] max-h-[500px] bg-gradient-to-br from-pink-100 to-purple-100"
+        <div
+          className="relative aspect-[3/4] sm:aspect-[4/3] md:aspect-[16/9] lg:aspect-[21/9] max-h-[500px] bg-gradient-to-br from-pink-100 to-purple-100 touch-none select-none"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -398,6 +422,10 @@ export default function OtherProfilePage() {
               alt=""
               className="w-full h-full object-cover select-none"
               draggable={false}
+              style={{
+                transform: `translateX(${swipeOffset}px)`,
+                transition: isTransitioning ? 'transform 0.3s ease-out' : 'none',
+              }}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -517,23 +545,30 @@ export default function OtherProfilePage() {
 
       {/* Action Buttons */}
       <div className="sticky top-0 z-10 bg-white border-b shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-center gap-3">
+        <div className="max-w-4xl mx-auto px-2 sm:px-4 py-3">
+          <div
+            className="flex items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide sm:justify-center"
+            style={{
+              touchAction: 'pan-x',
+              overscrollBehaviorX: 'contain',
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
             <button
               onClick={handleToggleFavorite}
               disabled={favoriteLoading}
               className={cn(
-                "flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-all",
+                "flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full font-medium transition-all text-sm sm:text-base",
                 isFavorite
                   ? "bg-pink-100 text-pink-600 hover:bg-pink-200"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               )}
             >
               {favoriteLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
               ) : (
                 <Heart
-                  className={cn("w-5 h-5", isFavorite && "fill-current")}
+                  className={cn("w-4 h-4 sm:w-5 sm:h-5", isFavorite && "fill-current")}
                 />
               )}
               {isFavorite ? "Favorited" : "Favorite"}
@@ -542,29 +577,29 @@ export default function OtherProfilePage() {
             <button
               onClick={handleMessage}
               disabled={isPending}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-medium hover:from-pink-600 hover:to-rose-600 transition-all"
+              className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-medium hover:from-pink-600 hover:to-rose-600 transition-all text-sm sm:text-base"
             >
               {isPending ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
               ) : (
-                <MessageCircle className="w-5 h-5" />
+                <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
               Message
             </button>
 
             <button
               onClick={handleShare}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-all"
+              className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-all text-sm sm:text-base"
             >
-              <Share2 className="w-5 h-5" />
+              <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
               Share
             </button>
 
             <button
               onClick={() => setShowReviewModal(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-amber-100 text-amber-700 rounded-full font-medium hover:bg-amber-200 transition-all"
+              className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-amber-100 text-amber-700 rounded-full font-medium hover:bg-amber-200 transition-all text-sm sm:text-base"
             >
-              <Star className="w-5 h-5" />
+              <Star className="w-4 h-4 sm:w-5 sm:h-5" />
               Review
             </button>
           </div>

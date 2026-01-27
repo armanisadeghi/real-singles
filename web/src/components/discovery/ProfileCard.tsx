@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import {
   X,
@@ -66,6 +66,12 @@ export function ProfileCard({
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Touch/swipe state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   // Combine profile image with gallery
   const photos = [
     profile.profile_image_url,
@@ -84,23 +90,78 @@ export function ProfileCard({
       ? `${profile.city}, ${profile.state}`
       : profile.city || profile.state;
 
-  const nextPhoto = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const goNextPhoto = useCallback(() => {
     if (photos.length > 1) {
       setCurrentPhotoIndex((prev) => (prev + 1) % photos.length);
     }
+  }, [photos.length]);
+
+  const goPrevPhoto = useCallback(() => {
+    if (photos.length > 1) {
+      setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length);
+    }
+  }, [photos.length]);
+
+  const nextPhoto = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    goNextPhoto();
   };
 
   const prevPhoto = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (photos.length > 1) {
-      setCurrentPhotoIndex(
-        (prev) => (prev - 1 + photos.length) % photos.length
-      );
-    }
+    goPrevPhoto();
   };
+
+  // Minimum swipe distance threshold (in pixels)
+  const minSwipeDistance = 50;
+
+  // Touch handlers for swipe navigation
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (isTransitioning) return;
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setSwipeOffset(0);
+  }, [isTransitioning]);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (isTransitioning || touchStart === null) return;
+    const currentX = e.targetTouches[0].clientX;
+    setTouchEnd(currentX);
+    // Calculate swipe offset with resistance at edges
+    const rawOffset = currentX - touchStart;
+    const isAtStart = currentPhotoIndex === 0 && rawOffset > 0;
+    const isAtEnd = currentPhotoIndex === photos.length - 1 && rawOffset < 0;
+    const resistance = isAtStart || isAtEnd ? 0.3 : 1;
+    setSwipeOffset(rawOffset * resistance);
+  }, [isTransitioning, touchStart, currentPhotoIndex, photos.length]);
+
+  const onTouchEnd = useCallback(() => {
+    if (isTransitioning || touchStart === null) return;
+
+    const distance = touchStart - (touchEnd ?? touchStart);
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    setIsTransitioning(true);
+
+    if (isLeftSwipe && currentPhotoIndex < photos.length - 1) {
+      goNextPhoto();
+    } else if (isRightSwipe && currentPhotoIndex > 0) {
+      goPrevPhoto();
+    }
+
+    // Reset swipe offset with animation
+    setSwipeOffset(0);
+
+    // Reset touch state after transition
+    setTimeout(() => {
+      setTouchStart(null);
+      setTouchEnd(null);
+      setIsTransitioning(false);
+    }, 300);
+  }, [isTransitioning, touchStart, touchEnd, goNextPhoto, goPrevPhoto, currentPhotoIndex, photos.length]);
 
   // Compact card layout (for horizontal scrolling sections like mobile)
   if (size === "compact") {
@@ -166,21 +227,33 @@ export function ProfileCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Photo Section */}
-      <Link
-        href={profile.user_id ? `/profile/${profile.user_id}` : "#"}
-        className="block relative aspect-[3/4] bg-gradient-to-br from-pink-100 to-purple-100"
+      <div
+        className="relative aspect-[3/4] bg-gradient-to-br from-pink-100 to-purple-100 touch-none select-none"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
-        {photos.length > 0 ? (
-          <img
-            src={photos[currentPhotoIndex]}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-6xl">👤</span>
-          </div>
-        )}
+        <Link
+          href={profile.user_id ? `/profile/${profile.user_id}` : "#"}
+          className="block w-full h-full"
+        >
+          {photos.length > 0 ? (
+            <img
+              src={photos[currentPhotoIndex]}
+              alt=""
+              className="w-full h-full object-cover"
+              draggable={false}
+              style={{
+                transform: `translateX(${swipeOffset}px)`,
+                transition: isTransitioning ? 'transform 0.3s ease-out' : 'none',
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-6xl">👤</span>
+            </div>
+          )}
+        </Link>
 
         {/* Photo navigation indicators */}
         {photos.length > 1 && (
@@ -231,10 +304,10 @@ export function ProfileCard({
         )}
 
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
         {/* Info overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+        <div className="absolute bottom-0 left-0 right-0 p-4 text-white pointer-events-none">
           <div className="flex items-center gap-2">
             <h3 className="text-xl font-bold">
               {name}
@@ -256,7 +329,7 @@ export function ProfileCard({
             </div>
           )}
         </div>
-      </Link>
+      </div>
 
       {/* Quick info bar */}
       <div className="px-4 py-3 border-t">

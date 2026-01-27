@@ -7,7 +7,7 @@
  * (Like, Pass, Super Like). Can be used as a modal overlay or standalone page.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   X,
@@ -95,6 +95,12 @@ export function ProfileFocusView({
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionComplete, setActionComplete] = useState<string | null>(null);
 
+  // Touch/swipe state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   // Combine profile image with gallery
   const photos = [
     profile.profile_image_url,
@@ -151,17 +157,66 @@ export function ProfileFocusView({
     }
   };
 
-  const nextPhoto = () => {
+  const nextPhoto = useCallback(() => {
     if (photos.length > 1) {
       setCurrentPhotoIndex((prev) => (prev + 1) % photos.length);
     }
-  };
+  }, [photos.length]);
 
-  const prevPhoto = () => {
+  const prevPhoto = useCallback(() => {
     if (photos.length > 1) {
       setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length);
     }
-  };
+  }, [photos.length]);
+
+  // Minimum swipe distance threshold (in pixels)
+  const minSwipeDistance = 50;
+
+  // Touch handlers for swipe navigation
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (isTransitioning) return;
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setSwipeOffset(0);
+  }, [isTransitioning]);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (isTransitioning || touchStart === null) return;
+    const currentX = e.targetTouches[0].clientX;
+    setTouchEnd(currentX);
+    // Calculate swipe offset with resistance at edges
+    const rawOffset = currentX - touchStart;
+    const isAtStart = currentPhotoIndex === 0 && rawOffset > 0;
+    const isAtEnd = currentPhotoIndex === photos.length - 1 && rawOffset < 0;
+    const resistance = isAtStart || isAtEnd ? 0.3 : 1;
+    setSwipeOffset(rawOffset * resistance);
+  }, [isTransitioning, touchStart, currentPhotoIndex, photos.length]);
+
+  const onTouchEnd = useCallback(() => {
+    if (isTransitioning || touchStart === null) return;
+
+    const distance = touchStart - (touchEnd ?? touchStart);
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    setIsTransitioning(true);
+
+    if (isLeftSwipe && currentPhotoIndex < photos.length - 1) {
+      nextPhoto();
+    } else if (isRightSwipe && currentPhotoIndex > 0) {
+      prevPhoto();
+    }
+
+    // Reset swipe offset with animation
+    setSwipeOffset(0);
+
+    // Reset touch state after transition
+    setTimeout(() => {
+      setTouchStart(null);
+      setTouchEnd(null);
+      setIsTransitioning(false);
+    }, 300);
+  }, [isTransitioning, touchStart, touchEnd, nextPhoto, prevPhoto, currentPhotoIndex, photos.length]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -181,12 +236,22 @@ export function ProfileFocusView({
       isModal ? "rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden" : "min-h-screen"
     )}>
       {/* Photo Section */}
-      <div className="relative aspect-[3/4] max-h-[60vh] bg-gradient-to-br from-pink-100 to-purple-100">
+      <div
+        className="relative aspect-[3/4] max-h-[60vh] bg-gradient-to-br from-pink-100 to-purple-100 touch-none select-none"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         {photos.length > 0 ? (
           <img
             src={photos[currentPhotoIndex]}
             alt=""
             className="w-full h-full object-cover"
+            draggable={false}
+            style={{
+              transform: `translateX(${swipeOffset}px)`,
+              transition: isTransitioning ? 'transform 0.3s ease-out' : 'none',
+            }}
           />
         ) : (
           <div 

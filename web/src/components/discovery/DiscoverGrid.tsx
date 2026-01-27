@@ -209,7 +209,14 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
         {/* View Mode Tabs & Filter Button */}
         <div className="flex items-center gap-3">
           {/* View mode tabs - scrollable on mobile */}
-          <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1 overflow-x-auto">
+          <div
+            className="flex items-center gap-1 bg-gray-100 rounded-full p-1 overflow-x-auto"
+            style={{
+              touchAction: 'pan-x',
+              overscrollBehaviorX: 'contain',
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
             <button
               onClick={() => setViewMode("all")}
               className={cn(
