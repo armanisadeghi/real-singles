@@ -46,9 +46,9 @@ export default function TabLayout() {
         />
       </NativeTabs.Trigger>
 
-      {/* Favorites Tab - Route: /favorites */}
-      <NativeTabs.Trigger name="favorites">
-        <Label>Favorites</Label>
+      {/* Matches Tab - Route: /matches */}
+      <NativeTabs.Trigger name="matches">
+        <Label>Matches</Label>
         <Icon 
           sf={{ default: 'heart', selected: 'heart.fill' }}
           drawable="ic_menu_star"
