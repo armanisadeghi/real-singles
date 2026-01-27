@@ -7,6 +7,15 @@ import { SupabaseClient } from "@supabase/supabase-js";
  * 
  * This is the single source of truth for URL resolution across the app.
  * All APIs should use this utility to ensure consistent behavior.
+ * 
+ * Bucket detection logic:
+ * - Explicit bucket option takes precedence
+ * - Paths containing "/avatar" → avatars bucket
+ * - All other paths (including userId/filename patterns) → gallery bucket
+ * 
+ * Note: We removed the UUID-based events detection because gallery images
+ * also use userId/filename format which starts with a UUID. Event images
+ * should use the explicit bucket option when needed.
  */
 export async function resolveStorageUrl(
   supabase: SupabaseClient,
@@ -22,14 +31,21 @@ export async function resolveStorageUrl(
     bucket = options.bucket;
   } else if (path.includes("/avatar")) {
     bucket = "avatars";
-  } else if (path.match(/^[0-9a-f-]{36}\//i)) {
-    // UUIDs at the start of path indicate event images (eventId/filename)
-    bucket = "events";
   } else {
+    // Default to gallery bucket for all other paths
+    // This includes userId/filename patterns used for profile images
     bucket = "gallery";
   }
   
-  // Events bucket is public, use public URL for better caching
+  // Avatars bucket is public, use public URL for better caching
+  if (bucket === "avatars") {
+    const { data } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(path);
+    return data?.publicUrl || "";
+  }
+  
+  // Events bucket is also public
   if (bucket === "events") {
     const { data } = supabase.storage
       .from(bucket)
@@ -37,10 +53,15 @@ export async function resolveStorageUrl(
     return data?.publicUrl || "";
   }
   
-  // For private buckets (gallery, avatars), use signed URLs
-  const { data } = await supabase.storage
+  // For private buckets (gallery), use signed URLs
+  const { data, error } = await supabase.storage
     .from(bucket)
     .createSignedUrl(path, options?.expiresIn ?? 3600);
+  
+  if (error) {
+    console.error(`Failed to create signed URL for ${bucket}/${path}:`, error.message);
+    return "";
+  }
   
   return data?.signedUrl || "";
 }
