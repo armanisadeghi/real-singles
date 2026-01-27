@@ -383,7 +383,7 @@ export default function ChatDetail() {
       {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
       <KeyboardAvoidingView
         enabled={true}
-        behavior={"padding"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
 
@@ -394,6 +394,7 @@ export default function ChatDetail() {
           visible={visible}
           animationType="fade"
           onRequestClose={() => setVisible(false)}
+          statusBarTranslucent={Platform.OS === 'android'}
         >
           <View style={styles.overlay}>
             <View style={styles.modalContainer}>

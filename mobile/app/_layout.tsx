@@ -2,9 +2,11 @@ import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import * as SplashScreen from 'expo-splash-screen';
+import * as NavigationBar from 'expo-navigation-bar';
 import IncomingCall from "@/components/IncomingCall";
 import NotificationBell from "@/components/NotificationBell";
 import { CallProvider, useCall } from "@/context/CallContext";
+import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { AuthProvider, useAuth } from "@/utils/authContext";
 import {
   setupNotificationChannels,
@@ -14,7 +16,7 @@ import {
 } from "@/utils/notifications";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
-import { Platform, StatusBar } from "react-native";
+import { Platform, StatusBar, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -26,6 +28,7 @@ SplashScreen.preventAutoHideAsync();
 function RootLayoutNav() {
   const agoraLoginRef = useRef(false);
   const router = useRouter();
+  const colorScheme = useColorScheme();
 
   const { isAuthenticated } = useAuth();
   const { loginToAgoraChat } = useCall();
@@ -38,11 +41,17 @@ function RootLayoutNav() {
     }
   }, [isAuthenticated]);
 
-  // Initialize push notifications
+  // Initialize Android-specific features
   useEffect(() => {
-    // Set up Android notification channels
     if (Platform.OS === "android") {
+      // Set up notification channels
       setupNotificationChannels();
+      
+      // Configure transparent navigation bar for edge-to-edge
+      NavigationBar.setBackgroundColorAsync('transparent');
+      NavigationBar.setPositionAsync('absolute');
+      // Set button style based on color scheme
+      NavigationBar.setButtonStyleAsync(colorScheme === 'dark' ? 'light' : 'dark');
     }
 
     // Listen for notifications received while app is foregrounded
@@ -74,7 +83,7 @@ function RootLayoutNav() {
       removeNotificationSubscription(notificationReceivedSubscription);
       removeNotificationSubscription(notificationResponseSubscription);
     };
-  }, []);
+  }, [colorScheme]);
 
   return (
     <>
@@ -247,14 +256,20 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <StatusBar backgroundColor="#FFFAF2" barStyle="dark-content" />
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <AuthProvider>
-          <CallProvider>
-            <RootLayoutNav />
-          </CallProvider>
-        </AuthProvider>
-      </GestureHandlerRootView>
+      <ThemeProvider>
+        <StatusBar 
+          backgroundColor="transparent" 
+          barStyle="dark-content" 
+          translucent={Platform.OS === 'android'}
+        />
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <AuthProvider>
+            <CallProvider>
+              <RootLayoutNav />
+            </CallProvider>
+          </AuthProvider>
+        </GestureHandlerRootView>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

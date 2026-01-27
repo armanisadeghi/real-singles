@@ -12,7 +12,6 @@
 
 import React, { useCallback, useState } from "react";
 import {
-  Dimensions,
   Modal,
   Platform,
   Pressable,
@@ -20,6 +19,7 @@ import {
   Text,
   View,
   StatusBar,
+  useWindowDimensions,
 } from "react-native";
 import { Image } from "expo-image";
 import Animated, {
@@ -40,8 +40,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from 'expo-haptics';
 import { PlatformIcon } from "@/components/ui";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
 const DOUBLE_TAP_SCALE = 2.5;
@@ -69,6 +67,7 @@ export default function FullScreenImageViewer({
   visible,
   onClose,
 }: FullScreenImageViewerProps) {
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   
@@ -143,8 +142,8 @@ export default function FullScreenImageViewer({
         translateX.value = event.translationX;
       } else {
         // When zoomed, allow panning
-        const maxTranslateX = (SCREEN_WIDTH * (scale.value - 1)) / 2;
-        const maxTranslateY = (SCREEN_HEIGHT * (scale.value - 1)) / 2;
+        const maxTranslateX = (screenWidth * (scale.value - 1)) / 2;
+        const maxTranslateY = (screenHeight * (scale.value - 1)) / 2;
         
         translateX.value = Math.min(
           Math.max(savedTranslateX.value + event.translationX, -maxTranslateX),
@@ -200,8 +199,8 @@ export default function FullScreenImageViewer({
         savedScale.value = DOUBLE_TAP_SCALE;
         
         // Calculate offset to zoom towards tap point
-        const centerX = SCREEN_WIDTH / 2;
-        const centerY = SCREEN_HEIGHT / 2;
+        const centerX = screenWidth / 2;
+        const centerY = screenHeight / 2;
         const offsetX = (centerX - event.x) * (DOUBLE_TAP_SCALE - 1);
         const offsetY = (centerY - event.y) * (DOUBLE_TAP_SCALE - 1);
         
@@ -281,7 +280,7 @@ export default function FullScreenImageViewer({
           <Animated.View style={[styles.imageContainer, imageAnimatedStyle]}>
             <Image
               source={{ uri: imageUri }}
-              style={styles.image}
+              style={{ width: screenWidth, height: screenHeight }}
               contentFit="contain"
               transition={200}
             />
@@ -353,10 +352,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  image: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
   },
   footer: {
     position: "absolute",

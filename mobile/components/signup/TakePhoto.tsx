@@ -644,11 +644,10 @@ import { signupProps } from "@/types";
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   FlatList,
   Image,
   PermissionsAndroid,
@@ -657,17 +656,25 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { moderateScale, scale, verticalScale } from "react-native-size-matters";
+import { useDeviceSize } from "@/hooks/useResponsive";
 import GradientButton from "../ui/GradientButton";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const CARD_WIDTH = (SCREEN_WIDTH - scale(48)) / 2;
 
 const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
+  const { gridColumns } = useDeviceSize();
+  
+  // Calculate card width responsively based on grid columns
+  const cardWidth = useMemo(
+    () => (screenWidth - scale(48) - scale(12) * (gridColumns - 1)) / gridColumns, 
+    [screenWidth, gridColumns]
+  );
+  
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
@@ -870,14 +877,15 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
             </View>
           ) : (
             <FlatList
+              key={`photos-${gridColumns}`}
               data={images}
-              numColumns={2}
+              numColumns={gridColumns}
               keyExtractor={(item, index) => index.toString()}
               columnWrapperStyle={{ justifyContent: "space-between" }}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: verticalScale(70) }}
               renderItem={({ item, index }) => (
-                <View style={styles.card}>
+                <View style={[styles.card, { width: cardWidth }]}>
                   <Image source={{ uri: item }} style={styles.photo} />
 
                   {/* ❌ Delete Button */}
@@ -1001,7 +1009,7 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    width: CARD_WIDTH,
+    // width set dynamically via inline style for responsive layouts
     marginBottom: verticalScale(15),
     backgroundColor: "#fff",
     borderRadius: moderateScale(12),

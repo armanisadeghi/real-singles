@@ -9,28 +9,42 @@
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 import { Platform, Dimensions } from 'react-native';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
 // Device size breakpoints
+// NOTE: For responsive values, use useDeviceSize() hook from @/hooks/useResponsive
 export const BREAKPOINTS = {
   small: 320,   // Small phones (iPhone SE)
   medium: 375,  // Standard phones (iPhone 13/14)
   large: 390,   // Pro models (iPhone 14 Pro)
   xl: 428,      // Max models (iPhone 14 Pro Max)
   tablet: 768,  // iPads and tablets
+  // Android 16 adaptive layout threshold (600dp)
+  adaptiveLayout: 600,
 } as const;
 
-// Detect device category
-export const getDeviceSize = () => {
-  if (SCREEN_WIDTH >= BREAKPOINTS.tablet) return 'tablet';
-  if (SCREEN_WIDTH >= BREAKPOINTS.xl) return 'xl';
-  if (SCREEN_WIDTH >= BREAKPOINTS.large) return 'large';
-  if (SCREEN_WIDTH >= BREAKPOINTS.medium) return 'medium';
+/**
+ * Get device size category from a width value
+ * Use with useWindowDimensions() hook for reactive updates
+ * @param width - Screen width from useWindowDimensions()
+ */
+export const getDeviceSizeFromWidth = (width: number) => {
+  if (width >= BREAKPOINTS.tablet) return 'tablet';
+  if (width >= BREAKPOINTS.xl) return 'xl';
+  if (width >= BREAKPOINTS.large) return 'large';
+  if (width >= BREAKPOINTS.medium) return 'medium';
   return 'small';
 };
 
-export const IS_TABLET = SCREEN_WIDTH >= BREAKPOINTS.tablet;
-export const IS_SMALL_DEVICE = SCREEN_WIDTH < BREAKPOINTS.medium;
+/**
+ * @deprecated Use useDeviceSize().isTablet from @/hooks/useResponsive instead
+ * Static value - does not update on screen resize
+ */
+export const IS_TABLET = Dimensions.get('window').width >= BREAKPOINTS.tablet;
+
+/**
+ * @deprecated Use useDeviceSize().isSmall from @/hooks/useResponsive instead
+ * Static value - does not update on screen resize
+ */
+export const IS_SMALL_DEVICE = Dimensions.get('window').width < BREAKPOINTS.medium;
 
 /**
  * Responsive Spacing System
@@ -340,40 +354,48 @@ export const COMPONENT_SIZES = {
 /**
  * Grid System for Card Layouts
  * Calculates card width based on columns and gaps
+ * @param screenWidth - Use useWindowDimensions().width for reactive updates
+ * @param columns - Number of columns
+ * @param gap - Gap between cards
  */
-export const getCardWidth = (columns: number = 2, gap: number = SPACING.md) => {
+export const getCardWidth = (
+  screenWidth: number,
+  columns: number = 2, 
+  gap: number = SPACING.md
+) => {
   const containerPadding = SPACING.screenPadding * 2;
   const totalGap = gap * (columns - 1);
-  const availableWidth = SCREEN_WIDTH - containerPadding - totalGap;
+  const availableWidth = screenWidth - containerPadding - totalGap;
   return availableWidth / columns;
 };
 
 /**
- * Responsive Card Dimensions
- * Replaces hard-coded w-[149px] h-[176px] patterns
+ * Get responsive card dimensions
+ * @deprecated Use useCardDimensions() hook from @/hooks/useResponsive instead
+ * This function requires screenWidth parameter for reactive updates
  */
-export const CARD_DIMENSIONS = {
+export const getCardDimensions = (screenWidth: number, isTablet: boolean) => ({
   // Profile cards (2 columns on phone, 3-4 on tablet)
   profile: {
-    width: IS_TABLET ? getCardWidth(4) : getCardWidth(2),
-    height: IS_TABLET ? verticalScale(200) : verticalScale(176),
+    width: isTablet ? getCardWidth(screenWidth, 4) : getCardWidth(screenWidth, 2),
+    height: isTablet ? verticalScale(200) : verticalScale(176),
   },
 
   // Event cards (2 columns)
   event: {
-    width: IS_TABLET ? getCardWidth(3) : getCardWidth(2),
-    height: IS_TABLET ? verticalScale(200) : verticalScale(176),
+    width: isTablet ? getCardWidth(screenWidth, 3) : getCardWidth(screenWidth, 2),
+    height: isTablet ? verticalScale(200) : verticalScale(176),
   },
 
   // Video cards (2 columns, landscape aspect)
   video: {
-    width: IS_TABLET ? getCardWidth(3) : getCardWidth(2),
-    height: IS_TABLET ? verticalScale(140) : verticalScale(127),
+    width: isTablet ? getCardWidth(screenWidth, 3) : getCardWidth(screenWidth, 2),
+    height: isTablet ? verticalScale(140) : verticalScale(127),
   },
 
   // Large feature cards (1 column, spans most of width)
   featured: {
-    width: SCREEN_WIDTH - (SPACING.screenPadding * 2),
+    width: screenWidth - (SPACING.screenPadding * 2),
     height: verticalScale(263),
   },
 
@@ -382,14 +404,30 @@ export const CARD_DIMENSIONS = {
     width: scale(154),
     height: verticalScale(175),
   },
-} as const;
+});
+
+/**
+ * @deprecated Use getCardDimensions(screenWidth, isTablet) or useCardDimensions() hook
+ * Static values - do not update on screen resize
+ */
+export const CARD_DIMENSIONS = getCardDimensions(
+  Dimensions.get('window').width, 
+  Dimensions.get('window').width >= BREAKPOINTS.tablet
+);
 
 /**
  * Layout Constants
+ * NOTE: For screenWidth/screenHeight, use useWindowDimensions() hook for reactive updates
  */
 export const LAYOUT = {
-  screenWidth: SCREEN_WIDTH,
-  screenHeight: SCREEN_HEIGHT,
+  /**
+   * @deprecated Use useWindowDimensions().width instead for reactive updates
+   */
+  screenWidth: Dimensions.get('window').width,
+  /**
+   * @deprecated Use useWindowDimensions().height instead for reactive updates
+   */
+  screenHeight: Dimensions.get('window').height,
   tabBarHeight: Platform.OS === 'ios' ? verticalScale(83) : verticalScale(56),
   headerHeight: Platform.OS === 'ios' ? verticalScale(44) : verticalScale(56),
   bottomSheetSnapPoints: ['78%', '85%'], // Percentages work better than fixed values

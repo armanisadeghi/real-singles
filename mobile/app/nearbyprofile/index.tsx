@@ -12,22 +12,21 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
-  Dimensions,
   Image,
   Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  useWindowDimensions,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const { width, height } = Dimensions.get("window");
-
 export default function NearBy() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const mapRef = useRef<any>(null);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -559,8 +558,9 @@ export default function NearBy() {
 
 const styles = StyleSheet.create({
   map: {
-    width: width,
-    height: height,
+    flex: 1,
+    width: "100%",
+    height: "100%",
   },
   headerContainer: {
     backgroundColor: "white",

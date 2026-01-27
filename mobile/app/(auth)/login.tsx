@@ -320,7 +320,8 @@ const Login = () => {
                 onChangeText={handleEmailChange}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                autoComplete="off"
+                autoComplete="email"
+                importantForAutofill="yes"
                 autoCorrect={false}
                 contextMenuHidden={true}
                 style={{
@@ -353,7 +354,8 @@ const Login = () => {
                 value={password}
                 onChangeText={handlePasswordChange}
                 secureTextEntry={!showPassword}
-                autoComplete="off"
+                autoComplete="password"
+                importantForAutofill="yes"
                 contextMenuHidden={true}
                 className="text-dark"
                 style={{
@@ -532,6 +534,9 @@ const Login = () => {
                       }}
                       keyboardType="email-address"
                       autoCapitalize="none"
+                      autoComplete="email"
+                      importantForAutofill="yes"
+                      textContentType="emailAddress"
                       style={{
                         flex: 1,
                         paddingHorizontal: 10,
@@ -598,6 +603,9 @@ const Login = () => {
                         setOtpError("");
                       }}
                       keyboardType="number-pad"
+                      autoComplete="sms-otp"
+                      importantForAutofill="yes"
+                      textContentType="oneTimeCode"
                       style={{
                         flex: 1,
                         paddingHorizontal: 10,
@@ -662,6 +670,9 @@ const Login = () => {
                         setNewPasswordError("");
                       }}
                       secureTextEntry={!showPassword}
+                      autoComplete="new-password"
+                      importantForAutofill="yes"
+                      textContentType="newPassword"
                       style={{
                         flex: 1,
                         paddingHorizontal: 10,

@@ -139,6 +139,7 @@ const SignupLogin = ({
       visible={showWebView}
       animationType="slide"
       onRequestClose={() => setShowWebView(false)}
+      statusBarTranslucent
     >
       <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
         <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-300">
@@ -174,6 +175,9 @@ const SignupLogin = ({
               placeholderTextColor="#B0B0B0"
               style={{ flex: 1, color: 'black' }}
               autoCapitalize="none"
+              autoComplete="username"
+              importantForAutofill="yes"
+              textContentType="username"
             />
           </View>
         </View>
@@ -195,7 +199,9 @@ const SignupLogin = ({
               style={{ flex: 1 , color: 'black'}}
               keyboardType="email-address"
               autoCapitalize="none"
-              
+              autoComplete="email"
+              importantForAutofill="yes"
+              textContentType="emailAddress"
             />
           </View>
         </View>
@@ -217,6 +223,9 @@ const SignupLogin = ({
               secureTextEntry={!showPassword}
               className="text-dark"
               style={{ flex: 1, color: 'black' }}
+              autoComplete="new-password"
+              importantForAutofill="yes"
+              textContentType="newPassword"
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
               <Image 
@@ -254,6 +263,9 @@ const SignupLogin = ({
               secureTextEntry={!showConfirmPassword}
               className="text-dark"
               style={{ flex: 1, color: 'black' }}
+              autoComplete="new-password"
+              importantForAutofill="yes"
+              textContentType="newPassword"
             />
             <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
               <Image 

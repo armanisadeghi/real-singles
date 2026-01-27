@@ -100,6 +100,9 @@ export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) 
             className="border border-border bg-light-100 rounded-full px-[15px] py-[12px]"
             value={formData.Name}
             onChangeText={(text) => handleChange("Name", text)}
+            autoComplete="name"
+            importantForAutofill="yes"
+            textContentType="name"
           />
         </View>
 
@@ -112,6 +115,9 @@ export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) 
             className="border border-border bg-light-100 rounded-full px-[15px] py-[12px]"
             value={formData.Phone}
             onChangeText={(text) => handleChange("Phone", text)}
+            autoComplete="tel"
+            importantForAutofill="yes"
+            textContentType="telephoneNumber"
           />
         </View>
 
@@ -124,6 +130,9 @@ export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) 
             className="border border-border bg-light-100 rounded-full px-[15px] py-[12px]"
             value={formData.Email}
             onChangeText={(text) => handleChange("Email", text)}
+            autoComplete="email"
+            importantForAutofill="yes"
+            textContentType="emailAddress"
           />
         </View>
 

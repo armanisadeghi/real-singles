@@ -1,11 +1,14 @@
 import { images } from "@/constants/images";
+import { useDeviceSize } from "@/hooks/useResponsive";
 import { signupProps } from "@/types";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState } from "react";
-import { Dimensions, FlatList, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { FlatList, Image, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 const ChooseInterests = ({ data, updateData, onNext, error }: signupProps) => {
+  const { width: screenWidth } = useWindowDimensions();
+  const { gridColumns } = useDeviceSize();
   const [validationError, setValidationError] = useState("");
   const [selectedInterests, setSelectedInterests] = useState<string[]>(data?.Interest || []);
 
@@ -75,8 +78,7 @@ const ChooseInterests = ({ data, updateData, onNext, error }: signupProps) => {
     onNext();
   };
 
-  const screenWidth = Dimensions.get('window').width;
-  const cardWidth = (screenWidth - 60) / 2;
+  const cardWidth = useMemo(() => (screenWidth - 60 - 12 * (gridColumns - 1)) / gridColumns, [screenWidth, gridColumns]);
 
   return (
     <ScrollView className="flex-1 bg-background">
@@ -96,8 +98,9 @@ const ChooseInterests = ({ data, updateData, onNext, error }: signupProps) => {
 
       <View className="mt-10">
         <FlatList
+          key={`interests-${gridColumns}`}
           data={chooseInterestsOptions}
-          numColumns={2}
+          numColumns={gridColumns}
           columnWrapperStyle={{
             justifyContent: "space-between",
             marginBottom: 12

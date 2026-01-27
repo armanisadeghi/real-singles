@@ -28,7 +28,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
-  Dimensions,
   Image,
   Platform,
   Pressable,
@@ -38,6 +37,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -50,13 +50,14 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-const PHOTO_HEIGHT = SCREEN_HEIGHT * 0.55;
-
 export default function ProfileFocusView() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  
+  // Calculate photo height based on screen height (reactive to orientation changes)
+  const photoHeight = useMemo(() => screenHeight * 0.55, [screenHeight]);
 
   const [profile, setProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -241,7 +242,7 @@ export default function ProfileFocusView() {
       <Toast />
 
       {/* Photo Section */}
-      <View style={[styles.photoSection, { height: PHOTO_HEIGHT }]}>
+      <View style={[styles.photoSection, { height: photoHeight }]}>
         {imageSource ? (
           <Image source={imageSource} style={styles.photo} resizeMode="cover" />
         ) : (
@@ -429,7 +430,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   photoSection: {
-    width: SCREEN_WIDTH,
+    width: "100%",
     position: "relative",
   },
   photo: {

@@ -1,15 +1,18 @@
 import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
-import { icons } from '@/constants/icons';
 
 /**
  * Native Bottom Tab Navigation
  * 
  * IMPORTANT: This uses actual platform-native components, not JS approximations:
- * - iOS: UITabBarController
- * - Android: BottomNavigationView (Material Design 3)
+ * - iOS: UITabBarController with SF Symbols
+ * - Android: BottomNavigationView (Material Design 3) with Material Icons
  * 
  * DO NOT override platform defaults unless absolutely necessary.
  * Native components handle haptics, animations, accessibility, and safe areas automatically.
+ * 
+ * Icons:
+ * - iOS: SF Symbols names (e.g., 'house', 'house.fill')
+ * - Android: Material Icons names (e.g., 'home', 'search')
  * 
  * @see /docs/NATIVE_FEEL_GUIDELINES.md
  */
@@ -21,7 +24,7 @@ export default function TabLayout() {
         <Label>Home</Label>
         <Icon
           sf={{ default: 'house', selected: 'house.fill' }}
-          androidSrc={icons.home}
+          android={{ default: 'home', selected: 'home' }}
         />
       </NativeTabs.Trigger>
 
@@ -30,7 +33,7 @@ export default function TabLayout() {
         <Label>Discover</Label>
         <Icon
           sf={{ default: 'magnifyingglass', selected: 'magnifyingglass' }}
-          androidSrc={icons.discover}
+          android={{ default: 'search', selected: 'search' }}
         />
       </NativeTabs.Trigger>
 
@@ -39,7 +42,7 @@ export default function TabLayout() {
         <Label>Chats</Label>
         <Icon
           sf={{ default: 'bubble.left.and.bubble.right', selected: 'bubble.left.and.bubble.right.fill' }}
-          androidSrc={icons.chats}
+          android={{ default: 'chat', selected: 'chat' }}
         />
       </NativeTabs.Trigger>
 
@@ -48,7 +51,7 @@ export default function TabLayout() {
         <Label>Favorites</Label>
         <Icon
           sf={{ default: 'heart', selected: 'heart.fill' }}
-          androidSrc={icons.heart}
+          android={{ default: 'favorite', selected: 'favorite' }}
         />
       </NativeTabs.Trigger>
 
@@ -57,7 +60,7 @@ export default function TabLayout() {
         <Label>Profile</Label>
         <Icon
           sf={{ default: 'person', selected: 'person.fill' }}
-          androidSrc={icons.profile}
+          android={{ default: 'person', selected: 'person' }}
         />
       </NativeTabs.Trigger>
     </NativeTabs>

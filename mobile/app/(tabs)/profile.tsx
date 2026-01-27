@@ -140,7 +140,7 @@ export default function Profile() {
             }}
             className="border border-white rounded-lg p-2 bg-black/45"
           >
-            <Image source={icons.menu} className="size-[15px]" />
+            <PlatformIcon name="menu" size={15} color="white" />
           </TouchableOpacity>
           <View className="flex-row gap-2 items-center">
             <TouchableOpacity
@@ -165,7 +165,7 @@ export default function Profile() {
               }}
               className="border border-border rounded-lg p-2"
             >
-              <Image source={icons.edit} />
+              <PlatformIcon name="edit" size={18} color="white" />
             </TouchableOpacity>
           </View>
         </View>

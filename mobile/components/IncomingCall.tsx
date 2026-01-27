@@ -3,7 +3,7 @@ import { PlatformIcon } from "@/components/ui";
 import { useAudioPlayer, AudioPlayer } from "expo-audio";
 import * as Haptics from 'expo-haptics';
 import React, { useEffect, useRef } from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
   Gesture,
   GestureDetector,
@@ -93,6 +93,7 @@ const IncomingCall = () => {
       transparent={true}
       visible={!!incomingCall}
       onRequestClose={handleReject}
+      statusBarTranslucent={Platform.OS === 'android'}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={styles.container}>

@@ -28,6 +28,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
+      "enableOnBackInvokedCallback": true,
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",

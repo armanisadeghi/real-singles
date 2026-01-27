@@ -626,6 +626,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
               value={formData.FirstName}
               onChangeText={(text) => onChangeField("FirstName", text)}
+              autoComplete="name-given"
+              importantForAutofill="yes"
+              textContentType="givenName"
             />
           </View>
 
@@ -637,6 +640,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
               value={formData.LastName}
               onChangeText={(text) => onChangeField("LastName", text)}
+              autoComplete="name-family"
+              importantForAutofill="yes"
+              textContentType="familyName"
             />
           </View>
         </View>
@@ -650,6 +656,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
             value={formData.DisplayName}
             onChangeText={(text) => onChangeField("DisplayName", text)}
+            autoComplete="username"
+            importantForAutofill="yes"
+            textContentType="username"
           />
         </View>
 
@@ -700,6 +709,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
               value={formData.Phone}
               onChangeText={(text) => onChangeField("Phone", text)}
+              autoComplete="tel"
+              importantForAutofill="yes"
+              textContentType="telephoneNumber"
             />
           </View>
         </View>
@@ -715,6 +727,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
               value={formData.Zipcode}
               onChangeText={(text) => onChangeField("Zipcode", text)}
+              autoComplete="postal-code"
+              importantForAutofill="yes"
+              textContentType="postalCode"
             />
           </View>
 

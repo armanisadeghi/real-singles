@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
-  Dimensions,
   Platform,
   Pressable,
   ScrollView,
@@ -17,6 +16,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -37,9 +37,6 @@ import { fetchOtherProfile, likeUser, passUser, superLikeUser, reportUser } from
 import { User } from "@/types";
 import { BORDER_RADIUS, SPACING, TYPOGRAPHY, VERTICAL_SPACING } from "@/constants/designTokens";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-const PHOTO_HEIGHT = SCREEN_HEIGHT * 0.55;
 
 // Helper to get image URLs from profile
 const getProfileImages = (profile: User, gallery?: any[]): string[] => {
@@ -70,6 +67,10 @@ export default function DiscoveryProfileView() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  
+  // Calculate photo height based on screen height (reactive to orientation changes)
+  const photoHeight = useMemo(() => screenHeight * 0.55, [screenHeight]);
   
   const [profile, setProfile] = useState<User | null>(null);
   const [gallery, setGallery] = useState<any[]>([]);
@@ -280,7 +281,7 @@ export default function DiscoveryProfileView() {
         <View style={styles.photoSection}>
           <PhotoCarousel
             images={images}
-            height={PHOTO_HEIGHT}
+            height={photoHeight}
             showGradient={true}
           />
           

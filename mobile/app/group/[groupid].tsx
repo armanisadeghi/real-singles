@@ -454,13 +454,14 @@ export default function GroupChat() {
   ];
 
   return (
-    <KeyboardAvoidingView enabled={true} behavior="padding" style={{ flex: 1 }}>
+    <KeyboardAvoidingView enabled={true} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
       {/* Members Modal */}
       <Modal
         visible={showMembers}
         transparent
         animationType="slide"
         onRequestClose={() => setShowMembers(false)}
+        statusBarTranslucent={Platform.OS === 'android'}
       >
         <View className="flex-1 bg-black/40 justify-end">
           <View className="bg-white rounded-t-2xl p-5 max-h-[60%]">

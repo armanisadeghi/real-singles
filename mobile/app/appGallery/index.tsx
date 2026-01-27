@@ -1,26 +1,29 @@
 import MediaItem from "@/components/MediaItem";
+import { useDeviceSize } from "@/hooks/useResponsive";
 import { fetchUserProfile, getProfile, saveGalleryImage, uploadImage } from "@/lib/api";
 import { Camera, CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   Alert,
-  Dimensions,
   FlatList,
   Text,
   TouchableOpacity,
-  View
+  View,
+  useWindowDimensions,
 } from "react-native";
 import Toast from "react-native-toast-message";
 
-
-const screenWidth = Dimensions.get("window").width;
-
 export default function AppGallery() {
+  const { width: screenWidth } = useWindowDimensions();
+  const { gridColumns } = useDeviceSize();
   const horizontalPadding = 20; // padding from screen edges
   const gap = 20; // gap between items
-  const itemWidth = (screenWidth - horizontalPadding * 2 - gap) / 2;
+  const itemWidth = useMemo(
+    () => (screenWidth - horizontalPadding * 2 - gap * (gridColumns - 1)) / gridColumns,
+    [screenWidth, gridColumns]
+  );
 
   const { otherUserID } = useLocalSearchParams<{ otherUserID: string }>();
   const [loading, setLoading] = useState(false);
@@ -292,8 +295,9 @@ export default function AppGallery() {
         ) : (
           <View className="mt-8 pb-40">
             <FlatList
+              key={`gallery-${gridColumns}`}
               data={[...mediaArray, ...capturedMedia]}
-              numColumns={2}
+              numColumns={gridColumns}
               renderItem={({ item }) => <MediaItem item={item} itemWidth={itemWidth} />}
               keyExtractor={(item, index) => `${index}`}
               columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 20, }}

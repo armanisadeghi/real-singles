@@ -111,7 +111,10 @@ export default function ShippingInfoForm({ productId, selectedUsers, redeemForYo
             className="border border-border rounded-full px-[15px] py-[12px]" 
             placeholder="Enter your Building Number" 
             placeholderTextColor="gray"
-            />
+            autoComplete="street-address"
+            importantForAutofill="yes"
+            textContentType="streetAddressLine1"
+          />
         </View>
 
         <View>
@@ -122,6 +125,9 @@ export default function ShippingInfoForm({ productId, selectedUsers, redeemForYo
             value={formData.Street}
             onChangeText={(text) => updateFormData("Street", text)}
             placeholderTextColor="gray"
+            autoComplete="street-address"
+            importantForAutofill="yes"
+            textContentType="streetAddressLine2"
           />
         </View>
 
@@ -134,6 +140,9 @@ export default function ShippingInfoForm({ productId, selectedUsers, redeemForYo
               value={formData.State}
               onChangeText={(text) => updateFormData("State", text)}
               placeholderTextColor="gray"
+              autoComplete="address-line2"
+              importantForAutofill="yes"
+              textContentType="addressState"
             />
           </View>
 
@@ -145,7 +154,10 @@ export default function ShippingInfoForm({ productId, selectedUsers, redeemForYo
               onChangeText={(text) => updateFormData("City", text)}
               className="border border-border rounded-full px-[15px] py-[12px]" 
               placeholderTextColor="gray"
-              />
+              autoComplete="address-line1"
+              importantForAutofill="yes"
+              textContentType="addressCity"
+            />
           </View>
         </View>
 
@@ -154,7 +166,14 @@ export default function ShippingInfoForm({ productId, selectedUsers, redeemForYo
           <TextInput
             value={formData.Zipcode}
             onChangeText={(text) => updateFormData("Zipcode", text)}
-            className="border border-border rounded-full px-[15px] py-[12px]" placeholder="*** ***" placeholderTextColor="gray" />
+            className="border border-border rounded-full px-[15px] py-[12px]" 
+            placeholder="*** ***" 
+            placeholderTextColor="gray"
+            keyboardType="numeric"
+            autoComplete="postal-code"
+            importantForAutofill="yes"
+            textContentType="postalCode"
+          />
         </View>
       </View>
       <Text className="my-4 text-[#FF0000] text-[10px] font-normal text-center">

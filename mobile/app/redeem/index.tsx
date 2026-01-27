@@ -1,13 +1,14 @@
 import ProductCard from "@/components/ui/ProductCard";
+import { useDeviceSize } from "@/hooks/useResponsive";
 import { getProductsGiftList } from "@/lib/api";
 import { ProductCardProps } from "@/types";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
   FlatList,
   Text,
-  View
+  View,
+  useWindowDimensions,
 } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -19,6 +20,7 @@ interface Data {
 }
 
 export default function Redeem() {
+  const { gridColumns } = useDeviceSize();
   const [data, setData] = useState<Data>();
   const [loading, setLoading] = useState(false);
 
@@ -59,8 +61,8 @@ export default function Redeem() {
     fetchProductsGiftsList();
   }, []);
 
-  const { width } = Dimensions.get("window");
-  const columnWidth = (width - 32 - 15) / 2;
+  const { width: screenWidth } = useWindowDimensions();
+  const columnWidth = useMemo(() => (screenWidth - 32 - 15) / 2, [screenWidth]);
 
 
 
@@ -108,9 +110,10 @@ export default function Redeem() {
         <Toast />
         <View className="mt-4 pb-36">
           <FlatList
+            key={`products-${gridColumns}`}
             data={data?.NewArrival}
             keyExtractor={(item) => item?.ProductID.toString()}
-            numColumns={2}
+            numColumns={gridColumns}
             columnWrapperStyle={{
               justifyContent: "space-between",
               marginBottom: 15,

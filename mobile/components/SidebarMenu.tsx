@@ -1,22 +1,19 @@
 import { PlatformIcon } from "@/components/ui";
 import * as Haptics from "expo-haptics";
 import { usePathname, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useMemo } from "react";
 import {
-  Dimensions,
   Platform,
   Share,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import Animated, { useSharedValue, withSpring, useAnimatedStyle } from "react-native-reanimated";
 import { Avatar } from "@/components/ui/Avatar";
 import { getReferralLink, APP_NAME } from "@/lib/config";
-
-const { width } = Dimensions.get("window");
-const MENU_WIDTH = width * 0.75; // Menu takes 75% of screen width
 
 interface SideMenuProps {
   visible: boolean;
@@ -39,7 +36,12 @@ const SideMenu = ({
 }: SideMenuProps) => {
   const router = useRouter();
   const currentPath = usePathname();
-  const translateX = useSharedValue(direction === "left" ? -MENU_WIDTH : width);
+  const { width: screenWidth } = useWindowDimensions();
+  
+  // Calculate menu width (75% of screen, adapts to screen size changes)
+  const menuWidth = useMemo(() => screenWidth * 0.75, [screenWidth]);
+  
+  const translateX = useSharedValue(direction === "left" ? -menuWidth : screenWidth);
 
   const handleReferFriend = async () => {
     // Haptic feedback for share action
@@ -89,10 +91,10 @@ const SideMenu = ({
 
   useEffect(() => {
     translateX.value = withSpring(
-      visible ? 0 : (direction === "left" ? -MENU_WIDTH : width),
+      visible ? 0 : (direction === "left" ? -menuWidth : screenWidth),
       { damping: 18, stiffness: 200 }
     );
-  }, [visible, direction]);
+  }, [visible, direction, menuWidth, screenWidth]);
 
   const menuAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -171,6 +173,7 @@ const SideMenu = ({
           styles.menu,
           menuAnimatedStyle,
           {
+            width: menuWidth,
             left: direction === "left" ? 0 : undefined,
             right: direction === "right" ? 0 : undefined,
           },
@@ -225,8 +228,7 @@ const styles = StyleSheet.create({
   menu: {
     position: "absolute",
     top: 50,
-    // left: 0,
-    width: MENU_WIDTH,
+    // width set dynamically via inline style
     height: "86%",
     backgroundColor: "#B06D1E", // Primary color
     paddingTop: 50,

@@ -2242,6 +2242,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - react-native-segmented-control (2.5.7):
+    - React-Core
   - react-native-slider (5.0.1):
     - boost
     - DoubleConversion
@@ -3440,6 +3442,7 @@ DEPENDENCIES:
   - react-native-maps (from `../node_modules/react-native-maps`)
   - react-native-pdf (from `../node_modules/react-native-pdf`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - "react-native-segmented-control (from `../node_modules/@react-native-segmented-control/segmented-control`)"
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - react-native-video (from `../node_modules/react-native-video`)
   - react-native-webview (from `../node_modules/react-native-webview`)
@@ -3679,6 +3682,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-pdf"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-segmented-control:
+    :path: "../node_modules/@react-native-segmented-control/segmented-control"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
   react-native-video:
@@ -3865,6 +3870,7 @@ SPEC CHECKSUMS:
   react-native-maps: 9febd31278b35cd21e4fad2cf6fa708993be5dab
   react-native-pdf: c586da0d19c14e6d859e62bf957851687fba0f25
   react-native-safe-area-context: c00143b4823773bba23f2f19f85663ae89ceb460
+  react-native-segmented-control: bf6e0032726727498e18dd437ae88afcdbc18e99
   react-native-slider: 663776e5683e257de8df8091abc2d93ff6ec67db
   react-native-video: 098058d5adff553e3bd4ba4c291be4a3b545901c
   react-native-webview: 4cbb7f05f2c50671a7dcff4012d3e85faad271e4

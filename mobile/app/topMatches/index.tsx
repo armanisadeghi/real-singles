@@ -2,6 +2,7 @@ import ProfileListItem from "@/components/ui/ProfileListItem";
 import VideoCard from "@/components/ui/VideoCard";
 import VirtualDateCard from "@/components/ui/VirtualDateCard";
 import { VERTICAL_SPACING } from "@/constants/designTokens";
+import { useDeviceSize } from "@/hooks/useResponsive";
 import {
   getAllFeaturedVideos,
   getAllTopMatches,
@@ -21,6 +22,7 @@ import {
 export default function TopMatches() {
   // const { category } = useLocalSearchParams();
     const params = useLocalSearchParams();
+  const { gridColumns } = useDeviceSize();
 
   // ✅ Safely get category with fallback
   const category = (params.category as string) || "topMatches";  
@@ -174,8 +176,9 @@ export default function TopMatches() {
             />
           ) : (
             <FlatList
+              key={`grid-${gridColumns}`}
               data={data}
-              numColumns={2}
+              numColumns={gridColumns}
               columnWrapperStyle={{
                 justifyContent: "space-between",
                 marginBottom: 20,

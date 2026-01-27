@@ -8,9 +8,8 @@
  * - Smooth snap scrolling
  */
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useMemo } from "react";
 import {
-  Dimensions,
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -18,13 +17,12 @@ import {
   StyleSheet,
   View,
   ViewToken,
+  useWindowDimensions,
 } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import FullScreenImageViewer from "./FullScreenImageViewer";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface PhotoCarouselProps {
   /** Array of image URLs */
@@ -52,6 +50,7 @@ export default function PhotoCarousel({
   showGradient = true,
   onIndexChange,
 }: PhotoCarouselProps) {
+  const { width: screenWidth } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isViewerVisible, setIsViewerVisible] = useState(false);
@@ -60,13 +59,13 @@ export default function PhotoCarousel({
   // Handle scroll end to update current index
   const handleMomentumScrollEnd = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const newIndex = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+      const newIndex = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
       if (newIndex !== currentIndex && newIndex >= 0 && newIndex < images.length) {
         setCurrentIndex(newIndex);
         onIndexChange?.(newIndex);
       }
     },
-    [currentIndex, images.length, onIndexChange]
+    [currentIndex, images.length, onIndexChange, screenWidth]
   );
   
   // Handle viewable items change
@@ -109,7 +108,7 @@ export default function PhotoCarousel({
     ({ item, index }: { item: string; index: number }) => (
       <Pressable
         onPress={() => openFullScreen(index)}
-        style={[styles.imageContainer, { height }]}
+        style={[styles.imageContainer, { height, width: screenWidth }]}
       >
         <Image
           source={{ uri: getImageUri(item) }}
@@ -119,7 +118,7 @@ export default function PhotoCarousel({
         />
       </Pressable>
     ),
-    [height, openFullScreen]
+    [height, openFullScreen, screenWidth]
   );
   
   // Key extractor
@@ -131,23 +130,23 @@ export default function PhotoCarousel({
   // Get item layout for better scrolling performance
   const getItemLayout = useCallback(
     (_: ArrayLike<string> | null | undefined, index: number) => ({
-      length: SCREEN_WIDTH,
-      offset: SCREEN_WIDTH * index,
+      length: screenWidth,
+      offset: screenWidth * index,
       index,
     }),
-    []
+    [screenWidth]
   );
   
   if (images.length === 0) {
     return (
-      <View style={[styles.placeholder, { height }]}>
+      <View style={[styles.placeholder, { height, width: screenWidth }]}>
         <View style={styles.placeholderInner} />
       </View>
     );
   }
   
   return (
-    <View style={[styles.container, { height }]}>
+    <View style={[styles.container, { height, width: screenWidth }]}>
       {/* Photo list */}
       <FlatList
         ref={flatListRef}
@@ -166,7 +165,7 @@ export default function PhotoCarousel({
         getItemLayout={getItemLayout}
         initialScrollIndex={0}
         decelerationRate="fast"
-        snapToInterval={SCREEN_WIDTH}
+        snapToInterval={screenWidth}
         snapToAlignment="center"
       />
       
@@ -213,10 +212,10 @@ export default function PhotoCarousel({
 const styles = StyleSheet.create({
   container: {
     position: "relative",
-    width: SCREEN_WIDTH,
+    // width set dynamically via inline style
   },
   imageContainer: {
-    width: SCREEN_WIDTH,
+    // width set dynamically via inline style
   },
   image: {
     width: "100%",
@@ -252,7 +251,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   placeholder: {
-    width: SCREEN_WIDTH,
+    // width set dynamically via inline style
     backgroundColor: "#E5E7EB",
     justifyContent: "center",
     alignItems: "center",
