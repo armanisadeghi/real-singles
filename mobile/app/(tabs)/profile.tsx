@@ -4,7 +4,7 @@ import { icons } from "@/constants/icons";
 import { getProfile } from "@/lib/api";
 import { User } from "@/types";
 import { IMAGE_URL, MEDIA_BASE_URL } from "@/utils/token";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import * as Haptics from 'expo-haptics';
 import { useFocusEffect, useRouter } from "expo-router";
@@ -153,7 +153,7 @@ export default function Profile() {
               }}
               className="border border-border rounded-lg p-1"
             >
-              <MaterialIcons name="settings" size={20} color="white" />
+              <PlatformIcon name="settings" size={20} color="white" />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {

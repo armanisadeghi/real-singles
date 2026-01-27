@@ -18,6 +18,7 @@ import { View, Text, TouchableOpacity, Image, Platform, StyleSheet, ViewStyle } 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { icons } from "@/constants/icons";
 import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES, SHADOWS, BORDER_RADIUS, Z_INDEX } from "@/constants/designTokens";
+import { LiquidGlassHeader } from "./LiquidGlass";
 
 export interface ScreenHeaderProps {
   /** Screen title displayed in the center-left */
@@ -44,6 +45,8 @@ export interface ScreenHeaderProps {
   style?: ViewStyle;
   /** Whether to use absolute positioning (for overlay headers) */
   absolute?: boolean;
+  /** Use Liquid Glass effect on iOS (default: false) */
+  liquidGlass?: boolean;
 }
 
 /**
@@ -89,6 +92,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   transparent = false,
   style,
   absolute = false,
+  liquidGlass = false,
 }) => {
   const insets = useSafeAreaInsets();
   
@@ -100,22 +104,25 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   // Standard header height (44pt iOS, 56dp Android as per platform guidelines)
   const headerHeight = Platform.OS === "ios" ? 44 : 56;
   
+  // Determine if we should use Liquid Glass
+  const useGlass = liquidGlass && Platform.OS === 'ios';
+  
   const containerStyle: ViewStyle[] = [
     styles.container,
     {
       paddingTop: topPadding,
       paddingBottom: VERTICAL_SPACING.md,
-      backgroundColor: transparent ? "transparent" : backgroundColor,
+      backgroundColor: useGlass || transparent ? "transparent" : backgroundColor,
       minHeight: topPadding + headerHeight,
     },
-    showShadow && !transparent && SHADOWS.md,
-    showBorderRadius && !transparent && styles.borderRadius,
+    showShadow && !transparent && !useGlass && SHADOWS.md,
+    showBorderRadius && !transparent && !useGlass && styles.borderRadius,
     absolute && styles.absolute,
     style,
   ].filter(Boolean) as ViewStyle[];
 
-  return (
-    <View style={containerStyle}>
+  const headerContent = (
+    <>
       {/* Left Section */}
       <View style={styles.leftSection}>
         {leftContent ? (
@@ -143,6 +150,21 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
       <View style={styles.rightSection}>
         {rightContent}
       </View>
+    </>
+  );
+
+  // Use Liquid Glass wrapper on iOS when enabled
+  if (useGlass) {
+    return (
+      <LiquidGlassHeader style={containerStyle} transparent>
+        {headerContent}
+      </LiquidGlassHeader>
+    );
+  }
+
+  return (
+    <View style={containerStyle}>
+      {headerContent}
     </View>
   );
 };

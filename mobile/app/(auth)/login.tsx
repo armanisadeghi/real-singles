@@ -330,6 +330,10 @@ const Login = () => {
                   color: 'black',
                   fontSize: 16,
                 }}
+                // iOS-specific enhancements
+                clearButtonMode="while-editing"
+                textContentType="emailAddress"
+                keyboardAppearance="light"
               />
             </View>
             {emailError ? (
@@ -359,6 +363,10 @@ const Login = () => {
                   color: 'black',
                   fontSize: 16,
                 }}
+                // iOS-specific enhancements
+                textContentType="password"
+                keyboardAppearance="light"
+                enablesReturnKeyAutomatically={true}
               />
               <TouchableOpacity onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

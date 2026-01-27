@@ -35,3 +35,24 @@ export { default as GradientButton } from "./GradientButton";
 // Badge components
 export { PointsHeart } from "./PointsHeart";
 export { PointsBadge } from "./PointsBadge";
+
+// Icon components
+export { PlatformIcon } from "./PlatformIcon";
+export type { PlatformIconProps } from "./PlatformIcon";
+
+// Liquid Glass components (iOS 26+)
+export { 
+  LiquidGlassView, 
+  LiquidGlassHeader, 
+  LiquidGlassFAB,
+  useLiquidGlass 
+} from "./LiquidGlass";
+export type { 
+  LiquidGlassViewProps, 
+  LiquidGlassHeaderProps, 
+  LiquidGlassFABProps 
+} from "./LiquidGlass";
+
+// Context Menu (iOS native, Android fallback)
+export { ContextMenu } from "./ContextMenu";
+export type { ContextMenuProps, ContextMenuItem } from "./ContextMenu";

@@ -4,7 +4,7 @@ import { BACKGROUND_COLORS } from "@/components/ui/ProfileCard";
 import { icons } from "@/constants/icons";
 import { addUpdateRating } from "@/lib/api";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
@@ -207,8 +207,8 @@ export default function Review() {
                         onPress={() => setRating(star)}
                         activeOpacity={0.7}
                       >
-                        <MaterialIcons
-                          name={(star <= rating ? "star" : "star-outline") as any}
+                        <PlatformIcon
+                          name={star <= rating ? "star" : "star-border"}
                           size={28}
                           color={star <= rating ? "#B06D1E" : "#D1D1D1"}
                         />
@@ -278,8 +278,8 @@ export default function Review() {
                 <View className="flex-row my-2 mx-auto gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <TouchableOpacity key={star} activeOpacity={1}>
-                      <MaterialIcons
-                        name={(star <= submittedRating ? "star" : "star-outline") as any}
+                      <PlatformIcon
+                        name={star <= submittedRating ? "star" : "star-border"}
                         size={28}
                         color={star <= submittedRating ? "#B06D1E" : "#D1D1D1"}
                       />

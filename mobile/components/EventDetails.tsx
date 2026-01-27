@@ -3,7 +3,7 @@ import { markEventAsInterested, cancelEventRegistration } from "@/lib/api";
 import { EventCardProps } from "@/types";
 import { addEventToCalendar } from "@/utils/permissions";
 import { VIDEO_URL } from "@/utils/token";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -326,7 +326,7 @@ export default function EventDetails({
             {event?.EventName}
           </Text>
           <View className="flex-row items-center mt-1">
-            <MaterialIcons name="location-on" size={14} color="#B06D1E" />
+            <PlatformIcon name="location-on" size={14} color="#B06D1E" />
             <Text className="text-[14px] text-gray ml-1">
               {event?.Street}, {event?.City}
             </Text>
@@ -339,13 +339,13 @@ export default function EventDetails({
             onPress={handleShare}
             className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center"
           >
-            <MaterialIcons name="share" size={20} color="#B06D1E" />
+            <PlatformIcon name="share" size={20} color="#B06D1E" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleAddToCalendar}
             className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center"
           >
-            <MaterialIcons name="event" size={20} color="#B06D1E" />
+            <PlatformIcon name="event" size={20} color="#B06D1E" />
           </TouchableOpacity>
         </View>
       </View>
@@ -523,7 +523,7 @@ export default function EventDetails({
         onPress={handleOpenInMaps}
         className="mt-4 mb-[120px] py-3 px-6 border border-primary rounded-full self-center flex-row items-center gap-2"
       >
-        <MaterialIcons name="navigation" size={18} color="#B06D1E" />
+        <PlatformIcon name="navigation" size={18} color="#B06D1E" />
         <Text className="text-primary font-medium">Get Directions</Text>
       </TouchableOpacity>
 
@@ -543,7 +543,7 @@ export default function EventDetails({
               onPress={() => setMapModalVisible(false)}
               className="p-2"
             >
-              <MaterialIcons name="close" size={24} color="#333" />
+              <PlatformIcon name="close" size={24} color="#333" />
             </TouchableOpacity>
           </View>
 
@@ -571,7 +571,7 @@ export default function EventDetails({
           {/* Footer with location info */}
           <View className="bg-white p-4">
             <View className="flex-row items-center mb-2">
-              <MaterialIcons name="location-on" size={16} color="#B06D1E" />
+              <PlatformIcon name="location-on" size={16} color="#B06D1E" />
               <Text className="text-sm ml-2">
                 {event?.Street}, {event?.City}
               </Text>
@@ -580,7 +580,7 @@ export default function EventDetails({
               onPress={handleOpenInMaps}
               className="py-3 px-6 bg-primary rounded-full self-center flex-row items-center gap-2 mb-2"
             >
-              <MaterialIcons name="navigation" size={18} color="#fff" />
+              <PlatformIcon name="navigation" size={18} color="#fff" />
               <Text className="text-white font-medium">Get Directions</Text>
             </TouchableOpacity>
             <GradientButton

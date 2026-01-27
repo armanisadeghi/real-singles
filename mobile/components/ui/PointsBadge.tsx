@@ -10,7 +10,7 @@ import React from "react";
 import { View, Text, StyleSheet, ViewStyle, Pressable } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { moderateScale } from "react-native-size-matters";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
 
 type BadgeSize = "sm" | "md" | "lg";
 
@@ -90,7 +90,7 @@ export function PointsBadge({
         style,
       ]}
     >
-      <MaterialIcons
+      <PlatformIcon
         name="favorite"
         size={config.iconSize}
         color="rgba(255, 255, 255, 0.95)"

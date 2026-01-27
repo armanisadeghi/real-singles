@@ -1,6 +1,6 @@
 import { icons } from "@/constants/icons";
 import { supabase } from "@/lib/supabase";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
 import React, { useState } from "react";
 import { Image, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -295,9 +295,9 @@ const SignupLogin = ({
     <View style={{ flexDirection: "row", alignItems: "center", marginTop: 20,  }}>
       <TouchableOpacity onPress={() => setChecked(!checked)}>
         {checked ? (
-          <MaterialIcons name="check-box" size={28} color="#C07618" />
+          <PlatformIcon name="check-box" size={28} color="#C07618" />
         ) : (
-          <MaterialIcons name="check-box-outline-blank" size={28} color="#C07618" />
+          <PlatformIcon name="check-box-outline-blank" size={28} color="#C07618" />
         )}
       </TouchableOpacity>
 
@@ -324,9 +324,9 @@ const SignupLogin = ({
    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 20 , marginRight: 5}}>
       <TouchableOpacity onPress={() => setChecked(!checked)}>
         {checked ? (
-          <MaterialIcons name="check-box" size={28} color="#C07618" />
+          <PlatformIcon name="check-box" size={28} color="#C07618" />
         ) : (
-          <MaterialIcons name="check-box-outline-blank" size={28} color="#C07618" />
+          <PlatformIcon name="check-box-outline-blank" size={28} color="#C07618" />
         )}
       </TouchableOpacity>
 

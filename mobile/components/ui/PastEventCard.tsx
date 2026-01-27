@@ -1,6 +1,7 @@
 import { icons } from "@/constants/icons";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
+import * as Haptics from 'expo-haptics';
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
@@ -81,7 +82,10 @@ const PastEventCard = (
   return (
     <TouchableOpacity
       activeOpacity={0.8}
-      onPress={() => router.push(`/events/event/${pastEvent?.EventID}`)}
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        router.push(`/events/event/${pastEvent?.EventID}`);
+      }}
       className="h-[97px] rounded-[15px] px-[12px] py-[14px] flex-row items-center gap-[10px] bg-white overflow-hidden"
       style={{
         shadowColor: "#000",
@@ -121,7 +125,7 @@ const PastEventCard = (
             </Text>
 
             <View className="flex-row items-center mt-1">
-              <MaterialIcons name="location-on" size={14} color="#B06D1E" />
+              <PlatformIcon name="location-on" size={14} color="#B06D1E" />
               <Text
                 className="text-[12px] text-gray-600 ml-1"
                 numberOfLines={1}

@@ -1,6 +1,7 @@
 import { useCall } from '@/context/CallContext';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
 import { useAudioPlayer, AudioPlayer } from "expo-audio";
+import * as Haptics from 'expo-haptics';
 import React, { useEffect, useRef } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
@@ -71,8 +72,8 @@ const IncomingCall = () => {
         // Threshold for accepting the call
         runOnJS(handleAccept)();
       } else {
-        // Reset position with a spring animation
-        translationX.value = withSpring(0);
+        // Reset position with a spring animation (native iOS feel)
+        translationX.value = withSpring(0, { damping: 15, stiffness: 150 });
       }
     });
 
@@ -105,7 +106,7 @@ const IncomingCall = () => {
                 <Animated.View
                   style={[styles.sliderButton, animatedSliderStyle]}
                 >
-                  <MaterialIcons name="call" size={32} color="#4CAF50" />
+                  <PlatformIcon name="call" size={32} color="#4CAF50" />
                 </Animated.View>
               </GestureDetector>
               <Text style={styles.sliderText}>Slide to Answer</Text>
@@ -114,9 +115,12 @@ const IncomingCall = () => {
             {/* Reject Button */}
             <TouchableOpacity
               style={styles.rejectButton}
-              onPress={handleReject}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                handleReject();
+              }}
             >
-              <MaterialIcons name="close" size={32} color="#ffffff" />
+              <PlatformIcon name="close" size={32} color="#ffffff" />
             </TouchableOpacity>
           </View>
         </View>

@@ -1,7 +1,7 @@
 // Import React Hooks
 import { getAgoraCallRefreshToken } from "@/lib/api";
 import { getCurrentUserId } from "@/utils/token";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -386,7 +386,7 @@ const VoiceCall = () => {
     <SafeAreaView style={styles.main}>
       <StatusBar barStyle="light-content" backgroundColor="#181C23" />
       <View style={styles.ongoingCallContainer}>
-        <MaterialIcons name="call" size={48} color="#E38F28" style={{ marginBottom: 24 }} />
+        <PlatformIcon name="call" size={48} color="#E38F28" style={{ marginBottom: 24 }} />
         <Text style={styles.ongoingCallTitle}>Voice Call</Text>
         <Text style={styles.ongoingCallStatus}>
           {isJoined && remoteUid !== 0
@@ -403,7 +403,7 @@ const VoiceCall = () => {
             style={styles.controlButton}
             onPress={toggleMute}
           >
-            <MaterialIcons
+            <PlatformIcon
               name={isMuted ? "mic-off" : "mic"}
               size={28}
               color="#ffffff"
@@ -413,13 +413,13 @@ const VoiceCall = () => {
             style={styles.endCallButton}
             onPress={leave}
           >
-            <MaterialIcons name="call" size={36} color="#ffffff" />
+            <PlatformIcon name="call" size={36} color="#ffffff" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.controlButton}
             onPress={toggleSpeaker}
           >
-            <MaterialIcons
+            <PlatformIcon
               name={isSpeakerEnabled ? "volume-up" : "volume-off"}
               size={28}
               color="#ffffff"

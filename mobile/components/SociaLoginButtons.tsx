@@ -2,7 +2,6 @@ import { icons } from "@/constants/icons";
 import { requestPermissionWithExplanation } from "@/utils/permissions";
 import { addCurrentUserId, getCurrentUserId, getToken, removeCurrentUserId, removeToken, storeToken } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as AppleAuthentication from 'expo-apple-authentication';
 // import * as AuthSession from "expo-auth-session";

@@ -27,15 +27,18 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
 } from "react-native-reanimated";
+
+// Spring config for native iOS feel
+const SPRING_CONFIG = { damping: 15, stiffness: 150 };
 import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import * as Haptics from 'expo-haptics';
+import { PlatformIcon } from "@/components/ui";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -80,10 +83,10 @@ export default function FullScreenImageViewer({
   
   // Reset transforms when changing images
   const resetTransforms = useCallback(() => {
-    scale.value = withTiming(1);
+    scale.value = withSpring(1, SPRING_CONFIG);
     savedScale.value = 1;
-    translateX.value = withTiming(0);
-    translateY.value = withTiming(0);
+    translateX.value = withSpring(0, SPRING_CONFIG);
+    translateY.value = withSpring(0, SPRING_CONFIG);
     savedTranslateX.value = 0;
     savedTranslateY.value = 0;
   }, []);
@@ -170,9 +173,9 @@ export default function FullScreenImageViewer({
           }
         }
         
-        translateX.value = withSpring(0);
-        translateY.value = withSpring(0);
-        dismissProgress.value = withTiming(0);
+        translateX.value = withSpring(0, SPRING_CONFIG);
+        translateY.value = withSpring(0, SPRING_CONFIG);
+        dismissProgress.value = withSpring(0, SPRING_CONFIG);
       } else {
         savedTranslateX.value = translateX.value;
         savedTranslateY.value = translateY.value;
@@ -250,11 +253,14 @@ export default function FullScreenImageViewer({
         <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
           {/* Close button */}
           <Pressable
-            onPress={handleClose}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              handleClose();
+            }}
             style={styles.closeButton}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <MaterialIcons name="close" size={28} color="white" />
+            <PlatformIcon name="close" size={28} color="white" />
           </Pressable>
           
           {/* Photo counter */}
@@ -289,7 +295,10 @@ export default function FullScreenImageViewer({
               {images.map((_, index) => (
                 <Pressable
                   key={index}
-                  onPress={() => goToImage(index)}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    goToImage(index);
+                  }}
                   style={[
                     styles.dot,
                     index === currentIndex && styles.dotActive,

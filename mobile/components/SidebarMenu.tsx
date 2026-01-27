@@ -1,4 +1,4 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
 import * as Haptics from "expo-haptics";
 import { usePathname, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef } from "react";
@@ -178,7 +178,7 @@ const SideMenu = ({
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <MaterialIcons name="close" size={24} color="#fff" />
+            <PlatformIcon name="close" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
 
@@ -192,7 +192,7 @@ const SideMenu = ({
               ]}
               onPress={item.onPress}
             >
-              <MaterialIcons name={item.icon} size={24} color="#fff" />
+              <PlatformIcon name={item.icon} size={24} color="#fff" />
               <Text style={styles.menuText}>{item.title}</Text>
             </TouchableOpacity>
           ))}

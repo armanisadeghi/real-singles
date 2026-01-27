@@ -8,7 +8,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
 import {
   BORDER_RADIUS,
   SPACING,
@@ -191,14 +191,14 @@ export default function ProfileSectionRenderer({
           </Text>
           {profile?.is_verified && (
             <View style={styles.verifiedBadge}>
-              <MaterialIcons name="check-circle" size={20} color="#3B82F6" />
+              <PlatformIcon name="check-circle" size={20} color="#3B82F6" />
             </View>
           )}
         </View>
         
         {location && (
           <View style={styles.locationRow}>
-            <MaterialIcons name="location-on" size={16} color="#6B7280" />
+            <PlatformIcon name="location-on" size={16} color="#6B7280" />
             <Text style={styles.locationText}>{location}</Text>
             {profile?.distance_in_km && (
               <Text style={styles.distanceText}>
@@ -210,7 +210,7 @@ export default function ProfileSectionRenderer({
         
         {shouldDisplay(profile?.JobTitle) && (
           <View style={styles.jobRow}>
-            <MaterialIcons name="work" size={16} color="#6B7280" />
+            <PlatformIcon name="work" size={16} color="#6B7280" />
             <Text style={styles.jobText}>{profile.JobTitle}</Text>
           </View>
         )}
@@ -260,7 +260,7 @@ export default function ProfileSectionRenderer({
           <View style={styles.detailsGrid}>
             {lifestyleItems.map((item, index) => (
               <View key={index} style={styles.detailItem}>
-                <MaterialIcons name={item.icon as any} size={18} color="#B06D1E" />
+                <PlatformIcon name={item.icon} size={18} color="#B06D1E" />
                 <View style={styles.detailTextContainer}>
                   <Text style={styles.detailLabel}>{item.label}</Text>
                   <Text style={styles.detailValue}>{item.value}</Text>
@@ -278,7 +278,7 @@ export default function ProfileSectionRenderer({
           <View style={styles.detailsGrid}>
             {backgroundItems.map((item, index) => (
               <View key={index} style={styles.detailItem}>
-                <MaterialIcons name={item.icon as any} size={18} color="#B06D1E" />
+                <PlatformIcon name={item.icon} size={18} color="#B06D1E" />
                 <View style={styles.detailTextContainer}>
                   <Text style={styles.detailLabel}>{item.label}</Text>
                   <Text style={styles.detailValue}>{item.value}</Text>
@@ -296,7 +296,7 @@ export default function ProfileSectionRenderer({
           <View style={styles.detailsGrid}>
             {familyItems.map((item, index) => (
               <View key={index} style={styles.detailItem}>
-                <MaterialIcons name={item.icon as any} size={18} color="#B06D1E" />
+                <PlatformIcon name={item.icon} size={18} color="#B06D1E" />
                 <View style={styles.detailTextContainer}>
                   <Text style={styles.detailLabel}>{item.label}</Text>
                   <Text style={styles.detailValue}>{item.value}</Text>
@@ -314,7 +314,7 @@ export default function ProfileSectionRenderer({
           <View style={styles.detailsGrid}>
             {vicesItems.map((item, index) => (
               <View key={index} style={styles.detailItem}>
-                <MaterialIcons name={item.icon as any} size={18} color="#B06D1E" />
+                <PlatformIcon name={item.icon} size={18} color="#B06D1E" />
                 <View style={styles.detailTextContainer}>
                   <Text style={styles.detailLabel}>{item.label}</Text>
                   <Text style={styles.detailValue}>{item.value}</Text>

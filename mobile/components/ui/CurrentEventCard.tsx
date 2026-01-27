@@ -1,7 +1,8 @@
 import { markEventAsInterested } from '@/lib/api';
 import { EventCardProps } from '@/types';
 import { IMAGE_URL, VIDEO_URL } from '@/utils/token';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
@@ -85,7 +86,10 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
     };
 
   return (
-    <TouchableOpacity activeOpacity={0.8} onPress={() => router.push(`/events/event/${currentEvent?.EventID}` as any)}>
+    <TouchableOpacity activeOpacity={0.8} onPress={() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      router.push(`/events/event/${currentEvent?.EventID}` as any);
+    }}>
     <View className="w-[309px] h-[263px] bg-white rounded-[18px] px-[17px] py-[16px] shadow-md">
       {/* Image and Time Badge */}
       <View className="relative rounded-xl overflow-hidden">
@@ -121,7 +125,7 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
 
       {/* Location */}
       <View className="flex-row items-center mt-1">
-        <MaterialIcons name="location-on" size={14} color="#B06D1E" />
+        <PlatformIcon name="location-on" size={14} color="#B06D1E" />
         <Text className="text-xs text-gray-500 ml-1">{currentEvent?.City}, {currentEvent?.State}</Text>
       </View>
 
@@ -132,7 +136,10 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
           <View className="flex-row">
             {currentEvent?.interestedUserImage.length > 0 && currentEvent?.interestedUserImage.slice(0, 3).map((user, index) => (
               <TouchableOpacity 
-                onPress={() => router.push(`/profiles/${user?.ID}`)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push(`/profiles/${user?.ID}`);
+                }}
                 key={index} 
                 className={`w-6 h-6 rounded-full border-2 border-white ${index > 0 ? 'ml-[-8px]' : ''}`}
                 style={{ zIndex: 3 - index }}
@@ -160,7 +167,10 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
 
         <TouchableOpacity 
           className="border border-primary px-3 py-1 rounded-lg"
-          onPress={handleEventInterested}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            handleEventInterested();
+          }}
         >
           <Text className="text-[10px] text-dark font-medium">{currentEvent?.interestedUserImage.find((u) => u?.ID === currUserId) ? 'Interested' : 'Mark Interested'}</Text>
         </TouchableOpacity>

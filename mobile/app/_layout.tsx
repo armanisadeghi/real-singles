@@ -83,10 +83,16 @@ function RootLayoutNav() {
           // Native header defaults - DO NOT override unless necessary
           headerTintColor: '#E91E63', // Brand color for interactive elements
           headerShadowVisible: false, // Clean flat header (modern design)
-          headerStyle: { backgroundColor: '#FFFFFF' },
           headerTitleStyle: { fontWeight: '600', color: '#000000' },
           // Prevent "(tabs)" from showing as back button title
           headerBackTitle: 'Back',
+          // iOS Liquid Glass: Transparent header with blur effect
+          headerTransparent: Platform.OS === 'ios',
+          headerBlurEffect: Platform.OS === 'ios' ? 'systemMaterial' : undefined,
+          // Fallback for Android and when blur is not available
+          headerStyle: Platform.OS === 'ios' 
+            ? undefined 
+            : { backgroundColor: '#FFFFFF' },
         }}
       >
         {/* Auth & Splash - No headers */}
@@ -117,6 +123,7 @@ function RootLayoutNav() {
           name="settings/index" 
           options={{ 
             title: 'Settings',
+            headerLargeTitle: Platform.OS === 'ios',
             headerRight: () => <NotificationBell />,
           }} 
         />
@@ -124,6 +131,7 @@ function RootLayoutNav() {
           name="notification/index" 
           options={{ 
             title: 'Notifications',
+            headerLargeTitle: Platform.OS === 'ios',
             headerRight: () => <NotificationBell />,
           }} 
         />
@@ -131,6 +139,7 @@ function RootLayoutNav() {
           name="events/index" 
           options={{ 
             title: 'Nearby Events',
+            headerLargeTitle: Platform.OS === 'ios',
             headerRight: () => <NotificationBell />,
           }} 
         />
@@ -150,6 +159,7 @@ function RootLayoutNav() {
           name="topMatches/index" 
           options={{ 
             title: 'Top Matches',
+            headerLargeTitle: Platform.OS === 'ios',
             headerRight: () => <NotificationBell />,
           }} 
         />
@@ -169,6 +179,7 @@ function RootLayoutNav() {
           name="redeem/index" 
           options={{ 
             title: 'Redeem Points',
+            headerLargeTitle: Platform.OS === 'ios',
           }} 
         />
         <Stack.Screen 

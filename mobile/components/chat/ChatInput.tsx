@@ -1,5 +1,5 @@
 import { icons } from "@/constants/icons";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
 import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -12,8 +12,7 @@ import {
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
-  Easing,
+  withSpring,
   interpolate,
 } from "react-native-reanimated";
 import LinearBg from "../LinearBg";
@@ -29,15 +28,16 @@ export default function ChatInput({ onSend }: ChatInputProps) {
   // Native reanimated shared values (run on UI thread for smooth 60fps)
   const animationProgress = useSharedValue(0);
 
-  // Animation configuration
-  const animationConfig = {
-    duration: 300,
-    easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+  // Spring animation configuration (native iOS feel)
+  const springConfig = {
+    damping: 18,
+    stiffness: 150,
+    mass: 1,
   };
 
   // React to menu toggle changes
   useEffect(() => {
-    animationProgress.value = withTiming(toggledMenu ? 1 : 0, animationConfig);
+    animationProgress.value = withSpring(toggledMenu ? 1 : 0, springConfig);
   }, [toggledMenu]);
 
   // Animated styles using native driver (runs on UI thread)
@@ -120,6 +120,10 @@ export default function ChatInput({ onSend }: ChatInputProps) {
             textAlignVertical: "center",
           }}
           onSubmitEditing={handleSend}
+          // iOS-specific enhancements
+          clearButtonMode="while-editing"
+          enablesReturnKeyAutomatically={true}
+          keyboardAppearance="light"
         />
 
         {/* Send button */}
@@ -128,7 +132,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           onPress={handleSend}
         >
           <LinearBg className="w-full h-full flex justify-center items-center" style={{padding: 10}}>
-            <MaterialIcons 
+            <PlatformIcon 
               name="send" 
               size={20} 
               color="#FFFFFF" 

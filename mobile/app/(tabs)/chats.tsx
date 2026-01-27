@@ -6,8 +6,9 @@ import { fetchUserProfile, getAgoraChatToken, getGroupList } from "@/lib/api";
 import { chatClient, deleteAllMyGroups, getAllConversations, getAllJoinedGroupsDetailed, getUserHistoryMessages, initChat, loginToChat } from "@/services/agoraChatServices";
 import { User } from "@/types";
 import { getCurrentUserId, IMAGE_URL, VIDEO_URL } from "@/utils/token";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon, LiquidGlassHeader, useLiquidGlass } from "@/components/ui";
 import * as Haptics from 'expo-haptics';
+import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { Link, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -344,7 +345,7 @@ const renderUserItem = ({
       <View className="flex-row justify-between items-center">
         <Text className="font-medium text-base">{item.name}</Text>
         {selectedUsers.includes(item.id) && (
-          <MaterialIcons name="check-circle" size={24} color="#4CAF50" />
+          <PlatformIcon name="check-circle" size={24} color="#4CAF50" />
         )}
         {/* <Text className="text-gray-500 text-xs">{item.time}</Text> */}
       </View>
@@ -735,16 +736,16 @@ export default function Chats() {
                 borderRadius: BORDER_RADIUS.full
               }}
             >
-              <MaterialIcons name="add" size={ICON_SIZES.lg} color="white" />
+              <PlatformIcon name="add" size={ICON_SIZES.lg} color="white" />
             </LinearBg>
           </View>
         </TouchableOpacity>
-        {/* Native-style header for tab screen */}
-        <View 
+        {/* Native-style header for tab screen with Liquid Glass on iOS */}
+        <LiquidGlassHeader
           style={{ 
             paddingTop: insets.top,
-            backgroundColor: '#FFFFFF',
           }}
+          transparent={Platform.OS === 'ios'}
         >
           <View 
             style={{ 
@@ -763,7 +764,7 @@ export default function Chats() {
                 }} 
                 style={{ width: 40 }}
               >
-                <MaterialIcons name="arrow-back" size={24} color="#E91E63" />
+                <PlatformIcon name="arrow-back" size={24} color="#E91E63" />
               </TouchableOpacity>
             ) : (
               <View style={{ width: 40 }} />
@@ -789,58 +790,81 @@ export default function Chats() {
               <NotificationBell />
             )}
           </View>
-        </View>
+        </LiquidGlassHeader>
 
         <View style={{ marginTop: VERTICAL_SPACING.sm }}>
-          <View
-            className="flex-row bg-white border border-border rounded-card"
-            style={{
-              marginHorizontal: SPACING.screenPadding,
-              gap: SPACING.xs,
-              padding: SPACING.xs,
-              marginBottom: VERTICAL_SPACING.md
-            }}
-          >
-            <TouchableOpacity
-              disabled={selectMode}
-              className={`flex-1 items-center rounded-input ${activeTab === "messages"
-                ? "border border-primary bg-white"
-                : "bg-light-100"
-                }`}
-              style={{ paddingVertical: SPACING.sm }}
-              onPress={() => {
+          {Platform.OS === 'ios' ? (
+            // Native iOS segmented control
+            <SegmentedControl
+              values={['Messages', 'Groups']}
+              selectedIndex={activeTab === 'messages' ? 0 : 1}
+              onChange={(event) => {
                 Haptics.selectionAsync();
-                setActiveTab("messages");
+                const index = event.nativeEvent.selectedSegmentIndex;
+                setActiveTab(index === 0 ? 'messages' : 'groups');
+              }}
+              enabled={!selectMode}
+              style={{
+                marginHorizontal: SPACING.screenPadding,
+                marginBottom: VERTICAL_SPACING.md,
+                height: 36,
+              }}
+              tintColor="#E91E63"
+              fontStyle={{ fontSize: 14, fontWeight: '500' }}
+              activeFontStyle={{ fontSize: 14, fontWeight: '600' }}
+            />
+          ) : (
+            // Android custom tab switcher
+            <View
+              className="flex-row bg-white border border-border rounded-card"
+              style={{
+                marginHorizontal: SPACING.screenPadding,
+                gap: SPACING.xs,
+                padding: SPACING.xs,
+                marginBottom: VERTICAL_SPACING.md
               }}
             >
-              <Text
-                className={activeTab === "messages" ? "text-primary" : "text-black"}
-                style={TYPOGRAPHY.body}
+              <TouchableOpacity
+                disabled={selectMode}
+                className={`flex-1 items-center rounded-input ${activeTab === "messages"
+                  ? "border border-primary bg-white"
+                  : "bg-light-100"
+                  }`}
+                style={{ paddingVertical: SPACING.sm }}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setActiveTab("messages");
+                }}
               >
-                Messages
-              </Text>
-            </TouchableOpacity>
+                <Text
+                  className={activeTab === "messages" ? "text-primary" : "text-black"}
+                  style={TYPOGRAPHY.body}
+                >
+                  Messages
+                </Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              disabled={selectMode}
-              className={`flex-1 items-center rounded-input ${activeTab === "groups"
-                ? "border border-primary bg-white"
-                : "bg-light-100"
-                }`}
-              style={{ paddingVertical: SPACING.sm }}
-              onPress={() => {
-                Haptics.selectionAsync();
-                setActiveTab("groups");
-              }}
-            >
-              <Text
-                className={activeTab === "groups" ? "text-primary" : "text-black"}
-                style={TYPOGRAPHY.body}
+              <TouchableOpacity
+                disabled={selectMode}
+                className={`flex-1 items-center rounded-input ${activeTab === "groups"
+                  ? "border border-primary bg-white"
+                  : "bg-light-100"
+                  }`}
+                style={{ paddingVertical: SPACING.sm }}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setActiveTab("groups");
+                }}
               >
-                Groups
-              </Text>
-            </TouchableOpacity>
-          </View>
+                <Text
+                  className={activeTab === "groups" ? "text-primary" : "text-black"}
+                  style={TYPOGRAPHY.body}
+                >
+                  Groups
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
           <View className="bg-white rounded-t-[30px] h-full"
             style={{
               shadowColor: "#000",

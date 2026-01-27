@@ -4,7 +4,7 @@ import { getProfile } from "@/lib/api";
 import { User } from "@/types";
 import { authenticateForAccountDeletion, shouldUseBiometrics } from "@/utils/biometrics";
 import { IMAGE_URL, MEDIA_BASE_URL, removeToken } from "@/utils/token";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { PlatformIcon } from "@/components/ui";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
@@ -320,16 +320,17 @@ export default function Settings() {
             <View className="rounded-xl overflow-hidden mt-4">
               <TouchableOpacity
                 className="flex-row items-center bg-light-100 mb-4 px-4 py-4 border border-border rounded-full"
-                onPress={() =>
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   router.push({
                     pathname: "/editProfile",
                     params: { profile: profile ? JSON.stringify(profile) : "" },
-                  })
-                }
+                  });
+                }}
               >
-                <MaterialIcons name="person-outline" size={20} color="#333" />
+                <PlatformIcon name="person-outline" size={20} color="#333" />
                 <Text className="ml-3 flex-1 text-dark">Edit Profile</Text>
-                <MaterialIcons
+                <PlatformIcon
                   name="keyboard-arrow-right"
                   size={22}
                   color="#999"
@@ -338,17 +339,18 @@ export default function Settings() {
               <TouchableOpacity
                 // onPress={gotoPrivacy}
                 onPress={() => {
-                  Platform.OS == 'ios' ? openModal(require("../../assets/docs/PrivacyPolicy.pdf")) : goToPrivacy()
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  Platform.OS == 'ios' ? openModal(require("../../assets/docs/PrivacyPolicy.pdf")) : goToPrivacy();
                 }}
                 className="flex-row items-center bg-light-100 mb-4 px-4 py-4 border border-border rounded-full"
               >
-                <MaterialIcons
+                <PlatformIcon
                   name="info-outline"
                   size={22}
                   color="#333"
                 />
                 <Text className="ml-3 flex-1 text-dark">Privacy Policy</Text>
-                <MaterialIcons
+                <PlatformIcon
                   name="keyboard-arrow-right"
                   size={22}
                   color="#999"
@@ -358,20 +360,21 @@ export default function Settings() {
 
             <View className="rounded-xl overflow-hidden">
               <TouchableOpacity className="flex-row items-center bg-light-100 mb-4 px-4 py-4 border border-border rounded-full"
-                onPress={() =>
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   router.push({
                     pathname: "/appGallery",
-                  })
-                }>
+                  });
+                }}>
                 {/* <Ionicons name="help-circle-outline" size={22} color="#333" /> */}
-                <MaterialIcons
+                <PlatformIcon
                   name="photo-library"
                   size={22}
                   color="#333"
                 />
                 {/* <Text className="ml-3 flex-1 text-dark">Help & Support</Text> */}
                 <Text className="ml-3 flex-1 text-dark">App Gallery</Text>
-                <MaterialIcons
+                <PlatformIcon
                   name="keyboard-arrow-right"
                   size={22}
                   color="#999"
@@ -382,9 +385,9 @@ export default function Settings() {
                 className="flex-row items-center bg-light-100 mb-4 px-4 py-4 border border-border rounded-full"
                 onPress={handleDeleteAccount}
               >
-                <MaterialIcons name="delete-outline" size={22} color="#333" />
+                <PlatformIcon name="delete-outline" size={22} color="#333" />
                 <Text className="ml-3 flex-1 text-dark">Delete Account</Text>
-                <MaterialIcons
+                <PlatformIcon
                   name="keyboard-arrow-right"
                   size={22}
                   color="#999"
