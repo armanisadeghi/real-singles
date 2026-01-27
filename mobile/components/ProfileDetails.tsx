@@ -4,6 +4,7 @@ import { getProfileLink, APP_NAME } from "@/lib/config";
 import { User } from "@/types";
 import { removeToken } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -50,6 +51,7 @@ console.log("profile?.Height",profile?.Height);
    
 
   const handleLogout = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await removeToken();
     router.replace("/(auth)/login");
   };
@@ -64,6 +66,7 @@ console.log("profile?.Height",profile?.Height);
 
 
   const handleAddFav = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const data = new FormData();
     data.append("OtherID", profile?.ID);
     data.append("Status", profile?.IsFavorite === 1 ? "0" : "1");
@@ -72,9 +75,11 @@ console.log("profile?.Height",profile?.Height);
       console.log("Add to favorites response:", res);
 
       if (res?.success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         console.log(res?.msg || "Added to favorites");
         fetchProfile();
       } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Toast.show({
           type: "error",
           text1: res?.msg || "Failed to add to favorites",
@@ -85,11 +90,13 @@ console.log("profile?.Height",profile?.Height);
         console.log("Failed to add to favorites:", res?.msg);
       }
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.log("Error adding to favorites:", error);
     }
   };
 
   const handleNavigateReview = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push({
       pathname: "/review",
       params: {
@@ -122,6 +129,7 @@ console.log("profile?.Height",profile?.Height);
   //  console.log("profile?.ID in profile details:", profile);
 
   const handleReferFriend = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       // Build the deep link URL
       const deepLinkUrl = getProfileLink(profile?.ID || '');
@@ -236,12 +244,13 @@ console.log("profile?.Height",profile?.Height);
         <View className="flex-row items-center gap-2">
           {!me &&
            <TouchableOpacity
-            onPress={() => 
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               router.push({
                 pathname: "/appGallery",
                 params:{otherUserID: profile?.ID}
-              })
-            }
+              });
+            }}
             className={`border border-[#C07618] rounded-lg overflow-hidden flex justify-center items-center w-8 h-8 bg-primary`}
           >
             <Ionicons
@@ -251,7 +260,8 @@ console.log("profile?.Height",profile?.Height);
             />
           </TouchableOpacity>}
           <TouchableOpacity
-            onPress={() =>
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               me
                 ? router.push("/(tabs)/chats")
                 :
@@ -264,9 +274,8 @@ console.log("profile?.Height",profile?.Height);
                     online: "false",
                     time: "Few min ago",
                   },
-                })
-              // router.push(`/chat/${profile?.ID}`)
-            }
+                });
+            }}
             className="border border-[#C07618] rounded-lg overflow-hidden flex justify-center items-center w-8 h-8 bg-primary"
           >
             <LinearBg className="w-full h-full flex justify-center items-center">

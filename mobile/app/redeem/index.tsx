@@ -1,17 +1,12 @@
-import NotificationBell from "@/components/NotificationBell";
 import ProductCard from "@/components/ui/ProductCard";
-import { icons } from "@/constants/icons";
 import { getProductsGiftList } from "@/lib/api";
 import { ProductCardProps } from "@/types";
-import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
   FlatList,
-  Image,
   Text,
-  TouchableOpacity,
   View
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -24,8 +19,6 @@ interface Data {
 }
 
 export default function Redeem() {
-  const router = useRouter();
-
   const [data, setData] = useState<Data>();
   const [loading, setLoading] = useState(false);
 
@@ -110,38 +103,10 @@ export default function Redeem() {
 
   return (
     <>
-      {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
+      {/* Native header is configured in _layout.tsx - no custom header needed */}
       <View className="flex-1 bg-background">
         <Toast />
-        <View
-          className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.1,
-            shadowRadius: 16,
-            elevation: 5,
-          }}
-        >
-          <View className="flex-row items-center gap-2">
-            <TouchableOpacity
-              onPress={router.back}
-              className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
-            >
-              <Image
-                source={icons.back}
-                className="size-4"
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <Text className="leading-[22px] text-base font-medium tracking-[-0.41px] text-dark">
-              Redeem Points
-            </Text>
-          </View>
-
-          <NotificationBell />
-        </View>
-        <View className="mt-8 pb-36">
+        <View className="mt-4 pb-36">
           <FlatList
             data={data?.NewArrival}
             keyExtractor={(item) => item?.ProductID.toString()}

@@ -1,25 +1,21 @@
 import EventDetails, { formatEventDate } from "@/components/EventDetails";
-import NotificationBell from "@/components/NotificationBell";
-import { icons } from "@/constants/icons";
 import { getEventDetails } from "@/lib/api";
 import { EventCardProps } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import * as Haptics from "expo-haptics";
-import { SymbolView } from "expo-symbols";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   ImageBackground,
   Platform,
   PlatformColor,
   Text,
-  TouchableOpacity,
   View
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+
+// Note: handleBack removed - now using native iOS back navigation
 
 // Array of background colors for random backgrounds
 const BACKGROUND_COLORS = [
@@ -47,7 +43,6 @@ export default function EventDetail() {
   const [loading, setLoading] = useState(false);
 
   const snapPoints = useMemo(() => ["62%", "70%"], []);
-  const router = useRouter();
 
   // Generate a random but consistent color for the event
   const bgColor = useMemo(() => {
@@ -85,11 +80,6 @@ export default function EventDetail() {
     fetchEventDetails();
   }, [id]);
 
-  const handleBack = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.back();
-  }, [router]);
-
   if(loading){
     return (
       <View className="flex-1 items-center justify-center bg-background">
@@ -103,47 +93,8 @@ export default function EventDetail() {
   
   return (
     <>
-      {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
-
+      {/* Native header is configured in _layout.tsx - no custom header needed */}
       <View className="flex-1 bg-background">
-        <View
-          className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-[1]"
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.1,
-            shadowRadius: 16,
-            elevation: 5,
-          }}
-        >
-          <View className="flex-row items-center gap-2">
-            <TouchableOpacity
-              onPress={handleBack}
-              className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
-              activeOpacity={0.7}
-            >
-              {Platform.OS === "ios" ? (
-                <SymbolView
-                  name="chevron.left"
-                  style={{ width: 16, height: 16 }}
-                  tintColor={Platform.select({ ios: PlatformColor("label") as unknown as string, default: "#000000" })}
-                />
-              ) : (
-                <Image
-                  source={icons.back}
-                  className="size-4"
-                  resizeMode="contain"
-                />
-              )}
-            </TouchableOpacity>
-            <Text className="leading-[22px] text-dark text-base font-medium tracking-[-0.41px]">
-              Event Details
-            </Text>
-          </View>
-
-          <NotificationBell />
-        </View>
-        
         {data?.EventImage ? (
           <ImageBackground
             className="relative h-[253px] mt-[-10px]"

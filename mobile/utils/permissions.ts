@@ -15,9 +15,18 @@
 import * as Calendar from "expo-calendar";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
-import { Camera } from "expo-camera";
+import { Camera, useMicrophonePermissions } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import { Alert, Linking, Platform } from "react-native";
+
+// Note: expo-notifications must be installed for notifications permission
+// Install with: npx expo install expo-notifications
+let Notifications: any = null;
+try {
+  Notifications = require("expo-notifications");
+} catch (e) {
+  // expo-notifications not installed yet
+}
 
 // ============================================
 // TYPES
@@ -25,10 +34,12 @@ import { Alert, Linking, Platform } from "react-native";
 
 export type PermissionType = 
   | "camera"
+  | "microphone"
   | "photoLibrary"
   | "calendar"
   | "location"
-  | "locationAlways";
+  | "locationAlways"
+  | "notifications";
 
 export type PermissionStatus = 
   | "granted"
@@ -63,6 +74,12 @@ const DEFAULT_CONFIGS: Record<PermissionType, PermissionConfig> = {
     deniedTitle: "Camera Access Required",
     deniedMessage: "Please enable camera access in Settings to take photos and videos.",
   },
+  microphone: {
+    title: "Microphone Access",
+    message: "RealSingles needs access to your microphone to record video and make calls.",
+    deniedTitle: "Microphone Access Required",
+    deniedMessage: "Please enable microphone access in Settings to record videos and make voice/video calls.",
+  },
   photoLibrary: {
     title: "Photo Library Access",
     message: "RealSingles needs access to your photos to let you share them on your profile.",
@@ -87,6 +104,12 @@ const DEFAULT_CONFIGS: Record<PermissionType, PermissionConfig> = {
     deniedTitle: "Background Location Required",
     deniedMessage: "Please enable 'Always' location access in Settings for background notifications.",
   },
+  notifications: {
+    title: "Enable Notifications",
+    message: "RealSingles would like to send you notifications about new matches, messages, and events.",
+    deniedTitle: "Notifications Required",
+    deniedMessage: "Please enable notifications in Settings to receive updates about matches and messages.",
+  },
 };
 
 // ============================================
@@ -101,6 +124,14 @@ export async function getPermissionStatus(type: PermissionType): Promise<Permiss
     switch (type) {
       case "camera": {
         const result = await Camera.getCameraPermissionsAsync();
+        return {
+          status: mapExpoStatus(result.status),
+          canAskAgain: result.canAskAgain,
+        };
+      }
+      
+      case "microphone": {
+        const result = await Camera.getMicrophonePermissionsAsync();
         return {
           status: mapExpoStatus(result.status),
           canAskAgain: result.canAskAgain,
@@ -136,6 +167,18 @@ export async function getPermissionStatus(type: PermissionType): Promise<Permiss
         return {
           status: mapExpoStatus(result.status),
           canAskAgain: result.canAskAgain,
+        };
+      }
+      
+      case "notifications": {
+        if (!Notifications) {
+          console.warn("expo-notifications not installed. Install with: npx expo install expo-notifications");
+          return { status: "undetermined", canAskAgain: true };
+        }
+        const result = await Notifications.getPermissionsAsync();
+        return {
+          status: mapExpoStatus(result.status),
+          canAskAgain: result.canAskAgain ?? true,
         };
       }
       
@@ -287,6 +330,14 @@ async function requestPermissionInternal(type: PermissionType): Promise<Permissi
       };
     }
     
+    case "microphone": {
+      const result = await Camera.requestMicrophonePermissionsAsync();
+      return {
+        status: mapExpoStatus(result.status),
+        canAskAgain: result.canAskAgain,
+      };
+    }
+    
     case "photoLibrary": {
       const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
       return {
@@ -324,6 +375,18 @@ async function requestPermissionInternal(type: PermissionType): Promise<Permissi
       return {
         status: mapExpoStatus(result.status),
         canAskAgain: result.canAskAgain,
+      };
+    }
+    
+    case "notifications": {
+      if (!Notifications) {
+        console.warn("expo-notifications not installed. Install with: npx expo install expo-notifications");
+        return { status: "undetermined", canAskAgain: true };
+      }
+      const result = await Notifications.requestPermissionsAsync();
+      return {
+        status: mapExpoStatus(result.status),
+        canAskAgain: result.canAskAgain ?? true,
       };
     }
     

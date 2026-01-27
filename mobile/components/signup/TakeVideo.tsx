@@ -4,6 +4,7 @@ import { signupProps } from "@/types";
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import { CameraType, CameraView, useCameraPermissions, useMicrophonePermissions } from "expo-camera";
 import * as FileSystem from "expo-file-system";
+import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -158,6 +159,7 @@ const TakeVideo = ({ data, updateData, onNext, error }: signupProps) => {
   };
 
   const toggleCameraFacing = () => {
+    Haptics.selectionAsync();
     setFacing((current) => (current === "back" ? "front" : "back"));
   };
 
@@ -185,11 +187,13 @@ const TakeVideo = ({ data, updateData, onNext, error }: signupProps) => {
     console.log("in startRecording");
 
     if (!cameraRef.current || !cameraReady) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       Alert.alert("Camera not ready", "Please wait for camera to initialize");
       return;
     }
 
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setRecording(true);
       setRecordingDuration(0);
 
@@ -208,11 +212,13 @@ const TakeVideo = ({ data, updateData, onNext, error }: signupProps) => {
       console.log("Recording completed:", video);
 
       if (video && video.uri) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setRecordedVideo(video.uri);
       } else {
         console.warn("recordAsync returned no uri:", video);
       }
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error("Failed to record video:", error);
       Alert.alert("Error", "Failed to record video. Please try again.");
     } finally {
@@ -228,6 +234,8 @@ const TakeVideo = ({ data, updateData, onNext, error }: signupProps) => {
   const stopRecording = async () => {
     if (!recording) return;
 
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    
     try {
       if (cameraRef.current) {
         console.log("Stopping recording...");
@@ -248,6 +256,7 @@ const TakeVideo = ({ data, updateData, onNext, error }: signupProps) => {
   const handleSaveVideo = async () => {
     if (!recordedVideo) return;
 
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setLoading(true);
     try {
       console.log("Preparing to upload video:", recordedVideo);
@@ -287,15 +296,18 @@ const TakeVideo = ({ data, updateData, onNext, error }: signupProps) => {
       console.log("Video upload response:", res);
 
       if (res && res?.name) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         updateData({ liveVideo: res?.name });
         Alert.alert("Upload Successful", "Your video has been successfully uploaded.");
         console.log("Updated video data with:", res?.name);
         onNext();
       } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         console.error("Upload response missing name property:", res);
         Alert.alert("Upload Failed", "There was an issue uploading your video. Please try again.");
       }
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error("Failed to upload video:", error);
       Alert.alert("Upload Failed", "There was an issue uploading your video. Please try again.");
     } finally {

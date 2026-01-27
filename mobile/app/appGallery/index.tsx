@@ -1,16 +1,13 @@
 import MediaItem from "@/components/MediaItem";
-import { icons } from "@/constants/icons";
 import { fetchUserProfile, getProfile, saveGalleryImage, uploadImage } from "@/lib/api";
-import { MaterialIcons } from "@expo/vector-icons";
 import { Camera, CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
 import {
   Alert,
   Dimensions,
   FlatList,
-  Image,
   Text,
   TouchableOpacity,
   View
@@ -25,7 +22,6 @@ export default function AppGallery() {
   const gap = 20; // gap between items
   const itemWidth = (screenWidth - horizontalPadding * 2 - gap) / 2;
 
-  const router = useRouter();
   const { otherUserID } = useLocalSearchParams<{ otherUserID: string }>();
   const [loading, setLoading] = useState(false);
   const [mediaArray, setMediaArray] = useState<any>([])
@@ -241,44 +237,9 @@ export default function AppGallery() {
 
   return (
     <>
-      {/* <StatusBar barStyle="dark-content" translucent /> */}
+      {/* Native header is configured in _layout.tsx - no custom header needed */}
       <View className="flex-1 bg-background">
         <Toast />
-        <View className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.1,
-            shadowRadius: 16,
-            elevation: 5,
-          }}
-        >
-          <View className="flex-row items-center gap-2 pt-5">
-            <TouchableOpacity
-              onPress={router.back}
-              className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
-            >
-              <Image
-                source={icons.back}
-                className="size-4"
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <Text className="leading-[22px] text-base font-medium tracking-[-0.41px] text-black">
-              My Gallery
-            </Text>
-          </View>
-
-          <TouchableOpacity onPress={handleAddPress} className="pt-5">
-            <MaterialIcons
-              name="add-circle-outline"
-              size={22}
-              color="#333"
-            />
-          </TouchableOpacity>
-
-        </View>
-
         {showCamera ? (
           <CameraView
             style={{ flex: 1 }}

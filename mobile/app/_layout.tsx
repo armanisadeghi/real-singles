@@ -6,9 +6,15 @@ import IncomingCall from "@/components/IncomingCall";
 import NotificationBell from "@/components/NotificationBell";
 import { CallProvider, useCall } from "@/context/CallContext";
 import { AuthProvider, useAuth } from "@/utils/authContext";
-import { Stack } from "expo-router";
+import {
+  setupNotificationChannels,
+  addNotificationReceivedListener,
+  addNotificationResponseListener,
+  removeNotificationSubscription,
+} from "@/utils/notifications";
+import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
-import { StatusBar } from "react-native";
+import { Platform, StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -19,16 +25,56 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const agoraLoginRef = useRef(false);
+  const router = useRouter();
 
   const { isAuthenticated } = useAuth();
   const { loginToAgoraChat } = useCall();
 
+  // Initialize Agora chat when authenticated
   useEffect(() => {
     if (isAuthenticated && !agoraLoginRef.current) {
       agoraLoginRef.current = true;
       loginToAgoraChat();
     }
   }, [isAuthenticated]);
+
+  // Initialize push notifications
+  useEffect(() => {
+    // Set up Android notification channels
+    if (Platform.OS === "android") {
+      setupNotificationChannels();
+    }
+
+    // Listen for notifications received while app is foregrounded
+    const notificationReceivedSubscription = addNotificationReceivedListener(
+      (notification) => {
+        console.log("Notification received:", notification);
+        // You can show a toast or in-app notification here
+      }
+    );
+
+    // Listen for notification taps (opens the app)
+    const notificationResponseSubscription = addNotificationResponseListener(
+      (response) => {
+        console.log("Notification tapped:", response);
+        const data = response.notification.request.content.data;
+        
+        // Handle navigation based on notification type
+        if (data?.type === "message" && data?.chatId) {
+          router.push(`/chat/${data.chatId}`);
+        } else if (data?.type === "match" && data?.userId) {
+          router.push(`/profiles/${data.userId}`);
+        } else if (data?.type === "event" && data?.eventId) {
+          router.push(`/events/event/${data.eventId}`);
+        }
+      }
+    );
+
+    return () => {
+      removeNotificationSubscription(notificationReceivedSubscription);
+      removeNotificationSubscription(notificationResponseSubscription);
+    };
+  }, []);
 
   return (
     <>
@@ -158,8 +204,8 @@ function RootLayoutNav() {
         <Stack.Screen 
           name="nearbyprofile/index" 
           options={{ 
-            title: 'Nearby Profiles',
-            headerRight: () => <NotificationBell />,
+            // Full-screen map view - use floating header instead of native header
+            headerShown: false,
           }} 
         />
         <Stack.Screen 

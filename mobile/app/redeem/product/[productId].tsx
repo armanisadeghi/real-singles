@@ -1,7 +1,5 @@
 import LinearBg from "@/components/LinearBg";
-import NotificationBell from "@/components/NotificationBell";
 import ProductDetails from "@/components/ProductDetails";
-import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
 import { getProductsGiftDetail } from "@/lib/api";
 import { ProductCardProps } from "@/types";
@@ -11,7 +9,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   ImageBackground,
   Text,
   TouchableOpacity,
@@ -95,38 +92,9 @@ export default function ProductDetail() {
   }
   return (
     <>
-      {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
-
+      {/* Native header is configured in _layout.tsx - no custom header needed */}
       <View className="flex-1 bg-background">
         <Toast />
-        <View
-          className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.1,
-            shadowRadius: 16,
-            elevation: 5,
-          }}
-        >
-          <View className="flex-row items-center gap-2">
-            <TouchableOpacity
-              onPress={router.back}
-              className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
-            >
-              <Image
-                source={icons.back}
-                className="size-4"
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <Text className="leading-[22px] text-dark text-base font-medium tracking-[-0.41px]">
-              Product Details
-            </Text>
-          </View>
-
-          <NotificationBell />
-        </View>
         <ImageBackground
           className="h-[253px] mt-[-10px]"
           source={data?.Image ? { uri: VIDEO_URL+data?.Image } : images.product}

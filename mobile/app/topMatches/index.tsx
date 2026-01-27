@@ -1,23 +1,19 @@
-import NotificationBell from "@/components/NotificationBell";
 import ProfileListItem from "@/components/ui/ProfileListItem";
 import VideoCard from "@/components/ui/VideoCard";
 import VirtualDateCard from "@/components/ui/VirtualDateCard";
-import { icons } from "@/constants/icons";
 import { VERTICAL_SPACING } from "@/constants/designTokens";
 import {
   getAllFeaturedVideos,
   getAllTopMatches,
   getAllVirtualDate
 } from "@/lib/api";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   Text,
-  TouchableOpacity,
   View
 } from "react-native";
 
@@ -29,7 +25,6 @@ export default function TopMatches() {
   // ✅ Safely get category with fallback
   const category = (params.category as string) || "topMatches";  
   console.log("Category:", category);
-  const router = useRouter();
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
 
@@ -154,38 +149,9 @@ export default function TopMatches() {
   }
   return (
     <>
-     
       <View className="flex-1 bg-background">
-         <StatusBar style="dark" backgroundColor="#ffffff" />
-
-        <View
-          className="bg-white flex-row justify-between items-center px-4 pt-20 pb-6 rounded-b-xl z-30"
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.1,
-            shadowRadius: 16,
-            elevation: 5,
-          }}
-        >
-          <View className="flex-row items-center gap-2">
-            <TouchableOpacity
-              onPress={router.back}
-              className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
-            >
-              <Image
-                source={icons.back}
-                className="size-4"
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <Text className="leading-[22px] text-base font-medium tracking-[-0.41px] text-black">
-              {getCategoryTitle()}
-            </Text>
-          </View>
-
-          <NotificationBell />
-        </View>
+        <StatusBar style="dark" backgroundColor="#ffffff" />
+        {/* Native header is configured in _layout.tsx - no custom header needed */}
         <View className="mt-4">
           {/* Use single-column for topMatches profiles, 2-column for videos/virtualDates */}
           {category === "topMatches" ? (

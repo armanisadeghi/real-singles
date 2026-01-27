@@ -1,6 +1,5 @@
 import { styles } from "@/components/forms/ContactForm";
 import LinearBg from "@/components/LinearBg";
-import NotificationBell from "@/components/NotificationBell";
 import GradientButton from "@/components/ui/GradientButton";
 import { icons } from "@/constants/icons";
 import * as ImagePicker from 'expo-image-picker';
@@ -153,34 +152,7 @@ export default function CreateGroup() {
   return (
     <View className="flex-1 bg-background">
       <Toast />
-      <View
-        className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
-        style={{
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0.1,
-          shadowRadius: 16,
-          elevation: 5,
-        }}
-      >
-        <View className="flex-row items-center gap-2">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
-          >
-            <Image
-              source={icons.back}
-              className="size-4"
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-          <Text className="leading-[22px] text-dark text-base font-medium tracking-[-0.41px]">
-            Create Group
-          </Text>
-        </View>
-
-        <NotificationBell />
-      </View>
+      {/* Native header is configured in _layout.tsx - no custom header needed */}
       <View
         className="bg-white rounded-[22px] px-[22px] py-[30px] flex-col mb-5 mt-16 mx-6"
         style={styles.shadow}

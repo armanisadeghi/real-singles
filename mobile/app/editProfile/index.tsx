@@ -9,15 +9,13 @@
  */
 
 import EditProfileForm from "@/components/forms/EditProfileForm";
-import { icons } from "@/constants/icons";
-import { supabase, getProfile, updateProfile, getCurrentUser } from "@/lib/supabase";
+import { getProfile, updateProfile, getCurrentUser } from "@/lib/supabase";
 import { EditProfileFormData } from "@/types";
 import { useAuth } from "@/utils/authContext";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState, useRef, useEffect } from "react";
 import { 
   ActivityIndicator, 
-  Image, 
   Keyboard, 
   ScrollView, 
   Text, 
@@ -501,27 +499,15 @@ const EditProfile = () => {
 
   return (
     <View className="flex-1 bg-background">
-      {/* Header */}
-      <View
-        className="bg-white flex-row justify-between items-center px-5 pt-8 pb-4 rounded-b-xl z-30"
-        style={{ shadowColor: "#000", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 5 }}
-      >
-        <View className="flex-row items-center gap-2">
-          <TouchableOpacity onPress={router.back} className="border border-gray rounded-lg w-8 h-8 justify-center items-center">
-            <Image source={icons.back} className="size-4" resizeMode="contain" />
-          </TouchableOpacity>
-          <View>
-            <Text className="leading-[22px] text-base font-medium tracking-[-0.41px] text-black">Edit Profile</Text>
-            {renderSaveStatus()}
-          </View>
-        </View>
-
+      {/* Native header is configured in _layout.tsx - Save status and button below */}
+      <View className="flex-row justify-between items-center px-5 py-2 bg-background">
+        <View>{renderSaveStatus()}</View>
         <TouchableOpacity 
           onPress={handleSave} 
           disabled={saving || saveStatus === "saving"}
-          style={{ paddingHorizontal: 20, paddingVertical: 10, opacity: saving ? 0.5 : 1 }}
+          style={{ paddingHorizontal: 16, paddingVertical: 8, opacity: saving ? 0.5 : 1 }}
         >
-          <Text className="text-primary w-full font-medium text-base tracking-[-0.41px] leading-[22px]">
+          <Text className="text-primary font-medium text-base">
             {saving ? "Saving..." : "Save"}
           </Text>
         </TouchableOpacity>

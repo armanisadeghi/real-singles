@@ -642,6 +642,7 @@
 import { CommonFileUpload } from "@/lib/api";
 import { signupProps } from "@/types";
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
+import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import {
@@ -689,19 +690,24 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
   };
 
   const takePhoto = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
     const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
     if (cameraPermission.status !== "granted") {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       alert("Camera permission required!");
       return;
     }
 
     const mediaPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (mediaPermission.status !== "granted") {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       alert("Storage permission required!");
       return;
     }
 
-        // ✅ Permission granted
+    // ✅ Permission granted
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setHasPermission(true);
 
     const result = await ImagePicker.launchCameraAsync({
@@ -711,6 +717,7 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
     });
 
     if (!result.canceled) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const uri = result.assets[0].uri;
       setImages((prev) => [...prev, uri]);
 
@@ -726,10 +733,12 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
 
   const handleSavePhotos = async () => {
   if (images.length === 0) {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert("No photos", "Please take at least one photo.");
     return;
   }
 
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   setLoading(true);
 
   try {
@@ -769,12 +778,15 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
     }
 
     if (uploadedNames.length > 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       updateData({ livePicture: uploadedNames.join(",") });
       onNext();
     } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert("Upload Failed", "Please try again.");
     }
   } catch (error) {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     console.error("Multiple upload error:", error);
     Alert.alert("Upload Failed", "Please try again.");
   } finally {
@@ -822,6 +834,7 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
   // };
 
   const deleteImage = (index: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 

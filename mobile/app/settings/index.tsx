@@ -2,10 +2,12 @@ import LinearBg from "@/components/LinearBg";
 import { icons } from "@/constants/icons";
 import { getProfile } from "@/lib/api";
 import { User } from "@/types";
+import { authenticateForAccountDeletion, shouldUseBiometrics } from "@/utils/biometrics";
 import { IMAGE_URL, MEDIA_BASE_URL, removeToken } from "@/utils/token";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
+import * as Haptics from "expo-haptics";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -119,7 +121,12 @@ export default function Settings() {
 
   const appVersion = Constants.expoConfig?.version || "1.0.0";
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    
+    // Check if we should use biometric authentication
+    const useBiometrics = await shouldUseBiometrics();
+    
     Alert.alert(
       "Delete Account",
       "Are you sure you want to delete your account? This action cannot be undone.",
@@ -127,11 +134,21 @@ export default function Settings() {
         {
           text: "Cancel",
           style: "cancel",
+          onPress: () => Haptics.selectionAsync(),
         },
         {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
+            // Require biometric authentication for sensitive action
+            if (useBiometrics) {
+              const authenticated = await authenticateForAccountDeletion();
+              if (!authenticated) {
+                return; // User cancelled or failed authentication
+              }
+            }
+            
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
             await removeToken();
             router.replace("/(auth)/login");
           },
@@ -141,15 +158,18 @@ export default function Settings() {
   };
 
   const handleLogout = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert("Logout", "Are you sure you want to Logout?", [
       {
         text: "Cancel",
         style: "cancel",
+        onPress: () => Haptics.selectionAsync(),
       },
       {
         text: "Logout",
         style: "destructive",
         onPress: async () => {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           await removeToken();
           router.replace("/(auth)/login");
         },

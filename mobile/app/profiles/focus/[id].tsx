@@ -21,6 +21,7 @@ import { fetchOtherProfile, likeUser, passUser, superLikeUser } from "@/lib/api"
 import { User } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -140,6 +141,13 @@ export default function ProfileFocusView() {
   const handleAction = async (action: "like" | "pass" | "super_like") => {
     if (!profile?.ID && !profile?.id) return;
     
+    // Haptic feedback based on action type
+    if (action === "like" || action === "super_like") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    
     const userId = (profile.ID || profile.id) as string;
     setActionLoading(action);
 
@@ -158,6 +166,11 @@ export default function ProfileFocusView() {
       }
 
       if (res?.success) {
+        // Success haptic for matches
+        if (res.is_mutual) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+        
         // Show success feedback
         const messages = {
           like: "Liked!",
@@ -176,6 +189,7 @@ export default function ProfileFocusView() {
         // Go back after action
         setTimeout(() => router.back(), 800);
       } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Toast.show({
           type: "error",
           text1: res?.msg || "Action failed",
@@ -183,6 +197,7 @@ export default function ProfileFocusView() {
         });
       }
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({
         type: "error",
         text1: "Something went wrong",
@@ -234,7 +249,10 @@ export default function ProfileFocusView() {
         {/* Close button */}
         <TouchableOpacity
           style={[styles.closeButton, { top: insets.top + SPACING.sm }]}
-          onPress={() => router.back()}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back();
+          }}
           activeOpacity={0.7}
         >
           <Ionicons name="close" size={24} color="white" />

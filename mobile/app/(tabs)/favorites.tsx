@@ -4,7 +4,6 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { VERTICAL_SPACING } from "@/constants/designTokens";
 import { getFavoriteList } from "@/lib/api";
 import { User } from "@/types";
-import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
@@ -14,7 +13,6 @@ import {
 import Toast from "react-native-toast-message";
 
 export default function Favorites() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [favoriteProfiles, setFavoriteProfiles] = useState<User[]>([]);
 
@@ -60,8 +58,7 @@ export default function Favorites() {
         <Toast/>
         <ScreenHeader
           title="My Favorites"
-          showBackButton
-          onBackPress={router.back}
+          showBackButton={false}
           rightContent={<NotificationBell />}
         />
         <View className="mt-4 pb-56">

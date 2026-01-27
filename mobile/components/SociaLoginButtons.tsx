@@ -1,4 +1,5 @@
 import { icons } from "@/constants/icons";
+import { requestPermissionWithExplanation } from "@/utils/permissions";
 import { addCurrentUserId, getCurrentUserId, getToken, removeCurrentUserId, removeToken, storeToken } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -156,8 +157,13 @@ async function signInWithApple() {
 
 const getLocation = async () => {
   try {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
+    // Use centralized permission utility with pre-explanation
+    const granted = await requestPermissionWithExplanation("location", {
+      title: "Location Required",
+      message: "RealSingles needs your location to show you nearby singles and personalize your experience.",
+    });
+    
+    if (!granted) {
       setLocationError("Location permission denied. Some features may be limited.");
       return null;
     }

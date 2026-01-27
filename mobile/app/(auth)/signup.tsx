@@ -22,6 +22,7 @@ import { images } from "@/constants/images";
 import { REFERRAL_CODE_STORAGE_KEY } from "@/lib/config";
 import { signUpWithEmail, supabase, updateProfile } from "@/lib/supabase";
 import { SignupData } from "@/types";
+import { requestPermission } from "@/utils/permissions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -377,8 +378,9 @@ const Signup = () => {
   useEffect(() => {
     const getLocation = async () => {
       try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
+        // Use centralized permission utility for proper iOS UX
+        const granted = await requestPermission("location");
+        if (!granted) {
           throw new Error("Permission denied");
         }
 

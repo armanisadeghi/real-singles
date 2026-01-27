@@ -8,10 +8,11 @@ import { getAgoraCallToken, getAgoraChatToken, blockUser, unblockUser, reportUse
 import { getUserHistoryMessages, initChat, isChatInitialized, isChatLoggedIn, loginToChat, sendMessage as sendAgoraMessage, setupMessageListener } from "@/services/agoraChatServices";
 import { getCurrentUserId, IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActionSheetIOS, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function ChatDetail() {
   const { userid: peerId, name, image, online, time } = useLocalSearchParams<{ userid: string, name: string, image: string, online: string, time: string }>();
@@ -28,56 +29,102 @@ export default function ChatDetail() {
 
 
   const handleUnBlockUser = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       const res = await unblockUser(peerId);
 
       if (res.success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setIsBlocked(false);
         Alert.alert("Success", "User unblocked");
       } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert("Error", res.msg || "Failed to unblock user");
       }
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error(error);
       Alert.alert("Error", "Something went wrong");
     }
   };
 
   const handleBlockUser = async (targetPeerId: string, setBlockedState: Function, currentlyBlocked: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     try {
       const res = await blockUser(targetPeerId);
 
       if (res.success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setBlockedState(true);
         Alert.alert("Success", "User blocked");
       } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert("Error", res.msg || "Failed to block user");
       }
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error(error);
       Alert.alert("Error", "Something went wrong");
     }
   };
 
   const blankReport = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert("Error", "Please enter a reason for reporting");
     return;
   };
 
   const handleReportUser = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     try {
       const res = await reportUser(peerId, reportReason);
 
       if (res.success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setReportReason("");
         setVisible(false);
         Alert.alert("Success", "User reported successfully");
       } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert("Error", res.msg || "Failed to report user");
       }
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error(error);
       Alert.alert("Error", "Something went wrong");
+    }
+  };
+
+  // Native iOS ActionSheet for user options
+  const showUserOptionsActionSheet = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ["Cancel", isBlocked ? "Unblock User" : "Block User", "Report User"],
+          destructiveButtonIndex: 1,
+          cancelButtonIndex: 0,
+          title: "User Options",
+          message: "Choose an action for this user",
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 1) {
+            // Block/Unblock
+            if (isBlocked) {
+              handleUnBlockUser();
+            } else {
+              handleBlockUser(peerId, setIsBlocked, isBlocked);
+            }
+          } else if (buttonIndex === 2) {
+            // Report - show modal for reason input
+            setVisible(true);
+          }
+        }
+      );
+    } else {
+      // Show modal for Android
+      setVisible(true);
     }
   };
 
@@ -242,13 +289,16 @@ export default function ChatDetail() {
   );
 
   const handleVideoCall = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!callerId || !peerId) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert("Error", "Could not identify caller or callee.");
       return;
     }
     try {
       const res = await getAgoraCallToken(callerId);
       if (!res?.success || !res?.data?.token || !res?.data?.channelName || !res?.data?.uid) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert("Error", "Could not create video call. Please try again.");
         return;
       }
@@ -264,19 +314,23 @@ export default function ChatDetail() {
         },
       });
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error("Failed to start video call:", error);
       Alert.alert("Error", "An unexpected error occurred while starting the call.");
     }
   };
 
   const handleVoiceCall = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!callerId || !peerId) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert("Error", "Could not identify caller or callee.");
       return;
     }
     try {
       const res = await getAgoraCallToken(callerId);
       if (!res?.success || !res?.data?.token || !res?.data?.channelName || !res?.data?.uid) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert("Error", "Could not create voice call. Please try again.");
         return;
       }
@@ -292,6 +346,7 @@ export default function ChatDetail() {
         },
       });
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error("Failed to start voice call:", error);
       Alert.alert("Error", "An unexpected error occurred while starting the call.");
     }
@@ -333,7 +388,7 @@ export default function ChatDetail() {
       >
 
 
-        {/* Modal */}
+        {/* Modal - iOS: Report only (Block handled by ActionSheet), Android: Full options */}
         <Modal
           transparent
           visible={visible}
@@ -343,29 +398,36 @@ export default function ChatDetail() {
           <View style={styles.overlay}>
             <View style={styles.modalContainer}>
               <TouchableOpacity
-                onPress={() => setVisible(false)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setVisible(false);
+                }}
                 style={styles.closeButton}
               >
                 <Ionicons name="close" size={22} color="#000" />
               </TouchableOpacity>
 
-              <Text style={styles.modalTitle}>Manage User</Text>
+              <Text style={styles.modalTitle}>
+                {Platform.OS === "ios" ? "Report User" : "Manage User"}
+              </Text>
 
-              <TouchableOpacity style={styles.actionBtn} onPress={() => {
-                isBlocked ? handleUnBlockUser() : handleBlockUser(peerId, setIsBlocked, isBlocked)
-              }}>
-                <LinearGradient
-                  colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.gradientBtn}
-                >
-                  <Text style={styles.actionText}>{isBlocked ? "Unblock User" : "Block User"}</Text>
-                </LinearGradient>
-              </TouchableOpacity>
+              {/* Block button - only show on Android (iOS uses ActionSheet) */}
+              {Platform.OS !== "ios" && (
+                <TouchableOpacity style={styles.actionBtn} onPress={() => {
+                  isBlocked ? handleUnBlockUser() : handleBlockUser(peerId, setIsBlocked, isBlocked)
+                }}>
+                  <LinearGradient
+                    colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.gradientBtn}
+                  >
+                    <Text style={styles.actionText}>{isBlocked ? "Unblock User" : "Block User"}</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              )}
 
-
-              <View style={{ width: "100%", marginTop: 10 }}>
+              <View style={{ width: "100%", marginTop: Platform.OS === "ios" ? 0 : 10 }}>
                 <TextInput
                   placeholder="Enter reason for reporting"
                   value={reportReason}
@@ -377,6 +439,7 @@ export default function ChatDetail() {
                     paddingHorizontal: 10,
                     height: 40,
                     marginBottom: 10,
+                    fontSize: 16, // iOS requires 16px+ to prevent zoom
                   }}
                 />
 
@@ -490,7 +553,7 @@ export default function ChatDetail() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => setVisible(true)}
+                  onPress={showUserOptionsActionSheet}
                   style={{ width: ICON_SIZES.xl, height: ICON_SIZES.xl, borderRadius: 8, overflow: "hidden", borderWidth: 1, borderColor: "#C07618" }}
                 >
                   <LinearGradient

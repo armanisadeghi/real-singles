@@ -2,6 +2,7 @@ import NotificationBell from "@/components/NotificationBell";
 import { icons } from "@/constants/icons";
 import { fetchUserProfile, getAllNearBy } from "@/lib/api";
 import { User } from "@/types";
+import { requestPermissionWithExplanation } from "@/utils/permissions";
 import { getCurrentUserId, VIDEO_URL } from "@/utils/token";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -110,8 +111,13 @@ export default function NearBy() {
   };
 
   const getUserLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
+    // Use centralized permission utility with pre-explanation for better iOS UX
+    const granted = await requestPermissionWithExplanation("location", {
+      title: "Location Access",
+      message: "RealSingles needs your location to show you nearby singles on the map.",
+    });
+    
+    if (!granted) {
       console.log("Permission to access location was denied");
       return;
     }
