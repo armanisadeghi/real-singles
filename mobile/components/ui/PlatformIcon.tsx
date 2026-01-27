@@ -1,5 +1,5 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView, SFSymbol } from 'expo-symbols';
 import React from 'react';
 import { Platform, StyleProp, ViewStyle } from 'react-native';
 
@@ -204,7 +204,7 @@ export function PlatformIcon({
 }: PlatformIconProps) {
   if (Platform.OS === 'ios') {
     // Use provided iosName or look up in mapping, fallback to name if not found
-    const sfSymbolName = iosName || SF_SYMBOL_MAP[name] || name;
+    const sfSymbolName = (iosName || SF_SYMBOL_MAP[name] || name) as SFSymbol;
     
     return (
       <SymbolView
