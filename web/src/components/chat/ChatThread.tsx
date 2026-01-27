@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Phone, Video, MoreVertical, Info } from "lucide-react";
+import { ArrowLeft, Phone, Video, Info } from "lucide-react";
 import { MessageGroup, Message } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
 import { Avatar } from "@/components/ui/Avatar";
 import { MessageSkeleton } from "@/components/ui/LoadingSkeleton";
-import { cn } from "@/lib/utils";
+import { useChat } from "@/hooks/useSupabaseMessaging";
+import { Message as SupabaseMessage } from "@/lib/supabase/messaging";
 
 interface Participant {
   user_id: string;
@@ -35,13 +36,7 @@ export function ChatThread({
   conversationName,
   participants,
   currentUserId,
-  initialMessages = [],
 }: ChatThreadProps) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [loading, setLoading] = useState(initialMessages.length === 0);
-  const [sending, setSending] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const [typingUser, setTypingUser] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -64,6 +59,33 @@ export function ChatThread({
       ? otherParticipant?.profile?.profile_image_url
       : null;
 
+  // Use the Supabase chat hook for real-time messaging
+  const {
+    messages: supabaseMessages,
+    loading,
+    sendMessage,
+    setTyping,
+    isAnyoneTyping,
+    typingText,
+  } = useChat({
+    conversationId,
+    currentUserId,
+    displayName: displayName,
+    initialLimit: 50,
+    autoMarkAsRead: true,
+  });
+
+  // Convert Supabase messages to the format expected by MessageGroup
+  const messages: Message[] = supabaseMessages.map((msg: SupabaseMessage) => ({
+    id: msg.id,
+    sender_id: msg.sender_id,
+    content: msg.content,
+    type: msg.message_type as "text" | "image" | "video",
+    media_url: msg.media_url || undefined,
+    created_at: msg.created_at,
+    status: msg.status as "sending" | "sent" | "delivered" | "read" | "failed",
+  }));
+
   // Create participant map for group chats
   const participantMap = new Map(
     participants.map((p) => [
@@ -81,32 +103,11 @@ export function ChatThread({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  // Fetch messages
-  const fetchMessages = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/conversations/${conversationId}/messages`);
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data.messages || []);
-      }
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [conversationId]);
-
-  useEffect(() => {
-    if (initialMessages.length === 0) {
-      fetchMessages();
-    }
-  }, [fetchMessages, initialMessages.length]);
-
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // Send message
+  // Send message handler
   const handleSend = async (
     content: string,
     type: "text" | "image" | "video" = "text",
@@ -114,54 +115,21 @@ export function ChatThread({
   ) => {
     if (!content && !mediaUrl) return;
 
-    // Optimistic update
-    const tempMessage: Message = {
-      id: `temp-${Date.now()}`,
-      sender_id: currentUserId,
-      content,
-      type,
-      media_url: mediaUrl,
-      created_at: new Date().toISOString(),
-      status: "sending",
-    };
-
-    setMessages((prev) => [...prev, tempMessage]);
-    setSending(true);
-
     try {
-      const res = await fetch(`/api/conversations/${conversationId}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, type, media_url: mediaUrl }),
-      });
+      // Stop typing indicator when sending
+      setTyping(false);
 
-      if (res.ok) {
-        const data = await res.json();
-        // Replace temp message with real one
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === tempMessage.id ? { ...data.message, status: "sent" } : m
-          )
-        );
-      } else {
-        // Mark as failed
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === tempMessage.id ? { ...m, status: "failed" } : m
-          )
-        );
-      }
+      // Send via Supabase - the hook handles optimistic updates
+      await sendMessage(content);
     } catch (error) {
       console.error("Error sending message:", error);
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === tempMessage.id ? { ...m, status: "failed" } : m
-        )
-      );
-    } finally {
-      setSending(false);
     }
   };
+
+  // Handle typing indicator
+  const handleTypingChange = useCallback((isTyping: boolean) => {
+    setTyping(isTyping);
+  }, [setTyping]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-var(--header-height,64px)-var(--bottom-nav-height,0px))] md:h-[calc(100vh-64px)] bg-gray-50">
@@ -193,13 +161,16 @@ export function ChatThread({
             </p>
           ) : (
             <div className="flex items-center gap-1.5">
-              {isOnline && (
+              {isAnyoneTyping ? (
+                <p className="text-xs text-pink-600 font-medium animate-pulse">
+                  {typingText}
+                </p>
+              ) : isOnline ? (
                 <>
                   <div className="w-2 h-2 rounded-full bg-green-500" />
                   <p className="text-xs text-green-600 font-medium">Online</p>
                 </>
-              )}
-              {!isOnline && (
+              ) : (
                 <p className="text-xs text-gray-500">Offline</p>
               )}
             </div>
@@ -256,10 +227,10 @@ export function ChatThread({
               showAvatars={conversationType === "group"}
               participants={participantMap}
             />
-            
+
             {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex gap-2 max-w-[85%] animate-fade-in">
+            {isAnyoneTyping && (
+              <div className="flex gap-2 max-w-[85%] animate-fade-in mt-2">
                 <Avatar
                   src={otherParticipant?.profile?.profile_image_url}
                   name={displayName}
@@ -280,10 +251,10 @@ export function ChatThread({
       </div>
 
       {/* Message Input */}
-      <MessageInput 
-        onSend={handleSend} 
-        disabled={sending}
-        onTyping={(typing) => setIsTyping(typing)}
+      <MessageInput
+        onSend={handleSend}
+        disabled={loading}
+        onTyping={handleTypingChange}
       />
     </div>
   );

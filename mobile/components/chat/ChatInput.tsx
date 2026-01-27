@@ -20,11 +20,21 @@ import LinearBg from "../LinearBg";
 
 interface ChatInputProps {
   onSend: (text: string) => void;
+  onTyping?: () => void;
+  typingText?: string;
 }
 
-export default function ChatInput({ onSend }: ChatInputProps) {
+export default function ChatInput({ onSend, onTyping, typingText }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [toggledMenu, setToggledMenu] = useState(false);
+
+  // Notify parent of typing activity
+  const handleTextChange = useCallback((text: string) => {
+    setMessage(text);
+    if (text.length > 0 && onTyping) {
+      onTyping();
+    }
+  }, [onTyping]);
 
   // Native reanimated shared values (run on UI thread for smooth 60fps)
   const animationProgress = useSharedValue(0);
@@ -88,6 +98,13 @@ export default function ChatInput({ onSend }: ChatInputProps) {
         elevation: 5,
       }}
     >
+      {/* Typing indicator */}
+      {typingText && (
+        <View className="mb-2 px-2">
+          <Text className="text-xs text-gray-500 italic">{typingText}</Text>
+        </View>
+      )}
+
       <View className="flex-row items-center gap-2">
         {/* Menu button with animated rotation */}
         {/* <TouchableOpacity
@@ -112,7 +129,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           placeholder="Write a message..."
           placeholderTextColor="#B0B0B0"
           value={message}
-          onChangeText={setMessage}
+          onChangeText={handleTextChange}
           multiline
           style={{
             minHeight: 45,

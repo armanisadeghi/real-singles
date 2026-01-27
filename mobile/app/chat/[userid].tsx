@@ -4,8 +4,9 @@ import { ScreenHeader, HeaderBackButton } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
 import { SPACING, TYPOGRAPHY, ICON_SIZES } from "@/constants/designTokens";
 import { useCall } from "@/context/CallContext";
-import { getAgoraCallToken, getAgoraChatToken, blockUser, unblockUser, reportUser } from "@/lib/api";
-import { getUserHistoryMessages, initChat, isChatInitialized, isChatLoggedIn, loginToChat, sendMessage as sendAgoraMessage, setupMessageListener } from "@/services/agoraChatServices";
+import { getAgoraCallToken, blockUser, unblockUser, reportUser } from "@/lib/api";
+import { useChat } from "@/hooks/useSupabaseMessaging";
+import { getOrCreateDirectConversation, Message } from "@/services/supabaseMessaging";
 import { getCurrentUserId, IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -19,13 +20,39 @@ export default function ChatDetail() {
   const router = useRouter();
   const [callerId, setCallerId] = useState<string | null>(null);
   const { sendInvitation } = useCall();
-  const [messages, setMessages] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [initializing, setInitializing] = useState(true);
   const [visible, setVisible] = useState(false);
-  // const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [isBlocked, setIsBlocked] = useState(false); // track block state
   const [reportReason, setReportReason] = useState(""); // reason typed by user
+
+  // Use Supabase messaging hooks when conversation is ready
+  const {
+    messages: chatMessages,
+    loading: messagesLoading,
+    sendMessage: sendChatMessage,
+    typingUsers,
+    setTyping,
+    isAnyoneTyping,
+    typingText,
+  } = useChat({
+    conversationId: conversationId || '',
+    currentUserId: callerId || '',
+    displayName: name || 'User',
+    initialLimit: 50,
+    autoMarkAsRead: true,
+  });
+
+  // Format messages for the Conversation component
+  const messages = chatMessages.map((msg: Message) => ({
+    id: msg.id,
+    senderId: msg.sender_id,
+    content: msg.content,
+    timestamp: new Date(msg.created_at).getTime(),
+  }));
+
+  const loading = initializing || messagesLoading;
 
 
   const handleUnBlockUser = async () => {
@@ -129,164 +156,74 @@ export default function ChatDetail() {
   };
 
 
-  // Use refs to store stable values for message listener
-  const peerIdRef = useRef<string | null>(null);
-  const callerIdRef = useRef<string | null>(null);
-  const listenerCleanupRef = useRef<(() => void) | null>(null);
-
+  // Initialize conversation with Supabase
   useEffect(() => {
     if (!peerId) return;
 
-    let unsubscribed = false;
-    peerIdRef.current = peerId;
+    let mounted = true;
 
-    // 🔑 helper: merge new messages into state without duplicates
-    const mergeMessages = (prev: any[], incoming: any[]) => {
-      const result = [...prev];
-      for (const msg of incoming) {
-        const existingIndex = result.findIndex(
-          (m) =>
-            m.id === msg.id || // exact match
-            (m.senderId === msg.senderId &&
-              m.content === msg.content &&
-              Math.abs(m.timestamp - msg.timestamp) < 10000) // same text within 10s
-        );
-        if (existingIndex !== -1) {
-          // Replace local copy with server one
-          result[existingIndex] = msg;
-        } else {
-          result.push(msg);
-        }
-      }
-      result.sort((a, b) => a.timestamp - b.timestamp);
-      return result;
-    };
-
-    const setup = async () => {
+    const initConversation = async () => {
       try {
-        setLoading(true);
+        setInitializing(true);
 
+        // Get current user ID
         const id: any = await getCurrentUserId();
         if (!id) {
           console.error("No user ID found");
           return;
         }
 
-        callerIdRef.current = id;
+        if (!mounted) return;
         setCallerId(id);
 
-        // Only initialize and login if not already done
-        if (!isChatInitialized()) {
-          await initChat();
-        }
+        // Get or create conversation with this user
+        const convId = await getOrCreateDirectConversation(id, peerId);
 
-        if (!isChatLoggedIn()) {
-          const tokenRes = await getAgoraChatToken(id);
-          await loginToChat(id, tokenRes.data.userToken);
-        }
-
-        // ---- Clean up previous listener if exists ----
-        if (listenerCleanupRef.current) {
-          listenerCleanupRef.current();
-          listenerCleanupRef.current = null;
-        }
-
-        // ---- load history ----
-        const history = await getUserHistoryMessages(peerId, 30, "");
-        console.log("history==>>>>", history);
-
-        const formattedHistory = history
-          .filter((msg: any) => msg.body.type === "txt")
-          .map((msg: any) => ({
-            id: msg.msgId, // use server msgId
-            senderId: msg.from,
-            content: msg.body.content,
-            timestamp: msg.serverTime || Date.now(),
-          }));
-
-        if (!unsubscribed) {
-          setMessages((prev) => mergeMessages(prev, formattedHistory));
-        }
-
-        // ---- setup listener with proper cleanup ----
-        const cleanup = setupMessageListener((msgs) => {
-          // Use refs to get current values, avoiding stale closures
-          const currentPeerId = peerIdRef.current;
-          const currentCallerId = callerIdRef.current;
-
-          if (!currentPeerId || !currentCallerId) {
-            return;
-          }
-
-          const newMsgs = msgs
-            .filter((msg: any) => {
-              // Filter messages that belong to this conversation
-              // Check both directions: incoming and outgoing
-              const isIncoming = msg.from === currentPeerId && msg.to === currentCallerId;
-              const isOutgoing = msg.from === currentCallerId && msg.to === currentPeerId;
-              return (isIncoming || isOutgoing) && msg.body.type === "txt";
-            })
-            .map((msg: any) => ({
-              id: msg.msgId || msg.localMsgId, // prefer server msgId
-              senderId: msg.from,
-              content: msg.body.content,
-              timestamp: msg.serverTime || Date.now(),
-            }));
-
-          if (!unsubscribed && newMsgs.length > 0) {
-            setMessages((prev) => mergeMessages(prev, newMsgs));
-          }
-        });
-
-        listenerCleanupRef.current = cleanup;
+        if (!mounted) return;
+        setConversationId(convId);
+        console.log(`[Chat] Conversation initialized: ${convId}`);
       } catch (error) {
-        console.error("Error in chat setup:", error);
+        console.error("Error initializing conversation:", error);
+        Alert.alert("Error", "Failed to load conversation");
       } finally {
-        if (!unsubscribed) setLoading(false);
+        if (mounted) {
+          setInitializing(false);
+        }
       }
     };
 
-    setup();
+    initConversation();
+
     return () => {
-      unsubscribed = true;
-      // Clean up listener when component unmounts or peerId changes
-      if (listenerCleanupRef.current) {
-        listenerCleanupRef.current();
-        listenerCleanupRef.current = null;
-      }
-      peerIdRef.current = null;
+      mounted = false;
     };
   }, [peerId]);
 
 
 
-  // Send message handler
+  // Send message handler using Supabase
   const handleSendMessage = useCallback(
     async (text: string) => {
-      if (!peerId || !callerId || !text.trim()) return;
+      if (!conversationId || !callerId || !text.trim()) return;
       try {
-        // Send message - the listener will receive it and add it to state
-        // We don't add it locally to avoid duplicates
-        await sendAgoraMessage(peerId, text);
-        // Optionally add optimistic update with a temporary ID
-        // The listener will replace it with the actual server message
-        const tempId = `temp_${Date.now()}_${Math.random()}`;
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: tempId,
-            senderId: callerId,
-            content: text,
-            timestamp: Date.now(),
-          },
-        ]);
+        // Stop typing indicator
+        setTyping(false);
+        // Send via Supabase - the hook handles optimistic updates
+        await sendChatMessage(text);
       } catch (e) {
         console.error("Failed to send message:", e);
         Alert.alert("Error", "Failed to send message");
       }
     },
-    [peerId, callerId]
+    [conversationId, callerId, sendChatMessage, setTyping]
   );
+
+  // Handle typing indicator when user is typing
+  const handleTyping = useCallback(() => {
+    if (conversationId && callerId) {
+      setTyping(true);
+    }
+  }, [conversationId, callerId, setTyping]);
 
   const handleVideoCall = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -581,7 +518,11 @@ export default function ChatDetail() {
               contact={contact}
             />
           )}
-          <ChatInput onSend={handleSendMessage} />
+          <ChatInput
+            onSend={handleSendMessage}
+            onTyping={handleTyping}
+            typingText={typingText}
+          />
 
         </View>
       </KeyboardAvoidingView>
