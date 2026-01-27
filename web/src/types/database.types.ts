@@ -455,6 +455,157 @@ export type Database = {
           },
         ]
       }
+      message_reactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          message_id: string
+          reaction: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message_id: string
+          reaction: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message_id?: string
+          reaction?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_read_receipts: {
+        Row: {
+          id: string
+          message_id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          message_id: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          message_id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_read_receipts_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_read_receipts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          client_message_id: string | null
+          content: string
+          conversation_id: string
+          created_at: string | null
+          deleted_at: string | null
+          deleted_for_everyone: boolean | null
+          edited_at: string | null
+          id: string
+          media_metadata: Json | null
+          media_thumbnail_url: string | null
+          media_url: string | null
+          message_type: string | null
+          reply_to_id: string | null
+          sender_id: string
+          status: string | null
+        }
+        Insert: {
+          client_message_id?: string | null
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          deleted_at?: string | null
+          deleted_for_everyone?: boolean | null
+          edited_at?: string | null
+          id?: string
+          media_metadata?: Json | null
+          media_thumbnail_url?: string | null
+          media_url?: string | null
+          message_type?: string | null
+          reply_to_id?: string | null
+          sender_id: string
+          status?: string | null
+        }
+        Update: {
+          client_message_id?: string | null
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          deleted_at?: string | null
+          deleted_for_everyone?: boolean | null
+          edited_at?: string | null
+          id?: string
+          media_metadata?: Json | null
+          media_thumbnail_url?: string | null
+          media_url?: string | null
+          message_type?: string | null
+          reply_to_id?: string | null
+          sender_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -1779,6 +1930,25 @@ export type Database = {
         Returns: boolean
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
+      get_conversations_with_details: {
+        Args: { p_user_id: string }
+        Returns: {
+          conversation_id: string
+          conversation_type: string
+          created_at: string
+          group_image_url: string
+          group_name: string
+          last_message_at: string
+          last_message_content: string
+          last_message_sender_id: string
+          unread_count: number
+          updated_at: string
+        }[]
+      }
+      get_unread_count: {
+        Args: { p_conversation_id: string; p_user_id: string }
+        Returns: number
+      }
       gettransactionid: { Args: never; Returns: unknown }
       longtransactionsenabled: { Args: never; Returns: boolean }
       populate_geometry_columns:
