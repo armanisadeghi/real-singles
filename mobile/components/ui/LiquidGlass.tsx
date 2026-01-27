@@ -7,7 +7,7 @@
  * - iOS 26 Liquid Glass is not available
  * - User has "Reduce Transparency" enabled
  * 
- * @see https://developer.apple.com/videos/play/wwdc2025/356
+ * @see https://docs.expo.dev/versions/latest/sdk/glass-effect/
  */
 
 import React, { useEffect, useState } from 'react';
@@ -19,18 +19,65 @@ import {
   ViewStyle 
 } from 'react-native';
 
-// Conditionally import expo-glass-effect
-let GlassView: any = null;
-let isLiquidGlassAvailable: () => boolean = () => false;
-let isGlassEffectAPIAvailable: () => boolean = () => false;
+// Type for glass effect styles
+type GlassStyle = 'clear' | 'regular';
 
-try {
-  const glassEffect = require('expo-glass-effect');
-  GlassView = glassEffect.GlassView;
-  isLiquidGlassAvailable = glassEffect.isLiquidGlassAvailable;
-  isGlassEffectAPIAvailable = glassEffect.isGlassEffectAPIAvailable;
-} catch {
-  // expo-glass-effect not installed or not available
+// Conditionally import expo-glass-effect with proper error handling
+let GlassView: React.ComponentType<{
+  style?: StyleProp<ViewStyle>;
+  isInteractive?: boolean;
+  glassEffectStyle?: GlassStyle;
+  tintColor?: string;
+  children?: React.ReactNode;
+}> | null = null;
+
+let GlassContainer: React.ComponentType<{
+  style?: StyleProp<ViewStyle>;
+  spacing?: number;
+  children?: React.ReactNode;
+}> | null = null;
+
+// Flags for availability
+let glassEffectLoaded = false;
+let liquidGlassAvailableResult = false;
+let glassEffectAPIAvailableResult = true; // Default true if function doesn't exist
+
+// Only attempt to load on iOS
+if (Platform.OS === 'ios') {
+  try {
+    const glassEffect = require('expo-glass-effect');
+    
+    if (glassEffect.GlassView) {
+      GlassView = glassEffect.GlassView;
+      glassEffectLoaded = true;
+    }
+    
+    if (glassEffect.GlassContainer) {
+      GlassContainer = glassEffect.GlassContainer;
+    }
+    
+    // Safely call availability checks
+    if (typeof glassEffect.isLiquidGlassAvailable === 'function') {
+      try {
+        liquidGlassAvailableResult = glassEffect.isLiquidGlassAvailable();
+      } catch (e) {
+        console.log('[LiquidGlass] isLiquidGlassAvailable check failed:', e);
+        liquidGlassAvailableResult = false;
+      }
+    }
+    
+    if (typeof glassEffect.isGlassEffectAPIAvailable === 'function') {
+      try {
+        glassEffectAPIAvailableResult = glassEffect.isGlassEffectAPIAvailable();
+      } catch (e) {
+        console.log('[LiquidGlass] isGlassEffectAPIAvailable check failed:', e);
+        glassEffectAPIAvailableResult = false;
+      }
+    }
+  } catch (e) {
+    // expo-glass-effect not installed or not available
+    console.log('[LiquidGlass] expo-glass-effect not available:', e);
+  }
 }
 
 /**
@@ -61,9 +108,12 @@ export function useLiquidGlass(): {
     }
   }, []);
   
+  // Use pre-computed availability results
   const isAvailable = Platform.OS === 'ios' && 
-    isLiquidGlassAvailable() && 
-    isGlassEffectAPIAvailable();
+    glassEffectLoaded &&
+    liquidGlassAvailableResult && 
+    glassEffectAPIAvailableResult &&
+    GlassView !== null;
   
   const showGlass = isAvailable && !reduceTransparency;
   
@@ -82,8 +132,10 @@ export interface LiquidGlassViewProps {
   fallbackColor?: string;
   /** Whether the element is interactive (affects rendering) */
   isInteractive?: boolean;
-  /** Glass intensity (0-1, default 0.8) */
-  intensity?: number;
+  /** Glass effect style: 'clear' or 'regular' (default: 'regular') */
+  glassEffectStyle?: GlassStyle;
+  /** Tint color to apply to the glass effect */
+  tintColor?: string;
 }
 
 /**
@@ -103,7 +155,8 @@ export function LiquidGlassView({
   style,
   fallbackColor = 'rgba(255, 255, 255, 0.95)',
   isInteractive = false,
-  intensity = 0.8,
+  glassEffectStyle = 'regular',
+  tintColor,
 }: LiquidGlassViewProps) {
   const { showGlass } = useLiquidGlass();
   
@@ -113,7 +166,8 @@ export function LiquidGlassView({
       <GlassView
         style={style}
         isInteractive={isInteractive}
-        intensity={intensity}
+        glassEffectStyle={glassEffectStyle}
+        tintColor={tintColor}
       >
         {children}
       </GlassView>
@@ -160,7 +214,7 @@ export function LiquidGlassHeader({
       <GlassView
         style={style}
         isInteractive={false}
-        intensity={0.9}
+        glassEffectStyle="regular"
       >
         {children}
       </GlassView>
@@ -208,7 +262,7 @@ export function LiquidGlassFAB({
       <GlassView
         style={[fabStyle, style]}
         isInteractive={true}
-        intensity={0.85}
+        glassEffectStyle="regular"
       >
         {children}
       </GlassView>

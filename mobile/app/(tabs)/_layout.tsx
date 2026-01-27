@@ -5,16 +5,16 @@ import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
  * 
  * IMPORTANT: This uses actual platform-native components, not JS approximations:
  * - iOS: UITabBarController with SF Symbols
- * - Android: BottomNavigationView (Material Design 3) with Material Icons
+ * - Android: BottomNavigationView (Material Design 3) with drawable resources
  * 
  * DO NOT override platform defaults unless absolutely necessary.
  * Native components handle haptics, animations, accessibility, and safe areas automatically.
  * 
  * Icons:
- * - iOS: SF Symbols names (e.g., 'house', 'house.fill')
- * - Android: Material Icons names (e.g., 'home', 'search')
+ * - iOS: SF Symbols via 'sf' prop with default/selected states
+ * - Android: Drawable resources via 'drawable' prop (uses system icons)
  * 
- * @see /docs/NATIVE_FEEL_GUIDELINES.md
+ * @see https://docs.expo.dev/router/advanced/native-tabs
  */
 export default function TabLayout() {
   return (
@@ -22,45 +22,45 @@ export default function TabLayout() {
       {/* Home Tab - Route: /home */}
       <NativeTabs.Trigger name="index">
         <Label>Home</Label>
-        <Icon
+        <Icon 
           sf={{ default: 'house', selected: 'house.fill' }}
-          android={{ default: 'home', selected: 'home' }}
+          drawable="ic_menu_home"
         />
       </NativeTabs.Trigger>
 
       {/* Discover Tab - Route: /discover */}
       <NativeTabs.Trigger name="discover">
         <Label>Discover</Label>
-        <Icon
-          sf={{ default: 'magnifyingglass', selected: 'magnifyingglass' }}
-          android={{ default: 'search', selected: 'search' }}
+        <Icon 
+          sf="magnifyingglass"
+          drawable="ic_menu_search"
         />
       </NativeTabs.Trigger>
 
       {/* Chats Tab - Route: /chats */}
       <NativeTabs.Trigger name="chats">
         <Label>Chats</Label>
-        <Icon
+        <Icon 
           sf={{ default: 'bubble.left.and.bubble.right', selected: 'bubble.left.and.bubble.right.fill' }}
-          android={{ default: 'chat', selected: 'chat' }}
+          drawable="ic_menu_send"
         />
       </NativeTabs.Trigger>
 
       {/* Favorites Tab - Route: /favorites */}
       <NativeTabs.Trigger name="favorites">
         <Label>Favorites</Label>
-        <Icon
+        <Icon 
           sf={{ default: 'heart', selected: 'heart.fill' }}
-          android={{ default: 'favorite', selected: 'favorite' }}
+          drawable="ic_menu_star"
         />
       </NativeTabs.Trigger>
 
       {/* Profile Tab - Route: /profile */}
       <NativeTabs.Trigger name="profile">
         <Label>Profile</Label>
-        <Icon
+        <Icon 
           sf={{ default: 'person', selected: 'person.fill' }}
-          android={{ default: 'person', selected: 'person' }}
+          drawable="ic_menu_myplaces"
         />
       </NativeTabs.Trigger>
     </NativeTabs>
