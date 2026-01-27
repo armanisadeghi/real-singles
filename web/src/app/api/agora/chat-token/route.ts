@@ -1,12 +1,31 @@
+/**
+ * @deprecated This endpoint is being phased out.
+ * 
+ * Chat messaging has been migrated to Supabase Realtime.
+ * This endpoint is temporarily kept for:
+ * - Group chat (pending migration)
+ * - Call signaling via Agora Chat custom messages (pending migration to Supabase Broadcast)
+ * 
+ * TODO: Remove this endpoint once group chat and call signaling are migrated.
+ */
+
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-import { generateChatToken, getAgoraConfig } from "@/lib/agora/token";
+import { ChatTokenBuilder } from "agora-token";
+
+const AGORA_APP_ID = process.env.AGORA_APP_ID!;
+const AGORA_APP_CERTIFICATE = process.env.AGORA_APP_CERTIFICATE!;
+
+// Token expiration time (24 hours in seconds)
+const TOKEN_EXPIRATION_SECONDS = 86400;
 
 /**
  * POST /api/agora/chat-token
- * Generate an Agora Chat token for the current user
+ * Generate an Agora Chat token for a user
+ * 
+ * @deprecated Use Supabase Realtime for new messaging implementations
  */
-export async function POST() {
+export async function POST(request: Request) {
   const supabase = await createApiClient();
 
   const {
@@ -22,64 +41,58 @@ export async function POST() {
   }
 
   try {
+    const body = await request.json();
+    const userId = body.user_id || user.id;
+
     // Check if Agora is configured
-    const config = getAgoraConfig();
-    if (!config.appId) {
-      // Agora not configured - return stub response for development
-      console.log("[Agora Chat] Service not configured - returning stub response");
-      return NextResponse.json({
-        success: true,
-        data: {
-          token: null,
-          expiresAt: null,
-          agoraUserId: null,
-          appId: null,
-          chatAppKey: null,
-          configured: false,
-        },
-        msg: "Chat service not configured - using stub response",
-      });
-    }
-
-    // Get or create Agora user ID for this user
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("agora_user_id")
-      .eq("id", user.id)
-      .single();
-
-    if (userError) {
-      console.error("Error fetching user:", userError);
+    if (!AGORA_APP_ID || !AGORA_APP_CERTIFICATE) {
       return NextResponse.json(
-        { success: false, msg: "Error fetching user data" },
-        { status: 500 }
+        { success: false, msg: "Chat service not configured" },
+        { status: 503 }
       );
     }
 
-    // If no Agora user ID, create one (using the Supabase user ID)
-    let agoraUserId = userData?.agora_user_id;
-    if (!agoraUserId) {
-      // Use a sanitized version of the UUID for Agora
-      agoraUserId = user.id.replace(/-/g, "");
-      
-      // Update user with Agora ID
+    // Get or create the user's Agora user ID
+    // Agora requires alphanumeric IDs, so we sanitize the UUID
+    let agoraUserId: string;
+
+    const { data: userData } = await supabase
+      .from("users")
+      .select("agora_user_id")
+      .eq("id", userId)
+      .single();
+
+    if (userData?.agora_user_id) {
+      agoraUserId = userData.agora_user_id;
+    } else {
+      // Create a new Agora user ID (remove dashes from UUID)
+      agoraUserId = userId.replace(/-/g, "");
+
+      // Store it for future use
       await supabase
         .from("users")
         .update({ agora_user_id: agoraUserId })
-        .eq("id", user.id);
+        .eq("id", userId);
     }
 
-    // Generate chat token
-    const tokenData = await generateChatToken(agoraUserId);
+    // Generate token
+    const timestamp = Math.floor(Date.now() / 1000);
+    const expiresAt = timestamp + TOKEN_EXPIRATION_SECONDS;
+
+    const token = ChatTokenBuilder.buildUserToken(
+      AGORA_APP_ID,
+      AGORA_APP_CERTIFICATE,
+      agoraUserId,
+      expiresAt
+    );
 
     return NextResponse.json({
       success: true,
       data: {
-        userToken: tokenData.token,
-        expiresAt: tokenData.expiresAt,
+        userToken: token,
         agoraUserId,
-        appId: config.appId,
-        chatAppKey: config.chatAppKey,
+        expiresAt,
+        appKey: process.env.AGORA_CHAT_APP_KEY,
       },
       msg: "Chat token generated successfully",
     });

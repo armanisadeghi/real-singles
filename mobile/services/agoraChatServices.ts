@@ -1,3 +1,19 @@
+/**
+ * @deprecated This service is being phased out in favor of Supabase Realtime messaging.
+ * 
+ * Migration status:
+ * - Direct chat (1:1): ✅ Migrated to supabaseMessaging.ts
+ * - Group chat: ❌ Still uses Agora (pending migration)
+ * - Chat list: ❌ Still uses Agora for conversation list (pending migration)
+ * - Call signaling: ❌ Still uses Agora custom messages (pending migration to Supabase Broadcast)
+ * 
+ * For new direct chat implementations, use:
+ * - mobile/services/supabaseMessaging.ts
+ * - mobile/hooks/useSupabaseMessaging.ts
+ * 
+ * TODO: Complete migration of group chat, chat list, and call signaling
+ */
+
 import { getAgoraChatToken } from "@/lib/api";
 import {
   ChatClient,
