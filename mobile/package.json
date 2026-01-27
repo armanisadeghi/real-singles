@@ -30,7 +30,9 @@
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
-    "ios": "expo run:ios",
+    "ios": "cd ios && pod install && cd .. && expo run:ios",
+    "ios:quick": "expo run:ios",
+    "pods": "cd ios && pod install",
     "web": "expo start --web",
     "lint": "expo lint",
     "type-check": "tsc --noEmit",
@@ -38,7 +40,7 @@
     "preflight:android": "node ./scripts/preflight.js --android",
     "preflight:ios": "node ./scripts/preflight.js --ios",
     "dev:android": "pnpm preflight:android && expo run:android",
-    "dev:ios": "pnpm preflight:ios && expo run:ios"
+    "dev:ios": "pnpm preflight:ios && cd ios && pod install && cd .. && expo run:ios"
   },
   "dependencies": {
     "@expo/metro-runtime": "^6.1.2",

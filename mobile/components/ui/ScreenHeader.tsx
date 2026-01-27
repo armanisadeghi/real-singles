@@ -17,7 +17,7 @@ import React, { ReactNode, useCallback } from "react";
 import { View, Text, TouchableOpacity, Platform, StyleSheet, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { PlatformIcon } from "@/components/ui";
+import { PlatformIcon } from "./PlatformIcon";
 import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES, SHADOWS, BORDER_RADIUS, Z_INDEX } from "@/constants/designTokens";
 import { LiquidGlassHeader } from "./LiquidGlass";
 

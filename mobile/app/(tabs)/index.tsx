@@ -491,6 +491,47 @@ export default function Home() {
               marginBottom: VERTICAL_SPACING.sm
             }}
           >
+            <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>Events</Text>
+            <TouchableOpacity
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/events");
+              }}
+              className="z-20"
+            >
+              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
+                View All
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingLeft: SPACING.screenPadding,
+              paddingRight: SPACING.screenPadding
+            }}
+          >
+            <View className="flex-row" style={{ gap: SPACING.md }}>
+              {events && events?.length ? (
+                events?.map((event, index) => (
+                  <EventCard key={event?.EventID || index} event={event} />
+                ))
+              ) : (
+                <Text className="text-gray" style={TYPOGRAPHY.body}>No events available</Text>
+              )}
+            </View>
+          </ScrollView>
+        </View>
+        <View>
+          <View
+            className="flex-row justify-between items-center"
+            style={{
+              paddingHorizontal: SPACING.screenPadding,
+              marginTop: VERTICAL_SPACING.md,
+              marginBottom: VERTICAL_SPACING.sm
+            }}
+          >
             <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>
               Featured Videos
             </Text>
@@ -619,47 +660,6 @@ export default function Home() {
                 <Text className="text-gray" style={TYPOGRAPHY.body}>
                   No nearby profiles available
                 </Text>
-              )}
-            </View>
-          </ScrollView>
-        </View>
-        <View>
-          <View
-            className="flex-row justify-between items-center"
-            style={{
-              paddingHorizontal: SPACING.screenPadding,
-              marginTop: VERTICAL_SPACING.md,
-              marginBottom: VERTICAL_SPACING.sm
-            }}
-          >
-            <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>Events</Text>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/events");
-              }}
-              className="z-20"
-            >
-              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
-                View All
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingLeft: SPACING.screenPadding,
-              paddingRight: SPACING.screenPadding
-            }}
-          >
-            <View className="flex-row" style={{ gap: SPACING.md }}>
-              {events && events?.length ? (
-                events?.map((event, index) => (
-                  <EventCard key={event?.EventID || index} event={event} />
-                ))
-              ) : (
-                <Text className="text-gray" style={TYPOGRAPHY.body}>No events available</Text>
               )}
             </View>
           </ScrollView>

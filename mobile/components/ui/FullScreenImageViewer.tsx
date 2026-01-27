@@ -38,7 +38,7 @@ import {
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from 'expo-haptics';
-import { PlatformIcon } from "@/components/ui";
+import { PlatformIcon } from "./PlatformIcon";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;

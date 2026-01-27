@@ -1,7 +1,7 @@
 import { markEventAsInterested } from '@/lib/api';
 import { EventCardProps } from '@/types';
 import { IMAGE_URL, VIDEO_URL } from '@/utils/token';
-import { PlatformIcon } from "@/components/ui";
+import { PlatformIcon } from "./PlatformIcon";
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';

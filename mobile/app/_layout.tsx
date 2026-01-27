@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as NavigationBar from 'expo-navigation-bar';
 import IncomingCall from "@/components/IncomingCall";
 import NotificationBell from "@/components/NotificationBell";
-import { CallProvider, useCall } from "@/context/CallContext";
+import { CallProvider } from "@/context/CallContext";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { AuthProvider, useAuth } from "@/utils/authContext";
 import {
@@ -15,7 +15,7 @@ import {
   removeNotificationSubscription,
 } from "@/utils/notifications";
 import { Stack, useRouter } from "expo-router";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { Platform, StatusBar, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -26,20 +26,31 @@ import "./globals.css";
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
-  const agoraLoginRef = useRef(false);
   const router = useRouter();
   const colorScheme = useColorScheme();
 
   const { isAuthenticated } = useAuth();
-  const { loginToAgoraChat } = useCall();
 
-  // Initialize Agora chat when authenticated
-  useEffect(() => {
-    if (isAuthenticated && !agoraLoginRef.current) {
-      agoraLoginRef.current = true;
-      loginToAgoraChat();
-    }
-  }, [isAuthenticated]);
+  // TODO: Re-enable Agora Chat login when video/voice calling is configured
+  // Currently disabled because:
+  // 1. Text messaging has been migrated to Supabase Realtime
+  // 2. Video/voice calling (Agora RTC) is not yet configured
+  // 3. The backend env vars AGORA_APP_ID and AGORA_APP_CERTIFICATE are not set
+  // 
+  // To re-enable:
+  // 1. Import useCall from "@/context/CallContext"
+  // 2. Add: const { loginToAgoraChat } = useCall();
+  // 3. Add: const agoraLoginRef = useRef(false);
+  // 4. Uncomment the useEffect below
+  // 5. Configure Agora credentials in backend .env
+  // 6. Test video/voice calling functionality
+  //
+  // useEffect(() => {
+  //   if (isAuthenticated && !agoraLoginRef.current) {
+  //     agoraLoginRef.current = true;
+  //     loginToAgoraChat();
+  //   }
+  // }, [isAuthenticated]);
 
   // Initialize Android-specific features
   useEffect(() => {

@@ -11,7 +11,7 @@ import { View, Text, StyleSheet, ViewStyle, Pressable } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { moderateScale } from "react-native-size-matters";
-import { PlatformIcon } from "@/components/ui";
+import { PlatformIcon } from "./PlatformIcon";
 
 type BadgeSize = "sm" | "md" | "lg";
 
