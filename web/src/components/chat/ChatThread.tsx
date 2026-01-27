@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, Phone, Video, Info } from "lucide-react";
 import { MessageGroup, Message } from "./MessageBubble";
@@ -8,6 +8,7 @@ import { MessageInput } from "./MessageInput";
 import { Avatar } from "@/components/ui/Avatar";
 import { MessageSkeleton } from "@/components/ui/LoadingSkeleton";
 import { useChat } from "@/hooks/useSupabaseMessaging";
+import { useOnlinePresence } from "@/hooks/useOnlinePresence";
 import { Message as SupabaseMessage } from "@/lib/supabase/messaging";
 
 interface Participant {
@@ -37,7 +38,6 @@ export function ChatThread({
   participants,
   currentUserId,
 }: ChatThreadProps) {
-  const [isOnline, setIsOnline] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -46,6 +46,16 @@ export function ChatThread({
     conversationType === "direct"
       ? participants.find((p) => p.user_id !== currentUserId)
       : null;
+
+  // Track online presence for conversation participants
+  const { isUserOnline } = useOnlinePresence({
+    conversationId,
+    currentUserId,
+    enabled: conversationType === "direct", // Only for direct chats
+  });
+
+  // Check if the other participant is online
+  const isOnline = otherParticipant ? isUserOnline(otherParticipant.user_id) : false;
 
   const displayName =
     conversationType === "group"

@@ -6,14 +6,15 @@ import { SPACING, TYPOGRAPHY, ICON_SIZES } from "@/constants/designTokens";
 import { useCall } from "@/context/CallContext";
 import { getAgoraCallToken, blockUser, unblockUser, reportUser } from "@/lib/api";
 import { useChat } from "@/hooks/useSupabaseMessaging";
+import { useOnlinePresence } from "@/hooks/useOnlinePresence";
 import { getOrCreateDirectConversation, Message } from "@/services/supabaseMessaging";
 import { getCurrentUserId, IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActionSheetIOS, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { ActionSheetIOS, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function ChatDetail() {
   const { userid: peerId, name, image, online, time } = useLocalSearchParams<{ userid: string, name: string, image: string, online: string, time: string }>();
@@ -51,6 +52,16 @@ export default function ChatDetail() {
     content: msg.content,
     timestamp: new Date(msg.created_at).getTime(),
   }));
+
+  // Track online presence for the peer
+  const { isUserOnline } = useOnlinePresence({
+    conversationId: conversationId || '',
+    currentUserId: callerId || '',
+    enabled: !!conversationId && !!callerId,
+  });
+
+  // Check if peer is online (use real-time if available, fallback to route param)
+  const isPeerOnline = peerId ? isUserOnline(peerId) : online === "true";
 
   const loading = initializing || messagesLoading;
 
@@ -283,7 +294,7 @@ export default function ChatDetail() {
   const contact = {
     id: peerId as string,
     name: name,
-    online: online === "true",
+    online: isPeerOnline,
     lastSeen: time,
     image: image,
   };
