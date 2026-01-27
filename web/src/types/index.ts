@@ -2,27 +2,82 @@
  * Types Index
  * 
  * This file exports:
- * - Standardized UI constants (OPTIONS arrays) - shared across all platforms
+ * - Standardized UI constants (OPTIONS arrays) - TYPE-CHECKED against DB constraints
  * - Database types (re-exported from db.ts) - SSOT from Supabase
  * - API response types
  * - Profile completion types
  * 
+ * IMPORTANT: OPTIONS arrays are type-checked against db-constraints.ts.
+ * If you add an option value not in the DB constraint, TypeScript will error.
+ * 
+ * To add a new option value:
+ * 1. Create a migration to update the DB CHECK constraint
+ * 2. Add the value to the type in db-constraints.ts
+ * 3. Add the value to the OPTIONS array below
+ * 
  * For entity types, prefer importing directly from @/types/db
  */
 
-// ============================================
-// STANDARDIZED OPTIONS (Must match across all platforms)
-// ============================================
+import type { 
+  DbGender,
+  DbBodyType,
+  DbMaritalStatus,
+  DbHasKids,
+  DbWantsKids,
+  DbSmoking,
+  DbDrinking,
+  DbMarijuana,
+  DbExercise,
+  DbDatingIntentions,
+  DbEducation,
+  DbEthnicity,
+  DbReligion,
+  DbPolitical,
+  DbZodiac,
+  TypedOption,
+} from "./db-constraints";
 
-export const GENDER_OPTIONS = [
+// Re-export constraint types for consumers
+export type {
+  DbGender,
+  DbBodyType,
+  DbMaritalStatus,
+  DbHasKids,
+  DbWantsKids,
+  DbSmoking,
+  DbDrinking,
+  DbMarijuana,
+  DbExercise,
+  DbDatingIntentions,
+  DbEducation,
+  DbEthnicity,
+  DbReligion,
+  DbPolitical,
+  DbZodiac,
+} from "./db-constraints";
+
+export { REQUIRED_FIELDS, SKIPPABLE_FIELDS } from "./db-constraints";
+
+// ============================================
+// TYPE-SAFE OPTIONS (Constrained by DB types)
+// ============================================
+// If you add a value not in the corresponding Db* type, TypeScript will error.
+
+/**
+ * Gender options - REQUIRED field for matching algorithm
+ * Users MUST select a gender to be shown to potential matches.
+ * Do NOT add "prefer_not_to_say" - this field cannot be skipped.
+ * @constraint DbGender - see db-constraints.ts
+ */
+export const GENDER_OPTIONS: readonly TypedOption<DbGender>[] = [
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
   { value: "non-binary", label: "Non-Binary" },
   { value: "other", label: "Other" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const BODY_TYPE_OPTIONS = [
+/** @constraint DbBodyType - see db-constraints.ts */
+export const BODY_TYPE_OPTIONS: readonly TypedOption<DbBodyType>[] = [
   { value: "slim", label: "Slim/Slender" },
   { value: "athletic", label: "Athletic/Fit" },
   { value: "average", label: "Average" },
@@ -32,7 +87,8 @@ export const BODY_TYPE_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const MARITAL_STATUS_OPTIONS = [
+/** @constraint DbMaritalStatus - see db-constraints.ts */
+export const MARITAL_STATUS_OPTIONS: readonly TypedOption<DbMaritalStatus>[] = [
   { value: "never_married", label: "Never Married" },
   { value: "separated", label: "Currently Separated" },
   { value: "divorced", label: "Divorced" },
@@ -40,14 +96,16 @@ export const MARITAL_STATUS_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const HAS_KIDS_OPTIONS = [
+/** @constraint DbHasKids - see db-constraints.ts */
+export const HAS_KIDS_OPTIONS: readonly TypedOption<DbHasKids>[] = [
   { value: "no", label: "No" },
   { value: "yes_live_at_home", label: "Yes (Live at home)" },
   { value: "yes_live_away", label: "Yes (Live away)" },
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const WANTS_KIDS_OPTIONS = [
+/** @constraint DbWantsKids - see db-constraints.ts */
+export const WANTS_KIDS_OPTIONS: readonly TypedOption<DbWantsKids>[] = [
   { value: "no", label: "No" },
   { value: "definitely", label: "Definitely" },
   { value: "someday", label: "Someday" },
@@ -55,7 +113,8 @@ export const WANTS_KIDS_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const SMOKING_OPTIONS = [
+/** @constraint DbSmoking - see db-constraints.ts */
+export const SMOKING_OPTIONS: readonly TypedOption<DbSmoking>[] = [
   { value: "no", label: "No" },
   { value: "occasionally", label: "Yes (Occasionally)" },
   { value: "daily", label: "Yes (Daily)" },
@@ -63,7 +122,8 @@ export const SMOKING_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const DRINKING_OPTIONS = [
+/** @constraint DbDrinking - see db-constraints.ts */
+export const DRINKING_OPTIONS: readonly TypedOption<DbDrinking>[] = [
   { value: "never", label: "Never" },
   { value: "social", label: "Social" },
   { value: "moderate", label: "Moderately" },
@@ -71,14 +131,16 @@ export const DRINKING_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const MARIJUANA_OPTIONS = [
+/** @constraint DbMarijuana - see db-constraints.ts */
+export const MARIJUANA_OPTIONS: readonly TypedOption<DbMarijuana>[] = [
   { value: "no", label: "No" },
   { value: "occasionally", label: "Occasionally" },
   { value: "yes", label: "Yes" },
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const EXERCISE_OPTIONS = [
+/** @constraint DbExercise - see db-constraints.ts */
+export const EXERCISE_OPTIONS: readonly TypedOption<DbExercise>[] = [
   { value: "never", label: "Never" },
   { value: "sometimes", label: "Sometimes" },
   { value: "regularly", label: "Regularly" },
@@ -86,8 +148,11 @@ export const EXERCISE_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-// Dating intentions - critical for serious-dater positioning (The League, Hinge model)
-export const DATING_INTENTIONS_OPTIONS = [
+/**
+ * Dating intentions - critical for serious-dater positioning (The League, Hinge model)
+ * @constraint DbDatingIntentions - see db-constraints.ts
+ */
+export const DATING_INTENTIONS_OPTIONS: readonly TypedOption<DbDatingIntentions>[] = [
   { value: "life_partner", label: "Life Partner" },
   { value: "long_term", label: "Long-term Relationship" },
   { value: "long_term_open", label: "Long-term, Open to Short" },
@@ -95,7 +160,8 @@ export const DATING_INTENTIONS_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const EDUCATION_OPTIONS = [
+/** @constraint DbEducation - see db-constraints.ts */
+export const EDUCATION_OPTIONS: readonly TypedOption<DbEducation>[] = [
   { value: "high_school", label: "High School" },
   { value: "some_college", label: "Some College" },
   { value: "associate", label: "Associate Degree" },
@@ -105,7 +171,8 @@ export const EDUCATION_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const ETHNICITY_OPTIONS = [
+/** @constraint DbEthnicity - see db-constraints.ts */
+export const ETHNICITY_OPTIONS: readonly TypedOption<DbEthnicity>[] = [
   { value: "white", label: "White/Caucasian" },
   { value: "latino", label: "Latino/Hispanic" },
   { value: "black", label: "Black/African American" },
@@ -120,7 +187,8 @@ export const ETHNICITY_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const RELIGION_OPTIONS = [
+/** @constraint DbReligion - see db-constraints.ts */
+export const RELIGION_OPTIONS: readonly TypedOption<DbReligion>[] = [
   { value: "adventist", label: "Adventist" },
   { value: "agnostic", label: "Agnostic" },
   { value: "atheist", label: "Atheist" },
@@ -135,7 +203,8 @@ export const RELIGION_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const POLITICAL_OPTIONS = [
+/** @constraint DbPolitical - see db-constraints.ts */
+export const POLITICAL_OPTIONS: readonly TypedOption<DbPolitical>[] = [
   { value: "no_answer", label: "No answer" },
   { value: "undecided", label: "Undecided" },
   { value: "conservative", label: "Conservative" },
@@ -145,7 +214,8 @@ export const POLITICAL_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-export const ZODIAC_OPTIONS = [
+/** @constraint DbZodiac - see db-constraints.ts */
+export const ZODIAC_OPTIONS: readonly TypedOption<DbZodiac>[] = [
   { value: "aries", label: "Aries" },
   { value: "taurus", label: "Taurus" },
   { value: "gemini", label: "Gemini" },

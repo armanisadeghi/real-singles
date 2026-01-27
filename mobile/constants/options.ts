@@ -1,21 +1,36 @@
 /**
  * Standardized Options for Mobile App
  * 
- * IMPORTANT: These options MUST match the database constraints and web options.
- * All values use lowercase with underscores to match the database schema.
+ * SINGLE SOURCE OF TRUTH: web/src/types/db-constraints.ts
  * 
- * When updating options, also update:
- * - web/src/types/index.ts
- * - web/supabase/migrations (if adding new values)
+ * These options MUST match:
+ * - Database CHECK constraints (web/supabase/migrations/)
+ * - Web types (web/src/types/db-constraints.ts)
+ * - Web OPTIONS (web/src/types/index.ts)
+ * 
+ * REQUIRED vs SKIPPABLE FIELDS:
+ * - REQUIRED (no prefer_not_to_say): gender
+ * - SKIPPABLE (has prefer_not_to_say): body_type, smoking, drinking, marijuana,
+ *   exercise, marital_status, has_kids, wants_kids, dating_intentions, education,
+ *   ethnicity, religion, political
+ * 
+ * To add a new option value:
+ * 1. Create a migration to update the DB CHECK constraint
+ * 2. Add the value to the type in web/src/types/db-constraints.ts
+ * 3. Add the value to web/src/types/index.ts
+ * 4. Add the value to this file
  */
 
-// Gender options
+/**
+ * Gender options - REQUIRED field for matching algorithm
+ * Users MUST select a gender to be shown to potential matches.
+ * Do NOT add "prefer_not_to_say" - this field cannot be skipped.
+ */
 export const GENDER_OPTIONS = [
   { label: "Male", value: "male" },
   { label: "Female", value: "female" },
   { label: "Non-Binary", value: "non-binary" },
   { label: "Other", value: "other" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Body type options - matches database CHECK constraint

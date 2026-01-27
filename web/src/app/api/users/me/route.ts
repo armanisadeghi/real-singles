@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { validateProfileUpdate } from "@/lib/validation/profile";
 
 // Helper to convert storage path to public URL
 function getGalleryPublicUrl(path: string): string {
@@ -298,6 +299,23 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json();
+
+    // Validate constrained fields before database update
+    const validation = validateProfileUpdate(body);
+    if (!validation.success) {
+      console.error("Profile validation failed:", validation.error);
+      return NextResponse.json(
+        { 
+          success: false, 
+          msg: validation.error,
+          validationErrors: validation.details.errors.map(e => ({
+            field: e.path.join("."),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
 
     // Update users table
     const userUpdates: Record<string, unknown> = {};
