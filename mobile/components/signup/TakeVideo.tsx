@@ -337,7 +337,7 @@ const TakeVideo = ({ data, updateData, onNext, error }: signupProps) => {
   if (!permission?.granted || !audioPermission?.granted) {
     return (
       <>
-        <StatusBar barStyle="light-content" backgroundColor="#1D2733" />
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
         <View className="bg-[#1D2733] py-12 flex flex-col items-center justify-center">
           <Text className="text-2xl text-white text-center mb-2 font-normal">
             Record Intro Video
@@ -363,7 +363,7 @@ const TakeVideo = ({ data, updateData, onNext, error }: signupProps) => {
 
 return (
   <View style={styles.root}>
-    <StatusBar barStyle="light-content" backgroundColor="#1D2733" />
+    <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
     {/* Header */}
     <View style={styles.header}>

@@ -13,10 +13,11 @@
  * <ScreenHeader title="Chats" rightContent={<NotificationBell />} />
  */
 
-import React, { ReactNode } from "react";
-import { View, Text, TouchableOpacity, Image, Platform, StyleSheet, ViewStyle } from "react-native";
+import React, { ReactNode, useCallback } from "react";
+import { View, Text, TouchableOpacity, Platform, StyleSheet, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { icons } from "@/constants/icons";
+import * as Haptics from "expo-haptics";
+import { PlatformIcon } from "@/components/ui";
 import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES, SHADOWS, BORDER_RADIUS, Z_INDEX } from "@/constants/designTokens";
 import { LiquidGlassHeader } from "./LiquidGlass";
 
@@ -52,20 +53,28 @@ export interface ScreenHeaderProps {
 /**
  * Standard back button component used across all screens
  */
-export const HeaderBackButton = ({ onPress }: { onPress?: () => void }) => (
-  <TouchableOpacity
-    onPress={onPress}
-    activeOpacity={0.7}
-    style={styles.backButton}
-    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-  >
-    <Image
-      source={icons.back}
-      style={styles.backIcon}
-      resizeMode="contain"
-    />
-  </TouchableOpacity>
-);
+export const HeaderBackButton = ({ onPress }: { onPress?: () => void }) => {
+  const handlePress = useCallback(() => {
+    // Haptic feedback for navigation - light impact feels native
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress?.();
+  }, [onPress]);
+
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      activeOpacity={0.7}
+      style={styles.backButton}
+      hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+    >
+      <PlatformIcon 
+        name="chevron-left" 
+        size={ICON_SIZES.sm * 0.9} 
+        color="#000000" 
+      />
+    </TouchableOpacity>
+  );
+};
 
 /**
  * Standard header title component
@@ -216,10 +225,6 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.button,
     justifyContent: "center",
     alignItems: "center",
-  },
-  backIcon: {
-    width: ICON_SIZES.sm * 0.8,
-    height: ICON_SIZES.sm * 0.8,
   },
   title: {
     ...TYPOGRAPHY.body,

@@ -21,6 +21,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import FullScreenImageViewer from "./FullScreenImageViewer";
 
@@ -84,6 +85,7 @@ export default function PhotoCarousel({
   
   // Open full screen viewer
   const openFullScreen = useCallback((index: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setViewerInitialIndex(index);
     setIsViewerVisible(true);
   }, []);
@@ -95,6 +97,7 @@ export default function PhotoCarousel({
   
   // Navigate to specific index via dot press
   const goToIndex = useCallback((index: number) => {
+    Haptics.selectionAsync();
     flatListRef.current?.scrollToIndex({
       index,
       animated: true,

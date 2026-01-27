@@ -5,6 +5,7 @@ import { icons } from "@/constants/icons";
 import { addUpdateRating } from "@/lib/api";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
@@ -204,7 +205,10 @@ export default function Review() {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <TouchableOpacity
                         key={star}
-                        onPress={() => setRating(star)}
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          setRating(star);
+                        }}
                         activeOpacity={0.7}
                       >
                         <PlatformIcon
@@ -296,7 +300,10 @@ export default function Review() {
 
               <View className="flex-col gap-4 my-10">
                 <TouchableOpacity
-                  onPress={() => router.replace("/(tabs)")}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    router.replace("/(tabs)");
+                  }}
                   className="shadow-lg shadow-white rounded-[99] overflow-hidden"
                 >
                   <LinearBg className="px-6">
@@ -307,7 +314,10 @@ export default function Review() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="py-5 bg-light-100 rounded-[99]"
-                  onPress={() => router.back()}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.back();
+                  }}
                 >
                   <Text className="text-center text-gray font-medium">
                     No Thanks

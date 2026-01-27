@@ -9,6 +9,7 @@
 import React from "react";
 import { View, Text, StyleSheet, ViewStyle, Pressable } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
 import { moderateScale } from "react-native-size-matters";
 import { PlatformIcon } from "@/components/ui";
 
@@ -122,7 +123,10 @@ export function PointsBadge({
   if (onPress) {
     return (
       <Pressable
-        onPress={onPress}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onPress();
+        }}
         style={({ pressed }) => [
           { opacity: pressed ? 0.85 : 1 },
           styles.pressable,

@@ -125,7 +125,7 @@ export default function FullScreenImageViewer({
     .onEnd(() => {
       savedScale.value = scale.value;
       if (scale.value < MIN_SCALE) {
-        scale.value = withSpring(MIN_SCALE);
+        scale.value = withSpring(MIN_SCALE, SPRING_CONFIG);
         savedScale.value = MIN_SCALE;
       }
     });
@@ -187,15 +187,15 @@ export default function FullScreenImageViewer({
     .onEnd((event) => {
       if (scale.value > 1) {
         // Zoom out
-        scale.value = withSpring(1);
+        scale.value = withSpring(1, SPRING_CONFIG);
         savedScale.value = 1;
-        translateX.value = withSpring(0);
-        translateY.value = withSpring(0);
+        translateX.value = withSpring(0, SPRING_CONFIG);
+        translateY.value = withSpring(0, SPRING_CONFIG);
         savedTranslateX.value = 0;
         savedTranslateY.value = 0;
       } else {
         // Zoom in to tap location
-        scale.value = withSpring(DOUBLE_TAP_SCALE);
+        scale.value = withSpring(DOUBLE_TAP_SCALE, SPRING_CONFIG);
         savedScale.value = DOUBLE_TAP_SCALE;
         
         // Calculate offset to zoom towards tap point
@@ -204,8 +204,8 @@ export default function FullScreenImageViewer({
         const offsetX = (centerX - event.x) * (DOUBLE_TAP_SCALE - 1);
         const offsetY = (centerY - event.y) * (DOUBLE_TAP_SCALE - 1);
         
-        translateX.value = withSpring(offsetX);
-        translateY.value = withSpring(offsetY);
+        translateX.value = withSpring(offsetX, SPRING_CONFIG);
+        translateY.value = withSpring(offsetY, SPRING_CONFIG);
         savedTranslateX.value = offsetX;
         savedTranslateY.value = offsetY;
       }

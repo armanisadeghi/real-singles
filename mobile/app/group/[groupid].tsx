@@ -12,6 +12,7 @@ import {
   setupMessageListener
 } from "@/services/agoraChatServices";
 import { getCurrentUserId, IMAGE_URL, MEDIA_BASE_URL, VIDEO_URL } from "@/utils/token";
+import * as Haptics from "expo-haptics";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -470,7 +471,10 @@ export default function GroupChat() {
               <Text className="text-base font-medium text-black">
                 Members ({groupMembers.length})
               </Text>
-              <TouchableOpacity onPress={() => setShowMembers(false)}>
+              <TouchableOpacity onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowMembers(false);
+              }}>
                 <MaterialIcons name="close" size={24} color={'black'} />
               </TouchableOpacity>
             </View>
@@ -590,6 +594,7 @@ export default function GroupChat() {
         rightContent={
           <TouchableOpacity
             onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               console.log("Group members:", groupMembers);
               setShowMembers(true);
             }}

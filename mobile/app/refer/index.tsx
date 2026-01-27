@@ -3,6 +3,7 @@ import { icons } from "@/constants/icons";
 import { getReferralLink, APP_NAME } from "@/lib/config";
 import { useAuth } from "@/utils/authContext";
 import * as Clipboard from "expo-clipboard";
+import * as Haptics from "expo-haptics";
 import React from "react";
 import {
   Alert,
@@ -23,6 +24,7 @@ export default function Refer() {
   const referralLink = referralCode ? getReferralLink(referralCode) : '';
 
   const handleCopyCode = async () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     if (!referralCode) {
       Alert.alert("Error", "Referral code not available");
       return;
@@ -32,6 +34,7 @@ export default function Refer() {
   };
 
   const handleCopyLink = async () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     if (!referralLink) {
       Alert.alert("Error", "Referral link not available");
       return;
