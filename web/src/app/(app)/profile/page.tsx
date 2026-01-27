@@ -10,6 +10,7 @@ import {
   Sparkles,
   Share2,
   Camera,
+  PauseCircle,
 } from "lucide-react";
 import { ReferralCard } from "@/components/profile/ReferralCard";
 
@@ -124,6 +125,24 @@ export default async function MyProfilePage() {
         </div>
       ) : (
         <>
+          {/* Profile Paused Banner */}
+          {profile.profile_hidden && (
+            <div className="bg-orange-500 text-white px-4 py-3">
+              <div className="max-w-4xl mx-auto flex items-center justify-center gap-2">
+                <PauseCircle className="w-5 h-5 shrink-0" />
+                <span className="text-sm font-medium">
+                  Your profile is paused — you won't appear in discovery or matches
+                </span>
+                <Link
+                  href="/settings"
+                  className="ml-2 text-sm underline underline-offset-2 hover:no-underline"
+                >
+                  Unpause
+                </Link>
+              </div>
+            </div>
+          )}
+          
           {/* Hero Header - Compact & Modern */}
           <div className="bg-white border-b">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

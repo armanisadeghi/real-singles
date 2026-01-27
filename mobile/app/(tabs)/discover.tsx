@@ -2,9 +2,10 @@ import FilterOptions, { FilterData } from "@/components/FilterOptions";
 import LinearBg from "@/components/LinearBg";
 import NotificationBell from "@/components/NotificationBell";
 import ProfileListItem from "@/components/ui/ProfileListItem";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { icons } from "@/constants/icons";
 import { ICON_SIZES, SPACING, TYPOGRAPHY, VERTICAL_SPACING } from "@/constants/designTokens";
-import { applyFilters, clearFilter, getHomeScreenData, saveFilter } from "@/lib/api";
+import { applyFilters, clearFilter, getHomeScreenData, getProfile, saveFilter } from "@/lib/api";
 import { User } from "@/types";
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -36,6 +37,7 @@ export default function Discover() {
   const [applyingFilters, setApplyingFilters] = useState(false);
   const [discoverProfiles, setDiscoverProfiles] = useState<User[]>([]);
   const [filtersApplied, setFiltersApplied] = useState(false);
+  const [isProfilePaused, setIsProfilePaused] = useState(false);
   
   // Filter state
   // Note: gender preference is NOT a filter - it comes from user's profile "looking_for" field
@@ -62,6 +64,17 @@ export default function Discover() {
   // Track pending filter changes (to be saved on sheet close)
   const pendingFiltersRef = useRef<Record<string, string> | null>(null);
   const filtersChangedRef = useRef(false);
+
+  const fetchMyProfileStatus = async () => {
+    try {
+      const res = await getProfile();
+      if (res?.success && res?.data) {
+        setIsProfilePaused(res.data.profile_hidden || res.data.ProfileHidden || false);
+      }
+    } catch (error) {
+      console.error("Error fetching profile status:", error);
+    }
+  };
 
   const fetchDiscoverProfiles = async () => {
     setLoading(true);
@@ -116,6 +129,7 @@ export default function Discover() {
 
   useEffect(() => {
     fetchDiscoverProfiles();
+    fetchMyProfileStatus();
   }, []);
 
   const handleFilterPress = useCallback(() => {
@@ -304,6 +318,28 @@ export default function Discover() {
             <NotificationBell />
           </View>
         </View>
+
+        {/* Profile Paused Reminder */}
+        {isProfilePaused && (
+          <TouchableOpacity 
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push("/settings");
+            }}
+            className="bg-orange-500 flex-row items-center justify-center"
+            style={{ 
+              paddingVertical: SPACING.sm,
+              paddingHorizontal: SPACING.screenPadding,
+              gap: SPACING.xs,
+            }}
+            activeOpacity={0.8}
+          >
+            <PlatformIcon name="pause-circle-outline" size={16} color="#fff" />
+            <Text className="text-white font-medium" style={TYPOGRAPHY.caption1}>
+              Your profile is paused — you won't appear to others
+            </Text>
+          </TouchableOpacity>
+        )}
 
         {/* Filter Applied Badge */}
         {filtersApplied && (

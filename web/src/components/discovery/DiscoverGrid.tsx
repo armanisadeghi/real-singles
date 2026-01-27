@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { SlidersHorizontal, Heart, Sparkles, MapPin, Loader2, X } from "lucide-react";
+import { SlidersHorizontal, Heart, Sparkles, MapPin, Loader2, X, PauseCircle } from "lucide-react";
+import Link from "next/link";
 import { ProfileListItem } from "./ProfileListItem";
 import { FilterPanel, FilterValues } from "./FilterPanel";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -28,11 +29,12 @@ interface Profile {
 
 interface DiscoverGridProps {
   initialProfiles: Profile[];
+  isProfilePaused?: boolean;
 }
 
 type ViewMode = "all" | "top-matches" | "nearby";
 
-export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
+export function DiscoverGrid({ initialProfiles, isProfilePaused = false }: DiscoverGridProps) {
   const [profiles, setProfiles] = useState<Profile[]>(initialProfiles);
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -197,6 +199,22 @@ export function DiscoverGrid({ initialProfiles }: DiscoverGridProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Profile Paused Banner */}
+      {isProfilePaused && (
+        <div className="bg-orange-500 text-white px-4 py-3 rounded-xl mb-6 flex items-center justify-center gap-2">
+          <PauseCircle className="w-5 h-5 shrink-0" />
+          <span className="text-sm font-medium">
+            Your profile is paused — you won't appear to others
+          </span>
+          <Link
+            href="/settings"
+            className="ml-2 text-sm underline underline-offset-2 hover:no-underline"
+          >
+            Unpause
+          </Link>
+        </div>
+      )}
+      
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>

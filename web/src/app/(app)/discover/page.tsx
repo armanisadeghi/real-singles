@@ -1,12 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
 import { DiscoverGrid, DiscoverGridSkeleton } from "@/components/discovery";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 async function getDiscoverProfiles() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) return [];
+  if (!user) return { profiles: [], isProfilePaused: false };
+
+  // Get current user's profile to check if paused
+  const { data: currentUserProfile } = await supabase
+    .from("profiles")
+    .select("profile_hidden")
+    .eq("user_id", user.id)
+    .single();
+
+  const isProfilePaused = currentUserProfile?.profile_hidden || false;
 
   // Get blocked user IDs to exclude
   const { data: blockedUsers } = await supabase
@@ -51,16 +61,22 @@ async function getDiscoverProfiles() {
     .order("created_at", { ascending: false })
     .limit(40);
 
-  // Transform user array to single object (Supabase returns arrays for joins)
-  return (profiles || []).map(p => ({
-    ...p,
-    user: Array.isArray(p.user) ? p.user[0] ?? null : p.user
-  }));
+  // Transform user array to single object and resolve storage URLs
+  // This ensures profile_image_url is a proper signed URL, not a storage path
+  const transformedProfiles = await Promise.all(
+    (profiles || []).map(async (p) => ({
+      ...p,
+      user: Array.isArray(p.user) ? p.user[0] ?? null : p.user,
+      profile_image_url: await resolveStorageUrl(supabase, p.profile_image_url),
+    }))
+  );
+
+  return { profiles: transformedProfiles, isProfilePaused };
 }
 
 async function DiscoverContent() {
-  const profiles = await getDiscoverProfiles();
-  return <DiscoverGrid initialProfiles={profiles} />;
+  const { profiles, isProfilePaused } = await getDiscoverProfiles();
+  return <DiscoverGrid initialProfiles={profiles} isProfilePaused={isProfilePaused} />;
 }
 
 export default function DiscoverPage() {
