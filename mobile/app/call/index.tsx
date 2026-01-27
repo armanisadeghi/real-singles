@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 // Import user interface elements
 import {
     Alert,
+    BackHandler,
     KeyboardAvoidingView,
     PermissionsAndroid,
     Platform,
@@ -14,7 +15,8 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 // Import Agora SDK
 import {
     ChannelProfileType,
@@ -28,6 +30,9 @@ import {
 } from 'react-native-agora';
 
 const Call = () => {
+    const router = useRouter();
+    const insets = useSafeAreaInsets();
+    
     // Connection states
     const [isJoined, setIsJoined] = useState(false);
     const [isHost, setIsHost] = useState(true);
@@ -45,6 +50,19 @@ const Call = () => {
     // Agora engine reference
     const agoraEngineRef = useRef<IRtcEngine | null>(null);
     const eventHandler = useRef<IRtcEngineEventHandler | null>(null);
+
+    // Android hardware back button handling
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+            if (isJoined) {
+                leave();
+            } else {
+                router.back();
+            }
+            return true;
+        });
+        return () => backHandler.remove();
+    }, [isJoined]);
 
     useEffect(() => {
         const init = async () => {
@@ -256,7 +274,7 @@ const Call = () => {
 
     // Call UI (after configuration)
     return (
-        <SafeAreaView style={styles.main}>
+        <SafeAreaView style={[styles.main, { paddingTop: insets.top }]} edges={['left', 'right', 'bottom']}>
             <Text style={styles.head}>Agora Video Call</Text>
             <View style={styles.infoContainer}>
                 <Text style={styles.infoText}>Channel: {channelName}</Text>
@@ -408,7 +426,6 @@ const styles = StyleSheet.create({
         flex: 1, 
         alignItems: 'center', 
         backgroundColor: '#F5F5F5',
-        paddingTop: 40,
     },
     head: { 
         fontSize: 24,

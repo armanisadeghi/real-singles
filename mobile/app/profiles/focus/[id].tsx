@@ -27,6 +27,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   Dimensions,
   Image,
   Platform,
@@ -61,6 +62,15 @@ export default function ProfileFocusView() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+
+  // Android hardware back button handling
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      router.back();
+      return true;
+    });
+    return () => backHandler.remove();
+  }, []);
 
   // Fetch profile data
   useEffect(() => {

@@ -7,6 +7,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   Image,
   ScrollView,
   StyleSheet,
@@ -14,12 +15,13 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Toast from "react-native-toast-message";
 
 export default function Review() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<VirtualDateSpeedDetails[]>([]);
   const [virtual, setVirtual] = useState<VirtualDataListItem[]>([]);
@@ -27,6 +29,15 @@ export default function Review() {
   const [registering, setRegistering] = useState(false);
 
   const { id } = useLocalSearchParams();
+
+  // Android hardware back button handling
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      router.back();
+      return true;
+    });
+    return () => backHandler.remove();
+  }, []);
 
   const fetchVirtualDateDetails = async () => {
     setLoading(true);
@@ -150,11 +161,12 @@ export default function Review() {
     <>
       {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
 
-      <SafeAreaView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1 bg-background" edges={['left', 'right', 'bottom']}>
         <Toast />
         <View
-          className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
+          className="bg-white flex-row justify-between items-center px-4 pb-6 rounded-b-xl z-30"
           style={{
+            paddingTop: insets.top + 8,
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 0 },
             shadowOpacity: 0.1,

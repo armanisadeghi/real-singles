@@ -5,13 +5,13 @@ import { useState } from "react";
 import {
   Image,
   Modal,
-  Platform,
   ScrollView,
   Text,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AuthHome() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -24,6 +24,7 @@ export default function AuthHome() {
 
   const { width } = useWindowDimensions();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const itemWidth = (width - 40 - 16) / 2;
 
@@ -122,7 +123,7 @@ export default function AuthHome() {
   return (
     <>
       <ScrollView className="flex-1 bg-white" 
-      contentContainerStyle={{ paddingVertical: Platform.OS == 'android' ? 20 : 70 }} >
+      contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }} >
         <View className="mt-12">
           <Image
             source={images.logo}

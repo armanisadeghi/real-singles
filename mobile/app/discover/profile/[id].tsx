@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   Dimensions,
   Platform,
   Pressable,
@@ -81,6 +82,15 @@ export default function DiscoveryProfileView() {
   const superLikeScale = useSharedValue(1);
   const likeScale = useSharedValue(1);
   
+  // Android hardware back button handling
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      router.back();
+      return true;
+    });
+    return () => backHandler.remove();
+  }, []);
+
   // Fetch profile data
   useEffect(() => {
     const loadProfile = async () => {

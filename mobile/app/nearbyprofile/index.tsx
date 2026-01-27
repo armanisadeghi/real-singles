@@ -11,6 +11,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   Dimensions,
   Image,
   Modal,
@@ -20,11 +21,13 @@ import {
   View
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width, height } = Dimensions.get("window");
 
 export default function NearBy() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const mapRef = useRef<any>(null);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,6 +40,15 @@ export default function NearBy() {
   });
   const [showUserModal, setShowUserModal] = useState(false);
   const [profile, setProfile] = useState<User | null>(null);
+
+  // Android hardware back button handling
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      router.back();
+      return true;
+    });
+    return () => backHandler.remove();
+  }, []);
 
   console.log("selectedUser in nerby", selectedUser);
 
@@ -389,8 +401,8 @@ export default function NearBy() {
 
       {/* Header Bar (Floating) */}
       <View
-        style={styles.headerContainer}
-        className="flex-row justify-between items-center px-4 pt-10 pb-4 absolute top-0 left-0 right-0 z-10"
+        style={[styles.headerContainer, { paddingTop: insets.top + 8 }]}
+        className="flex-row justify-between items-center px-4 pb-4 absolute top-0 left-0 right-0 z-10"
       >
         <View className="flex-row items-center gap-2">
           <TouchableOpacity

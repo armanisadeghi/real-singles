@@ -4,8 +4,9 @@ import GradientButton from "@/components/ui/GradientButton";
 import { icons } from "@/constants/icons";
 import { signInWithEmail, resetPassword as supabaseResetPassword } from "@/lib/supabase";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  BackHandler,
   Image,
   Keyboard,
   Modal,
@@ -15,7 +16,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Pdf from "react-native-pdf";
 import Toast from "react-native-toast-message";
 import { WebView } from "react-native-webview";
@@ -29,6 +30,16 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  // Android hardware back button handling
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      router.back();
+      return true;
+    });
+    return () => backHandler.remove();
+  }, []);
 
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");

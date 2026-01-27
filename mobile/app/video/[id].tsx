@@ -7,18 +7,30 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState, useEffect, useRef } from "react";
 import {
+  BackHandler,
   Image,
   Text,
   TouchableOpacity,
   View
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function VideoPage() {
   const { id, data } = useLocalSearchParams<any>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const videoData = JSON.parse(data);
 
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // Android hardware back button handling
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      router.back();
+      return true;
+    });
+    return () => backHandler.remove();
+  }, []);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
@@ -110,7 +122,10 @@ export default function VideoPage() {
     <>
       <View className="flex-1 bg-background">
         {/* Header */}
-        <View className="absolute top-0 left-0 w-full flex-row justify-between items-center px-4 pt-10 pb-6 z-30 bg-black/50 rounded-b-xl">
+        <View 
+          className="absolute top-0 left-0 w-full flex-row justify-between items-center px-4 pb-6 z-30 bg-black/50 rounded-b-xl"
+          style={{ paddingTop: insets.top + 8 }}
+        >
           <View className="flex-row items-center gap-2">
             <TouchableOpacity
               onPress={() => router.back()}

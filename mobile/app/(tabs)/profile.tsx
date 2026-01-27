@@ -22,9 +22,11 @@ import {
   View
 } from "react-native";
 import CircularProgress from "react-native-circular-progress-indicator";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Profile() {
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const insets = useSafeAreaInsets();
   const [menuVisible, setMenuVisible] = useState(false);
   const [profile, setProfile] = useState<User | null>();
   const [currentSnapPointIndex, setCurrentSnapPointIndex] = useState(0);
@@ -126,7 +128,10 @@ export default function Profile() {
         resizeMode="cover"
       >
         <View className={`absolute inset-0 bg-black/20`} />
-        <View className="flex-row justify-between items-start px-3 mt-16">
+        <View 
+          className="flex-row justify-between items-start px-3"
+          style={{ marginTop: insets.top + 8 }}
+        >
            <TouchableOpacity onPress={() => setMenuVisible(true)}
             className="border border-white rounded-lg p-2 bg-black/45"
           >

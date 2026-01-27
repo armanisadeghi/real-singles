@@ -13,6 +13,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
+  BackHandler,
   Image,
   ImageBackground,
   StyleSheet,
@@ -20,11 +21,13 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 export default function ProfileDetail() {
   const navState = useNavigationState((state) => state);
   const canGoBack = navState?.routes?.length > 1;
+  const insets = useSafeAreaInsets();
 
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -33,6 +36,19 @@ export default function ProfileDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retryAnimation] = useState(new Animated.Value(1));
+
+  // Android hardware back button handling
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (canGoBack) {
+        router.back();
+      } else {
+        router.replace("/(tabs)");
+      }
+      return true;
+    });
+    return () => backHandler.remove();
+  }, [canGoBack]);
   // const [loadfollow, setLoadfollow] = useState(false);
   // const [isFollowing, setIsFollowing] = useState(false);
 
@@ -284,7 +300,10 @@ export default function ProfileDetail() {
           source={{ uri: profile.Image?.startsWith('http') ? profile.Image : (profile.Image?.startsWith('uploads/') ? IMAGE_URL + profile.Image : VIDEO_URL + profile.Image) }}
           resizeMode="cover"
         >
-          <View className="flex-row justify-between items-start px-3 mt-16">
+          <View 
+            className="flex-row justify-between items-start px-3"
+            style={{ marginTop: insets.top + 8 }}
+          >
             <View className="flex-row gap-2 items-center">
               <TouchableOpacity
                 onPress={() => {
@@ -318,7 +337,10 @@ export default function ProfileDetail() {
             <Text style={styles.initialsText}>{content.initials}</Text>
           </View>
 
-          <View className="flex-row justify-between items-start px-3 absolute top-16 left-0 right-0">
+          <View 
+            className="flex-row justify-between items-start px-3 absolute left-0 right-0"
+            style={{ top: insets.top + 8 }}
+          >
             <View className="flex-row gap-2 items-center">
               <TouchableOpacity
                 onPress={router.back}

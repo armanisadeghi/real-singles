@@ -8,6 +8,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  BackHandler,
   PermissionsAndroid,
   Platform,
   StatusBar,
@@ -209,6 +210,15 @@ const VoiceCall = () => {
       }
     };
   }, [showControls, isJoined]);
+
+  // Android hardware back button handling - end call when pressed
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      leave();
+      return true; // Prevent default back behavior
+    });
+    return () => backHandler.remove();
+  }, [isJoined]);
 
   const setupVideoSDKEngine = async () => {
     try {
