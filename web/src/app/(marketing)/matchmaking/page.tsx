@@ -29,7 +29,7 @@ export default function MatchmakingPage() {
       {/* Hero Section */}
       <PageHero
         title="Matchmaking"
-        backgroundColor="beige"
+        backgroundImage="/images/marketing/hero/matchmaking-hero.webp"
       />
 
       {/* Personal Matchmaking Section */}

@@ -55,7 +55,7 @@ export default function MembershipPage() {
       {/* Hero Section */}
       <PageHero
         title="Membership"
-        backgroundColor="beige"
+        backgroundImage="/images/marketing/hero/membership-hero.webp"
       />
 
       {/* Why Join Section */}

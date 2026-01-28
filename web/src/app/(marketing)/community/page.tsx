@@ -41,7 +41,7 @@ export default function CommunityPage() {
       {/* Hero Section */}
       <PageHero
         title="Community"
-        backgroundColor="beige"
+        backgroundImage="/images/marketing/hero/community-hero.jpg"
       />
 
       {/* Intro Section */}
