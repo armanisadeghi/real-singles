@@ -239,7 +239,7 @@ function LikesYouTab() {
               {like.profile_image_url ? (
                 <img
                   src={like.profile_image_url}
-                  alt=""
+                  alt={`Photo of ${name}`}
                   className="w-full h-full object-cover"
                 />
               ) : (

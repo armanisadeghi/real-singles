@@ -267,7 +267,7 @@ export function ProfileFocusView({
   const content = (
     <div className={cn(
       "flex flex-col bg-white",
-      isModal ? "rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden" : "min-h-screen"
+      isModal ? "rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden" : "min-h-dvh"
     )}>
       {/* Photo Section */}
       <div
@@ -279,7 +279,7 @@ export function ProfileFocusView({
         {photos.length > 0 ? (
           <img
             src={photos[currentPhotoIndex]}
-            alt=""
+            alt={`Photo of ${name}`}
             className="w-full h-full object-cover"
             draggable={false}
             style={{

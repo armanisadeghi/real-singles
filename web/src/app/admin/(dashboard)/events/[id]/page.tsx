@@ -8,14 +8,15 @@ import {
   MapPin,
   Clock,
   Users,
-  ArrowLeft,
   Edit2,
   XCircle,
   Trash2,
   Loader2,
   User,
   Mail,
+  CalendarDays,
 } from "lucide-react";
+import { AdminPageHeader, AdminLinkButton, AdminButton } from "@/components/admin/AdminPageHeader";
 
 interface EventDetail {
   id: string;
@@ -189,70 +190,77 @@ export default function AdminEventDetailPage({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 bg-slate-100 rounded-lg animate-pulse" />
+          <div className="space-y-2">
+            <div className="h-7 w-48 bg-slate-100 rounded animate-pulse" />
+            <div className="h-4 w-32 bg-slate-100 rounded animate-pulse" />
+          </div>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+        </div>
       </div>
     );
   }
 
   if (!event) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 mb-4">Event not found</p>
-        <Link href="/admin/events" className="text-indigo-600 hover:underline">
-          Back to Events
-        </Link>
+      <div className="space-y-6">
+        <AdminPageHeader
+          title="Event Not Found"
+          subtitle="The requested event could not be found"
+          showBack
+        />
+        <div className="text-center py-12 bg-white rounded-2xl border border-slate-200/80">
+          <CalendarDays className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+          <p className="text-slate-600 mb-4">This event may have been deleted or doesn&apos;t exist.</p>
+          <Link href="/admin/events" className="text-blue-600 hover:text-blue-700 font-medium">
+            View all events
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/admin/events"
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+      <AdminPageHeader
+        title={event.title}
+        subtitle="Event Details"
+        showBack
+      >
+        <AdminLinkButton
+          href={`/admin/events/${event.id}/edit`}
+          variant="secondary"
+          icon={Edit2}
+        >
+          Edit
+        </AdminLinkButton>
+        {event.status !== "cancelled" && (
+          <AdminButton
+            variant="danger"
+            icon={isCancelling ? undefined : XCircle}
+            onClick={handleCancelEvent}
+            loading={isCancelling}
           >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{event.title}</h1>
-            <p className="text-sm text-gray-500">Event Details</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Link
-            href={`/admin/events/${event.id}/edit`}
-            className="inline-flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-          >
-            <Edit2 className="w-4 h-4" />
-            Edit
-          </Link>
-          {event.status !== "cancelled" && (
-            <button
-              onClick={handleCancelEvent}
-              disabled={isCancelling}
-              className="inline-flex items-center gap-2 px-4 py-2 text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50"
-            >
-              {isCancelling ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <XCircle className="w-4 h-4" />
-              )}
-              Cancel Event
-            </button>
-          )}
-        </div>
-      </div>
+            Cancel Event
+          </AdminButton>
+        )}
+      </AdminPageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Event Details */}
         <div className="lg:col-span-2 space-y-6">
           {/* Main Info Card */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div 
+            className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6
+              opacity-100 translate-y-0
+              [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+              [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+          >
             {event.image_url && (
               <div className="aspect-video rounded-lg overflow-hidden mb-6 bg-gray-100">
                 <img
@@ -342,7 +350,13 @@ export default function AdminEventDetailPage({
         <div className="space-y-6">
           {/* Summary */}
           {summary && (
-            <div className="bg-white rounded-lg shadow p-6">
+            <div 
+              className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6
+                opacity-100 translate-y-0
+                [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+                [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+              style={{ transitionDelay: "100ms" }}
+            >
               <h3 className="font-semibold text-gray-900 mb-4">Attendee Summary</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
@@ -366,7 +380,13 @@ export default function AdminEventDetailPage({
           )}
 
           {/* Attendee List */}
-          <div className="bg-white rounded-lg shadow">
+          <div 
+            className="bg-white rounded-2xl border border-slate-200/80 shadow-sm
+              opacity-100 translate-y-0
+              [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+              [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+            style={{ transitionDelay: "150ms" }}
+          >
             <div className="p-4 border-b">
               <h3 className="font-semibold text-gray-900">Attendees</h3>
             </div>

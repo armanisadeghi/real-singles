@@ -120,7 +120,7 @@ const SignupLogin = ({
                 : "Terms & Conditions"}
             </Text>
             <TouchableOpacity onPress={() => setVisible(false)}>
-              <Text className="text-xl text-gray-600">✕</Text>
+              <PlatformIcon name="close" size={24} color="#666" />
             </TouchableOpacity>
           </View>
 
@@ -145,7 +145,7 @@ const SignupLogin = ({
         <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-300">
           <Text className="text-lg font-semibold">{webViewTitle}</Text>
           <TouchableOpacity onPress={() => setShowWebView(false)}>
-            <Text className="text-black-500 font-bold text-lg">✕</Text>
+            <PlatformIcon name="close" size={24} color="#000" />
           </TouchableOpacity>
         </View>
 

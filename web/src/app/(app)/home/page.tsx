@@ -414,7 +414,7 @@ export default function HomePage() {
                     <div className="aspect-video bg-gradient-to-br from-orange-100 to-pink-100 relative overflow-hidden">
                       <img
                         src={event.EventImage}
-                        alt=""
+                        alt={event.EventName || "Event image"}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
@@ -480,7 +480,7 @@ export default function HomePage() {
                     <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 relative overflow-hidden">
                       <img
                         src={session.Image}
-                        alt=""
+                        alt={session.Title || "Speed dating session"}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       {/* Status badge overlay */}

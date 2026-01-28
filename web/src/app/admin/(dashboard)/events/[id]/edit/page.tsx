@@ -3,7 +3,8 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload, X, CalendarDays } from "lucide-react";
+import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
 
 interface EventFormData {
   title: string;
@@ -204,29 +205,37 @@ export default function AdminEditEventPage({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 bg-slate-100 rounded-lg animate-pulse" />
+          <div className="space-y-2">
+            <div className="h-7 w-32 bg-slate-100 rounded animate-pulse" />
+            <div className="h-4 w-48 bg-slate-100 rounded animate-pulse" />
+          </div>
+        </div>
+        <div className="flex items-center justify-center py-12 bg-white rounded-2xl border border-slate-200/80">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link
-          href={`/admin/events/${resolvedParams.id}`}
-          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Edit Event</h1>
-          <p className="text-sm text-gray-500">Update event details</p>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Edit Event"
+        subtitle="Update event details"
+        showBack
+      />
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
+      <form 
+        onSubmit={handleSubmit} 
+        className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6
+          opacity-100 translate-y-0
+          [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+          [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+      >
         {/* Image Upload */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -466,21 +475,19 @@ export default function AdminEditEventPage({
         </div>
 
         {/* Submit */}
-        <div className="flex justify-end gap-4 pt-4 border-t">
+        <div className="flex justify-end gap-3 pt-6 border-t border-slate-200/80">
           <Link
             href={`/admin/events/${resolvedParams.id}`}
-            className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="px-5 py-2.5 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 font-medium transition-colors"
           >
             Cancel
           </Link>
-          <button
+          <AdminButton
             type="submit"
-            disabled={isSubmitting}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
+            loading={isSubmitting}
           >
-            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
             Save Changes
-          </button>
+          </AdminButton>
         </div>
       </form>
     </div>

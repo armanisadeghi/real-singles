@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, use } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft,
   User,
   Mail,
   Phone,
@@ -23,6 +23,7 @@ import {
 import { Skeleton } from "@/components/ui/LoadingSkeleton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { BottomSheet, BottomSheetActions } from "@/components/ui/BottomSheet";
+import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
 import { cn, formatPoints, calculateAge } from "@/lib/utils";
 import {
   DndContext,
@@ -482,14 +483,19 @@ export default function AdminUserDetailPage({ params }: PageProps) {
     }
   };
 
+  const router = useRouter();
+
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Skeleton className="w-6 h-6" />
-          <Skeleton className="h-8 w-48" />
+        <div className="flex items-center gap-4">
+          <Skeleton className="w-10 h-10 rounded-lg" />
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-6">
           <div className="flex items-start gap-6">
             <Skeleton className="w-24 h-24 rounded-full" />
             <div className="flex-1 space-y-3">
@@ -505,91 +511,95 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
   if (!user) {
     return (
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">User Not Found</h1>
-        <Link href="/admin/users" className="text-pink-600 hover:text-pink-700">
-          Back to Users
-        </Link>
+      <div className="space-y-6">
+        <AdminPageHeader
+          title="User Not Found"
+          subtitle="The requested user could not be found"
+          showBack
+        />
+        <div className="text-center py-12 bg-white rounded-2xl border border-slate-200/80">
+          <User className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+          <p className="text-slate-600 mb-4">This user may have been deleted or doesn&apos;t exist.</p>
+          <Link href="/admin/users" className="text-blue-600 hover:text-blue-700 font-medium">
+            View all users
+          </Link>
+        </div>
       </div>
     );
   }
 
   const statusColors = {
-    active: "bg-green-100 text-green-800",
+    active: "bg-emerald-100 text-emerald-800",
     suspended: "bg-red-100 text-red-800",
-    deleted: "bg-gray-100 text-gray-800",
+    deleted: "bg-slate-100 text-slate-800",
   };
 
   const roleColors = {
     admin: "bg-purple-100 text-purple-800",
     moderator: "bg-blue-100 text-blue-800",
-    user: "bg-gray-100 text-gray-800",
+    user: "bg-slate-100 text-slate-800",
   };
+
+  const userName = profile?.first_name && profile?.last_name
+    ? `${profile.first_name} ${profile.last_name}`
+    : user.display_name || "User Details";
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/admin/users"
-            className="p-2 hover:bg-gray-100 rounded-lg"
+      <AdminPageHeader
+        title={userName}
+        subtitle={user.email}
+        showBack
+      >
+        <AdminButton
+          variant="secondary"
+          icon={User}
+          onClick={() => setShowEditProfileSheet(true)}
+        >
+          Edit Profile
+        </AdminButton>
+        <AdminButton
+          variant="warning"
+          icon={Star}
+          onClick={() => setShowPointsSheet(true)}
+        >
+          Adjust Points
+        </AdminButton>
+        {user.status === "active" ? (
+          <AdminButton
+            variant="warning"
+            icon={Ban}
+            onClick={() => setShowSuspendConfirm(true)}
           >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <h1 className="text-2xl font-bold text-gray-900">User Details</h1>
-        </div>
-
-        {/* Quick actions */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowEditProfileSheet(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+            Suspend
+          </AdminButton>
+        ) : user.status === "suspended" ? (
+          <AdminButton
+            variant="success"
+            icon={CheckCircle}
+            onClick={() => handleStatusChange("active")}
+            loading={actionLoading}
           >
-            <User className="w-4 h-4" />
-            Edit Profile
-          </button>
-          <button
-            onClick={() => setShowPointsSheet(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors"
-          >
-            <Star className="w-4 h-4" />
-            Adjust Points
-          </button>
-
-          {user.status === "active" ? (
-            <button
-              onClick={() => setShowSuspendConfirm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
-            >
-              <Ban className="w-4 h-4" />
-              Suspend
-            </button>
-          ) : user.status === "suspended" ? (
-            <button
-              onClick={() => handleStatusChange("active")}
-              disabled={actionLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors disabled:opacity-50"
-            >
-              <CheckCircle className="w-4 h-4" />
-              Reactivate
-            </button>
-          ) : null}
-
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-            Delete
-          </button>
-        </div>
-      </div>
+            Reactivate
+          </AdminButton>
+        ) : null}
+        <AdminButton
+          variant="danger"
+          icon={Trash2}
+          onClick={() => setShowDeleteConfirm(true)}
+        >
+          Delete
+        </AdminButton>
+      </AdminPageHeader>
 
       {/* Main content */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Profile card */}
-        <div className="lg:col-span-2 bg-white rounded-lg shadow">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm
+          opacity-100 translate-y-0
+          [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+          [@starting-style]:opacity-0 [@starting-style]:translate-y-4">
           <div className="p-6 border-b">
             <div className="flex items-start gap-6">
               {/* Avatar */}
@@ -727,7 +737,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
           </div>
 
           {/* Account info */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
             <h3 className="font-semibold text-gray-900 mb-4">Account Info</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between">
@@ -755,7 +765,11 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
       {/* Gallery Section */}
       {gallery.length > 0 && (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6
+          opacity-100 translate-y-0
+          [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+          [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+          style={{ transitionDelay: "100ms" }}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-900">Gallery Images</h3>
             <span className="text-xs text-gray-500">Drag to reorder</span>

@@ -1,7 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import Link from "next/link";
-import { User } from "lucide-react";
+import { User, Users, Search } from "lucide-react";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 interface UserWithProfile {
   id: string;
@@ -99,113 +100,151 @@ export default async function AdminUsersPage() {
   const users = await getUsers();
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-        <div className="text-sm text-gray-500">
-          Showing {users.length} users
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="User Management"
+        subtitle="View and manage all registered users"
+        variant="hero"
+        icon={Users}
+        iconGradient="from-blue-500 to-blue-600"
+        stat={{
+          value: users.length.toLocaleString(),
+          label: "Total Users",
+        }}
+      />
+
+      {/* Table Card */}
+      <div
+        className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden
+          opacity-100 translate-y-0
+          [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+          [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+        style={{ transitionDelay: "100ms" }}
+      >
+        {/* Table Header */}
+        <div className="px-6 py-4 border-b border-slate-200/80 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
+              <Search className="w-4 h-4 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-slate-900">All Users</h2>
+              <p className="text-xs text-slate-500">Showing {users.length} users</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200/80">
+            <thead className="bg-slate-50/80">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  User
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Role
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Points
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Joined
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Last Active
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-slate-200/60">
+              {users.map((user, index) => (
+                <tr 
+                  key={user.id} 
+                  className="hover:bg-slate-50/80 cursor-pointer group transition-colors"
+                  style={{
+                    animation: `fadeIn 300ms ease-out forwards`,
+                    animationDelay: `${index * 30}ms`,
+                    opacity: 0,
+                  }}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-3">
+                      {/* Avatar */}
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center shrink-0 overflow-hidden ring-2 ring-white shadow-sm">
+                        {user.profiles?.profile_image_url ? (
+                          <img
+                            src={user.profiles.profile_image_url}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-5 h-5 text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-slate-900 group-hover:text-blue-600 transition-colors">
+                          {getUserDisplayName(user)}
+                        </div>
+                        <div className="text-sm text-slate-500">{user.email}</div>
+                      </div>
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Link href={`/admin/users/${user.id}`}>
+                      <span
+                        className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          user.status === "active"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : user.status === "suspended"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-slate-100 text-slate-800"
+                        }`}
+                      >
+                        {user.status}
+                      </span>
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Link href={`/admin/users/${user.id}`}>
+                      <span
+                        className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          user.role === "admin"
+                            ? "bg-purple-100 text-purple-800"
+                            : user.role === "moderator"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-slate-100 text-slate-800"
+                        }`}
+                      >
+                        {user.role}
+                      </span>
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Link href={`/admin/users/${user.id}`} className="block">
+                      <span className="text-sm font-medium text-slate-900">
+                        {user.points_balance.toLocaleString()}
+                      </span>
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                    <Link href={`/admin/users/${user.id}`} className="block">
+                      {user.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                    <Link href={`/admin/users/${user.id}`} className="block">
+                      {formatRelativeTime(user.last_active_at)}
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                User
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Role
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Points
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Joined
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Last Active
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50 cursor-pointer group">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Link href={`/admin/users/${user.id}`} className="flex items-center gap-3">
-                    {/* Avatar */}
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center shrink-0 overflow-hidden">
-                      {user.profiles?.profile_image_url ? (
-                        <img
-                          src={user.profiles.profile_image_url}
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-5 h-5 text-white" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 group-hover:text-indigo-600">
-                        {getUserDisplayName(user)}
-                      </div>
-                      <div className="text-sm text-gray-500">{user.email}</div>
-                    </div>
-                  </Link>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Link href={`/admin/users/${user.id}`}>
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : user.status === "suspended"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {user.status}
-                    </span>
-                  </Link>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Link href={`/admin/users/${user.id}`}>
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.role === "admin"
-                          ? "bg-purple-100 text-purple-800"
-                          : user.role === "moderator"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {user.role}
-                    </span>
-                  </Link>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <Link href={`/admin/users/${user.id}`} className="block">
-                    {user.points_balance}
-                  </Link>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <Link href={`/admin/users/${user.id}`} className="block">
-                    {user.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}
-                  </Link>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <Link href={`/admin/users/${user.id}`} className="block">
-                    {formatRelativeTime(user.last_active_at)}
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }

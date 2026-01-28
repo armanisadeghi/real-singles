@@ -153,7 +153,7 @@ export default async function MyProfilePage() {
                     {profile.profile_image_url ? (
                       <img
                         src={profile.profile_image_url}
-                        alt=""
+                        alt={`Profile photo of ${profile.first_name || "user"}`}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -290,7 +290,7 @@ export default async function MyProfilePage() {
                             {isVideo ? (
                               <video src={item.media_url} className="w-full h-full object-cover" muted playsInline />
                             ) : (
-                              <img src={item.media_url} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                              <img src={item.media_url} alt="Gallery photo" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                             )}
                           </div>
                         );

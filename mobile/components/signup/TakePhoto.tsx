@@ -663,6 +663,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { moderateScale, scale, verticalScale } from "react-native-size-matters";
 import { useDeviceSize } from "@/hooks/useResponsive";
 import GradientButton from "../ui/GradientButton";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 
 const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
   const insets = useSafeAreaInsets();
@@ -866,14 +867,20 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
             <View style={styles.emptyPlaceholder}>
               <Text style={styles.emptyText}>Please add your pictures by clicking the button below</Text>
                <GradientButton
-                  text={hasPermission ? "📸 Take Photo" : "Grant Permission"}
                   onPress={takePhoto}
                   containerStyle={{
                     marginVertical: 40,
                     width: "50%",
                     marginHorizontal: "auto",
                   }}
-                />
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    {hasPermission && <PlatformIcon name="camera-alt" size={18} color="#fff" />}
+                    <Text style={{ color: '#fff', fontWeight: '600' }}>
+                      {hasPermission ? "Take Photo" : "Grant Permission"}
+                    </Text>
+                  </View>
+                </GradientButton>
             </View>
           ) : (
             <FlatList
@@ -888,12 +895,12 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
                 <View style={[styles.card, { width: cardWidth }]}>
                   <Image source={{ uri: item }} style={styles.photo} />
 
-                  {/* ❌ Delete Button */}
+                  {/* Delete Button */}
                   <TouchableOpacity
                     style={styles.deleteIcon}
                     onPress={() => deleteImage(index)}
                   >
-                    <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 14 }}>✕</Text>
+                    <PlatformIcon name="close" size={14} color="#fff" />
                   </TouchableOpacity>
 
                   {/* <Text style={styles.label}>Photo {index + 1}</Text> */}
@@ -913,12 +920,16 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
           >
             {/* Take Photo Button */}
             <GradientButton
-              text="📸 Take Photo"
               onPress={takePhoto}
               containerStyle={{
                 paddingHorizontal: 20,
               }}
-            />
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <PlatformIcon name="camera-alt" size={18} color="#fff" />
+                <Text style={{ color: '#fff', fontWeight: '600' }}>Take Photo</Text>
+              </View>
+            </GradientButton>
 
             {/* Upload Button */}
             <GradientButton

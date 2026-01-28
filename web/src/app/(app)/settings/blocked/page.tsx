@@ -183,7 +183,7 @@ export default function BlockedUsersPage() {
                       {image ? (
                         <img
                           src={image}
-                          alt=""
+                          alt={`Photo of ${name}`}
                           className="w-12 h-12 rounded-full object-cover"
                         />
                       ) : (

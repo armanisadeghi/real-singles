@@ -41,11 +41,26 @@ export async function GET(request: NextRequest) {
   const offset = parseInt(searchParams.get("offset") || "0");
 
   // Get user's referral code
-  const { data: userData } = await supabase
+  let { data: userData } = await supabase
     .from("users")
     .select("referral_code, points_balance")
     .eq("id", user.id)
     .single();
+
+  // Generate referral code if user doesn't have one (handles legacy users)
+  if (userData && !userData.referral_code) {
+    const newCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const { data: updatedUser } = await supabase
+      .from("users")
+      .update({ referral_code: newCode })
+      .eq("id", user.id)
+      .select("referral_code, points_balance")
+      .single();
+    
+    if (updatedUser) {
+      userData = updatedUser;
+    }
+  }
 
   // Get referrals made by user
   const { data: referrals, error: referralsError } = await supabase
@@ -56,7 +71,7 @@ export async function GET(request: NextRequest) {
         id,
         display_name,
         created_at,
-        profiles:id(first_name, profile_image_url)
+        profiles!profiles_user_id_fkey(first_name, profile_image_url)
       )
     `)
     .eq("referrer_id", user.id)

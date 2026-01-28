@@ -28,6 +28,7 @@ interface ReferralData {
 export default function ReferPage() {
   const [data, setData] = useState<ReferralData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
 
   useEffect(() => {
@@ -36,13 +37,17 @@ export default function ReferPage() {
 
   const fetchReferralData = async () => {
     try {
+      setError(null);
       const response = await fetch("/api/referrals");
       const result = await response.json();
       if (result.success) {
         setData(result.data);
+      } else {
+        setError(result.msg || "Failed to load referral data");
       }
     } catch (error) {
       console.error("Failed to fetch referral data:", error);
+      setError("Unable to connect to server");
     } finally {
       setLoading(false);
     }
@@ -96,6 +101,25 @@ export default function ReferPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-4">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => {
+              setLoading(true);
+              fetchReferralData();
+            }}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       {/* Header */}
@@ -115,7 +139,7 @@ export default function ReferPage() {
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 bg-white rounded-xl px-4 py-3 border border-amber-200">
             <code className="text-xl font-mono font-bold text-amber-900 tracking-wider">
-              {data?.referral_code || "Loading..."}
+              {data?.referral_code || "—"}
             </code>
           </div>
           <button
@@ -136,7 +160,7 @@ export default function ReferPage() {
         <div className="flex items-center gap-3 mb-6">
           <div className="flex-1 bg-white rounded-xl px-4 py-3 border border-amber-200 overflow-hidden">
             <p className="text-sm text-gray-600 truncate">
-              {data?.referral_code ? getReferralLink(data.referral_code) : "Loading..."}
+              {data?.referral_code ? getReferralLink(data.referral_code) : "—"}
             </p>
           </div>
           <button

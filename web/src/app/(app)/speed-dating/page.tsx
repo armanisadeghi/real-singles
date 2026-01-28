@@ -164,7 +164,7 @@ export default async function SpeedDatingPage() {
                   {session.image_url ? (
                     <img
                       src={session.image_url}
-                      alt=""
+                      alt={session.name || "Speed dating session"}
                       className="w-full h-full object-cover"
                     />
                   ) : (

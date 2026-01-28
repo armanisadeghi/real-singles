@@ -1,7 +1,7 @@
 import { icons } from "@/constants/icons";
 import { requestPermissionWithExplanation } from "@/utils/permissions";
 import { addCurrentUserId, getCurrentUserId, getToken, removeCurrentUserId, removeToken, storeToken } from "@/utils/token";
-import { Ionicons } from "@expo/vector-icons";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as AppleAuthentication from 'expo-apple-authentication';
 // import * as AuthSession from "expo-auth-session";
@@ -199,7 +199,7 @@ const getLocation = async () => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           signInWithApple();
         }} className="flex-row justify-center items-center gap-2 my-2 bg-light-200 py-4 rounded-[99] border-border">
-          <Ionicons name="logo-apple" size={24} color="black" />
+          <PlatformIcon name="apple" iosName="apple.logo" size={24} color="black" />
           <Text className="text-gray font-medium text-xs">
             Continue with Apple
           </Text>

@@ -155,6 +155,9 @@ const SF_SYMBOL_MAP: Record<string, string> = {
   'pets': 'pawprint.fill',
   'people-outline': 'person.2',
   'mail-outline': 'envelope',
+  
+  // Brand logos
+  'apple': 'apple.logo',
 };
 
 export interface PlatformIconProps {

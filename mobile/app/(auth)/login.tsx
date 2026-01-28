@@ -249,7 +249,7 @@ const Login = () => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setVisible(false);
             }}>
-              <Text className="text-xl text-gray-600">✕</Text>
+              <PlatformIcon name="close" size={24} color="#666" />
             </TouchableOpacity>
           </View>
 
@@ -276,7 +276,7 @@ const Login = () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setShowWebView(false);
           }}>
-            <Text className="text-black-500 font-bold text-lg">✕</Text>
+            <PlatformIcon name="close" size={24} color="#000" />
           </TouchableOpacity>
         </View>
 

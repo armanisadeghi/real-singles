@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { DataIntegrityActions } from "./components/DataIntegrityActions";
 import { IssueTypeCard } from "./components/IssueTypeCard";
+import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
 import type { IntegrityCheckResult } from "@/lib/services/data-integrity";
 
 export default function DataIntegrityPage() {
@@ -47,15 +48,21 @@ export default function DataIntegrityPage() {
     return (
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Data Integrity</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Monitor and fix data quality issues across user accounts
-          </p>
-        </div>
+        <AdminPageHeader
+          title="Data Integrity"
+          subtitle="Monitor and fix data quality issues across user accounts"
+          variant="hero"
+          icon={ShieldCheck}
+          iconGradient="from-emerald-500 to-teal-500"
+        />
 
         {/* Run Check Card */}
-        <div className="bg-white rounded-lg shadow p-8">
+        <div 
+          className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-8
+            opacity-100 translate-y-0
+            [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+            [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+        >
           <div className="text-center max-w-md mx-auto">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <ShieldCheck className="w-8 h-8 text-blue-600" />
@@ -70,23 +77,25 @@ export default function DataIntegrityPage() {
             </p>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
                 {error}
               </div>
             )}
 
-            <button
-              onClick={runCheck}
-              className="inline-flex items-center gap-2 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-medium transition-colors"
-            >
-              <Play className="w-5 h-5" />
+            <AdminButton onClick={runCheck} icon={Play} size="md">
               Start Integrity Check
-            </button>
+            </AdminButton>
           </div>
         </div>
 
         {/* What Gets Checked */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div 
+          className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6
+            opacity-100 translate-y-0
+            [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+            [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+          style={{ transitionDelay: "100ms" }}
+        >
           <h3 className="font-semibold text-gray-900 mb-4">
             What Gets Checked
           </h3>
@@ -135,21 +144,22 @@ export default function DataIntegrityPage() {
     return (
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Data Integrity</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Monitor and fix data quality issues across user accounts
-          </p>
-        </div>
+        <AdminPageHeader
+          title="Data Integrity"
+          subtitle="Monitor and fix data quality issues across user accounts"
+          variant="hero"
+          icon={ShieldCheck}
+          iconGradient="from-emerald-500 to-teal-500"
+        />
 
         {/* Loading Card */}
-        <div className="bg-white rounded-lg shadow p-12">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-12">
           <div className="text-center">
             <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">
               Running Integrity Check...
             </h2>
-            <p className="text-gray-600">
+            <p className="text-slate-600">
               Analyzing user profiles, avatars, and gallery items. This may take a minute.
             </p>
           </div>
@@ -203,38 +213,33 @@ export default function DataIntegrityPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Data Integrity</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Monitor and fix data quality issues across user accounts
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500 flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
-            Last checked:{" "}
-            {new Date(data.checkedAt).toLocaleString("en-US", {
-              dateStyle: "short",
-              timeStyle: "short",
-            })}
-          </span>
-          <button
-            onClick={runCheck}
-            disabled={loading}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Data Integrity"
+        subtitle="Monitor and fix data quality issues across user accounts"
+      >
+        <span className="text-xs text-slate-500 flex items-center gap-1.5 mr-2">
+          <Clock className="w-3.5 h-3.5" />
+          Last checked:{" "}
+          {new Date(data.checkedAt).toLocaleString("en-US", {
+            dateStyle: "short",
+            timeStyle: "short",
+          })}
+        </span>
+        <AdminButton
+          variant="secondary"
+          icon={RefreshCw}
+          onClick={runCheck}
+          loading={loading}
+        >
+          Refresh
+        </AdminButton>
+      </AdminPageHeader>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Link
           href="/admin/users"
-          className="bg-white rounded-lg shadow p-5 hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md hover:border-slate-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -251,7 +256,7 @@ export default function DataIntegrityPage() {
 
         <Link
           href="/admin/data-integrity/all?severity=critical"
-          className="bg-white rounded-lg shadow p-5 hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md hover:border-slate-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -268,7 +273,7 @@ export default function DataIntegrityPage() {
 
         <Link
           href="/admin/data-integrity/all?severity=warning"
-          className="bg-white rounded-lg shadow p-5 hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md hover:border-slate-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -285,7 +290,7 @@ export default function DataIntegrityPage() {
 
         <Link
           href="/admin/data-integrity/all?severity=info"
-          className="bg-white rounded-lg shadow p-5 hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md hover:border-slate-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -303,17 +308,17 @@ export default function DataIntegrityPage() {
 
       {/* Health Status Banner */}
       {hasNoIssues ? (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-          <CheckCircle className="w-6 h-6 text-green-600" />
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
+          <CheckCircle className="w-6 h-6 text-emerald-600" />
           <div>
-            <p className="font-medium text-green-800">All Systems Healthy</p>
-            <p className="text-sm text-green-600">
+            <p className="font-medium text-emerald-800">All Systems Healthy</p>
+            <p className="text-sm text-emerald-600">
               No data integrity issues detected across {data.totalUsers} users.
             </p>
           </div>
         </div>
       ) : (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-6 h-6 text-amber-600" />
             <div>
@@ -441,7 +446,7 @@ export default function DataIntegrityPage() {
 
       {/* Recent Issues Table Preview */}
       {data.issues.length > 0 && (
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">
               Recent Critical Issues

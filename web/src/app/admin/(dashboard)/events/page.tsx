@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
-import { Calendar, Plus, Eye, Edit2, XCircle } from "lucide-react";
+import { Calendar, Plus, Eye, Edit2, CalendarDays } from "lucide-react";
+import { AdminPageHeader, AdminLinkButton } from "@/components/admin/AdminPageHeader";
 
 interface EventListItem {
   id: string;
@@ -58,13 +59,13 @@ function getStatusColor(status: string): string {
     case "upcoming":
       return "bg-blue-100 text-blue-800";
     case "ongoing":
-      return "bg-green-100 text-green-800";
+      return "bg-emerald-100 text-emerald-800";
     case "completed":
-      return "bg-gray-100 text-gray-800";
+      return "bg-slate-100 text-slate-800";
     case "cancelled":
       return "bg-red-100 text-red-800";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-slate-100 text-slate-800";
   }
 }
 
@@ -85,126 +86,153 @@ export default async function AdminEventsPage() {
   const events = await getEvents();
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Events</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Manage events and view attendees
-          </p>
-        </div>
-        <Link
-          href="/admin/events/create"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Event Management"
+        subtitle="Create and manage singles events"
+        variant="hero"
+        icon={CalendarDays}
+        iconGradient="from-purple-500 to-purple-600"
+        stat={{
+          value: events.length,
+          label: "Total Events",
+        }}
+      >
+        <AdminLinkButton href="/admin/events/create" icon={Plus}>
           Create Event
-        </Link>
-      </div>
+        </AdminLinkButton>
+      </AdminPageHeader>
 
       {events.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500 mb-4">No events yet. Create one to get started.</p>
-          <Link
-            href="/admin/events/create"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            <Plus className="w-4 h-4" />
+        <div 
+          className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-12 text-center
+            opacity-100 translate-y-0
+            [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+            [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+        >
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Calendar className="w-8 h-8 text-slate-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">No events yet</h3>
+          <p className="text-slate-500 mb-6 max-w-sm mx-auto">
+            Create your first event to start engaging with your community.
+          </p>
+          <AdminLinkButton href="/admin/events/create" icon={Plus}>
             Create Event
-          </Link>
+          </AdminLinkButton>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Event
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Location
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Attendees
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {events.map((event) => (
-                <tr key={event.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <Link
-                      href={`/admin/events/${event.id}`}
-                      className="text-sm font-medium text-gray-900 hover:text-indigo-600"
-                    >
-                      {event.title}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-500">
-                      {getEventTypeLabel(event.event_type)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-500">
-                      {formatDate(event.start_datetime)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-500">
-                      {[event.city, event.state].filter(Boolean).join(", ") || "—"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                        event.status
-                      )}`}
-                    >
-                      {event.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {event.current_attendees}
-                    {event.max_attendees ? `/${event.max_attendees}` : ""}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <div className="flex items-center justify-end gap-2">
+        <div 
+          className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden
+            opacity-100 translate-y-0
+            [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+            [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+          style={{ transitionDelay: "100ms" }}
+        >
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200/80">
+              <thead className="bg-slate-50/80">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Event
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Location
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Attendees
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-slate-200/60">
+                {events.map((event, index) => (
+                  <tr 
+                    key={event.id} 
+                    className="hover:bg-slate-50/80 transition-colors"
+                    style={{
+                      animation: `fadeIn 300ms ease-out forwards`,
+                      animationDelay: `${index * 30}ms`,
+                      opacity: 0,
+                    }}
+                  >
+                    <td className="px-6 py-4">
                       <Link
                         href={`/admin/events/${event.id}`}
-                        className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded"
-                        title="View details"
+                        className="text-sm font-medium text-slate-900 hover:text-blue-600 transition-colors"
                       >
-                        <Eye className="w-4 h-4" />
+                        {event.title}
                       </Link>
-                      <Link
-                        href={`/admin/events/${event.id}/edit`}
-                        className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded"
-                        title="Edit"
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-slate-600">
+                        {getEventTypeLabel(event.event_type)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-slate-600">
+                        {formatDate(event.start_datetime)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-slate-600">
+                        {[event.city, event.state].filter(Boolean).join(", ") || "—"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          event.status
+                        )}`}
                       >
-                        <Edit2 className="w-4 h-4" />
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        {event.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-medium text-slate-900">
+                        {event.current_attendees}
+                        {event.max_attendees ? (
+                          <span className="text-slate-500">/{event.max_attendees}</span>
+                        ) : null}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Link
+                          href={`/admin/events/${event.id}`}
+                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="View details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                        <Link
+                          href={`/admin/events/${event.id}/edit`}
+                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
+
     </div>
   );
 }

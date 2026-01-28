@@ -143,3 +143,15 @@ input, select, textarea {
   outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
 }
+
+/* Admin fadeIn animation for staggered list items */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

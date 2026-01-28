@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, Edit2, Trash2, Save, X, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Edit2, Trash2, Save, X, ChevronUp, ChevronDown, MessageSquare } from "lucide-react";
 import type { PromptDefinition } from "@/types";
 import { PROMPT_CATEGORIES } from "@/types";
+import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
 
 export default function AdminPromptsPage() {
   const [prompts, setPrompts] = useState<PromptDefinition[]>([]);
@@ -183,41 +184,46 @@ export default function AdminPromptsPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 bg-slate-100 rounded-lg animate-pulse" />
+          <div className="space-y-2">
+            <div className="h-7 w-40 bg-slate-100 rounded animate-pulse" />
+            <div className="h-4 w-64 bg-slate-100 rounded animate-pulse" />
+          </div>
+        </div>
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-64 bg-slate-100 rounded-2xl"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Profile Prompts</h1>
-        <button
-          onClick={() => setShowNewForm(true)}
-          className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
-        >
-          <Plus className="w-4 h-4" />
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Profile Prompts"
+        subtitle="Manage the prompts users can answer on their profiles"
+        showBack
+      >
+        <AdminButton onClick={() => setShowNewForm(true)} icon={Plus}>
           Add Prompt
-        </button>
-      </div>
+        </AdminButton>
+      </AdminPageHeader>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-          {error}
-          <button onClick={() => setError("")} className="float-right">
+        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex justify-between items-center">
+          <span>{error}</span>
+          <button onClick={() => setError("")} className="p-1 hover:bg-red-100 rounded-lg">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {success && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg">
-          {success}
-          <button onClick={() => setSuccess("")} className="float-right">
+        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex justify-between items-center">
+          <span>{success}</span>
+          <button onClick={() => setSuccess("")} className="p-1 hover:bg-emerald-100 rounded-lg">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -225,7 +231,7 @@ export default function AdminPromptsPage() {
 
       {/* New/Edit Form */}
       {(showNewForm || editingId) && (
-        <div className="mb-6 p-6 bg-white rounded-lg shadow border">
+        <div className="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
           <h2 className="text-lg font-semibold mb-4">
             {editingId ? "Edit Prompt" : "New Prompt"}
           </h2>
@@ -349,13 +355,13 @@ export default function AdminPromptsPage() {
       {Object.entries(groupedPrompts).map(([category, categoryPrompts]) => {
         const categoryInfo = PROMPT_CATEGORIES.find((c) => c.value === category);
         return (
-          <div key={category} className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-3">
+          <div key={category}>
+            <h2 className="text-lg font-semibold text-slate-800 mb-3">
               {categoryInfo?.label || category}
             </h2>
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+              <table className="min-w-full divide-y divide-slate-200/80">
+                <thead className="bg-slate-50/80">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Order
@@ -429,14 +435,14 @@ export default function AdminPromptsPage() {
       })}
 
       {prompts.length === 0 && !showNewForm && (
-        <div className="text-center py-12 bg-white rounded-lg shadow">
-          <p className="text-gray-500">No prompts defined yet.</p>
-          <button
-            onClick={() => setShowNewForm(true)}
-            className="mt-4 text-indigo-600 hover:text-indigo-800"
-          >
+        <div className="text-center py-12 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <MessageSquare className="w-8 h-8 text-slate-400" />
+          </div>
+          <p className="text-slate-600 mb-4">No prompts defined yet.</p>
+          <AdminButton onClick={() => setShowNewForm(true)} icon={Plus}>
             Add your first prompt
-          </button>
+          </AdminButton>
         </div>
       )}
     </div>

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
+import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
 
 interface EventFormData {
   title: string;
@@ -163,29 +164,28 @@ export default function AdminCreateEventPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link
-          href="/admin/events"
-          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Create Event</h1>
-          <p className="text-sm text-gray-500">Add a new event for users</p>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Create Event"
+        subtitle="Add a new event for users"
+        showBack
+      />
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
+      <form 
+        onSubmit={handleSubmit} 
+        className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6
+          opacity-100 translate-y-0
+          [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+          [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+      >
         {/* Image Upload */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-slate-700 mb-2">
             Event Image
           </label>
           {imagePreview ? (
-            <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-100">
+            <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-100">
               <img
                 src={imagePreview}
                 alt="Preview"
@@ -194,16 +194,16 @@ export default function AdminCreateEventPage() {
               <button
                 type="button"
                 onClick={removeImage}
-                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                className="absolute top-3 right-3 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-slate-300 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">Click to upload event image</p>
+                <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                <p className="text-sm text-slate-500">Click to upload event image</p>
               </div>
               <input
                 type="file"
@@ -217,7 +217,7 @@ export default function AdminCreateEventPage() {
 
         {/* Title */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="title" className="block text-sm font-medium text-slate-700 mb-1">
             Title *
           </label>
           <input
@@ -226,8 +226,8 @@ export default function AdminCreateEventPage() {
             name="title"
             value={formData.title}
             onChange={handleChange}
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-              errors.title ? "border-red-500" : "border-gray-300"
+            className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+              errors.title ? "border-red-500" : "border-slate-300"
             }`}
             placeholder="Event title"
           />
@@ -236,7 +236,7 @@ export default function AdminCreateEventPage() {
 
         {/* Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">
             Description
           </label>
           <textarea
@@ -245,14 +245,14 @@ export default function AdminCreateEventPage() {
             value={formData.description}
             onChange={handleChange}
             rows={4}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             placeholder="Event description"
           />
         </div>
 
         {/* Event Type */}
         <div>
-          <label htmlFor="event_type" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="event_type" className="block text-sm font-medium text-slate-700 mb-1">
             Event Type
           </label>
           <select
@@ -260,7 +260,7 @@ export default function AdminCreateEventPage() {
             name="event_type"
             value={formData.event_type}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
           >
             <option value="in_person">In Person</option>
             <option value="virtual">Virtual</option>
@@ -271,7 +271,7 @@ export default function AdminCreateEventPage() {
         {/* Date/Time */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="start_datetime" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="start_datetime" className="block text-sm font-medium text-slate-700 mb-1">
               Start Date & Time *
             </label>
             <input
@@ -280,8 +280,8 @@ export default function AdminCreateEventPage() {
               name="start_datetime"
               value={formData.start_datetime}
               onChange={handleChange}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                errors.start_datetime ? "border-red-500" : "border-gray-300"
+              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                errors.start_datetime ? "border-red-500" : "border-slate-300"
               }`}
             />
             {errors.start_datetime && (
@@ -289,7 +289,7 @@ export default function AdminCreateEventPage() {
             )}
           </div>
           <div>
-            <label htmlFor="end_datetime" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="end_datetime" className="block text-sm font-medium text-slate-700 mb-1">
               End Date & Time
             </label>
             <input
@@ -298,14 +298,14 @@ export default function AdminCreateEventPage() {
               name="end_datetime"
               value={formData.end_datetime}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             />
           </div>
         </div>
 
         {/* Location */}
         <div>
-          <label htmlFor="venue_name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="venue_name" className="block text-sm font-medium text-slate-700 mb-1">
             Venue Name
           </label>
           <input
@@ -314,13 +314,13 @@ export default function AdminCreateEventPage() {
             name="venue_name"
             value={formData.venue_name}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             placeholder="e.g., The Grand Ballroom"
           />
         </div>
 
         <div>
-          <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="address" className="block text-sm font-medium text-slate-700 mb-1">
             Address
           </label>
           <input
@@ -329,14 +329,14 @@ export default function AdminCreateEventPage() {
             name="address"
             value={formData.address}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             placeholder="Street address"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="city" className="block text-sm font-medium text-slate-700 mb-1">
               City
             </label>
             <input
@@ -345,12 +345,12 @@ export default function AdminCreateEventPage() {
               name="city"
               value={formData.city}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               placeholder="City"
             />
           </div>
           <div>
-            <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="state" className="block text-sm font-medium text-slate-700 mb-1">
               State
             </label>
             <input
@@ -359,7 +359,7 @@ export default function AdminCreateEventPage() {
               name="state"
               value={formData.state}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               placeholder="State"
             />
           </div>
@@ -367,7 +367,7 @@ export default function AdminCreateEventPage() {
 
         {/* Capacity */}
         <div>
-          <label htmlFor="max_attendees" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="max_attendees" className="block text-sm font-medium text-slate-700 mb-1">
             Max Attendees
           </label>
           <input
@@ -377,7 +377,7 @@ export default function AdminCreateEventPage() {
             value={formData.max_attendees}
             onChange={handleChange}
             min="1"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             placeholder="Leave empty for unlimited"
           />
         </div>
@@ -390,29 +390,27 @@ export default function AdminCreateEventPage() {
             name="is_public"
             checked={formData.is_public}
             onChange={handleChange}
-            className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+            className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
           />
-          <label htmlFor="is_public" className="text-sm text-gray-700">
+          <label htmlFor="is_public" className="text-sm text-slate-700">
             Public event (visible to all users)
           </label>
         </div>
 
         {/* Submit */}
-        <div className="flex justify-end gap-4 pt-4 border-t">
+        <div className="flex justify-end gap-3 pt-6 border-t border-slate-200/80">
           <Link
             href="/admin/events"
-            className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="px-5 py-2.5 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 font-medium transition-colors"
           >
             Cancel
           </Link>
-          <button
+          <AdminButton
             type="submit"
-            disabled={isSubmitting}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
+            loading={isSubmitting}
           >
-            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
             Create Event
-          </button>
+          </AdminButton>
         </div>
       </form>
     </div>
