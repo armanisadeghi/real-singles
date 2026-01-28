@@ -5,7 +5,6 @@ import { EventCardProps } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { addEventToCalendar } from "@/utils/permissions";
 import { PlatformIcon } from "@/components/ui";
-import { SymbolView } from "expo-symbols";
 import * as Haptics from "expo-haptics";
 import { BlurView } from "expo-blur";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
@@ -318,15 +317,7 @@ export default function EventDetail() {
             <View style={styles.titleSection}>
               <Text style={styles.title}>{data?.EventName}</Text>
               <View style={styles.locationRow}>
-                {Platform.OS === "ios" ? (
-                  <SymbolView
-                    name="location.fill"
-                    style={styles.locationIcon}
-                    tintColor="#B06D1E"
-                  />
-                ) : (
-                  <PlatformIcon name="location-on" size={16} color="#B06D1E" />
-                )}
+                <PlatformIcon name="location-on" size={16} color="#B06D1E" style={styles.locationIcon} />
                 <Text style={styles.locationText}>{locationString || "Location TBD"}</Text>
               </View>
             </View>
@@ -397,22 +388,14 @@ export default function EventDetail() {
                 <Text style={styles.infoCardTitle}>Event Info</Text>
 
                 <View style={styles.infoRow}>
-                  {Platform.OS === "ios" ? (
-                    <SymbolView name="clock" style={styles.infoIcon} tintColor="#666" />
-                  ) : (
-                    <PlatformIcon name="schedule" size={16} color="#666" />
-                  )}
+                  <PlatformIcon name="schedule" size={16} color="#666" style={styles.infoIcon} />
                   <Text style={styles.infoText}>
                     {data?.StartTime || "TBD"} - {data?.EndTime || "TBD"}
                   </Text>
                 </View>
 
                 <View style={styles.infoRow}>
-                  {Platform.OS === "ios" ? (
-                    <SymbolView name="calendar" style={styles.infoIcon} tintColor="#666" />
-                  ) : (
-                    <PlatformIcon name="event" size={16} color="#666" />
-                  )}
+                  <PlatformIcon name="event" size={16} color="#666" style={styles.infoIcon} />
                   <Text style={styles.infoText}>
                     {data?.EventDate ? formatEventDate(data.EventDate) : "Date TBD"}
                   </Text>
@@ -423,11 +406,7 @@ export default function EventDetail() {
                     style={styles.infoRow}
                     onPress={() => handleOpenLink(data.Link)}
                   >
-                    {Platform.OS === "ios" ? (
-                      <SymbolView name="link" style={styles.infoIcon} tintColor="#B06D1E" />
-                    ) : (
-                      <PlatformIcon name="link" size={16} color="#B06D1E" />
-                    )}
+                    <PlatformIcon name="link" size={16} color="#B06D1E" style={styles.infoIcon} />
                     <Text style={[styles.infoText, styles.linkText]} numberOfLines={1}>
                       {data.Link}
                     </Text>
@@ -458,11 +437,7 @@ export default function EventDetail() {
                   />
                 </MapView>
                 <View style={styles.miniMapOverlay}>
-                  {Platform.OS === "ios" ? (
-                    <SymbolView name="arrow.up.right" style={styles.miniMapIcon} tintColor="#fff" />
-                  ) : (
-                    <PlatformIcon name="open-in-new" size={14} color="#fff" />
-                  )}
+                  <PlatformIcon name="open-in-new" iosName="arrow.up.right" size={14} color="#fff" />
                 </View>
               </TouchableOpacity>
             </View>
@@ -473,10 +448,10 @@ export default function EventDetail() {
         </ScrollView>
 
         {/* Floating Action Bar */}
-        <View style={[styles.actionBarContainer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View style={[styles.actionBarContainer, { paddingBottom: Math.max(insets.bottom + 8, 20) }]}>
           {Platform.OS === "ios" && !reduceTransparency ? (
             <BlurView
-              intensity={80}
+              intensity={100}
               tint="systemChromeMaterial"
               style={styles.actionBar}
             >
@@ -490,7 +465,7 @@ export default function EventDetail() {
               />
             </BlurView>
           ) : (
-            <View style={[styles.actionBar, styles.actionBarFallback]}>
+            <View style={[styles.actionBar, styles.actionBarSolid]}>
               <ActionBarContent
                 isRegistered={isRegistered}
                 isRsvpLoading={isRsvpLoading}
@@ -523,29 +498,43 @@ function ActionBarContent({
   onDirections: () => void;
   onRsvp: () => void;
 }) {
+  const iconColor = Platform.OS === "ios" 
+    ? (PlatformColor("systemBlue") as unknown as string) 
+    : "#007AFF";
+  
+  const labelColor = Platform.OS === "ios"
+    ? (PlatformColor("secondaryLabel") as unknown as string)
+    : "#666";
+
   return (
     <View style={styles.actionBarInner}>
-      {/* Secondary Actions */}
-      <View style={styles.secondaryActions}>
-        <ActionButton
-          iosIcon="square.and.arrow.up"
-          androidIcon="share"
-          onPress={onShare}
-          label="Share"
-        />
-        <ActionButton
-          iosIcon="calendar.badge.plus"
-          androidIcon="event"
-          onPress={onCalendar}
-          label="Calendar"
-        />
-        <ActionButton
-          iosIcon="location.fill"
-          androidIcon="directions"
-          onPress={onDirections}
-          label="Directions"
-        />
-      </View>
+      {/* Action Buttons - Evenly distributed */}
+      <Pressable
+        onPress={onShare}
+        style={({ pressed }) => [styles.actionButton, pressed && styles.actionButtonPressed]}
+        accessibilityLabel="Share"
+      >
+        <PlatformIcon name="share" iosName="square.and.arrow.up" size={24} color={iconColor} />
+        <Text style={[styles.actionLabel, { color: labelColor }]}>Share</Text>
+      </Pressable>
+
+      <Pressable
+        onPress={onCalendar}
+        style={({ pressed }) => [styles.actionButton, pressed && styles.actionButtonPressed]}
+        accessibilityLabel="Add to Calendar"
+      >
+        <PlatformIcon name="event" iosName="calendar.badge.plus" size={24} color={iconColor} />
+        <Text style={[styles.actionLabel, { color: labelColor }]}>Calendar</Text>
+      </Pressable>
+
+      <Pressable
+        onPress={onDirections}
+        style={({ pressed }) => [styles.actionButton, pressed && styles.actionButtonPressed]}
+        accessibilityLabel="Get Directions"
+      >
+        <PlatformIcon name="directions" iosName="location.fill" size={24} color={iconColor} />
+        <Text style={[styles.actionLabel, { color: labelColor }]}>Directions</Text>
+      </Pressable>
 
       {/* Primary RSVP Button */}
       <Pressable
@@ -557,26 +546,18 @@ function ActionBarContent({
           pressed && styles.rsvpButtonPressed,
           isRsvpLoading && styles.rsvpButtonDisabled,
         ]}
+        accessibilityLabel={isRegistered ? "Cancel RSVP" : "RSVP to Event"}
       >
         {isRsvpLoading ? (
           <ActivityIndicator size="small" color={isRegistered ? "#666" : "#fff"} />
         ) : (
           <>
-            {Platform.OS === "ios" ? (
-              <SymbolView
-                name={isRegistered ? "xmark.circle" : "checkmark.circle.fill"}
-                style={styles.rsvpIcon}
-                tintColor={isRegistered ? "#666" : "#fff"}
-              />
-            ) : (
-              <View style={styles.rsvpIcon}>
-                <PlatformIcon
-                  name={isRegistered ? "cancel" : "check-circle"}
-                  size={18}
-                  color={isRegistered ? "#666" : "#fff"}
-                />
-              </View>
-            )}
+            <PlatformIcon
+              name={isRegistered ? "close" : "check-circle"}
+              iosName={isRegistered ? "xmark.circle" : "checkmark.circle.fill"}
+              size={20}
+              color={isRegistered ? "#666" : "#fff"}
+            />
             <Text style={[styles.rsvpText, isRegistered && styles.rsvpTextSecondary]}>
               {isRegistered ? "Cancel" : "RSVP"}
             </Text>
@@ -584,40 +565,6 @@ function ActionBarContent({
         )}
       </Pressable>
     </View>
-  );
-}
-
-// Action Button Component
-function ActionButton({
-  iosIcon,
-  androidIcon,
-  onPress,
-  label,
-}: {
-  iosIcon: string;
-  androidIcon: string;
-  onPress: () => void;
-  label: string;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.actionButton,
-        pressed && styles.actionButtonPressed,
-      ]}
-      accessibilityLabel={label}
-    >
-      {Platform.OS === "ios" ? (
-        <SymbolView
-          name={iosIcon as any}
-          style={styles.actionButtonIcon}
-          tintColor={Platform.OS === "ios" ? (PlatformColor("systemBlue") as unknown as string) : "#007AFF"}
-        />
-      ) : (
-        <PlatformIcon name={androidIcon} size={22} color="#007AFF" />
-      )}
-    </Pressable>
   );
 }
 
@@ -696,8 +643,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   locationIcon: {
-    width: 16,
-    height: 16,
     marginRight: 6,
   },
   locationText: {
@@ -799,8 +744,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   infoIcon: {
-    width: 16,
-    height: 16,
     marginRight: 8,
   },
   infoText: {
@@ -830,78 +773,76 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 4,
   },
-  miniMapIcon: {
-    width: 14,
-    height: 14,
-  },
   actionBarContainer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
+    paddingHorizontal: 16,
   },
   actionBar: {
-    marginHorizontal: 16,
     borderRadius: 20,
     overflow: "hidden",
-  },
-  actionBarFallback: {
-    backgroundColor: "#fff",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
+    shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 8,
   },
+  actionBarSolid: {
+    backgroundColor: Platform.OS === "ios" 
+      ? (PlatformColor("secondarySystemBackground") as unknown as string) 
+      : "#f8f8f8",
+  },
   actionBarInner: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
+    justifyContent: "space-around",
+    paddingHorizontal: 12,
     paddingVertical: 12,
   },
-  secondaryActions: {
-    flexDirection: "row",
-  },
   actionButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(0,122,255,0.1)",
-    justifyContent: "center",
     alignItems: "center",
-    marginRight: 8,
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    minWidth: 60,
   },
   actionButtonPressed: {
-    backgroundColor: Platform.OS === "ios" ? "rgba(0,122,255,0.2)" : "rgba(0,122,255,0.2)",
+    backgroundColor: Platform.OS === "ios" 
+      ? "rgba(0,0,0,0.05)" 
+      : "rgba(0,0,0,0.05)",
   },
-  actionButtonIcon: {
-    width: 22,
-    height: 22,
+  actionLabel: {
+    fontSize: 10,
+    fontWeight: "500",
+    marginTop: 4,
   },
   rsvpButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 24,
+    justifyContent: "center",
+    paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 22,
+    borderRadius: 16,
+    minWidth: 100,
+    gap: 6,
   },
   rsvpButtonPrimary: {
     backgroundColor: "#B06D1E",
   },
   rsvpButtonSecondary: {
-    backgroundColor: Platform.OS === "ios" ? (PlatformColor("systemGray5") as unknown as string) : "#e0e0e0",
+    backgroundColor: Platform.OS === "ios" 
+      ? (PlatformColor("systemGray4") as unknown as string) 
+      : "#d0d0d0",
   },
   rsvpButtonPressed: {
-    opacity: 0.8,
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
   },
   rsvpButtonDisabled: {
     opacity: 0.6,
-  },
-  rsvpIcon: {
-    width: 18,
-    height: 18,
-    marginRight: 8,
   },
   rsvpText: {
     fontSize: 15,
@@ -909,6 +850,8 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   rsvpTextSecondary: {
-    color: "#666",
+    color: Platform.OS === "ios" 
+      ? (PlatformColor("label") as unknown as string) 
+      : "#333",
   },
 });

@@ -4,7 +4,6 @@ import 'react-native-reanimated';
 import * as SplashScreen from 'expo-splash-screen';
 import * as NavigationBar from 'expo-navigation-bar';
 import IncomingCall from "@/components/IncomingCall";
-import NotificationBell from "@/components/NotificationBell";
 import { CallProvider } from "@/context/CallContext";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { AuthProvider, useAuth } from "@/utils/authContext";
@@ -138,13 +137,12 @@ function RootLayoutNav() {
         <Stack.Screen name="voicecall/index" options={{ headerShown: false }} />
         <Stack.Screen name="virtualdate/[id]" options={{ headerShown: false }} />
         
-        {/* Standard screens - Native headers with NotificationBell */}
+        {/* ===== LIST PAGES - Large titles on iOS, clean native headers ===== */}
         <Stack.Screen 
           name="settings/index" 
           options={{ 
             title: 'Settings',
             headerLargeTitle: Platform.OS === 'ios',
-            headerRight: () => <NotificationBell />,
           }} 
         />
         <Stack.Screen 
@@ -152,17 +150,38 @@ function RootLayoutNav() {
           options={{ 
             title: 'Notifications',
             headerLargeTitle: Platform.OS === 'ios',
-            headerRight: () => <NotificationBell />,
           }} 
         />
         <Stack.Screen 
           name="events/index" 
           options={{ 
-            title: 'Nearby Events',
+            title: 'Events',
             headerLargeTitle: Platform.OS === 'ios',
-            headerRight: () => <NotificationBell />,
           }} 
         />
+        <Stack.Screen 
+          name="topMatches/index" 
+          options={{ 
+            title: 'Top Matches',
+            headerLargeTitle: Platform.OS === 'ios',
+          }} 
+        />
+        <Stack.Screen 
+          name="redeem/index" 
+          options={{ 
+            title: 'Redeem Points',
+            headerLargeTitle: Platform.OS === 'ios',
+          }} 
+        />
+        <Stack.Screen 
+          name="speed-dating/index" 
+          options={{ 
+            title: 'Speed Dating',
+            headerLargeTitle: Platform.OS === 'ios',
+          }} 
+        />
+        
+        {/* ===== DETAIL PAGES - Standard headers ===== */}
         <Stack.Screen 
           name="events/event/[id]" 
           options={{ 
@@ -176,11 +195,15 @@ function RootLayoutNav() {
           }} 
         />
         <Stack.Screen 
-          name="topMatches/index" 
+          name="speed-dating/[id]" 
           options={{ 
-            title: 'Top Matches',
-            headerLargeTitle: Platform.OS === 'ios',
-            headerRight: () => <NotificationBell />,
+            title: 'Session Details',
+          }} 
+        />
+        <Stack.Screen 
+          name="redeem/product/[productId]" 
+          options={{ 
+            title: 'Product Details',
           }} 
         />
         <Stack.Screen 
@@ -193,19 +216,6 @@ function RootLayoutNav() {
           name="contact/index" 
           options={{ 
             title: 'Contact Us',
-          }} 
-        />
-        <Stack.Screen 
-          name="redeem/index" 
-          options={{ 
-            title: 'Redeem Points',
-            headerLargeTitle: Platform.OS === 'ios',
-          }} 
-        />
-        <Stack.Screen 
-          name="redeem/product/[productId]" 
-          options={{ 
-            title: 'Product Details',
           }} 
         />
         <Stack.Screen 
@@ -233,13 +243,6 @@ function RootLayoutNav() {
           }} 
         />
         <Stack.Screen 
-          name="nearbyprofile/index" 
-          options={{ 
-            // Full-screen map view - use floating header instead of native header
-            headerShown: false,
-          }} 
-        />
-        <Stack.Screen 
           name="group/create/index" 
           options={{ 
             title: 'Create Group',
@@ -249,6 +252,14 @@ function RootLayoutNav() {
           name="group/addmember/index" 
           options={{ 
             title: 'Add Members',
+          }} 
+        />
+        
+        {/* ===== FULL-SCREEN / CUSTOM HEADER PAGES ===== */}
+        <Stack.Screen 
+          name="nearbyprofile/index" 
+          options={{ 
+            headerShown: false,
           }} 
         />
         <Stack.Screen 

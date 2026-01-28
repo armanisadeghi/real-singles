@@ -439,6 +439,7 @@ export default function SpeedDatingPage() {
           ListHeaderComponent={ListHeader}
           ListFooterComponent={ErrorState}
           contentContainerStyle={{ paddingBottom: contentPadding }}
+          contentInsetAdjustmentBehavior="automatic"
           refreshControl={
             <RefreshControl
               refreshing={isRefreshing}
@@ -455,6 +456,7 @@ export default function SpeedDatingPage() {
           ListHeaderComponent={ListHeader}
           ListEmptyComponent={EmptyState}
           contentContainerStyle={{ paddingBottom: contentPadding }}
+          contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl

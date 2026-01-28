@@ -317,6 +317,7 @@ export default function SpeedDatingDetailScreen() {
         className="flex-1 bg-gray-50" 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: contentPadding }}
+        contentInsetAdjustmentBehavior="automatic"
       >
         {/* Image */}
         <View className="aspect-video">
