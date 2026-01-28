@@ -140,6 +140,11 @@ export default function ProfileIssuesPage() {
     );
   }
 
+  // Guard against null data
+  if (!data) {
+    return null;
+  }
+
   // Show results
   const missingGender = data.summary.byType.missing_gender || 0;
   const missingLookingFor = data.summary.byType.missing_looking_for || 0;

@@ -158,6 +158,11 @@ export default function DataIntegrityPage() {
     );
   }
 
+  // Guard against null data
+  if (!data) {
+    return null;
+  }
+
   // Show results
   const totalIssues =
     data.summary.critical + data.summary.warning + data.summary.info;

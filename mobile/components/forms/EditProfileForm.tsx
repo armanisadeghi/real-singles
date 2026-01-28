@@ -1,5 +1,6 @@
 import { Label, styles } from "@/components/forms/ContactForm";
 import { icons } from "@/constants/icons";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import {
   BODY_TYPE_OPTIONS,
   DATING_INTENTIONS_OPTIONS,

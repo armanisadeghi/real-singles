@@ -139,6 +139,11 @@ export default function AvatarIssuesPage() {
     );
   }
 
+  // Guard against null data
+  if (!data) {
+    return null;
+  }
+
   // Show results
   const missingCount = data.summary.byType.missing_avatar || 0;
   const brokenCount = data.summary.byType.broken_avatar || 0;

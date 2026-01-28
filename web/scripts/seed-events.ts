@@ -16,7 +16,40 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function seedEvents() {
+  const shouldCleanup = process.argv.includes("--clean");
+  
   console.log("🌱 Seeding events and speed dating sessions...\n");
+
+  if (shouldCleanup) {
+    console.log("🧹 Cleaning up existing seed data...");
+    
+    // Delete speed dating sessions without registrations (seed data)
+    const { error: sdDelError } = await supabase
+      .from("virtual_speed_dating")
+      .delete()
+      .eq("status", "scheduled");
+    
+    if (sdDelError) {
+      console.error("Error cleaning speed dating:", sdDelError.message);
+    } else {
+      console.log("   Deleted existing scheduled speed dating sessions");
+    }
+
+    // Delete upcoming events without attendees (seed data)
+    const { error: evDelError } = await supabase
+      .from("events")
+      .delete()
+      .eq("status", "upcoming")
+      .eq("current_attendees", 0);
+    
+    if (evDelError) {
+      console.error("Error cleaning events:", evDelError.message);
+    } else {
+      console.log("   Deleted existing upcoming events with no attendees");
+    }
+    
+    console.log("");
+  }
 
   // Speed Dating Sessions with images
   const speedDatingSessions = [

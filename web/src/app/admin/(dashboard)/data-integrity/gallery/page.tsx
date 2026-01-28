@@ -140,6 +140,11 @@ export default function GalleryIssuesPage() {
     );
   }
 
+  // Guard against null data
+  if (!data) {
+    return null;
+  }
+
   // Show results
   const noPhotos = data.summary.byType.no_gallery_photos || 0;
   const missingPrimary = data.summary.byType.missing_primary_photo || 0;

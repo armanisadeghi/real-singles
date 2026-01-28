@@ -151,6 +151,11 @@ export default function AllIssuesPage() {
     );
   }
 
+  // Guard against null data
+  if (!data) {
+    return null;
+  }
+
   // Show results
   return (
     <div className="space-y-6">
