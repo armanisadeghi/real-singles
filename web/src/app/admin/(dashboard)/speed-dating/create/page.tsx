@@ -134,7 +134,8 @@ export default function AdminCreateSpeedDatingPage() {
         const uploadFormData = new FormData();
         uploadFormData.append("file", imageFile);
         uploadFormData.append("bucket", "events"); // Using events bucket for speed dating images too
-        uploadFormData.append("sessionId", sessionId);
+        uploadFormData.append("eventId", sessionId); // Use eventId (API param name)
+        uploadFormData.append("isSpeedDating", "true"); // Flag for speed dating sessions
 
         const uploadRes = await fetch("/api/upload", {
           method: "POST",
@@ -153,6 +154,8 @@ export default function AdminCreateSpeedDatingPage() {
               body: JSON.stringify({ image_url: imagePath }),
             });
           }
+        } else {
+          console.error("Failed to upload image:", await uploadRes.json());
         }
       }
 

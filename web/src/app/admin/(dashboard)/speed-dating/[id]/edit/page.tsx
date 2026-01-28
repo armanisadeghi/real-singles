@@ -31,6 +31,7 @@ export default function AdminEditSpeedDatingPage({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
   const [formData, setFormData] = useState<SessionFormData>({
     title: "",
     description: "",
@@ -115,6 +116,7 @@ export default function AdminEditSpeedDatingPage({
       };
       reader.readAsDataURL(file);
       setExistingImageUrl(null);
+      setImageRemoved(false); // Reset since we have a new image
     }
   };
 
@@ -122,6 +124,7 @@ export default function AdminEditSpeedDatingPage({
     setImageFile(null);
     setImagePreview(null);
     setExistingImageUrl(null);
+    setImageRemoved(true); // Track that user explicitly removed the image
   };
 
   const validate = (): boolean => {
@@ -152,7 +155,38 @@ export default function AdminEditSpeedDatingPage({
     setIsSubmitting(true);
 
     try {
-      // Update session
+      // Determine the final image URL
+      let finalImageUrl: string | null = existingImageUrl;
+
+      // Upload new image if there is one
+      if (imageFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", imageFile);
+        uploadFormData.append("bucket", "events");
+        uploadFormData.append("eventId", resolvedParams.id); // Use eventId (API param name)
+        uploadFormData.append("isSpeedDating", "true"); // Flag for speed dating sessions
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        });
+
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          finalImageUrl = uploadData.path || null;
+        } else {
+          const errorData = await uploadRes.json();
+          console.error("Upload failed:", errorData);
+          alert(errorData.error || "Failed to upload image");
+          setIsSubmitting(false);
+          return;
+        }
+      } else if (imageRemoved) {
+        // User explicitly removed the image without uploading a new one
+        finalImageUrl = null;
+      }
+
+      // Update session with all data including image_url
       const sessionData = {
         title: formData.title,
         description: formData.description || null,
@@ -165,6 +199,7 @@ export default function AdminEditSpeedDatingPage({
         age_min: formData.age_min ? parseInt(formData.age_min) : null,
         age_max: formData.age_max ? parseInt(formData.age_max) : null,
         status: formData.status,
+        image_url: finalImageUrl, // Always include image_url in the update
       };
 
       const res = await fetch(`/api/admin/speed-dating/${resolvedParams.id}`, {
@@ -178,32 +213,6 @@ export default function AdminEditSpeedDatingPage({
       if (!data.success) {
         alert(data.msg || "Failed to update session");
         return;
-      }
-
-      // Upload new image if there is one
-      if (imageFile) {
-        const uploadFormData = new FormData();
-        uploadFormData.append("file", imageFile);
-        uploadFormData.append("bucket", "events");
-        uploadFormData.append("sessionId", resolvedParams.id);
-
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: uploadFormData,
-        });
-
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          const imagePath = uploadData.path || "";
-
-          if (imagePath) {
-            await fetch(`/api/admin/speed-dating/${resolvedParams.id}`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ image_url: imagePath }),
-            });
-          }
-        }
       }
 
       router.push(`/admin/speed-dating/${resolvedParams.id}`);

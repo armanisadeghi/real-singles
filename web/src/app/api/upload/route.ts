@@ -107,20 +107,18 @@ export async function POST(request: NextRequest) {
         break;
 
       case STORAGE_BUCKETS.EVENTS:
-        // Events bucket requires eventId
+        // Events bucket requires eventId (can be an event or speed dating session)
         if (!eventId) {
           return NextResponse.json(
             { error: "Event ID required for events bucket" },
             { status: 400 }
           );
         }
+        
+        // Check if this is a speed dating session
+        const isSpeedDating = formData.get("isSpeedDating") === "true";
+        
         // Verify user is admin or event creator
-        const { data: eventData } = await supabase
-          .from("events")
-          .select("created_by")
-          .eq("id", eventId)
-          .single();
-
         const { data: userData } = await supabase
           .from("users")
           .select("role")
@@ -128,13 +126,52 @@ export async function POST(request: NextRequest) {
           .single();
 
         const isAdmin = userData?.role === "admin";
-        const isCreator = eventData?.created_by === user.id;
+        
+        if (isSpeedDating) {
+          // For speed dating, check the virtual_speed_dating table
+          const { data: sessionData } = await supabase
+            .from("virtual_speed_dating")
+            .select("id")
+            .eq("id", eventId)
+            .single();
+          
+          // Speed dating sessions can only be managed by admins
+          if (!isAdmin) {
+            return NextResponse.json(
+              { error: "Only admins can upload speed dating session images" },
+              { status: 403 }
+            );
+          }
+          
+          if (!sessionData) {
+            return NextResponse.json(
+              { error: "Speed dating session not found" },
+              { status: 404 }
+            );
+          }
+        } else {
+          // For regular events, check the events table
+          const { data: eventData } = await supabase
+            .from("events")
+            .select("created_by")
+            .eq("id", eventId)
+            .single();
 
-        if (!isAdmin && !isCreator) {
-          return NextResponse.json(
-            { error: "Only admins or event creators can upload event images" },
-            { status: 403 }
-          );
+          const isCreator = eventData?.created_by === user.id;
+
+          if (!isAdmin && !isCreator) {
+            return NextResponse.json(
+              { error: "Only admins or event creators can upload event images" },
+              { status: 403 }
+            );
+          }
+          
+          if (!eventData) {
+            return NextResponse.json(
+              { error: "Event not found" },
+              { status: 404 }
+            );
+          }
         }
 
         filePath = `${eventId}/${timestamp}_${file.name}`;
