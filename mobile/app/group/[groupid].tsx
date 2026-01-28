@@ -40,6 +40,8 @@ export default function GroupChat() {
     secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
     tertiaryText: Platform.OS === 'ios' ? (PlatformColor('tertiaryLabel') as unknown as string) : (isDark ? '#9CA3AF' : '#666666'),
     border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    // Accent color
+    systemPink: Platform.OS === 'ios' ? (PlatformColor('systemPink') as unknown as string) : '#C07618',
   }), [isDark, colors]);
   
   const [userId, setUserId] = useState<string | null>(null);
@@ -635,7 +637,7 @@ export default function GroupChat() {
       {/* Loading or Messages */}
       {loading ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color="#C07618" />
+          <ActivityIndicator size="large" color={themedColors.systemPink} />
           <Text style={{ marginTop: 16, color: themedColors.secondaryText }}>Setting up chat...</Text>
         </View>
       ) : messages.length === 0 ? (

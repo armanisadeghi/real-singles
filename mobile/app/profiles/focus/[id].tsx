@@ -68,6 +68,11 @@ export default function ProfileFocusView() {
     text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
     secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
     separator: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outlineVariant,
+    // System colors for actions
+    systemRed: Platform.OS === 'ios' ? (PlatformColor('systemRed') as unknown as string) : '#EF4444',
+    systemBlue: Platform.OS === 'ios' ? (PlatformColor('systemBlue') as unknown as string) : '#3B82F6',
+    systemPink: Platform.OS === 'ios' ? (PlatformColor('systemPink') as unknown as string) : '#B06D1E',
+    systemGray4: Platform.OS === 'ios' ? (PlatformColor('systemGray4') as unknown as string) : isDark ? '#3A3A3C' : '#D1D1D6',
   }), [isDark, colors]);
   
   // Calculate visible photo height (below safe area)
@@ -243,7 +248,7 @@ export default function ProfileFocusView() {
   if (loading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: themedColors.background }]}>
-        <ActivityIndicator size="large" color="#B06D1E" />
+        <ActivityIndicator size="large" color={themedColors.systemPink} />
       </View>
     );
   }
@@ -306,7 +311,7 @@ export default function ProfileFocusView() {
             </Text>
             {profile.livePicture && (
               <View style={styles.verifiedBadge}>
-                <PlatformIcon name="check-circle" size={20} color="#3B82F6" />
+                <PlatformIcon name="check-circle" iosName="checkmark.seal.fill" size={20} color={themedColors.systemBlue} />
               </View>
             )}
           </View>
@@ -404,46 +409,58 @@ export default function ProfileFocusView() {
       >
         <View style={styles.actionButtons}>
           {/* Pass Button */}
-          <TouchableOpacity
-            style={[styles.actionButton, styles.passButton, { backgroundColor: themedColors.background }]}
+          <Pressable
+            style={({ pressed }) => [
+              styles.actionButton, 
+              styles.passButton, 
+              { backgroundColor: themedColors.background, borderColor: themedColors.systemGray4 },
+              pressed && styles.buttonPressed,
+            ]}
             onPress={() => handleAction("pass")}
             disabled={actionLoading !== null}
-            activeOpacity={0.7}
           >
             {actionLoading === "pass" ? (
-              <ActivityIndicator size="small" color="#EF4444" />
+              <ActivityIndicator size="small" color={themedColors.systemRed} />
             ) : (
-              <PlatformIcon name="close" size={24} color="#EF4444" />
+              <PlatformIcon name="close" iosName="xmark" size={24} color={themedColors.systemRed} />
             )}
-          </TouchableOpacity>
+          </Pressable>
 
           {/* Super Like Button */}
-          <TouchableOpacity
-            style={[styles.actionButton, styles.superLikeButton, { backgroundColor: themedColors.background }]}
+          <Pressable
+            style={({ pressed }) => [
+              styles.actionButton, 
+              styles.superLikeButton, 
+              { backgroundColor: themedColors.background, borderColor: themedColors.systemGray4 },
+              pressed && styles.buttonPressed,
+            ]}
             onPress={() => handleAction("super_like")}
             disabled={actionLoading !== null}
-            activeOpacity={0.7}
           >
             {actionLoading === "super_like" ? (
-              <ActivityIndicator size="small" color="#3B82F6" />
+              <ActivityIndicator size="small" color={themedColors.systemBlue} />
             ) : (
-              <PlatformIcon name="star" size={18} color="#3B82F6" />
+              <PlatformIcon name="star" iosName="star.fill" size={18} color={themedColors.systemBlue} />
             )}
-          </TouchableOpacity>
+          </Pressable>
 
           {/* Like Button */}
-          <TouchableOpacity
-            style={[styles.actionButton, styles.likeButton]}
+          <Pressable
+            style={({ pressed }) => [
+              styles.actionButton, 
+              styles.likeButton,
+              { backgroundColor: themedColors.systemPink },
+              pressed && styles.buttonPressed,
+            ]}
             onPress={() => handleAction("like")}
             disabled={actionLoading !== null}
-            activeOpacity={0.7}
           >
             {actionLoading === "like" ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <PlatformIcon name="favorite" size={24} color="white" />
+              <PlatformIcon name="favorite" iosName="heart.fill" size={24} color="white" />
             )}
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </Animated.View>
     </View>
@@ -560,7 +577,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.bodySemibold,
-    color: "#B06D1E",
+    color: Platform.OS === 'ios' ? (PlatformColor('systemPink') as unknown as string) : '#B06D1E',
     marginBottom: SPACING.sm,
   },
   aboutText: {
@@ -641,22 +658,24 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    // backgroundColor applied inline with themedColors.background
+    // backgroundColor and borderColor applied inline
     borderWidth: 1.5,
-    borderColor: "#FECACA", // Semantic red border - keeps visibility in both modes
   },
   superLikeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    // backgroundColor applied inline with themedColors.background
+    // backgroundColor and borderColor applied inline
     borderWidth: 1.5,
-    borderColor: "#BFDBFE", // Semantic blue border - keeps visibility in both modes
   },
   likeButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#B06D1E",
+    // backgroundColor applied inline with themedColors.systemPink
+  },
+  buttonPressed: {
+    opacity: 0.7,
+    transform: [{ scale: 0.95 }],
   },
 });

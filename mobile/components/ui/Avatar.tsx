@@ -149,10 +149,14 @@ export function Avatar({
   const isDark = colorScheme === 'dark';
   const colors = useThemeColors();
   
-  // Theme-aware border color for online indicator
+  // Theme-aware colors for online indicator
   const indicatorBorderColor = Platform.OS === 'ios'
     ? (PlatformColor('systemBackground') as unknown as string)
     : colors.background;
+  
+  const onlineColor = Platform.OS === 'ios'
+    ? (PlatformColor('systemGreen') as unknown as string)
+    : '#22c55e';
 
   const avatarSize = COMPONENT_SIZES.avatar[size];
   const imageSource = resolveImageSource(src);
@@ -226,6 +230,7 @@ export function Avatar({
               borderRadius: onlineIndicatorSizes[size] / 2,
               borderWidth: size === "xs" || size === "sm" ? 1 : 2,
               borderColor: indicatorBorderColor,
+              backgroundColor: onlineColor,
             },
           ]}
         />
@@ -258,8 +263,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "#22c55e", // Green for online - intentional
-    // borderColor set dynamically
+    // backgroundColor and borderColor set dynamically with platform colors
   },
 });
 

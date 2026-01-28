@@ -8,16 +8,23 @@
 import NotificationBell from "@/components/NotificationBell";
 import ProfileListItem from "@/components/ui/ProfileListItem";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { VERTICAL_SPACING } from "@/constants/designTokens";
+import { useThemeColors } from "@/context/ThemeContext";
 import { getMatches } from "@/lib/api";
 import { User } from "@/types";
+import * as Haptics from "expo-haptics";
+import { SymbolView } from "expo-symbols";
 import { useFocusEffect } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
+  PlatformColor,
   RefreshControl,
   Text,
+  useColorScheme,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -65,6 +72,25 @@ export default function MatchesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [matches, setMatches] = useState<User[]>([]);
 
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const colors = useThemeColors();
+
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === "ios"
+      ? (PlatformColor("systemBackground") as unknown as string)
+      : colors.background,
+    label: Platform.OS === "ios"
+      ? (PlatformColor("label") as unknown as string)
+      : colors.onSurface,
+    secondaryLabel: Platform.OS === "ios"
+      ? (PlatformColor("secondaryLabel") as unknown as string)
+      : colors.onSurfaceVariant,
+    systemPink: Platform.OS === "ios"
+      ? (PlatformColor("systemPink") as unknown as string)
+      : "#F59E0B",
+  }), [isDark, colors]);
+
   const fetchMatches = useCallback(async (showLoader = true) => {
     if (showLoader) {
       setLoading(true);
@@ -76,8 +102,12 @@ export default function MatchesScreen() {
       if (res?.matches) {
         const mappedMatches = res.matches.map(mapMatchToUser);
         setMatches(mappedMatches);
+        if (!showLoader) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
       } else if (res?.error) {
         console.log("Failed to fetch matches:", res.error);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Toast.show({
           type: "error",
           text1: res.error || "Failed to fetch matches",
@@ -88,6 +118,7 @@ export default function MatchesScreen() {
       }
     } catch (error) {
       console.error("Error fetching matches:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({
         type: "error",
         text1: "Failed to fetch matches",
@@ -115,19 +146,27 @@ export default function MatchesScreen() {
   }, [fetchMatches]);
 
   const renderEmptyComponent = () => (
-    <View className="flex-1 items-center justify-center py-20 px-6">
-      <Text className="text-6xl mb-4">💕</Text>
-      <Text className="text-xl font-semibold text-gray-900 mb-2 text-center">
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 80, paddingHorizontal: 24 }}>
+      {Platform.OS === "ios" ? (
+        <SymbolView
+          name="heart.slash"
+          style={{ width: 64, height: 64, marginBottom: 16 }}
+          tintColor={themedColors.systemPink}
+        />
+      ) : (
+        <PlatformIcon name="favorite-border" size={64} color={themedColors.systemPink} />
+      )}
+      <Text style={{ fontSize: 20, fontWeight: "600", color: themedColors.label, marginBottom: 8, textAlign: "center" }}>
         No matches yet
       </Text>
-      <Text className="text-sm text-gray-500 text-center">
+      <Text style={{ fontSize: 14, color: themedColors.secondaryLabel, textAlign: "center" }}>
         Start liking profiles to find your matches!
       </Text>
     </View>
   );
 
   return (
-    <View className="flex-1 bg-background">
+    <View style={{ flex: 1, backgroundColor: themedColors.background }}>
       <Toast />
       <ScreenHeader
         title="Your Matches"
@@ -136,17 +175,19 @@ export default function MatchesScreen() {
       />
       
       {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#F59E0B" />
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator size="large" color={themedColors.systemPink} />
         </View>
       ) : (
-        <View className="flex-1 pb-20">
+        <View style={{ flex: 1, paddingBottom: 80 }}>
           <FlatList
             data={matches}
             contentContainerStyle={{
               gap: VERTICAL_SPACING.xs,
               paddingBottom: 100,
+              flexGrow: 1,
             }}
+            contentInsetAdjustmentBehavior="automatic"
             renderItem={({ item }) => (
               <ProfileListItem
                 key={item.ID}
@@ -161,8 +202,8 @@ export default function MatchesScreen() {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
-                tintColor="#F59E0B"
-                colors={["#F59E0B"]}
+                tintColor={themedColors.systemPink}
+                colors={[themedColors.systemPink]}
               />
             }
           />

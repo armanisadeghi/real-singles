@@ -42,6 +42,9 @@ export default function NearBy() {
     secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
     text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
     secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    // System accent colors
+    systemPink: Platform.OS === 'ios' ? (PlatformColor('systemPink') as unknown as string) : '#B06D1E',
+    systemOrange: Platform.OS === 'ios' ? (PlatformColor('systemOrange') as unknown as string) : '#FFB72B',
   }), [isDark, colors]);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -226,10 +229,15 @@ export default function NearBy() {
     }, [])
   );
 
+  // Primary color for loading indicators
+  const primaryColor = Platform.OS === 'ios' 
+    ? (PlatformColor('systemPink') as unknown as string) 
+    : '#B06D1E';
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#B06D1E" />
+        <ActivityIndicator size="large" color={primaryColor} />
       </View>
     );
   }
@@ -394,8 +402,9 @@ export default function NearBy() {
         >
           <PlatformIcon
             name="location-on"
+            iosName="location.fill"
             size={20}
-            color="#B06D1E"
+            color={themedColors.systemPink}
           />
         </TouchableOpacity>
 
@@ -511,8 +520,9 @@ export default function NearBy() {
                   <View className="flex-row items-center mb-4">
                     <PlatformIcon
                       name="mail"
+                      iosName="envelope.fill"
                       size={20}
-                      color="#B06D1E"
+                      color={themedColors.systemPink}
                       style={{ marginRight: 8 }}
                     />
                     <Text className="flex-1" style={{ color: themedColors.secondaryText }}>
@@ -530,7 +540,7 @@ export default function NearBy() {
                       }}
                     >
                       <LinearGradient
-                        colors={["#FFB72B", "#B06D1E"]}
+                        colors={[themedColors.systemOrange, themedColors.systemPink]}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
                         style={styles.gradientButton}
@@ -647,6 +657,6 @@ const styles = StyleSheet.create({
   mapControlText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#B06D1E",
+    color: Platform.OS === 'ios' ? (PlatformColor('systemPink') as unknown as string) : '#B06D1E',
   },
 });

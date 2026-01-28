@@ -59,6 +59,8 @@ export default function Home() {
     text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
     secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
     border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    // Brand/accent color
+    primary: Platform.OS === 'ios' ? (PlatformColor('systemPink') as unknown as string) : '#B06D1E',
   };
 
   interface HomeData {
@@ -200,32 +202,18 @@ export default function Home() {
     }
   }, [data]);
 
+  // Primary color for loading indicators
+  const primaryColor = Platform.OS === 'ios' 
+    ? (PlatformColor('systemPink') as unknown as string) 
+    : '#B06D1E';
+
   if (isLoading) {
     return (
       <View className="w-full h-full flex items-center justify-center py-4">
-        <ActivityIndicator size="large" color="#B06D1E" />
+        <ActivityIndicator size="large" color={primaryColor} />
       </View>
     );
   }
-
-
-  const BACKGROUND_COLORS = [
-    "#F44336",
-    "#E91E63",
-    "#9C27B0",
-    "#673AB7",
-    "#3F51B5",
-    "#2196F3",
-    "#03A9F4",
-    "#00BCD4",
-    "#009688",
-    "#4CAF50",
-    "#8BC34A",
-    "#FF9800",
-    "#FF5722",
-    "#795548",
-    "#607D8B",
-  ];
 
   return (
     <>
@@ -237,10 +225,10 @@ export default function Home() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#B06D1E"]}
-            tintColor="#B06D1E"
+            colors={[primaryColor]}
+            tintColor={primaryColor}
             title="Pull to refresh..."
-            titleColor="#B06D1E"
+            titleColor={primaryColor}
           />
         }
       >

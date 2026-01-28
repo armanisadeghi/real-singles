@@ -50,6 +50,12 @@ const Call = () => {
         border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
         infoBg: isDark ? '#2C3E50' : '#E8EAF6',
         warnBg: isDark ? '#5D4037' : '#FFF9C4',
+        // Call action colors
+        systemGreen: Platform.OS === 'ios' ? (PlatformColor('systemGreen') as unknown as string) : '#34C759',
+        systemRed: Platform.OS === 'ios' ? (PlatformColor('systemRed') as unknown as string) : '#FF3B30',
+        systemBlue: Platform.OS === 'ios' ? (PlatformColor('systemBlue') as unknown as string) : '#007AFF',
+        systemGray: Platform.OS === 'ios' ? (PlatformColor('systemGray') as unknown as string) : '#8E8E93',
+        systemGray4: Platform.OS === 'ios' ? (PlatformColor('systemGray4') as unknown as string) : isDark ? '#3A3A3C' : '#D1D1D6',
     }), [isDark, colors]);
     
     // Connection states
@@ -278,15 +284,16 @@ const Call = () => {
                                             setIsHost(value);
                                         }}
                                         value={isHost}
-                                        trackColor={{ false: isDark ? '#3A3A3C' : '#767577', true: "#81b0ff" }}
-                                        thumbColor={isHost ? "#0055cc" : isDark ? '#FFFFFF' : "#f4f3f4"}
+                                        trackColor={{ false: themedColors.systemGray4, true: themedColors.systemBlue }}
+                                        thumbColor={Platform.OS === 'ios' ? undefined : (isHost ? themedColors.systemBlue : isDark ? '#FFFFFF' : "#f4f3f4")}
+                                        ios_backgroundColor={themedColors.systemGray4}
                                     />
                                     <Text style={{ color: themedColors.text }}>Host</Text>
                                 </View>
                             </View>
 
                             <TouchableOpacity
-                                style={styles.configButton}
+                                style={[styles.configButton, { backgroundColor: themedColors.systemBlue }]}
                                 onPress={() => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                                     configureCall();
@@ -312,21 +319,21 @@ const Call = () => {
             </View>
             <View style={styles.btnContainer}>
                 {!isJoined ? (
-                    <TouchableOpacity style={styles.joinButton} onPress={() => {
+                    <TouchableOpacity style={[styles.joinButton, { backgroundColor: themedColors.systemGreen }]} onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         join();
                     }}>
                         <Text style={styles.buttonText}>Join Call</Text>
                     </TouchableOpacity>
                 ) : (
-                    <TouchableOpacity style={styles.leaveButton} onPress={() => {
+                    <TouchableOpacity style={[styles.leaveButton, { backgroundColor: themedColors.systemRed }]} onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         leave();
                     }}>
                         <Text style={styles.buttonText}>Leave Call</Text>
                     </TouchableOpacity>
                 )}
-                <TouchableOpacity style={styles.resetButton} onPress={() => {
+                <TouchableOpacity style={[styles.resetButton, { backgroundColor: themedColors.systemGray }]} onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     resetConfiguration();
                 }}>
@@ -447,7 +454,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     configButton: {
-        backgroundColor: '#0055cc', // Brand action color
+        // backgroundColor set dynamically with themedColors.systemBlue
         borderRadius: 8,
         padding: 16,
         alignItems: 'center',
@@ -489,7 +496,7 @@ const styles = StyleSheet.create({
         width: '90%',
     },
     joinButton: {
-        backgroundColor: '#4CAF50', // Green for join
+        // backgroundColor set dynamically with themedColors.systemGreen
         borderRadius: 8,
         padding: 12,
         flex: 1,
@@ -497,7 +504,7 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     leaveButton: {
-        backgroundColor: '#F44336', // Red for leave
+        // backgroundColor set dynamically with themedColors.systemRed
         borderRadius: 8,
         padding: 12,
         flex: 1,
@@ -505,7 +512,7 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     resetButton: {
-        backgroundColor: '#9E9E9E', // Gray for reset
+        // backgroundColor set dynamically with themedColors.systemGray
         borderRadius: 8,
         padding: 12,
         width: 80,
