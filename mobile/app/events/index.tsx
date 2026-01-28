@@ -103,8 +103,12 @@ export default function EventsPage() {
         />
       ) : (
         <View 
-          className="flex-row rounded-lg overflow-hidden"
-          style={{ backgroundColor: "#E5E7EB" }}
+          style={{ 
+            flexDirection: "row", 
+            borderRadius: 8, 
+            overflow: "hidden",
+            backgroundColor: isDark ? "#2C2C2E" : "#E5E7EB",
+          }}
         >
           {["Upcoming", "Past"].map((label, index) => (
             <View
@@ -117,10 +121,11 @@ export default function EventsPage() {
               onTouchEnd={() => handleFilterChange(index)}
             >
               <Text
-                className="text-center font-medium"
                 style={{
                   fontSize: 14,
-                  color: filterIndex === index ? "#FFFFFF" : "#4B5563",
+                  fontWeight: "500",
+                  textAlign: "center",
+                  color: filterIndex === index ? "#FFFFFF" : (isDark ? "#9CA3AF" : "#4B5563"),
                 }}
               >
                 {label}
