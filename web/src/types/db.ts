@@ -43,6 +43,7 @@ export type DbReview = Tables<"reviews">;
 export type DbReport = Tables<"reports">;
 export type DbNotification = Tables<"notifications">;
 export type DbContactSubmission = Tables<"contact_submissions">;
+export type DbAdminEmailLog = Tables<"admin_email_logs">;
 
 // =============================================================================
 // TABLE INSERT TYPES (for INSERT queries - what you SEND to create)
@@ -70,6 +71,7 @@ export type DbReviewInsert = TablesInsert<"reviews">;
 export type DbReportInsert = TablesInsert<"reports">;
 export type DbNotificationInsert = TablesInsert<"notifications">;
 export type DbContactSubmissionInsert = TablesInsert<"contact_submissions">;
+export type DbAdminEmailLogInsert = TablesInsert<"admin_email_logs">;
 
 // =============================================================================
 // TABLE UPDATE TYPES (for UPDATE queries - what you SEND to update)
@@ -97,6 +99,7 @@ export type DbReviewUpdate = TablesUpdate<"reviews">;
 export type DbReportUpdate = TablesUpdate<"reports">;
 export type DbNotificationUpdate = TablesUpdate<"notifications">;
 export type DbContactSubmissionUpdate = TablesUpdate<"contact_submissions">;
+export type DbAdminEmailLogUpdate = TablesUpdate<"admin_email_logs">;
 
 // =============================================================================
 // CASE CONVERSION UTILITIES
@@ -805,6 +808,19 @@ export interface AppUserProfilePrompt {
   updatedAt: string | null;
 }
 
+/**
+ * Admin Email Log type for application use (camelCase)
+ */
+export interface AppAdminEmailLog {
+  id: string;
+  sentBy: string;
+  recipientCount: number;
+  subject: string;
+  successfulCount: number | null;
+  failedCount: number | null;
+  createdAt: string | null;
+}
+
 // =============================================================================
 // ADDITIONAL CONVERSION FUNCTIONS
 // =============================================================================
@@ -948,6 +964,21 @@ export function dbPromptToApp(dbPrompt: DbPromptDefinition): AppPromptDefinition
     icon: dbPrompt.icon,
     createdAt: dbPrompt.created_at,
     updatedAt: dbPrompt.updated_at,
+  };
+}
+
+/**
+ * Convert DbAdminEmailLog to AppAdminEmailLog
+ */
+export function dbAdminEmailLogToApp(dbLog: DbAdminEmailLog): AppAdminEmailLog {
+  return {
+    id: dbLog.id,
+    sentBy: dbLog.sent_by,
+    recipientCount: dbLog.recipient_count,
+    subject: dbLog.subject,
+    successfulCount: dbLog.successful_count,
+    failedCount: dbLog.failed_count,
+    createdAt: dbLog.created_at,
   };
 }
 

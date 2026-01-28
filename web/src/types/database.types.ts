@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_email_logs: {
+        Row: {
+          created_at: string | null
+          failed_count: number | null
+          id: string
+          recipient_count: number
+          sent_by: string
+          subject: string
+          successful_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          failed_count?: number | null
+          id?: string
+          recipient_count: number
+          sent_by: string
+          subject: string
+          successful_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          failed_count?: number | null
+          id?: string
+          recipient_count?: number
+          sent_by?: string
+          subject?: string
+          successful_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_email_logs_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blocks: {
         Row: {
           blocked_id: string | null
