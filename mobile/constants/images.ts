@@ -23,6 +23,7 @@ import lang from "../assets/images/lang.png";
 import locationEvent from "../assets/images/localevent.png";
 import location from "../assets/images/location.png";
 import logo from "../assets/images/logo.png";
+import logoDark from "../assets/images/logo-dark.png";
 import marital from "../assets/images/marital.png";
 import museum from "../assets/images/museum.png";
 import music from "../assets/images/music.png";
@@ -47,6 +48,7 @@ import wavy from "../assets/images/wavy.png";
 
 export const images = {
   logo,
+  logoDark,
   splash1,
   splash2,
   appearance,

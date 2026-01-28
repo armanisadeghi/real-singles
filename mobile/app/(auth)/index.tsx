@@ -144,7 +144,7 @@ export default function AuthHome() {
       contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }} >
         <View className="mt-12">
           <Image
-            source={images.logo}
+            source={isDark ? images.logoDark : images.logo}
             className="mx-auto w-32 h-28"
           />
           <Text className="text-center mt-3 text-dark">

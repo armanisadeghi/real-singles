@@ -252,23 +252,18 @@ export default function Home() {
           <View 
             className="flex-row items-center justify-between"
           >
-            {/* Left: App Logo - with background for dark mode visibility */}
-            <View
-              style={isDark ? {
-                backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                borderRadius: 8,
-                padding: 6,
-              } : undefined}
-            >
-              <Image
-                source={require('../../assets/images/logo.png')}
-                style={{ 
-                  height: 36,
-                  width: 100,
-                  resizeMode: 'contain',
-                }}
-              />
-            </View>
+            {/* Left: App Logo - switches based on color scheme */}
+            <Image
+              source={isDark 
+                ? require('../../assets/images/logo-dark.png')
+                : require('../../assets/images/logo.png')
+              }
+              style={{ 
+                height: 36,
+                width: 100,
+                resizeMode: 'contain',
+              }}
+            />
             
             {/* Right Actions: Points + Notifications + Menu */}
             <View 
