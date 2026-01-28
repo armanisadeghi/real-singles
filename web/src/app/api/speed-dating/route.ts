@@ -77,9 +77,13 @@ export async function GET(request: NextRequest) {
       const imageUrl = await resolveStorageUrl(supabase, session.image_url, { bucket: "events" });
 
       return {
+        // Primary identifiers - use both for backwards compatibility
+        ID: session.id,
         SessionID: session.id,
         Title: session.title,
         Description: session.description,
+        // Image fields - use both for backwards compatibility
+        Image: imageUrl,
         ImageURL: imageUrl,
         ScheduledDateTime: session.scheduled_datetime,
         DurationMinutes: session.duration_minutes,

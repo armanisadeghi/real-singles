@@ -3,8 +3,9 @@ import NotificationBell from "@/components/NotificationBell";
 import { PlatformIcon } from "@/components/ui";
 import { getVirtualSpeedDetails, registerVirtualSlot } from "@/lib/api";
 import { VirtualDataListItem, VirtualDateSpeedDetails } from "@/types";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
@@ -100,7 +101,19 @@ export default function Review() {
     return `${hour.toString().padStart(2, "0")}:${minutes} ${ampm}`;
   };
 
+  // Haptic feedback handlers for native feel
+  const handleSlotSelect = useCallback((item: VirtualDataListItem) => {
+    Haptics.selectionAsync();
+    setSelectedDate(item);
+  }, []);
+
+  const handleBackPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.back();
+  }, [router]);
+
   const handleRegister = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       const data = new FormData();
       // data.append("OtherID", selectedDate?.VirtualDateID);
@@ -112,6 +125,7 @@ export default function Review() {
       console.log("Register Virtual Date Response:", res);
       
       if (res?.success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Toast.show({
           type: "success",
           text1: "Registered Successfully!",
@@ -123,6 +137,7 @@ export default function Review() {
           router.replace('/(tabs)');
         }, 1000);
       } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Toast.show({
           type: "error",
           text1: res?.msg || "Failed to register for virtual date",
@@ -132,6 +147,7 @@ export default function Review() {
         console.log("Failed to register for virtual date:", res);
       }
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error("Error registering for virtual date:", error);
       Toast.show({
         type: "error",
@@ -139,7 +155,7 @@ export default function Review() {
         position: "bottom",
         visibilityTime: 2000,
       });
-    }finally{
+    } finally {
       setRegistering(false);
     }
   };
@@ -175,7 +191,7 @@ export default function Review() {
         >
           <View className="flex-row items-center gap-2">
             <TouchableOpacity
-              onPress={router.back}
+              onPress={handleBackPress}
               className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
             >
               <PlatformIcon name="chevron-left" size={16} color="#000" />
@@ -205,10 +221,11 @@ export default function Review() {
 
             <ScrollView className="my-6">
               {virtual.length ? (
-                virtual.map((item, index) => (
+                virtual.map((item) => (
                   <TouchableOpacity
                     key={item?.SlotID}
-                    onPress={() => setSelectedDate(item)}
+                    onPress={() => handleSlotSelect(item)}
+                    activeOpacity={0.7}
                     className={`p-4 border rounded-[30px] mb-4 ${
                       selectedDate?.SlotID === item?.SlotID
                         ? "bg-[#F3961D33] border-primary"
@@ -233,6 +250,7 @@ export default function Review() {
           <TouchableOpacity
             onPress={handleRegister}
             disabled={!selectedDate || registering}
+            activeOpacity={0.7}
             className="w-3/4 mx-auto border border-primary rounded-[30px] overflow-hidden"
           >
             <LinearBg className="w-full py-4 items-center justify-center" style={{paddingVertical: 10}}>
@@ -248,7 +266,8 @@ export default function Review() {
 
           {/* Cancel Button */}
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={handleBackPress}
+            activeOpacity={0.7}
             className="w-3/4 mx-auto bg-light-100 border border-border rounded-[30px] py-4 flex items-center justify-center"
           >
             <Text className="font-medium text-base text-gray">Cancel</Text>

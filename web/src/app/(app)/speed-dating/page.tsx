@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import Link from "next/link";
 import { Calendar, Clock, Users, Video, MapPin } from "lucide-react";
-import { EmptyState } from "@/components/ui/EmptyState";
 
 interface SpeedDatingSession {
   id: string;
@@ -14,30 +13,39 @@ interface SpeedDatingSession {
   duration_minutes: number;
   round_duration_minutes: number;
   max_participants: number;
-  status: "upcoming" | "ongoing" | "completed" | "cancelled";
+  current_participants: number;
+  status: "scheduled" | "in_progress" | "completed" | "cancelled";
   event_type: "in_person" | "virtual";
   city?: string | null;
   image_url?: string | null;
   registration_count?: number;
 }
 
+/**
+ * Fetches speed dating sessions using the same logic as the API endpoint
+ * Status values: 'scheduled' (upcoming) and 'in_progress' (currently happening)
+ * Database constraint: status IN ('scheduled', 'in_progress', 'completed', 'cancelled')
+ */
 async function getSpeedDatingSessions() {
   const supabase = await createClient();
 
+  // Query for scheduled (upcoming) and in_progress (currently happening) sessions
+  // These are the correct status values per database schema
   const { data: sessions } = await supabase
     .from("virtual_speed_dating")
-    .select("*")
-    .in("status", ["upcoming", "ongoing"])
-    .order("session_date", { ascending: true });
+    .select(`
+      *,
+      speed_dating_registrations(user_id, status)
+    `)
+    .in("status", ["scheduled", "in_progress"])
+    .order("scheduled_datetime", { ascending: true });
 
-  // Get registration counts for each session and resolve image URLs
+  // Format sessions with registration counts and resolved image URLs
   if (sessions) {
     const sessionsWithCounts = await Promise.all(
       sessions.map(async (session) => {
-        const { count } = await supabase
-          .from("speed_dating_registrations")
-          .select("*", { count: "exact", head: true })
-          .eq("session_id", session.id);
+        const registrations = session.speed_dating_registrations || [];
+        const registrationCount = registrations.length;
 
         // Resolve the image URL (speed dating images use the events bucket)
         const resolvedImageUrl = await resolveStorageUrl(supabase, session.image_url, { bucket: "events" });
@@ -57,11 +65,13 @@ async function getSpeedDatingSessions() {
           duration_minutes: durationMinutes,
           round_duration_minutes: roundDurationMinutes,
           max_participants: session.max_participants || 20,
-          status: (session.status || "upcoming") as "upcoming" | "ongoing" | "completed" | "cancelled",
+          current_participants: registrationCount,
+          // Map DB status to display-friendly label (scheduled = upcoming, in_progress = live)
+          status: session.status as "scheduled" | "in_progress" | "completed" | "cancelled",
           event_type: "virtual" as const,
           city: null,
           image_url: resolvedImageUrl || null,
-          registration_count: count || 0,
+          registration_count: registrationCount,
         } as SpeedDatingSession;
       })
     );
@@ -144,12 +154,20 @@ export default async function SpeedDatingPage() {
       </div>
 
       {/* Sessions list */}
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Upcoming Sessions</h2>
+        <p className="text-sm text-gray-500">Register now to secure your spot</p>
+      </div>
+      
       {sessions.length === 0 ? (
-        <EmptyState
-          type="events"
-          title="No upcoming sessions"
-          description="Check back soon for new speed dating events"
-        />
+        <div className="bg-gray-50 rounded-xl p-8 text-center">
+          <Video className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="font-semibold text-gray-900 mb-2">No sessions scheduled right now</h3>
+          <p className="text-gray-500 text-sm max-w-md mx-auto">
+            We host virtual speed dating sessions regularly. Check back soon or enable notifications 
+            to be the first to know when a new session is scheduled!
+          </p>
+        </div>
       ) : (
         <div className="space-y-4">
           {sessions.map((session) => (
@@ -187,14 +205,14 @@ export default async function SpeedDatingPage() {
                     </div>
                     <span
                       className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-medium ${
-                        session.status === "upcoming"
+                        session.status === "scheduled"
                           ? "bg-green-100 text-green-700"
-                          : session.status === "ongoing"
-                          ? "bg-yellow-100 text-yellow-700"
+                          : session.status === "in_progress"
+                          ? "bg-amber-100 text-amber-700"
                           : "bg-gray-100 text-gray-700"
                       }`}
                     >
-                      {session.status}
+                      {session.status === "scheduled" ? "Upcoming" : session.status === "in_progress" ? "Live" : session.status}
                     </span>
                   </div>
 

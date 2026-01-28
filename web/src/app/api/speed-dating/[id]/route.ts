@@ -19,6 +19,26 @@ interface SessionWithRegistrations extends DbVirtualSpeedDating {
 interface ParticipantProfile extends Pick<DbProfile, "user_id" | "first_name" | "gender" | "profile_image_url" | "is_verified"> {}
 
 /**
+ * Map database status values to display-friendly status values
+ * Database: scheduled, in_progress, completed, cancelled
+ * Display: upcoming, ongoing, completed, cancelled
+ */
+function mapStatusForDisplay(dbStatus: string | null): "upcoming" | "ongoing" | "completed" | "cancelled" {
+  switch (dbStatus) {
+    case "scheduled":
+      return "upcoming";
+    case "in_progress":
+      return "ongoing";
+    case "completed":
+      return "completed";
+    case "cancelled":
+      return "cancelled";
+    default:
+      return "upcoming";
+  }
+}
+
+/**
  * Helper to format datetime for display
  */
 function formatTimeFromDatetime(datetime: string | null): string {
@@ -135,7 +155,7 @@ export async function GET(
       duration_minutes: session.duration_minutes || 45,
       round_duration_minutes: roundDurationMinutes,
       max_participants: session.max_participants || 20,
-      status: session.status || "upcoming",
+      status: mapStatusForDisplay(session.status),
       event_type: "virtual" as const,
       city: null,
       venue_name: null,
