@@ -30,17 +30,19 @@ import {
   BackHandler,
   Image,
   Platform,
+  PlatformColor,
   Pressable,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+import { useThemeColors } from "@/context/ThemeContext";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -55,6 +57,18 @@ export default function ProfileFocusView() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    tertiaryBackground: Platform.OS === 'ios' ? (PlatformColor('tertiarySystemBackground') as unknown as string) : colors.surfaceContainerLow,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    separator: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outlineVariant,
+  }), [isDark, colors]);
   
   // Calculate visible photo height (below safe area)
   // We add insets.top to get the total height for edge-to-edge display
@@ -228,7 +242,7 @@ export default function ProfileFocusView() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: themedColors.background }]}>
         <ActivityIndicator size="large" color="#B06D1E" />
       </View>
     );
@@ -239,8 +253,7 @@ export default function ProfileFocusView() {
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: themedColors.background }]}>
       <Toast />
 
       {/* Photo Section */}
@@ -319,7 +332,7 @@ export default function ProfileFocusView() {
 
       {/* Info Section */}
       <ScrollView
-        style={styles.infoSection}
+        style={[styles.infoSection, { backgroundColor: themedColors.background }]}
         contentContainerStyle={styles.infoContent}
         showsVerticalScrollIndicator={false}
       >
@@ -327,7 +340,7 @@ export default function ProfileFocusView() {
         {profile.About && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>About</Text>
-            <Text style={styles.aboutText}>{profile.About}</Text>
+            <Text style={[styles.aboutText, { color: themedColors.secondaryText }]}>{profile.About}</Text>
           </View>
         )}
 
@@ -337,8 +350,8 @@ export default function ProfileFocusView() {
             <Text style={styles.sectionTitle}>Interests</Text>
             <View style={styles.interestsContainer}>
               {interests.map((interest, index) => (
-                <View key={index} style={styles.interestTag}>
-                  <Text style={styles.interestText}>
+                <View key={index} style={[styles.interestTag, { backgroundColor: isDark ? 'rgba(254, 243, 199, 0.2)' : '#FEF3C7' }]}>
+                  <Text style={[styles.interestText, { color: isDark ? '#FFBA70' : '#92400E' }]}>
                     {interest.trim().charAt(0).toUpperCase() + interest.trim().slice(1)}
                   </Text>
                 </View>
@@ -352,23 +365,23 @@ export default function ProfileFocusView() {
           <Text style={styles.sectionTitle}>Info</Text>
           <View style={styles.quickInfoGrid}>
             {profile.Gender && (
-              <View style={styles.quickInfoItem}>
-                <Text style={styles.quickInfoLabel}>Gender</Text>
-                <Text style={styles.quickInfoValue}>
+              <View style={[styles.quickInfoItem, { backgroundColor: themedColors.secondaryBackground }]}>
+                <Text style={[styles.quickInfoLabel, { color: themedColors.secondaryText }]}>Gender</Text>
+                <Text style={[styles.quickInfoValue, { color: themedColors.text }]}>
                   {profile.Gender.charAt(0).toUpperCase() + profile.Gender.slice(1)}
                 </Text>
               </View>
             )}
             {profile.Height && (
-              <View style={styles.quickInfoItem}>
-                <Text style={styles.quickInfoLabel}>Height</Text>
-                <Text style={styles.quickInfoValue}>{Number(profile.Height).toFixed(1)} ft</Text>
+              <View style={[styles.quickInfoItem, { backgroundColor: themedColors.secondaryBackground }]}>
+                <Text style={[styles.quickInfoLabel, { color: themedColors.secondaryText }]}>Height</Text>
+                <Text style={[styles.quickInfoValue, { color: themedColors.text }]}>{Number(profile.Height).toFixed(1)} ft</Text>
               </View>
             )}
             {profile.HSign && (
-              <View style={styles.quickInfoItem}>
-                <Text style={styles.quickInfoLabel}>Zodiac</Text>
-                <Text style={styles.quickInfoValue}>
+              <View style={[styles.quickInfoItem, { backgroundColor: themedColors.secondaryBackground }]}>
+                <Text style={[styles.quickInfoLabel, { color: themedColors.secondaryText }]}>Zodiac</Text>
+                <Text style={[styles.quickInfoValue, { color: themedColors.text }]}>
                   {profile.HSign.charAt(0).toUpperCase() + profile.HSign.slice(1)}
                 </Text>
               </View>
@@ -383,12 +396,16 @@ export default function ProfileFocusView() {
       {/* Action Bar */}
       <Animated.View
         entering={SlideInDown.springify()}
-        style={[styles.actionBar, { paddingBottom: Math.max(insets.bottom, 8) + 8 }]}
+        style={[styles.actionBar, { 
+          paddingBottom: Math.max(insets.bottom, 8) + 8,
+          backgroundColor: isDark ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+          borderTopColor: themedColors.separator,
+        }]}
       >
         <View style={styles.actionButtons}>
           {/* Pass Button */}
           <TouchableOpacity
-            style={[styles.actionButton, styles.passButton]}
+            style={[styles.actionButton, styles.passButton, { backgroundColor: themedColors.background }]}
             onPress={() => handleAction("pass")}
             disabled={actionLoading !== null}
             activeOpacity={0.7}
@@ -402,7 +419,7 @@ export default function ProfileFocusView() {
 
           {/* Super Like Button */}
           <TouchableOpacity
-            style={[styles.actionButton, styles.superLikeButton]}
+            style={[styles.actionButton, styles.superLikeButton, { backgroundColor: themedColors.background }]}
             onPress={() => handleAction("super_like")}
             disabled={actionLoading !== null}
             activeOpacity={0.7}
@@ -436,13 +453,13 @@ export default function ProfileFocusView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    // backgroundColor applied inline with themedColors.background
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    // backgroundColor applied inline with themedColors.background
   },
   photoSection: {
     width: "100%",
@@ -533,7 +550,7 @@ const styles = StyleSheet.create({
   },
   infoSection: {
     flex: 1,
-    backgroundColor: "white",
+    // backgroundColor applied inline with themedColors.background
   },
   infoContent: {
     padding: SPACING.lg,
@@ -548,7 +565,7 @@ const styles = StyleSheet.create({
   },
   aboutText: {
     ...TYPOGRAPHY.body,
-    color: "#4B5563",
+    // color applied inline with themedColors.secondaryText
     lineHeight: 22,
   },
   interestsContainer: {
@@ -557,14 +574,14 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   interestTag: {
-    backgroundColor: "#FEF3C7",
+    // backgroundColor applied inline with dark mode support
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
     borderRadius: BORDER_RADIUS.full,
   },
   interestText: {
     ...TYPOGRAPHY.caption1,
-    color: "#92400E",
+    // color applied inline with dark mode support
     fontWeight: "500",
   },
   quickInfoGrid: {
@@ -573,7 +590,7 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   quickInfoItem: {
-    backgroundColor: "#F3F4F6",
+    // backgroundColor applied inline with themedColors.secondaryBackground
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.md,
@@ -581,12 +598,12 @@ const styles = StyleSheet.create({
   },
   quickInfoLabel: {
     ...TYPOGRAPHY.caption2,
-    color: "#6B7280",
+    // color applied inline with themedColors.secondaryText
     marginBottom: 2,
   },
   quickInfoValue: {
     ...TYPOGRAPHY.subheadline,
-    color: "#111827",
+    // color applied inline with themedColors.text
     fontWeight: "500",
   },
   actionBar: {
@@ -596,9 +613,8 @@ const styles = StyleSheet.create({
     right: 0,
     paddingTop: SPACING.sm,
     paddingHorizontal: SPACING.lg,
-    backgroundColor: "rgba(255, 255, 255, 0.98)",
+    // backgroundColor and borderTopColor applied inline with dark mode support
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "rgba(0, 0, 0, 0.1)",
   },
   actionButtons: {
     flexDirection: "row",
@@ -625,17 +641,17 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "white",
+    // backgroundColor applied inline with themedColors.background
     borderWidth: 1.5,
-    borderColor: "#FECACA",
+    borderColor: "#FECACA", // Semantic red border - keeps visibility in both modes
   },
   superLikeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "white",
+    // backgroundColor applied inline with themedColors.background
     borderWidth: 1.5,
-    borderColor: "#BFDBFE",
+    borderColor: "#BFDBFE", // Semantic blue border - keeps visibility in both modes
   },
   likeButton: {
     width: 48,

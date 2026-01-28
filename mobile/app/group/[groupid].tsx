@@ -3,6 +3,7 @@ import GroupConversation from "@/components/chat/GroupConversation";
 import { ScreenHeader, HeaderBackButton } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
 import { SPACING, TYPOGRAPHY, ICON_SIZES } from "@/constants/designTokens";
+import { useThemeColors } from "@/context/ThemeContext";
 import { fetchUserProfile } from "@/lib/api";
 import {
   chatClient,
@@ -15,8 +16,8 @@ import { getCurrentUserId, IMAGE_URL, MEDIA_BASE_URL, VIDEO_URL } from "@/utils/
 import * as Haptics from "expo-haptics";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Image, KeyboardAvoidingView, Modal, Platform, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
+import { ActivityIndicator, Alert, FlatList, Image, KeyboardAvoidingView, Modal, Platform, PlatformColor, Text, TouchableOpacity, useColorScheme, View } from "react-native";
 
 export default function GroupChat() {
   const { groupid, name, image, members, createdBy } = useLocalSearchParams<{
@@ -28,6 +29,19 @@ export default function GroupChat() {
   }>();
 
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    tertiaryText: Platform.OS === 'ios' ? (PlatformColor('tertiaryLabel') as unknown as string) : (isDark ? '#9CA3AF' : '#666666'),
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+  }), [isDark, colors]);
+  
   const [userId, setUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -455,7 +469,7 @@ export default function GroupChat() {
   ];
 
   return (
-    <KeyboardAvoidingView enabled={true} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+    <KeyboardAvoidingView enabled={true} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, backgroundColor: themedColors.background }}>
       {/* Members Modal */}
       <Modal
         visible={showMembers}
@@ -464,18 +478,18 @@ export default function GroupChat() {
         onRequestClose={() => setShowMembers(false)}
         statusBarTranslucent={Platform.OS === 'android'}
       >
-        <View className="flex-1 bg-black/40 justify-end">
-          <View className="bg-white rounded-t-2xl p-5 max-h-[60%]">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: themedColors.secondaryBackground, borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 20, maxHeight: '60%' }}>
             {/* Header */}
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-base font-medium text-black">
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={{ fontSize: 16, fontWeight: '500', color: themedColors.text }}>
                 Members ({groupMembers.length})
               </Text>
               <TouchableOpacity onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setShowMembers(false);
               }}>
-                <PlatformIcon name="close" size={24} color="#000" />
+                <PlatformIcon name="close" size={24} color={themedColors.text} />
               </TouchableOpacity>
             </View>
 
@@ -484,18 +498,23 @@ export default function GroupChat() {
               data={groupMembers}
               keyExtractor={(item, index) => `${index}`}
               renderItem={({ item }) => (
-                <View className="flex-row items-center py-3 border-b border-gray-100">
+                <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: themedColors.border }}>
                   {/* Profile Image / Icon */}
                   {item.Image ? (
                     <Image
                       source={{ uri: item.Image.startsWith('http') ? item.Image : MEDIA_BASE_URL + item.Image }}
-                      className="w-9 h-9 rounded-full mr-3"
+                      style={{ width: 36, height: 36, borderRadius: 18, marginRight: 12 }}
                       resizeMode="cover"
                     />
                   ) : (
                     <View
-                      className="w-9 h-9 rounded-full mr-3 justify-center items-center"
                       style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 18,
+                        marginRight: 12,
+                        justifyContent: 'center',
+                        alignItems: 'center',
                         backgroundColor: BACKGROUND_COLORS[
                           Math.abs(
                             (item.Username || "U")
@@ -506,7 +525,7 @@ export default function GroupChat() {
                         ],
                       }}
                     >
-                      <Text className="text-white font-bold text-xs">
+                      <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 12 }}>
                         {(item.Username || "U")
                           .split(" ")
                           .map((part: any) => part?.charAt(0) || "")
@@ -519,11 +538,11 @@ export default function GroupChat() {
 
                   {/* Name & Email */}
                   <View>
-                    <Text className="text-sm font-medium text-black">
+                    <Text style={{ fontSize: 14, fontWeight: '500', color: themedColors.text }}>
                       {item.Username || item.ID || "Unknown User"}
                     </Text>
                     {item.Email && (
-                      <Text className="text-xs text-gray">
+                      <Text style={{ fontSize: 12, color: themedColors.secondaryText }}>
                         {item.Email}
                       </Text>
                     )}
@@ -582,10 +601,10 @@ export default function GroupChat() {
               </View>
             )}
             <View>
-              <Text style={[TYPOGRAPHY.subheadline, { color: "#000" }]}>
+              <Text style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
                 {name || groupid}
               </Text>
-              <Text style={[TYPOGRAPHY.caption1, { color: "#6B7280" }]}>
+              <Text style={[TYPOGRAPHY.caption1, { color: themedColors.secondaryText }]}>
                 {chatReady ? "Connected" : "Connecting..."}
               </Text>
             </View>
@@ -603,26 +622,26 @@ export default function GroupChat() {
               height: 36,
               borderRadius: 18,
               borderWidth: 1,
-              borderColor: "#D1D5DB",
+              borderColor: themedColors.border,
               justifyContent: "center",
               alignItems: "center",
             }}
           >
-            <PlatformIcon name="group" size={22} color="#000" />
+            <PlatformIcon name="group" size={22} color={themedColors.text} />
           </TouchableOpacity>
         }
       />
 
       {/* Loading or Messages */}
       {loading ? (
-        <View className="flex-1 justify-center items-center">
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color="#C07618" />
-          <Text className="mt-4 text-gray">Setting up chat...</Text>
+          <Text style={{ marginTop: 16, color: themedColors.secondaryText }}>Setting up chat...</Text>
         </View>
       ) : messages.length === 0 ? (
-        <View className="flex-1 justify-center items-center">
-          <Text className="text-gray">No messages yet</Text>
-          <Text className="text-xs text-gray mt-2">Start the conversation!</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: themedColors.secondaryText }}>No messages yet</Text>
+          <Text style={{ fontSize: 12, color: themedColors.secondaryText, marginTop: 8 }}>Start the conversation!</Text>
         </View>
       ) : (
         <GroupConversation messages={messages} currentUserId={userId} />

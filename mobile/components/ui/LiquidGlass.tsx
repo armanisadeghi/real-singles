@@ -14,10 +14,13 @@ import React, { useEffect, useState } from 'react';
 import { 
   AccessibilityInfo, 
   Platform, 
+  PlatformColor,
   StyleProp, 
   View, 
-  ViewStyle 
+  ViewStyle,
+  useColorScheme 
 } from 'react-native';
+import { useThemeColors } from '@/context/ThemeContext';
 
 // Type for glass effect styles
 type GlassStyle = 'clear' | 'regular';
@@ -200,10 +203,21 @@ export function LiquidGlassHeader({
   transparent = true,
 }: LiquidGlassHeaderProps) {
   const { showGlass } = useLiquidGlass();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  // Theme-aware fallback colors
+  const solidBg = Platform.OS === 'ios'
+    ? (PlatformColor('systemBackground') as unknown as string)
+    : colors.background;
+  const translucentBg = isDark 
+    ? 'rgba(28, 28, 30, 0.95)' 
+    : 'rgba(255, 255, 255, 0.95)';
   
   if (!transparent) {
     return (
-      <View style={[style, { backgroundColor: '#FFFFFF' }]}>
+      <View style={[style, { backgroundColor: solidBg }]}>
         {children}
       </View>
     );
@@ -223,7 +237,7 @@ export function LiquidGlassHeader({
   
   // Fallback with subtle transparency
   return (
-    <View style={[style, { backgroundColor: 'rgba(255, 255, 255, 0.95)' }]}>
+    <View style={[style, { backgroundColor: translucentBg }]}>
       {children}
     </View>
   );
@@ -247,6 +261,13 @@ export function LiquidGlassFAB({
   size = 56,
 }: LiquidGlassFABProps) {
   const { showGlass } = useLiquidGlass();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  
+  // Theme-aware fallback color
+  const fallbackBg = isDark 
+    ? 'rgba(28, 28, 30, 0.95)' 
+    : 'rgba(255, 255, 255, 0.95)';
   
   const fabStyle: ViewStyle = {
     width: size,
@@ -275,7 +296,7 @@ export function LiquidGlassFAB({
       style={[
         fabStyle, 
         { 
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backgroundColor: fallbackBg,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.15,

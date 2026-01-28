@@ -18,10 +18,14 @@ import React, {
 import {
   ActivityIndicator,
   Alert,
+  Platform,
+  PlatformColor,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View
 } from "react-native";
+import { useThemeColors } from "@/context/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CircularProgress from "react-native-circular-progress-indicator";
 
@@ -33,6 +37,19 @@ export default function Profile() {
   const [currentSnapPointIndex, setCurrentSnapPointIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // Dark mode support
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+  };
 
   const fetchProfile = async () => {
     setLoading(true);

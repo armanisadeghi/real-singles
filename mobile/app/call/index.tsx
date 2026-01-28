@@ -1,5 +1,5 @@
 // Import React Hooks
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 // Import user interface elements
 import {
     Alert,
@@ -7,17 +7,20 @@ import {
     KeyboardAvoidingView,
     PermissionsAndroid,
     Platform,
+    PlatformColor,
     ScrollView,
     StyleSheet,
     Switch,
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
+    useColorScheme
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { useThemeColors } from '@/context/ThemeContext';
 // Import Agora SDK
 import {
     ChannelProfileType,
@@ -33,6 +36,21 @@ import {
 const Call = () => {
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const colorScheme = useColorScheme();
+    const isDark = colorScheme === 'dark';
+    const colors = useThemeColors();
+    
+    // Theme-aware colors for debug screen
+    const themedColors = useMemo(() => ({
+        background: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : (isDark ? '#1C1C1E' : '#F5F5F5'),
+        cardBackground: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.surface,
+        text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+        secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+        inputBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : (isDark ? '#2C2C2E' : '#F5F5F5'),
+        border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+        infoBg: isDark ? '#2C3E50' : '#E8EAF6',
+        warnBg: isDark ? '#5D4037' : '#FFF9C4',
+    }), [isDark, colors]);
     
     // Connection states
     const [isJoined, setIsJoined] = useState(false);
@@ -192,74 +210,78 @@ const Call = () => {
     // Configuration UI
     if (!isConfigured) {
         return (
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView style={[styles.container, { backgroundColor: themedColors.background }]}>
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     style={styles.keyboardAvoid}
                 >
                     <ScrollView contentContainerStyle={styles.scrollContent}>
-                        <View style={styles.formContainer}>
-                            <Text style={styles.title}>Configure Video Call</Text>
+                        <View style={[styles.formContainer, { backgroundColor: themedColors.cardBackground }]}>
+                            <Text style={[styles.title, { color: themedColors.text }]}>Configure Video Call</Text>
 
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>App ID</Text>
+                                <Text style={[styles.label, { color: themedColors.text }]}>App ID</Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input, { backgroundColor: themedColors.inputBackground, borderColor: themedColors.border, color: themedColors.text }]}
                                     value={appId}
                                     onChangeText={setAppId}
                                     placeholder="Enter App ID"
-                                    placeholderTextColor="#8D8D8D"
+                                    placeholderTextColor={isDark ? '#9CA3AF' : '#8D8D8D'}
+                                    keyboardAppearance={isDark ? 'dark' : 'light'}
                                 />
                             </View>
                             
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Token <Text style={styles.required}>*</Text></Text>
+                                <Text style={[styles.label, { color: themedColors.text }]}>Token <Text style={styles.required}>*</Text></Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input, { backgroundColor: themedColors.inputBackground, borderColor: themedColors.border, color: themedColors.text }]}
                                     value={token}
                                     onChangeText={setToken}
                                     placeholder="Enter token"
-                                    placeholderTextColor="#8D8D8D"
+                                    placeholderTextColor={isDark ? '#9CA3AF' : '#8D8D8D'}
+                                    keyboardAppearance={isDark ? 'dark' : 'light'}
                                 />
                             </View>
                             
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Channel Name <Text style={styles.required}>*</Text></Text>
+                                <Text style={[styles.label, { color: themedColors.text }]}>Channel Name <Text style={styles.required}>*</Text></Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input, { backgroundColor: themedColors.inputBackground, borderColor: themedColors.border, color: themedColors.text }]}
                                     value={channelName}
                                     onChangeText={setChannelName}
                                     placeholder="Enter channel name"
-                                    placeholderTextColor="#8D8D8D"
+                                    placeholderTextColor={isDark ? '#9CA3AF' : '#8D8D8D'}
+                                    keyboardAppearance={isDark ? 'dark' : 'light'}
                                 />
                             </View>
                             
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Local UID <Text style={styles.required}>*</Text></Text>
+                                <Text style={[styles.label, { color: themedColors.text }]}>Local UID <Text style={styles.required}>*</Text></Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input, { backgroundColor: themedColors.inputBackground, borderColor: themedColors.border, color: themedColors.text }]}
                                     value={localUid}
                                     onChangeText={setLocalUid}
                                     placeholder="Enter your UID (numbers only)"
-                                    placeholderTextColor="#8D8D8D"
+                                    placeholderTextColor={isDark ? '#9CA3AF' : '#8D8D8D'}
                                     keyboardType="numeric"
+                                    keyboardAppearance={isDark ? 'dark' : 'light'}
                                 />
                             </View>
                             
                             <View style={styles.roleContainer}>
-                                <Text style={styles.label}>User Role:</Text>
+                                <Text style={[styles.label, { color: themedColors.text }]}>User Role:</Text>
                                 <View style={styles.switchContainer}>
-                                    <Text>Audience</Text>
+                                    <Text style={{ color: themedColors.text }}>Audience</Text>
                                     <Switch
                                         onValueChange={(value) => {
                                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                                             setIsHost(value);
                                         }}
                                         value={isHost}
-                                        trackColor={{ false: "#767577", true: "#81b0ff" }}
-                                        thumbColor={isHost ? "#0055cc" : "#f4f3f4"}
+                                        trackColor={{ false: isDark ? '#3A3A3C' : '#767577', true: "#81b0ff" }}
+                                        thumbColor={isHost ? "#0055cc" : isDark ? '#FFFFFF' : "#f4f3f4"}
                                     />
-                                    <Text>Host</Text>
+                                    <Text style={{ color: themedColors.text }}>Host</Text>
                                 </View>
                             </View>
 
@@ -281,12 +303,12 @@ const Call = () => {
 
     // Call UI (after configuration)
     return (
-        <SafeAreaView style={[styles.main, { paddingTop: insets.top }]} edges={['left', 'right', 'bottom']}>
-            <Text style={styles.head}>Agora Video Call</Text>
-            <View style={styles.infoContainer}>
-                <Text style={styles.infoText}>Channel: {channelName}</Text>
-                <Text style={styles.infoText}>UID: {localUid}</Text>
-                <Text style={styles.infoText}>Role: {isHost ? 'Host' : 'Audience'}</Text>
+        <SafeAreaView style={[styles.main, { paddingTop: insets.top, backgroundColor: themedColors.background }]} edges={['left', 'right', 'bottom']}>
+            <Text style={[styles.head, { color: themedColors.text }]}>Agora Video Call</Text>
+            <View style={[styles.infoContainer, { backgroundColor: themedColors.infoBg }]}>
+                <Text style={[styles.infoText, { color: themedColors.text }]}>Channel: {channelName}</Text>
+                <Text style={[styles.infoText, { color: themedColors.text }]}>UID: {localUid}</Text>
+                <Text style={[styles.infoText, { color: themedColors.text }]}>Role: {isHost ? 'Host' : 'Audience'}</Text>
             </View>
             <View style={styles.btnContainer}>
                 {!isJoined ? (
@@ -312,7 +334,7 @@ const Call = () => {
                 </TouchableOpacity>
             </View>
             <ScrollView
-                style={styles.scroll}
+                style={[styles.scroll, { backgroundColor: themedColors.cardBackground }]}
                 contentContainerStyle={styles.scrollContainer}>
                 {isJoined && isHost ? (
                     <View style={styles.videoContainer}>
@@ -326,7 +348,7 @@ const Call = () => {
                         />
                     </View>
                 ) : (
-                    <Text style={styles.waitingText}>
+                    <Text style={[styles.waitingText, { color: themedColors.secondaryText }]}>
                         {!isJoined ? 'Click Join to start the call' : 'Viewing as audience'}
                     </Text>
                 )}
@@ -342,11 +364,10 @@ const Call = () => {
                         />
                     </View>
                 ) : (
-                    <Text style={styles.waitingText}>
+                    <Text style={[styles.waitingText, { color: themedColors.secondaryText }]}>
                         {isJoined ? 'Waiting for remote user to join' : ''}
-                    </Text>
                 )}
-                {message ? <Text style={styles.info}>{message}</Text> : null}
+                {message ? <Text style={[styles.info, { backgroundColor: themedColors.warnBg, color: themedColors.text }]}>{message}</Text> : null}
             </ScrollView>
         </SafeAreaView>
     );
@@ -362,11 +383,11 @@ const getPermission = async () => {
     }
 };
 
-// Enhanced styles
+// Enhanced styles - colors are now applied inline with themedColors
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F5F5',
+        // backgroundColor set dynamically
     },
     keyboardAvoid: {
         flex: 1,
@@ -377,7 +398,7 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     formContainer: {
-        backgroundColor: 'white',
+        // backgroundColor set dynamically
         borderRadius: 12,
         padding: 20,
         shadowColor: '#000',
@@ -394,7 +415,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 24,
         textAlign: 'center',
-        color: '#333',
+        // color set dynamically
     },
     inputGroup: {
         marginBottom: 16,
@@ -403,18 +424,17 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '500',
         marginBottom: 6,
-        color: '#333',
+        // color set dynamically
     },
     required: {
         color: 'red',
     },
     input: {
-        backgroundColor: '#F5F5F5',
+        // backgroundColor, borderColor, color set dynamically
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
     },
     roleContainer: {
         marginVertical: 16,
@@ -426,14 +446,14 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     configButton: {
-        backgroundColor: '#0055cc',
+        backgroundColor: '#0055cc', // Brand action color
         borderRadius: 8,
         padding: 16,
         alignItems: 'center',
         marginTop: 16,
     },
     buttonText: {
-        color: 'white',
+        color: 'white', // White on colored buttons
         fontSize: 16,
         fontWeight: 'bold',
     },
@@ -441,15 +461,16 @@ const styles = StyleSheet.create({
     main: { 
         flex: 1, 
         alignItems: 'center', 
-        backgroundColor: '#F5F5F5',
+        // backgroundColor set dynamically
     },
     head: { 
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 16,
+        // color set dynamically
     },
     infoContainer: {
-        backgroundColor: '#E8EAF6',
+        // backgroundColor set dynamically
         padding: 12,
         borderRadius: 8,
         marginBottom: 16,
@@ -458,6 +479,7 @@ const styles = StyleSheet.create({
     infoText: {
         fontSize: 14,
         marginBottom: 4,
+        // color set dynamically
     },
     btnContainer: { 
         flexDirection: 'row', 
@@ -466,7 +488,7 @@ const styles = StyleSheet.create({
         width: '90%',
     },
     joinButton: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#4CAF50', // Green for join
         borderRadius: 8,
         padding: 12,
         flex: 1,
@@ -474,7 +496,7 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     leaveButton: {
-        backgroundColor: '#F44336',
+        backgroundColor: '#F44336', // Red for leave
         borderRadius: 8,
         padding: 12,
         flex: 1,
@@ -482,7 +504,7 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     resetButton: {
-        backgroundColor: '#9E9E9E',
+        backgroundColor: '#9E9E9E', // Gray for reset
         borderRadius: 8,
         padding: 12,
         width: 80,
@@ -495,7 +517,7 @@ const styles = StyleSheet.create({
     },
     scroll: { 
         flex: 1, 
-        backgroundColor: '#FFFFFF', 
+        // backgroundColor set dynamically
         width: '100%',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
@@ -509,11 +531,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         borderRadius: 12,
         overflow: 'hidden',
-        backgroundColor: '#F0F0F0',
+        backgroundColor: '#333333', // Dark for video placeholder
     },
     uidLabel: {
         padding: 8,
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        backgroundColor: 'rgba(0,0,0,0.6)', // Overlay label
         color: 'white',
         position: 'absolute',
         top: 0,
@@ -529,13 +551,13 @@ const styles = StyleSheet.create({
     waitingText: {
         marginVertical: 20,
         fontSize: 16,
-        color: '#666',
+        // color set dynamically
     },
     info: { 
-        backgroundColor: '#FFF9C4', 
+        // backgroundColor set dynamically
         padding: 12,
         borderRadius: 8, 
-        color: '#333',
+        // color set dynamically
         marginTop: 20,
         width: '100%',
     },

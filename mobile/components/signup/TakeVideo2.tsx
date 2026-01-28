@@ -1,14 +1,25 @@
 import { CommonFileUpload } from '@/lib/api';
+import { useThemeColors } from '@/context/ThemeContext';
 import { signupProps } from '@/types';
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import * as FileSystem from "expo-file-system";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, PermissionsAndroid, Platform, PlatformColor, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 import Video from 'react-native-video';
 import { Camera, useCameraDevice, useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
 import GradientButton from '../ui/GradientButton';
 
 const TakeVideo2 = ({ updateData, onNext }: signupProps) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
+
   const camera = useRef<Camera | null>(null);
   const videoPathRef = useRef<string | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0); 

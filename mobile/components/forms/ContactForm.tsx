@@ -1,13 +1,17 @@
 import { contactUs } from "@/lib/api";
+import { useThemeColors } from "@/context/ThemeContext";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
+  PlatformColor,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
+  useColorScheme,
 } from "react-native";
 import LinearBg from "../LinearBg";
 
@@ -28,6 +32,15 @@ export const Label = ({ text, marginLeft }: { text: string, marginLeft?: string 
 );
 
 export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    placeholder: isDark ? '#9CA3AF' : '#888888',
+  };
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<Formdata>({
     Name: "",
@@ -96,7 +109,7 @@ export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) 
           <Label text="Full Name" />
           <TextInput
             placeholder="John Doe"
-            placeholderTextColor={"#A0A0A0"}
+            placeholderTextColor={themedColors.placeholder}
             className="border border-border bg-light-100 rounded-full px-[15px] py-[12px]"
             value={formData.Name}
             onChangeText={(text) => handleChange("Name", text)}
@@ -110,7 +123,7 @@ export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) 
           <Label text="Phone Number" />
           <TextInput
             placeholder="+1(41)4258741"
-            placeholderTextColor={"#A0A0A0"}
+            placeholderTextColor={themedColors.placeholder}
             keyboardType="phone-pad"
             className="border border-border bg-light-100 rounded-full px-[15px] py-[12px]"
             value={formData.Phone}
@@ -125,7 +138,7 @@ export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) 
           <Label text="Email Address" />
           <TextInput
             placeholder="email@example.com"
-            placeholderTextColor={"#A0A0A0"}
+            placeholderTextColor={themedColors.placeholder}
             keyboardType="email-address"
             className="border border-border bg-light-100 rounded-full px-[15px] py-[12px]"
             value={formData.Email}
@@ -140,7 +153,7 @@ export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) 
           <Label text="Leave us Message" />
           <TextInput
             placeholder="Your message here"
-            placeholderTextColor={"#A0A0A0"}
+            placeholderTextColor={themedColors.placeholder}
             multiline
             numberOfLines={3}
             textAlignVertical="top"

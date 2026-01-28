@@ -78,7 +78,6 @@ export default function Notification() {
 );
   return (
     <>
-      {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
       <View className="flex-1 bg-background">
         <Toast/>
         <View className="mt-4 px-2">

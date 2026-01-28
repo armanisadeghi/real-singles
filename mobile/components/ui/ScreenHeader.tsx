@@ -14,12 +14,13 @@
  */
 
 import React, { ReactNode, useCallback } from "react";
-import { View, Text, TouchableOpacity, Platform, StyleSheet, ViewStyle } from "react-native";
+import { View, Text, TouchableOpacity, Platform, StyleSheet, ViewStyle, PlatformColor, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { PlatformIcon } from "./PlatformIcon";
 import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES, SHADOWS, BORDER_RADIUS, Z_INDEX } from "@/constants/designTokens";
 import { LiquidGlassHeader } from "./LiquidGlass";
+import { useThemeColors } from "@/context/ThemeContext";
 
 export interface ScreenHeaderProps {
   /** Screen title displayed in the center-left */
@@ -54,23 +55,35 @@ export interface ScreenHeaderProps {
  * Standard back button component used across all screens
  */
 export const HeaderBackButton = ({ onPress }: { onPress?: () => void }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
   const handlePress = useCallback(() => {
     // Haptic feedback for navigation - light impact feels native
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress?.();
   }, [onPress]);
 
+  // Theme-aware colors
+  const iconColor = Platform.OS === 'ios' 
+    ? (PlatformColor('label') as unknown as string)
+    : colors.onSurface;
+  const borderColor = Platform.OS === 'ios'
+    ? (PlatformColor('separator') as unknown as string)
+    : colors.outline;
+
   return (
     <TouchableOpacity
       onPress={handlePress}
       activeOpacity={0.7}
-      style={styles.backButton}
+      style={[styles.backButton, { borderColor }]}
       hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
     >
       <PlatformIcon 
         name="chevron-left" 
         size={ICON_SIZES.sm * 0.9} 
-        color="#000000" 
+        color={iconColor} 
       />
     </TouchableOpacity>
   );
@@ -79,11 +92,18 @@ export const HeaderBackButton = ({ onPress }: { onPress?: () => void }) => {
 /**
  * Standard header title component
  */
-export const HeaderTitle = ({ title }: { title: string }) => (
-  <Text style={styles.title} numberOfLines={1}>
-    {title}
-  </Text>
-);
+export const HeaderTitle = ({ title }: { title: string }) => {
+  const colors = useThemeColors();
+  const textColor = Platform.OS === 'ios'
+    ? (PlatformColor('label') as unknown as string)
+    : colors.onSurface;
+    
+  return (
+    <Text style={[styles.title, { color: textColor }]} numberOfLines={1}>
+      {title}
+    </Text>
+  );
+};
 
 /**
  * Main ScreenHeader component
@@ -95,7 +115,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   leftContent,
   centerContent,
   rightContent,
-  backgroundColor = "#FFFFFF",
+  backgroundColor,
   showShadow = true,
   showBorderRadius = true,
   transparent = false,
@@ -104,6 +124,15 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   liquidGlass = false,
 }) => {
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  // Theme-aware default background color
+  const defaultBgColor = Platform.OS === 'ios'
+    ? (PlatformColor('systemBackground') as unknown as string)
+    : colors.background;
+  const bgColor = backgroundColor ?? defaultBgColor;
   
   // Calculate consistent padding
   // iOS: Account for notch/Dynamic Island (44-59pt depending on device)
@@ -121,7 +150,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
     {
       paddingTop: topPadding,
       paddingBottom: VERTICAL_SPACING.md,
-      backgroundColor: useGlass || transparent ? "transparent" : backgroundColor,
+      backgroundColor: useGlass || transparent ? "transparent" : bgColor,
       minHeight: topPadding + headerHeight,
     },
     showShadow && !transparent && !useGlass && SHADOWS.md,
@@ -221,7 +250,7 @@ const styles = StyleSheet.create({
     width: ICON_SIZES.xl,
     height: ICON_SIZES.xl,
     borderWidth: 1,
-    borderColor: "#CCCCCC",
+    // borderColor is now set dynamically in component
     borderRadius: BORDER_RADIUS.button,
     justifyContent: "center",
     alignItems: "center",
@@ -229,7 +258,7 @@ const styles = StyleSheet.create({
   title: {
     ...TYPOGRAPHY.body,
     fontWeight: "500",
-    color: "#000000",
+    // color is now set dynamically in component
     marginLeft: SPACING.xs,
   },
 });

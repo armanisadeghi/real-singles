@@ -4,6 +4,7 @@ import { EventCardProps } from "@/types";
 import { addEventToCalendar } from "@/utils/permissions";
 import { VIDEO_URL } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui";
+import { useThemeColors } from "@/context/ThemeContext";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -13,9 +14,11 @@ import {
   Linking,
   Modal,
   Platform,
+  PlatformColor,
   Share,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
   ActivityIndicator,
 } from "react-native";
@@ -75,6 +78,17 @@ export default function EventDetails({
   const [mapModalVisible, setMapModalVisible] = useState(false);
   const [isRsvpLoading, setIsRsvpLoading] = useState(false);
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainerLow,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+  };
 
   const mapRegion = {
     latitude: parseFloat(event?.Latitude) || 37.78825,
@@ -390,10 +404,10 @@ export default function EventDetails({
           {/* Show more count if there are more than 3 interested users */}
           {event?.interestedUserImage && event?.interestedUserImage.length > 3 && (
             <View 
-              className="w-[26px] h-[26px] rounded-full bg-[#F0F0F0] border-2 border-white justify-center items-center ml-[-8px]"
-              style={{ zIndex: 0 }}
+              className="w-[26px] h-[26px] rounded-full border-2 border-white justify-center items-center ml-[-8px]"
+              style={{ zIndex: 0, backgroundColor: themedColors.secondaryBackground }}
             >
-              <Text className="text-[#515151] text-[8px] font-bold">
+              <Text className="text-[8px] font-bold" style={{ color: themedColors.secondaryText }}>
                 +{event.interestedUserImage.length - 3}
               </Text>
             </View>
@@ -426,7 +440,8 @@ export default function EventDetails({
         <View>
           <Text
             numberOfLines={expanded ? undefined : 3}
-            className="text-[12px] font-normal text-[#686A6F] leading-5"
+            className="text-[12px] font-normal leading-5"
+            style={{ color: themedColors.secondaryText }}
           >
             {event?.Description}
           </Text>
@@ -455,7 +470,7 @@ export default function EventDetails({
               className="w-3 h-3"
               resizeMode="contain"
             />
-            <Text className="text-[10px] font-normal text-[#686A6F]">
+            <Text className="text-[10px] font-normal" style={{ color: themedColors.secondaryText }}>
               {event?.StartTime} - {event?.EndTime}
             </Text>
           </View>
@@ -465,7 +480,7 @@ export default function EventDetails({
               className="w-3 h-3"
               resizeMode="contain"
             />
-            <Text className="text-[10px] font-normal text-[#686A6F]">
+            <Text className="text-[10px] font-normal" style={{ color: themedColors.secondaryText }}>
               {event?.EventDate
                 ? formatEventDate(event?.EventDate)
                 : "Date not available"}
@@ -535,7 +550,7 @@ export default function EventDetails({
       >
         <View className="flex-1">
           {/* Header with close button */}
-          <View className="bg-white p-4 flex-row justify-between items-center" style={{marginTop: 40}}>
+          <View className="p-4 flex-row justify-between items-center" style={{marginTop: 40, backgroundColor: themedColors.background}}>
             <Text className="font-bold text-lg text-primary" >
               {event?.EventName} - Location
             </Text>
@@ -543,7 +558,7 @@ export default function EventDetails({
               onPress={() => setMapModalVisible(false)}
               className="p-2"
             >
-              <PlatformIcon name="close" size={24} color="#333" />
+              <PlatformIcon name="close" size={24} color={themedColors.text as string} />
             </TouchableOpacity>
           </View>
 
@@ -569,10 +584,10 @@ export default function EventDetails({
           </MapView>
 
           {/* Footer with location info */}
-          <View className="bg-white p-4">
+          <View className="p-4" style={{ backgroundColor: themedColors.background }}>
             <View className="flex-row items-center mb-2">
               <PlatformIcon name="location-on" size={16} color="#B06D1E" />
-              <Text className="text-sm ml-2">
+              <Text className="text-sm ml-2" style={{ color: themedColors.text }}>
                 {event?.Street}, {event?.City}
               </Text>
             </View>

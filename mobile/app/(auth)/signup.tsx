@@ -27,7 +27,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, BackHandler, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, BackHandler, Platform, PlatformColor, ScrollView, Text, useColorScheme, View } from "react-native";
+import { useThemeColors } from "@/context/ThemeContext";
 
 const getSections = (signupData: any, updateSignupData: any, goToNextSection: any, sectionError: any) => [
   {
@@ -251,6 +252,19 @@ const Signup = () => {
   const [showReview, setShowReview] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const router = useRouter();
+  
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    inputBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainerHigh,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
   const [signupData, setSignupData] = useState<SignupData>({
     Username: "",
     Email: "",
@@ -584,7 +598,7 @@ const Signup = () => {
 
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#FFFAF2" }}>
+    <View style={{ flex: 1, backgroundColor: themedColors.background }}>
       {isSubmitted ? (
         <Success
           image={images.signupSuccess}

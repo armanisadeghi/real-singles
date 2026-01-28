@@ -1,8 +1,9 @@
 import { icons } from "@/constants/icons";
 import { supabase } from "@/lib/supabase";
 import { PlatformIcon } from "@/components/ui";
+import { useThemeColors } from "@/context/ThemeContext";
 import React, { useState } from "react";
-import { Image, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, Modal, Platform, PlatformColor, ScrollView, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Pdf from "react-native-pdf";
 import { WebView } from "react-native-webview";
@@ -14,6 +15,16 @@ const SignupLogin = ({
   onNext,
   error,
 }: any) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
+
   const [validationError, setValidationError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -172,8 +183,8 @@ const SignupLogin = ({
               value={data.Username}
               onChangeText={(text) => updateData({ Username: text })}
               placeholder="Username"
-              placeholderTextColor="#B0B0B0"
-              style={{ flex: 1, color: 'black' }}
+              placeholderTextColor={themedColors.placeholder}
+              style={{ flex: 1, color: themedColors.text }}
               autoCapitalize="none"
               autoComplete="username"
               importantForAutofill="yes"
@@ -195,8 +206,8 @@ const SignupLogin = ({
               value={data.Email}
               onChangeText={(text) => updateData({ Email: text })}
               placeholder="Email"
-              placeholderTextColor="#B0B0B0"
-              style={{ flex: 1 , color: 'black'}}
+              placeholderTextColor={themedColors.placeholder}
+              style={{ flex: 1, color: themedColors.text }}
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
@@ -219,10 +230,10 @@ const SignupLogin = ({
               value={data.Password}
               onChangeText={(text) => updateData({ Password: text })}
               placeholder="Password (min 8 characters)"
-              placeholderTextColor="#B0B0B0"
+              placeholderTextColor={themedColors.placeholder}
               secureTextEntry={!showPassword}
-              className="text-dark"
-              style={{ flex: 1, color: 'black' }}
+              className="text-dark dark:text-white"
+              style={{ flex: 1, color: themedColors.text }}
               autoComplete="new-password"
               importantForAutofill="yes"
               textContentType="newPassword"
@@ -259,10 +270,10 @@ const SignupLogin = ({
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Confirm Password"
-              placeholderTextColor="#B0B0B0"
+              placeholderTextColor={themedColors.placeholder}
               secureTextEntry={!showConfirmPassword}
-              className="text-dark"
-              style={{ flex: 1, color: 'black' }}
+              className="text-dark dark:text-white"
+              style={{ flex: 1, color: themedColors.text }}
               autoComplete="new-password"
               importantForAutofill="yes"
               textContentType="newPassword"
@@ -313,7 +324,7 @@ const SignupLogin = ({
         )}
       </TouchableOpacity>
 
-      <Text style={{ marginLeft: 8, color: "#333", fontSize: 15}}>
+      <Text style={{ marginLeft: 8, color: themedColors.text, fontSize: 15}}>
         Please agree to our{" "}
         <Text
           style={{ color: "skyblue", textDecorationLine: "underline"}}
@@ -342,7 +353,7 @@ const SignupLogin = ({
         )}
       </TouchableOpacity>
 
-      <Text style={{ marginLeft: 8, color: "#333", fontSize: 15 }}>
+      <Text style={{ marginLeft: 8, color: themedColors.text, fontSize: 15 }}>
         Please agree to our{" "}
         <Text
           style={{ color: "skyblue", textDecorationLine: "underline"}}

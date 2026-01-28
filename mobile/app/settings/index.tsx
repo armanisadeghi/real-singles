@@ -5,20 +5,23 @@ import { User } from "@/types";
 import { authenticateForAccountDeletion, shouldUseBiometrics } from "@/utils/biometrics";
 import { IMAGE_URL, MEDIA_BASE_URL, removeToken } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui";
+import { useThemeColors } from "@/context/ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
   Modal,
   Platform,
+  PlatformColor,
   Switch,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -34,6 +37,20 @@ export default function Settings() {
   const [profileHidden, setProfileHidden] = useState(false);
   const [pauseLoading, setPauseLoading] = useState(false);
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    tertiaryText: Platform.OS === 'ios' ? (PlatformColor('tertiaryLabel') as unknown as string) : (isDark ? '#9CA3AF' : '#666666'),
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    cardBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : (isDark ? '#1C1C1E' : '#FFFFFF'),
+    rowBackground: Platform.OS === 'ios' ? (PlatformColor('tertiarySystemBackground') as unknown as string) : (isDark ? '#2C2C2E' : '#F5F5F5'),
+  }), [isDark, colors]);
   // const { profile } = useLocalSearchParams();
   // const profileData = JSON.parse(profile as string);
   // let profileData = null;
@@ -281,10 +298,10 @@ export default function Settings() {
 
   return (
     <>
-      <View className="flex-1 bg-background">
+      <View style={{ flex: 1, backgroundColor: themedColors.background }}>
         <Toast />
         {loading && (
-          <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-black/20 z-50">
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)', zIndex: 50 }}>
             <ActivityIndicator size="large" color="#B06D1E" />
           </View>
         )}
@@ -296,16 +313,16 @@ export default function Settings() {
             animationType="slide"
             onRequestClose={() => setVisible(false)}
           >
-            <SafeAreaView className="flex-1 bg-white">
+            <SafeAreaView style={{ flex: 1, backgroundColor: themedColors.background }}>
               {/* Header */}
-              <View className="flex-row justify-between items-center p-4 bg-gray-100 border-b border-gray-300">
-                <Text className="text-base font-bold text-gray-800">
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: themedColors.secondaryBackground, borderBottomWidth: 1, borderBottomColor: themedColors.border }}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: themedColors.text }}>
                   {pdfSource === require("../../assets/docs/PrivacyPolicy.pdf")
                     ? "Privacy Policy"
                     : "Terms & Conditions"}
                 </Text>
                 <TouchableOpacity onPress={() => setVisible(false)}>
-                  <PlatformIcon name="close" size={24} color="#666" />
+                  <PlatformIcon name="close" size={24} color={themedColors.secondaryText} />
                 </TouchableOpacity>
               </View>
 
@@ -325,10 +342,10 @@ export default function Settings() {
             animationType="slide"
             onRequestClose={() => setShowWebView(false)}
           >
-            <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-300 mt-10">
-              <Text className="text-lg font-semibold">{webViewTitle}</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: themedColors.border, marginTop: 40, backgroundColor: themedColors.background }}>
+              <Text style={{ fontSize: 18, fontWeight: '600', color: themedColors.text }}>{webViewTitle}</Text>
               <TouchableOpacity onPress={() => setShowWebView(false)}>
-                <PlatformIcon name="close" size={24} color="#000" />
+                <PlatformIcon name="close" size={24} color={themedColors.text} />
               </TouchableOpacity>
             </View>
 
@@ -340,26 +357,31 @@ export default function Settings() {
             />
           </Modal>}
 
-        <ScrollView className="flex-1">
-          <View className="items-center mt-8 mb-6">
-            <View className="rounded-full overflow-hidden border-2 border-primary">
+        <ScrollView style={{ flex: 1 }}>
+          <View style={{ alignItems: 'center', marginTop: 32, marginBottom: 24 }}>
+            <View style={{ borderRadius: 50, overflow: 'hidden', borderWidth: 2, borderColor: '#B06D1E' }}>
 
               <Image
                 source={getProfileImage()}
                 style={{ width: 100, height: 100 }}
               />
             </View>
-            <Text className="mt-3 font-semibold text-lg text-dark">
+            <Text style={{ marginTop: 12, fontWeight: '600', fontSize: 18, color: themedColors.text }}>
               {profile?.DisplayName || "User"}
             </Text>
-            <Text className="text-gray-500">
+            <Text style={{ color: themedColors.secondaryText }}>
               {profile?.Email || appleUserInfo?.email || "No email provided"}
             </Text>
           </View>
 
           <View
-            className="mx-5 rounded-xl overflow-hidden bg-white py-6 px-5"
             style={{
+              marginHorizontal: 20,
+              borderRadius: 12,
+              overflow: 'hidden',
+              backgroundColor: themedColors.cardBackground,
+              paddingVertical: 24,
+              paddingHorizontal: 20,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 0 },
               shadowOpacity: 0.1,
@@ -367,9 +389,9 @@ export default function Settings() {
               elevation: 5,
             }}
           >
-            <View className="rounded-xl overflow-hidden mt-4">
+            <View style={{ borderRadius: 12, overflow: 'hidden', marginTop: 16 }}>
               <TouchableOpacity
-                className="flex-row items-center bg-light-100 mb-4 px-4 py-4 border border-border rounded-full"
+                style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: themedColors.rowBackground, marginBottom: 16, paddingHorizontal: 16, paddingVertical: 16, borderWidth: 1, borderColor: themedColors.border, borderRadius: 9999 }}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   router.push({
@@ -378,25 +400,25 @@ export default function Settings() {
                   });
                 }}
               >
-                <PlatformIcon name="person-outline" size={20} color="#333" />
-                <Text className="ml-3 flex-1 text-dark">Edit Profile</Text>
+                <PlatformIcon name="person-outline" size={20} color={themedColors.text} />
+                <Text style={{ marginLeft: 12, flex: 1, color: themedColors.text }}>Edit Profile</Text>
                 <PlatformIcon
                   name="keyboard-arrow-right"
                   size={22}
-                  color="#999"
+                  color={themedColors.tertiaryText}
                 />
               </TouchableOpacity>
               <View
-                className="flex-row items-center bg-light-100 mb-4 px-4 py-4 border border-border rounded-full"
+                style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: themedColors.rowBackground, marginBottom: 16, paddingHorizontal: 16, paddingVertical: 16, borderWidth: 1, borderColor: themedColors.border, borderRadius: 9999 }}
               >
                 <PlatformIcon
                   name={profileHidden ? "pause-circle-outline" : "play-circle-outline"}
                   size={22}
-                  color={profileHidden ? "#F97316" : "#333"}
+                  color={profileHidden ? "#F97316" : themedColors.text}
                 />
-                <View className="ml-3 flex-1">
-                  <Text className="text-dark">Pause Account</Text>
-                  <Text className="text-xs text-gray-500">
+                <View style={{ marginLeft: 12, flex: 1 }}>
+                  <Text style={{ color: themedColors.text }}>Pause Account</Text>
+                  <Text style={{ fontSize: 12, color: themedColors.secondaryText }}>
                     {profileHidden 
                       ? "Your profile is hidden" 
                       : "Hide from discovery"}
@@ -406,9 +428,9 @@ export default function Settings() {
                   value={profileHidden}
                   onValueChange={handlePauseToggle}
                   disabled={pauseLoading}
-                  trackColor={{ false: "#E5E7EB", true: "#FDBA74" }}
+                  trackColor={{ false: isDark ? '#3A3A3C' : '#E5E7EB', true: "#FDBA74" }}
                   thumbColor={profileHidden ? "#F97316" : "#f4f3f4"}
-                  ios_backgroundColor="#E5E7EB"
+                  ios_backgroundColor={isDark ? '#3A3A3C' : '#E5E7EB'}
                 />
               </View>
 
@@ -418,55 +440,53 @@ export default function Settings() {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   Platform.OS == 'ios' ? openModal(require("../../assets/docs/PrivacyPolicy.pdf")) : goToPrivacy();
                 }}
-                className="flex-row items-center bg-light-100 mb-4 px-4 py-4 border border-border rounded-full"
+                style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: themedColors.rowBackground, marginBottom: 16, paddingHorizontal: 16, paddingVertical: 16, borderWidth: 1, borderColor: themedColors.border, borderRadius: 9999 }}
               >
                 <PlatformIcon
                   name="info-outline"
                   size={22}
-                  color="#333"
+                  color={themedColors.text}
                 />
-                <Text className="ml-3 flex-1 text-dark">Privacy Policy</Text>
+                <Text style={{ marginLeft: 12, flex: 1, color: themedColors.text }}>Privacy Policy</Text>
                 <PlatformIcon
                   name="keyboard-arrow-right"
                   size={22}
-                  color="#999"
+                  color={themedColors.tertiaryText}
                 />
               </TouchableOpacity>
             </View>
 
-            <View className="rounded-xl overflow-hidden">
-              <TouchableOpacity className="flex-row items-center bg-light-100 mb-4 px-4 py-4 border border-border rounded-full"
+            <View style={{ borderRadius: 12, overflow: 'hidden' }}>
+              <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: themedColors.rowBackground, marginBottom: 16, paddingHorizontal: 16, paddingVertical: 16, borderWidth: 1, borderColor: themedColors.border, borderRadius: 9999 }}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   router.push({
                     pathname: "/appGallery",
                   });
                 }}>
-                {/* <Ionicons name="help-circle-outline" size={22} color="#333" /> */}
                 <PlatformIcon
                   name="photo-library"
                   size={22}
-                  color="#333"
+                  color={themedColors.text}
                 />
-                {/* <Text className="ml-3 flex-1 text-dark">Help & Support</Text> */}
-                <Text className="ml-3 flex-1 text-dark">App Gallery</Text>
+                <Text style={{ marginLeft: 12, flex: 1, color: themedColors.text }}>App Gallery</Text>
                 <PlatformIcon
                   name="keyboard-arrow-right"
                   size={22}
-                  color="#999"
+                  color={themedColors.tertiaryText}
                 />
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-row items-center bg-light-100 mb-4 px-4 py-4 border border-border rounded-full"
+                style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: themedColors.rowBackground, marginBottom: 16, paddingHorizontal: 16, paddingVertical: 16, borderWidth: 1, borderColor: themedColors.border, borderRadius: 9999 }}
                 onPress={handleDeleteAccount}
               >
-                <PlatformIcon name="delete-outline" size={22} color="#333" />
-                <Text className="ml-3 flex-1 text-dark">Delete Account</Text>
+                <PlatformIcon name="delete-outline" size={22} color={themedColors.text} />
+                <Text style={{ marginLeft: 12, flex: 1, color: themedColors.text }}>Delete Account</Text>
                 <PlatformIcon
                   name="keyboard-arrow-right"
                   size={22}
-                  color="#999"
+                  color={themedColors.tertiaryText}
                 />
               </TouchableOpacity>
             </View>
@@ -474,16 +494,16 @@ export default function Settings() {
 
           <TouchableOpacity
             onPress={handleLogout}
-            className="overflow-hidden w-3/4 mx-auto my-6 rounded-full"
+            style={{ overflow: 'hidden', width: '75%', alignSelf: 'center', marginVertical: 24, borderRadius: 9999 }}
           >
-            <LinearBg className="py-4 rounded-full" style={{ paddingVertical: 10 }}>
-              <View className="flex-row items-center justify-center">
-                <Text className="text-white text-lg font-semibold">Logout</Text>
+            <LinearBg style={{ paddingVertical: 10, borderRadius: 9999 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ color: '#FFFFFF', fontSize: 18, fontWeight: '600' }}>Logout</Text>
               </View>
             </LinearBg>
           </TouchableOpacity>
 
-          <Text className="text-gray text-center">Version {appVersion}</Text>
+          <Text style={{ color: themedColors.secondaryText, textAlign: 'center' }}>Version {appVersion}</Text>
         </ScrollView>
       </View>
     </>

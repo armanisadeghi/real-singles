@@ -1,7 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { SymbolView, SFSymbol } from 'expo-symbols';
 import React from 'react';
-import { Platform, StyleProp, ViewStyle } from 'react-native';
+import { Platform, StyleProp, ViewStyle, PlatformColor, useColorScheme } from 'react-native';
 
 /**
  * SF Symbol name mappings for iOS
@@ -196,8 +196,12 @@ export interface PlatformIconProps {
  * This follows iOS Human Interface Guidelines by using native system icons.
  * 
  * @example
- * // Basic usage - automatic mapping
- * <PlatformIcon name="settings" size={24} color="#000" />
+ * // Basic usage - automatic mapping (uses system label color)
+ * <PlatformIcon name="settings" size={24} />
+ * 
+ * @example
+ * // With explicit color
+ * <PlatformIcon name="settings" size={24} color="#B06D1E" />
  * 
  * @example
  * // With iOS-specific symbol override
@@ -206,11 +210,21 @@ export interface PlatformIconProps {
 export function PlatformIcon({
   name,
   size = 24,
-  color = '#000000',
+  color,
   iosName,
   style,
   symbolType = 'monochrome',
 }: PlatformIconProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  
+  // Theme-aware default color
+  const iconColor = color ?? (
+    Platform.OS === 'ios' 
+      ? (PlatformColor('label') as unknown as string)
+      : (isDark ? '#FFFFFF' : '#000000')
+  );
+  
   if (Platform.OS === 'ios') {
     // Use provided iosName or look up in mapping, fallback to name if not found
     const sfSymbolName = (iosName || SF_SYMBOL_MAP[name] || name) as SFSymbol;
@@ -219,7 +233,7 @@ export function PlatformIcon({
       <SymbolView
         name={sfSymbolName}
         style={[{ width: size, height: size }, style]}
-        tintColor={color}
+        tintColor={iconColor}
         type={symbolType}
       />
     );
@@ -230,7 +244,7 @@ export function PlatformIcon({
     <MaterialIcons
       name={name as any}
       size={size}
-      color={color}
+      color={iconColor}
       style={style as any}
     />
   );

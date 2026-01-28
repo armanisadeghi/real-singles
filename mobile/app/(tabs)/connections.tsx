@@ -18,12 +18,16 @@ import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
+  PlatformColor,
   RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
+import { useThemeColors } from "@/context/ThemeContext";
 import Toast from "react-native-toast-message";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
 
@@ -127,6 +131,19 @@ export default function ConnectionsScreen() {
   const [likes, setLikes] = useState<(User & { is_super_like: boolean; liked_at?: string | null })[]>([]);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  // Dark mode support
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+  };
+
   const fetchData = useCallback(async (showLoader = true) => {
     if (showLoader) {
       setLoading(true);
@@ -226,18 +243,18 @@ export default function ConnectionsScreen() {
     const isLoading = actionLoading === item.ID;
     
     return (
-      <View style={[styles.listItem, item.is_super_like && styles.superLikeItem]}>
+      <View style={[styles.listItem, { backgroundColor: themedColors.background }, item.is_super_like && styles.superLikeItem]}>
         <ProfileListItem 
           profile={item} 
           onPress={() => router.push(`/discover/profile/${item.ID}` as Href)}
         />
         <View style={styles.actionButtons}>
           <TouchableOpacity
-            style={styles.passButton}
+            style={[styles.passButton, { backgroundColor: themedColors.secondaryBackground }]}
             onPress={() => handlePass(item.ID)}
             disabled={isLoading}
           >
-            <PlatformIcon name="close" size={20} color="#666" />
+            <PlatformIcon name="close" size={20} color={themedColors.secondaryText as string} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.likeButton}
@@ -257,7 +274,7 @@ export default function ConnectionsScreen() {
 
   // Render match item with message button
   const renderMatchItem = ({ item }: { item: User & { conversation_id?: string | null } }) => (
-    <View style={styles.listItem}>
+    <View style={[styles.listItem, { backgroundColor: themedColors.background }]}>
       <ProfileListItem 
         profile={item} 
         onPress={() => router.push(`/discover/profile/${item.ID}` as Href)}
@@ -276,8 +293,8 @@ export default function ConnectionsScreen() {
   const renderEmptyLikes = () => (
     <View style={styles.emptyContainer}>
       <PlatformIcon name="thumb-up" size={64} color="#FFB347" />
-      <Text style={styles.emptyTitle}>No new likes</Text>
-      <Text style={styles.emptySubtitle}>
+      <Text style={[styles.emptyTitle, { color: themedColors.text }]}>No new likes</Text>
+      <Text style={[styles.emptySubtitle, { color: themedColors.secondaryText }]}>
         When someone likes you, they'll appear here
       </Text>
     </View>
@@ -286,29 +303,29 @@ export default function ConnectionsScreen() {
   const renderEmptyMatches = () => (
     <View style={styles.emptyContainer}>
       <PlatformIcon name="favorite-border" size={64} color="#FF6B9D" />
-      <Text style={styles.emptyTitle}>No matches yet</Text>
-      <Text style={styles.emptySubtitle}>
+      <Text style={[styles.emptyTitle, { color: themedColors.text }]}>No matches yet</Text>
+      <Text style={[styles.emptySubtitle, { color: themedColors.secondaryText }]}>
         When you and someone else like each other, you'll match!
       </Text>
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themedColors.secondaryBackground }]}>
       <ScreenHeader title="Connections" />
 
       {/* Tab Navigation */}
-      <View style={styles.tabContainer}>
+      <View style={[styles.tabContainer, { backgroundColor: themedColors.background, borderBottomColor: themedColors.border }]}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === "likes" && styles.activeTab]}
+          style={[styles.tab, { backgroundColor: themedColors.secondaryBackground }, activeTab === "likes" && [styles.activeTab, { backgroundColor: themedColors.background }]]}
           onPress={() => setActiveTab("likes")}
         >
           <PlatformIcon 
             name="thumb-up" 
             size={18} 
-            color={activeTab === "likes" ? COLORS.primary : "#666"} 
+            color={activeTab === "likes" ? COLORS.primary : themedColors.secondaryText as string} 
           />
-          <Text style={[styles.tabText, activeTab === "likes" && styles.activeTabText]}>
+          <Text style={[styles.tabText, { color: themedColors.secondaryText }, activeTab === "likes" && styles.activeTabText]}>
             Likes You
           </Text>
           {likes.length > 0 && (
@@ -319,15 +336,15 @@ export default function ConnectionsScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, activeTab === "matches" && styles.activeTab]}
+          style={[styles.tab, { backgroundColor: themedColors.secondaryBackground }, activeTab === "matches" && [styles.activeTab, { backgroundColor: themedColors.background }]]}
           onPress={() => setActiveTab("matches")}
         >
           <PlatformIcon 
             name={activeTab === "matches" ? "favorite" : "favorite-border"} 
             size={18} 
-            color={activeTab === "matches" ? COLORS.primary : "#666"} 
+            color={activeTab === "matches" ? COLORS.primary : themedColors.secondaryText as string} 
           />
-          <Text style={[styles.tabText, activeTab === "matches" && styles.activeTabText]}>
+          <Text style={[styles.tabText, { color: themedColors.secondaryText }, activeTab === "matches" && styles.activeTabText]}>
             Matches
           </Text>
           {matches.length > 0 && (

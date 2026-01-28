@@ -655,7 +655,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: -12,
     right: 16,
-    backgroundColor: "#fff",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -714,7 +713,6 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: "#fff",
     overflow: "hidden",
   },
   avatarImage: {
@@ -733,7 +731,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   avatarMore: {
-    backgroundColor: "#e0e0e0",
     justifyContent: "center",
     alignItems: "center",
     marginLeft: -10,
@@ -741,7 +738,6 @@ const styles = StyleSheet.create({
   avatarMoreText: {
     fontSize: 10,
     fontWeight: "bold",
-    color: "#666",
   },
   attendeesText: {
     fontSize: 14,

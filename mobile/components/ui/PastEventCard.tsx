@@ -4,7 +4,8 @@ import { PlatformIcon } from "./PlatformIcon";
 import * as Haptics from 'expo-haptics';
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Platform, PlatformColor, Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import { useThemeColors } from "@/context/ThemeContext";
 
 // Define the interface for component props
 export interface EventCardProps {
@@ -52,6 +53,15 @@ const PastEventCard = (
   { pastEvent }: { pastEvent: EventCardProps } // Destructure pastEvent from props
 ) => {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    cardBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+  };
   
   // Generate a random but consistent color for the event
   const bgColor = useMemo(() => {
@@ -86,8 +96,9 @@ const PastEventCard = (
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         router.push(`/events/event/${pastEvent?.EventID}`);
       }}
-      className="h-[97px] rounded-[15px] px-[12px] py-[14px] flex-row items-center gap-[10px] bg-white overflow-hidden"
+      className="h-[97px] rounded-[15px] px-[12px] py-[14px] flex-row items-center gap-[10px] overflow-hidden"
       style={{
+        backgroundColor: themedColors.cardBackground,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
@@ -127,7 +138,8 @@ const PastEventCard = (
             <View className="flex-row items-center mt-1">
               <PlatformIcon name="location-on" size={14} color="#B06D1E" />
               <Text
-                className="text-[12px] text-gray-600 ml-1"
+                className="text-[12px] ml-1"
+                style={{ color: themedColors.secondaryText }}
                 numberOfLines={1}
               >
                 {pastEvent?.Street}, {pastEvent?.City}

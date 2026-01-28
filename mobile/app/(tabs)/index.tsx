@@ -24,13 +24,15 @@ import {
   Image,
   ImageBackground,
   Platform,
+  PlatformColor,
   RefreshControl,
   ScrollView,
-  StatusBar,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
+import { useThemeColors } from "@/context/ThemeContext";
 import Toast from "react-native-toast-message";
 import { useSafeArea, useBottomSpacing, useHeaderSpacing } from "@/hooks/useResponsive";
 import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES } from "@/constants/designTokens";
@@ -45,6 +47,19 @@ export default function Home() {
   const safeArea = useSafeArea();
   const { contentPadding } = useBottomSpacing(true);
   const { minimal: headerTopPadding } = useHeaderSpacing();
+
+  // Dark mode support
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+  };
 
   interface HomeData {
     TopMatch: User[];
@@ -214,7 +229,6 @@ export default function Home() {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1 bg-background"
@@ -259,7 +273,7 @@ export default function Home() {
                 src={profile?.Image}
                 name={profile?.DisplayName || "User"}
                 size="xl"
-                borderColor="#ffffff"
+                borderColor={themedColors.background}
                 borderWidth={2}
               />
             </TouchableOpacity>

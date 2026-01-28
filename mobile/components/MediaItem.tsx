@@ -1,8 +1,9 @@
 import { IMAGE_URL } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
+import { useThemeColors } from "@/context/ThemeContext";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useState, useEffect } from "react";
-import { Image, Pressable, View } from "react-native";
+import { Image, Platform, PlatformColor, Pressable, useColorScheme, View } from "react-native";
 
 interface MediaItemProps {
   item: string;
@@ -19,6 +20,13 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
   const mediaUri = isLocalFile || isFullUrl ? item : IMAGE_URL + item;
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    cardBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainerLow,
+  };
   
   // Create video player only for video items
   const player = useVideoPlayer(isVideo ? mediaUri : null, (player) => {
@@ -51,10 +59,10 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
           width: itemWidth,
           aspectRatio: 1,
           borderRadius: 12,
-          backgroundColor: "#fff",
+          backgroundColor: themedColors.cardBackground,
           padding: 5,
           shadowColor: "#000",
-          shadowOpacity: 0.15,
+          shadowOpacity: isDark ? 0.3 : 0.15,
           shadowRadius: 6,
           shadowOffset: { width: 0, height: 3 },
           elevation: 6,
@@ -84,10 +92,10 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
         width: itemWidth,
         aspectRatio: 1,
         borderRadius: 12,
-        backgroundColor: "#fff",
+        backgroundColor: themedColors.cardBackground,
         padding: 5,
         shadowColor: "#000",
-        shadowOpacity: 0.15,
+        shadowOpacity: isDark ? 0.3 : 0.15,
         shadowRadius: 6,
         shadowOffset: { width: 0, height: 3 },
         elevation: 6,

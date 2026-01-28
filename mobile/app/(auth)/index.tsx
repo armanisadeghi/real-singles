@@ -5,13 +5,17 @@ import { useState } from "react";
 import {
   Image,
   Modal,
+  Platform,
+  PlatformColor,
   ScrollView,
   Text,
   TouchableOpacity,
+  useColorScheme,
   useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useThemeColors } from "@/context/ThemeContext";
 
 export default function AuthHome() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -25,6 +29,19 @@ export default function AuthHome() {
   const { width } = useWindowDimensions();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    inputBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainerHigh,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
 
   const itemWidth = (width - 40 - 16) / 2;
 
@@ -122,7 +139,8 @@ export default function AuthHome() {
 
   return (
     <>
-      <ScrollView className="flex-1 bg-white" 
+      <ScrollView className="flex-1" 
+      style={{ backgroundColor: themedColors.background }}
       contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }} >
         <View className="mt-12">
           <Image
@@ -151,7 +169,7 @@ export default function AuthHome() {
                 className="absolute bottom-0 opacity-40 w-full"
                 resizeMode="cover"
               />
-              <Text className="text-center mt-6 md:mt-5 text-sm md:text-base font-bold px-5 text-black">
+              <Text className="text-center mt-6 md:mt-5 text-sm md:text-base font-bold px-5" style={{ color: themedColors.text }}>
                 {feature.title}
               </Text>
               <Image 
@@ -172,7 +190,7 @@ export default function AuthHome() {
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="w-10/12 bg-white p-6 rounded-2xl">
+          <View className="w-10/12 p-6 rounded-2xl" style={{ backgroundColor: themedColors.background }}>
             <View className="flex-row-reverse justify-between items-center mb-4">
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Image

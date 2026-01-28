@@ -15,9 +15,10 @@
  * </ContextMenu>
  */
 
-import React, { ReactNode, useState, useCallback } from 'react';
-import { Platform, ActionSheetIOS, View, TouchableOpacity, StyleProp, ViewStyle, Modal, Text, Pressable, StyleSheet } from 'react-native';
+import React, { ReactNode, useState, useCallback, useMemo } from 'react';
+import { Platform, ActionSheetIOS, View, TouchableOpacity, StyleProp, ViewStyle, Modal, Text, Pressable, StyleSheet, useColorScheme } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { useThemeColors } from '@/context/ThemeContext';
 // Only import on iOS to avoid issues on Android
 let ContextMenuView: any = null;
 if (Platform.OS === 'ios') {
@@ -67,6 +68,20 @@ export function ContextMenu({
   style,
 }: ContextMenuProps) {
   const [menuVisible, setMenuVisible] = useState(false);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  // Theme-aware colors for Android bottom sheet
+  const themedColors = useMemo(() => ({
+    overlay: isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)',
+    sheet: colors.surface,
+    handle: isDark ? '#666666' : '#DDDDDD',
+    menuItemPressed: isDark ? '#3A3A3C' : '#F5F5F5',
+    menuText: colors.onSurface,
+    divider: isDark ? '#3A3A3C' : '#E0E0E0',
+    cancelText: colors.onSurfaceVariant,
+  }), [isDark, colors]);
   
   // Show menu on long press (Android)
   const showMenu = useCallback(() => {
@@ -190,35 +205,36 @@ export function ContextMenu({
         onRequestClose={closeMenu}
         statusBarTranslucent
       >
-        <Pressable style={menuStyles.overlay} onPress={closeMenu}>
-          <View style={menuStyles.sheet}>
-            <View style={menuStyles.handle} />
+        <Pressable style={[menuStyles.overlay, { backgroundColor: themedColors.overlay }]} onPress={closeMenu}>
+          <View style={[menuStyles.sheet, { backgroundColor: themedColors.sheet }]}>
+            <View style={[menuStyles.handle, { backgroundColor: themedColors.handle }]} />
             {menuItems.map((item, index) => (
               <Pressable
                 key={index}
                 style={({ pressed }) => [
                   menuStyles.menuItem,
-                  pressed && menuStyles.menuItemPressed,
+                  pressed && { backgroundColor: themedColors.menuItemPressed, borderRadius: 8 },
                 ]}
                 onPress={() => handleItemPress(item)}
               >
                 <Text style={[
                   menuStyles.menuItemText,
+                  { color: themedColors.menuText },
                   item.destructive && menuStyles.destructiveText,
                 ]}>
                   {item.title}
                 </Text>
               </Pressable>
             ))}
-            <View style={menuStyles.divider} />
+            <View style={[menuStyles.divider, { backgroundColor: themedColors.divider }]} />
             <Pressable
               style={({ pressed }) => [
                 menuStyles.menuItem,
-                pressed && menuStyles.menuItemPressed,
+                pressed && { backgroundColor: themedColors.menuItemPressed, borderRadius: 8 },
               ]}
               onPress={closeMenu}
             >
-              <Text style={menuStyles.cancelText}>Cancel</Text>
+              <Text style={[menuStyles.cancelText, { color: themedColors.cancelText }]}>Cancel</Text>
             </Pressable>
           </View>
         </Pressable>
@@ -230,11 +246,11 @@ export function ContextMenu({
 const menuStyles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // backgroundColor set dynamically
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: 'white',
+    // backgroundColor set dynamically
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: 12,
@@ -244,7 +260,7 @@ const menuStyles = StyleSheet.create({
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: '#DDD',
+    // backgroundColor set dynamically
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 16,
@@ -253,25 +269,21 @@ const menuStyles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 8,
   },
-  menuItemPressed: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 8,
-  },
   menuItemText: {
     fontSize: 16,
-    color: '#000',
+    // color set dynamically
   },
   destructiveText: {
-    color: '#F44336',
+    color: '#F44336', // Red for destructive actions - intentional
   },
   divider: {
     height: 1,
-    backgroundColor: '#E0E0E0',
+    // backgroundColor set dynamically
     marginVertical: 8,
   },
   cancelText: {
     fontSize: 16,
-    color: '#666',
+    // color set dynamically
     textAlign: 'center',
   },
 });

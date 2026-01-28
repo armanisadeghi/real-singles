@@ -19,16 +19,20 @@ import { clearFilter, getFilter } from "@/lib/api";
 import Slider from "@react-native-community/slider";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Platform,
+  PlatformColor,
   StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
+import { useThemeColors } from "@/context/ThemeContext";
 import RNPickerSelect from "react-native-picker-select";
 import Toast from "react-native-toast-message";
 import LinearBg from "./LinearBg";
@@ -75,6 +79,19 @@ export default function FilterOptions({
   onFilterChange,
   onClearFilters,
 }: FilterOptionsProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    inputBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainerHigh,
+    placeholder: isDark ? '#9CA3AF' : '#9E9E9E',
+  }), [isDark, colors]);
+
   console.log("initialFilters?.ageRange",initialFilters?.ageRange);
   
 
@@ -265,21 +282,21 @@ export default function FilterOptions({
       paddingVertical: 14,
       paddingHorizontal: 28,
       borderWidth: 1,
-      borderColor: "#E5E5E5",
+      borderColor: themedColors.border,
       borderRadius: 30,
-      backgroundColor: "#F5F5F5",
-      color: "#333333",
+      backgroundColor: themedColors.inputBackground,
+      color: themedColors.text,
       paddingRight: 30,
       marginBottom: 10,
     },
     // Android: Let native picker handle styling for native feel
     inputAndroid: {
       fontSize: 16,
-      color: "#333333",
+      color: themedColors.text,
       marginBottom: 10,
     },
     placeholder: {
-      color: "#9E9E9E",
+      color: themedColors.placeholder,
     },
     iconContainer: {
       top: 16,
@@ -446,7 +463,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.BodyType || bodyType}
         onValueChange={(value) => setBodyType(value)}
-        placeholder={{ label: "Body Type", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Body Type", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="bodyType"
@@ -462,7 +479,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.marital_status || maritalStatus}
         onValueChange={(value) => setMaritalStatus(value)}
-        placeholder={{ label: "Marital status", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Marital status", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="Marital Status"
@@ -478,7 +495,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.Ethnicity || ethnicity}
         onValueChange={(value) => setEthnicity(value)}
-        placeholder={{ label: "Ethnicity", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Ethnicity", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="Ethnicity"
@@ -494,7 +511,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.Religion || religion}
         onValueChange={(value) => setReligion(value)}
-        placeholder={{ label: "Religion", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Religion", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="religion"
@@ -510,7 +527,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.Marijuana || marijuana}
         onValueChange={(value) => setMarijuana(value)}
-        placeholder={{ label: "Marijuana", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Marijuana", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="marijuana"
@@ -526,7 +543,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.Drinks || drinking}
         onValueChange={(value) => setDrinking(value)}
-        placeholder={{ label: "Drinking", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Drinking", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="drinking"
@@ -542,7 +559,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.HaveChild || hasKids}
         onValueChange={(value) => setHasKids(value)}
-        placeholder={{ label: "Has Kids", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Has Kids", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="has kids"
@@ -558,7 +575,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.WantChild || wantKids}
         onValueChange={(value) => setWantKids(value)}
-        placeholder={{ label: "Want Kids", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Want Kids", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="want kids"
@@ -574,7 +591,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.Education || education}
         onValueChange={(value) => setEducation(value)}
-        placeholder={{ label: "Education", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Education", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="education"
@@ -590,7 +607,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.Smoke || smoke}
         onValueChange={(value) => setSmoke(value)}
-        placeholder={{ label: "Smoking", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Smoking", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="smoke"
@@ -606,7 +623,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.PoliticalView || politicalView}
         onValueChange={(value) => setPoliticalView(value)}
-        placeholder={{ label: "Political View", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Political View", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="politicalView"
@@ -622,7 +639,7 @@ export default function FilterOptions({
       <RNPickerSelect
         value={filterData?.exercise || exercise}
         onValueChange={(value) => setExercise(value)}
-        placeholder={{ label: "Exercise", value: null, color: "#9EA0A4" }}
+        placeholder={{ label: "Exercise", value: null, color: themedColors.placeholder }}
         style={pickerSelectStyles}
         useNativeAndroidPickerStyle={true}
         key="exercise"
@@ -706,7 +723,7 @@ export default function FilterOptions({
                 onPress={() => toggleZodiac(option.value)}
                 className="rounded-full border overflow-hidden px-4 py-2"
                 style={{
-                  borderColor: isSelected ? "#B06D1E" : "#E5E7EB",
+                  borderColor: isSelected ? "#B06D1E" : themedColors.border,
                 }}
               >
                 {isSelected && (
@@ -738,7 +755,7 @@ export default function FilterOptions({
           {loadingclear ? (
             <ActivityIndicator
               size="small"
-              color="#9A9CA0"
+              color={themedColors.placeholder}
               className="text-center"
             />
           ) : (

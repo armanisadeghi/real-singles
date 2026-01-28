@@ -36,12 +36,15 @@ import {
   Image,
   Modal,
   Platform,
+  PlatformColor,
   Pressable,
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
+import { useThemeColors } from "@/context/ThemeContext";
 import Animated, { 
   useSharedValue, 
   withSpring, 
@@ -113,6 +116,21 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   const [passwordError, setPasswordError] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
 
+  // Dark mode support
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  // Theme-aware colors
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    inputBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainerHigh,
+    placeholder: isDark ? '#9CA3AF' : '#9E9E9E',
+  };
+
   const arrowRotation = useSharedValue(0);
 
   useEffect(() => {
@@ -155,10 +173,10 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       paddingVertical: 14,
       paddingHorizontal: 28,
       borderWidth: 1,
-      borderColor: "#E5E5E5", // gray border
+      borderColor: themedColors.border,
       borderRadius: 30,
-      backgroundColor: "#F5F5F5", // light background
-      color: "#333333",
+      backgroundColor: themedColors.inputBackground,
+      color: themedColors.text,
       paddingRight: 30, // to ensure the text is never behind the icon
       marginBottom: 10,
     },
@@ -167,15 +185,15 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
       paddingHorizontal: 28,
       paddingVertical: 14,
       borderWidth: 1,
-      borderColor: "#E5E5E5", // gray border
+      borderColor: themedColors.border,
       borderRadius: 99,
-      backgroundColor: "#F9F9FC", // light background
-      color: "#333333",
+      backgroundColor: themedColors.inputBackground,
+      color: themedColors.text,
       paddingRight: 30, // to ensure the text is never behind the icon
       marginBottom: 10,
     },
     placeholder: {
-      color: "#9E9E9E",
+      color: themedColors.placeholder,
     },
     iconContainer: {
       top: 16,
@@ -581,7 +599,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 onPress={pickImage}
                 className="absolute bottom-3 right-0 border border-dark bg-white rounded-lg p-2"
               >
-                <PlatformIcon name="edit" size={16} color="#000000" />
+                <PlatformIcon name="edit" size={16} color={themedColors.text} />
               </Pressable>
             </View>
 
@@ -665,7 +683,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 {/* {formData.DOB || "Select Date"} */}
                 {formData.DOB ? formatDateToMMDDYYYY(formData.DOB) : "Select Date"}
               </Text>
-              <PlatformIcon name="calendar-today" size={16} color="#000000" />
+              <PlatformIcon name="calendar-today" size={16} color={themedColors.text} />
             </TouchableOpacity>
 
             {showDatePicker && (
@@ -786,7 +804,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             Personal Details
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color={themedColors.text} />
           </Animated.View>
         </TouchableOpacity>
 
@@ -817,7 +835,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -856,7 +874,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -890,7 +908,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               /> */}
@@ -913,7 +931,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -933,7 +951,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -953,7 +971,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -975,7 +993,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -995,7 +1013,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -1020,7 +1038,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             Pick your Interest
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color={themedColors.text} />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1048,7 +1066,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                       borderRadius: 50,
                       overflow: "hidden",
                       borderWidth: 1,
-                      borderColor: isSelected ? "transparent" : "grey",
+                      borderColor: isSelected ? "transparent" : themedColors.border,
                     }}
                   >
                     {isSelected ? (
@@ -1073,7 +1091,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                           borderRadius: 50, // for consistent look
                         }}
                       >
-                        <Text style={{ color: 'black' }}>{option.label}</Text>
+                        <Text style={{ color: themedColors.text }}>{option.label}</Text>
                       </View>
                     )}
                   </TouchableOpacity>
@@ -1104,7 +1122,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             Education and Job Details
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color={themedColors.text} />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1137,7 +1155,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                         onChangeField("School", schools);
                       }}
                       placeholder="Add school name"
-                      placeholderTextColor="#B0B0B0"
+                      placeholderTextColor={themedColors.placeholder}
                       className="flex-1 px-4 py-3 border border-border rounded-[99] mr-2 bg-light-200 text-black"
                     />
 
@@ -1204,7 +1222,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                     value={formData.Company}
                     onChangeText={(text) => onChangeField("Company", text)}
                     placeholder="Company Name"
-                    placeholderTextColor="#B0B0B0"
+                    placeholderTextColor={themedColors.placeholder}
                     className="px-4 py-3 border border-border rounded-[99] bg-light-100 text-black"
                   />
                 </View>
@@ -1216,7 +1234,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                     value={formData.JobTitle}
                     onChangeText={(text) => onChangeField("JobTitle", text)}
                     placeholder="Job Title"
-                    placeholderTextColor="#B0B0B0"
+                    placeholderTextColor={themedColors.placeholder}
                     className="px-4 py-3 border border-border rounded-[99] bg-light-100 text-black"
                   />
                 </View>
@@ -1240,7 +1258,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         >
           <Text className="text-primary font-medium text-lg">Appearance</Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color={themedColors.text} />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1275,7 +1293,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                         key={feet} 
                         label={`${feet}'`} 
                         value={feet}
-                        color="#333"
+                        color={themedColors.text as string}
                       />
                     ))}
                   </Picker>
@@ -1292,7 +1310,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                         key={inches} 
                         label={`${inches}"`} 
                         value={inches}
-                        color="#333"
+                        color={themedColors.text as string}
                       />
                     ))}
                   </Picker>
@@ -1318,7 +1336,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                           borderRadius: 50,
                           overflow: "hidden",
                           borderWidth: 1,
-                          borderColor: isSelected ? "transparent" : "grey", // similar to your “primary”
+                          borderColor: isSelected ? "transparent" : themedColors.border, // similar to your “primary”
                         }}
                       >
                         {isSelected ? (
@@ -1343,7 +1361,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                               borderRadius: 50,
                             }}
                           >
-                            <Text style={{ color: "#000" }}>{option.label}</Text>
+                            <Text style={{ color: themedColors.text }}>{option.label}</Text>
                           </View>
                         )}
                       </TouchableOpacity>
@@ -1374,7 +1392,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             Habit & Interests
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color={themedColors.text} />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1399,7 +1417,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -1419,7 +1437,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -1439,7 +1457,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -1464,7 +1482,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                         borderRadius: 50,
                         overflow: "hidden",
                         borderWidth: 1,
-                        borderColor: isSelected ? "transparent" : "lightgrey",
+                        borderColor: isSelected ? "transparent" : themedColors.border,
                       }}
                     >
                       {isSelected ? (
@@ -1489,7 +1507,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                             borderRadius: 50,
                           }}
                         >
-                          <Text style={{ color: "#000" }}>{option.label}</Text>
+                          <Text style={{ color: themedColors.text }}>{option.label}</Text>
                         </View>
                       )}
                     </TouchableOpacity>
@@ -1512,7 +1530,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -1535,7 +1553,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         >
           <Text className="text-primary font-medium text-lg">Ethnicity</Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color={themedColors.text} />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1563,7 +1581,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                       borderRadius: 50,
                       overflow: "hidden",
                       borderWidth: 1,
-                      borderColor: isSelected ? "transparent" : "lightgrey",
+                      borderColor: isSelected ? "transparent" : themedColors.border,
                     }}
                   >
                     {isSelected ? (
@@ -1588,7 +1606,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                           borderRadius: 50,
                         }}
                       >
-                        <Text style={{ color: "#000" }}>{option.label}</Text>
+                        <Text style={{ color: themedColors.text }}>{option.label}</Text>
                       </View>
                     )}
                   </TouchableOpacity>
@@ -1614,7 +1632,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         >
           <Text className="text-primary font-medium text-lg">Language</Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color={themedColors.text} />
           </Animated.View>
         </TouchableOpacity>
         {language && (
@@ -1643,7 +1661,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                       borderRadius: 50,
                       overflow: "hidden",
                       borderWidth: 1,
-                      borderColor: isSelected ? "transparent" : "lightgrey",
+                      borderColor: isSelected ? "transparent" : themedColors.border,
                     }}
                   >
                     {isSelected ? (
@@ -1670,7 +1688,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                           borderRadius: 50,
                         }}
                       >
-                        <Text style={{ color: "#000", textTransform: "capitalize" }}>
+                        <Text style={{ color: themedColors.text, textTransform: "capitalize" }}>
                           {option.label}
                         </Text>
                       </View>
@@ -1701,7 +1719,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         >
           <Text className="text-primary font-medium text-lg">Religion</Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color={themedColors.text} />
           </Animated.View>
         </TouchableOpacity>
         {religion && (
@@ -1725,7 +1743,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                       borderRadius: 50,
                       overflow: "hidden",
                       borderWidth: 1,
-                      borderColor: isSelected ? "transparent" : "lightgrey",
+                      borderColor: isSelected ? "transparent" : themedColors.border,
                     }}
                   >
                     {isSelected ? (
@@ -1752,7 +1770,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                           borderRadius: 50,
                         }}
                       >
-                        <Text style={{ color: "#000", textTransform: "capitalize" }}>
+                        <Text style={{ color: themedColors.text, textTransform: "capitalize" }}>
                           {option.label}
                         </Text>
                       </View>
@@ -1782,7 +1800,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             Poltical Views
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color={themedColors.text} />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1806,7 +1824,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
                   <View style={{ marginRight: 15 }}>
-                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color={themedColors.text} />
                   </View>
                 )}
               />
@@ -1830,7 +1848,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         >
           <Text className="text-primary font-medium text-lg">Life Goals</Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color={themedColors.text} />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1877,8 +1895,8 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                                 borderColor: isSelected
                                   ? "transparent"
                                   : canSelect
-                                  ? "lightgrey"
-                                  : "#e5e5e5",
+                                  ? themedColors.border
+                                  : themedColors.border,
                                 opacity: canSelect ? 1 : 0.5,
                               }}
                             >
@@ -1906,7 +1924,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                                     borderRadius: 50,
                                   }}
                                 >
-                                  <Text style={{ color: "#333", fontSize: 12 }}>
+                                  <Text style={{ color: themedColors.text, fontSize: 12 }}>
                                     {goal.label}
                                   </Text>
                                 </View>
@@ -1942,7 +1960,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             In a few Words
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color={themedColors.text} />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1958,7 +1976,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 numberOfLines={6}
                 maxLength={300}
                 placeholder="Tell me a little about yourself"
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={formData.About}
                 onChangeText={(value) => onChangeField("About", value)}
                 textAlignVertical="top"
@@ -1978,7 +1996,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 numberOfLines={6}
                 maxLength={300}
                 placeholder="My ideal first date starts with... and ends with..."
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={formData.IdeaDate}
                 onChangeText={(value) => onChangeField("IdeaDate", value)}
                 textAlignVertical="top"
@@ -1998,7 +2016,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 numberOfLines={6}
                 maxLength={300}
                 placeholder="My top non-negotiables"
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={formData.NonNegotiable}
                 onChangeText={(value) => onChangeField("NonNegotiable", value)}
                 textAlignVertical="top"
@@ -2018,7 +2036,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 numberOfLines={6}
                 maxLength={300}
                 placeholder="The way to my heart is through..."
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={formData.WayToHeart}
                 onChangeText={(value) => onChangeField("WayToHeart", value)}
                 textAlignVertical="top"
@@ -2038,7 +2056,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 numberOfLines={6}
                 maxLength={300}
                 placeholder="After work, you can find me..."
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={formData.FindMe}
                 onChangeText={(value) => onChangeField("FindMe", value)}
                 textAlignVertical="top"
@@ -2058,7 +2076,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 numberOfLines={6}
                 maxLength={300}
                 placeholder="Nightclub or night at home?"
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={formData.NightAtHome}
                 onChangeText={(value) => onChangeField("NightAtHome", value)}
                 textAlignVertical="top"
@@ -2078,7 +2096,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 numberOfLines={6}
                 maxLength={300}
                 placeholder="Craziest travel story"
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={formData.craziestTravelStory}
                 onChangeText={(value) => onChangeField("craziestTravelStory", value)}
                 textAlignVertical="top"
@@ -2098,7 +2116,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 numberOfLines={6}
                 maxLength={300}
                 placeholder="Weirdest gift I've received"
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={formData.weirdestGift}
                 onChangeText={(value) => onChangeField("weirdestGift", value)}
                 textAlignVertical="top"
@@ -2118,7 +2136,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 numberOfLines={6}
                 maxLength={300}
                 placeholder="The worst job I ever had"
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={formData.WorstJob}
                 onChangeText={(value) => onChangeField("WorstJob", value)}
                 textAlignVertical="top"
@@ -2138,7 +2156,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 numberOfLines={6}
                 maxLength={300}
                 placeholder="The job I'd do for no money"
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={formData.DreamJob}
                 onChangeText={(value) => onChangeField("DreamJob", value)}
                 textAlignVertical="top"
@@ -2158,7 +2176,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 numberOfLines={6}
                 maxLength={300}
                 placeholder="If I could attend any event in history..."
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={formData.PastEvent}
                 onChangeText={(value) => onChangeField("PastEvent", value)}
                 textAlignVertical="top"
@@ -2219,7 +2237,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             <View className="flex-row justify-between items-center mb-6">
               <Text className="text-xl font-semibold text-primary">Change Password</Text>
               <TouchableOpacity onPress={() => setShowPasswordModal(false)}>
-                <PlatformIcon name="close" size={16} color="#000" />
+                <PlatformIcon name="close" size={16} color={themedColors.text} />
               </TouchableOpacity>
             </View>
 

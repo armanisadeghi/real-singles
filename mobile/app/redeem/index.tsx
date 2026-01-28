@@ -1,4 +1,5 @@
 import ProductCard from "@/components/ui/ProductCard";
+import { useThemeColors } from "@/context/ThemeContext";
 import { useDeviceSize } from "@/hooks/useResponsive";
 import { getProductsGiftList } from "@/lib/api";
 import { ProductCardProps } from "@/types";
@@ -6,6 +7,8 @@ import React, { useEffect, useState, useMemo } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
+  PlatformColor,
   Text,
   View,
   useWindowDimensions,
@@ -23,6 +26,11 @@ export default function Redeem() {
   const { gridColumns } = useDeviceSize();
   const [data, setData] = useState<Data>();
   const [loading, setLoading] = useState(false);
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+  };
 
   const fetchProductsGiftsList = async () => {
     setLoading(true);
@@ -98,7 +106,7 @@ export default function Redeem() {
    if (loading) {
       return (
         <View className="w-full h-full flex items-center justify-center py-4">
-          <ActivityIndicator size="large" color="#000000" />
+          <ActivityIndicator size="large" color={themedColors.text} />
         </View>
       );
     }

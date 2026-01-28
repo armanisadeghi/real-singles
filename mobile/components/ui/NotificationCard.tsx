@@ -1,5 +1,6 @@
 import { VIDEO_URL } from "@/utils/token";
-import { Image, Text, View } from "react-native";
+import { Image, Platform, PlatformColor, Text, useColorScheme, View } from "react-native";
+import { useThemeColors } from "@/context/ThemeContext";
 
 // Updated interface to match API response
 interface Notification {
@@ -16,6 +17,16 @@ interface Notification {
 }
 
 const NotificationCard = ({ item }: { item: Notification }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    cardBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+  };
+
   // const formatTimeAgo = (dateString: string) => {
   //   try {
   //     const date = parseISO(dateString);
@@ -29,7 +40,7 @@ const NotificationCard = ({ item }: { item: Notification }) => {
   const fullName = `${item.senderFirstName} ${item.senderLastname}`;
   
   return (
-    <View className="flex-row justify-between items-start border border-border rounded-[12px] p-[10px] mb-3 bg-white">
+    <View className="flex-row justify-between items-start border border-border rounded-[12px] p-[10px] mb-3" style={{ backgroundColor: themedColors.cardBackground }}>
       <Image
         source={item?.Image ? {uri: VIDEO_URL+item?.Image} : {uri: 'https://randomuser.me/api/portraits/women/1.jpg'}}
         style={{ width: 50, height: 50, borderRadius: 12 }}
@@ -42,8 +53,8 @@ const NotificationCard = ({ item }: { item: Notification }) => {
           {fullName}
         </Text>
         <Text
-          className="text-[11px] text-[#818387] font-normal"
-          style={{ fontFamily: "SF Pro Display" }}
+          className="text-[11px] font-normal"
+          style={{ fontFamily: "SF Pro Display", color: themedColors.secondaryText }}
         >
           {item.msg}
         </Text>

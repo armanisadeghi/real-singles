@@ -1,6 +1,7 @@
 import { images } from '@/constants/images';
+import { useThemeColors } from '@/context/ThemeContext';
 import React from 'react';
-import { Image, StatusBar, Text, View } from 'react-native';
+import { Image, Platform, PlatformColor, Text, View, useColorScheme } from 'react-native';
 import GradientButton from '../ui/GradientButton';
 
 interface SuccessProps {
@@ -12,9 +13,18 @@ interface SuccessProps {
 }
 
 export default function Success({image, title, subTitle, desc, onPress} : SuccessProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
+
   return (
     <View className='relative flex-1 mt-20'>
-        <StatusBar barStyle='dark-content' backgroundColor='transparent' translucent />
         <View className='flex-row-reverse'>
                 <Image source={images.ellipseEnd} resizeMode='contain' className='-mb-3' />
             </View>
@@ -22,7 +32,7 @@ export default function Success({image, title, subTitle, desc, onPress} : Succes
         <View className='relative flex-col items-center justify-center px-6 bg-white py-6 shadow-lg rounded-2xl z-10'>
             <Image source={image} resizeMode='contain' className='w-32 h-32 my-6'/>
             <Text className='text-3xl text-primary font-bold mt-3 mb-6'>{title}</Text>
-            <Text className='text-[#303030] text-[15px] font-normal text-center mb-1'>
+            <Text className='text-dark dark:text-white text-[15px] font-normal text-center mb-1'>
            {subTitle}
             </Text>
             <Text className='text-gray text-[14px] font-normal text-center mb-6'>
