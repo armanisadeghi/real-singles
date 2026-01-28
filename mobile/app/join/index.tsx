@@ -1,8 +1,9 @@
+import { useThemeColors } from "@/context/ThemeContext";
 import { REFERRAL_CODE_STORAGE_KEY } from "@/lib/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Platform, PlatformColor, Text, View, useColorScheme } from "react-native";
 
 /**
  * Join Page - Handles referral deep links
@@ -16,6 +17,17 @@ export default function JoinPage() {
   const router = useRouter();
   const { ref } = useLocalSearchParams<{ ref?: string }>();
   const [message, setMessage] = useState("Processing your invite...");
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    cardBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainerLow,
+    cardBorder: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    cardText: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+  };
 
   useEffect(() => {
     handleReferral();
@@ -50,14 +62,14 @@ export default function JoinPage() {
   };
 
   return (
-    <View className="flex-1 bg-white items-center justify-center px-8">
+    <View style={{ backgroundColor: themedColors.background }} className="flex-1 items-center justify-center px-8">
       <ActivityIndicator size="large" color="#B06D1E" />
-      <Text className="text-lg text-gray-600 mt-4 text-center">
+      <Text style={{ color: themedColors.secondaryText }} className="text-lg mt-4 text-center">
         {message}
       </Text>
       {ref && (
-        <View className="mt-6 bg-amber-50 rounded-xl px-4 py-3 border border-amber-200">
-          <Text className="text-amber-800 text-sm text-center">
+        <View style={{ backgroundColor: themedColors.cardBackground, borderColor: themedColors.cardBorder }} className="mt-6 rounded-xl px-4 py-3 border">
+          <Text style={{ color: themedColors.cardText }} className="text-sm text-center">
             Referral code: <Text className="font-bold">{ref.toUpperCase()}</Text>
           </Text>
         </View>

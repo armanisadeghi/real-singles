@@ -5,7 +5,8 @@ import { PlatformIcon } from "./PlatformIcon";
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Platform, PlatformColor, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { useThemeColors } from "@/context/ThemeContext";
 
 // Array of background colors for random backgrounds
 const BACKGROUND_COLORS = [
@@ -30,6 +31,15 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
   console.log("Current Event Card Props:", currentEvent);
   
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    cardBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+  };
   
   // Generate a random but consistent color for the event
   const eventBgColor = useMemo(() => {
@@ -90,7 +100,7 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.push(`/events/event/${currentEvent?.EventID}` as any);
     }}>
-    <View className="w-[309px] h-[263px] bg-white rounded-[18px] px-[17px] py-[16px] shadow-md">
+    <View className="w-[309px] h-[263px] rounded-[18px] px-[17px] py-[16px] shadow-md" style={{ backgroundColor: themedColors.cardBackground }}>
       {/* Image and Time Badge */}
       <View className="relative rounded-xl overflow-hidden">
         {currentEvent?.EventImage ? (
@@ -109,7 +119,7 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
             </Text>
           </View>
         )}
-        <View className="absolute z-10 top-2 right-2 bg-white px-2 py-1 rounded-full">
+        <View className="absolute z-10 top-2 right-2 px-2 py-1 rounded-full" style={{ backgroundColor: themedColors.cardBackground }}>
           <Text className="text-[8px] font-semibold text-red-600">{currentEvent?.EventDate} {currentEvent?.StartTime}</Text>
         </View>
         {currentEvent?.EventImage && (
@@ -126,7 +136,7 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
       {/* Location */}
       <View className="flex-row items-center mt-1">
         <PlatformIcon name="location-on" size={14} color="#B06D1E" />
-        <Text className="text-xs text-gray-500 ml-1">{currentEvent?.City}, {currentEvent?.State}</Text>
+        <Text className="text-xs ml-1" style={{ color: themedColors.secondaryText }}>{currentEvent?.City}, {currentEvent?.State}</Text>
       </View>
 
       {/* Likes & Button */}
@@ -162,7 +172,7 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
               </TouchableOpacity>
             ))}
           </View>
-          <Text className="text-xs text-gray-600">{currentEvent?.interestedUserImage?.length > 0 ? currentEvent?.interestedUserImage?.length : '0'} Likes</Text>
+          <Text className="text-xs" style={{ color: themedColors.secondaryText }}>{currentEvent?.interestedUserImage?.length > 0 ? currentEvent?.interestedUserImage?.length : '0'} Likes</Text>
         </View>
 
         <TouchableOpacity 

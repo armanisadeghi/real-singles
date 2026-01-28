@@ -4,10 +4,12 @@ import { PlatformIcon } from "@/components/ui";
 import { getVirtualSpeedDetails, registerSpeedDating, cancelSpeedDatingRegistration } from "@/lib/api";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import {
   ActivityIndicator,
   BackHandler,
+  Platform,
+  PlatformColor,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,9 +17,11 @@ import {
   View,
   Image,
   Alert,
+  useColorScheme,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+import { useThemeColors } from "@/context/ThemeContext";
 
 interface SpeedDatingSession {
   id: string;
@@ -44,6 +48,22 @@ export default function SpeedDatingDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  // Theme-aware colors
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' 
+      ? (PlatformColor('systemBackground') as unknown as string) 
+      : colors.background,
+    text: Platform.OS === 'ios' 
+      ? (PlatformColor('label') as unknown as string) 
+      : colors.onSurface,
+    border: Platform.OS === 'ios' 
+      ? (PlatformColor('separator') as unknown as string) 
+      : colors.outline,
+  }), [isDark, colors]);
   
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<SpeedDatingSession | null>(null);
@@ -242,19 +262,20 @@ export default function SpeedDatingDetailScreen() {
     return (
       <SafeAreaView className="flex-1 bg-background" edges={['left', 'right', 'bottom']}>
         <View
-          className="bg-white flex-row justify-between items-center px-4 pb-4 z-30"
-          style={{ paddingTop: insets.top + 8 }}
+          className="flex-row justify-between items-center px-4 pb-4 z-30"
+          style={{ paddingTop: insets.top + 8, backgroundColor: themedColors.background }}
         >
           <TouchableOpacity
             onPress={handleBackPress}
-            className="border border-gray-200 rounded-lg p-2"
+            className="rounded-lg p-2"
+            style={{ borderWidth: 1, borderColor: themedColors.border }}
           >
-            <PlatformIcon name="chevron-left" size={16} color="#000" />
+            <PlatformIcon name="chevron-left" size={16} color={themedColors.text} />
           </TouchableOpacity>
         </View>
         <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-2">Session Not Found</Text>
-          <Text className="text-gray-500 text-center mb-6">
+          <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Session Not Found</Text>
+          <Text className="text-gray-500 dark:text-gray-400 text-center mb-6">
             This speed dating session may have been removed or is no longer available.
           </Text>
           <TouchableOpacity onPress={handleBackPress}>
@@ -271,9 +292,10 @@ export default function SpeedDatingDetailScreen() {
       
       {/* Header */}
       <View
-        className="bg-white flex-row justify-between items-center px-4 pb-4 z-30"
+        className="flex-row justify-between items-center px-4 pb-4 z-30"
         style={{
           paddingTop: insets.top + 8,
+          backgroundColor: themedColors.background,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.05,
@@ -284,11 +306,12 @@ export default function SpeedDatingDetailScreen() {
         <View className="flex-row items-center gap-3">
           <TouchableOpacity
             onPress={handleBackPress}
-            className="border border-gray-200 rounded-lg p-2"
+            className="rounded-lg p-2"
+            style={{ borderWidth: 1, borderColor: themedColors.border }}
           >
-            <PlatformIcon name="chevron-left" size={16} color="#000" />
+            <PlatformIcon name="chevron-left" size={16} color={themedColors.text} />
           </TouchableOpacity>
-          <Text className="text-base font-medium text-dark">Speed Dating</Text>
+          <Text className="text-base font-medium text-dark dark:text-white">Speed Dating</Text>
         </View>
         <NotificationBell />
       </View>

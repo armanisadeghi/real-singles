@@ -9,26 +9,43 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
   Image,
   Modal,
+  Platform,
+  PlatformColor,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
   useWindowDimensions,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useThemeColors } from "@/context/ThemeContext";
 
 export default function NearBy() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
   const mapRef = useRef<any>(null);
+
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    // System accent colors
+    systemPink: Platform.OS === 'ios' ? (PlatformColor('systemPink') as unknown as string) : '#B06D1E',
+    systemOrange: Platform.OS === 'ios' ? (PlatformColor('systemOrange') as unknown as string) : '#FFB72B',
+  }), [isDark, colors]);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -212,10 +229,15 @@ export default function NearBy() {
     }, [])
   );
 
+  // Primary color for loading indicators
+  const primaryColor = Platform.OS === 'ios' 
+    ? (PlatformColor('systemPink') as unknown as string) 
+    : '#B06D1E';
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#B06D1E" />
+        <ActivityIndicator size="large" color={primaryColor} />
       </View>
     );
   }
@@ -380,8 +402,9 @@ export default function NearBy() {
         >
           <PlatformIcon
             name="location-on"
+            iosName="location.fill"
             size={20}
-            color="#B06D1E"
+            color={themedColors.systemPink}
           />
         </TouchableOpacity>
 
@@ -410,7 +433,7 @@ export default function NearBy() {
 
       {/* Header Bar (Floating) */}
       <View
-        style={[styles.headerContainer, { paddingTop: insets.top + 8 }]}
+        style={[styles.headerContainer, { paddingTop: insets.top + 8, backgroundColor: themedColors.background }]}
         className="flex-row justify-between items-center px-4 pb-4 absolute top-0 left-0 right-0 z-10"
       >
         <View className="flex-row items-center gap-2">
@@ -419,18 +442,19 @@ export default function NearBy() {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               router.back();
             }}
-            className="bg-white border border-gray rounded-lg flex justify-center items-center w-8 h-8 shadow-sm"
+            className="border border-gray rounded-lg flex justify-center items-center w-8 h-8 shadow-sm"
+            style={{ backgroundColor: themedColors.background }}
           >
-            <PlatformIcon name="chevron-left" size={16} color="#000" />
+            <PlatformIcon name="chevron-left" size={16} color={themedColors.text} />
           </TouchableOpacity>
-          <View className="bg-white px-3 py-1 rounded-lg shadow-sm">
-            <Text className="text-base font-medium tracking-[-0.41px] text-black">
+          <View className="px-3 py-1 rounded-lg shadow-sm" style={{ backgroundColor: themedColors.background }}>
+            <Text className="text-base font-medium tracking-[-0.41px]" style={{ color: themedColors.text }}>
               Nearby Profiles
             </Text>
           </View>
         </View>
 
-        <View className="bg-white rounded-lg shadow-sm">
+        <View className="rounded-lg shadow-sm" style={{ backgroundColor: themedColors.background }}>
           <NotificationBell />
         </View>
       </View>
@@ -446,7 +470,7 @@ export default function NearBy() {
         }}
       >
         <View style={[styles.modalContainer, { justifyContent: 'flex-end' }]}>
-          <View style={[styles.modalContent, { height: '60%', borderTopLeftRadius: 24, borderTopRightRadius: 24 }]}>
+          <View style={[styles.modalContent, { height: '60%', borderTopLeftRadius: 24, borderTopRightRadius: 24, backgroundColor: themedColors.background }]}>
             {selectedUser && (
               <>
                 <View className="relative w-full h-80 rounded-t-2xl overflow-hidden">
@@ -496,11 +520,12 @@ export default function NearBy() {
                   <View className="flex-row items-center mb-4">
                     <PlatformIcon
                       name="mail"
+                      iosName="envelope.fill"
                       size={20}
-                      color="#B06D1E"
+                      color={themedColors.systemPink}
                       style={{ marginRight: 8 }}
                     />
-                    <Text className="text-gray flex-1">
+                    <Text className="flex-1" style={{ color: themedColors.secondaryText }}>
                       {selectedUser?.Email}
                     </Text>
                   </View>
@@ -515,7 +540,7 @@ export default function NearBy() {
                       }}
                     >
                       <LinearGradient
-                        colors={["#FFB72B", "#B06D1E"]}
+                        colors={[themedColors.systemOrange, themedColors.systemPink]}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
                         style={styles.gradientButton}
@@ -578,7 +603,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   headerContainer: {
-    backgroundColor: "white",
+    // backgroundColor applied inline with themedColors.background
   },
   modalContainer: {
     flex: 1,
@@ -586,7 +611,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
-    backgroundColor: "white",
+    // backgroundColor applied inline with themedColors.background
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: "70%",
@@ -632,6 +657,6 @@ const styles = StyleSheet.create({
   mapControlText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#B06D1E",
+    color: Platform.OS === 'ios' ? (PlatformColor('systemPink') as unknown as string) : '#B06D1E',
   },
 });

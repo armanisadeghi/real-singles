@@ -1,10 +1,21 @@
 import { images } from "@/constants/images";
+import { useThemeColors } from "@/context/ThemeContext";
 import { signupProps } from "@/types";
 import React, { useState } from "react";
-import { Image, ScrollView, Text, TextInput, View } from "react-native";
+import { Image, Platform, PlatformColor, ScrollView, Text, TextInput, View, useColorScheme } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 const Intro = ({ data, updateData, onNext, error }: signupProps) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
+
   const [validationError, setValidationError] = useState("");
 
   const handleNext = () => {
@@ -49,13 +60,14 @@ const Intro = ({ data, updateData, onNext, error }: signupProps) => {
             numberOfLines={6}
             maxLength={300}
             placeholder="Tell me a little about yourself"
-            placeholderTextColor="#B0B0B0"
+            placeholderTextColor={themedColors.placeholder}
             value={data?.About}
             onChangeText={(text) => updateData({ About: text })}
             textAlignVertical="top"
             style={{
               height: 120, // Fixed height instead of relying on numberOfLines
               paddingBottom: 20, // Space for the counter
+              color: themedColors.text,
             }}
           />
           <Text className="absolute bottom-3 right-3 text-xs text-gray">
@@ -68,13 +80,14 @@ const Intro = ({ data, updateData, onNext, error }: signupProps) => {
             numberOfLines={6}
             maxLength={300}
             placeholder="Craziest thing you have done"
-            placeholderTextColor="#B0B0B0"
+            placeholderTextColor={themedColors.placeholder}
             value={data?.CraziestThings}
             onChangeText={(text) => updateData({ CraziestThings: text })}
             textAlignVertical="top"
             style={{
               height: 120,
               paddingBottom: 20,
+              color: themedColors.text,
             }}
           />
           <Text className="absolute bottom-3 right-3 text-xs text-gray">

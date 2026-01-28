@@ -652,16 +652,18 @@ import {
   Image,
   PermissionsAndroid,
   Platform,
-  StatusBar,
+  PlatformColor,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  useColorScheme,
   useWindowDimensions,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { moderateScale, scale, verticalScale } from "react-native-size-matters";
 import { useDeviceSize } from "@/hooks/useResponsive";
+import { useThemeColors } from "@/context/ThemeContext";
 import GradientButton from "../ui/GradientButton";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
 
@@ -669,6 +671,15 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const { gridColumns } = useDeviceSize();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
   
   // Calculate card width responsively based on grid columns
   const cardWidth = useMemo(
@@ -848,7 +859,6 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
 
   return (
     <SafeAreaView style={[styles.safeArea]}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       <View style={styles.container}>
         {/* HEADER */}
@@ -862,7 +872,7 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
 
         {/* CONTENT */}
         <View style={styles.content}>
-          {images.length > 0 && <Text style={styles.heading}>Saved Photos</Text>}
+          {images.length > 0 && <Text style={[styles.heading, { color: themedColors.text }]}>Saved Photos</Text>}
           {images.length === 0 ? (
             <View style={styles.emptyPlaceholder}>
               <Text style={styles.emptyText}>Please add your pictures by clicking the button below</Text>
@@ -1010,7 +1020,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(20),
     fontWeight: "bold",
     marginBottom: verticalScale(12),
-    color: "black",
   },
 
   grid: {

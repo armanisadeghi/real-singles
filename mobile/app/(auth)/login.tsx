@@ -13,15 +13,18 @@ import {
   Keyboard,
   Modal,
   Platform,
+  PlatformColor,
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Pdf from "react-native-pdf";
 import Toast from "react-native-toast-message";
 import { WebView } from "react-native-webview";
+import { useThemeColors } from "@/context/ThemeContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -33,6 +36,19 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    inputBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainerHigh,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
 
   // Android hardware back button handling
   useEffect(() => {
@@ -237,10 +253,10 @@ const Login = () => {
         animationType="slide"
         onRequestClose={() => setVisible(false)}
       >
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView style={{ flex: 1, backgroundColor: themedColors.background }}>
           {/* Header */}
-          <View className="flex-row justify-between items-center p-4 bg-gray-100 border-b border-gray-300">
-            <Text className="text-base font-bold text-gray-800">
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: themedColors.inputBackground, borderBottomWidth: 1, borderBottomColor: themedColors.border }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: themedColors.text }}>
               {pdfSource === require("../../assets/docs/PrivacyPolicy.pdf")
                 ? "Privacy Policy"
                 : "Terms & Conditions"}
@@ -249,7 +265,7 @@ const Login = () => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setVisible(false);
             }}>
-              <PlatformIcon name="close" size={24} color="#666" />
+              <PlatformIcon name="close" size={24} color={themedColors.secondaryText} />
             </TouchableOpacity>
           </View>
 
@@ -269,14 +285,14 @@ const Login = () => {
       animationType="slide"
       onRequestClose={() => setShowWebView(false)}
     >
-      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-        <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-300">
-          <Text className="text-lg font-semibold">{webViewTitle}</Text>
+      <SafeAreaView style={{ flex: 1, backgroundColor: themedColors.background }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: themedColors.border }}>
+          <Text style={{ fontSize: 18, fontWeight: '600', color: themedColors.text }}>{webViewTitle}</Text>
           <TouchableOpacity onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setShowWebView(false);
           }}>
-            <PlatformIcon name="close" size={24} color="#000" />
+            <PlatformIcon name="close" size={24} color={themedColors.text} />
           </TouchableOpacity>
         </View>
 
@@ -303,7 +319,7 @@ const Login = () => {
           <View></View>
         </View>
 
-        <View className="mt-8 px-6 bg-white rounded-2xl shadow-lg py-10">
+        <View className="mt-8 px-6 rounded-2xl shadow-lg py-10" style={{ backgroundColor: themedColors.background }}>
           {generalError ? (
             <Text className="text-red-500 mb-4 text-center px-8">
               {generalError}
@@ -313,10 +329,10 @@ const Login = () => {
           {/* Email Input */}
           <View className="mb-4">
             <View className="flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
-              <PlatformIcon name="mail" size={20} color="#666" />
+              <PlatformIcon name="mail" size={20} color={themedColors.secondaryText} />
               <TextInput
                 placeholder="Email or Phone Number"
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={email}
                 onChangeText={handleEmailChange}
                 keyboardType="email-address"
@@ -329,13 +345,13 @@ const Login = () => {
                   flex: 1,
                   paddingLeft: 10,
                   paddingVertical: 10,
-                  color: 'black',
+                  color: themedColors.text,
                   fontSize: 16,
                 }}
                 // iOS-specific enhancements
                 clearButtonMode="while-editing"
                 textContentType="emailAddress"
-                keyboardAppearance="light"
+                keyboardAppearance={isDark ? 'dark' : 'light'}
               />
             </View>
             {emailError ? (
@@ -348,10 +364,10 @@ const Login = () => {
           {/* Password Input */}
           <View className="mb-3">
             <View className="relative flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
-              <PlatformIcon name="lock" size={20} color="#666" />
+              <PlatformIcon name="lock" size={20} color={themedColors.secondaryText} />
               <TextInput
                 placeholder="Password"
-                placeholderTextColor="#B0B0B0"
+                placeholderTextColor={themedColors.placeholder}
                 value={password}
                 onChangeText={handlePasswordChange}
                 secureTextEntry={!showPassword}
@@ -363,12 +379,12 @@ const Login = () => {
                   flex: 1,
                   paddingLeft: 10,
                   paddingVertical: 10,
-                  color: 'black',
+                  color: themedColors.text,
                   fontSize: 16,
                 }}
                 // iOS-specific enhancements
                 textContentType="password"
-                keyboardAppearance="light"
+                keyboardAppearance={isDark ? 'dark' : 'light'}
                 enablesReturnKeyAutomatically={true}
               />
               <TouchableOpacity onPress={() => {
@@ -378,7 +394,7 @@ const Login = () => {
                 <PlatformIcon 
                   name={showPassword ? "visibility-off" : "visibility"} 
                   size={15} 
-                  color="#666" 
+                  color={themedColors.secondaryText} 
                 />
               </TouchableOpacity>
             </View>
@@ -485,7 +501,7 @@ const Login = () => {
         onRequestClose={() => setShowForgotPasswordModal(false)}
       >
         <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white p-6 rounded-2xl w-[90%] max-w-[400px]">
+          <View className="p-6 rounded-2xl w-[90%] max-w-[400px]" style={{ backgroundColor: themedColors.background }}>
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-primary font-bold text-xl text-center flex-1">
                 {showResetPassword
@@ -524,10 +540,10 @@ const Login = () => {
 
                 <View className="mb-4">
                   <View className="flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
-                    <PlatformIcon name="mail" size={20} color="#666" />
+                    <PlatformIcon name="mail" size={20} color={themedColors.secondaryText} />
                     <TextInput
                       placeholder="Enter your email"
-                      placeholderTextColor="#B0B0B0"
+                      placeholderTextColor={themedColors.placeholder}
                       value={forgotEmail}
                       onChangeText={(text) => {
                         setForgotEmail(text);
@@ -541,7 +557,7 @@ const Login = () => {
                       style={{
                         flex: 1,
                         paddingHorizontal: 10,
-                        color: 'black',
+                        color: themedColors.text,
                       }}
                     />
                   </View>
@@ -597,7 +613,7 @@ const Login = () => {
                   <View className="flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
                     <TextInput
                       placeholder="Enter OTP"
-                      placeholderTextColor="#B0B0B0"
+                      placeholderTextColor={themedColors.placeholder}
                       value={otp}
                       onChangeText={(text) => {
                         setOtp(text);
@@ -610,6 +626,7 @@ const Login = () => {
                       style={{
                         flex: 1,
                         paddingHorizontal: 10,
+                        color: themedColors.text,
                       }}
                     />
                   </View>
@@ -661,10 +678,10 @@ const Login = () => {
 
                 <View className="mb-4">
                   <View className="relative flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
-                    <PlatformIcon name="lock" size={20} color="#666" />
+                    <PlatformIcon name="lock" size={20} color={themedColors.secondaryText} />
                     <TextInput
                       placeholder="New Password"
-                      placeholderTextColor="#B0B0B0"
+                      placeholderTextColor={themedColors.placeholder}
                       value={newPassword}
                       onChangeText={(text) => {
                         setNewPassword(text);
@@ -677,6 +694,7 @@ const Login = () => {
                       style={{
                         flex: 1,
                         paddingHorizontal: 10,
+                        color: themedColors.text,
                       }}
                     />
                     <TouchableOpacity
@@ -688,7 +706,7 @@ const Login = () => {
                       <PlatformIcon 
                         name={showPassword ? "visibility-off" : "visibility"} 
                         size={15} 
-                        color="#666" 
+                        color={themedColors.secondaryText} 
                       />
                     </TouchableOpacity>
                   </View>

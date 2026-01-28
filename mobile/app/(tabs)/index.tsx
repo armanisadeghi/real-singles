@@ -20,13 +20,15 @@ import React, {
 import {
   ActivityIndicator,
   Platform,
+  PlatformColor,
   RefreshControl,
   ScrollView,
-  StatusBar,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
+import { useThemeColors } from "@/context/ThemeContext";
 import Toast from "react-native-toast-message";
 import { useSafeArea, useBottomSpacing, useHeaderSpacing } from "@/hooks/useResponsive";
 import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES } from "@/constants/designTokens";
@@ -41,6 +43,21 @@ export default function Home() {
   const safeArea = useSafeArea();
   const { contentPadding } = useBottomSpacing(true);
   const { minimal: headerTopPadding } = useHeaderSpacing();
+
+  // Dark mode support
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    // Brand/accent color
+    primary: Platform.OS === 'ios' ? (PlatformColor('systemPink') as unknown as string) : '#B06D1E',
+  };
 
   interface HomeData {
     TopMatch: User[];
@@ -181,36 +198,21 @@ export default function Home() {
     }
   }, [data]);
 
+  // Primary color for loading indicators
+  const primaryColor = Platform.OS === 'ios' 
+    ? (PlatformColor('systemPink') as unknown as string) 
+    : '#B06D1E';
+
   if (isLoading) {
     return (
       <View className="w-full h-full flex items-center justify-center py-4">
-        <ActivityIndicator size="large" color="#B06D1E" />
+        <ActivityIndicator size="large" color={primaryColor} />
       </View>
     );
   }
 
-
-  const BACKGROUND_COLORS = [
-    "#F44336",
-    "#E91E63",
-    "#9C27B0",
-    "#673AB7",
-    "#3F51B5",
-    "#2196F3",
-    "#03A9F4",
-    "#00BCD4",
-    "#009688",
-    "#4CAF50",
-    "#8BC34A",
-    "#FF9800",
-    "#FF5722",
-    "#795548",
-    "#607D8B",
-  ];
-
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1 bg-background"
@@ -219,10 +221,10 @@ export default function Home() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#B06D1E"]}
-            tintColor="#B06D1E"
+            colors={[primaryColor]}
+            tintColor={primaryColor}
             title="Pull to refresh..."
-            titleColor="#B06D1E"
+            titleColor={primaryColor}
           />
         }
       >
@@ -238,8 +240,8 @@ export default function Home() {
         )}
         {/* Clean Native Header */}
         <View
-          className="bg-background"
           style={{ 
+            backgroundColor: themedColors.background,
             paddingTop: headerTopPadding,
             paddingHorizontal: SPACING.screenPadding,
             paddingBottom: SPACING.md,
@@ -249,8 +251,7 @@ export default function Home() {
           <View className="flex-row justify-between items-center">
             {/* Greeting */}
             <Text
-              className="text-foreground font-semibold"
-              style={TYPOGRAPHY.h2}
+              style={[TYPOGRAPHY.h2, { color: themedColors.text }]}
               numberOfLines={1}
             >
               Welcome back{profile?.FirstName ? `, ${profile.FirstName}` : ''}
@@ -271,21 +272,22 @@ export default function Home() {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   router.push("/notification");
                 }}
-                className="rounded-full bg-secondary"
+                className="rounded-full"
                 style={{ 
                   padding: SPACING.sm,
+                  backgroundColor: themedColors.secondaryBackground,
                 }}
                 activeOpacity={0.7}
               >
                 <PlatformIcon
                   name="notifications"
                   size={ICON_SIZES.md}
-                  color={Platform.OS === 'ios' ? '#000000' : '#1C1B1F'}
+                  color={themedColors.text}
                 />
               </TouchableOpacity>
               <HomeHeaderMenu
                 onShowMenu={() => setMenuVisible(true)}
-                iconColor={Platform.OS === 'ios' ? '#000000' : '#1C1B1F'}
+                iconColor={themedColors.text}
                 backgroundColor="transparent"
               />
             </View>

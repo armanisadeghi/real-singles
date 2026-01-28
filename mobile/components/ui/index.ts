@@ -57,3 +57,9 @@ export type {
 // Context Menu (iOS native, Android fallback)
 export { ContextMenu } from "./ContextMenu";
 export type { ContextMenuProps, ContextMenuItem } from "./ContextMenu";
+
+// Floating Action Bar (iOS glass effect, Android solid)
+export { FloatingActionBar } from "./FloatingActionBar";
+
+// Native Segmented Tabs (iOS native, Android styled)
+export { NativeSegmentedTabs } from "./NativeSegmentedTabs";

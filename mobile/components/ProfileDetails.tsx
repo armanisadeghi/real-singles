@@ -4,6 +4,7 @@ import { getProfileLink, APP_NAME } from "@/lib/config";
 import { User } from "@/types";
 import { removeToken } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui";
+import { useThemeColors } from "@/context/ThemeContext";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -12,10 +13,12 @@ import {
   Alert,
   Image,
   Platform,
+  PlatformColor,
   ScrollView,
   Share,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -40,6 +43,16 @@ export default function ProfileDetails({
   const [expanded, setExpanded] = useState(false);
   const router = useRouter();
   const [loadingLogout, setLoadingLogout] = useState(false);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+  };
 
 console.log("profile?.Height",profile?.Height);
 
@@ -193,7 +206,7 @@ console.log("profile?.Height",profile?.Height);
             {profile?.DisplayName}
           </Text>
 
-          <Text className="font-normal text-[14px] text-[#686A6E] mb-2">
+          <Text className="font-normal text-[14px] mb-2" style={{ color: themedColors.secondaryText }}>
             {profile?.Email}
           </Text>
 
@@ -201,14 +214,14 @@ console.log("profile?.Height",profile?.Height);
           <View className="flex-row items-center gap-3">
             {/* City, State */}
              {profile?.City && profile?.State && (
-                <Text className="font-normal text-[13px] text-[#686A6E]">
+                <Text className="font-normal text-[13px]" style={{ color: themedColors.secondaryText }}>
                   {profile.City}, {profile.State}
                 </Text>
               )}
 
                {/* Distance */}
               {profile?.distance_in_km !== undefined && (
-                <Text className="font-medium text-[12px] text-[#4B5563]">
+                <Text className="font-medium text-[12px]" style={{ color: themedColors.secondaryText }}>
                • {Number(profile.distance_in_km).toFixed(1)} km away
                 </Text>
               )}
@@ -294,7 +307,8 @@ console.log("profile?.Height",profile?.Height);
         <View>
           <Text
             numberOfLines={expanded ? undefined : 3}
-            className="text-[12px] font-normal text-[#686A6F] leading-5"
+            className="text-[12px] font-normal leading-5"
+            style={{ color: themedColors.secondaryText }}
           >
             {profile?.About || "No information available."}
           </Text>
@@ -361,7 +375,7 @@ console.log("profile?.Height",profile?.Height);
         </Text>
         <View className="flex-col gap-2">
           <View className="flex-row items-center justify-between">
-            <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+            <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
               Gender
             </Text>
             <Text className="text-dark leading-5 text-xs font-normal">
@@ -369,7 +383,7 @@ console.log("profile?.Height",profile?.Height);
             </Text>
           </View>
           <View className="flex-row items-center justify-between">
-            <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+            <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
               Age
             </Text>
             <Text className="text-dark leading-5 text-xs font-normal">
@@ -378,7 +392,7 @@ console.log("profile?.Height",profile?.Height);
           </View>
           {profile?.Height && (
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+              <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                 Height
               </Text>
               <Text className="text-dark leading-5 text-xs font-normal">
@@ -388,7 +402,7 @@ console.log("profile?.Height",profile?.Height);
           )}
           {profile?.BodyType && (
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+              <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                 Body Type
               </Text>
               <Text className="text-dark leading-5 text-xs font-normal capitalize">
@@ -398,7 +412,7 @@ console.log("profile?.Height",profile?.Height);
           )}
           {profile?.Education && (
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+              <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                 Education
               </Text>
               <Text className="text-dark leading-5 text-xs font-normal capitalize">
@@ -408,7 +422,7 @@ console.log("profile?.Height",profile?.Height);
           )}
           {profile?.Religion && (
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+              <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                 Religion
               </Text>
               <Text className="text-dark leading-5 text-xs font-normal capitalize">
@@ -418,7 +432,7 @@ console.log("profile?.Height",profile?.Height);
           )}
           {profile?.Ethnicity && (
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+              <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                 Ethnicity
               </Text>
               <Text className="text-dark leading-5 text-xs font-normal capitalize">
@@ -440,7 +454,7 @@ console.log("profile?.Height",profile?.Height);
           <View className="flex-col gap-2">
             {profile?.Smoking && (
               <View className="flex-row items-center justify-between">
-                <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                   Smoking
                 </Text>
                 <Text className="text-dark leading-5 text-xs font-normal capitalize">
@@ -450,7 +464,7 @@ console.log("profile?.Height",profile?.Height);
             )}
             {profile?.Drinks && (
               <View className="flex-row items-center justify-between">
-                <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                   Drinking
                 </Text>
                 <Text className="text-dark leading-5 text-xs font-normal capitalize">
@@ -460,7 +474,7 @@ console.log("profile?.Height",profile?.Height);
             )}
             {profile?.Marijuana && (
               <View className="flex-row items-center justify-between">
-                <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                   Marijuana
                 </Text>
                 <Text className="text-dark leading-5 text-xs font-normal capitalize">
@@ -470,7 +484,7 @@ console.log("profile?.Height",profile?.Height);
             )}
             {profile?.HaveChild && (
               <View className="flex-row items-center justify-between">
-                <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                   Has Kids
                 </Text>
                 <Text className="text-dark leading-5 text-xs font-normal capitalize">
@@ -480,7 +494,7 @@ console.log("profile?.Height",profile?.Height);
             )}
             {profile?.WantChild && (
               <View className="flex-row items-center justify-between">
-                <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                   Wants Kids
                 </Text>
                 <Text className="text-dark leading-5 text-xs font-normal capitalize">
@@ -516,7 +530,8 @@ console.log("profile?.Height",profile?.Height);
           <View className="flex-row gap-4 my-10">
             <TouchableOpacity
               onPress={handleReferFriend}
-              className="flex-1 py-4 bg-light-100 rounded-[99] border border-[#EAEAEB]"
+              className="flex-1 py-4 bg-light-100 rounded-[99] border"
+              style={{ borderColor: themedColors.border }}
             >
               <Text className="text-center text-gray font-medium">
                 Refer to a Friend

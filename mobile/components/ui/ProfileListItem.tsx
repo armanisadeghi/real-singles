@@ -16,10 +16,12 @@ import React, { useCallback, useMemo } from "react";
 import {
   Image,
   Platform,
+  PlatformColor,
   Pressable,
   StyleSheet,
   Text,
   View,
+  useColorScheme,
 } from "react-native";
 import { moderateScale, scale, verticalScale } from "react-native-size-matters";
 import {
@@ -30,6 +32,7 @@ import {
   TYPOGRAPHY,
   VERTICAL_SPACING,
 } from "@/constants/designTokens";
+import { useThemeColors } from "@/context/ThemeContext";
 
 // Background colors for initials (same as ProfileCard for consistency)
 const BACKGROUND_COLORS = [
@@ -52,6 +55,31 @@ export default function ProfileListItem({
   onPress 
 }: ProfileListItemProps) {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  // Theme-aware colors
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' 
+      ? (PlatformColor('secondarySystemBackground') as unknown as string)
+      : colors.surface,
+    text: Platform.OS === 'ios'
+      ? (PlatformColor('label') as unknown as string)
+      : colors.onSurface,
+    secondaryText: Platform.OS === 'ios'
+      ? (PlatformColor('secondaryLabel') as unknown as string)
+      : colors.onSurfaceVariant,
+    tertiaryText: Platform.OS === 'ios'
+      ? (PlatformColor('tertiaryLabel') as unknown as string)
+      : (isDark ? '#9CA3AF' : '#6B7280'),
+    badgeBackground: Platform.OS === 'ios'
+      ? (PlatformColor('systemGray5') as unknown as string)
+      : (isDark ? '#374151' : '#F3F4F6'),
+    systemBlue: Platform.OS === 'ios'
+      ? (PlatformColor('systemBlue') as unknown as string)
+      : '#3B82F6',
+  }), [isDark, colors]);
   
   // Generate consistent background color based on user ID/name
   const bgColor = useMemo(() => {
@@ -125,13 +153,13 @@ export default function ProfileListItem({
       {/* Info Section */}
       <View style={styles.infoContainer}>
         {/* Name */}
-        <Text style={styles.name} numberOfLines={1}>
+        <Text style={[styles.name, { color: themedColors.text }]} numberOfLines={1}>
           {profile?.DisplayName || "Anonymous"}
         </Text>
 
         {/* Location */}
         {locationString ? (
-          <Text style={styles.location} numberOfLines={1}>
+          <Text style={[styles.location, { color: themedColors.secondaryText }]} numberOfLines={1}>
             {locationString}
           </Text>
         ) : null}
@@ -140,27 +168,27 @@ export default function ProfileListItem({
         <View style={styles.badgesRow}>
           {/* Verified Badge */}
           {profile?.livePicture && (
-            <View style={styles.badge}>
+            <View style={[styles.badge, { backgroundColor: themedColors.badgeBackground }]}>
               <Image
                 source={icons.check}
                 style={styles.badgeIcon}
                 resizeMode="contain"
-                tintColor="#3B82F6"
+                tintColor={themedColors.systemBlue}
               />
-              <Text style={[styles.badgeText, { color: "#3B82F6" }]}>Verified</Text>
+              <Text style={[styles.badgeText, { color: themedColors.systemBlue }]}>Verified</Text>
             </View>
           )}
 
           {/* Distance Badge */}
           {distanceString && (
-            <View style={styles.badge}>
+            <View style={[styles.badge, { backgroundColor: themedColors.badgeBackground }]}>
               <Image
                 source={icons.mapMarker}
                 style={styles.badgeIcon}
                 resizeMode="contain"
-                tintColor="#6B7280"
+                tintColor={themedColors.secondaryText}
               />
-              <Text style={styles.badgeText}>{distanceString}</Text>
+              <Text style={[styles.badgeText, { color: themedColors.secondaryText }]}>{distanceString}</Text>
             </View>
           )}
         </View>
@@ -168,7 +196,7 @@ export default function ProfileListItem({
 
       {/* Chevron - using text character for simplicity */}
       <View style={styles.chevronContainer}>
-        <Text style={styles.chevronText}>›</Text>
+        <Text style={[styles.chevronText, { color: themedColors.tertiaryText }]}>›</Text>
       </View>
     </View>
   );
@@ -190,9 +218,10 @@ export default function ProfileListItem({
       onPress={handlePress}
       style={({ pressed }) => [
         styles.pressable,
+        { backgroundColor: themedColors.background },
         pressed && styles.pressed,
       ]}
-      android_ripple={{ color: "rgba(0, 0, 0, 0.08)" }}
+      android_ripple={{ color: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)" }}
     >
       {content}
     </Pressable>
@@ -203,7 +232,7 @@ const PHOTO_SIZE = moderateScale(72);
 
 const styles = StyleSheet.create({
   pressable: {
-    backgroundColor: "#FFFFFF",
+    // backgroundColor is set dynamically
     marginHorizontal: SPACING.screenPadding,
     marginVertical: VERTICAL_SPACING.xs,
     borderRadius: BORDER_RADIUS.lg,
@@ -246,7 +275,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   initials: {
-    color: "#FFFFFF",
+    color: "#FFFFFF", // White on colored background - intentional
     fontSize: moderateScale(24),
     fontWeight: "700",
   },
@@ -257,11 +286,11 @@ const styles = StyleSheet.create({
   },
   name: {
     ...TYPOGRAPHY.bodySemibold,
-    color: "#111827",
+    // color is set dynamically
   },
   location: {
     ...TYPOGRAPHY.subheadline,
-    color: "#6B7280",
+    // color is set dynamically
   },
   badgesRow: {
     flexDirection: "row",
@@ -274,7 +303,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: SPACING.xxs,
-    backgroundColor: "#F3F4F6",
+    // backgroundColor is set dynamically
     paddingHorizontal: SPACING.xs,
     paddingVertical: SPACING.xxs,
     borderRadius: BORDER_RADIUS.badge,
@@ -285,7 +314,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     ...TYPOGRAPHY.caption2,
-    color: "#6B7280",
+    // color is set dynamically
   },
   chevronContainer: {
     justifyContent: "center",
@@ -294,7 +323,7 @@ const styles = StyleSheet.create({
   },
   chevronText: {
     fontSize: moderateScale(24),
-    color: "#9CA3AF",
+    // color is set dynamically
     fontWeight: "300",
   },
 });

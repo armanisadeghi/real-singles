@@ -1,7 +1,8 @@
 import { createEvent } from "@/lib/api";
+import { useThemeColors } from "@/context/ThemeContext";
 import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -12,6 +13,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,6 +23,19 @@ import { SymbolView } from "expo-symbols";
 export default function CreateEvent() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    tertiaryText: Platform.OS === 'ios' ? (PlatformColor('tertiaryLabel') as unknown as string) : (isDark ? '#9CA3AF' : '#666666'),
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    placeholderText: Platform.OS === 'ios' ? (PlatformColor('placeholderText') as unknown as string) : (isDark ? '#8E8E93' : '#9CA3AF'),
+  }), [isDark, colors]);
   
   const [loading, setLoading] = useState(false);
   const [eventName, setEventName] = useState("");
@@ -139,60 +154,89 @@ export default function CreateEvent() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-background"
+      style={{ flex: 1, backgroundColor: themedColors.background }}
     >
       <ScrollView
-        className="flex-1"
+        style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View className="px-4 py-6">
+        <View style={{ paddingHorizontal: 16, paddingVertical: 24 }}>
           {/* Event Name */}
-          <View className="mb-5">
-            <Text className="text-sm font-medium text-dark mb-2">Event Name *</Text>
+          <View style={{ marginBottom: 20 }}>
+            <Text style={{ fontSize: 14, fontWeight: '500', color: themedColors.text, marginBottom: 8 }}>Event Name *</Text>
             <TextInput
-              className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-base text-dark"
+              style={{
+                backgroundColor: themedColors.secondaryBackground,
+                borderWidth: 1,
+                borderColor: themedColors.border,
+                borderRadius: 12,
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                fontSize: 16,
+                color: themedColors.text,
+                minHeight: 48,
+              }}
               placeholder="Enter event name"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={themedColors.placeholderText}
               value={eventName}
               onChangeText={setEventName}
               clearButtonMode="while-editing"
               enablesReturnKeyAutomatically
               returnKeyType="next"
-              style={{ minHeight: 48 }}
             />
           </View>
 
           {/* Description */}
-          <View className="mb-5">
-            <Text className="text-sm font-medium text-dark mb-2">Description *</Text>
+          <View style={{ marginBottom: 20 }}>
+            <Text style={{ fontSize: 14, fontWeight: '500', color: themedColors.text, marginBottom: 8 }}>Description *</Text>
             <TextInput
-              className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-base text-dark"
+              style={{
+                backgroundColor: themedColors.secondaryBackground,
+                borderWidth: 1,
+                borderColor: themedColors.border,
+                borderRadius: 12,
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                fontSize: 16,
+                color: themedColors.text,
+                minHeight: 120,
+              }}
               placeholder="Describe your event..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={themedColors.placeholderText}
               value={description}
               onChangeText={setDescription}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
-              style={{ minHeight: 120 }}
             />
           </View>
 
           {/* Date & Time Section */}
-          <Text className="text-sm font-semibold text-dark mb-3">Date & Time</Text>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: themedColors.text, marginBottom: 12 }}>Date & Time</Text>
           
           {/* Event Date */}
           <TouchableOpacity
-            className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-3 flex-row justify-between items-center"
+            style={{
+              backgroundColor: themedColors.secondaryBackground,
+              borderWidth: 1,
+              borderColor: themedColors.border,
+              borderRadius: 12,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              marginBottom: 12,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
             onPress={() => {
               Haptics.selectionAsync();
               setShowDatePicker(true);
             }}
             activeOpacity={0.7}
           >
-            <View className="flex-row items-center">
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               {Platform.OS === "ios" && (
                 <SymbolView
                   name="calendar"
@@ -200,9 +244,9 @@ export default function CreateEvent() {
                   tintColor={Platform.select({ ios: PlatformColor("systemBlue") as unknown as string, default: "#007AFF" })}
                 />
               )}
-              <Text className="text-base text-dark ml-2">Date</Text>
+              <Text style={{ fontSize: 16, color: themedColors.text, marginLeft: 8 }}>Date</Text>
             </View>
-            <Text className="text-base text-primary">{formatDate(eventDate)}</Text>
+            <Text style={{ fontSize: 16, color: '#B06D1E' }}>{formatDate(eventDate)}</Text>
           </TouchableOpacity>
 
           {showDatePicker && (
@@ -217,14 +261,25 @@ export default function CreateEvent() {
 
           {/* Start Time */}
           <TouchableOpacity
-            className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-3 flex-row justify-between items-center"
+            style={{
+              backgroundColor: themedColors.secondaryBackground,
+              borderWidth: 1,
+              borderColor: themedColors.border,
+              borderRadius: 12,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              marginBottom: 12,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
             onPress={() => {
               Haptics.selectionAsync();
               setShowStartTimePicker(true);
             }}
             activeOpacity={0.7}
           >
-            <View className="flex-row items-center">
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               {Platform.OS === "ios" && (
                 <SymbolView
                   name="clock"
@@ -232,9 +287,9 @@ export default function CreateEvent() {
                   tintColor={Platform.select({ ios: PlatformColor("systemGreen") as unknown as string, default: "#34C759" })}
                 />
               )}
-              <Text className="text-base text-dark ml-2">Start Time</Text>
+              <Text style={{ fontSize: 16, color: themedColors.text, marginLeft: 8 }}>Start Time</Text>
             </View>
-            <Text className="text-base text-primary">{formatTime(startTime)}</Text>
+            <Text style={{ fontSize: 16, color: '#B06D1E' }}>{formatTime(startTime)}</Text>
           </TouchableOpacity>
 
           {showStartTimePicker && (
@@ -248,14 +303,25 @@ export default function CreateEvent() {
 
           {/* End Time */}
           <TouchableOpacity
-            className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-5 flex-row justify-between items-center"
+            style={{
+              backgroundColor: themedColors.secondaryBackground,
+              borderWidth: 1,
+              borderColor: themedColors.border,
+              borderRadius: 12,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              marginBottom: 20,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
             onPress={() => {
               Haptics.selectionAsync();
               setShowEndTimePicker(true);
             }}
             activeOpacity={0.7}
           >
-            <View className="flex-row items-center">
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               {Platform.OS === "ios" && (
                 <SymbolView
                   name="clock.badge.checkmark"
@@ -263,9 +329,9 @@ export default function CreateEvent() {
                   tintColor={Platform.select({ ios: PlatformColor("systemOrange") as unknown as string, default: "#FF9500" })}
                 />
               )}
-              <Text className="text-base text-dark ml-2">End Time</Text>
+              <Text style={{ fontSize: 16, color: themedColors.text, marginLeft: 8 }}>End Time</Text>
             </View>
-            <Text className="text-base text-primary">{formatTime(endTime)}</Text>
+            <Text style={{ fontSize: 16, color: '#B06D1E' }}>{formatTime(endTime)}</Text>
           </TouchableOpacity>
 
           {showEndTimePicker && (
@@ -278,43 +344,71 @@ export default function CreateEvent() {
           )}
 
           {/* Location Section */}
-          <Text className="text-sm font-semibold text-dark mb-3">Location (Optional)</Text>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: themedColors.text, marginBottom: 12 }}>Location (Optional)</Text>
 
           {/* Street */}
-          <View className="mb-3">
+          <View style={{ marginBottom: 12 }}>
             <TextInput
-              className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-base text-dark"
+              style={{
+                backgroundColor: themedColors.secondaryBackground,
+                borderWidth: 1,
+                borderColor: themedColors.border,
+                borderRadius: 12,
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                fontSize: 16,
+                color: themedColors.text,
+                minHeight: 48,
+              }}
               placeholder="Street Address"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={themedColors.placeholderText}
               value={street}
               onChangeText={setStreet}
               clearButtonMode="while-editing"
               enablesReturnKeyAutomatically
               returnKeyType="next"
-              style={{ minHeight: 48 }}
             />
           </View>
 
           {/* City & State */}
-          <View className="flex-row mb-3 gap-3">
-            <View className="flex-1">
+          <View style={{ flexDirection: 'row', marginBottom: 12, gap: 12 }}>
+            <View style={{ flex: 1 }}>
               <TextInput
-                className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-base text-dark"
+                style={{
+                  backgroundColor: themedColors.secondaryBackground,
+                  borderWidth: 1,
+                  borderColor: themedColors.border,
+                  borderRadius: 12,
+                  paddingHorizontal: 16,
+                  paddingVertical: 12,
+                  fontSize: 16,
+                  color: themedColors.text,
+                  minHeight: 48,
+                }}
                 placeholder="City"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={themedColors.placeholderText}
                 value={city}
                 onChangeText={setCity}
                 clearButtonMode="while-editing"
                 enablesReturnKeyAutomatically
                 returnKeyType="next"
-                style={{ minHeight: 48 }}
               />
             </View>
-            <View className="w-24">
+            <View style={{ width: 96 }}>
               <TextInput
-                className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-base text-dark"
+                style={{
+                  backgroundColor: themedColors.secondaryBackground,
+                  borderWidth: 1,
+                  borderColor: themedColors.border,
+                  borderRadius: 12,
+                  paddingHorizontal: 16,
+                  paddingVertical: 12,
+                  fontSize: 16,
+                  color: themedColors.text,
+                  minHeight: 48,
+                }}
                 placeholder="State"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={themedColors.placeholderText}
                 value={state}
                 onChangeText={setState}
                 clearButtonMode="while-editing"
@@ -322,17 +416,26 @@ export default function CreateEvent() {
                 returnKeyType="next"
                 autoCapitalize="characters"
                 maxLength={2}
-                style={{ minHeight: 48 }}
               />
             </View>
           </View>
 
           {/* Postal Code */}
-          <View className="mb-8">
+          <View style={{ marginBottom: 32 }}>
             <TextInput
-              className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-base text-dark"
+              style={{
+                backgroundColor: themedColors.secondaryBackground,
+                borderWidth: 1,
+                borderColor: themedColors.border,
+                borderRadius: 12,
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                fontSize: 16,
+                color: themedColors.text,
+                minHeight: 48,
+              }}
               placeholder="Postal Code"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={themedColors.placeholderText}
               value={postalCode}
               onChangeText={setPostalCode}
               clearButtonMode="while-editing"
@@ -340,7 +443,6 @@ export default function CreateEvent() {
               returnKeyType="done"
               keyboardType="number-pad"
               maxLength={10}
-              style={{ minHeight: 48 }}
             />
           </View>
         </View>
@@ -348,13 +450,26 @@ export default function CreateEvent() {
 
       {/* Create Button - Fixed at bottom */}
       <View 
-        className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 pt-3"
-        style={{ paddingBottom: insets.bottom + 12 }}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: themedColors.secondaryBackground,
+          borderTopWidth: 1,
+          borderTopColor: themedColors.border,
+          paddingHorizontal: 16,
+          paddingTop: 12,
+          paddingBottom: insets.bottom + 12,
+        }}
       >
         <TouchableOpacity
-          className={`rounded-xl py-4 items-center ${
-            loading ? "bg-primary/70" : "bg-primary"
-          }`}
+          style={{
+            backgroundColor: loading ? 'rgba(176, 109, 30, 0.7)' : '#B06D1E',
+            borderRadius: 12,
+            paddingVertical: 16,
+            alignItems: 'center',
+          }}
           onPress={handleCreateEvent}
           disabled={loading}
           activeOpacity={0.8}
@@ -362,7 +477,7 @@ export default function CreateEvent() {
           {loading ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <View className="flex-row items-center">
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               {Platform.OS === "ios" && (
                 <SymbolView
                   name="plus.circle.fill"
@@ -370,7 +485,7 @@ export default function CreateEvent() {
                   tintColor="#FFFFFF"
                 />
               )}
-              <Text className="text-white font-semibold text-base">Create Event</Text>
+              <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 16 }}>Create Event</Text>
             </View>
           )}
         </TouchableOpacity>

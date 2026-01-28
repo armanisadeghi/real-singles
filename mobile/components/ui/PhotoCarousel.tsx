@@ -14,10 +14,13 @@ import {
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
+  PlatformColor,
   Pressable,
   StyleSheet,
   View,
   ViewToken,
+  useColorScheme,
   useWindowDimensions,
 } from "react-native";
 import { Image } from "expo-image";
@@ -26,6 +29,7 @@ import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import FullScreenImageViewer from "./FullScreenImageViewer";
+import { useThemeColors } from "@/context/ThemeContext";
 
 interface PhotoCarouselProps {
   /** Array of image URLs */
@@ -69,6 +73,17 @@ export default function PhotoCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isViewerVisible, setIsViewerVisible] = useState(false);
   const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  // Theme-aware placeholder colors
+  const placeholderBg = Platform.OS === 'ios'
+    ? (PlatformColor('systemGray5') as unknown as string)
+    : (isDark ? '#3A3A3C' : '#E5E7EB');
+  const placeholderInnerBg = Platform.OS === 'ios'
+    ? (PlatformColor('systemGray4') as unknown as string)
+    : (isDark ? '#48484A' : '#D1D5DB');
 
   // Calculate total height including safe area compensation
   const totalHeight = useMemo(() => {
@@ -160,8 +175,8 @@ export default function PhotoCarousel({
   
   if (images.length === 0) {
     return (
-      <View style={[styles.placeholder, { height: totalHeight, width: screenWidth }]}>
-        <View style={styles.placeholderInner} />
+      <View style={[styles.placeholder, { height: totalHeight, width: screenWidth, backgroundColor: placeholderBg }]}>
+        <View style={[styles.placeholderInner, { backgroundColor: placeholderInnerBg }]} />
       </View>
     );
   }
@@ -294,8 +309,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   placeholder: {
-    // width set dynamically via inline style
-    backgroundColor: "#E5E7EB",
+    // width and backgroundColor set dynamically via inline style
     justifyContent: "center",
     alignItems: "center",
   },
@@ -303,6 +317,6 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#D1D5DB",
+    // backgroundColor set dynamically via inline style
   },
 });

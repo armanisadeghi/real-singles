@@ -1,7 +1,8 @@
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
+import { useThemeColors } from "@/context/ThemeContext";
 import React, { useState } from "react";
-import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, Platform, PlatformColor, ScrollView, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 const EducationJob = ({
@@ -10,6 +11,16 @@ const EducationJob = ({
   onNext,
   error,
 }: any) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
+
   const [validationError, setValidationError] = useState("");
   
   const handleNext = () => {
@@ -86,7 +97,8 @@ const EducationJob = ({
                     setValidationError(""); 
                   }}
                   placeholder="Add school name"
-                  placeholderTextColor="#B0B0B0"
+                  placeholderTextColor={themedColors.placeholder}
+                  style={{ color: themedColors.text }}
                   className="flex-1 px-4 py-4 border border-border rounded-[99] mr-2 bg-light-200"
                 />
                 <TouchableOpacity 
@@ -132,7 +144,8 @@ const EducationJob = ({
                 setValidationError(""); // Clear error on change
               }}
               placeholder="Company Name"
-              placeholderTextColor="#B0B0B0"
+              placeholderTextColor={themedColors.placeholder}
+              style={{ color: themedColors.text }}
               className="flex-1 px-4 py-4 border border-border rounded-[99] mr-2 mb-4 bg-light-200"
             />
             <TextInput
@@ -142,7 +155,8 @@ const EducationJob = ({
                 setValidationError(""); // Clear error on change
               }}
               placeholder="Job Title"
-              placeholderTextColor="#B0B0B0"
+              placeholderTextColor={themedColors.placeholder}
+              style={{ color: themedColors.text }}
               className="flex-1 bg-gray-50 px-4 py-4 border border-border rounded-[99] mb-4 bg-light-200"
             />
           </View>

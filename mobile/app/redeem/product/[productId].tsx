@@ -1,6 +1,7 @@
 import LinearBg from "@/components/LinearBg";
 import ProductDetails from "@/components/ProductDetails";
 import { images } from "@/constants/images";
+import { useThemeColors } from "@/context/ThemeContext";
 import { getProductsGiftDetail } from "@/lib/api";
 import { ProductCardProps } from "@/types";
 import { VIDEO_URL } from "@/utils/token";
@@ -11,6 +12,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ImageBackground,
+  Platform,
+  PlatformColor,
   Text,
   TouchableOpacity,
   View
@@ -22,6 +25,11 @@ export default function ProductDetail() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [data, setData] = useState<ProductCardProps>();
   const [loading, setLoading] = useState(false);
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+  };
 
   const fetchProductDetails = async () => {
     setLoading(true);
@@ -89,7 +97,7 @@ export default function ProductDetail() {
   if (loading) {
     return (
       <View className="w-full h-full flex items-center justify-center py-4">
-        <ActivityIndicator size="large" color="#000000" />
+        <ActivityIndicator size="large" color={themedColors.text} />
       </View>
     );
   }

@@ -1,30 +1,72 @@
+/**
+ * Favorites Screen
+ * 
+ * Displays user's saved/favorited profiles.
+ */
+
 import NotificationBell from "@/components/NotificationBell";
 import ProfileListItem from "@/components/ui/ProfileListItem";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { VERTICAL_SPACING } from "@/constants/designTokens";
+import { useThemeColors } from "@/context/ThemeContext";
 import { getFavoriteList } from "@/lib/api";
 import { User } from "@/types";
-import React, { useEffect, useState } from "react";
+import * as Haptics from "expo-haptics";
+import { SymbolView } from "expo-symbols";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
+  Platform,
+  PlatformColor,
+  RefreshControl,
   Text,
-  View
+  useColorScheme,
+  View,
 } from "react-native";
 import Toast from "react-native-toast-message";
 
 export default function Favorites() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [favoriteProfiles, setFavoriteProfiles] = useState<User[]>([]);
 
-  const fetchFavorites = async () => {
-    setLoading(true);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const colors = useThemeColors();
+
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === "ios"
+      ? (PlatformColor("systemBackground") as unknown as string)
+      : colors.background,
+    label: Platform.OS === "ios"
+      ? (PlatformColor("label") as unknown as string)
+      : colors.onSurface,
+    secondaryLabel: Platform.OS === "ios"
+      ? (PlatformColor("secondaryLabel") as unknown as string)
+      : colors.onSurfaceVariant,
+    systemPink: Platform.OS === "ios"
+      ? (PlatformColor("systemPink") as unknown as string)
+      : "#B06D1E",
+  }), [isDark, colors]);
+
+  const fetchFavorites = useCallback(async (showLoader = true) => {
+    if (showLoader) {
+      setLoading(true);
+    }
     try {
       const res = await getFavoriteList();
       console.log("Favorites fetched:", res);
-      if(res?.success){
+      if (res?.success) {
         setFavoriteProfiles(res?.data || []);
-      }else{
+        if (!showLoader) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+      } else {
         console.log("Failed to fetch favorites:", res?.msg);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Toast.show({
           type: "error",
           text1: res?.msg || "Failed to fetch favorites",
@@ -35,6 +77,7 @@ export default function Favorites() {
       }
     } catch (error) {
       console.error("Error fetching favorites:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({
         type: "error",
         text1: "Failed to fetch favorites",
@@ -43,30 +86,62 @@ export default function Favorites() {
         visibilityTime: 2000,
         autoHide: true,
       });
-    }finally{
+    } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  }
-
-  useEffect(() => {
-    fetchFavorites();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchFavorites();
+    }, [fetchFavorites])
+  );
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchFavorites(false);
+  }, [fetchFavorites]);
+
+  const renderEmptyComponent = () => (
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 80 }}>
+      {Platform.OS === "ios" ? (
+        <SymbolView
+          name="star.slash"
+          style={{ width: 64, height: 64, marginBottom: 16 }}
+          tintColor={themedColors.systemPink}
+        />
+      ) : (
+        <PlatformIcon name="star-border" size={64} color={themedColors.systemPink} />
+      )}
+      <Text style={{ fontSize: 14, color: themedColors.secondaryLabel }}>
+        No Favorites available
+      </Text>
+    </View>
+  );
   
   return (
-    <>
-      <View className="flex-1 bg-background">
-        <Toast/>
-        <ScreenHeader
-          title="My Favorites"
-          showBackButton={false}
-          rightContent={<NotificationBell />}
-        />
-        <View className="mt-4 pb-56">
+    <View style={{ flex: 1, backgroundColor: themedColors.background }}>
+      <Toast />
+      <ScreenHeader
+        title="My Favorites"
+        showBackButton={false}
+        rightContent={<NotificationBell />}
+      />
+      
+      {loading ? (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator size="large" color={themedColors.systemPink} />
+        </View>
+      ) : (
+        <View style={{ marginTop: 16, paddingBottom: 224 }}>
           <FlatList
             data={favoriteProfiles}
             contentContainerStyle={{
               gap: VERTICAL_SPACING.xs,
+              flexGrow: 1,
             }}
+            contentInsetAdjustmentBehavior="automatic"
             renderItem={({ item }) => (
               <ProfileListItem
                 key={item?.ID}
@@ -74,16 +149,20 @@ export default function Favorites() {
                 navigateToFocus={true}
               />
             )}
-            keyExtractor={(item, index) => `${index}`}
+            keyExtractor={(item, index) => item?.ID || `${index}`}
             showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-                <View className="flex-1 items-center justify-center py-20" >
-                  <Text className="text-sm text-gray-500 text-black">No Favorites available</Text>
-                </View>
-              }
+            ListEmptyComponent={renderEmptyComponent}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={themedColors.systemPink}
+                colors={[themedColors.systemPink]}
+              />
+            }
           />
         </View>
-      </View>
-    </>
+      )}
+    </View>
   );
 }

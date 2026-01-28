@@ -47,7 +47,7 @@ const GradientButton: React.FC<GradientButtonProps> = ({
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={handlePress} {...touchableProps}>
       <LinearGradient
-        colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
+        colors={colors}
         start={start}
         end={end}
         style={[

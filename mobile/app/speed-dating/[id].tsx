@@ -16,6 +16,7 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -44,6 +45,8 @@ interface SpeedDatingSession {
 
 export default function SpeedDatingDetailScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
   const { id } = useLocalSearchParams<{ id: string }>();
   const { contentPadding } = useBottomSpacing(true);
   
@@ -54,9 +57,39 @@ export default function SpeedDatingDetailScreen() {
   const [registering, setRegistering] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
-  const primaryColor = Platform.OS === "ios" 
-    ? (PlatformColor("systemPurple") as unknown as string) 
-    : "#9333EA";
+  // Theme colors
+  const colors = {
+    background: Platform.OS === "ios" 
+      ? PlatformColor("systemBackground") as unknown as string
+      : isDark ? "#000000" : "#F9FAFB",
+    secondaryBackground: Platform.OS === "ios"
+      ? PlatformColor("secondarySystemBackground") as unknown as string
+      : isDark ? "#1C1C1E" : "#FFFFFF",
+    tertiaryBackground: Platform.OS === "ios"
+      ? PlatformColor("tertiarySystemBackground") as unknown as string
+      : isDark ? "#2C2C2E" : "#F3F4F6",
+    label: Platform.OS === "ios"
+      ? PlatformColor("label") as unknown as string
+      : isDark ? "#FFFFFF" : "#000000",
+    secondaryLabel: Platform.OS === "ios"
+      ? PlatformColor("secondaryLabel") as unknown as string
+      : isDark ? "#8E8E93" : "#6B7280",
+    tertiaryLabel: Platform.OS === "ios"
+      ? PlatformColor("tertiaryLabel") as unknown as string
+      : isDark ? "#48484A" : "#9CA3AF",
+    separator: Platform.OS === "ios"
+      ? PlatformColor("separator") as unknown as string
+      : isDark ? "#38383A" : "#E5E5EA",
+    purple: Platform.OS === "ios"
+      ? PlatformColor("systemPurple") as unknown as string
+      : "#9333EA",
+    green: Platform.OS === "ios"
+      ? PlatformColor("systemGreen") as unknown as string
+      : "#22C55E",
+    red: Platform.OS === "ios"
+      ? PlatformColor("systemRed") as unknown as string
+      : "#EF4444",
+  };
 
   const fetchSessionDetails = useCallback(async () => {
     if (!id) return;
@@ -67,10 +100,8 @@ export default function SpeedDatingDetailScreen() {
       console.log("Speed Dating Details:", res);
       
       if (res?.success) {
-        // Handle both API response formats
         const sessionData = res.session || res.data;
         if (sessionData) {
-          // Normalize from legacy format if needed
           setSession({
             id: sessionData.id || sessionData.ID,
             name: sessionData.name || sessionData.Title,
@@ -161,13 +192,10 @@ export default function SpeedDatingDetailScreen() {
         setIsRegistered(true);
         setRegistrationCount((prev) => prev + 1);
         
-        // iOS-native alert style
         Alert.alert(
           `Registered for "${session?.name}"`,
           "We'll send you a reminder before the session starts.",
-          [
-            { text: "OK", style: "cancel" },
-          ]
+          [{ text: "OK", style: "cancel" }]
         );
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -253,26 +281,45 @@ export default function SpeedDatingDetailScreen() {
     (session.status === "scheduled" || session.status === "in_progress") && 
     !isRegistered && !isFull;
 
-  // Get status display
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
       case "scheduled":
-        return { bg: "#DCFCE7", text: "#15803D", label: "Upcoming" };
+        return { 
+          bg: isDark ? "rgba(34, 197, 94, 0.2)" : "#DCFCE7", 
+          text: isDark ? "#4ADE80" : "#15803D", 
+          label: "Upcoming" 
+        };
       case "in_progress":
-        return { bg: "#FEF3C7", text: "#B45309", label: "Live" };
+        return { 
+          bg: isDark ? "rgba(251, 191, 36, 0.2)" : "#FEF3C7", 
+          text: isDark ? "#FBBF24" : "#B45309", 
+          label: "Live" 
+        };
       case "completed":
-        return { bg: "#F3F4F6", text: "#4B5563", label: "Completed" };
+        return { 
+          bg: isDark ? "rgba(156, 163, 175, 0.2)" : "#F3F4F6", 
+          text: colors.secondaryLabel, 
+          label: "Completed" 
+        };
       case "cancelled":
-        return { bg: "#FEE2E2", text: "#DC2626", label: "Cancelled" };
+        return { 
+          bg: isDark ? "rgba(239, 68, 68, 0.2)" : "#FEE2E2", 
+          text: isDark ? "#F87171" : "#DC2626", 
+          label: "Cancelled" 
+        };
       default:
-        return { bg: "#F3F4F6", text: "#4B5563", label: status };
+        return { 
+          bg: isDark ? "rgba(156, 163, 175, 0.2)" : "#F3F4F6", 
+          text: colors.secondaryLabel, 
+          label: status 
+        };
     }
   };
 
   if (loading) {
     return (
-      <View className="flex-1 bg-gray-50 justify-center items-center">
-        <ActivityIndicator size="large" color={primaryColor} />
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.purple} />
       </View>
     );
   }
@@ -281,25 +328,27 @@ export default function SpeedDatingDetailScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Not Found" }} />
-        <View className="flex-1 bg-gray-50 justify-center items-center px-6">
+        <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center", paddingHorizontal: 24 }}>
           {Platform.OS === "ios" ? (
             <SymbolView
               name="exclamationmark.triangle"
               style={{ width: 48, height: 48, marginBottom: SPACING.md }}
-              tintColor="#9CA3AF"
+              tintColor={colors.tertiaryLabel}
             />
           ) : (
-            <PlatformIcon name="error-outline" size={48} color="#9CA3AF" style={{ marginBottom: SPACING.md }} />
+            <PlatformIcon name="error-outline" size={48} color={colors.tertiaryLabel} style={{ marginBottom: SPACING.md }} />
           )}
-          <Text className="text-lg font-semibold text-gray-900 mb-2">Session Not Found</Text>
-          <Text className="text-gray-500 text-center mb-6">
+          <Text style={{ fontSize: 18, fontWeight: "600", color: colors.label, marginBottom: 8 }}>
+            Session Not Found
+          </Text>
+          <Text style={{ fontSize: 15, color: colors.secondaryLabel, textAlign: "center", marginBottom: 24 }}>
             This speed dating session may have been removed or is no longer available.
           </Text>
           <TouchableOpacity 
             onPress={() => router.back()}
             activeOpacity={0.7}
           >
-            <Text style={{ color: primaryColor, fontWeight: "500" }}>Go Back</Text>
+            <Text style={{ color: colors.purple, fontWeight: "500" }}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </>
@@ -314,17 +363,17 @@ export default function SpeedDatingDetailScreen() {
       <Toast />
       
       <ScrollView 
-        className="flex-1 bg-gray-50" 
+        style={{ flex: 1, backgroundColor: colors.background }}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: contentPadding }}
         contentInsetAdjustmentBehavior="automatic"
       >
         {/* Image */}
-        <View className="aspect-video">
+        <View style={{ aspectRatio: 16 / 9 }}>
           {session.image_url ? (
             <Image
               source={{ uri: session.image_url }}
-              className="w-full h-full"
+              style={{ width: "100%", height: "100%" }}
               resizeMode="cover"
             />
           ) : (
@@ -332,7 +381,7 @@ export default function SpeedDatingDetailScreen() {
               colors={["#A855F7", "#EC4899"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              className="w-full h-full justify-center items-center"
+              style={{ width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }}
             >
               {Platform.OS === "ios" ? (
                 <SymbolView
@@ -349,11 +398,17 @@ export default function SpeedDatingDetailScreen() {
 
         <View style={{ padding: SPACING.screenPadding }}>
           {/* Header with status */}
-          <View className="flex-row items-start justify-between mb-4" style={{ gap: SPACING.md }}>
-            <Text className="flex-1 text-2xl font-bold text-gray-900">{session.name}</Text>
+          <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16, gap: SPACING.md }}>
+            <Text style={{ flex: 1, fontSize: 24, fontWeight: "bold", color: colors.label }}>
+              {session.name}
+            </Text>
             <View 
-              className="px-3 py-1 rounded-full"
-              style={{ backgroundColor: statusStyle.bg }}
+              style={{ 
+                paddingHorizontal: 12, 
+                paddingVertical: 4, 
+                borderRadius: 12,
+                backgroundColor: statusStyle.bg,
+              }}
             >
               <Text style={{ fontSize: 13, fontWeight: "500", color: statusStyle.text }}>
                 {statusStyle.label}
@@ -363,7 +418,7 @@ export default function SpeedDatingDetailScreen() {
 
           {/* Description */}
           {session.description && (
-            <Text className="text-gray-600 mb-6" style={{ fontSize: 15, lineHeight: 22 }}>
+            <Text style={{ fontSize: 15, lineHeight: 22, color: colors.secondaryLabel, marginBottom: 24 }}>
               {session.description}
             </Text>
           )}
@@ -371,30 +426,30 @@ export default function SpeedDatingDetailScreen() {
           {/* Details cards */}
           <View style={{ gap: SPACING.md, marginBottom: VERTICAL_SPACING.lg }}>
             {/* Date */}
-            <View className="flex-row items-center bg-gray-100 rounded-xl p-4" style={{ gap: SPACING.md }}>
+            <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.tertiaryBackground, borderRadius: 12, padding: 16, gap: SPACING.md }}>
               {Platform.OS === "ios" ? (
-                <SymbolView name="calendar" style={{ width: 22, height: 22 }} tintColor={primaryColor} />
+                <SymbolView name="calendar" style={{ width: 22, height: 22 }} tintColor={colors.purple} />
               ) : (
-                <PlatformIcon name="event" size={22} color={primaryColor} />
+                <PlatformIcon name="event" size={22} color={colors.purple} />
               )}
               <View>
-                <Text className="text-gray-500" style={{ fontSize: 13 }}>Date</Text>
-                <Text className="font-medium text-gray-900" style={{ fontSize: 15 }}>
+                <Text style={{ fontSize: 13, color: colors.secondaryLabel }}>Date</Text>
+                <Text style={{ fontSize: 15, fontWeight: "500", color: colors.label }}>
                   {formatDate(session.session_date)}
                 </Text>
               </View>
             </View>
 
             {/* Time */}
-            <View className="flex-row items-center bg-gray-100 rounded-xl p-4" style={{ gap: SPACING.md }}>
+            <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.tertiaryBackground, borderRadius: 12, padding: 16, gap: SPACING.md }}>
               {Platform.OS === "ios" ? (
-                <SymbolView name="clock" style={{ width: 22, height: 22 }} tintColor={primaryColor} />
+                <SymbolView name="clock" style={{ width: 22, height: 22 }} tintColor={colors.purple} />
               ) : (
-                <PlatformIcon name="schedule" size={22} color={primaryColor} />
+                <PlatformIcon name="schedule" size={22} color={colors.purple} />
               )}
               <View>
-                <Text className="text-gray-500" style={{ fontSize: 13 }}>Time</Text>
-                <Text className="font-medium text-gray-900" style={{ fontSize: 15 }}>
+                <Text style={{ fontSize: 13, color: colors.secondaryLabel }}>Time</Text>
+                <Text style={{ fontSize: 15, fontWeight: "500", color: colors.label }}>
                   {formatTime(session.start_time)}
                   {session.end_time && ` - ${formatTime(session.end_time)}`}
                 </Text>
@@ -402,30 +457,30 @@ export default function SpeedDatingDetailScreen() {
             </View>
 
             {/* Participants */}
-            <View className="flex-row items-center bg-gray-100 rounded-xl p-4" style={{ gap: SPACING.md }}>
+            <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.tertiaryBackground, borderRadius: 12, padding: 16, gap: SPACING.md }}>
               {Platform.OS === "ios" ? (
-                <SymbolView name="person.2" style={{ width: 22, height: 22 }} tintColor={primaryColor} />
+                <SymbolView name="person.2" style={{ width: 22, height: 22 }} tintColor={colors.purple} />
               ) : (
-                <PlatformIcon name="people" size={22} color={primaryColor} />
+                <PlatformIcon name="people" size={22} color={colors.purple} />
               )}
               <View>
-                <Text className="text-gray-500" style={{ fontSize: 13 }}>Participants</Text>
-                <Text className="font-medium text-gray-900" style={{ fontSize: 15 }}>
+                <Text style={{ fontSize: 13, color: colors.secondaryLabel }}>Participants</Text>
+                <Text style={{ fontSize: 15, fontWeight: "500", color: colors.label }}>
                   {registrationCount}/{session.max_participants} registered
                 </Text>
               </View>
             </View>
 
             {/* Format */}
-            <View className="flex-row items-center bg-gray-100 rounded-xl p-4" style={{ gap: SPACING.md }}>
+            <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.tertiaryBackground, borderRadius: 12, padding: 16, gap: SPACING.md }}>
               {Platform.OS === "ios" ? (
-                <SymbolView name="video" style={{ width: 22, height: 22 }} tintColor={primaryColor} />
+                <SymbolView name="video" style={{ width: 22, height: 22 }} tintColor={colors.purple} />
               ) : (
-                <PlatformIcon name="videocam" size={22} color={primaryColor} />
+                <PlatformIcon name="videocam" size={22} color={colors.purple} />
               )}
               <View>
-                <Text className="text-gray-500" style={{ fontSize: 13 }}>Format</Text>
-                <Text className="font-medium text-gray-900" style={{ fontSize: 15 }}>
+                <Text style={{ fontSize: 13, color: colors.secondaryLabel }}>Format</Text>
+                <Text style={{ fontSize: 15, fontWeight: "500", color: colors.label }}>
                   {session.round_duration_minutes} min per date • {session.duration_minutes} min total
                 </Text>
               </View>
@@ -435,8 +490,15 @@ export default function SpeedDatingDetailScreen() {
           {/* Age/Gender preferences */}
           {(session.min_age || session.max_age || session.gender_preference) && (
             <View 
-              className="flex-row items-start rounded-xl p-4 mb-6" 
-              style={{ gap: SPACING.md, backgroundColor: "#F3E8FF" }}
+              style={{ 
+                flexDirection: "row", 
+                alignItems: "flex-start", 
+                borderRadius: 12, 
+                padding: 16, 
+                marginBottom: 24, 
+                gap: SPACING.md,
+                backgroundColor: isDark ? "rgba(147, 51, 234, 0.15)" : "#F3E8FF",
+              }}
             >
               {Platform.OS === "ios" ? (
                 <SymbolView name="info.circle" style={{ width: 22, height: 22 }} tintColor="#9333EA" />
@@ -444,8 +506,8 @@ export default function SpeedDatingDetailScreen() {
                 <PlatformIcon name="info-outline" size={22} color="#9333EA" />
               )}
               <View>
-                <Text className="font-medium" style={{ color: "#581C87" }}>Preferences</Text>
-                <Text style={{ fontSize: 14, color: "#7E22CE" }}>
+                <Text style={{ fontWeight: "500", color: isDark ? "#C084FC" : "#581C87" }}>Preferences</Text>
+                <Text style={{ fontSize: 14, color: isDark ? "#A855F7" : "#7E22CE" }}>
                   {session.min_age && session.max_age
                     ? `Ages ${session.min_age}-${session.max_age}`
                     : session.min_age
@@ -462,23 +524,41 @@ export default function SpeedDatingDetailScreen() {
           {/* Registration status */}
           {isRegistered && (
             <View 
-              className="flex-row items-center justify-between rounded-xl p-4 mb-6 border"
-              style={{ gap: SPACING.md, backgroundColor: "#F0FDF4", borderColor: "#BBF7D0" }}
+              style={{ 
+                flexDirection: "row", 
+                alignItems: "center", 
+                justifyContent: "space-between", 
+                borderRadius: 12, 
+                padding: 16, 
+                marginBottom: 24, 
+                gap: SPACING.md,
+                backgroundColor: isDark ? "rgba(34, 197, 94, 0.15)" : "#F0FDF4",
+                borderWidth: 1,
+                borderColor: isDark ? "rgba(34, 197, 94, 0.3)" : "#BBF7D0",
+              }}
             >
-              <View className="flex-row items-center flex-1" style={{ gap: SPACING.md }}>
+              <View style={{ flexDirection: "row", alignItems: "center", flex: 1, gap: SPACING.md }}>
                 <View 
-                  className="w-10 h-10 rounded-full justify-center items-center"
-                  style={{ backgroundColor: "#DCFCE7" }}
+                  style={{ 
+                    width: 40, 
+                    height: 40, 
+                    borderRadius: 20, 
+                    justifyContent: "center", 
+                    alignItems: "center",
+                    backgroundColor: isDark ? "rgba(34, 197, 94, 0.2)" : "#DCFCE7",
+                  }}
                 >
                   {Platform.OS === "ios" ? (
-                    <SymbolView name="checkmark" style={{ width: 20, height: 20 }} tintColor="#16A34A" />
+                    <SymbolView name="checkmark" style={{ width: 20, height: 20 }} tintColor={isDark ? "#4ADE80" : "#16A34A"} />
                   ) : (
-                    <PlatformIcon name="check" size={20} color="#16A34A" />
+                    <PlatformIcon name="check" size={20} color={isDark ? "#4ADE80" : "#16A34A"} />
                   )}
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text className="font-medium" style={{ color: "#166534" }}>You're registered!</Text>
-                  <Text style={{ fontSize: 13, color: "#15803D" }}>
+                  <Text style={{ fontWeight: "500", color: isDark ? "#4ADE80" : "#166534" }}>
+                    You're registered!
+                  </Text>
+                  <Text style={{ fontSize: 13, color: isDark ? "#86EFAC" : "#15803D" }}>
                     We'll send you a reminder before the session.
                   </Text>
                 </View>
@@ -487,13 +567,13 @@ export default function SpeedDatingDetailScreen() {
                 <TouchableOpacity
                   onPress={handleCancelRegistration}
                   disabled={cancelling}
-                  className="px-3 py-1.5"
+                  style={{ paddingHorizontal: 12, paddingVertical: 6 }}
                   activeOpacity={0.7}
                 >
                   {cancelling ? (
-                    <ActivityIndicator size="small" color="#DC2626" />
+                    <ActivityIndicator size="small" color={colors.red} />
                   ) : (
-                    <Text style={{ fontSize: 14, fontWeight: "500", color: "#DC2626" }}>Cancel</Text>
+                    <Text style={{ fontSize: 14, fontWeight: "500", color: colors.red }}>Cancel</Text>
                   )}
                 </TouchableOpacity>
               )}
@@ -505,25 +585,24 @@ export default function SpeedDatingDetailScreen() {
             onPress={canRegister ? handleRegister : undefined}
             disabled={!canRegister || registering}
             activeOpacity={canRegister ? 0.7 : 1}
-            className="w-full rounded-xl overflow-hidden"
-            style={{ opacity: canRegister ? 1 : 0.5 }}
+            style={{ width: "100%", borderRadius: 12, overflow: "hidden", opacity: canRegister ? 1 : 0.5 }}
           >
             {canRegister ? (
               <LinearGradient
                 colors={["#A855F7", "#EC4899"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                className="py-4 items-center justify-center"
+                style={{ paddingVertical: 16, alignItems: "center", justifyContent: "center" }}
               >
                 {registering ? (
                   <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
-                  <Text className="font-semibold text-lg text-white">Register Now</Text>
+                  <Text style={{ fontSize: 18, fontWeight: "600", color: "#FFFFFF" }}>Register Now</Text>
                 )}
               </LinearGradient>
             ) : (
-              <View className="bg-gray-200 py-4 items-center justify-center">
-                <Text className="font-semibold text-lg text-gray-400">
+              <View style={{ backgroundColor: colors.tertiaryBackground, paddingVertical: 16, alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ fontSize: 18, fontWeight: "600", color: colors.tertiaryLabel }}>
                   {isRegistered
                     ? "Already Registered"
                     : isFull

@@ -1,13 +1,17 @@
+import { useThemeColors } from "@/context/ThemeContext";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
   ActivityIndicator,
   Image,
+  Platform,
+  PlatformColor,
   ScrollView,
   Text,
   TouchableOpacity,
-  View
+  View,
+  useColorScheme
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -29,6 +33,15 @@ const ReviewProfile = ({
   error,
   isSubmitted,
 }: ReviewProfileProps) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
 
   console.log("ReviewProfile data:", data);
   console.log('isSubmitted===>>>>>>', isSubmitted);

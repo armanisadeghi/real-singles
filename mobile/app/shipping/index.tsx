@@ -1,15 +1,21 @@
 import ShippingInfoForm from "@/components/forms/ShippingInfoForm";
 import Success from "@/components/signup/Success";
 import { images } from "@/constants/images";
+import { useThemeColors } from "@/context/ThemeContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Text, View } from "react-native";
+import { Platform, PlatformColor, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 export default function ShippingInfo() {
   const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
   const {productId, selectedUsers, productPoints, redeemForYou} = useLocalSearchParams();
+  const colors = useThemeColors();
+
+  const themedColors = {
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+  };
 
   const handleFormSubmit = () => {
     setSubmitted(true);
@@ -17,7 +23,6 @@ export default function ShippingInfo() {
 
   return (
     <>
-      {/* <StatusBar barStyle="dark-content" backgroundColor="#ffffff" /> */}
     {
       submitted ? (
         <View className="flex-1 bg-background">
@@ -29,7 +34,7 @@ export default function ShippingInfo() {
         <ScrollView className="pt-4 px-4">
             <View className="mb-6">
                 <Text className="text-primary font-bold text-lg">Address:</Text>
-                <Text className="text-sm font-normal text-[#686A6F] leading-5">Please provide your shipping information</Text>
+                <Text style={{ color: themedColors.secondaryText }} className="text-sm font-normal leading-5">Please provide your shipping information</Text>
             </View>
             <ShippingInfoForm productId={Array.isArray(productId) ? productId[0] : productId} productPoints={productPoints} selectedUsers={selectedUsers} redeemForYou={Array.isArray(redeemForYou) ? redeemForYou[0] : redeemForYou} onSubmitSuccess={handleFormSubmit}/>
         </ScrollView>

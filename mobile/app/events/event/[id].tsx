@@ -24,6 +24,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
@@ -43,11 +44,48 @@ export default function EventDetail() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
   const [data, setData] = useState<EventCardProps>();
   const [loading, setLoading] = useState(false);
   const [isRsvpLoading, setIsRsvpLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [reduceTransparency, setReduceTransparency] = useState(false);
+
+  // Theme colors
+  const colors = {
+    background: Platform.OS === "ios" 
+      ? PlatformColor("systemBackground") as unknown as string
+      : isDark ? "#000000" : "#FFFFFF",
+    secondaryBackground: Platform.OS === "ios"
+      ? PlatformColor("secondarySystemBackground") as unknown as string
+      : isDark ? "#1C1C1E" : "#F5F5F5",
+    tertiaryBackground: Platform.OS === "ios"
+      ? PlatformColor("tertiarySystemBackground") as unknown as string
+      : isDark ? "#2C2C2E" : "#E5E5E5",
+    label: Platform.OS === "ios"
+      ? PlatformColor("label") as unknown as string
+      : isDark ? "#FFFFFF" : "#000000",
+    secondaryLabel: Platform.OS === "ios"
+      ? PlatformColor("secondaryLabel") as unknown as string
+      : isDark ? "#8E8E93" : "#666666",
+    tertiaryLabel: Platform.OS === "ios"
+      ? PlatformColor("tertiaryLabel") as unknown as string
+      : isDark ? "#48484A" : "#999999",
+    separator: Platform.OS === "ios"
+      ? PlatformColor("separator") as unknown as string
+      : isDark ? "#38383A" : "#E5E5EA",
+    systemBlue: Platform.OS === "ios"
+      ? PlatformColor("systemBlue") as unknown as string
+      : "#007AFF",
+    systemGray4: Platform.OS === "ios"
+      ? PlatformColor("systemGray4") as unknown as string
+      : isDark ? "#3A3A3C" : "#D1D1D6",
+    cardBackground: isDark ? "#1C1C1E" : "#FFFFFF",
+    dateBadgeBg: isDark ? "#2C2C2E" : "#FFFFFF",
+    avatarMoreBg: isDark ? "#48484A" : "#E0E0E0",
+    avatarMoreText: isDark ? "#FFFFFF" : "#666666",
+  };
 
   // Check accessibility preferences for reduced transparency
   useEffect(() => {
@@ -251,7 +289,7 @@ export default function EventDetail() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator
           size="large"
           color={Platform.OS === "ios" ? (PlatformColor("systemPink") as unknown as string) : "#E91E63"}
@@ -280,7 +318,7 @@ export default function EventDetail() {
         }}
       />
 
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
@@ -304,7 +342,7 @@ export default function EventDetail() {
             )}
 
             {/* Date Badge */}
-            <View style={styles.dateBadge}>
+            <View style={[styles.dateBadge, { backgroundColor: colors.dateBadgeBg }]}>
               <Text style={styles.dateBadgeText}>
                 {data?.EventDate ? formatEventDate(data.EventDate) : "Date TBD"}
               </Text>
@@ -315,16 +353,16 @@ export default function EventDetail() {
           <View style={styles.content}>
             {/* Title & Location */}
             <View style={styles.titleSection}>
-              <Text style={styles.title}>{data?.EventName}</Text>
+              <Text style={[styles.title, { color: colors.label }]}>{data?.EventName}</Text>
               <View style={styles.locationRow}>
                 <PlatformIcon name="location-on" size={16} color="#B06D1E" style={styles.locationIcon} />
-                <Text style={styles.locationText}>{locationString || "Location TBD"}</Text>
+                <Text style={[styles.locationText, { color: colors.secondaryLabel }]}>{locationString || "Location TBD"}</Text>
               </View>
             </View>
 
             {/* Interested Users */}
             {data?.interestedUserImage && data.interestedUserImage.length > 0 && (
-              <View style={styles.attendeesSection}>
+              <View style={[styles.attendeesSection, { backgroundColor: colors.secondaryBackground }]}>
                 <View style={styles.attendeesAvatars}>
                   {data.interestedUserImage.slice(0, 5).map((member, index) => (
                     <TouchableOpacity
@@ -333,7 +371,7 @@ export default function EventDetail() {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         router.push(`/discover/profile/${member?.ID}`);
                       }}
-                      style={[styles.avatar, { marginLeft: index > 0 ? -10 : 0, zIndex: 5 - index }]}
+                      style={[styles.avatar, { marginLeft: index > 0 ? -10 : 0, zIndex: 5 - index, borderColor: colors.background }]}
                     >
                       {member?.Image ? (
                         <Image
@@ -350,12 +388,12 @@ export default function EventDetail() {
                     </TouchableOpacity>
                   ))}
                   {data.interestedUserImage.length > 5 && (
-                    <View style={[styles.avatar, styles.avatarMore]}>
-                      <Text style={styles.avatarMoreText}>+{data.interestedUserImage.length - 5}</Text>
+                    <View style={[styles.avatar, styles.avatarMore, { backgroundColor: colors.avatarMoreBg }]}>
+                      <Text style={[styles.avatarMoreText, { color: colors.avatarMoreText }]}>+{data.interestedUserImage.length - 5}</Text>
                     </View>
                   )}
                 </View>
-                <Text style={styles.attendeesText}>
+                <Text style={[styles.attendeesText, { color: colors.secondaryLabel }]}>
                   {data.interestedUserImage.length} {data.interestedUserImage.length === 1 ? "person" : "people"} interested
                 </Text>
               </View>
@@ -365,7 +403,7 @@ export default function EventDetail() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>About Event</Text>
               <Text
-                style={styles.description}
+                style={[styles.description, { color: colors.secondaryLabel }]}
                 numberOfLines={expanded ? undefined : 4}
               >
                 {data?.Description || "No description available."}
@@ -383,20 +421,20 @@ export default function EventDetail() {
             </View>
 
             {/* Event Info Card */}
-            <View style={styles.infoCard}>
+            <View style={[styles.infoCard, { backgroundColor: colors.secondaryBackground }]}>
               <View style={styles.infoCardContent}>
                 <Text style={styles.infoCardTitle}>Event Info</Text>
 
                 <View style={styles.infoRow}>
-                  <PlatformIcon name="schedule" size={16} color="#666" style={styles.infoIcon} />
-                  <Text style={styles.infoText}>
+                  <PlatformIcon name="schedule" size={16} color={colors.secondaryLabel} style={styles.infoIcon} />
+                  <Text style={[styles.infoText, { color: colors.secondaryLabel }]}>
                     {data?.StartTime || "TBD"} - {data?.EndTime || "TBD"}
                   </Text>
                 </View>
 
                 <View style={styles.infoRow}>
-                  <PlatformIcon name="event" size={16} color="#666" style={styles.infoIcon} />
-                  <Text style={styles.infoText}>
+                  <PlatformIcon name="event" size={16} color={colors.secondaryLabel} style={styles.infoIcon} />
+                  <Text style={[styles.infoText, { color: colors.secondaryLabel }]}>
                     {data?.EventDate ? formatEventDate(data.EventDate) : "Date TBD"}
                   </Text>
                 </View>
@@ -452,7 +490,7 @@ export default function EventDetail() {
           {Platform.OS === "ios" && !reduceTransparency ? (
             <BlurView
               intensity={100}
-              tint="systemChromeMaterial"
+              tint={isDark ? "systemChromeMaterialDark" : "systemChromeMaterial"}
               style={styles.actionBar}
             >
               <ActionBarContent
@@ -462,10 +500,11 @@ export default function EventDetail() {
                 onCalendar={handleAddToCalendar}
                 onDirections={handleOpenInMaps}
                 onRsvp={handleRsvp}
+                isDark={isDark}
               />
             </BlurView>
           ) : (
-            <View style={[styles.actionBar, styles.actionBarSolid]}>
+            <View style={[styles.actionBar, styles.actionBarSolid, { backgroundColor: colors.secondaryBackground }]}>
               <ActionBarContent
                 isRegistered={isRegistered}
                 isRsvpLoading={isRsvpLoading}
@@ -473,6 +512,7 @@ export default function EventDetail() {
                 onCalendar={handleAddToCalendar}
                 onDirections={handleOpenInMaps}
                 onRsvp={handleRsvp}
+                isDark={isDark}
               />
             </View>
           )}
@@ -490,6 +530,7 @@ function ActionBarContent({
   onCalendar,
   onDirections,
   onRsvp,
+  isDark,
 }: {
   isRegistered: boolean;
   isRsvpLoading: boolean;
@@ -497,6 +538,7 @@ function ActionBarContent({
   onCalendar: () => void;
   onDirections: () => void;
   onRsvp: () => void;
+  isDark: boolean;
 }) {
   const iconColor = Platform.OS === "ios" 
     ? (PlatformColor("systemBlue") as unknown as string) 
@@ -504,7 +546,11 @@ function ActionBarContent({
   
   const labelColor = Platform.OS === "ios"
     ? (PlatformColor("secondaryLabel") as unknown as string)
-    : "#666";
+    : isDark ? "#8E8E93" : "#666666";
+  
+  const rsvpSecondaryColor = Platform.OS === "ios"
+    ? (PlatformColor("label") as unknown as string)
+    : isDark ? "#FFFFFF" : "#333333";
 
   return (
     <View style={styles.actionBarInner}>
@@ -549,16 +595,16 @@ function ActionBarContent({
         accessibilityLabel={isRegistered ? "Cancel RSVP" : "RSVP to Event"}
       >
         {isRsvpLoading ? (
-          <ActivityIndicator size="small" color={isRegistered ? "#666" : "#fff"} />
+          <ActivityIndicator size="small" color={isRegistered ? labelColor : "#fff"} />
         ) : (
           <>
             <PlatformIcon
               name={isRegistered ? "close" : "check-circle"}
               iosName={isRegistered ? "xmark.circle" : "checkmark.circle.fill"}
               size={20}
-              color={isRegistered ? "#666" : "#fff"}
+              color={isRegistered ? labelColor : "#fff"}
             />
-            <Text style={[styles.rsvpText, isRegistered && styles.rsvpTextSecondary]}>
+            <Text style={[styles.rsvpText, isRegistered && { color: rsvpSecondaryColor }]}>
               {isRegistered ? "Cancel" : "RSVP"}
             </Text>
           </>
@@ -609,7 +655,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: -12,
     right: 16,
-    backgroundColor: "#fff",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -668,7 +713,6 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: "#fff",
     overflow: "hidden",
   },
   avatarImage: {
@@ -687,7 +731,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   avatarMore: {
-    backgroundColor: "#e0e0e0",
     justifyContent: "center",
     alignItems: "center",
     marginLeft: -10,
@@ -695,7 +738,6 @@ const styles = StyleSheet.create({
   avatarMoreText: {
     fontSize: 10,
     fontWeight: "bold",
-    color: "#666",
   },
   attendeesText: {
     fontSize: 14,

@@ -1,12 +1,23 @@
 import { images } from "@/constants/images";
 import { BODY_TYPE_OPTIONS } from "@/constants/options";
+import { useThemeColors } from "@/context/ThemeContext";
 import { signupProps } from "@/types";
 import Slider from "@react-native-community/slider";
 import React, { useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Image, Platform, PlatformColor, ScrollView, Text, TouchableOpacity, View, useColorScheme } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 const Appearance = ({ data, updateData, onNext, error }: signupProps) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
+
   const [validationError, setValidationError] = useState("");
 
 

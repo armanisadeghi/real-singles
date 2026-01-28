@@ -13,9 +13,13 @@ import {
   StyleSheet,
   ViewStyle,
   ImageSourcePropType,
+  Platform,
+  PlatformColor,
+  useColorScheme,
 } from "react-native";
 import { COMPONENT_SIZES, TYPOGRAPHY, BORDER_RADIUS } from "@/constants/designTokens";
 import { getImageUrl } from "@/utils/token";
+import { useThemeColors } from "@/context/ThemeContext";
 
 type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 
@@ -141,6 +145,18 @@ export function Avatar({
 }: AvatarProps) {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  // Theme-aware colors for online indicator
+  const indicatorBorderColor = Platform.OS === 'ios'
+    ? (PlatformColor('systemBackground') as unknown as string)
+    : colors.background;
+  
+  const onlineColor = Platform.OS === 'ios'
+    ? (PlatformColor('systemGreen') as unknown as string)
+    : '#22c55e';
 
   const avatarSize = COMPONENT_SIZES.avatar[size];
   const imageSource = resolveImageSource(src);
@@ -213,6 +229,8 @@ export function Avatar({
               height: onlineIndicatorSizes[size],
               borderRadius: onlineIndicatorSizes[size] / 2,
               borderWidth: size === "xs" || size === "sm" ? 1 : 2,
+              borderColor: indicatorBorderColor,
+              backgroundColor: onlineColor,
             },
           ]}
         />
@@ -245,8 +263,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "#22c55e",
-    borderColor: "#ffffff",
+    // backgroundColor and borderColor set dynamically with platform colors
   },
 });
 

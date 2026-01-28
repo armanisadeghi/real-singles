@@ -95,23 +95,36 @@ function RootLayoutNav() {
     };
   }, [colorScheme]);
 
+  const isDark = colorScheme === 'dark';
+  
   return (
     <>
+      {/* StatusBar adapts to light/dark mode */}
+      <StatusBar 
+        backgroundColor="transparent" 
+        barStyle={isDark ? 'light-content' : 'dark-content'} 
+        translucent={Platform.OS === 'android'}
+      />
       <Stack
         screenOptions={{
           // Native header defaults - DO NOT override unless necessary
           headerTintColor: '#E91E63', // Brand color for interactive elements
           headerShadowVisible: false, // Clean flat header (modern design)
-          headerTitleStyle: { fontWeight: '600', color: '#000000' },
+          // Header title adapts to light/dark mode
+          headerTitleStyle: { 
+            fontWeight: '600', 
+            color: isDark ? '#FFFFFF' : '#000000' 
+          },
           // Prevent "(tabs)" from showing as back button title
           headerBackTitle: 'Back',
           // iOS blur effect for navigation bar
           headerBlurEffect: Platform.OS === 'ios' ? 'systemMaterial' : undefined,
           // Note: Don't use headerTransparent globally - it breaks content insets
           // for screens with headerLargeTitle. Let native navigation handle layout.
+          // Android header background adapts to light/dark mode
           headerStyle: Platform.OS === 'ios' 
             ? undefined 
-            : { backgroundColor: '#FFFFFF' },
+            : { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' },
         }}
       >
         {/* Auth & Splash - No headers */}
@@ -279,11 +292,6 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <StatusBar 
-          backgroundColor="transparent" 
-          barStyle="dark-content" 
-          translucent={Platform.OS === 'android'}
-        />
         <GestureHandlerRootView style={{ flex: 1 }}>
           <AuthProvider>
             <CallProvider>

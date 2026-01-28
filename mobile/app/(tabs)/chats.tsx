@@ -16,11 +16,14 @@ import {
   FlatList,
   Image,
   Platform,
+  PlatformColor,
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View
 } from "react-native";
+import { useThemeColors } from "@/context/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { useBottomSpacing } from "@/hooks/useResponsive";
@@ -380,6 +383,19 @@ export default function Chats() {
   
   // Native header height: iOS 44pt, Android 56dp
   const headerHeight = Platform.OS === 'ios' ? 44 : 56;
+
+  // Dark mode support
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+  };
 
   // 🗑️ TEMPORARY: Delete all Agora groups function
   const handleDeleteAllAgoraGroups = async () => {
@@ -769,7 +785,7 @@ export default function Chats() {
             ) : (
               <View style={{ width: 40 }} />
             )}
-            <Text style={{ fontSize: 17, fontWeight: '600', color: '#000' }}>
+            <Text style={{ fontSize: 17, fontWeight: '600', color: themedColors.text }}>
               {selectMode ? "Select Friends" : "Chats"}
             </Text>
             {selectMode ? (
@@ -816,8 +832,9 @@ export default function Chats() {
           ) : (
             // Android custom tab switcher
             <View
-              className="flex-row bg-white border border-border rounded-card"
+              className="flex-row border border-border rounded-card"
               style={{
+                backgroundColor: themedColors.background,
                 marginHorizontal: SPACING.screenPadding,
                 gap: SPACING.xs,
                 padding: SPACING.xs,
@@ -827,18 +844,20 @@ export default function Chats() {
               <TouchableOpacity
                 disabled={selectMode}
                 className={`flex-1 items-center rounded-input ${activeTab === "messages"
-                  ? "border border-primary bg-white"
-                  : "bg-light-100"
+                  ? "border border-primary"
+                  : ""
                   }`}
-                style={{ paddingVertical: SPACING.sm }}
+                style={{ 
+                  paddingVertical: SPACING.sm,
+                  backgroundColor: activeTab === "messages" ? themedColors.background : themedColors.secondaryBackground,
+                }}
                 onPress={() => {
                   Haptics.selectionAsync();
                   setActiveTab("messages");
                 }}
               >
                 <Text
-                  className={activeTab === "messages" ? "text-primary" : "text-black"}
-                  style={TYPOGRAPHY.body}
+                  style={[TYPOGRAPHY.body, { color: activeTab === "messages" ? colors.primary : themedColors.text }]}
                 >
                   Messages
                 </Text>
@@ -847,26 +866,29 @@ export default function Chats() {
               <TouchableOpacity
                 disabled={selectMode}
                 className={`flex-1 items-center rounded-input ${activeTab === "groups"
-                  ? "border border-primary bg-white"
-                  : "bg-light-100"
+                  ? "border border-primary"
+                  : ""
                   }`}
-                style={{ paddingVertical: SPACING.sm }}
+                style={{ 
+                  paddingVertical: SPACING.sm,
+                  backgroundColor: activeTab === "groups" ? themedColors.background : themedColors.secondaryBackground,
+                }}
                 onPress={() => {
                   Haptics.selectionAsync();
                   setActiveTab("groups");
                 }}
               >
                 <Text
-                  className={activeTab === "groups" ? "text-primary" : "text-black"}
-                  style={TYPOGRAPHY.body}
+                  style={[TYPOGRAPHY.body, { color: activeTab === "groups" ? colors.primary : themedColors.text }]}
                 >
                   Groups
                 </Text>
               </TouchableOpacity>
             </View>
           )}
-          <View className="bg-white rounded-t-[30px] h-full"
+          <View className="rounded-t-[30px] h-full"
             style={{
+              backgroundColor: themedColors.background,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: -4 },
               shadowOpacity: 0.8,
@@ -880,8 +902,9 @@ export default function Chats() {
                 renderItem={({ item }) =>
                   renderUserItem({ item, handleSelectFriend, selectedUsers })
                 }
-                className="bg-white rounded-t-[30px] h-full"
+                className="rounded-t-[30px] h-full"
                 style={{
+                  backgroundColor: themedColors.background,
                   shadowColor: "#000",
                   shadowOffset: { width: 0, height: -4 },
                   shadowOpacity: 0.1,
@@ -891,15 +914,14 @@ export default function Chats() {
                 contentContainerStyle={{ paddingBottom: 260 }}
                 ListHeaderComponent={
                   <View className="px-6 py-5" >
-                    <View className="flex-row items-center border border-border rounded-[10px] bg-light-100" >
+                    <View className="flex-row items-center border border-border rounded-[10px]" style={{ backgroundColor: themedColors.secondaryBackground }}>
                       <TextInput
-                        className="flex-1 text-sm text-black"
+                        className="flex-1 text-sm"
+                        style={{ color: themedColors.text }}
                         placeholder="Search Chat"
                         placeholderTextColor={"#B0B0B0"}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
-
-
                       />
                       <Image
                         source={icons.search}
@@ -912,7 +934,7 @@ export default function Chats() {
                 ListEmptyComponent={
                   !loading ? (
                     <View className="items-center justify-center py-10">
-                      <Text className="text-gray">No friend found</Text>
+                      <Text style={{ color: themedColors.secondaryText }}>No friend found</Text>
                     </View>
                   ) : null
                 }
@@ -932,14 +954,14 @@ export default function Chats() {
                   contentContainerStyle={{ paddingBottom: 400 }}
                   ListHeaderComponent={
                     <View className="px-6 py-5">
-                      <View className="flex-row items-center border border-border rounded-[10px] bg-light-100">
+                      <View className="flex-row items-center border border-border rounded-[10px]" style={{ backgroundColor: themedColors.secondaryBackground }}>
                         <TextInput
                           className="flex-1 text-sm"
                           placeholder="Search Chat"
                           placeholderTextColor={"#B0B0B0"}
                           value={searchQuery}
                           onChangeText={setSearchQuery}
-                          style={{ paddingVertical: 8, paddingHorizontal: 8 }}
+                          style={{ paddingVertical: 8, paddingHorizontal: 8, color: themedColors.text }}
                         />
                         <Image
                           source={icons.search}
@@ -952,7 +974,7 @@ export default function Chats() {
                   ListEmptyComponent={
                     !loading ? (
                       <View className="items-center justify-center py-10">
-                        <Text className="text-gray">No chats found</Text>
+                        <Text style={{ color: themedColors.secondaryText }}>No chats found</Text>
                       </View>
                     ) : null
                   }
@@ -969,8 +991,9 @@ export default function Chats() {
                   renderItem={renderGroupItem}
                   keyExtractor={(item) => item?.GroupID.toString()}
                   contentContainerStyle={{ paddingBottom: 500 }}
-                  className="bg-white rounded-t-[30px] h-full"
+                  className="rounded-t-[30px] h-full"
                   style={{
+                    backgroundColor: themedColors.background,
                     shadowColor: "#000",
                     shadowOffset: { width: 0, height: -4 },
                     shadowOpacity: 0.1,
@@ -979,14 +1002,14 @@ export default function Chats() {
                   }}
                   ListHeaderComponent={
                     <View className="px-6 py-5">
-                      <View className="flex-row items-center border border-border rounded-[10px] bg-light-100">
+                      <View className="flex-row items-center border border-border rounded-[10px]" style={{ backgroundColor: themedColors.secondaryBackground }}>
                         <TextInput
                           className="flex-1 text-sm"
                           placeholder="Search Group"
                           placeholderTextColor={"#B0B0B0"}
                           value={searchQuery}
                           onChangeText={setSearchQuery}
-                          style={{ paddingVertical: 8, paddingHorizontal: 8, color: 'black' }}
+                          style={{ paddingVertical: 8, paddingHorizontal: 8, color: themedColors.text }}
                         />
                         <Image
                           source={icons.search}
@@ -1012,7 +1035,7 @@ export default function Chats() {
                   ListEmptyComponent={
                     !loadingGroups ? (
                       <View className="items-center justify-center py-10">
-                        <Text className="text-gray">No Groups found</Text>
+                        <Text style={{ color: themedColors.secondaryText }}>No Groups found</Text>
                       </View>
                     ) : null
                   }

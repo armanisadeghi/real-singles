@@ -1,6 +1,7 @@
 import { acceptOrderRedeemPoints } from "@/lib/api";
+import { useThemeColors } from "@/context/ThemeContext";
 import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Platform, PlatformColor, StyleSheet, Text, TextInput, View, useColorScheme } from "react-native";
 import Toast from "react-native-toast-message";
 import GradientButton from "../ui/GradientButton";
 
@@ -27,6 +28,15 @@ interface ShippingInfoFormProps {
 }
 
 export default function ShippingInfoForm({ productId, selectedUsers, redeemForYou, productPoints, onSubmitSuccess }: ShippingInfoFormProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    placeholder: isDark ? '#9CA3AF' : '#888888',
+  };
+
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState<ShippingFormData>({
@@ -110,7 +120,7 @@ export default function ShippingInfoForm({ productId, selectedUsers, redeemForYo
             onChangeText={(text) => updateFormData("Building", text)}
             className="border border-border rounded-full px-[15px] py-[12px]" 
             placeholder="Enter your Building Number" 
-            placeholderTextColor="gray"
+            placeholderTextColor={themedColors.placeholder}
             autoComplete="street-address"
             importantForAutofill="yes"
             textContentType="streetAddressLine1"
@@ -124,7 +134,7 @@ export default function ShippingInfoForm({ productId, selectedUsers, redeemForYo
             placeholder="Enter your Street Address"
             value={formData.Street}
             onChangeText={(text) => updateFormData("Street", text)}
-            placeholderTextColor="gray"
+            placeholderTextColor={themedColors.placeholder}
             autoComplete="street-address"
             importantForAutofill="yes"
             textContentType="streetAddressLine2"
@@ -139,7 +149,7 @@ export default function ShippingInfoForm({ productId, selectedUsers, redeemForYo
               placeholder="Enter your State"
               value={formData.State}
               onChangeText={(text) => updateFormData("State", text)}
-              placeholderTextColor="gray"
+              placeholderTextColor={themedColors.placeholder}
               autoComplete="address-line2"
               importantForAutofill="yes"
               textContentType="addressState"
@@ -153,7 +163,7 @@ export default function ShippingInfoForm({ productId, selectedUsers, redeemForYo
               placeholder="Enter your City"
               onChangeText={(text) => updateFormData("City", text)}
               className="border border-border rounded-full px-[15px] py-[12px]" 
-              placeholderTextColor="gray"
+              placeholderTextColor={themedColors.placeholder}
               autoComplete="address-line1"
               importantForAutofill="yes"
               textContentType="addressCity"
@@ -168,7 +178,7 @@ export default function ShippingInfoForm({ productId, selectedUsers, redeemForYo
             onChangeText={(text) => updateFormData("Zipcode", text)}
             className="border border-border rounded-full px-[15px] py-[12px]" 
             placeholder="*** ***" 
-            placeholderTextColor="gray"
+            placeholderTextColor={themedColors.placeholder}
             keyboardType="numeric"
             autoComplete="postal-code"
             importantForAutofill="yes"

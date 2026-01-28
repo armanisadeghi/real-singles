@@ -1,11 +1,22 @@
 import { images } from "@/constants/images";
 import { ETHNICITY_OPTIONS } from "@/constants/options";
+import { useThemeColors } from "@/context/ThemeContext";
 import { signupProps } from "@/types";
 import React, { useState } from "react";
-import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, Platform, PlatformColor, ScrollView, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 const Ethnicity = ({ data, updateData, onNext, error }: signupProps) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
+
   const [validationError, setValidationError] = useState("");
   const [customEthnicity, setCustomEthnicity] = useState("");
 
@@ -125,6 +136,8 @@ const Ethnicity = ({ data, updateData, onNext, error }: signupProps) => {
                     setValidationError("");
                   }}
                   placeholder="Enter your ethnicity"
+                  placeholderTextColor={themedColors.placeholder}
+                  style={{ color: themedColors.text }}
                   className="flex-1 bg-gray-50 px-4 py-3 rounded-l-full"
                 />
                 <TouchableOpacity

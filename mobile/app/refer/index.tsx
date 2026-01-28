@@ -1,5 +1,6 @@
 import GradientButton from "@/components/ui/GradientButton";
 import { icons } from "@/constants/icons";
+import { useThemeColors } from "@/context/ThemeContext";
 import { getReferralLink, APP_NAME } from "@/lib/config";
 import { useAuth } from "@/utils/authContext";
 import * as Clipboard from "expo-clipboard";
@@ -9,15 +10,28 @@ import {
   Alert,
   Image,
   Platform,
+  PlatformColor,
   Share,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View
 } from "react-native";
 
 export default function Refer() {
   const { user } = useAuth();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    cardBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainerLow,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    inputBackground: Platform.OS === 'ios' ? (PlatformColor('tertiarySystemBackground') as unknown as string) : colors.surfaceContainerHighest,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+  };
 
   // Get the user's referral code from auth context
   const referralCode = user?.referral_code || '';
@@ -85,14 +99,14 @@ export default function Refer() {
       <View className="flex-1 bg-background">
         <View className="mt-8 px-4">
           <View
-            style={[styles.shadow, { borderRadius: 20 }]}
-            className="bg-white p-6"
+            style={[styles.shadow, { borderRadius: 20, backgroundColor: themedColors.cardBackground }]}
+            className="p-6"
           >
             <Text className="text-center font-bold text-[24px] leading-[24px] text-primary my-4">
               Invite Your Friend
             </Text>
 
-            <Text className="text-center mx-8 text-[14px] leading-[18px] text-[#686A6E]">
+            <Text style={{ color: themedColors.secondaryText }} className="text-center mx-8 text-[14px] leading-[18px]">
               Share your referral link and invite your friends via SMS/ Email/
               WhatsApp.
             </Text>
@@ -103,23 +117,25 @@ export default function Refer() {
 
             <TouchableOpacity 
               onPress={handleCopyCode}
-              className="bg-light-100 border border-light-200 rounded-xl items-center py-4 mb-3 w-3/4 mx-auto flex-row justify-center gap-2"
+              style={{ backgroundColor: themedColors.inputBackground, borderColor: themedColors.border }}
+              className="border rounded-xl items-center py-4 mb-3 w-3/4 mx-auto flex-row justify-center gap-2"
             >
-              <Text className="text-[16px] font-medium text-dark">{referralCode || 'Not Available'}</Text>
+              <Text style={{ color: themedColors.text }} className="text-[16px] font-medium">{referralCode || 'Not Available'}</Text>
               <Image
                 source={icons.link}
                 className="size-4"
                 resizeMode="contain"
-                tintColor="#686A6E"
+                tintColor={themedColors.secondaryText}
               />
             </TouchableOpacity>
 
             <TouchableOpacity 
               onPress={handleCopyLink}
-              className="bg-light-100 border border-light-200 rounded-xl items-center py-3 mb-3 w-3/4 mx-auto"
+              style={{ backgroundColor: themedColors.inputBackground, borderColor: themedColors.border }}
+              className="border rounded-xl items-center py-3 mb-3 w-3/4 mx-auto"
             >
-              <Text className="text-[12px] text-[#686A6E] mb-1">Tap to copy link</Text>
-              <Text className="text-[11px] font-medium text-dark" numberOfLines={1}>{referralLink || 'Not Available'}</Text>
+              <Text style={{ color: themedColors.secondaryText }} className="text-[12px] mb-1">Tap to copy link</Text>
+              <Text style={{ color: themedColors.text }} className="text-[11px] font-medium" numberOfLines={1}>{referralLink || 'Not Available'}</Text>
             </TouchableOpacity>
 
             <GradientButton
@@ -141,9 +157,9 @@ export default function Refer() {
 
 const styles = StyleSheet.create({
   shadow: {
-    shadowColor: "#000000",
+    shadowColor: "#000",
     shadowOffset: { width: 2, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 5,
   },

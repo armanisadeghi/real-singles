@@ -1,6 +1,7 @@
+import { useThemeColors } from '@/context/ThemeContext';
 import { IMAGE_URL, MEDIA_BASE_URL } from '@/utils/token';
 import React, { memo } from 'react';
-import { Image, ScrollView, Text, View } from 'react-native';
+import { Image, Platform, PlatformColor, ScrollView, Text, useColorScheme, View } from 'react-native';
 
 interface Message {
   id: string;
@@ -17,6 +18,17 @@ interface ConversationProps {
 }
 
 const Conversation = ({ messages, currentUserId, contact }: ConversationProps) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    inputBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+  };
 
   // Format timestamp to readable time
   const formatTime = (timestamp: number) => {
@@ -112,16 +124,18 @@ const Conversation = ({ messages, currentUserId, contact }: ConversationProps) =
               <View
                 className={`px-4 py-2 ${isMine
                   ? 'bg-chatBg rounded-tl-lg rounded-tr-lg rounded-bl-lg'
-                  : 'bg-white rounded-tr-lg rounded-tl-lg rounded-br-lg'
+                  : 'rounded-tr-lg rounded-tl-lg rounded-br-lg'
                   }`}
+                style={!isMine ? { backgroundColor: themedColors.inputBackground } : undefined}
               >
                 <Text
-                  className={`${isMine ? 'text-white leading-[22px]' : 'text-dark'} text-[12px]`}
+                  className={`${isMine ? 'text-white leading-[22px]' : ''} text-[12px]`}
+                  style={!isMine ? { color: themedColors.text } : undefined}
                 >
                   {message.content}
                 </Text>
               </View>
-              <Text className="text-xs text-gray mt-1 text-right">
+              <Text className="text-xs mt-1 text-right" style={{ color: themedColors.secondaryText }}>
                 {formatTime(message.timestamp)}
               </Text>
             </View>

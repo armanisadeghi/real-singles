@@ -1,6 +1,6 @@
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { SPACING, TYPOGRAPHY, VERTICAL_SPACING } from "@/constants/designTokens";
-import { useSafeArea, useBottomSpacing } from "@/hooks/useResponsive";
+import { useBottomSpacing } from "@/hooks/useResponsive";
 import { getAllVirtualDate } from "@/lib/api";
 import { VIDEO_URL } from "@/utils/token";
 import * as Haptics from "expo-haptics";
@@ -16,6 +16,7 @@ import {
   RefreshControl,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 
@@ -45,12 +46,42 @@ interface SpeedDatingSession {
 
 export default function SpeedDatingPage() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
   const [sessions, setSessions] = useState<SpeedDatingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { contentPadding } = useBottomSpacing(true);
+
+  // Theme colors
+  const colors = {
+    background: Platform.OS === "ios" 
+      ? PlatformColor("systemBackground") as unknown as string
+      : isDark ? "#000000" : "#F9FAFB",
+    secondaryBackground: Platform.OS === "ios"
+      ? PlatformColor("secondarySystemBackground") as unknown as string
+      : isDark ? "#1C1C1E" : "#FFFFFF",
+    tertiaryBackground: Platform.OS === "ios"
+      ? PlatformColor("tertiarySystemBackground") as unknown as string
+      : isDark ? "#2C2C2E" : "#F3F4F6",
+    label: Platform.OS === "ios"
+      ? PlatformColor("label") as unknown as string
+      : isDark ? "#FFFFFF" : "#000000",
+    secondaryLabel: Platform.OS === "ios"
+      ? PlatformColor("secondaryLabel") as unknown as string
+      : isDark ? "#8E8E93" : "#6B7280",
+    tertiaryLabel: Platform.OS === "ios"
+      ? PlatformColor("tertiaryLabel") as unknown as string
+      : isDark ? "#48484A" : "#9CA3AF",
+    separator: Platform.OS === "ios"
+      ? PlatformColor("separator") as unknown as string
+      : isDark ? "#38383A" : "#E5E5EA",
+    purple: Platform.OS === "ios"
+      ? PlatformColor("systemPurple") as unknown as string
+      : "#9333EA",
+  };
 
   const fetchSessions = useCallback(async (showRefresh = false) => {
     if (showRefresh) {
@@ -64,7 +95,6 @@ export default function SpeedDatingPage() {
       const res = await getAllVirtualDate();
       
       if (res?.success) {
-        // Handle both API response formats (new and legacy)
         const data = res.data || res.Virtual || [];
         setSessions(Array.isArray(data) ? data : []);
         if (showRefresh) {
@@ -93,10 +123,6 @@ export default function SpeedDatingPage() {
     fetchSessions(true);
   }, [fetchSessions]);
 
-  const primaryColor = Platform.OS === "ios" 
-    ? (PlatformColor("systemPurple") as unknown as string) 
-    : "#9333EA";
-
   // Normalize session data from different API formats
   const normalizeSession = (session: SpeedDatingSession) => ({
     id: session.id || session.ID || "",
@@ -111,7 +137,6 @@ export default function SpeedDatingPage() {
     image_url: session.image_url || (session.Image ? (session.Image.startsWith("http") ? session.Image : VIDEO_URL + session.Image) : null),
   });
 
-  // Format date
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "";
     try {
@@ -126,11 +151,9 @@ export default function SpeedDatingPage() {
     }
   };
 
-  // Format time
   const formatTime = (timeStr: string) => {
     if (!timeStr) return "";
     try {
-      // Handle both HH:MM:SS and HH:MM formats
       const [hours, minutes] = timeStr.split(":");
       const date = new Date();
       date.setHours(parseInt(hours), parseInt(minutes));
@@ -143,29 +166,41 @@ export default function SpeedDatingPage() {
     }
   };
 
-  // Get status badge style
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
       case "scheduled":
-        return { bg: "#DCFCE7", text: "#15803D", label: "Upcoming" };
+        return { 
+          bg: isDark ? "rgba(34, 197, 94, 0.2)" : "#DCFCE7", 
+          text: isDark ? "#4ADE80" : "#15803D", 
+          label: "Upcoming" 
+        };
       case "in_progress":
-        return { bg: "#FEF3C7", text: "#B45309", label: "Live" };
+        return { 
+          bg: isDark ? "rgba(251, 191, 36, 0.2)" : "#FEF3C7", 
+          text: isDark ? "#FBBF24" : "#B45309", 
+          label: "Live" 
+        };
       default:
-        return { bg: "#F3F4F6", text: "#4B5563", label: status };
+        return { 
+          bg: isDark ? "rgba(156, 163, 175, 0.2)" : "#F3F4F6", 
+          text: colors.secondaryLabel, 
+          label: status 
+        };
     }
   };
 
   // How It Works component
   const HowItWorks = () => (
     <View 
-      className="mx-4 rounded-2xl p-4 mb-6"
       style={{ 
-        backgroundColor: Platform.OS === "ios" 
-          ? "rgba(147, 51, 234, 0.08)" 
-          : "#F3E8FF"
+        marginHorizontal: 16,
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 24,
+        backgroundColor: isDark ? "rgba(147, 51, 234, 0.15)" : "rgba(147, 51, 234, 0.08)",
       }}
     >
-      <Text className="font-semibold text-gray-900 mb-4" style={TYPOGRAPHY.body}>
+      <Text style={[TYPOGRAPHY.body, { fontWeight: "600", color: colors.label, marginBottom: 16 }]}>
         How It Works
       </Text>
       <View style={{ gap: SPACING.md }}>
@@ -174,18 +209,24 @@ export default function SpeedDatingPage() {
           { num: "2", title: "Meet", desc: "Have quick video dates with multiple people", color: "#EC4899" },
           { num: "3", title: "Match", desc: "Connect with mutual interests after the session", color: "#F43F5E" },
         ].map((step) => (
-          <View key={step.num} className="flex-row items-start" style={{ gap: SPACING.md }}>
+          <View key={step.num} style={{ flexDirection: "row", alignItems: "flex-start", gap: SPACING.md }}>
             <View 
-              className="w-8 h-8 rounded-full justify-center items-center"
-              style={{ backgroundColor: step.color + "20" }}
+              style={{ 
+                width: 32, 
+                height: 32, 
+                borderRadius: 16, 
+                justifyContent: "center", 
+                alignItems: "center",
+                backgroundColor: step.color + (isDark ? "40" : "20"),
+              }}
             >
               <Text style={{ color: step.color, fontWeight: "700" }}>{step.num}</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text className="font-medium text-gray-900" style={{ fontSize: 15 }}>
+              <Text style={{ fontSize: 15, fontWeight: "500", color: colors.label }}>
                 {step.title}
               </Text>
-              <Text className="text-gray-600" style={{ fontSize: 13 }}>
+              <Text style={{ fontSize: 13, color: colors.secondaryLabel }}>
                 {step.desc}
               </Text>
             </View>
@@ -207,23 +248,28 @@ export default function SpeedDatingPage() {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
           router.push(`/speed-dating/${normalized.id}` as any);
         }}
-        className="bg-white rounded-xl overflow-hidden mx-4 mb-4"
         style={{
+          marginHorizontal: 16,
+          marginBottom: 16,
+          borderRadius: 12,
+          overflow: "hidden",
+          backgroundColor: colors.secondaryBackground,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.05,
+          shadowOpacity: isDark ? 0.3 : 0.05,
           shadowRadius: 3,
           elevation: 2,
         }}
       >
-        <View className="flex-row">
+        <View style={{ flexDirection: "row" }}>
           {/* Image */}
           <View 
-            className="justify-center items-center"
             style={{ 
               width: 120, 
               height: 120,
               backgroundColor: "#A855F7",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
             {normalized.image_url ? (
@@ -247,17 +293,20 @@ export default function SpeedDatingPage() {
 
           {/* Content */}
           <View style={{ flex: 1, padding: SPACING.base }}>
-            <View className="flex-row items-start justify-between" style={{ gap: SPACING.sm }}>
+            <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: SPACING.sm }}>
               <Text 
-                className="font-semibold text-gray-900 flex-1"
-                style={{ fontSize: 15 }}
+                style={{ flex: 1, fontSize: 15, fontWeight: "600", color: colors.label }}
                 numberOfLines={1}
               >
                 {normalized.name}
               </Text>
               <View 
-                className="px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: statusStyle.bg }}
+                style={{ 
+                  paddingHorizontal: 8, 
+                  paddingVertical: 2, 
+                  borderRadius: 12,
+                  backgroundColor: statusStyle.bg,
+                }}
               >
                 <Text style={{ fontSize: 11, fontWeight: "500", color: statusStyle.text }}>
                   {statusStyle.label}
@@ -267,61 +316,57 @@ export default function SpeedDatingPage() {
 
             {normalized.description && (
               <Text 
-                className="text-gray-500 mt-1"
-                style={{ fontSize: 13 }}
+                style={{ fontSize: 13, color: colors.secondaryLabel, marginTop: 4 }}
                 numberOfLines={2}
               >
                 {normalized.description}
               </Text>
             )}
 
-            <View className="flex-row flex-wrap mt-2" style={{ gap: SPACING.sm }}>
-              {/* Date */}
+            <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8, gap: SPACING.sm }}>
               {normalized.session_date && (
-                <View className="flex-row items-center" style={{ gap: 4 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                   {Platform.OS === "ios" ? (
-                    <SymbolView name="calendar" style={{ width: 14, height: 14 }} tintColor="#6B7280" />
+                    <SymbolView name="calendar" style={{ width: 14, height: 14 }} tintColor={colors.secondaryLabel} />
                   ) : (
-                    <PlatformIcon name="event" size={14} color="#6B7280" />
+                    <PlatformIcon name="event" size={14} color={colors.secondaryLabel} />
                   )}
-                  <Text className="text-gray-600" style={{ fontSize: 12 }}>
+                  <Text style={{ fontSize: 12, color: colors.secondaryLabel }}>
                     {formatDate(normalized.session_date)}
                   </Text>
                 </View>
               )}
 
-              {/* Time */}
               {normalized.start_time && (
-                <View className="flex-row items-center" style={{ gap: 4 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                   {Platform.OS === "ios" ? (
-                    <SymbolView name="clock" style={{ width: 14, height: 14 }} tintColor="#6B7280" />
+                    <SymbolView name="clock" style={{ width: 14, height: 14 }} tintColor={colors.secondaryLabel} />
                   ) : (
-                    <PlatformIcon name="schedule" size={14} color="#6B7280" />
+                    <PlatformIcon name="schedule" size={14} color={colors.secondaryLabel} />
                   )}
-                  <Text className="text-gray-600" style={{ fontSize: 12 }}>
+                  <Text style={{ fontSize: 12, color: colors.secondaryLabel }}>
                     {formatTime(normalized.start_time)}
                   </Text>
                 </View>
               )}
 
-              {/* Participants */}
-              <View className="flex-row items-center" style={{ gap: 4 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                 {Platform.OS === "ios" ? (
-                  <SymbolView name="person.2" style={{ width: 14, height: 14 }} tintColor="#6B7280" />
+                  <SymbolView name="person.2" style={{ width: 14, height: 14 }} tintColor={colors.secondaryLabel} />
                 ) : (
-                  <PlatformIcon name="people" size={14} color="#6B7280" />
+                  <PlatformIcon name="people" size={14} color={colors.secondaryLabel} />
                 )}
-                <Text className="text-gray-600" style={{ fontSize: 12 }}>
-                  {normalized.registration_count}/{normalized.max_participants} registered
+                <Text style={{ fontSize: 12, color: colors.secondaryLabel }}>
+                  {normalized.registration_count}/{normalized.max_participants}
                 </Text>
               </View>
             </View>
 
-            <View className="flex-row items-center justify-between mt-2">
-              <Text className="text-gray-500" style={{ fontSize: 12 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
+              <Text style={{ fontSize: 12, color: colors.tertiaryLabel }}>
                 {normalized.duration_minutes} min total
               </Text>
-              <Text style={{ fontSize: 13, fontWeight: "500", color: primaryColor }}>
+              <Text style={{ fontSize: 13, fontWeight: "500", color: colors.purple }}>
                 View Details →
               </Text>
             </View>
@@ -334,25 +379,13 @@ export default function SpeedDatingPage() {
   // Header component
   const ListHeader = () => (
     <View style={{ paddingTop: SPACING.md }}>
-      {/* Page Header */}
-      <View style={{ paddingHorizontal: SPACING.screenPadding, paddingBottom: VERTICAL_SPACING.md }}>
-        <Text className="font-bold text-gray-900" style={TYPOGRAPHY.h2}>
-          Virtual Speed Dating
-        </Text>
-        <Text className="text-gray-500 mt-1" style={{ fontSize: 15 }}>
-          Meet multiple matches in one fun session
-        </Text>
-      </View>
-
-      {/* How It Works */}
       <HowItWorks />
 
-      {/* Upcoming Sessions Header */}
       <View style={{ paddingHorizontal: SPACING.screenPadding, paddingBottom: SPACING.md }}>
-        <Text className="font-semibold text-gray-900" style={{ fontSize: 17 }}>
+        <Text style={{ fontSize: 17, fontWeight: "600", color: colors.label }}>
           Upcoming Sessions
         </Text>
-        <Text className="text-gray-500" style={{ fontSize: 13 }}>
+        <Text style={{ fontSize: 13, color: colors.secondaryLabel }}>
           Register now to secure your spot
         </Text>
       </View>
@@ -362,27 +395,32 @@ export default function SpeedDatingPage() {
   // Empty state
   const EmptyState = () => (
     <View 
-      className="mx-4 rounded-xl p-8 items-center"
-      style={{ backgroundColor: "#F9FAFB" }}
+      style={{ 
+        marginHorizontal: 16, 
+        borderRadius: 12, 
+        padding: 32, 
+        alignItems: "center",
+        backgroundColor: colors.tertiaryBackground,
+      }}
     >
       {Platform.OS === "ios" ? (
         <SymbolView
           name="video.slash"
           style={{ width: 48, height: 48, marginBottom: SPACING.md }}
-          tintColor="#9CA3AF"
+          tintColor={colors.tertiaryLabel}
         />
       ) : (
         <PlatformIcon 
           name="videocam-off" 
           size={48} 
-          color="#9CA3AF" 
+          color={colors.tertiaryLabel} 
           style={{ marginBottom: SPACING.md }}
         />
       )}
-      <Text className="font-semibold text-gray-900 text-center mb-2" style={TYPOGRAPHY.body}>
+      <Text style={[TYPOGRAPHY.body, { fontWeight: "600", color: colors.label, textAlign: "center", marginBottom: 8 }]}>
         No sessions scheduled right now
       </Text>
-      <Text className="text-gray-500 text-center" style={{ fontSize: 14, maxWidth: 280 }}>
+      <Text style={{ fontSize: 14, color: colors.secondaryLabel, textAlign: "center", maxWidth: 280 }}>
         We host virtual speed dating sessions regularly. Check back soon or enable notifications 
         to be the first to know when a new session is scheduled!
       </Text>
@@ -391,7 +429,7 @@ export default function SpeedDatingPage() {
 
   // Error state
   const ErrorState = () => (
-    <View className="items-center justify-center" style={{ paddingVertical: VERTICAL_SPACING.xl * 2 }}>
+    <View style={{ alignItems: "center", justifyContent: "center", paddingVertical: VERTICAL_SPACING.xl * 2 }}>
       {Platform.OS === "ios" ? (
         <SymbolView
           name="exclamationmark.triangle"
@@ -401,37 +439,36 @@ export default function SpeedDatingPage() {
       ) : (
         <PlatformIcon name="error-outline" size={48} color="#EF4444" style={{ marginBottom: SPACING.md }} />
       )}
-      <Text className="text-red-500 text-center mb-4" style={TYPOGRAPHY.body}>
+      <Text style={[TYPOGRAPHY.body, { color: "#EF4444", textAlign: "center", marginBottom: 16 }]}>
         {error}
       </Text>
       <TouchableOpacity
         onPress={() => fetchSessions()}
-        className="rounded-full"
         style={{
           paddingHorizontal: SPACING.base,
           paddingVertical: SPACING.sm,
-          backgroundColor: primaryColor,
+          backgroundColor: colors.purple,
+          borderRadius: 20,
         }}
         activeOpacity={0.7}
       >
-        <Text className="text-white font-medium" style={{ fontSize: 14 }}>
+        <Text style={{ fontSize: 14, fontWeight: "500", color: "#FFFFFF" }}>
           Try Again
         </Text>
       </TouchableOpacity>
     </View>
   );
 
-  // Loading state
   if (isLoading && !isRefreshing) {
     return (
-      <View className="flex-1 bg-gray-50 justify-center items-center">
-        <ActivityIndicator size="large" color={primaryColor} />
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.purple} />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       {error ? (
         <FlatList
           data={[]}
@@ -444,7 +481,7 @@ export default function SpeedDatingPage() {
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={onRefresh}
-              tintColor={primaryColor}
+              tintColor={colors.purple}
             />
           }
         />
@@ -462,7 +499,7 @@ export default function SpeedDatingPage() {
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={onRefresh}
-              tintColor={primaryColor}
+              tintColor={colors.purple}
             />
           }
         />

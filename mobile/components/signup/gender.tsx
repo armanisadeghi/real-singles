@@ -1,8 +1,9 @@
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
+import { useThemeColors } from "@/context/ThemeContext";
 import { signupProps } from "@/types";
 import React, { useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Image, Platform, PlatformColor, ScrollView, Text, TouchableOpacity, View, useColorScheme } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 // Gender options that match database constraint
@@ -26,6 +27,16 @@ const Gender = ({
   onNext,
   error,
 }: signupProps) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
+
   const [validationError, setValidationError] = useState("");
   const [step, setStep] = useState<"gender" | "looking_for">("gender");
 

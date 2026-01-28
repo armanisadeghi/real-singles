@@ -4,6 +4,7 @@ import { ScreenHeader, HeaderBackButton } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
 import { SPACING, TYPOGRAPHY, ICON_SIZES } from "@/constants/designTokens";
 import { useCall } from "@/context/CallContext";
+import { useThemeColors } from "@/context/ThemeContext";
 import { getAgoraCallToken, blockUser, unblockUser, reportUser } from "@/lib/api";
 import { useChat } from "@/hooks/useSupabaseMessaging";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
@@ -13,12 +14,25 @@ import { PlatformIcon } from "@/components/ui";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
-import { ActionSheetIOS, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
+import { ActionSheetIOS, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, PlatformColor, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View } from "react-native";
 
 export default function ChatDetail() {
   const { userid: peerId, name, image, online, time } = useLocalSearchParams<{ userid: string, name: string, image: string, online: string, time: string }>();
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    tertiaryText: Platform.OS === 'ios' ? (PlatformColor('tertiaryLabel') as unknown as string) : (isDark ? '#9CA3AF' : '#666666'),
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+  }), [isDark, colors]);
+  
   const [callerId, setCallerId] = useState<string | null>(null);
   const { sendInvitation } = useCall();
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -336,7 +350,7 @@ export default function ChatDetail() {
           statusBarTranslucent={Platform.OS === 'android'}
         >
           <View style={styles.overlay}>
-            <View style={styles.modalContainer}>
+            <View style={[styles.modalContainer, { backgroundColor: themedColors.secondaryBackground }]}>
               <TouchableOpacity
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -344,10 +358,10 @@ export default function ChatDetail() {
                 }}
                 style={styles.closeButton}
               >
-                <PlatformIcon name="close" size={22} color="#000" />
+                <PlatformIcon name="close" size={22} color={themedColors.text} />
               </TouchableOpacity>
 
-              <Text style={styles.modalTitle}>
+              <Text style={[styles.modalTitle, { color: themedColors.text }]}>
                 {Platform.OS === "ios" ? "Report User" : "Manage User"}
               </Text>
 
@@ -370,16 +384,19 @@ export default function ChatDetail() {
               <View style={{ width: "100%", marginTop: Platform.OS === "ios" ? 0 : 10 }}>
                 <TextInput
                   placeholder="Enter reason for reporting"
+                  placeholderTextColor={themedColors.tertiaryText}
                   value={reportReason}
                   onChangeText={setReportReason}
                   style={{
                     borderWidth: 1,
-                    borderColor: "#ccc",
+                    borderColor: themedColors.border,
                     borderRadius: 8,
                     paddingHorizontal: 10,
                     height: 40,
                     marginBottom: 10,
                     fontSize: 16, // iOS requires 16px+ to prevent zoom
+                    color: themedColors.text,
+                    backgroundColor: themedColors.background,
                   }}
                 />
 
@@ -403,7 +420,7 @@ export default function ChatDetail() {
           </View>
         </Modal>
 
-        <View className="flex-1 bg-background">
+        <View style={{ flex: 1, backgroundColor: themedColors.background }}>
           <ScreenHeader
             leftContent={
               <View style={{ flexDirection: "row", alignItems: "center", gap: SPACING.sm }}>
@@ -454,8 +471,8 @@ export default function ChatDetail() {
                     </View>
                   )}
                   <View>
-                    <Text style={[TYPOGRAPHY.subheadline, { color: "#000" }]}>{contact.name}</Text>
-                    <Text style={[TYPOGRAPHY.caption1, { color: contact.online ? "#22C55E" : "#6B7280" }]}>
+                    <Text style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>{contact.name}</Text>
+                    <Text style={[TYPOGRAPHY.caption1, { color: contact.online ? "#22C55E" : themedColors.secondaryText }]}>
                       {contact.online ? "Online" : `Last seen ${contact.lastSeen ? contact.lastSeen : 'Few sec ago'}`}
                     </Text>
                   </View>
@@ -510,7 +527,7 @@ export default function ChatDetail() {
           />
 
           {loading ? (
-            <View className="flex-1 justify-center items-center">
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <ActivityIndicator size="large" color="#C07618" />
             </View>
           ) : callerId && (
@@ -540,7 +557,6 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: "80%",
-    backgroundColor: "#fff",
     borderRadius: 16,
     paddingTop: 40,
     paddingBottom: 30,

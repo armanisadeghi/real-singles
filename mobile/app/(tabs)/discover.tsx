@@ -19,11 +19,14 @@ import {
   FlatList,
   Image,
   Platform,
+  PlatformColor,
   RefreshControl,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
+import { useThemeColors } from "@/context/ThemeContext";
 import Toast from "react-native-toast-message";
 import { useSafeArea, useHeaderSpacing } from "@/hooks/useResponsive";
 
@@ -31,6 +34,19 @@ export default function Discover() {
   const router = useRouter();
   const safeArea = useSafeArea();
   const { minimal: headerTopPadding } = useHeaderSpacing();
+
+  // Dark mode support
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+  };
   
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -251,8 +267,9 @@ export default function Discover() {
         
         {/* Header */}
         <View
-          className="bg-white flex-row justify-between items-center rounded-b-xl z-30"
+          className="flex-row justify-between items-center rounded-b-xl z-30"
           style={{
+            backgroundColor: themedColors.background,
             paddingHorizontal: SPACING.screenPadding,
             paddingTop: headerTopPadding,
             paddingBottom: VERTICAL_SPACING.md,
@@ -276,8 +293,8 @@ export default function Discover() {
               resizeMode="contain"
             />
             <Text
-              className="text-black font-semibold"
-              style={TYPOGRAPHY.h2}
+              className="font-semibold"
+              style={[TYPOGRAPHY.h2, { color: themedColors.text }]}
             >
               Discover
             </Text>
@@ -450,7 +467,7 @@ export default function Discover() {
       >
         <BottomSheetScrollView
           contentContainerStyle={{
-            backgroundColor: "#fff",
+            backgroundColor: themedColors.background,
             paddingBottom: 120,
           }}
         >
@@ -467,7 +484,7 @@ export default function Discover() {
         <View 
           className="absolute inset-0 bg-black/30 z-50 items-center justify-center"
         >
-          <View className="bg-white rounded-xl p-6 items-center">
+          <View className="rounded-xl p-6 items-center" style={{ backgroundColor: themedColors.background }}>
             <ActivityIndicator size="large" color="#B06D1E" />
             <Text className="text-primary mt-3" style={TYPOGRAPHY.body}>
               Saving filters...

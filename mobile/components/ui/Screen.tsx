@@ -24,10 +24,11 @@
  */
 
 import React, { ReactNode } from "react";
-import { View, StyleSheet, ViewStyle, StatusBar } from "react-native";
+import { Platform, PlatformColor, View, StyleSheet, ViewStyle, StatusBar, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader, ScreenHeaderProps } from "./ScreenHeader";
 import { useBottomSpacing } from "@/hooks/useResponsive";
+import { useThemeColors } from "@/context/ThemeContext";
 
 export interface ScreenProps extends Omit<ScreenHeaderProps, "title"> {
   children: ReactNode;
@@ -56,7 +57,7 @@ export interface ScreenProps extends Omit<ScreenHeaderProps, "title"> {
 export const Screen: React.FC<ScreenProps> = ({
   children,
   hasTabBar = false,
-  backgroundColor = "#FFFAF2", // App background color
+  backgroundColor,
   headerTitle,
   showHeader = false,
   showBackButton = false,
@@ -72,12 +73,20 @@ export const Screen: React.FC<ScreenProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { contentPadding: tabBarPadding } = useBottomSpacing(hasTabBar);
+  const colors = useThemeColors();
+  
+  // Use PlatformColor on iOS for proper system color adaptation
+  const defaultBackground = Platform.OS === "ios"
+    ? (PlatformColor("systemBackground") as unknown as string)
+    : colors.background;
+  
+  const bgColor = backgroundColor || defaultBackground;
 
   // For screens without header, we need to handle safe area in content
   const needsTopSafeArea = !showHeader && !contentUnderHeader;
 
   return (
-    <View style={[styles.container, { backgroundColor }, containerStyle]}>
+    <View style={[styles.container, { backgroundColor: bgColor }, containerStyle]}>
       <StatusBar barStyle={statusBarStyle} backgroundColor="transparent" translucent />
       
       {showHeader && (

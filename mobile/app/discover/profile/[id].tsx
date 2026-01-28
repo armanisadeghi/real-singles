@@ -10,11 +10,12 @@ import {
   ActivityIndicator,
   BackHandler,
   Platform,
+  PlatformColor,
   Pressable,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
+  useColorScheme,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -30,6 +31,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import Toast from "react-native-toast-message";
+import { useThemeColors } from "@/context/ThemeContext";
 
 import PhotoCarousel from "@/components/ui/PhotoCarousel";
 import ProfileSectionRenderer from "@/components/profile/ProfileSectionRenderer";
@@ -68,6 +70,17 @@ export default function DiscoveryProfileView() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    separator: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outlineVariant,
+  }), [isDark, colors]);
   
   // Calculate visible photo height (below safe area)
   // PhotoCarousel will add safe area inset to this for total height
@@ -253,7 +266,7 @@ export default function DiscoveryProfileView() {
   
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: themedColors.background }]}>
         <ActivityIndicator size="large" color="#B06D1E" />
       </View>
     );
@@ -264,8 +277,7 @@ export default function DiscoveryProfileView() {
   }
   
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+    <View style={[styles.container, { backgroundColor: themedColors.background }]}>
       <Toast />
       
       {/* Main scrollable content */}
@@ -325,7 +337,11 @@ export default function DiscoveryProfileView() {
         entering={SlideInDown.springify()}
         style={[
           styles.actionBar,
-          { paddingBottom: Math.max(insets.bottom, 8) + 8 },
+          { 
+            paddingBottom: Math.max(insets.bottom, 8) + 8,
+            backgroundColor: isDark ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+            borderTopColor: themedColors.separator,
+          },
         ]}
       >
         {/* Pass Button */}
@@ -333,7 +349,7 @@ export default function DiscoveryProfileView() {
           <Pressable
             onPress={() => handleAction("pass")}
             disabled={actionLoading !== null}
-            style={[styles.actionButton, styles.passButton]}
+            style={[styles.actionButton, styles.passButton, { backgroundColor: themedColors.background }]}
           >
             {actionLoading === "pass" ? (
               <ActivityIndicator size="small" color="#EF4444" />
@@ -348,7 +364,7 @@ export default function DiscoveryProfileView() {
           <Pressable
             onPress={() => handleAction("super_like")}
             disabled={actionLoading !== null}
-            style={[styles.actionButton, styles.superLikeButton]}
+            style={[styles.actionButton, styles.superLikeButton, { backgroundColor: themedColors.background }]}
           >
             {actionLoading === "super_like" ? (
               <ActivityIndicator size="small" color="#3B82F6" />
@@ -381,10 +397,10 @@ export default function DiscoveryProfileView() {
             style={styles.reportBackdrop}
             onPress={() => setShowReportSheet(false)}
           />
-          <View style={[styles.reportSheet, { paddingBottom: insets.bottom + 20 }]}>
-            <View style={styles.reportHandle} />
-            <Text style={styles.reportTitle}>Report this profile</Text>
-            <Text style={styles.reportSubtitle}>
+          <View style={[styles.reportSheet, { paddingBottom: insets.bottom + 20, backgroundColor: themedColors.background }]}>
+            <View style={[styles.reportHandle, { backgroundColor: themedColors.separator }]} />
+            <Text style={[styles.reportTitle, { color: themedColors.text }]}>Report this profile</Text>
+            <Text style={[styles.reportSubtitle, { color: themedColors.secondaryText }]}>
               Why are you reporting {profile.DisplayName || "this user"}?
             </Text>
             
@@ -401,10 +417,10 @@ export default function DiscoveryProfileView() {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   handleReport(reason);
                 }}
-                style={styles.reportOption}
+                style={[styles.reportOption, { borderBottomColor: themedColors.separator }]}
               >
-                <Text style={styles.reportOptionText}>{reason}</Text>
-                <PlatformIcon name="chevron-right" size={20} color="#9CA3AF" />
+                <Text style={[styles.reportOptionText, { color: themedColors.text }]}>{reason}</Text>
+                <PlatformIcon name="chevron-right" size={20} color={themedColors.secondaryText} />
               </Pressable>
             ))}
             
@@ -415,7 +431,7 @@ export default function DiscoveryProfileView() {
               }}
               style={styles.reportCancel}
             >
-              <Text style={styles.reportCancelText}>Cancel</Text>
+              <Text style={[styles.reportCancelText, { color: themedColors.secondaryText }]}>Cancel</Text>
             </Pressable>
           </View>
         </View>
@@ -427,13 +443,13 @@ export default function DiscoveryProfileView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    // backgroundColor applied inline with themedColors.background
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    // backgroundColor applied inline with themedColors.background
   },
   scrollView: {
     flex: 1,
@@ -473,9 +489,8 @@ const styles = StyleSheet.create({
     gap: SPACING.lg,
     paddingTop: SPACING.sm,
     paddingHorizontal: SPACING.lg,
-    backgroundColor: "rgba(255, 255, 255, 0.98)",
+    // backgroundColor and borderTopColor applied inline with dark mode support
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "rgba(0, 0, 0, 0.1)",
   },
   actionButton: {
     justifyContent: "center",
@@ -496,17 +511,17 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "white",
+    // backgroundColor applied inline with themedColors.background
     borderWidth: 1.5,
-    borderColor: "#FECACA",
+    borderColor: "#FECACA", // Semantic red border - keeps visibility in both modes
   },
   superLikeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "white",
+    // backgroundColor applied inline with themedColors.background
     borderWidth: 1.5,
-    borderColor: "#BFDBFE",
+    borderColor: "#BFDBFE", // Semantic blue border - keeps visibility in both modes
   },
   likeButton: {
     width: 48,
@@ -524,7 +539,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   reportSheet: {
-    backgroundColor: "white",
+    // backgroundColor applied inline with themedColors.background
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: SPACING.lg,
@@ -532,20 +547,20 @@ const styles = StyleSheet.create({
   reportHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#E5E7EB",
+    // backgroundColor applied inline with themedColors.separator
     borderRadius: 2,
     alignSelf: "center",
     marginBottom: SPACING.lg,
   },
   reportTitle: {
     ...TYPOGRAPHY.h3,
-    color: "#111827",
+    // color applied inline with themedColors.text
     textAlign: "center",
     marginBottom: SPACING.xs,
   },
   reportSubtitle: {
     ...TYPOGRAPHY.subheadline,
-    color: "#6B7280",
+    // color applied inline with themedColors.secondaryText
     textAlign: "center",
     marginBottom: SPACING.lg,
   },
@@ -555,11 +570,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    // borderBottomColor applied inline with themedColors.separator
   },
   reportOptionText: {
     ...TYPOGRAPHY.body,
-    color: "#374151",
+    // color applied inline with themedColors.text
   },
   reportCancel: {
     marginTop: SPACING.lg,
@@ -568,6 +583,6 @@ const styles = StyleSheet.create({
   },
   reportCancelText: {
     ...TYPOGRAPHY.bodySemibold,
-    color: "#6B7280",
+    // color applied inline with themedColors.secondaryText
   },
 });

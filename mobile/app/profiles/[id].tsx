@@ -15,19 +15,33 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
+  Platform,
+  PlatformColor,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View
 } from "react-native";
 import Animated, { useSharedValue, withSpring, useAnimatedStyle, withSequence } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+import { useThemeColors } from "@/context/ThemeContext";
 
 export default function ProfileDetail() {
   const navState = useNavigationState((state) => state);
   const canGoBack = navState?.routes?.length > 1;
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+  }), [isDark, colors]);
 
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -223,19 +237,20 @@ export default function ProfileDetail() {
 
   if (loading) {
     return (
-      <View className="w-full h-full flex items-center justify-center py-4">
-        <ActivityIndicator size="large" color="#000000" />
+      <View className="w-full h-full flex items-center justify-center py-4" style={{ backgroundColor: themedColors.background }}>
+        <ActivityIndicator size="large" color={themedColors.text} />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.errorContainer}>
+      <View style={[styles.errorContainer, { backgroundColor: themedColors.background }]}>
         <Toast />
         <View
-          className="bg-white flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
+          className="flex-row justify-between items-center px-4 pt-10 pb-6 rounded-b-xl z-30"
           style={{
+            backgroundColor: themedColors.background,
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 0 },
             shadowOpacity: 0.1,
@@ -250,10 +265,11 @@ export default function ProfileDetail() {
                 router.back();
               }}
               className="border border-gray rounded-lg flex justify-center items-center w-8 h-8"
+              style={{ backgroundColor: themedColors.secondaryBackground }}
             >
-              <PlatformIcon name="chevron-left" size={16} color="#000" />
+              <PlatformIcon name="chevron-left" size={16} color={themedColors.text} />
             </TouchableOpacity>
-            <Text className="leading-[22px] text-dark text-base font-medium tracking-[-0.41px]">
+            <Text className="leading-[22px] text-base font-medium tracking-[-0.41px]" style={{ color: themedColors.text }}>
               Profile
             </Text>
           </View>
@@ -263,8 +279,8 @@ export default function ProfileDetail() {
 
         <View style={styles.errorContent}>
           <PlatformIcon name="error-outline" size={80} color="#FF6B6B" />
-          <Text style={styles.errorTitle}>Oops!</Text>
-          <Text style={styles.errorMessage}>{error}</Text>
+          <Text style={[styles.errorTitle, { color: themedColors.text }]}>Oops!</Text>
+          <Text style={[styles.errorMessage, { color: themedColors.secondaryText }]}>{error}</Text>
 
           <Animated.View
             style={[
@@ -289,7 +305,7 @@ export default function ProfileDetail() {
               router.back();
             }}
           >
-            <Text style={styles.goBackText}>Go Back</Text>
+            <Text style={[styles.goBackText, { color: themedColors.secondaryText }]}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -387,7 +403,7 @@ export default function ProfileDetail() {
 const styles = StyleSheet.create({
   errorContainer: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
+    // backgroundColor applied inline with themedColors.background
   },
   header: {
     flexDirection: "row",
@@ -396,24 +412,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 16,
-    backgroundColor: "#FFFFFF",
+    // backgroundColor applied inline
     borderBottomWidth: 1,
-    borderBottomColor: "#E8E8E8",
+    // borderBottomColor applied inline
   },
   backButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: "#F0F0F0",
+    // backgroundColor applied inline with themedColors.secondaryBackground
   },
   backIcon: {
     width: 20,
     height: 20,
-    tintColor: "#333333",
+    // tintColor applied inline with themedColors.text
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333333",
+    // color applied inline with themedColors.text
   },
   errorContent: {
     flex: 1,
@@ -424,14 +440,14 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#333333",
+    // color applied inline with themedColors.text
     marginTop: 24,
     marginBottom: 8,
   },
   errorMessage: {
     fontSize: 16,
     textAlign: "center",
-    color: "#666666",
+    // color applied inline with themedColors.secondaryText
     marginBottom: 32,
     lineHeight: 22,
   },
@@ -441,7 +457,7 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     flexDirection: "row",
-    backgroundColor: "#B06D1E",
+    backgroundColor: "#B06D1E", // Brand color - intentional
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 50,
@@ -454,7 +470,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   retryText: {
-    color: "#FFFFFF",
+    color: "#FFFFFF", // White on brand button - intentional
     fontWeight: "600",
     fontSize: 16,
     marginLeft: 8,
@@ -464,7 +480,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   goBackText: {
-    color: "#666666",
+    // color applied inline with themedColors.secondaryText
     fontSize: 14,
   },
   initialsOverlay: {

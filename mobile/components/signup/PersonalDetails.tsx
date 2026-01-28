@@ -1,11 +1,22 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useThemeColors } from "@/context/ThemeContext";
 import React, { useState, useEffect } from "react";
-import { Platform, ScrollView, Text, TextInput, View } from "react-native";
+import { Platform, PlatformColor, ScrollView, Text, TextInput, View, useColorScheme } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import GradientButton from "../ui/GradientButton";
 import { COUNTRY_OPTIONS, getZodiacFromDate, ZODIAC_OPTIONS } from "@/constants/options";
 
 const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
+
   const [validationError, setValidationError] = useState("");
 
   // Initialize country to US if not set
@@ -203,10 +214,10 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               value={data.FirstName}
               onChangeText={(text) => updateData({ FirstName: text })}
               placeholder="First Name"
-              placeholderTextColor="#B0B0B0"
+              placeholderTextColor={themedColors.placeholder}
               autoComplete="given-name"
               textContentType="givenName"
-              style={{paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, flex: 1, color: 'black' }}
+              style={{paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, flex: 1, color: themedColors.text }}
             />
           </View>
 
@@ -215,10 +226,10 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               value={data.LastName}
               onChangeText={(text) => updateData({ LastName: text })}
               placeholder="Last Name"
-              placeholderTextColor="#B0B0B0"
+              placeholderTextColor={themedColors.placeholder}
               autoComplete="family-name"
               textContentType="familyName"
-              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: 'black' }}
+              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: themedColors.text }}
             />
           </View>
         </View>
@@ -229,10 +240,10 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
             value={data.DisplayName}
             onChangeText={(text) => updateData({ DisplayName: text })}
             placeholder="Display Name"
-            placeholderTextColor="#B0B0B0"
+            placeholderTextColor={themedColors.placeholder}
             autoComplete="name"
             textContentType="name"
-            style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: 'black' }}
+            style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: themedColors.text }}
           />
         </View>
 
@@ -243,8 +254,8 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               value={data.DOB}
               onChangeText={(text) => updateData({ DOB: text })}
               placeholder="DOB(MM/DD/YYYY)"
-              placeholderTextColor="#B0B0B0"
-              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: 'black' }}
+              placeholderTextColor={themedColors.placeholder}
+              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: themedColors.text }}
             />
           </View>
 
@@ -254,10 +265,10 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               onChangeText={(text) => updateData({ Phone: text })}
               placeholder="Phone Number"
               keyboardType="phone-pad"
-              placeholderTextColor="#B0B0B0"
+              placeholderTextColor={themedColors.placeholder}
               autoComplete="tel"
               textContentType="telephoneNumber"
-              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: 'black' }}
+              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: themedColors.text }}
             />
           </View>
         </View>
@@ -269,18 +280,18 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               value={data.Zipcode}
               onChangeText={(text) => updateData({ Zipcode: text })}
               placeholder="Zip Code"
-              placeholderTextColor="#B0B0B0"
+              placeholderTextColor={themedColors.placeholder}
               keyboardType="numeric"
               autoComplete="postal-code"
               textContentType="postalCode"
-              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: 'black' }}
+              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: themedColors.text }}
             />
           </View>
 
           {/* Zodiac Sign - Auto-calculated from DOB (read-only display) */}
           <View className="flex-1 border border-border rounded-[99] bg-gray-100">
             <View style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16 }}>
-              <Text style={{ color: data.HSign ? 'black' : '#B0B0B0' }}>
+              <Text style={{ color: data.HSign ? themedColors.text : themedColors.placeholder }}>
                 {data.HSign 
                   ? ZODIAC_OPTIONS.find(z => z.value === data.HSign)?.label || data.HSign
                   : 'Zodiac (from DOB)'}
@@ -300,15 +311,15 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               inputIOS: {
                 paddingVertical: 18,
                 paddingHorizontal: 16,
-                color: 'black',
+                color: themedColors.text as string,
               },
               inputAndroid: {
                 paddingVertical: 10,
                 paddingHorizontal: 16,
-                color: 'black',
+                color: themedColors.text as string,
               },
               placeholder: {
-                color: '#B0B0B0',
+                color: themedColors.placeholder,
               },
             }}
           />
@@ -320,10 +331,10 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               value={data.City}
               onChangeText={(text) => updateData({ City: text })}
               placeholder="City"
-              placeholderTextColor="#B0B0B0"
-autoComplete="off"
+              placeholderTextColor={themedColors.placeholder}
+              autoComplete="off"
               textContentType="addressCity"
-              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: 'black' }}
+              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: themedColors.text }}
             />
           </View>
 
@@ -332,10 +343,10 @@ autoComplete="off"
               value={data.State}
               onChangeText={(text) => updateData({ State: text })}
               placeholder="State"
-              placeholderTextColor="#B0B0B0"
-autoComplete="off"
+              placeholderTextColor={themedColors.placeholder}
+              autoComplete="off"
               textContentType="addressState"
-              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16 , color: 'black'}}
+              style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: themedColors.text }}
             />
           </View>
         </View>

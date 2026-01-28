@@ -1,16 +1,27 @@
 import { images } from "@/constants/images";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
+import { useThemeColors } from "@/context/ThemeContext";
 import { useDeviceSize } from "@/hooks/useResponsive";
 import { signupProps } from "@/types";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, Image, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
+import { FlatList, Image, Platform, PlatformColor, ScrollView, Text, TouchableOpacity, View, useColorScheme, useWindowDimensions } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 const ChooseInterests = ({ data, updateData, onNext, error }: signupProps) => {
   const { width: screenWidth } = useWindowDimensions();
   const { gridColumns } = useDeviceSize();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+
+  const themedColors = {
+    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    placeholder: isDark ? '#9CA3AF' : '#B0B0B0',
+  };
+
   const [validationError, setValidationError] = useState("");
   const [selectedInterests, setSelectedInterests] = useState<string[]>(data?.Interest || []);
 
