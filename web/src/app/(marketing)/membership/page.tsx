@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { PageHero, ServiceCard } from "@/components/marketing";
 import {
@@ -61,16 +62,33 @@ export default function MembershipPage() {
       {/* Why Join Section */}
       <section className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-              WHY JOIN <span className="text-brand-primary">RealSingles.dating?</span>
-            </h2>
-            <p className="mt-6 text-xl text-muted-foreground">
-              If you&apos;re picky, busy, and don&apos;t like wasting time, Membership is for you. Become a Member and see increased speed, quantity, and quality of Matches.
-            </p>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Members support our mission to keep RealSingles a selective and high-quality community of motivated daters looking for meaningful long-term relationships. Is there a more important search in your entire life? We don&apos;t think so. Some things in life are important enough not to leave up to chance, and we believe stacking your odds of meeting The One is the best investment you can make in yourself.
-            </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* App Screenshot */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative w-full max-w-md">
+                <Image
+                  src="/images/marketing/app-screenshot.webp"
+                  alt="RealSingles app interface showing profile matching"
+                  width={400}
+                  height={800}
+                  className="w-full h-auto"
+                  priority
+                />
+              </div>
+            </div>
+            
+            {/* Text Content */}
+            <div className="text-center lg:text-left">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+                WHY JOIN <span className="text-brand-primary">RealSingles.dating?</span>
+              </h2>
+              <p className="mt-6 text-xl text-muted-foreground">
+                If you&apos;re picky, busy, and don&apos;t like wasting time, Membership is for you. Become a Member and see increased speed, quantity, and quality of Matches.
+              </p>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Members support our mission to keep RealSingles a selective and high-quality community of motivated daters looking for meaningful long-term relationships. Is there a more important search in your entire life? We don&apos;t think so. Some things in life are important enough not to leave up to chance, and we believe stacking your odds of meeting The One is the best investment you can make in yourself.
+              </p>
+            </div>
           </div>
         </div>
       </section>

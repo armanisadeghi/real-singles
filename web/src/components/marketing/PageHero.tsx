@@ -30,7 +30,7 @@ export function PageHero({
   };
 
   return (
-    <section className={`relative ${bgColors[backgroundColor]} py-20 sm:py-28 overflow-hidden`}>
+    <section className={`relative ${bgColors[backgroundColor]} py-40 sm:py-56 overflow-hidden`}>
       {backgroundImage && (
         <>
           <Image

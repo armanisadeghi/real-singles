@@ -29,7 +29,6 @@ export default function AboutPage() {
       <PageHero
         title="About Us"
         backgroundImage="/images/marketing/hero/about-hero.jpg"
-        imagePosition="center 20%"
       />
 
       {/* Our Journey Section */}
