@@ -69,6 +69,16 @@ platform :ios, podfile_properties['ios.deploymentTarget'] || '15.1'
 # Explicitly specify the Xcode project to avoid ambiguity
 project 'RealSingles.xcodeproj'
 
+# =============================================================================
+# Suppress Third-Party Warnings
+# =============================================================================
+# All 1400+ warnings in this project come from third-party dependencies
+# (react-native-blob-util, expo-file-system, react-native-svg, etc.).
+# These are not actionable by us - they must be fixed by package maintainers.
+# Suppress them to keep our build output clean and focused on real issues.
+# =============================================================================
+inhibit_all_warnings!
+
 prepare_react_native_project!
 
 target 'RealSingles' do
