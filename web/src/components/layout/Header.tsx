@@ -1,20 +1,88 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Menu, X, Sparkles, Compass } from "lucide-react";
+import { Menu, X, Sparkles, Compass, ChevronDown, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
-// Public navigation - ALWAYS shown on public pages regardless of auth state
+// Public navigation - matches WordPress site structure
 const navigation = [
-  { name: "Features", href: "/features" },
+  { name: "About Us", href: "/about" },
+  { name: "Membership", href: "/membership" },
+  { name: "Community", href: "/community" },
+  { name: "Matchmaking", href: "/matchmaking" },
   { name: "Events", href: "/our-events" },
-  { name: "About", href: "/about" },
-  { name: "Contact", href: "/contact" },
 ];
+
+const appDownloadLinks = {
+  ios: "https://apps.apple.com/app/real-singles/id6473915498",
+  android: "https://play.google.com/store/apps/details?id=com.realsingles.app",
+};
+
+function DownloadDropdown() {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-brand-primary transition-colors"
+      >
+        Download the App
+        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+      
+      {isOpen && (
+        <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+          <Link
+            href={appDownloadLinks.ios}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+            </svg>
+            <div>
+              <p className="text-xs text-gray-500">Download on the</p>
+              <p className="text-sm font-semibold text-foreground">App Store</p>
+            </div>
+          </Link>
+          <Link
+            href={appDownloadLinks.android}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 010 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z"/>
+            </svg>
+            <div>
+              <p className="text-xs text-gray-500">Get it on</p>
+              <p className="text-sm font-semibold text-foreground">Google Play</p>
+            </div>
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -82,7 +150,7 @@ export function Header() {
           </div>
 
           {/* Desktop navigation */}
-          <div className="hidden lg:flex lg:gap-x-8">
+          <div className="hidden lg:flex lg:gap-x-6 items-center">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -92,6 +160,9 @@ export function Header() {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Download App Dropdown */}
+            <DownloadDropdown />
           </div>
 
           {/* Desktop CTA buttons */}
@@ -140,7 +211,7 @@ export function Header() {
         {mobileMenuOpen && (
           <div className="lg:hidden">
             <div className="space-y-1 pb-4 pt-2">
-              {/* Always show public navigation */}
+              {/* Main navigation */}
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -151,12 +222,38 @@ export function Header() {
                   {item.name}
                 </Link>
               ))}
-              <div className="border-t border-border mt-4 pt-4 space-y-2">
+              
+              {/* App download links */}
+              <div className="border-t border-border mt-3 pt-3">
+                <p className="px-3 py-2 text-sm font-semibold text-muted-foreground">Download the App</p>
+                <Link
+                  href={appDownloadLinks.ios}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Download className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-base font-medium text-foreground">iOS App Store</span>
+                </Link>
+                <Link
+                  href={appDownloadLinks.android}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Download className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-base font-medium text-foreground">Google Play</span>
+                </Link>
+              </div>
+              
+              {/* Auth actions */}
+              <div className="border-t border-border mt-3 pt-3 space-y-2">
                 {loading ? (
                   <div className="w-full h-10 bg-gray-200 animate-pulse rounded-lg" />
                 ) : user ? (
                   <>
-                    {/* Authenticated user on public page */}
                     <Link
                       href="/discover"
                       className="flex items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-brand-primary-dark transition-colors"
@@ -174,7 +271,6 @@ export function Header() {
                   </>
                 ) : (
                   <>
-                    {/* Guest */}
                     <Link
                       href="/login"
                       className="block rounded-lg px-3 py-2 text-base font-medium text-foreground hover:bg-muted transition-colors"

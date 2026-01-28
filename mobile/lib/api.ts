@@ -14,7 +14,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/api";
 /**
  * Make an authenticated API request
  */
-async function apiRequest<T = any>(
+export async function apiRequest<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {

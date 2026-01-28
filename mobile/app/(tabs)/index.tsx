@@ -533,54 +533,6 @@ export default function Home() {
             }}
           >
             <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>
-              Featured Videos
-            </Text>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push({
-                  pathname: "/topMatches",
-                  params: { category: "featuredVideos" },
-                });
-              }}
-              className="z-20"
-            >
-              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
-                View All
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingLeft: SPACING.screenPadding,
-              paddingRight: SPACING.screenPadding
-            }}
-          >
-            <View className="flex-row" style={{ gap: SPACING.md }}>
-              {videos && videos?.length ? (
-                videos?.map((video, index) => (
-                  <VideoCard key={index} video={video} isVideo={true} />
-                ))
-              ) : (
-                <Text className="text-gray" style={TYPOGRAPHY.body}>
-                  No featured videos available
-                </Text>
-              )}
-            </View>
-          </ScrollView>
-        </View>
-        <View>
-          <View
-            className="flex-row justify-between items-center"
-            style={{
-              paddingHorizontal: SPACING.screenPadding,
-              marginTop: VERTICAL_SPACING.md,
-              marginBottom: VERTICAL_SPACING.sm
-            }}
-          >
-            <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>
               Virtual Speed Dating
             </Text>
             <TouchableOpacity
@@ -629,7 +581,7 @@ export default function Home() {
             }}
           >
             <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>
-              Nearby Profile
+              Nearby Profiles
             </Text>
             <TouchableOpacity
               onPress={() => {
@@ -659,6 +611,54 @@ export default function Home() {
               ) : (
                 <Text className="text-gray" style={TYPOGRAPHY.body}>
                   No nearby profiles available
+                </Text>
+              )}
+            </View>
+          </ScrollView>
+        </View>
+        <View>
+          <View
+            className="flex-row justify-between items-center"
+            style={{
+              paddingHorizontal: SPACING.screenPadding,
+              marginTop: VERTICAL_SPACING.md,
+              marginBottom: VERTICAL_SPACING.sm
+            }}
+          >
+            <Text className="text-primary font-bold" style={TYPOGRAPHY.h3}>
+              Featured Videos
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push({
+                  pathname: "/topMatches",
+                  params: { category: "featuredVideos" },
+                });
+              }}
+              className="z-20"
+            >
+              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
+                View All
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingLeft: SPACING.screenPadding,
+              paddingRight: SPACING.screenPadding
+            }}
+          >
+            <View className="flex-row" style={{ gap: SPACING.md }}>
+              {videos && videos?.length ? (
+                videos?.map((video, index) => (
+                  <VideoCard key={index} video={video} isVideo={true} />
+                ))
+              ) : (
+                <Text className="text-gray" style={TYPOGRAPHY.body}>
+                  No featured videos available
                 </Text>
               )}
             </View>

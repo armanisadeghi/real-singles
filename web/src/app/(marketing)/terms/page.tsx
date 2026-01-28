@@ -1,144 +1,106 @@
-import Link from "next/link";
-import { ArrowLeft, FileText } from "lucide-react";
-import { Header, Footer } from "@/components/layout";
+import { PageHero } from "@/components/marketing";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-dvh flex flex-col">
-      <Header />
-      <main className="flex-1 pt-[var(--header-height)] bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Header */}
-          <div className="mb-8">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Link>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-4xl font-bold text-gray-900">Terms of Service</h1>
-            </div>
-            <p className="text-gray-600">Last updated: January 24, 2026</p>
-          </div>
+    <>
+      {/* Hero Section */}
+      <PageHero
+        title="Terms"
+        backgroundColor="dark"
+      />
 
-          {/* Content */}
-          <div className="bg-white rounded-xl shadow-sm p-8 prose prose-gray max-w-none">
-            <h2>1. Acceptance of Terms</h2>
-            <p>
-              By accessing and using RealSingles (&quot;the Service&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use the Service.
+      {/* Terms Content */}
+      <section className="bg-white py-20 sm:py-28">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="prose prose-lg max-w-none">
+            <h2 className="text-3xl font-bold text-foreground">
+              THE REAL SINGLES TERMS OF SERVICE AGREEMENT
+            </h2>
+            
+            <p className="text-brand-primary font-semibold">
+              Effective Date: September 26, 2024
             </p>
 
-            <h2>2. Description of Service</h2>
+            <h3>Introduction</h3>
             <p>
-              RealSingles is a dating platform that connects singles through verified profiles, events, and virtual speed dating. We provide tools for users to create profiles, browse other members, send messages, and participate in events.
+              Welcome to &quot;Real Singles&quot;. We value your privacy and are committed to protecting your personal information. This Privacy Policy outlines how we collect, use, share, and protect your data when you use our app. By using Real Singles, you agree to the terms of this policy.
             </p>
 
-            <h2>3. Eligibility</h2>
-            <p>
-              You must be at least 18 years old to use this Service. By using the Service, you represent and warrant that:
-            </p>
+            <h3>1. Information We Collect</h3>
+            <p>We collect various types of information to provide and improve our services:</p>
             <ul>
-              <li>You are at least 18 years of age</li>
-              <li>You are legally able to enter into a binding contract</li>
-              <li>You are not prohibited by law from using the Service</li>
-              <li>You have not previously been banned from the Service</li>
+              <li><strong>Cookies and Tracking Technologies:</strong> We use cookies, web beacons, and similar technologies to collect information about your activity within the app.</li>
+              <li><strong>Usage Data:</strong> Information on how you use our app, including interaction data, logs, and analytics.</li>
+              <li><strong>Location Data:</strong> If you enable location services, we may collect information about your precise location to enhance user matching.</li>
+              <li><strong>Profile Information:</strong> Details you choose to include in your profile, such as photos, interests, and preferences.</li>
+              <li><strong>Personal Information:</strong> This includes your name, email address, phone number, date of birth, and any other information you provide when creating an account.</li>
             </ul>
 
-            <h2>4. User Account and Profile</h2>
-            <p>
-              To use certain features of the Service, you must register for an account. You agree to:
-            </p>
+            <h3>2. How We Use Your Information</h3>
+            <p>We use your information for various purposes, including:</p>
             <ul>
-              <li>Provide accurate, current, and complete information</li>
-              <li>Maintain and update your information to keep it accurate</li>
-              <li>Maintain the security of your password</li>
-              <li>Be responsible for all activity under your account</li>
-              <li>Not impersonate any person or entity</li>
-              <li>Not use false information or a false identity</li>
+              <li><strong>Security:</strong> To protect against fraudulent activities and enhance user safety.</li>
+              <li><strong>Analytics:</strong> To analyze usage patterns and improve our app.</li>
+              <li><strong>Matching:</strong> To match you with other users based on your preferences and behavior.</li>
+              <li><strong>Communication:</strong> To send you updates, newsletters, marketing communications, and respond to inquiries.</li>
+              <li><strong>Personalization:</strong> To personalize your experience and improve our services based on user preferences.</li>
+              <li><strong>Account Management:</strong> To create and manage your user account.</li>
             </ul>
 
-            <h2>5. User Conduct</h2>
-            <p>You agree not to use the Service to:</p>
+            <h3>3. Sharing Your Information</h3>
+            <p>We do not sell your personal information. However, we may share your information in the following circumstances:</p>
             <ul>
-              <li>Harass, abuse, or harm another person</li>
-              <li>Post false, inaccurate, or misleading information</li>
-              <li>Upload inappropriate photos or content</li>
-              <li>Solicit money or personal information from other users</li>
-              <li>Use the Service for any commercial purposes without our consent</li>
-              <li>Violate any local, state, national, or international law</li>
-              <li>Spam, phish, or engage in fraudulent activity</li>
+              <li><strong>Business Transfers:</strong> In the event of a merger, acquisition, or asset sale, your data may be transferred as part of that transaction.</li>
+              <li><strong>Legal Compliance:</strong> We may disclose your information if required by law or to respond to legal requests.</li>
+              <li><strong>Service Providers:</strong> We may share information with third-party service providers who assist us in operating our app and conducting our business.</li>
+              <li><strong>With Other Users:</strong> Your profile information may be visible to other users.</li>
             </ul>
 
-            <h2>6. Verification</h2>
+            <h3>4. Your Rights and Choices</h3>
+            <p>You have certain rights regarding your personal information:</p>
+            <ul>
+              <li><strong>Location Data:</strong> You can control location services through your device settings.</li>
+              <li><strong>Data Deletion:</strong> You can request the deletion of your account and personal data by contacting us.</li>
+              <li><strong>Opt-Out:</strong> You can opt-out of marketing communications by following the unsubscribe instructions provided in our emails.</li>
+              <li><strong>Access and Update:</strong> You can access and update your information within the app.</li>
+            </ul>
+
+            <h3>5. Data Security</h3>
             <p>
-              RealSingles offers profile verification features. While we strive to verify user identities, we cannot guarantee the accuracy of all user information. Users are responsible for their own safety and should exercise caution when meeting others.
+              We implement reasonable security measures to protect your information from unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the Internet or electronic storage is 100% secure.
             </p>
 
-            <h2>7. Content and Intellectual Property</h2>
+            <h3>6. Data Retention</h3>
             <p>
-              You retain ownership of content you post. By posting content, you grant RealSingles a worldwide, non-exclusive, royalty-free license to use, copy, reproduce, and display your content in connection with the Service.
-            </p>
-            <p>
-              The RealSingles platform, including all text, graphics, user interfaces, trademarks, and logos are owned by RealSingles and protected by copyright and trademark laws.
+              We retain your personal information only for as long as necessary to fulfill the purposes for which it was collected or as required by law.
             </p>
 
-            <h2>8. Rewards Program</h2>
+            <h3>7. International Data Transfers</h3>
             <p>
-              RealSingles offers a rewards program where users can earn points for various activities. Points have no cash value and cannot be transferred or sold. We reserve the right to modify or discontinue the rewards program at any time.
+              If you are accessing our app from outside USA, your information may be transferred to servers located in country and processed there. We comply with applicable data protection laws regarding international transfers.
             </p>
 
-            <h2>9. Termination</h2>
+            <h3>8. Children&apos;s Privacy</h3>
             <p>
-              We reserve the right to suspend or terminate your account at any time for any reason, including violation of these Terms. Upon termination, your right to use the Service will immediately cease.
+              Our app is not intended for children under 18 years of age. We do not knowingly collect personal information from children. If we become aware that we have collected such information, we will take steps to delete it.
             </p>
 
-            <h2>10. Disclaimer of Warranties</h2>
+            <h3>9. Changes to This Privacy Policy</h3>
             <p>
-              The Service is provided &quot;as is&quot; and &quot;as available&quot; without warranties of any kind, either express or implied. We do not warrant that the Service will be uninterrupted, secure, or error-free.
+              We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated effective date. We encourage you to review this policy periodically for any changes.
             </p>
 
-            <h2>11. Limitation of Liability</h2>
+            <h3>10. Contact Us</h3>
             <p>
-              To the maximum extent permitted by law, RealSingles shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the Service.
-            </p>
-
-            <h2>12. Privacy</h2>
-            <p>
-              Your use of the Service is also governed by our{" "}
-              <Link href="/privacy-policy" className="text-pink-600 hover:underline">
-                Privacy Policy
-              </Link>
-              . Please review our Privacy Policy to understand our practices.
-            </p>
-
-            <h2>13. Changes to Terms</h2>
-            <p>
-              We reserve the right to modify these Terms at any time. We will notify users of significant changes via email or through the Service. Your continued use of the Service after changes constitutes acceptance of the modified Terms.
-            </p>
-
-            <h2>14. Contact Us</h2>
-            <p>
-              If you have questions about these Terms, please contact us at{" "}
-              <Link href="/contact" className="text-pink-600 hover:underline">
-                our contact page
-              </Link>
+              If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at{" "}
+              <a href="mailto:support@realsingles.dating" className="text-brand-primary hover:underline">
+                support@realsingles.dating
+              </a>
               .
             </p>
-
-            <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-600 mb-0">
-                <strong>Effective Date:</strong> January 24, 2026
-              </p>
-            </div>
           </div>
         </div>
-      </main>
-      <Footer />
-    </div>
+      </section>
+    </>
   );
 }

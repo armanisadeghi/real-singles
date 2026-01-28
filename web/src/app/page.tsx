@@ -2,119 +2,102 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Shield,
-  Users,
   Video,
   CalendarHeart,
   Star,
-  CheckCircle,
+  Award,
+  Users,
+  UserPlus,
+  GraduationCap,
+  Crown,
+  Search,
+  MonitorPlay,
+  Sparkles,
   ArrowRight,
-  MessageCircle,
-  UserCheck,
 } from "lucide-react";
 import { Header, Footer } from "@/components/layout";
-import { HeroSection, CTASection } from "@/components/landing";
+import { ServiceCard } from "@/components/marketing";
 
-const features = [
+// Services matching WordPress "Discover Our Unique Services" section
+const services = [
   {
-    name: "Verified Profiles",
+    title: "Verification & Video Profile",
     description:
-      "Every member goes through our verification process including video profiles and reference checks.",
-    icon: "/images/icons/Verification-Badges.svg",
-    iconFallback: UserCheck,
+      "To improve safety and combat fake profiles, RealSingles goes over and beyond to verify everyone's identity. We use facial recognition technology, video verification, selfie verification and confirming phone numbers to ensure that users are genuine.",
+    icon: Shield,
+    href: "/membership",
   },
   {
-    name: "Video Profiles",
+    title: "Events",
     description:
-      "See who you're talking to with authentic video introductions. No more catfishing.",
-    icon: "/images/icons/Verification-video-profile.svg",
-    iconFallback: Video,
+      "Are you tired of swiping and reading profiles? Our events offer a fresh alternative to just online searches. We hold events in many markets to provide you an opportunity to meet many quality singles in one night.",
+    icon: CalendarHeart,
+    href: "/events",
   },
   {
-    name: "Real Community",
+    title: "Virtual Speed Dating",
     description:
-      "Join a supportive community of singles who are serious about finding meaningful connections.",
-    icon: "/images/icons/Community.svg",
-    iconFallback: Users,
+      "Are you a busy person that does not have time to keep swiping? Would you like to have a live 3 minute conversation with 5-7 potential matches? Once a week you have an opportunity to participate in a 30 minute live virtual speed dating session.",
+    icon: Video,
+    href: "/membership",
   },
   {
-    name: "Curated Events",
+    title: "Rewards",
     description:
-      "Meet singles in person at our exclusive events, from speed dating to social mixers.",
-    icon: "/images/icons/Events.svg",
-    iconFallback: CalendarHeart,
+      "Real Singles is committed to authenticity and weeding out bad actors. We reward our members as they help us verify accounts and screen out fakes in our effort to build a safe community full of real prospects.",
+    icon: Award,
+    href: "/membership",
   },
   {
-    name: "Virtual Speed Dating",
+    title: "Reviews",
     description:
-      "Can't make it in person? Join our virtual speed dating sessions from anywhere.",
-    icon: "/images/icons/Virtual-speed-date.svg",
-    iconFallback: MessageCircle,
+      "Wouldn't it be great to get a third party verification by someone that knows your match personally or have met them? Our Reviews offer just that. Write a brief review and get reward points!",
+    icon: Star,
+    href: "/membership",
   },
   {
-    name: "Safety First",
+    title: "Wingman",
     description:
-      "Your safety is our priority with built-in safety features and community guidelines.",
-    icon: "/images/icons/First-Date-Safety.svg",
-    iconFallback: Shield,
+      "On RealSingles we welcome non-singles to have a limited access account to play wingman for their friends. A wingman assists others to connect with and attract the best potential match, earning rewards for their efforts.",
+    icon: UserPlus,
+    href: "/community",
+  },
+  {
+    title: "Coaching & Resources",
+    description:
+      "Dating in the current environment is not easy so we are here to help. Whether you are looking for resources to help improve your profile or you would like to work with a dating coach we got you covered.",
+    icon: GraduationCap,
+    href: "/matchmaking",
+  },
+  {
+    title: "VIP Matchmakers",
+    description:
+      "Tired of swiping? We will feature professional matchmakers that you can hire for an additional fee and they will provide you with personalized matches based on your preferences. Stay tuned!",
+    icon: Crown,
+    href: "/matchmaking",
   },
 ];
 
-const howItWorks = [
+// "Date. Intelligently" features
+const intelligentFeatures = [
   {
-    step: "01",
-    title: "Create Your Profile",
+    title: "Unlock our exclusive member base with Search",
     description:
-      "Sign up and build your authentic profile with photos, a video introduction, and details about yourself.",
+      "We heard you. You want more control over what users you see and you want to see more of them. Say hello to our brand new Search feature. Take your search for love into your own hands by exploring our member base and filtering profiles based on your unique tastes.",
+    icon: Search,
   },
   {
-    step: "02",
-    title: "Get Verified",
+    title: "1:1 Video Chat: Your first step before a first date",
     description:
-      "Complete our verification process to show you're a real person serious about dating.",
+      "Convenient, cost effective and a safer way to date. Once you match, no need to swap phone numbers, just use our video calling to talk to each other. Click the video button once you agree on a time and fall in love or just enjoy meeting someone new.",
+    icon: MonitorPlay,
   },
   {
-    step: "03",
-    title: "Discover Matches",
+    title: "Empowerment: Say goodbye to wondering if they look like their profile pictures",
     description:
-      "Browse verified profiles and find compatible matches based on your preferences and interests.",
+      "Real Singles users can now add a 10-second video to their dating profile. Stand out from the rest of the pack by being in full-color and moving, get priority in our matching algorithm and increase your like rate.",
+    icon: Sparkles,
   },
-  {
-    step: "04",
-    title: "Connect & Meet",
-    description:
-      "Start meaningful conversations, attend events, and meet your matches in person.",
-  },
-];
-
-const testimonials = [
-  {
-    content:
-      "I was tired of the superficial dating apps. Real Singles actually focuses on genuine connections. I met my partner at one of their events!",
-    author: "Sarah M.",
-    role: "Engaged after 8 months",
-    rating: 5,
-  },
-  {
-    content:
-      "The video profiles feature is a game changer. You can tell so much about someone's personality before you even message them.",
-    author: "James K.",
-    role: "In a relationship",
-    rating: 5,
-  },
-  {
-    content:
-      "The verification process gave me confidence that I was talking to real people. It's worth the extra step for peace of mind.",
-    author: "Michelle T.",
-    role: "Dating for 6 months",
-    rating: 5,
-  },
-];
-
-const stats = [
-  { value: "50K+", label: "Active Members" },
-  { value: "10K+", label: "Successful Matches" },
-  { value: "500+", label: "Events Hosted" },
-  { value: "98%", label: "Verified Profiles" },
 ];
 
 export default function HomePage() {
@@ -122,202 +105,165 @@ export default function HomePage() {
     <div className="min-h-dvh flex flex-col">
       <Header />
       <main className="flex-1 pt-[var(--header-height)]">
-        {/* Hero Section - lazy-loads auth state client-side */}
-        <HeroSection />
-
-        {/* Stats Section */}
-        <section className="bg-white border-b border-border">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-              {stats.map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <p className="text-3xl sm:text-4xl font-bold text-brand-primary">
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
-                </div>
-              ))}
-            </div>
+        {/* Hero Section */}
+        <section className="relative bg-gradient-to-br from-[#F6EDE1] to-white py-20 sm:py-28 overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <Image
+              src="/images/hero/couple-beach.jpg"
+              alt=""
+              fill
+              className="object-cover"
+              priority
+            />
           </div>
-        </section>
-
-        {/* Features Section */}
-        <section className="bg-muted py-20 sm:py-28">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-                Why Choose <span className="text-brand-primary">Real Singles</span>?
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                We&apos;re not just another dating app. We&apos;re a community built on authenticity, safety, and real human connections.
-              </p>
-            </div>
-
-            <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {features.map((feature) => (
-                <div
-                  key={feature.name}
-                  className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="w-14 h-14 rounded-xl bg-brand-primary/10 flex items-center justify-center mb-6">
-                    <Image
-                      src={feature.icon}
-                      alt=""
-                      width={32}
-                      height={32}
-                      className="text-brand-primary"
-                    />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground">
-                    {feature.name}
-                  </h3>
-                  <p className="mt-3 text-muted-foreground leading-relaxed">
-                    {feature.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* How It Works Section */}
-        <section className="bg-white py-20 sm:py-28">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-                How It <span className="text-brand-primary">Works</span>
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                Getting started is easy. Here&apos;s how you can find your real connection in four simple steps.
-              </p>
-            </div>
-
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {howItWorks.map((step, index) => (
-                <div key={step.step} className="relative">
-                  {index < howItWorks.length - 1 && (
-                    <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-brand-primary to-transparent -translate-x-4" />
-                  )}
-                  <div className="text-5xl font-bold text-brand-primary/20 mb-4">
-                    {step.step}
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground">
-                    {step.title}
-                  </h3>
-                  <p className="mt-3 text-muted-foreground">
-                    {step.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        <section className="bg-[#F6EDE1] py-20 sm:py-28">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-                Real <span className="text-brand-primary">Success Stories</span>
-              </h2>
-              <p className="mt-4 text-lg text-gray-600">
-                Thousands of singles have found meaningful connections through Real Singles.
-              </p>
-            </div>
-
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-              {testimonials.map((testimonial, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl p-8 shadow-sm"
-                >
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-500" fill="currentColor" />
-                    ))}
-                  </div>
-                  <p className="text-gray-600 leading-relaxed">
-                    &quot;{testimonial.content}&quot;
-                  </p>
-                  <div className="mt-6 flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full border-4 border-brand-primary bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center">
-                      <span className="text-white font-semibold">
-                        {testimonial.author.charAt(0)}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground">{testimonial.author}</p>
-                      <p className="text-sm text-gray-500">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Events Preview Section */}
-        <section className="bg-white py-20 sm:py-28">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-                  Meet Singles at <span className="text-brand-primary">Exclusive Events</span>
-                </h2>
-                <p className="mt-4 text-lg text-muted-foreground">
-                  Skip the endless swiping. Our curated events bring singles together in real life. From speed dating nights to social mixers, find your connection in person.
+              <div className="text-center lg:text-left">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+                  Find Your <span className="text-brand-primary">True Connection</span>
+                </h1>
+                <p className="mt-6 text-xl text-gray-600 max-w-xl mx-auto lg:mx-0">
+                  Join Real Singles and discover genuine relationships in a supportive community of like-minded individuals.
                 </p>
-                
-                <ul className="mt-8 space-y-4">
-                  {[
-                    "Speed Dating Events",
-                    "Social Mixers & Parties",
-                    "Interest-Based Meetups",
-                    "Virtual Speed Dating",
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3">
-                      <CheckCircle className="w-5 h-5 text-brand-primary flex-shrink-0" />
-                      <span className="text-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <Link
-                  href="/our-events"
-                  className="mt-8 inline-flex items-center gap-2 text-brand-primary font-semibold hover:underline"
-                >
-                  View Upcoming Events
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+                <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-brand-primary-dark transition-all hover:scale-105"
+                  >
+                    Start Your Journey
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                </div>
               </div>
               
-              <div className="relative">
-                <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
+              <div className="relative hidden lg:block">
+                <div className="relative aspect-[4/5] max-w-md mx-auto">
                   <Image
-                    src="/images/events-party.jpg"
-                    alt="Singles event"
+                    src="/images/app-mockup.png"
+                    alt="Real Singles App"
                     fill
-                    className="object-cover"
+                    className="object-contain"
+                    priority
                   />
-                </div>
-                <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-lg p-4 max-w-xs">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-brand-primary/10 flex items-center justify-center">
-                      <CalendarHeart className="w-6 h-6 text-brand-primary" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground">Next Event</p>
-                      <p className="text-sm text-muted-foreground">Saturday Speed Dating</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* CTA Section - lazy-loads auth state client-side */}
-        <CTASection />
+        {/* Discover Our Unique Services Section */}
+        <section className="bg-white py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-2xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+                Discover Our <span className="text-brand-primary">Unique Services</span>
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Explore a variety of offerings designed to help you find love and build relationships within our supportive community.
+              </p>
+            </div>
+
+            <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {services.map((service) => (
+                <ServiceCard
+                  key={service.title}
+                  title={service.title}
+                  description={service.description}
+                  IconComponent={service.icon}
+                  href={service.href}
+                  variant="compact"
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Date. Intelligently Section */}
+        <section className="bg-muted py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+                Date. <span className="text-brand-primary">Intelligently</span>
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                For those fatigued with the endless swiping, RealSingles offers members a curated &quot;Batch&quot; of potentials each day, rather than an unlimited stream of profiles. Combined with our Search feature, powerful matching algorithm and 1:1 video chatting, we like to think of ourselves as the most efficient dating platform on the market.
+              </p>
+            </div>
+
+            <div className="mt-16 space-y-12">
+              {intelligentFeatures.map((feature, index) => (
+                <div
+                  key={feature.title}
+                  className={`flex flex-col ${
+                    index % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"
+                  } gap-8 lg:gap-16 items-center`}
+                >
+                  <div className="flex-1">
+                    <div className="w-16 h-16 rounded-2xl bg-brand-primary/10 flex items-center justify-center mb-6">
+                      <feature.icon className="w-8 h-8 text-brand-primary" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-foreground">
+                      {feature.title}
+                    </h3>
+                    <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </div>
+                  <div className="flex-1">
+                    <div className="aspect-video rounded-2xl bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 flex items-center justify-center">
+                      <feature.icon className="w-24 h-24 text-brand-primary/30" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Text Me the App CTA Section */}
+        <section className="bg-gradient-to-r from-brand-primary to-brand-primary-dark py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">
+              ARE YOU IN?
+            </h2>
+            <p className="mt-4 text-xl text-white/90 max-w-2xl mx-auto">
+              We know your time is valuable, so tell us your preferences and we&apos;ll handle the scouting for you. Get the app now.
+            </p>
+            
+            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="https://apps.apple.com/app/real-singles/id6473915498"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-3 bg-white text-foreground hover:bg-gray-100 transition-colors rounded-xl px-6 py-4"
+              >
+                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                </svg>
+                <div className="text-left">
+                  <p className="text-xs text-gray-500">Download on the</p>
+                  <p className="text-base font-semibold">App Store</p>
+                </div>
+              </Link>
+              
+              <Link
+                href="https://play.google.com/store/apps/details?id=com.realsingles.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-3 bg-white text-foreground hover:bg-gray-100 transition-colors rounded-xl px-6 py-4"
+              >
+                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 010 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z"/>
+                </svg>
+                <div className="text-left">
+                  <p className="text-xs text-gray-500">Get it on</p>
+                  <p className="text-base font-semibold">Google Play</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
       <Footer />
     </div>

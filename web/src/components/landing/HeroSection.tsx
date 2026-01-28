@@ -168,7 +168,7 @@ export function HeroSection() {
                   Start Your Journey
                 </Link>
                 <Link
-                  href="/features"
+                  href="/membership"
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-secondary px-8 py-4 text-lg font-semibold text-white hover:bg-brand-secondary-dark transition-colors"
                 >
                   Learn More

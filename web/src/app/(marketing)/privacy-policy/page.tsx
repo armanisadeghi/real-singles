@@ -1,148 +1,106 @@
-import Link from "next/link";
-import { ArrowLeft, Shield } from "lucide-react";
-import { Header, Footer } from "@/components/layout";
+import { PageHero } from "@/components/marketing";
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-dvh flex flex-col">
-      <Header />
-      <main className="flex-1 pt-[var(--header-height)] bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Header */}
-          <div className="mb-8">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Link>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-4xl font-bold text-gray-900">Privacy Policy</h1>
-            </div>
-            <p className="text-gray-600">Last updated: January 24, 2026</p>
-          </div>
+    <>
+      {/* Hero Section */}
+      <PageHero
+        title="Privacy Policy"
+        backgroundColor="dark"
+      />
 
-          {/* Content */}
-          <div className="bg-white rounded-xl shadow-sm p-8 prose prose-gray max-w-none">
-            <h2>1. Information We Collect</h2>
+      {/* Privacy Policy Content */}
+      <section className="bg-white py-20 sm:py-28">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="prose prose-lg max-w-none">
+            <h2 className="text-3xl font-bold text-foreground">
+              THE REAL SINGLES PRIVACY POLICY
+            </h2>
             
-            <h3>Personal Information</h3>
-            <p>When you create an account, we collect:</p>
+            <p className="text-brand-primary font-semibold">
+              Effective Date: September 26, 2024
+            </p>
+
+            <h3>Introduction</h3>
+            <p>
+              Welcome to &quot;Real Singles&quot;. We value your privacy and are committed to protecting your personal information. This Privacy Policy outlines how we collect, use, share, and protect your data when you use our app. By using Real Singles, you agree to the terms of this policy.
+            </p>
+
+            <h3>1. Information We Collect</h3>
+            <p>We collect various types of information to provide and improve our services:</p>
             <ul>
-              <li>Name, email address, phone number</li>
-              <li>Date of birth, gender, location</li>
-              <li>Profile photos and videos</li>
-              <li>Physical characteristics (height, body type)</li>
-              <li>Lifestyle preferences and interests</li>
-              <li>Verification documents (if you choose to verify)</li>
+              <li><strong>Cookies and Tracking Technologies:</strong> We use cookies, web beacons, and similar technologies to collect information about your activity within the app.</li>
+              <li><strong>Usage Data:</strong> Information on how you use our app, including interaction data, logs, and analytics.</li>
+              <li><strong>Location Data:</strong> If you enable location services, we may collect information about your precise location to enhance user matching.</li>
+              <li><strong>Profile Information:</strong> Details you choose to include in your profile, such as photos, interests, and preferences.</li>
+              <li><strong>Personal Information:</strong> This includes your name, email address, phone number, date of birth, and any other information you provide when creating an account.</li>
             </ul>
 
-            <h3>Usage Information</h3>
-            <p>We automatically collect:</p>
+            <h3>2. How We Use Your Information</h3>
+            <p>We use your information for various purposes, including:</p>
             <ul>
-              <li>Device information and IP address</li>
-              <li>Browser type and operating system</li>
-              <li>Pages visited and features used</li>
-              <li>Interactions with other users (matches, messages, likes)</li>
-              <li>Location data (if you grant permission)</li>
+              <li><strong>Security:</strong> To protect against fraudulent activities and enhance user safety.</li>
+              <li><strong>Analytics:</strong> To analyze usage patterns and improve our app.</li>
+              <li><strong>Matching:</strong> To match you with other users based on your preferences and behavior.</li>
+              <li><strong>Communication:</strong> To send you updates, newsletters, marketing communications, and respond to inquiries.</li>
+              <li><strong>Personalization:</strong> To personalize your experience and improve our services based on user preferences.</li>
+              <li><strong>Account Management:</strong> To create and manage your user account.</li>
             </ul>
 
-            <h2>2. How We Use Your Information</h2>
-            <p>We use your information to:</p>
+            <h3>3. Sharing Your Information</h3>
+            <p>We do not sell your personal information. However, we may share your information in the following circumstances:</p>
             <ul>
-              <li>Provide and improve the Service</li>
-              <li>Match you with compatible users</li>
-              <li>Facilitate communication between users</li>
-              <li>Send you notifications and updates</li>
-              <li>Ensure safety and prevent fraud</li>
-              <li>Analyze usage patterns and improve features</li>
-              <li>Comply with legal obligations</li>
+              <li><strong>Business Transfers:</strong> In the event of a merger, acquisition, or asset sale, your data may be transferred as part of that transaction.</li>
+              <li><strong>Legal Compliance:</strong> We may disclose your information if required by law or to respond to legal requests.</li>
+              <li><strong>Service Providers:</strong> We may share information with third-party service providers who assist us in operating our app and conducting our business.</li>
+              <li><strong>With Other Users:</strong> Your profile information may be visible to other users.</li>
             </ul>
 
-            <h2>3. Information Sharing</h2>
-            
-            <h3>With Other Users</h3>
-            <p>
-              Your profile information, photos, and activity are visible to other users of the Service based on your privacy settings. You can control visibility in your settings.
-            </p>
-
-            <h3>With Third Parties</h3>
-            <p>We may share information with:</p>
+            <h3>4. Your Rights and Choices</h3>
+            <p>You have certain rights regarding your personal information:</p>
             <ul>
-              <li><strong>Service Providers:</strong> Companies that help us operate the Service (hosting, analytics, payment processing)</li>
-              <li><strong>Legal Requirements:</strong> When required by law or to protect rights and safety</li>
-              <li><strong>Business Transfers:</strong> In connection with a merger, acquisition, or sale of assets</li>
+              <li><strong>Location Data:</strong> You can control location services through your device settings.</li>
+              <li><strong>Data Deletion:</strong> You can request the deletion of your account and personal data by contacting us.</li>
+              <li><strong>Opt-Out:</strong> You can opt-out of marketing communications by following the unsubscribe instructions provided in our emails.</li>
+              <li><strong>Access and Update:</strong> You can access and update your information within the app.</li>
             </ul>
 
-            <p>We do not sell your personal information to third parties.</p>
-
-            <h2>4. Data Security</h2>
+            <h3>5. Data Security</h3>
             <p>
-              We implement appropriate technical and organizational measures to protect your data. However, no internet transmission is completely secure, and we cannot guarantee absolute security.
+              We implement reasonable security measures to protect your information from unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the Internet or electronic storage is 100% secure.
             </p>
 
-            <h2>5. Your Rights and Choices</h2>
-            <p>You have the right to:</p>
-            <ul>
-              <li>Access and download your data</li>
-              <li>Correct inaccurate information</li>
-              <li>Delete your account and data</li>
-              <li>Control privacy settings and visibility</li>
-              <li>Opt-out of marketing communications</li>
-              <li>Block or report other users</li>
-            </ul>
-
-            <h2>6. Data Retention</h2>
+            <h3>6. Data Retention</h3>
             <p>
-              We retain your information for as long as your account is active or as needed to provide services. If you delete your account, we will delete or anonymize your data within 30 days, except where we must retain data for legal purposes.
+              We retain your personal information only for as long as necessary to fulfill the purposes for which it was collected or as required by law.
             </p>
 
-            <h2>7. Children's Privacy</h2>
+            <h3>7. International Data Transfers</h3>
             <p>
-              The Service is not intended for users under 18 years of age. We do not knowingly collect information from children. If we discover we have collected information from a child, we will delete it immediately.
+              If you are accessing our app from outside USA, your information may be transferred to servers located in country and processed there. We comply with applicable data protection laws regarding international transfers.
             </p>
 
-            <h2>8. International Users</h2>
+            <h3>8. Children&apos;s Privacy</h3>
             <p>
-              If you access the Service from outside the United States, your information may be transferred to and processed in the United States. By using the Service, you consent to such transfer and processing.
+              Our app is not intended for children under 18 years of age. We do not knowingly collect personal information from children. If we become aware that we have collected such information, we will take steps to delete it.
             </p>
 
-            <h2>9. Cookies and Tracking</h2>
+            <h3>9. Changes to This Privacy Policy</h3>
             <p>
-              We use cookies and similar technologies to enhance your experience, remember preferences, and analyze usage. You can control cookies through your browser settings.
+              We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated effective date. We encourage you to review this policy periodically for any changes.
             </p>
 
-            <h2>10. Changes to Privacy Policy</h2>
+            <h3>10. Contact Us</h3>
             <p>
-              We may update this Privacy Policy from time to time. We will notify you of significant changes via email or through the Service. Continued use after changes constitutes acceptance.
+              If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at{" "}
+              <a href="mailto:support@realsingles.dating" className="text-brand-primary hover:underline">
+                support@realsingles.dating
+              </a>
+              .
             </p>
-
-            <h2>11. Contact Us</h2>
-            <p>
-              For questions about this Privacy Policy or our data practices, contact us at{" "}
-              <Link href="/contact" className="text-pink-600 hover:underline">
-                our contact page
-              </Link>
-              {" "}or email privacy@realsingles.com.
-            </p>
-
-            <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-800 mb-0">
-                <strong>Your Privacy Matters:</strong> We are committed to protecting your personal information and giving you control over how it's used. Review your{" "}
-                <Link href="/settings/privacy" className="text-blue-600 hover:underline font-semibold">
-                  privacy settings
-                </Link>
-                {" "}anytime.
-              </p>
-            </div>
           </div>
         </div>
-      </main>
-      <Footer />
-    </div>
+      </section>
+    </>
   );
 }
