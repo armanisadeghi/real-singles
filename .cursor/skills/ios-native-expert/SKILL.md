@@ -1,12 +1,53 @@
+---
+name: ios-native-expert
+description: Ensures iOS implementations use truly native components, iOS 26 Liquid Glass design, SF Symbols, and proper light/dark mode support with PlatformColor. Use when implementing iOS-specific features, reviewing iOS code for native feel, fixing light/dark mode issues, theming, or when the user mentions iOS native, Liquid Glass, SF Symbols, dark mode, PlatformColor, DynamicColorIOS, or color adaptation. NEVER modifies web code or Android implementations.
+---
+
 # iOS Native Expert
 
-**Your job:** Make iOS implementations authentically native using iOS 26 design patterns, Liquid Glass, and Human Interface Guidelines.
+**Your job:** Make iOS implementations authentically native using iOS 26 design patterns, Liquid Glass, SF Symbols, and proper light/dark mode support with `PlatformColor`.
 
 ---
 
-## Rules You Must Follow
+## CRITICAL: Pattern Violations to Fix
 
-### Scope: iOS-ONLY
+**Before implementing anything, check for these violations and FIX THEM:**
+
+### 1. Hardcoded Hex Colors (WRONG)
+
+```tsx
+// ❌ VIOLATION - hardcoded colors don't adapt
+backgroundColor: '#FFFFFF'
+color: isDark ? '#FFFFFF' : '#000000'
+background: isDark ? '#000000' : BRAND_BACKGROUND
+
+// ✅ CORRECT - use PlatformColor
+backgroundColor: Platform.OS === 'ios' ? PlatformColor('systemBackground') : colors.background
+color: Platform.OS === 'ios' ? PlatformColor('label') : colors.onSurface
+```
+
+### 2. ThemeContext iOS Colors (KNOWN VIOLATION)
+
+**`mobile/context/ThemeContext.tsx`** has hardcoded iOS colors. The `createIOSColors()` function returns hex strings instead of `PlatformColor`. When working with iOS theming:
+
+- Do NOT follow the `ThemeContext` pattern for system colors
+- Use `PlatformColor` directly for backgrounds, labels, separators
+- Use `DynamicColorIOS` only for custom brand colors
+
+### 3. Old BlurView Instead of GlassView
+
+```tsx
+// ❌ OUTDATED for floating elements
+<BlurView intensity={80} tint="light" />
+
+// ✅ MODERN (iOS 26+)
+import { GlassView, isGlassEffectAPIAvailable } from 'expo-glass-effect';
+{isGlassEffectAPIAvailable() ? <GlassView /> : <BlurView ... />}
+```
+
+---
+
+## Scope: iOS-ONLY
 
 | Action | Allowed |
 |--------|---------|
@@ -15,37 +56,83 @@
 | Add iOS-only features | ✅ Yes |
 | Modify `/web` in any way | ❌ NEVER |
 | Change shared logic that affects Android | ❌ NEVER |
-| Remove Android implementations | ❌ NEVER |
-
-### When Unsure: Check Documentation First
-
-**ALWAYS check the official Expo docs before implementing.** These APIs are actively evolving.
-
-| Package | Documentation URL |
-|---------|-------------------|
-| expo-glass-effect | https://docs.expo.dev/versions/latest/sdk/glass-effect/ |
-| expo-symbols | https://docs.expo.dev/versions/latest/sdk/symbols/ |
-| expo-haptics | https://docs.expo.dev/versions/latest/sdk/haptics/ |
-| expo-blur | https://docs.expo.dev/versions/latest/sdk/blur-view/ |
-| expo-calendar | https://docs.expo.dev/versions/latest/sdk/calendar/ |
-| Native Tabs | https://docs.expo.dev/versions/latest/sdk/router-native-tabs/ |
-| Native Tabs Guide | https://docs.expo.dev/router/advanced/native-tabs/ |
-
-**Quick Reference:** See `ios-components-reference.md` in this skill folder for verified API details.
 
 ---
 
-## Liquid Glass (iOS 26)
+## Color Implementation (MANDATORY)
 
-Apple's translucent design language that reflects/refracts surroundings. **Use for navigation and floating elements only.**
+### Priority 1: PlatformColor for System Colors
 
-> `GlassView` is only available on iOS 26+. Falls back to regular `View` on unsupported platforms.
+**ALWAYS use PlatformColor for iOS system colors.** They automatically adapt to light/dark mode, high contrast, and Liquid Glass.
 
-### Where to Apply
+```tsx
+import { Platform, PlatformColor } from 'react-native';
 
-| ✅ Use Liquid Glass | ❌ Never Use |
-|---------------------|--------------|
-| Tab bars (automatic) | Lists/tables |
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: Platform.OS === 'ios' 
+      ? PlatformColor('systemBackground') 
+      : colors.background,
+  },
+  text: {
+    color: Platform.OS === 'ios' 
+      ? PlatformColor('label') 
+      : colors.onSurface,
+  },
+});
+```
+
+**Essential PlatformColor names:**
+
+| Category | Names |
+|----------|-------|
+| Backgrounds | `systemBackground`, `secondarySystemBackground`, `tertiarySystemBackground`, `systemGroupedBackground` |
+| Labels | `label`, `secondaryLabel`, `tertiaryLabel`, `quaternaryLabel`, `placeholderText` |
+| Separators | `separator`, `opaqueSeparator` |
+| System Tints | `systemBlue`, `systemRed`, `systemGreen`, `systemOrange`, `systemPink`, `systemPurple`, `systemYellow` |
+| Grays | `systemGray` through `systemGray6` |
+
+### Priority 2: DynamicColorIOS for Brand Colors
+
+**Only use DynamicColorIOS for custom brand colors** not in the system palette:
+
+```tsx
+import { DynamicColorIOS, Platform } from 'react-native';
+
+const brandPrimary = Platform.OS === 'ios' 
+  ? DynamicColorIOS({
+      light: '#B06D1E',
+      dark: '#FFBA70',
+      highContrastLight: '#8A5516',  // Optional
+      highContrastDark: '#FFD4A3',   // Optional
+    })
+  : isDark ? '#FFBA70' : '#B06D1E';
+```
+
+### Hardcoded Color Migration
+
+| Hardcoded | Replace With |
+|-----------|--------------|
+| `#FFFFFF`, `white` | `PlatformColor('systemBackground')` |
+| `#F2F2F7`, `#F5F5F5` | `PlatformColor('secondarySystemBackground')` |
+| `#000000`, `#333333` | `PlatformColor('label')` |
+| `#666666`, `#8E8E93` | `PlatformColor('secondaryLabel')` |
+| `#E5E5EA`, `#D1D1D6` | `PlatformColor('separator')` |
+| `#007AFF` | `PlatformColor('systemBlue')` |
+| `#FF3B30` | `PlatformColor('systemRed')` |
+| `#34C759` | `PlatformColor('systemGreen')` |
+
+---
+
+## Liquid Glass (iOS 26) - PROACTIVELY MODERNIZE
+
+**iOS 26 apps SHOULD use Liquid Glass for floating UI elements.** When working on iOS UI, proactively upgrade to Liquid Glass where appropriate.
+
+### Where to Apply Liquid Glass
+
+| ✅ Use | ❌ Never |
+|--------|----------|
+| Tab bars (automatic) | List cells/tables |
 | Toolbars | Card backgrounds |
 | Navigation bars (automatic) | Page content |
 | Floating action buttons | Media content |
@@ -57,40 +144,142 @@ Apple's translucent design language that reflects/refracts surroundings. **Use f
 import { GlassView, GlassContainer, isLiquidGlassAvailable, isGlassEffectAPIAvailable } from 'expo-glass-effect';
 import { AccessibilityInfo, Platform } from 'react-native';
 
-// REQUIRED: Full availability check (prevents crashes on iOS 26 betas)
+// REQUIRED: Full availability check
 const hasLiquidGlass = Platform.OS === 'ios' && isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
 
-// Respect user accessibility preferences
+// Respect accessibility
 const [reduceTransparency, setReduceTransparency] = useState(false);
 useEffect(() => {
   AccessibilityInfo.isReduceTransparencyEnabled().then(setReduceTransparency);
+  const sub = AccessibilityInfo.addEventListener('reduceTransparencyChanged', setReduceTransparency);
+  return () => sub.remove();
 }, []);
+
 const showGlass = hasLiquidGlass && !reduceTransparency;
+
+// Usage
+{showGlass ? (
+  <GlassView style={styles.floating} glassEffectStyle="regular" />
+) : (
+  <View style={[styles.floating, { backgroundColor: PlatformColor('secondarySystemBackground') }]} />
+)}
 ```
 
-### GlassView Props
+### GlassView Critical Rules
 
-| Prop | Type | Default |
-|------|------|---------|
-| `glassEffectStyle` | `'regular'` \| `'clear'` | `'regular'` |
-| `isInteractive` | `boolean` | `false` |
-| `tintColor` | `string` | - |
+1. **`isInteractive` is immutable** — set once on mount, use `key` to remount
+2. **NEVER `opacity < 1`** on GlassView or parent views (causes rendering bugs)
+3. **ALWAYS check `isGlassEffectAPIAvailable()`** — prevents crashes on some iOS 26 betas
 
-### Known Issues (CRITICAL)
+---
 
-1. **`isInteractive` is immutable** — set once on mount, remount with different `key` to change
-2. **Never `opacity < 1`** on GlassView or parents (causes rendering bugs per Apple docs)
-3. **Always use `isGlassEffectAPIAvailable()`** — prevents crashes on some iOS 26 betas
+## SF Symbols (expo-symbols)
 
-### System Colors
-
-**Always use `PlatformColor`** — adapts to light/dark mode and Liquid Glass:
+**All iOS icons MUST use SF Symbols.** Never use icon fonts or PNGs on iOS.
 
 ```tsx
-backgroundColor: Platform.OS === 'ios' ? PlatformColor('systemBackground') : '#FFFFFF'
+import { SymbolView } from 'expo-symbols';
+
+<SymbolView
+  name="heart.fill"
+  style={{ width: 24, height: 24 }}
+  tintColor={PlatformColor('systemPink')}  // Use PlatformColor!
+  type="hierarchical"
+  fallback={<MaterialIcon name="favorite" />}
+/>
 ```
 
-Common: `systemBackground`, `secondarySystemBackground`, `label`, `secondaryLabel`, `systemBlue`, `systemRed`, `systemGreen`, `systemPink`, `separator`
+### Symbol Types
+
+| Type | Use For |
+|------|---------|
+| `monochrome` | Single color icons |
+| `hierarchical` | Depth with one color |
+| `palette` | Multiple explicit colors |
+| `multicolor` | Built-in multicolor |
+
+### Symbol Animations
+
+```tsx
+<SymbolView
+  name="heart.fill"
+  animationSpec={{ 
+    effect: { type: 'bounce', wholeSymbol: true }, 
+    repeating: false 
+  }}
+/>
+```
+
+---
+
+## Native Tabs (expo-router/unstable-native-tabs)
+
+Native tabs automatically get Liquid Glass on iOS 26. Use `DynamicColorIOS` for tab colors:
+
+```tsx
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { DynamicColorIOS } from 'react-native';
+
+<NativeTabs
+  tintColor={DynamicColorIOS({ dark: 'white', light: 'black' })}
+  labelStyle={{ color: DynamicColorIOS({ dark: 'white', light: 'black' }) }}
+>
+  <NativeTabs.Trigger name="index">
+    <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+    <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
+  </NativeTabs.Trigger>
+</NativeTabs>
+```
+
+---
+
+## Haptic Feedback (expo-haptics)
+
+**Add haptics to all interactive elements:**
+
+| Action | Code |
+|--------|------|
+| Toggle/select | `Haptics.selectionAsync()` |
+| Button tap | `Haptics.impactAsync(ImpactFeedbackStyle.Light)` |
+| Card press | `Haptics.impactAsync(ImpactFeedbackStyle.Medium)` |
+| Success | `Haptics.notificationAsync(NotificationFeedbackType.Success)` |
+| Error | `Haptics.notificationAsync(NotificationFeedbackType.Error)` |
+
+---
+
+## Accessibility Requirements
+
+### Reduce Transparency
+
+Fall back from blur/glass effects:
+
+```tsx
+const [reduceTransparency, setReduceTransparency] = useState(false);
+
+useEffect(() => {
+  AccessibilityInfo.isReduceTransparencyEnabled().then(setReduceTransparency);
+  const sub = AccessibilityInfo.addEventListener('reduceTransparencyChanged', setReduceTransparency);
+  return () => sub.remove();
+}, []);
+
+// Use solid background when reduceTransparency is true
+```
+
+### Reduce Motion
+
+Disable animations:
+
+```tsx
+const [reduceMotion, setReduceMotion] = useState(false);
+
+useEffect(() => {
+  AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
+  const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
+  return () => sub.remove();
+}, []);
+
+const animationDuration = reduceMotion ? 0 : 300;
+```
 
 ---
 
@@ -107,240 +296,7 @@ Common: `systemBackground`, `secondarySystemBackground`, `label`, `secondaryLabe
 | Date picker | `@react-native-community/datetimepicker` | Custom pickers |
 | Haptics | `expo-haptics` | Vibration API |
 | Blur | `expo-blur` | Custom opacity overlays |
-| Gestures | `react-native-gesture-handler` | PanResponder |
 | Animations | `react-native-reanimated` | Animated API |
-
----
-
-## SF Symbols (expo-symbols)
-
-> **Note:** This library is in beta and subject to breaking changes.
-
-**All iOS icons must use SF Symbols.** Never use icon fonts or PNGs on iOS.
-
-### Basic Usage
-
-```tsx
-<SymbolView
-  name="heart.fill"
-  style={{ width: 24, height: 24 }}
-  tintColor="systemRed"
-  type="hierarchical" // 'monochrome' | 'hierarchical' | 'palette' | 'multicolor'
-/>
-```
-
-### Tab Bar Icons (Native Tabs)
-
-```tsx
-// SDK 55+ syntax
-<NativeTabs.Trigger.Icon sf={{ default: 'heart', selected: 'heart.fill' }} md="home" />
-```
-
-### Symbol Animations
-
-| Type | Use For | Example |
-|------|---------|---------|
-| `bounce` | Attention/feedback | Like button tap |
-| `pulse` | Loading/progress | Audio levels |
-| `scale` | Emphasis | Selection |
-
-```tsx
-<SymbolView
-  name="heart.fill"
-  animationSpec={{ 
-    effect: { type: 'bounce', wholeSymbol: true }, 
-    repeating: false 
-  }}
-/>
-```
-
-**Variable animations** for progress:
-```tsx
-variableAnimationSpec: { cumulative: true, dimInactiveLayers: true }
-```
-
-**Find symbols:** https://developer.apple.com/sf-symbols/
-
----
-
-## Haptic Feedback (expo-haptics)
-
-**Add haptics to all interactive elements:**
-
-| Action | Code |
-|--------|------|
-| Toggle/select | `Haptics.selectionAsync()` |
-| Button tap | `Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)` |
-| Card press | `Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)` |
-| Success | `Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)` |
-| Error | `Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)` |
-
-### ImpactFeedbackStyle Options
-
-`Light` | `Medium` | `Heavy` | `Rigid` | `Soft`
-
----
-
-## Native Tabs (expo-router/unstable-native-tabs)
-
-> Native tabs is alpha (SDK 54+). API subject to change.
-
-### Basic Example (SDK 55+)
-
-```tsx
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
-
-export default function TabLayout() {
-  return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
-      </NativeTabs.Trigger>
-    </NativeTabs>
-  );
-}
-```
-
-### Dynamic Colors for Liquid Glass
-
-Liquid Glass changes colors based on background. Use `DynamicColorIOS`:
-
-```tsx
-import { DynamicColorIOS } from 'react-native';
-
-<NativeTabs
-  labelStyle={{ color: DynamicColorIOS({ dark: 'white', light: 'black' }) }}
-  tintColor={DynamicColorIOS({ dark: 'white', light: 'black' })}
->
-```
-
-### iOS 26 Features
-
-| Feature | Prop/Usage |
-|---------|------------|
-| Search tab | `role="search"` on Trigger |
-| Minimize on scroll | `minimizeBehavior="onScrollDown"` |
-| Prevent transparency | `disableTransparentOnScrollEdge={true}` |
-
-### Known Limitations
-
-- Max 5 tabs on Android
-- Cannot measure tab bar height
-- No nested native tabs
-- FlatList: scroll-to-top not supported
-
----
-
-## BlurView (expo-blur)
-
-### Known Issue (CRITICAL)
-
-BlurView must be rendered AFTER dynamic content:
-
-```tsx
-// ✅ Correct
-<View>
-  <FlatList />
-  <BlurView />
-</View>
-
-// ❌ BlurView won't update
-<View>
-  <BlurView />
-  <FlatList />
-</View>
-```
-
----
-
-## Native Alerts & Confirmations
-
-**iOS alerts must be clean, professional, and informative.** Never use emojis or casual language.
-
-### Alert Style Guidelines
-
-| ✅ Native iOS | ❌ Avoid |
-|---------------|----------|
-| Clean, concise text | Emojis in alerts |
-| Specific details (what, when, where) | Generic "Success!" messages |
-| Actionable button labels | Vague buttons like "OK" alone |
-| Title describes the action completed | Titles like "Done" or "Success" |
-
-### Button Order (iOS Convention)
-
-- **Cancel/dismiss**: LEFT (`style: "cancel"`)
-- **Primary action**: RIGHT (`style: "default"`)
-- **Destructive action**: RIGHT (`style: "destructive"`)
-
-### Example
-
-```tsx
-Alert.alert(
-  `"${eventName}" Added`,
-  `${formattedDate} at ${formattedTime}\n${location}`,
-  [
-    { text: "OK", style: "cancel" },
-    { text: "View in Calendar", style: "default", onPress: () => Linking.openURL("calshow:") },
-  ]
-);
-```
-
----
-
-## iOS Permissions (CRITICAL)
-
-**Any feature requiring iOS permissions MUST have Info.plist entries.** Missing entries cause instant crashes.
-
-### Info.plist Location
-
-`mobile/ios/RealSingles/Info.plist` — This is a **bare workflow** project, so Info.plist must be manually updated.
-
-### Required Permission Keys
-
-**iOS 17+ introduced granular permission keys.** Include BOTH legacy and new keys for compatibility.
-
-| Feature | Required Keys |
-|---------|---------------|
-| **Calendar** | `NSCalendarsUsageDescription`, `NSCalendarsFullAccessUsageDescription`, `NSCalendarsWriteOnlyAccessUsageDescription` |
-| **Reminders** | `NSRemindersUsageDescription`, `NSRemindersFullAccessUsageDescription` |
-| **Camera** | `NSCameraUsageDescription` |
-| **Microphone** | `NSMicrophoneUsageDescription` |
-| **Photo Library** | `NSPhotoLibraryUsageDescription`, `NSPhotoLibraryAddUsageDescription` |
-| **Location** | `NSLocationWhenInUseUsageDescription`, `NSLocationAlwaysAndWhenInUseUsageDescription`, `NSLocationAlwaysUsageDescription` |
-| **Contacts** | `NSContactsUsageDescription` |
-| **Face ID** | `NSFaceIDUsageDescription` |
-
-### expo-calendar Note
-
-The current project's Info.plist already has all 5 required calendar/reminders keys configured.
-
-### Permission Request Pattern
-
-Use the centralized utility at `mobile/utils/permissions.ts`:
-
-```tsx
-import { requestPermission, addEventToCalendar } from "@/utils/permissions";
-
-const granted = await requestPermission("calendar");
-
-// Or use the helper that handles everything
-const result = await addEventToCalendar({
-  title: "Event",
-  startDate: new Date(),
-  endDate: new Date(),
-});
-```
-
-### Info.plist Changes Require Native Rebuild
-
-**Metro reload is NOT enough.** After modifying Info.plist:
-
-```bash
-cd mobile && pnpm ios
-# Or for clean rebuild:
-cd mobile/ios && pod install && cd .. && pnpm ios
-```
 
 ---
 
@@ -353,17 +309,13 @@ cd mobile/ios && pod install && cd .. && pnpm ios
   headerLargeTitle: Platform.OS === 'ios',
   headerLargeTitleShadowVisible: false,
   headerBlurEffect: Platform.OS === 'ios' ? 'regular' : undefined,
-  headerTransparent: Platform.OS === 'ios', // Enables Liquid Glass
+  headerTransparent: Platform.OS === 'ios',
 }} />
 ```
 
-### Native Search Bar
-
-Use `headerSearchBarOptions` with `hideWhenScrolling: true`.
-
 ---
 
-## Animations
+## Spring Animations
 
 **Always use spring physics** with `react-native-reanimated`:
 
@@ -376,19 +328,41 @@ Use `headerSearchBarOptions` with `hideWhenScrolling: true`.
 
 ---
 
+## Status Bar
+
+```tsx
+import { StatusBar } from 'expo-status-bar';
+
+<StatusBar style="auto" />  // Adapts to light/dark
+```
+
+---
+
+## iOS Permissions
+
+**Missing Info.plist entries cause crashes.** Location: `mobile/ios/RealSingles/Info.plist`
+
+iOS 17+ requires BOTH legacy and new permission keys:
+
+| Feature | Keys Required |
+|---------|---------------|
+| Calendar | `NSCalendarsUsageDescription`, `NSCalendarsFullAccessUsageDescription`, `NSCalendarsWriteOnlyAccessUsageDescription` |
+| Camera | `NSCameraUsageDescription` |
+| Photo Library | `NSPhotoLibraryUsageDescription`, `NSPhotoLibraryAddUsageDescription` |
+| Location | `NSLocationWhenInUseUsageDescription`, `NSLocationAlwaysAndWhenInUseUsageDescription` |
+
+---
+
 ## Pre-Completion Checklist
 
-- [ ] Native-backed components (not JS approximations)
-- [ ] SF Symbols for all icons (via expo-symbols)
-- [ ] Haptic feedback on interactive elements
-- [ ] `PlatformColor` for system colors
-- [ ] `Platform.OS === 'ios'` isolates all iOS code
-- [ ] Liquid Glass on floating/navigation elements (with `isGlassEffectAPIAvailable` check)
-- [ ] Accessibility: respect `isReduceTransparencyEnabled`
-- [ ] **Permissions: Info.plist has ALL required keys** (legacy + iOS 17+)
-- [ ] **Permissions: Use `utils/permissions.ts` utility** (not inline requests)
-- [ ] **Alerts: Clean, specific, no emojis** (include relevant details)
-- [ ] Android unchanged, Web untouched
+- [ ] **PlatformColor** used for all system colors (backgrounds, labels, separators)
+- [ ] **No hardcoded hex colors** for system UI (except brand colors via DynamicColorIOS)
+- [ ] **SF Symbols** for all iOS icons (via expo-symbols with fallback)
+- [ ] **Haptic feedback** on interactive elements
+- [ ] **GlassView** for floating elements where appropriate (with availability check)
+- [ ] **Accessibility**: respect reduce transparency and reduce motion
+- [ ] **Platform.OS === 'ios'** isolates all iOS code
+- [ ] **Android unchanged**, Web untouched
 
 ---
 
@@ -396,40 +370,17 @@ Use `headerSearchBarOptions` with `hideWhenScrolling: true`.
 
 | File | Purpose |
 |------|---------|
-| `ios-components-reference.md` | Detailed API reference for all iOS packages |
-| `mobile/app/(tabs)/_layout.tsx` | Native tabs with SF Symbols (best example) |
-| `mobile/utils/permissions.ts` | Centralized iOS permissions utility |
-| `mobile/ios/RealSingles/Info.plist` | iOS permission declarations |
+| `reference.md` | Detailed API reference for iOS packages |
+| `mobile/app/(tabs)/_layout.tsx` | Native tabs example |
+| `mobile/utils/platformColors.ts` | PlatformColor utilities |
 
 ---
 
-## Installed Packages
-
-| Package | Purpose |
-|---------|---------|
-| `expo-symbols` | SF Symbols (beta) |
-| `expo-glass-effect` | Liquid Glass (iOS 26+) |
-| `expo-haptics` | Haptic feedback |
-| `expo-blur` | Native blur effects |
-| `expo-calendar` | Calendar & reminders |
-| `expo-camera` | Camera access |
-| `expo-image-picker` | Photo library access |
-| `expo-location` | Location services |
-| `@react-native-segmented-control/segmented-control` | Native segmented control |
-| `react-native-ios-context-menu` | Native context menus |
-
----
-
-## Official Documentation
-
-**Always verify against official docs before implementing:**
+## Documentation Links
 
 - expo-glass-effect: https://docs.expo.dev/versions/latest/sdk/glass-effect/
 - expo-symbols: https://docs.expo.dev/versions/latest/sdk/symbols/
-- expo-haptics: https://docs.expo.dev/versions/latest/sdk/haptics/
-- expo-blur: https://docs.expo.dev/versions/latest/sdk/blur-view/
-- expo-calendar: https://docs.expo.dev/versions/latest/sdk/calendar/
-- Native Tabs: https://docs.expo.dev/versions/latest/sdk/router-native-tabs/
-- Native Tabs Guide: https://docs.expo.dev/router/advanced/native-tabs/
+- PlatformColor: https://reactnative.dev/docs/platformcolor
+- DynamicColorIOS: https://reactnative.dev/docs/dynamiccolorios
 - Apple HIG: https://developer.apple.com/design/human-interface-guidelines/
-- SF Symbols: https://developer.apple.com/sf-symbols/
+- Liquid Glass Gallery: https://developer.apple.com/design/new-design-gallery/
