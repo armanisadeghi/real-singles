@@ -138,7 +138,7 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
               <TouchableOpacity 
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push(`/profiles/${user?.ID}`);
+                  router.push(`/discover/profile/${user?.ID}`);
                 }}
                 key={index} 
                 className={`w-6 h-6 rounded-full border-2 border-white ${index > 0 ? 'ml-[-8px]' : ''}`}

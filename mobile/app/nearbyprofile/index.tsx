@@ -511,7 +511,7 @@ export default function NearBy() {
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         setShowUserModal(false);
-                        router.push(`/profiles/${selectedUser?.id}`);
+                        router.push(`/discover/profile/${selectedUser?.id}`);
                       }}
                     >
                       <LinearGradient

@@ -5,7 +5,6 @@ import { User } from "@/types";
 import { removeToken } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui";
 import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -15,7 +14,6 @@ import {
   Platform,
   ScrollView,
   Share,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View
@@ -95,18 +93,6 @@ console.log("profile?.Height",profile?.Height);
     }
   };
 
-  const handleNavigateReview = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push({
-      pathname: "/review",
-      params: {
-        userId: profile?.ID,
-        userName: profile?.DisplayName,
-        userImage: profile?.Image,
-        userRating: profile?.RATINGS,
-      },
-    });
-  };
 
 
   function calculateAge(dob: any): number {
@@ -211,20 +197,8 @@ console.log("profile?.Height",profile?.Height);
             {profile?.Email}
           </Text>
 
-          {/* Rating + City/State Row */}
+          {/* City/State + Distance Row */}
           <View className="flex-row items-center gap-3">
-            {/* Rating */}
-            <View className="flex-row items-center gap-2 py-[3px] px-[6px] border border-border rounded-[30px]">
-              <Text className="font-medium text-[9px] text-black">
-                {profile?.RATINGS || 0}
-              </Text>
-              <Image
-                source={icons.star}
-                className="size-2"
-                resizeMode="contain"
-              />
-            </View>
-
             {/* City, State */}
              {profile?.City && profile?.State && (
                 <Text className="font-normal text-[13px] text-[#686A6E]">
@@ -433,42 +407,16 @@ console.log("profile?.Height",profile?.Height);
         </TouchableOpacity>
       ) : (
         profile ? (
-
           <View className="flex-row gap-4 my-10">
-            {/* <TouchableOpacity
-              onPress={handleFollow}
-              className="flex-1 py-5 bg-light-100 rounded-[99]"
-            >
-              <Text className="text-center text-gray font-medium">
-                {isFollowing ? "Following" : "Follow"}
-              </Text>
-            </TouchableOpacity> */}
             <TouchableOpacity
               onPress={handleReferFriend}
               className="flex-1 py-4 bg-light-100 rounded-[99] border border-[#EAEAEB]"
             >
               <Text className="text-center text-gray font-medium">
-                {"Refer to a Friends"}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleNavigateReview}
-              className="flex-1 py-5 rounded-[99] overflow-hidden"
-            >
-              <LinearGradient
-                colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={StyleSheet.absoluteFillObject}
-              />
-              <Text className="text-center text-white font-medium">
-                Write a Review
+                Refer to a Friend
               </Text>
             </TouchableOpacity>
           </View>
-
-
         ) : null
       )}
     </ScrollView>

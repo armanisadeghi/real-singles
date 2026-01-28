@@ -409,7 +409,7 @@ export default function ChatDetail() {
               <View style={{ flexDirection: "row", alignItems: "center", gap: SPACING.sm }}>
                 <HeaderBackButton onPress={router.back} />
                 <TouchableOpacity 
-                  onPress={() => router.push(`/profiles/${contact.id}`)} 
+                  onPress={() => router.push(`/discover/profile/${contact.id}`)} 
                   style={{ flexDirection: "row", alignItems: "center" }}
                 >
                   {contact.image ? (

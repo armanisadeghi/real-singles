@@ -85,37 +85,56 @@ TWILIO_PHONE_NUMBER=+1234567890
 
 ---
 
-## 3. Resend (Transactional Email)
+## 3. Resend (Transactional Email + Supabase Auth SMTP)
 
 **Console:** https://resend.com/
 
-**Status:** ❌ Not Started
+**Status:** ✅ API Key Created | ⏳ Domain: Using dev domain (updates.aimatrx.com)
 
-### What You Need
+### What You Have
 | Item | Where to Find | Status |
 |------|---------------|--------|
-| API Key | API Keys → Create API Key | ❌ Need |
-| Verified Domain | Domains → Add Domain | ❌ Need (optional for testing) |
+| API Key | API Keys → "RealSingles Production" | ✅ Have |
+| Dev Domain | updates.aimatrx.com | ✅ Verified |
+| Production Domain | realsingles.com | ⏳ Pending access |
 
 ### Environment Variables to Set
 
 **Web (`web/.env.local`):**
 ```env
 RESEND_API_KEY=re_xxxxxxxxxxxx
-EMAIL_FROM=RealSingles <noreply@yourdomain.com>
+EMAIL_FROM=RealSingles <noreply@updates.aimatrx.com>
 ```
 
-### How to Set Up
-1. Sign up at https://resend.com/signup
-2. Go to API Keys → Create API Key
-3. Copy the key (only shown once!)
-4. **For production:** Add and verify your domain (requires DNS records)
-5. **For testing:** You can send to your own email without domain verification
+**When switching to production domain, update EMAIL_FROM to:**
+```env
+EMAIL_FROM=RealSingles <noreply@realsingles.com>
+```
 
-### Domain Verification (Production)
-1. Go to Domains → Add Domain
-2. Add DNS records (TXT, MX, DKIM) to your domain
-3. Wait for verification (usually 5-10 minutes)
+### Supabase Auth SMTP Configuration
+
+Resend also handles Supabase Auth emails (password reset, magic links, verification).
+
+**Configure in Supabase Dashboard → Project Settings → Authentication → SMTP:**
+
+| Field | Value |
+|-------|-------|
+| Host | `smtp.resend.com` |
+| Port | `465` |
+| Username | `resend` |
+| Password | Your RESEND_API_KEY |
+| Sender email | `noreply@updates.aimatrx.com` (or production domain) |
+| Sender name | `RealSingles` |
+
+### How to Switch Domains (When Ready)
+1. Go to https://resend.com/domains
+2. Add Domain → `realsingles.com`
+3. Add the DNS records Resend provides (SPF, DKIM, DMARC)
+4. Wait for verification
+5. Update `EMAIL_FROM` in:
+   - `web/.env.local`
+   - Vercel environment variables
+   - Supabase SMTP settings
 
 ---
 
@@ -259,7 +278,7 @@ ONESIGNAL_REST_API_KEY=<your-rest-api-key>
 |---------|-----------------|---------------------|--------------|--------|
 | Agora | ✅ | ✅ | ✅ | ❌ |
 | Twilio | ❌ | ❌ | ❌ | ❌ |
-| Resend | ❌ | ❌ | ❌ | ❌ |
+| Resend | ✅ | ✅ | ✅ | ⏳ |
 | Google Maps | ❌ | ❌ | ❌ | ❌ |
 | Google OAuth | ❌ | ❌ | ❌ | ❌ |
 | Apple Sign In | ❌ | ❌ | ❌ | ❌ |
@@ -283,8 +302,8 @@ AGORA_APP_CERTIFICATE=494dab7988de4cdeb15b4c8a4930335d
 AGORA_CHAT_APP_KEY=4110015888#1651644
 
 # Email (Resend)
-RESEND_API_KEY=
-EMAIL_FROM=RealSingles <noreply@realsingles.com>
+RESEND_API_KEY=re_xxxxxxxxxxxx
+EMAIL_FROM=RealSingles <noreply@updates.aimatrx.com>
 
 # Twilio (SMS/OTP)
 TWILIO_ACCOUNT_SID=

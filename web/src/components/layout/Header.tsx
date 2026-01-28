@@ -4,22 +4,16 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Menu, X, Sparkles, User, LogOut, Compass } from "lucide-react";
+import { Menu, X, Sparkles, Compass } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
-const publicNavigation = [
+// Public navigation - ALWAYS shown on public pages regardless of auth state
+const navigation = [
   { name: "Features", href: "/features" },
-  { name: "Events", href: "/events" },
+  { name: "Events", href: "/our-events" },
   { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },
-];
-
-const authenticatedNavigation = [
-  { name: "Discover", href: "/discover" },
-  { name: "Matches", href: "/matches" },
-  { name: "Favorites", href: "/favorites" },
-  { name: "Events", href: "/events" },
 ];
 
 export function Header() {
@@ -31,7 +25,7 @@ export function Header() {
   useEffect(() => {
     const supabase = createClient();
     
-    // Get initial session
+    // Get initial session - only used for CTA button display
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
@@ -52,8 +46,6 @@ export function Header() {
     router.push("/");
     router.refresh();
   };
-
-  const navigation = user ? authenticatedNavigation : publicNavigation;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border">
@@ -108,30 +100,24 @@ export function Header() {
               <div className="w-20 h-8 bg-gray-200 animate-pulse rounded" />
             ) : user ? (
               <>
-                <Link
-                  href="/profile"
-                  className="text-sm font-medium text-foreground hover:text-brand-primary transition-colors px-4 py-2 flex items-center gap-2"
+                {/* Authenticated user on public page - show "Enter App" */}
+                <button
+                  onClick={handleLogout}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-4 py-2"
                 >
-                  <User className="w-4 h-4" />
-                  Profile
-                </Link>
+                  Log out
+                </button>
                 <Link
                   href="/discover"
                   className="rounded-full bg-brand-primary px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-primary-dark transition-colors flex items-center gap-2"
                 >
                   <Compass className="w-4 h-4" />
-                  Discover
+                  Enter App
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-4 py-2 flex items-center gap-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Log out
-                </button>
               </>
             ) : (
               <>
+                {/* Guest - show login and signup */}
                 <Link
                   href="/login"
                   className="text-sm font-medium text-foreground hover:text-brand-primary transition-colors px-4 py-2"
@@ -154,6 +140,7 @@ export function Header() {
         {mobileMenuOpen && (
           <div className="lg:hidden">
             <div className="space-y-1 pb-4 pt-2">
+              {/* Always show public navigation */}
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -169,32 +156,25 @@ export function Header() {
                   <div className="w-full h-10 bg-gray-200 animate-pulse rounded-lg" />
                 ) : user ? (
                   <>
-                    <Link
-                      href="/profile"
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-base font-medium text-foreground hover:bg-muted transition-colors"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <User className="w-5 h-5" />
-                      Profile
-                    </Link>
+                    {/* Authenticated user on public page */}
                     <Link
                       href="/discover"
                       className="flex items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-brand-primary-dark transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Compass className="w-5 h-5" />
-                      Discover
+                      Enter App
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-2 w-full rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted transition-colors"
+                      className="block w-full rounded-lg px-3 py-2 text-center text-base font-medium text-muted-foreground hover:bg-muted transition-colors"
                     >
-                      <LogOut className="w-5 h-5" />
                       Log out
                     </button>
                   </>
                 ) : (
                   <>
+                    {/* Guest */}
                     <Link
                       href="/login"
                       className="block rounded-lg px-3 py-2 text-base font-medium text-foreground hover:bg-muted transition-colors"

@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import {
-  Heart,
   Shield,
   Users,
   Video,
@@ -10,12 +8,11 @@ import {
   Star,
   CheckCircle,
   ArrowRight,
-  Sparkles,
   MessageCircle,
   UserCheck,
 } from "lucide-react";
 import { Header, Footer } from "@/components/layout";
-import { createClient } from "@/lib/supabase/server";
+import { HeroSection, CTASection } from "@/components/landing";
 
 const features = [
   {
@@ -120,85 +117,13 @@ const stats = [
   { value: "98%", label: "Verified Profiles" },
 ];
 
-export default async function HomePage() {
-  // Redirect authenticated users to the app home/dashboard
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    redirect("/home");
-  }
-
+export default function HomePage() {
   return (
     <div className="min-h-dvh flex flex-col">
       <Header />
       <main className="flex-1 pt-[var(--header-height)]">
-        {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-[#F6EDE1] to-white overflow-hidden">
-          <div className="absolute inset-0 bg-[url('/images/hero/homepage-hero.jpg')] bg-cover bg-center opacity-20" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#F6EDE1] via-[#F6EDE1]/90 to-transparent" />
-          
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 bg-brand-primary/10 rounded-full px-4 py-2 mb-6">
-                <Sparkles className="w-4 h-4 text-brand-primary" />
-                <span className="text-sm text-brand-primary font-medium">
-                  Real People. Real Connections.
-                </span>
-              </div>
-              
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight">
-                Find Your{" "}
-                <span className="text-brand-primary">Real</span>{" "}
-                Connection
-              </h1>
-              
-              <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-lg">
-                Join the dating community that prioritizes authenticity. With verified profiles, video introductions, and curated events, find someone who's genuinely looking for what you are.
-              </p>
-              
-              <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/register"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-brand-primary-dark transition-all hover:scale-105"
-                >
-                  <Heart className="w-5 h-5" />
-                  Start Your Journey
-                </Link>
-                <Link
-                  href="/features"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-secondary px-8 py-4 text-lg font-semibold text-white hover:bg-brand-secondary-dark transition-colors"
-                >
-                  Learn More
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-              </div>
-              
-              <div className="mt-12 flex items-center gap-6">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-brand-primary to-brand-secondary"
-                    />
-                  ))}
-                </div>
-                <div>
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-500" fill="currentColor" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    Trusted by 50,000+ singles
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Hero Section - lazy-loads auth state client-side */}
+        <HeroSection />
 
         {/* Stats Section */}
         <section className="bg-white border-b border-border">
@@ -224,7 +149,7 @@ export default async function HomePage() {
                 Why Choose <span className="text-brand-primary">Real Singles</span>?
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                We're not just another dating app. We're a community built on authenticity, safety, and real human connections.
+                We&apos;re not just another dating app. We&apos;re a community built on authenticity, safety, and real human connections.
               </p>
             </div>
 
@@ -263,7 +188,7 @@ export default async function HomePage() {
                 How It <span className="text-brand-primary">Works</span>
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Getting started is easy. Here's how you can find your real connection in four simple steps.
+                Getting started is easy. Here&apos;s how you can find your real connection in four simple steps.
               </p>
             </div>
 
@@ -358,7 +283,7 @@ export default async function HomePage() {
                 </ul>
                 
                 <Link
-                  href="/events"
+                  href="/our-events"
                   className="mt-8 inline-flex items-center gap-2 text-brand-primary font-semibold hover:underline"
                 >
                   View Upcoming Events
@@ -391,32 +316,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="bg-gradient-to-r from-brand-primary to-brand-primary-dark py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">
-              Ready to Find Your Real Connection?
-            </h2>
-            <p className="mt-4 text-lg text-white/80 max-w-2xl mx-auto">
-              Join thousands of singles who have found meaningful relationships through Real Singles. Your perfect match is waiting.
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-lg font-semibold text-brand-primary shadow-lg hover:bg-gray-100 transition-all hover:scale-105"
-              >
-                <Sparkles className="w-5 h-5" />
-                Create Free Account
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white px-8 py-4 text-lg font-semibold text-white hover:bg-white/10 transition-colors"
-              >
-                Contact Us
-              </Link>
-            </div>
-          </div>
-        </section>
+        {/* CTA Section - lazy-loads auth state client-side */}
+        <CTASection />
       </main>
       <Footer />
     </div>

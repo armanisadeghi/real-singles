@@ -17,6 +17,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { AdminPageHeader, AdminLinkButton, AdminButton } from "@/components/admin/AdminPageHeader";
+import { EmailComposeSheet } from "@/components/admin/EmailComposeSheet";
 
 interface EventDetail {
   id: string;
@@ -74,6 +75,7 @@ export default function AdminEventDetailPage({
   const [isLoading, setIsLoading] = useState(true);
   const [isCancelling, setIsCancelling] = useState(false);
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
+  const [showEmailSheet, setShowEmailSheet] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -232,6 +234,15 @@ export default function AdminEventDetailPage({
         subtitle="Event Details"
         showBack
       >
+        {attendees.length > 0 && (
+          <AdminButton
+            variant="primary"
+            iconName="zap"
+            onClick={() => setShowEmailSheet(true)}
+          >
+            Email Attendees ({attendees.length})
+          </AdminButton>
+        )}
         <AdminLinkButton
           href={`/admin/events/${event.id}/edit`}
           variant="secondary"
@@ -450,6 +461,19 @@ export default function AdminEventDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Email Attendees Sheet */}
+      <EmailComposeSheet
+        isOpen={showEmailSheet}
+        onClose={() => setShowEmailSheet(false)}
+        recipients={attendees.map((a) => ({
+          id: a.userId,
+          email: a.email,
+          name: a.displayName || `${a.firstName} ${a.lastName}`.trim() || a.email,
+        }))}
+        title="Email Event Attendees"
+        defaultSubject={`Update: ${event.title}`}
+      />
     </div>
   );
 }

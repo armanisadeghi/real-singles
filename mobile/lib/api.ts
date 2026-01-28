@@ -522,7 +522,26 @@ export const getVirtualSpeedDetails = async (id: string) => {
 };
 
 /**
- * Register for virtual speed dating slot
+ * Register for a virtual speed dating session
+ */
+export const registerSpeedDating = async (sessionId: string) => {
+  return apiRequest(`/speed-dating/${sessionId}/register`, {
+    method: "POST",
+  });
+};
+
+/**
+ * Cancel registration for a virtual speed dating session
+ */
+export const cancelSpeedDatingRegistration = async (sessionId: string) => {
+  return apiRequest(`/speed-dating/${sessionId}/register`, {
+    method: "DELETE",
+  });
+};
+
+/**
+ * @deprecated Use registerSpeedDating instead
+ * Register for virtual speed dating slot (legacy - kept for backwards compatibility)
  */
 export const registerVirtualSlot = async (data: FormData) => {
   const sessionId = data.get("SessionID") as string || data.get("session_id") as string;
@@ -607,30 +626,6 @@ export const acceptOrderRedeemPoints = async (data: FormData) => {
 
 // Alias for compatibility
 export const acceptOrderRedeemPointsWithFetch = acceptOrderRedeemPoints;
-
-// ===========================================
-// REVIEWS & RATINGS ENDPOINTS
-// ===========================================
-
-/**
- * Add or update rating/review
- */
-export const addUpdateRating = async (data: FormData) => {
-  const reviewedUserId = data.get("ReviewedUserID") as string || data.get("reviewed_user_id") as string;
-  const rating = data.get("Rating") as string || data.get("rating") as string;
-  const reviewText = data.get("ReviewText") as string || data.get("review_text") as string;
-  const relationship = data.get("Relationship") as string || data.get("relationship") as string;
-  
-  return apiRequest("/reviews", {
-    method: "POST",
-    body: JSON.stringify({
-      reviewed_user_id: reviewedUserId,
-      rating: parseInt(rating),
-      review_text: reviewText,
-      relationship,
-    }),
-  });
-};
 
 // ===========================================
 // AGORA CHAT & CALL ENDPOINTS

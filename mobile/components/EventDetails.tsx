@@ -358,7 +358,7 @@ export default function EventDetails({
               .map((member, index) => (
                 member?.Image ? (
                   <TouchableOpacity key={member?.ID}
-                  onPress={() => router.push(`/profiles/${member?.ID}`)}
+                  onPress={() => router.push(`/discover/profile/${member?.ID}`)}
                   >
                   <Image
                     source={{ uri: member.Image.startsWith('http') ? member.Image : VIDEO_URL + member?.Image }}
@@ -370,7 +370,7 @@ export default function EventDetails({
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
-                  onPress={() => router.push(`/profiles/${member?.ID}`)}
+                  onPress={() => router.push(`/discover/profile/${member?.ID}`)}
                     key={index}
                     className={`w-[26px] h-[26px] rounded-full border-2 border-white justify-center items-center ${
                       index > 0 ? "ml-[-8px]" : ""

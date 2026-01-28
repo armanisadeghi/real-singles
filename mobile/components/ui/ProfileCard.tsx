@@ -110,7 +110,7 @@ export default function ProfileCard({ profile }: { profile: User }) {
   }, []);
 
   return (
-    <Link asChild href={`/profiles/${profile?.id || profile?.ID}`}>
+    <Link asChild href={`/discover/profile/${profile?.id || profile?.ID}`}>
       <TouchableOpacity
         className="relative rounded-card overflow-hidden"
         style={{ width: cardWidth, height: cardHeight }}
@@ -122,8 +122,8 @@ export default function ProfileCard({ profile }: { profile: User }) {
             className="w-full h-full rounded-card overflow-hidden"
             resizeMode="cover"
           >
-            {/* Rating and content overlays for image background */}
-            <RatingOverlay profile={profile} />
+            {/* Distance and content overlays for image background */}
+            <DistanceOverlay profile={profile} />
             <GradientOverlay profile={profile} />
           </ImageBackground>
         ) : (
@@ -139,8 +139,8 @@ export default function ProfileCard({ profile }: { profile: User }) {
               {content.initials !== '?' ? content.initials : "User"}
             </Text>
 
-            {/* Rating overlay for solid background */}
-            <RatingOverlay profile={profile} />
+            {/* Distance overlay for solid background */}
+            <DistanceOverlay profile={profile} />
 
             {/* Name and location overlay for solid background */}
             <View className="absolute bottom-0 left-0 right-0" style={{ padding: SPACING.sm }}>
@@ -165,35 +165,15 @@ export default function ProfileCard({ profile }: { profile: User }) {
 }
 
 
-// Extracted Rating component to avoid duplication
-function RatingOverlay({ profile }: { profile: User }) {
-  const finalRating =
-    profile?.RATINGS !== undefined && profile?.RATINGS !== null
-      ? profile.RATINGS
-      : profile?.TotalRating ?? "";
-
+// Distance overlay - shows only distance, no ratings (users aren't products)
+function DistanceOverlay({ profile }: { profile: User }) {
+  if (!profile?.distance_in_km) return null;
+  
   return (
     <View
       className="absolute flex-row items-center"
       style={{ top: SPACING.sm, right: SPACING.sm, gap: SPACING.xs }}
     >
-      {profile?.distance_in_km && (
-        <View
-          className="flex-row items-center bg-white rounded-full shadow-sm"
-          style={{
-            gap: SPACING.xxs,
-            paddingHorizontal: SPACING.xs,
-            paddingVertical: SPACING.xxs
-          }}
-        >
-          <Text
-            className="font-medium text-dark"
-            style={TYPOGRAPHY.caption2}
-          >
-            {profile?.distance_in_km.toFixed(2)} Away
-          </Text>
-        </View>
-      )}
       <View
         className="flex-row items-center bg-white rounded-full shadow-sm"
         style={{
@@ -206,13 +186,8 @@ function RatingOverlay({ profile }: { profile: User }) {
           className="font-medium text-dark"
           style={TYPOGRAPHY.caption2}
         >
-          {profile?.TotalRating ?? profile?.RATINGS ?? ""}
+          {profile?.distance_in_km.toFixed(1)} km
         </Text>
-        <Image
-          source={icons.star}
-          style={{ width: ICON_SIZES.xs * 0.4, height: ICON_SIZES.xs * 0.4 }}
-          resizeMode="contain"
-        />
       </View>
     </View>
   );

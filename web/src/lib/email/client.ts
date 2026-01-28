@@ -1,6 +1,58 @@
 import { Resend } from "resend";
 
+// Validate required environment variables
+if (!process.env.RESEND_API_KEY) {
+  console.warn("RESEND_API_KEY is not set - email sending will fail");
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+/**
+ * Get the list of allowed email domains for sending
+ * Uses EMAIL_ALLOWED_DOMAINS env var, or extracts domain from EMAIL_FROM
+ */
+export function getAllowedEmailDomains(): string[] {
+  // If explicitly configured, use that
+  if (process.env.EMAIL_ALLOWED_DOMAINS) {
+    return process.env.EMAIL_ALLOWED_DOMAINS.split(",").map((d) => d.trim().toLowerCase());
+  }
+  
+  // Otherwise, extract domain from EMAIL_FROM
+  const emailFrom = process.env.EMAIL_FROM;
+  if (emailFrom) {
+    const match = emailFrom.match(/<([^>]+)>/) || emailFrom.match(/([^\s<>]+@[^\s<>]+)/);
+    if (match) {
+      const domain = match[1].split("@")[1];
+      if (domain) return [domain.toLowerCase()];
+    }
+  }
+  
+  return [];
+}
+
+/**
+ * Get the default from address
+ */
+export function getDefaultFromAddress(): string {
+  return process.env.EMAIL_FROM || "";
+}
+
+/**
+ * Validate that a from address uses an allowed domain
+ */
+export function isValidFromAddress(from: string): boolean {
+  const allowedDomains = getAllowedEmailDomains();
+  if (allowedDomains.length === 0) return true; // No restrictions if not configured
+  
+  // Extract email from "Name <email>" format or plain email
+  const match = from.match(/<([^>]+)>/) || from.match(/([^\s<>]+@[^\s<>]+)/);
+  if (!match) return false;
+  
+  const email = match[1].toLowerCase();
+  const domain = email.split("@")[1];
+  
+  return allowedDomains.includes(domain);
+}
 
 interface SendEmailOptions {
   to: string | string[];
@@ -10,12 +62,23 @@ interface SendEmailOptions {
   from?: string;
 }
 
+/**
+ * Send an email using Resend
+ * Requires RESEND_API_KEY and EMAIL_FROM environment variables
+ */
 export async function sendEmail(options: SendEmailOptions) {
   const { to, subject, html, text, from } = options;
 
+  const senderAddress = from || process.env.EMAIL_FROM;
+  
+  if (!senderAddress) {
+    console.error("EMAIL_FROM environment variable is not set");
+    return { success: false, error: new Error("EMAIL_FROM is not configured") };
+  }
+
   try {
     const { data, error } = await resend.emails.send({
-      from: from || process.env.EMAIL_FROM || "RealSingles <noreply@realsingles.com>",
+      from: senderAddress,
       to: Array.isArray(to) ? to : [to],
       subject,
       html,

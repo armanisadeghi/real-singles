@@ -15,7 +15,9 @@ import {
   User,
   Video,
   Info,
+  Mail,
 } from "lucide-react";
+import { EmailComposeSheet } from "@/components/admin/EmailComposeSheet";
 
 interface SessionDetail {
   id: string;
@@ -66,6 +68,7 @@ export default function AdminSpeedDatingDetailPage({
   const [isLoading, setIsLoading] = useState(true);
   const [isCancelling, setIsCancelling] = useState(false);
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
+  const [showEmailSheet, setShowEmailSheet] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -215,6 +218,15 @@ export default function AdminSpeedDatingDetailPage({
         </div>
 
         <div className="flex items-center gap-2">
+          {registrations.length > 0 && (
+            <button
+              onClick={() => setShowEmailSheet(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 text-white bg-violet-600 rounded-lg hover:bg-violet-700"
+            >
+              <Mail className="w-4 h-4" />
+              Email Participants ({registrations.length})
+            </button>
+          )}
           <Link
             href={`/admin/speed-dating/${session.id}/edit`}
             className="inline-flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -423,6 +435,19 @@ export default function AdminSpeedDatingDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Email Participants Sheet */}
+      <EmailComposeSheet
+        isOpen={showEmailSheet}
+        onClose={() => setShowEmailSheet(false)}
+        recipients={registrations.map((r) => ({
+          id: r.userId,
+          email: r.email,
+          name: r.displayName || `${r.firstName} ${r.lastName}`.trim() || r.email,
+        }))}
+        title="Email Speed Dating Participants"
+        defaultSubject={`Update: ${session.title}`}
+      />
     </div>
   );
 }

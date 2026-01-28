@@ -2,13 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { Mail, Send, Users, FileText, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { Mail, Send, Users, FileText, Loader2, CheckCircle, XCircle, ChevronDown, ChevronUp } from "lucide-react";
 
 interface EmailTemplate {
   id: string;
   name: string;
   subject: string;
   message: string;
+}
+
+interface EmailConfig {
+  defaultFrom: string;
+  allowedDomains: string[];
 }
 
 interface UserOption {
@@ -25,19 +30,23 @@ export default function AdminEmailPage() {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [customFrom, setCustomFrom] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [emailConfig, setEmailConfig] = useState<EmailConfig | null>(null);
   const [users, setUsers] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [result, setResult] = useState<{ success: boolean; msg: string } | null>(null);
 
-  // Fetch templates on mount
+  // Fetch templates and config on mount
   useEffect(() => {
     fetch("/api/admin/email")
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.data) {
-          setTemplates(data.data);
+        if (data.success) {
+          if (data.data) setTemplates(data.data);
+          if (data.config) setEmailConfig(data.config);
         }
       })
       .catch(console.error);
@@ -73,10 +82,15 @@ export default function AdminEmailPage() {
       return;
     }
 
-    let payload: { subject: string; message: string; to?: string[]; userIds?: string[] } = {
+    let payload: { subject: string; message: string; to?: string[]; userIds?: string[]; from?: string } = {
       subject,
       message,
     };
+
+    // Include custom from if provided
+    if (customFrom.trim()) {
+      payload.from = customFrom.trim();
+    }
 
     if (recipientMode === "custom") {
       const emails = customEmails
@@ -119,6 +133,8 @@ export default function AdminEmailPage() {
         setSelectedUserIds([]);
         setSubject("");
         setMessage("");
+        setCustomFrom("");
+        setShowAdvanced(false);
       }
     } catch (error) {
       setResult({ success: false, msg: "Failed to send email" });
@@ -278,6 +294,42 @@ export default function AdminEmailPage() {
                   Plain text message. Line breaks will be preserved.
                 </p>
               </div>
+
+              {/* Advanced Options */}
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
+              >
+                {showAdvanced ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+                {showAdvanced ? "Hide" : "Show"} advanced options
+              </button>
+
+              {showAdvanced && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    From Address (optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={customFrom}
+                    onChange={(e) => setCustomFrom(e.target.value)}
+                    placeholder={emailConfig?.defaultFrom || "Display Name <email@domain.com>"}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    {emailConfig?.allowedDomains && emailConfig.allowedDomains.length > 0 ? (
+                      <>Allowed domains: {emailConfig.allowedDomains.join(", ")}</>
+                    ) : (
+                      <>Leave blank to use default: {emailConfig?.defaultFrom || "loading..."}</>
+                    )}
+                  </p>
+                </div>
+              )}
 
               {/* Result Message */}
               {result && (

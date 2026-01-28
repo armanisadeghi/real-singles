@@ -5,7 +5,7 @@ import { Mail, Phone, Facebook, Instagram, Twitter } from "lucide-react";
 const footerNavigation = {
   product: [
     { name: "Features", href: "/features" },
-    { name: "Events", href: "/events" },
+    { name: "Events", href: "/our-events" },
     { name: "Success Stories", href: "/success-stories" },
     { name: "Pricing", href: "/pricing" },
   ],

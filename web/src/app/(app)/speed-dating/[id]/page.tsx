@@ -70,7 +70,9 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [registering, setRegistering] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -114,6 +116,31 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setRegistering(false);
+    }
+  };
+
+  const handleCancelRegistration = async () => {
+    setCancelling(true);
+    try {
+      const res = await fetch(`/api/speed-dating/${id}/register`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        setIsRegistered(false);
+        setRegistrationCount((prev) => Math.max(0, prev - 1));
+        setShowCancelConfirm(false);
+        toast.success("Your registration has been cancelled.");
+      } else {
+        toast.error(data.msg || "Failed to cancel registration");
+      }
+    } catch (error) {
+      console.error("Error cancelling registration:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -281,16 +308,26 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
 
       {/* Registration status */}
       {isRegistered && (
-        <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl mb-6">
-          <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-            <Check className="w-5 h-5 text-green-600" />
+        <div className="flex items-center justify-between gap-3 p-4 bg-green-50 border border-green-200 rounded-xl mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+              <Check className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <p className="font-medium text-green-800">You're registered!</p>
+              <p className="text-sm text-green-600">
+                We'll send you a reminder before the session starts.
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="font-medium text-green-800">You're registered!</p>
-            <p className="text-sm text-green-600">
-              We'll send you a reminder before the session starts.
-            </p>
-          </div>
+          {session.status === "upcoming" && (
+            <button
+              onClick={() => setShowCancelConfirm(true)}
+              className="shrink-0 px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+          )}
         </div>
       )}
 
@@ -314,7 +351,7 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
           : "Register Now"}
       </button>
 
-      {/* Confirm Modal */}
+      {/* Register Confirm Modal */}
       <ConfirmModal
         isOpen={showConfirm}
         onClose={() => setShowConfirm(false)}
@@ -324,6 +361,18 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
         confirmLabel="Register"
         variant="success"
         loading={registering}
+      />
+
+      {/* Cancel Registration Confirm Modal */}
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        onConfirm={handleCancelRegistration}
+        title="Cancel Registration"
+        message={`Are you sure you want to cancel your registration for "${session.name}"? You can register again if spots are available.`}
+        confirmLabel="Cancel Registration"
+        variant="danger"
+        loading={cancelling}
       />
     </div>
   );

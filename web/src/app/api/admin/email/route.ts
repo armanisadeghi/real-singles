@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/email/client";
+import { sendEmail, isValidFromAddress, getDefaultFromAddress, getAllowedEmailDomains } from "@/lib/email/client";
 
 /**
  * POST /api/admin/email
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { to, subject, message, userIds } = body;
+    const { to, subject, message, userIds, from } = body;
 
     // Validate required fields
     if (!subject || !message) {
@@ -46,6 +46,22 @@ export async function POST(request: Request) {
         { success: false, msg: "Subject and message are required" },
         { status: 400 }
       );
+    }
+
+    // Validate custom from address if provided
+    let senderAddress: string | undefined;
+    if (from && from.trim()) {
+      if (!isValidFromAddress(from)) {
+        const allowedDomains = getAllowedEmailDomains();
+        return NextResponse.json(
+          { 
+            success: false, 
+            msg: `Invalid sender domain. Allowed domains: ${allowedDomains.join(", ") || "not configured"}` 
+          },
+          { status: 400 }
+        );
+      }
+      senderAddress = from.trim();
     }
 
     // Determine recipients
@@ -107,6 +123,7 @@ export async function POST(request: Request) {
           to: email,
           subject,
           html: htmlContent,
+          from: senderAddress, // Use custom from if provided, otherwise defaults to EMAIL_FROM
         })
       )
     );
@@ -138,11 +155,11 @@ export async function POST(request: Request) {
 }
 
 /**
- * GET /api/admin/email/templates
- * Get available email templates
+ * GET /api/admin/email
+ * Get email config and templates
  */
 export async function GET() {
-  // Return available email templates for the admin UI
+  // Return available email templates and config for the admin UI
   const templates = [
     {
       id: "welcome",
@@ -196,5 +213,12 @@ The RealSingles Team`,
     },
   ];
 
-  return NextResponse.json({ success: true, data: templates });
+  return NextResponse.json({ 
+    success: true, 
+    data: templates,
+    config: {
+      defaultFrom: getDefaultFromAddress(),
+      allowedDomains: getAllowedEmailDomains(),
+    },
+  });
 }

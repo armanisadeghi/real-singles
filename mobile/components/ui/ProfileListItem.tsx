@@ -92,18 +92,13 @@ export default function ProfileListItem({
 
   const imageSource = getImageSource();
   const userId = profile?.id || profile?.ID;
-  // Navigate to the discovery profile view for matching flow
-  const href = navigateToFocus 
-    ? `/discover/profile/${userId}` 
-    : `/profiles/${userId}`;
+  // Always navigate to the discovery profile view (proper dating app UI)
+  const href = `/discover/profile/${userId}`;
 
   // Format location string
   const locationString = [profile?.City, profile?.State]
     .filter(Boolean)
     .join(", ");
-
-  // Get rating value
-  const rating = profile?.TotalRating ?? profile?.RATINGS;
 
   // Format distance
   const distanceString = profile?.distance_in_km 
@@ -153,18 +148,6 @@ export default function ProfileListItem({
                 tintColor="#3B82F6"
               />
               <Text style={[styles.badgeText, { color: "#3B82F6" }]}>Verified</Text>
-            </View>
-          )}
-
-          {/* Rating Badge */}
-          {rating !== undefined && rating !== null && (
-            <View style={styles.badge}>
-              <Image
-                source={icons.star}
-                style={styles.badgeIcon}
-                resizeMode="contain"
-              />
-              <Text style={styles.badgeText}>{rating}</Text>
             </View>
           )}
 

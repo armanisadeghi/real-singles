@@ -36,7 +36,7 @@ export function getReferralLink(code: string): string {
 /**
  * Generate a profile link for sharing
  * @param userId - The user's ID
- * @returns Full URL for the profile
+ * @returns Full URL for the profile (uses web profile view with Favorite/Message)
  */
 export function getProfileLink(userId: string): string {
   return `${APP_URL}/profile/${userId}`;

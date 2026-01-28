@@ -1,6 +1,6 @@
 import { useCall } from '@/context/CallContext';
 import { PlatformIcon } from "@/components/ui";
-import { useAudioPlayer, AudioPlayer } from "expo-audio";
+import { useAudioPlayer } from "expo-audio";
 import * as Haptics from 'expo-haptics';
 import React, { useEffect, useRef } from 'react';
 import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -22,6 +22,21 @@ const IncomingCall = () => {
   const hasStartedPlaying = useRef(false);
   const translationX = useSharedValue(0);
 
+  // Helper to safely pause player - expo-audio can release the native object
+  // before our JS cleanup runs, causing "shared object already released" errors.
+  // TODO: When expo-audio stabilizes, check if there's a way to verify player validity
+  // before calling methods, or use a different audio library with better lifecycle handling.
+  const safePausePlayer = () => {
+    try {
+      if (player) {
+        player.pause();
+      }
+    } catch (error) {
+      // Player was already released by native side - this is expected on unmount
+      console.log('[IncomingCall] Audio player already released, skipping pause');
+    }
+  };
+
   // Play sound on incoming call
   useEffect(() => {
     if (incomingCall && player && !hasStartedPlaying.current) {
@@ -30,33 +45,25 @@ const IncomingCall = () => {
         player.play();
         hasStartedPlaying.current = true;
       } catch (error) {
-        console.error(
-          "Failed to play sound. Please check the path and ensure the file exists in assets/sounds.",
-          error
-        );
+        // expo-audio may not be fully initialized or the sound file may be missing
+        console.log('[IncomingCall] Failed to play ringtone:', error);
       }
     }
 
     // Cleanup sound
     return () => {
-      if (player) {
-        player.pause();
-        hasStartedPlaying.current = false;
-      }
+      safePausePlayer();
+      hasStartedPlaying.current = false;
     };
   }, [incomingCall, player]);
 
   const handleReject = () => {
-    if (player) {
-      player.pause();
-    }
+    safePausePlayer();
     rejectCall();
   };
 
   const handleAccept = () => {
-    if (player) {
-      player.pause();
-    }
+    safePausePlayer();
     acceptCall();
   };
 

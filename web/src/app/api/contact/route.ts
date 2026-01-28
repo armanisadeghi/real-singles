@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { sendEmail } from "@/lib/email/client";
 
 /**
  * POST /api/contact
@@ -80,13 +81,29 @@ export async function POST(request: Request) {
       );
     }
 
-    // TODO: Send email notification to admin using Resend
-    // const emailClient = createEmailClient();
-    // await emailClient.sendEmail({
-    //   to: process.env.ADMIN_EMAIL,
-    //   subject: `New Contact Form: ${subject || 'No Subject'}`,
-    //   body: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
-    // });
+    // Send email notification to admin (if ADMIN_EMAIL is configured)
+    if (process.env.ADMIN_EMAIL) {
+      try {
+        await sendEmail({
+          to: process.env.ADMIN_EMAIL,
+          subject: `New Contact Form: ${subject || "No Subject"}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #6366f1;">New Contact Form Submission</h2>
+              <p><strong>Name:</strong> ${name || "Not provided"}</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Subject:</strong> ${subject || "No subject"}</p>
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;" />
+              <p><strong>Message:</strong></p>
+              <p style="white-space: pre-wrap;">${message}</p>
+            </div>
+          `,
+        });
+      } catch (emailError) {
+        // Log but don't fail the request if email fails
+        console.error("Failed to send admin notification email:", emailError);
+      }
+    }
 
     return NextResponse.json({
       success: true,

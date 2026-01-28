@@ -83,7 +83,7 @@ function RootLayoutNav() {
         if (data?.type === "message" && data?.chatId) {
           router.push(`/chat/${data.chatId}`);
         } else if (data?.type === "match" && data?.userId) {
-          router.push(`/profiles/${data.userId}`);
+          router.push(`/discover/profile/${data.userId}`);
         } else if (data?.type === "event" && data?.eventId) {
           router.push(`/events/event/${data.eventId}`);
         }

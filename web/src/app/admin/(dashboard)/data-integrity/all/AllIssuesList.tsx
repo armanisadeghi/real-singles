@@ -19,7 +19,9 @@ import {
   Copy,
   ClipboardList,
   Check,
+  Mail,
 } from "lucide-react";
+import { EmailComposeSheet } from "@/components/admin/EmailComposeSheet";
 import type {
   DataIntegrityIssue,
   IssueType,
@@ -65,6 +67,7 @@ export function AllIssuesList({
     (initialType as IssueType) || "all"
   );
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [showEmailSheet, setShowEmailSheet] = useState(false);
   const { copy, copiedId } = useCopyToClipboard();
 
   const toggleRowExpand = (id: string) => {
@@ -129,6 +132,22 @@ export function AllIssuesList({
       return matchesSearch && matchesSeverity && matchesType;
     });
   }, [issues, searchQuery, filterSeverity, filterType]);
+
+  // Get unique users from filtered issues for emailing
+  const uniqueUsersForEmail = useMemo(() => {
+    const seenIds = new Set<string>();
+    return filteredIssues
+      .filter((issue) => {
+        if (seenIds.has(issue.userId)) return false;
+        seenIds.add(issue.userId);
+        return true;
+      })
+      .map((issue) => ({
+        id: issue.userId,
+        email: issue.userEmail,
+        name: `${issue.firstName || ""} ${issue.lastName || ""}`.trim() || issue.userEmail,
+      }));
+  }, [filteredIssues]);
 
   async function handleFixSingle(
     userId: string,
@@ -305,6 +324,17 @@ export function AllIssuesList({
         </select>
 
         <div className="flex items-center gap-2 ml-auto">
+          {/* Email Affected Users Button */}
+          {uniqueUsersForEmail.length > 0 && (
+            <button
+              onClick={() => setShowEmailSheet(true)}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700"
+            >
+              <Mail className="w-4 h-4" />
+              Email Users ({uniqueUsersForEmail.length})
+            </button>
+          )}
+
           {/* Copy All Button */}
           <button
             onClick={copyAllToClipboard}
@@ -526,6 +556,25 @@ export function AllIssuesList({
           </div>
         )}
       </div>
+
+      {/* Email Affected Users Sheet */}
+      <EmailComposeSheet
+        isOpen={showEmailSheet}
+        onClose={() => setShowEmailSheet(false)}
+        recipients={uniqueUsersForEmail}
+        title="Email Affected Users"
+        defaultSubject="Action Required: Profile Issue"
+        defaultMessage={`Hello,
+
+We noticed an issue with your profile that requires your attention.
+
+Please log in to your account and review your profile settings.
+
+If you have any questions, feel free to reply to this email.
+
+Best regards,
+The RealSingles Team`}
+      />
     </div>
   );
 }

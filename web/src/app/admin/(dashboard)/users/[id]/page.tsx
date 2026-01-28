@@ -24,6 +24,7 @@ import { Skeleton } from "@/components/ui/LoadingSkeleton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { BottomSheet, BottomSheetActions } from "@/components/ui/BottomSheet";
 import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
+import { EmailComposeSheet } from "@/components/admin/EmailComposeSheet";
 import { cn, formatPoints, calculateAge } from "@/lib/utils";
 import {
   DndContext,
@@ -182,6 +183,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
   const [showPointsSheet, setShowPointsSheet] = useState(false);
   const [showEditProfileSheet, setShowEditProfileSheet] = useState(false);
   const [showEditImageSheet, setShowEditImageSheet] = useState(false);
+  const [showEmailSheet, setShowEmailSheet] = useState(false);
   const [editingImageIndex, setEditingImageIndex] = useState<number | null>(null);
   const [pointsAmount, setPointsAmount] = useState(0);
   const [pointsReason, setPointsReason] = useState("");
@@ -552,6 +554,13 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         subtitle={user.email}
         showBack
       >
+        <AdminButton
+          variant="primary"
+          iconName="zap"
+          onClick={() => setShowEmailSheet(true)}
+        >
+          Email User
+        </AdminButton>
         <AdminButton
           variant="secondary"
           iconName="user"
@@ -1074,6 +1083,20 @@ export default function AdminUserDetailPage({ params }: PageProps) {
           </button>
         </BottomSheetActions>
       </BottomSheet>
+
+      {/* Email User Sheet */}
+      <EmailComposeSheet
+        isOpen={showEmailSheet}
+        onClose={() => setShowEmailSheet(false)}
+        recipients={[{
+          id: user.id,
+          email: user.email,
+          name: profile?.first_name && profile?.last_name
+            ? `${profile.first_name} ${profile.last_name}`
+            : user.display_name || user.email,
+        }]}
+        title="Email User"
+      />
     </div>
   );
 }

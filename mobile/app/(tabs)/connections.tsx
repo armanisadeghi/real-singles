@@ -229,7 +229,7 @@ export default function ConnectionsScreen() {
       <View style={[styles.listItem, item.is_super_like && styles.superLikeItem]}>
         <ProfileListItem 
           profile={item} 
-          onPress={() => router.push(`/profiles/focus/${item.ID}` as Href)}
+          onPress={() => router.push(`/discover/profile/${item.ID}` as Href)}
         />
         <View style={styles.actionButtons}>
           <TouchableOpacity
@@ -260,7 +260,7 @@ export default function ConnectionsScreen() {
     <View style={styles.listItem}>
       <ProfileListItem 
         profile={item} 
-        onPress={() => router.push(`/profiles/${item.ID}` as Href)}
+        onPress={() => router.push(`/discover/profile/${item.ID}` as Href)}
       />
       {item.conversation_id && (
         <TouchableOpacity
