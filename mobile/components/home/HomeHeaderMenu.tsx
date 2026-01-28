@@ -1,28 +1,26 @@
 /**
- * HomeHeaderMenu - Platform-aware menu component for home screen header
+ * HomeHeaderMenu - Native iOS pull-down menu for home screen header
  * 
- * iOS: Native context menu with SF Symbols (tap to reveal)
- * Android: Keeps the existing drawer trigger pattern
- * 
- * This follows iOS Human Interface Guidelines by using native context menus
- * instead of side drawers, which are not a native iOS pattern.
+ * iOS: Uses ContextMenuButton with isMenuPrimaryAction for tap-to-show behavior.
+ *      This creates a native UIMenu that appears right at the button with
+ *      the glass/blur effect and smooth animations.
+ * Android: Keeps the existing drawer trigger pattern.
  */
 
 import React, { useCallback } from 'react';
-import { Platform, TouchableOpacity, View, StyleSheet } from 'react-native';
+import { Platform, TouchableOpacity, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { PlatformIcon } from '@/components/ui/PlatformIcon';
 import { SPACING, ICON_SIZES } from '@/constants/designTokens';
 
-// Only import ContextMenuView on iOS
-let ContextMenuView: any = null;
+// Only import ContextMenuButton on iOS
+let ContextMenuButton: any = null;
 if (Platform.OS === 'ios') {
   try {
     const contextMenu = require('react-native-ios-context-menu');
-    ContextMenuView = contextMenu.ContextMenuView;
+    ContextMenuButton = contextMenu.ContextMenuButton;
   } catch (e) {
-    // Package not available, will use fallback
     console.warn('react-native-ios-context-menu not available');
   }
 }
@@ -38,20 +36,14 @@ export interface HomeHeaderMenuProps {
 
 /**
  * Menu items configuration
- * These match the items in the existing SideMenu component
+ * Only includes useful, non-duplicate items
  */
 const menuItems = [
   {
-    actionKey: 'profile',
-    actionTitle: 'Profile',
-    sfSymbol: 'person',
-    route: '/(tabs)/profile' as const,
-  },
-  {
-    actionKey: 'notifications',
-    actionTitle: 'Notifications',
-    sfSymbol: 'bell',
-    route: '/notification' as const,
+    actionKey: 'settings',
+    actionTitle: 'Settings',
+    sfSymbol: 'gearshape',
+    route: '/settings' as const,
   },
   {
     actionKey: 'contact',
@@ -62,19 +54,19 @@ const menuItems = [
   {
     actionKey: 'refer',
     actionTitle: 'Refer a Friend',
-    sfSymbol: 'person.2',
+    sfSymbol: 'person.badge.plus',
     route: '/refer' as const,
   },
 ];
 
 export function HomeHeaderMenu({
   onShowMenu,
-  iconColor = '#ffffff',
-  backgroundColor = 'rgba(255, 255, 255, 0.15)',
+  iconColor = '#000000',
+  backgroundColor = 'transparent',
 }: HomeHeaderMenuProps) {
   const router = useRouter();
 
-  // Handle menu item selection (iOS)
+  // Handle menu item selection
   const handleMenuPress = useCallback((actionKey: string) => {
     Haptics.selectionAsync();
     const item = menuItems.find((m) => m.actionKey === actionKey);
@@ -89,8 +81,8 @@ export function HomeHeaderMenu({
     onShowMenu?.();
   }, [onShowMenu]);
 
-  // iOS: Native context menu
-  if (Platform.OS === 'ios' && ContextMenuView) {
+  // iOS: Native ContextMenuButton (tap to show, appears at button location)
+  if (Platform.OS === 'ios' && ContextMenuButton) {
     const menuConfig = {
       menuTitle: '',
       menuItems: menuItems.map((item) => ({
@@ -106,13 +98,11 @@ export function HomeHeaderMenu({
     };
 
     return (
-      <ContextMenuView
+      <ContextMenuButton
+        isMenuPrimaryAction={true}
         menuConfig={menuConfig}
         onPressMenuItem={({ nativeEvent }: any) => {
           handleMenuPress(nativeEvent.actionKey);
-        }}
-        onPressMenuPreview={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         }}
       >
         <View
@@ -122,17 +112,17 @@ export function HomeHeaderMenu({
           ]}
         >
           <PlatformIcon
-            name="more-vert"
-            iosName="ellipsis"
-            size={ICON_SIZES.md}
+            name="more-horiz"
+            iosName="ellipsis.circle"
+            size={ICON_SIZES.lg}
             color={iconColor}
           />
         </View>
-      </ContextMenuView>
+      </ContextMenuButton>
     );
   }
 
-  // iOS fallback (if context menu package not available) - use ActionSheet
+  // iOS fallback (if ContextMenuButton not available)
   if (Platform.OS === 'ios') {
     const { ActionSheetIOS } = require('react-native');
     
@@ -165,9 +155,9 @@ export function HomeHeaderMenu({
         activeOpacity={0.7}
       >
         <PlatformIcon
-          name="more-vert"
-          iosName="ellipsis"
-          size={ICON_SIZES.md}
+          name="more-horiz"
+          iosName="ellipsis.circle"
+          size={ICON_SIZES.lg}
           color={iconColor}
         />
       </TouchableOpacity>
@@ -192,8 +182,7 @@ export function HomeHeaderMenu({
 
 const styles = StyleSheet.create({
   iconButton: {
-    borderRadius: 9999, // Full rounded
-    padding: SPACING.sm,
+    padding: SPACING.xs,
   },
 });
 

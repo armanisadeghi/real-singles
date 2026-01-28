@@ -19,6 +19,7 @@ import React, {
 } from "react";
 import {
   ActivityIndicator,
+  Image,
   Platform,
   PlatformColor,
   RefreshControl,
@@ -244,21 +245,28 @@ export default function Home() {
             backgroundColor: themedColors.background,
             paddingTop: headerTopPadding,
             paddingHorizontal: SPACING.screenPadding,
-            paddingBottom: SPACING.md,
+            paddingBottom: SPACING.sm,
           }}
         >
-          {/* Header Row: Greeting + Actions */}
-          <View className="flex-row justify-between items-center">
-            {/* Greeting */}
-            <Text
-              style={[TYPOGRAPHY.h2, { color: themedColors.text }]}
-              numberOfLines={1}
-            >
-              Welcome back{profile?.FirstName ? `, ${profile.FirstName}` : ''}
-            </Text>
+          {/* Header Row: Logo + Actions */}
+          <View 
+            className="flex-row items-center justify-between"
+          >
+            {/* Left: App Logo */}
+            <Image
+              source={require('../../assets/images/logo.png')}
+              style={{ 
+                width: 32, 
+                height: 32,
+                resizeMode: 'contain',
+              }}
+            />
             
             {/* Right Actions: Points + Notifications + Menu */}
-            <View className="flex-row items-center" style={{ gap: SPACING.sm }}>
+            <View 
+              className="flex-row items-center" 
+              style={{ gap: SPACING.md }}
+            >
               <PointsBadge
                 points={redeemPoints}
                 size="sm"
@@ -272,16 +280,13 @@ export default function Home() {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   router.push("/notification");
                 }}
-                className="rounded-full"
-                style={{ 
-                  padding: SPACING.sm,
-                  backgroundColor: themedColors.secondaryBackground,
-                }}
                 activeOpacity={0.7}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <PlatformIcon
-                  name="notifications"
-                  size={ICON_SIZES.md}
+                  name="notifications-none"
+                  iosName="bell"
+                  size={ICON_SIZES.lg}
                   color={themedColors.text}
                 />
               </TouchableOpacity>
