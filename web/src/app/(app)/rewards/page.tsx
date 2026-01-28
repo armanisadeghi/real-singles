@@ -163,8 +163,7 @@ export default function RewardsPage() {
             className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide"
             style={{
               touchAction: 'pan-x',
-              overscrollBehaviorX: 'contain',
-              WebkitOverflowScrolling: 'touch'
+              overscrollBehaviorX: 'contain'
             }}
           >
             {categories.map((cat) => {

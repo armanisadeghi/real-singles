@@ -399,9 +399,10 @@ export default function OtherProfilePage() {
 
   return (
     <div className="min-h-[calc(100dvh-var(--header-height))] bg-gray-50">
-      {/* Hero Section with Photo */}
-      <div className="relative">
-        {/* Back button */}
+      {/* Hero Section with Photo - constrained to max-w-6xl for desktop consistency */}
+      <div className="max-w-6xl mx-auto">
+        <div className="relative">
+          {/* Back button */}
         <button
           onClick={() => router.back()}
           className="absolute top-4 left-4 z-20 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors"
@@ -541,6 +542,7 @@ export default function OtherProfilePage() {
             </div>
           </div>
         </div>
+        </div>
       </div>
 
       {/* Action Buttons */}
@@ -550,8 +552,7 @@ export default function OtherProfilePage() {
             className="flex items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide sm:justify-center"
             style={{
               touchAction: 'pan-x',
-              overscrollBehaviorX: 'contain',
-              WebkitOverflowScrolling: 'touch'
+              overscrollBehaviorX: 'contain'
             }}
           >
             <button

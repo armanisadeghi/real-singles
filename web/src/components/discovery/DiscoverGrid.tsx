@@ -231,8 +231,7 @@ export function DiscoverGrid({ initialProfiles, isProfilePaused = false }: Disco
             className="flex items-center gap-1 bg-gray-100 rounded-full p-1 overflow-x-auto"
             style={{
               touchAction: 'pan-x',
-              overscrollBehaviorX: 'contain',
-              WebkitOverflowScrolling: 'touch'
+              overscrollBehaviorX: 'contain'
             }}
           >
             <button

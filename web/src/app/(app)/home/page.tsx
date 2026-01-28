@@ -293,8 +293,7 @@ export default function HomePage() {
               className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 flex-1"
               style={{
                 touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain',
-                WebkitOverflowScrolling: 'touch'
+                overscrollBehaviorX: 'contain'
               }}
             >
               <Link
@@ -367,12 +366,11 @@ export default function HomePage() {
               className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
               style={{
                 touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain',
-                WebkitOverflowScrolling: 'touch'
+                overscrollBehaviorX: 'contain'
               }}
             >
               {topMatches.slice(0, 10).map((profile) => (
-                <div key={profile.ID || profile.id} className="flex-shrink-0 w-44">
+                <div key={profile.ID || profile.id} className="flex-shrink-0 w-40 sm:w-44">
                   <ProfileCard
                     profile={formatProfileForCard(profile)}
                     showActions={false}
@@ -403,8 +401,7 @@ export default function HomePage() {
               className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
               style={{
                 touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain',
-                WebkitOverflowScrolling: 'touch'
+                overscrollBehaviorX: 'contain'
               }}
             >
               {videos.slice(0, 10).map((video) => (
@@ -458,15 +455,14 @@ export default function HomePage() {
               className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
               style={{
                 touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain',
-                WebkitOverflowScrolling: 'touch'
+                overscrollBehaviorX: 'contain'
               }}
             >
               {speedDating.slice(0, 10).map((session) => (
                 <Link
                   key={session.ID}
                   href={`/speed-dating/${session.ID}`}
-                  className="flex-shrink-0 w-64 bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-4 border"
+                  className="flex-shrink-0 w-60 sm:w-64 bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-4 border"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -515,12 +511,11 @@ export default function HomePage() {
               className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
               style={{
                 touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain',
-                WebkitOverflowScrolling: 'touch'
+                overscrollBehaviorX: 'contain'
               }}
             >
               {nearbyProfiles.slice(0, 10).map((profile) => (
-                <div key={profile.ID || profile.id} className="flex-shrink-0 w-44">
+                <div key={profile.ID || profile.id} className="flex-shrink-0 w-40 sm:w-44">
                   <ProfileCard
                     profile={formatProfileForCard(profile)}
                     showActions={false}
@@ -551,8 +546,7 @@ export default function HomePage() {
               className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
               style={{
                 touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain',
-                WebkitOverflowScrolling: 'touch'
+                overscrollBehaviorX: 'contain'
               }}
             >
               {events.slice(0, 10).map((event) => (

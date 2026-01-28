@@ -142,7 +142,7 @@ export function ChatThread({
   }, [setTyping]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-var(--header-height,64px)-var(--bottom-nav-height,0px))] md:h-[calc(100vh-64px)] bg-gray-50">
+    <div className="flex flex-col h-[calc(100dvh-var(--header-height,72px)-var(--bottom-nav-height,0px))] md:h-[calc(100dvh-var(--header-height,72px))] bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b px-4 py-3 flex items-center gap-3 shrink-0">
         {/* Back button */}

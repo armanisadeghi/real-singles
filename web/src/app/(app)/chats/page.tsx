@@ -123,14 +123,14 @@ async function ConversationsContent() {
 
 export default function ChatsPage() {
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6">
       {/* Header */}
-      <div className="px-4 py-4 border-b bg-white sticky top-0 z-10">
+      <div className="py-4 border-b bg-white sticky top-0 z-10">
         <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
       </div>
 
       {/* Conversation List */}
-      <div className="bg-white min-h-[calc(100vh-200px)]">
+      <div className="bg-white min-h-[calc(100dvh-var(--header-height)-80px)]">
         <Suspense fallback={<ConversationListSkeleton />}>
           <ConversationsContent />
         </Suspense>

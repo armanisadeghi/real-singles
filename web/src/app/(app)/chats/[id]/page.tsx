@@ -89,7 +89,7 @@ async function getConversation(conversationId: string) {
 
 function ChatSkeleton() {
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)]">
+    <div className="flex flex-col h-[calc(100dvh-var(--header-height,72px))]">
       {/* Header skeleton */}
       <div className="bg-white border-b px-4 py-3 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
