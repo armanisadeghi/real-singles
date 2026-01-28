@@ -7,7 +7,6 @@
  * Designed to be native-first for iOS and Android.
  */
 
-import { icons } from "@/constants/icons";
 import { User } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { useRouter } from "expo-router";
@@ -23,16 +22,16 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-import { moderateScale, scale, verticalScale } from "react-native-size-matters";
+import { moderateScale, verticalScale } from "react-native-size-matters";
 import {
   BORDER_RADIUS,
   ICON_SIZES,
-  SHADOWS,
   SPACING,
   TYPOGRAPHY,
   VERTICAL_SPACING,
 } from "@/constants/designTokens";
 import { useThemeColors } from "@/context/ThemeContext";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 
 // Background colors for initials (same as ProfileCard for consistency)
 const BACKGROUND_COLORS = [
@@ -59,7 +58,7 @@ export default function ProfileListItem({
   const isDark = colorScheme === 'dark';
   const colors = useThemeColors();
   
-  // Theme-aware colors
+  // Theme-aware colors using iOS PlatformColor for automatic dark mode adaptation
   const themedColors = useMemo(() => ({
     background: Platform.OS === 'ios' 
       ? (PlatformColor('secondarySystemBackground') as unknown as string)
@@ -73,12 +72,18 @@ export default function ProfileListItem({
     tertiaryText: Platform.OS === 'ios'
       ? (PlatformColor('tertiaryLabel') as unknown as string)
       : (isDark ? '#9CA3AF' : '#6B7280'),
+    // Badge uses systemGray5 which adapts to dark mode (#E5E5EA light, #2C2C2E dark)
     badgeBackground: Platform.OS === 'ios'
       ? (PlatformColor('systemGray5') as unknown as string)
       : (isDark ? '#374151' : '#F3F4F6'),
-    systemBlue: Platform.OS === 'ios'
+    // Verified badge specific - use systemBlue which adapts (#007AFF light, #0A84FF dark)
+    verifiedColor: Platform.OS === 'ios'
       ? (PlatformColor('systemBlue') as unknown as string)
-      : '#3B82F6',
+      : (isDark ? '#0A84FF' : '#007AFF'),
+    // Distance/secondary badge text
+    badgeText: Platform.OS === 'ios'
+      ? (PlatformColor('secondaryLabel') as unknown as string)
+      : (isDark ? '#9CA3AF' : '#6B7280'),
   }), [isDark, colors]);
   
   // Generate consistent background color based on user ID/name
@@ -166,29 +171,29 @@ export default function ProfileListItem({
 
         {/* Badges Row */}
         <View style={styles.badgesRow}>
-          {/* Verified Badge */}
+          {/* Verified Badge - uses native SF Symbol checkmark.seal.fill on iOS */}
           {profile?.livePicture && (
             <View style={[styles.badge, { backgroundColor: themedColors.badgeBackground }]}>
-              <Image
-                source={icons.check}
-                style={styles.badgeIcon}
-                resizeMode="contain"
-                tintColor={themedColors.systemBlue}
+              <PlatformIcon
+                name="verified"
+                iosName="checkmark.seal.fill"
+                size={moderateScale(12)}
+                color={themedColors.verifiedColor}
               />
-              <Text style={[styles.badgeText, { color: themedColors.systemBlue }]}>Verified</Text>
+              <Text style={[styles.badgeText, { color: themedColors.verifiedColor }]}>Verified</Text>
             </View>
           )}
 
-          {/* Distance Badge */}
+          {/* Distance Badge - uses native SF Symbol location.fill on iOS */}
           {distanceString && (
             <View style={[styles.badge, { backgroundColor: themedColors.badgeBackground }]}>
-              <Image
-                source={icons.mapMarker}
-                style={styles.badgeIcon}
-                resizeMode="contain"
-                tintColor={themedColors.secondaryText}
+              <PlatformIcon
+                name="location-on"
+                iosName="location.fill"
+                size={moderateScale(12)}
+                color={themedColors.badgeText}
               />
-              <Text style={[styles.badgeText, { color: themedColors.secondaryText }]}>{distanceString}</Text>
+              <Text style={[styles.badgeText, { color: themedColors.badgeText }]}>{distanceString}</Text>
             </View>
           )}
         </View>
@@ -307,10 +312,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xs,
     paddingVertical: SPACING.xxs,
     borderRadius: BORDER_RADIUS.badge,
-  },
-  badgeIcon: {
-    width: ICON_SIZES.xs * 0.75,
-    height: ICON_SIZES.xs * 0.75,
   },
   badgeText: {
     ...TYPOGRAPHY.caption2,

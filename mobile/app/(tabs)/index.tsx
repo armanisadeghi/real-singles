@@ -324,7 +324,7 @@ export default function Home() {
               }}
               activeOpacity={0.7}
             >
-              <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>Discover</Text>
+              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>Discover</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -343,7 +343,7 @@ export default function Home() {
               }}
               activeOpacity={0.7}
             >
-              <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
+              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
                 Top Matches
               </Text>
             </TouchableOpacity>
@@ -364,7 +364,7 @@ export default function Home() {
               }}
               activeOpacity={0.7}
             >
-              <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
+              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
                 Videos
               </Text>
             </TouchableOpacity>
@@ -382,7 +382,7 @@ export default function Home() {
               }}
               activeOpacity={0.7}
             >
-              <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
+              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
                 Virtual Dates
               </Text>
             </TouchableOpacity>
@@ -400,7 +400,7 @@ export default function Home() {
               }}
               activeOpacity={0.7}
             >
-              <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
+              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
                 Nearby
               </Text>
             </TouchableOpacity>
@@ -418,7 +418,7 @@ export default function Home() {
               }}
               activeOpacity={0.7}
             >
-              <Text className="text-black font-medium" style={TYPOGRAPHY.subheadline}>
+              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
                 Events
               </Text>
             </TouchableOpacity>
@@ -444,7 +444,7 @@ export default function Home() {
               }}
               className="z-20"
             >
-              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
+              <Text className="font-medium underline" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
                 View All
               </Text>
             </TouchableOpacity>
@@ -463,7 +463,7 @@ export default function Home() {
                   <ProfileCard key={index} profile={profile} />
                 ))
               ) : (
-                <Text className="text-gray" style={TYPOGRAPHY.body}>
+                <Text style={[TYPOGRAPHY.body, { color: themedColors.secondaryText }]}>
                   No top matches available
                 </Text>
               )}
@@ -487,7 +487,7 @@ export default function Home() {
               }}
               className="z-20"
             >
-              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
+              <Text className="font-medium underline" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
                 View All
               </Text>
             </TouchableOpacity>
@@ -506,7 +506,7 @@ export default function Home() {
                   <EventCard key={event?.EventID || index} event={event} />
                 ))
               ) : (
-                <Text className="text-gray" style={TYPOGRAPHY.body}>No events available</Text>
+                <Text style={[TYPOGRAPHY.body, { color: themedColors.secondaryText }]}>No events available</Text>
               )}
             </View>
           </ScrollView>
@@ -530,7 +530,7 @@ export default function Home() {
                 router.push("/speed-dating");
               }}
             >
-              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
+              <Text className="font-medium underline" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
                 View All
               </Text>
             </TouchableOpacity>
@@ -549,7 +549,7 @@ export default function Home() {
                   <VirtualDateCard key={index} virtualDate={video} />
                 ))
               ) : (
-                <Text className="text-gray" style={TYPOGRAPHY.body}>
+                <Text style={[TYPOGRAPHY.body, { color: themedColors.secondaryText }]}>
                   No virtual speed dating available
                 </Text>
               )}
@@ -575,7 +575,7 @@ export default function Home() {
               }}
               className="z-20"
             >
-              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
+              <Text className="font-medium underline" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
                 View All
               </Text>
             </TouchableOpacity>
@@ -594,7 +594,7 @@ export default function Home() {
                   <ProfileCard key={index} profile={profile} />
                 ))
               ) : (
-                <Text className="text-gray" style={TYPOGRAPHY.body}>
+                <Text style={[TYPOGRAPHY.body, { color: themedColors.secondaryText }]}>
                   No nearby profiles available
                 </Text>
               )}
@@ -623,7 +623,7 @@ export default function Home() {
               }}
               className="z-20"
             >
-              <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
+              <Text className="font-medium underline" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
                 View All
               </Text>
             </TouchableOpacity>
@@ -642,7 +642,7 @@ export default function Home() {
                   <VideoCard key={index} video={video} isVideo={true} />
                 ))
               ) : (
-                <Text className="text-gray" style={TYPOGRAPHY.body}>
+                <Text style={[TYPOGRAPHY.body, { color: themedColors.secondaryText }]}>
                   No featured videos available
                 </Text>
               )}

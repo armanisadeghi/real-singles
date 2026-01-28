@@ -40,13 +40,35 @@ export default function Discover() {
   const isDark = colorScheme === 'dark';
   const colors = useThemeColors();
 
-  const themedColors = {
-    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
-    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
-    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
-    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
-    border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
-  };
+  // Theme-aware colors using iOS PlatformColor for automatic dark mode adaptation
+  const themedColors = useMemo(() => ({
+    background: Platform.OS === 'ios' 
+      ? (PlatformColor('systemBackground') as unknown as string) 
+      : colors.background,
+    secondaryBackground: Platform.OS === 'ios' 
+      ? (PlatformColor('secondarySystemBackground') as unknown as string) 
+      : colors.surfaceContainer,
+    text: Platform.OS === 'ios' 
+      ? (PlatformColor('label') as unknown as string) 
+      : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' 
+      ? (PlatformColor('secondaryLabel') as unknown as string) 
+      : colors.onSurfaceVariant,
+    tertiaryText: Platform.OS === 'ios'
+      ? (PlatformColor('tertiaryLabel') as unknown as string)
+      : (isDark ? '#6B7280' : '#9CA3AF'),
+    border: Platform.OS === 'ios' 
+      ? (PlatformColor('separator') as unknown as string) 
+      : colors.outline,
+    // Brand primary color that works in both modes
+    primary: Platform.OS === 'ios'
+      ? (PlatformColor('systemPink') as unknown as string)
+      : '#B06D1E',
+    // Handle indicator for bottom sheet
+    handleIndicator: Platform.OS === 'ios'
+      ? (PlatformColor('systemGray3') as unknown as string)
+      : (isDark ? '#4B5563' : '#CBD5E1'),
+  }), [isDark, colors]);
   
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -287,10 +309,11 @@ export default function Discover() {
           }}
         >
           <View className="flex-row items-center" style={{ gap: SPACING.sm }}>
-            <Image
-              source={icons.search}
-              style={{ width: ICON_SIZES.md, height: ICON_SIZES.md }}
-              resizeMode="contain"
+            <PlatformIcon
+              name="search"
+              iosName="magnifyingglass"
+              size={ICON_SIZES.md}
+              color={themedColors.text}
             />
             <Text
               className="font-semibold"
@@ -387,8 +410,8 @@ export default function Discover() {
 
         {/* Content */}
         {loading && !refreshing ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#B06D1E" />
+          <View className="flex-1 items-center justify-center" style={{ backgroundColor: themedColors.background }}>
+            <ActivityIndicator size="large" color={themedColors.primary} />
           </View>
         ) : (
           <View className="flex-1" style={{ paddingTop: VERTICAL_SPACING.md }}>
@@ -407,38 +430,36 @@ export default function Discover() {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                colors={["#B06D1E"]}
-                tintColor="#B06D1E"
+                colors={[themedColors.primary]}
+                tintColor={themedColors.primary}
               />
             }
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center py-20">
-                <Image
-                  source={icons.search}
-                  style={{ 
-                    width: ICON_SIZES['3xl'], 
-                    height: ICON_SIZES['3xl'],
-                    opacity: 0.3,
-                    marginBottom: VERTICAL_SPACING.md,
-                  }}
-                  resizeMode="contain"
+                <PlatformIcon
+                  name="search"
+                  iosName="magnifyingglass"
+                  size={ICON_SIZES['3xl']}
+                  color={themedColors.tertiaryText}
+                  style={{ marginBottom: VERTICAL_SPACING.md, opacity: 0.5 }}
                 />
                 <Text 
-                  className="text-gray-500 text-center"
-                  style={TYPOGRAPHY.body}
+                  className="text-center"
+                  style={[TYPOGRAPHY.body, { color: themedColors.secondaryText }]}
                 >
                   No profiles found
                 </Text>
                 <Text 
-                  className="text-gray-400 text-center"
-                  style={{ ...TYPOGRAPHY.caption1, marginTop: SPACING.xs }}
+                  className="text-center"
+                  style={[TYPOGRAPHY.caption1, { color: themedColors.tertiaryText, marginTop: SPACING.xs }]}
                 >
                   Try adjusting your filters
                 </Text>
                 <TouchableOpacity
                   onPress={handleFilterPress}
-                  className="mt-4 bg-primary rounded-full"
+                  className="mt-4 rounded-full"
                   style={{
+                    backgroundColor: themedColors.primary,
                     paddingHorizontal: SPACING.lg,
                     paddingVertical: SPACING.sm,
                   }}
@@ -455,7 +476,7 @@ export default function Discover() {
         )}
       </View>
 
-      {/* Filter Bottom Sheet */}
+      {/* Filter Bottom Sheet - with dark mode support */}
       <BottomSheet
         ref={bottomSheetRef}
         index={bottomSheetIndex}
@@ -463,7 +484,8 @@ export default function Discover() {
         enablePanDownToClose={true}
         onClose={handleSheetClose}
         backdropComponent={renderBackdrop}
-        handleIndicatorStyle={{ backgroundColor: '#CBD5E1' }}
+        handleIndicatorStyle={{ backgroundColor: themedColors.handleIndicator }}
+        backgroundStyle={{ backgroundColor: themedColors.background }}
       >
         <BottomSheetScrollView
           contentContainerStyle={{
@@ -482,11 +504,28 @@ export default function Discover() {
       {/* Loading overlay when saving filters */}
       {applyingFilters && (
         <View 
-          className="absolute inset-0 bg-black/30 z-50 items-center justify-center"
+          className="absolute inset-0 z-50 items-center justify-center"
+          style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.3)' }}
         >
-          <View className="rounded-xl p-6 items-center" style={{ backgroundColor: themedColors.background }}>
-            <ActivityIndicator size="large" color="#B06D1E" />
-            <Text className="text-primary mt-3" style={TYPOGRAPHY.body}>
+          <View 
+            className="rounded-xl p-6 items-center" 
+            style={{ 
+              backgroundColor: themedColors.secondaryBackground,
+              ...Platform.select({
+                ios: {
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: isDark ? 0.4 : 0.15,
+                  shadowRadius: 12,
+                },
+                android: {
+                  elevation: 8,
+                },
+              }),
+            }}
+          >
+            <ActivityIndicator size="large" color={themedColors.primary} />
+            <Text className="mt-3" style={[TYPOGRAPHY.body, { color: themedColors.text }]}>
               Saving filters...
             </Text>
           </View>

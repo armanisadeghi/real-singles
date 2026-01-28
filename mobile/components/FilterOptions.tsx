@@ -385,13 +385,13 @@ export default function FilterOptions({
 
       {/* Age Range - Native Sliders */}
       <View className="mb-6 pb-6 border-b border-b-border">
-        <Text className="text-base font-medium mb-1 text-dark">Age Range</Text>
-        <Text className="text-xs font-normal mb-3 text-gray">
+        <Text className="text-base font-medium mb-1" style={{ color: themedColors.text }}>Age Range</Text>
+        <Text className="text-xs font-normal mb-3" style={{ color: themedColors.secondaryText }}>
           {ageMin} - {ageMax} years
         </Text>
         
         <View className="mb-2">
-          <Text className="text-xs text-gray mb-1">Minimum: {ageMin}</Text>
+          <Text className="text-xs mb-1" style={{ color: themedColors.secondaryText }}>Minimum: {ageMin}</Text>
           <Slider
             minimumValue={18}
             maximumValue={70}
@@ -407,7 +407,7 @@ export default function FilterOptions({
         </View>
         
         <View>
-          <Text className="text-xs text-gray mb-1">Maximum: {ageMax}</Text>
+          <Text className="text-xs mb-1" style={{ color: themedColors.secondaryText }}>Maximum: {ageMax}</Text>
           <Slider
             minimumValue={18}
             maximumValue={70}
@@ -424,13 +424,13 @@ export default function FilterOptions({
 
       {/* Height Range - Native Sliders */}
       <View className="mb-6 pb-6 border-b border-b-border">
-        <Text className="text-base font-medium mb-1 text-dark">Height Range</Text>
-        <Text className="text-xs font-normal mb-3 text-gray">
+        <Text className="text-base font-medium mb-1" style={{ color: themedColors.text }}>Height Range</Text>
+        <Text className="text-xs font-normal mb-3" style={{ color: themedColors.secondaryText }}>
           {heightMin.toFixed(1)} - {heightMax.toFixed(1)} ft
         </Text>
         
         <View className="mb-2">
-          <Text className="text-xs text-gray mb-1">Minimum: {heightMin.toFixed(1)} ft</Text>
+          <Text className="text-xs mb-1" style={{ color: themedColors.secondaryText }}>Minimum: {heightMin.toFixed(1)} ft</Text>
           <Slider
             minimumValue={4}
             maximumValue={10}
@@ -445,7 +445,7 @@ export default function FilterOptions({
         </View>
         
         <View>
-          <Text className="text-xs text-gray mb-1">Maximum: {heightMax.toFixed(1)} ft</Text>
+          <Text className="text-xs mb-1" style={{ color: themedColors.secondaryText }}>Maximum: {heightMax.toFixed(1)} ft</Text>
           <Slider
             minimumValue={4}
             maximumValue={10}
@@ -656,13 +656,13 @@ export default function FilterOptions({
 
       {/* Distance Range - Native Sliders */}
       <View className="mb-6 pb-6 border-b border-b-border">
-        <Text className="text-base font-medium mb-1 text-dark">Distance Range</Text>
-        <Text className="text-xs font-normal mb-3 text-gray">
+        <Text className="text-base font-medium mb-1" style={{ color: themedColors.text }}>Distance Range</Text>
+        <Text className="text-xs font-normal mb-3" style={{ color: themedColors.secondaryText }}>
           {minDistance} - {maxDistance} miles
         </Text>
         
         <View className="mb-2">
-          <Text className="text-xs text-gray mb-1">Minimum: {minDistance} mi</Text>
+          <Text className="text-xs mb-1" style={{ color: themedColors.secondaryText }}>Minimum: {minDistance} mi</Text>
           <Slider
             minimumValue={0}
             maximumValue={10000}
@@ -677,7 +677,7 @@ export default function FilterOptions({
         </View>
         
         <View>
-          <Text className="text-xs text-gray mb-1">Maximum: {maxDistance} mi</Text>
+          <Text className="text-xs mb-1" style={{ color: themedColors.secondaryText }}>Maximum: {maxDistance} mi</Text>
           <Slider
             minimumValue={0}
             maximumValue={10000}
@@ -694,9 +694,10 @@ export default function FilterOptions({
 
       {/* Pets Toggle - Native Switch */}
       <View 
-        className="flex-row items-center justify-between rounded-[30px] border border-border bg-light-100 px-7 py-[14px] mb-4"
+        className="flex-row items-center justify-between rounded-[30px] border border-border px-7 py-[14px] mb-4"
+        style={{ backgroundColor: themedColors.inputBackground }}
       >
-        <Text className="text-lg font-normal text-dark">
+        <Text className="text-lg font-normal" style={{ color: themedColors.text }}>
           Pets
         </Text>
         <Switch
@@ -712,7 +713,7 @@ export default function FilterOptions({
       </View>
 
       <View className="my-6 pb-6 border-b border-b-border">
-        <Text className="text-base font-medium mb-3 text-dark">Zodiac</Text>
+        <Text className="text-base font-medium mb-3" style={{ color: themedColors.text }}>Zodiac</Text>
         <View className="flex-row gap-3 flex-wrap">
           {zodiacOptions.map((option) => {
             const isSelected = zodiac.includes(option.value);
@@ -737,7 +738,7 @@ export default function FilterOptions({
                   />
                 )}
 
-                <Text className={isSelected ? "text-white" : "text-dark"}>
+                <Text style={{ color: isSelected ? '#FFFFFF' : themedColors.text }}>
                   {option.label}
                 </Text>
               </TouchableOpacity>
@@ -750,7 +751,8 @@ export default function FilterOptions({
       <View className="w-full my-5 -z-10">
         <TouchableOpacity
           onPress={handleClearFilter}
-          className="w-full border border-border bg-light-100 rounded-[50px] px-7 py-[14px]"
+          className="w-full border border-border rounded-[50px] px-7 py-[14px]"
+          style={{ backgroundColor: themedColors.inputBackground }}
         >
           {loadingclear ? (
             <ActivityIndicator
@@ -759,12 +761,12 @@ export default function FilterOptions({
               className="text-center"
             />
           ) : (
-            <Text className="text-gray text-base text-center font-medium">
+            <Text className="text-base text-center font-medium" style={{ color: themedColors.secondaryText }}>
               Clear All Filters
             </Text>
           )}
         </TouchableOpacity>
-        <Text className="text-gray text-xs text-center mt-3">
+        <Text className="text-xs text-center mt-3" style={{ color: themedColors.secondaryText }}>
           Filters are saved automatically when you close this panel
         </Text>
       </View>
