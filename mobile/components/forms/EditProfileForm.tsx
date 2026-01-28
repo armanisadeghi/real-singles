@@ -581,11 +581,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 onPress={pickImage}
                 className="absolute bottom-3 right-0 border border-dark bg-white rounded-lg p-2"
               >
-                <Image
-                  source={icons.edit}
-                  className="w-4 h-4"
-                  tintColor={"#000000"}
-                />
+                <PlatformIcon name="edit" size={16} color="#000000" />
               </Pressable>
             </View>
 
@@ -669,11 +665,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 {/* {formData.DOB || "Select Date"} */}
                 {formData.DOB ? formatDateToMMDDYYYY(formData.DOB) : "Select Date"}
               </Text>
-              <Image
-                source={icons.calender}
-                className="w-4 h-4"
-                resizeMode="contain"
-              />
+              <PlatformIcon name="calendar-today" size={16} color="#000000" />
             </TouchableOpacity>
 
             {showDatePicker && (
@@ -2281,12 +2273,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             <View className="flex-row justify-between items-center mb-6">
               <Text className="text-xl font-semibold text-primary">Change Password</Text>
               <TouchableOpacity onPress={() => setShowPasswordModal(false)}>
-                <Image
-                  source={icons.times}
-                  className="w-4 h-4"
-                  resizeMode="contain"
-                  tintColor="#000"
-                />
+                <PlatformIcon name="close" size={16} color="#000" />
               </TouchableOpacity>
             </View>
 
