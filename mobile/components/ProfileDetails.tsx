@@ -314,7 +314,7 @@ console.log("profile?.Height",profile?.Height);
 
       <View className="mt-[18px]">
         <Text className="text-base mb-2 text-primary font-medium">
-          Interest:{" "}
+          Interests:{" "}
         </Text>
         <View className="flex-row items-center justify-start gap-3 flex-wrap">
           {profile?.Interest &&
@@ -354,9 +354,10 @@ console.log("profile?.Height",profile?.Height);
         </View>
       )}
 
+      {/* Details Section - matches web */}
       <View className="mt-[18px]">
         <Text className="text-base mb-2 text-primary font-medium">
-          {profile?.DisplayName} Info:{" "}
+          Details
         </Text>
         <View className="flex-col gap-2">
           <View className="flex-row items-center justify-between">
@@ -375,16 +376,121 @@ console.log("profile?.Height",profile?.Height);
               {calculateAge(profile?.DOB)} Yrs
             </Text>
           </View>
-          <View className="flex-row items-center justify-between">
-            <Text className="text-xs text-[#686A6F] leading-5 font-normal">
-              Height
-            </Text>
-            <Text className="text-dark leading-5 text-xs font-normal">
-                  {Number(profile.Height).toFixed(1)} ft
-            </Text>
-          </View>
+          {profile?.Height && (
+            <View className="flex-row items-center justify-between">
+              <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                Height
+              </Text>
+              <Text className="text-dark leading-5 text-xs font-normal">
+                {Number(profile.Height).toFixed(1)} ft
+              </Text>
+            </View>
+          )}
+          {profile?.BodyType && (
+            <View className="flex-row items-center justify-between">
+              <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                Body Type
+              </Text>
+              <Text className="text-dark leading-5 text-xs font-normal capitalize">
+                {profile.BodyType.replace(/_/g, " ")}
+              </Text>
+            </View>
+          )}
+          {profile?.Education && (
+            <View className="flex-row items-center justify-between">
+              <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                Education
+              </Text>
+              <Text className="text-dark leading-5 text-xs font-normal capitalize">
+                {profile.Education.replace(/_/g, " ")}
+              </Text>
+            </View>
+          )}
+          {profile?.Religion && (
+            <View className="flex-row items-center justify-between">
+              <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                Religion
+              </Text>
+              <Text className="text-dark leading-5 text-xs font-normal capitalize">
+                {profile.Religion}
+              </Text>
+            </View>
+          )}
+          {profile?.Ethnicity && (
+            <View className="flex-row items-center justify-between">
+              <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                Ethnicity
+              </Text>
+              <Text className="text-dark leading-5 text-xs font-normal capitalize">
+                {Array.isArray(profile.Ethnicity) 
+                  ? profile.Ethnicity.map(e => e.replace(/_/g, " ")).join(", ")
+                  : profile.Ethnicity.replace(/_/g, " ")}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
+
+      {/* Lifestyle Section - matches web */}
+      {(profile?.Smoking || profile?.Drinks || profile?.HaveChild || profile?.WantChild) && (
+        <View className="mt-[18px]">
+          <Text className="text-base mb-2 text-primary font-medium">
+            Lifestyle
+          </Text>
+          <View className="flex-col gap-2">
+            {profile?.Smoking && (
+              <View className="flex-row items-center justify-between">
+                <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                  Smoking
+                </Text>
+                <Text className="text-dark leading-5 text-xs font-normal capitalize">
+                  {profile.Smoking.replace(/_/g, " ")}
+                </Text>
+              </View>
+            )}
+            {profile?.Drinks && (
+              <View className="flex-row items-center justify-between">
+                <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                  Drinking
+                </Text>
+                <Text className="text-dark leading-5 text-xs font-normal capitalize">
+                  {profile.Drinks.replace(/_/g, " ")}
+                </Text>
+              </View>
+            )}
+            {profile?.Marijuana && (
+              <View className="flex-row items-center justify-between">
+                <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                  Marijuana
+                </Text>
+                <Text className="text-dark leading-5 text-xs font-normal capitalize">
+                  {profile.Marijuana.replace(/_/g, " ")}
+                </Text>
+              </View>
+            )}
+            {profile?.HaveChild && (
+              <View className="flex-row items-center justify-between">
+                <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                  Has Kids
+                </Text>
+                <Text className="text-dark leading-5 text-xs font-normal capitalize">
+                  {profile.HaveChild.replace(/_/g, " ")}
+                </Text>
+              </View>
+            )}
+            {profile?.WantChild && (
+              <View className="flex-row items-center justify-between">
+                <Text className="text-xs text-[#686A6F] leading-5 font-normal">
+                  Wants Kids
+                </Text>
+                <Text className="text-dark leading-5 text-xs font-normal capitalize">
+                  {profile.WantChild.replace(/_/g, " ")}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      )}
 
       {me ? (
         <TouchableOpacity

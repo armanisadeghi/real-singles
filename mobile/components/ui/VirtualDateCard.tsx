@@ -74,7 +74,7 @@ export default function VirtualDateCard({virtualDate}: { virtualDate: VirtualDat
     <TouchableOpacity
       activeOpacity={0.7}
       onPressIn={handlePressIn}
-      onPress={() => router.push(`/virtualdate/${virtualDate?.ID}`)}
+      onPress={() => router.push(`/speed-dating/${virtualDate?.ID}`)}
       className="overflow-hidden"
       style={{
         width: CARD_DIMENSIONS.listItem.width,

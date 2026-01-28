@@ -6,8 +6,8 @@ import {
   DRINKING_OPTIONS,
   EDUCATION_OPTIONS,
   ETHNICITY_OPTIONS,
+  EXERCISE_OPTIONS,
   HAS_KIDS_OPTIONS,
-  LOOKING_FOR_OPTIONS,
   MARIJUANA_OPTIONS,
   MARITAL_STATUS_OPTIONS,
   POLITICAL_OPTIONS,
@@ -61,7 +61,7 @@ export interface FilterData {
   smoke?: string;
   politicalView?: string;
   exercise?: string;
-  lookingFor?: string;
+  // Note: lookingFor removed - gender preference comes from user profile settings
 }
 
 interface FilterOptionsProps {
@@ -97,9 +97,7 @@ export default function FilterOptions({
   const [exercise, setExercise] = useState<string>(
     initialFilters?.exercise || ""
   );
-  const [lookingFor, setLookingFor] = useState<string>(
-    initialFilters?.lookingFor || ""
-  );
+  // Note: "Looking For" (gender preference) removed - comes from user profile settings, not filters
   const [minDistance, setMinDistance] = useState<number>(
     initialFilters?.distanceRange?.min || 0
   );
@@ -152,7 +150,6 @@ export default function FilterOptions({
     max_distance: number;
     exercise: string;
     marital_status: string;
-    looking_for: string;
     Smoke: string;
     PoliticalView: string;
   } | null>({
@@ -175,7 +172,6 @@ export default function FilterOptions({
     max_distance: 10000,
     exercise: "",
     marital_status: "",
-    looking_for: "",
     Smoke: "",
     PoliticalView: ""
   });
@@ -209,7 +205,7 @@ export default function FilterOptions({
         if (data.Education) setEducation(data.Education);
         if (data.Smoke) setSmoke(data.Smoke);
         if (data.PoliticalView) setPoliticalView(data.PoliticalView);
-        if (data.looking_for) setLookingFor(data.looking_for);
+        if (data.exercise) setExercise(data.exercise);
       }
     } catch (error) {
       console.error("Error fetching filters:", error);
@@ -243,11 +239,11 @@ export default function FilterOptions({
       min_distance: minDistance.toString(),
       max_distance: maxDistance.toString(),
       marital_status: maritalStatus,
-      looking_for: lookingFor,
       Smoke: smoke,
       PoliticalView: politicalView,
+      exercise: exercise,
     };
-  }, [ageMin, ageMax, heightMin, heightMax, bodyType, ethnicity, drinking, religion, education, hasKids, wantKids, pets, zodiac, marijuana, minDistance, maxDistance, maritalStatus, lookingFor, smoke, politicalView]);
+  }, [ageMin, ageMax, heightMin, heightMax, bodyType, ethnicity, drinking, religion, education, hasKids, wantKids, pets, zodiac, marijuana, minDistance, maxDistance, maritalStatus, smoke, politicalView, exercise]);
 
   // Report filter changes to parent whenever any value changes
   // Skip during initial API loading to avoid false positives
@@ -334,7 +330,6 @@ export default function FilterOptions({
         setSmoke("");
         setPoliticalView("");
         setExercise("");
-        setLookingFor("");
         setMinDistance(0);
         setMaxDistance(10000);
         // Note: gender state removed - comes from profile
@@ -624,7 +619,7 @@ export default function FilterOptions({
         )}
         items={POLITICAL_OPTIONS}
       />
-      {/* <RNPickerSelect
+      <RNPickerSelect
         value={filterData?.exercise || exercise}
         onValueChange={(value) => setExercise(value)}
         placeholder={{ label: "Exercise", value: null, color: "#9EA0A4" }}
@@ -638,24 +633,9 @@ export default function FilterOptions({
             resizeMode="contain"
           />
         )}
-        items={exerciseOptions}
-      /> */}
-      <RNPickerSelect
-        value={filterData?.looking_for || lookingFor}
-        onValueChange={(value) => setLookingFor(value)}
-        placeholder={{ label: "Looking For", value: null, color: "#9EA0A4" }}
-        style={pickerSelectStyles}
-        useNativeAndroidPickerStyle={true}
-        key="lookingFor"
-        Icon={() => (
-          <Image
-            source={icons.down}
-            className="size-4 mr-4"
-            resizeMode="contain"
-          />
-        )}
-        items={LOOKING_FOR_OPTIONS}
+        items={EXERCISE_OPTIONS}
       />
+      {/* Note: "Looking For" (gender preference) removed - comes from user profile settings, not filters */}
 
       {/* Distance Range - Native Sliders */}
       <View className="mb-6 pb-6 border-b border-b-border">

@@ -380,10 +380,7 @@ export default function Home() {
             <TouchableOpacity
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push({
-                  pathname: "/topMatches",
-                  params: { category: "virtualDates" },
-                });
+                router.push("/speed-dating");
               }}
               className="border border-primary bg-secondary rounded-full"
               style={{ 
@@ -539,10 +536,7 @@ export default function Home() {
               className="z-20"
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push({
-                  pathname: "/topMatches",
-                  params: { category: "virtualDates" },
-                });
+                router.push("/speed-dating");
               }}
             >
               <Text className="font-medium underline text-black" style={TYPOGRAPHY.subheadline}>
