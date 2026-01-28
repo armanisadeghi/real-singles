@@ -227,31 +227,47 @@ export default function HomePage() {
 
   return (
     <div className="min-h-dvh bg-background">
-      {/* Clean Native Header */}
-      <header className="bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center gap-4">
-            {/* Greeting */}
-            <h1 className="text-xl sm:text-2xl font-semibold text-foreground truncate">
-              Welcome back{userInfo.displayName ? `, ${userInfo.displayName.split(' ')[0]}` : ''}
-            </h1>
+      {/* Clean Header with Logo */}
+      <header className="bg-background border-b border-border sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            {/* Logo */}
+            <Link href="/home" className="flex items-center gap-2 flex-shrink-0">
+              <img 
+                src="/images/logo.png" 
+                alt="RealSingles" 
+                className="h-8 sm:h-9 w-auto"
+              />
+            </Link>
             
-            {/* Right Actions: Points + Notifications + Menu */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Right Actions: Refresh + Points + Notifications + Menu */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Refresh - subtle, appears on hover of container */}
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary/80 transition-colors disabled:opacity-50"
+                title="Refresh content"
+              >
+                <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </button>
+              
               <PointsBadge
                 points={userInfo.points}
                 size="sm"
                 href="/rewards"
               />
+              
               <Link
                 href="/notifications"
-                className="p-2.5 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
+                className="p-2 sm:p-2.5 rounded-full hover:bg-secondary/80 transition-colors"
               >
                 <Bell className="w-5 h-5 text-foreground" />
               </Link>
+              
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className="p-2.5 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
+                className="p-2 sm:p-2.5 rounded-full hover:bg-secondary/80 transition-colors"
               >
                 <Menu className="w-5 h-5 text-foreground" />
               </button>
@@ -260,65 +276,52 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Quick Action Pills with Refresh */}
-      <section className="bg-white/95 backdrop-blur-sm sticky top-0 z-40 shadow-sm">
+      {/* Quick Action Pills */}
+      <section className="bg-background border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center gap-2">
-            {/* Scrollable Pills */}
-            <div
-              className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 flex-1"
-              style={{
-                touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain'
-              }}
+          <div
+            className="flex gap-2 overflow-x-auto scrollbar-hide"
+            style={{
+              touchAction: 'pan-x',
+              overscrollBehaviorX: 'contain'
+            }}
+          >
+            <Link
+              href="/discover"
+              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
             >
-              <Link
-                href="/discover"
-                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
-              >
-                Discover
-              </Link>
-              <Link
-                href="/matches"
-                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
-              >
-                Top Matches
-              </Link>
-              <Link
-                href="/discover?filter=videos"
-                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
-              >
-                Videos
-              </Link>
-              <Link
-                href="/speed-dating"
-                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
-              >
-                Virtual Dates
-              </Link>
-              <Link
-                href="/discover?filter=nearby"
-                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
-              >
-                Nearby
-              </Link>
-              <Link
-                href="/events"
-                className="flex-shrink-0 px-4 py-2 bg-white border border-primary text-primary hover:bg-primary/5 rounded-full font-medium text-sm transition-colors"
-              >
-                Events
-              </Link>
-            </div>
-            
-            {/* Refresh Button - Icon only */}
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="flex-shrink-0 p-2 text-gray-400 hover:text-primary hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
-              title="Refresh"
+              Discover
+            </Link>
+            <Link
+              href="/matches"
+              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
             >
-              <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </button>
+              Top Matches
+            </Link>
+            <Link
+              href="/discover?filter=videos"
+              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
+            >
+              Videos
+            </Link>
+            <Link
+              href="/speed-dating"
+              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
+            >
+              Virtual Dates
+            </Link>
+            <Link
+              href="/discover?filter=nearby"
+              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
+            >
+              Nearby
+            </Link>
+            <Link
+              href="/events"
+              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
+            >
+              Events
+            </Link>
           </div>
         </div>
       </section>
