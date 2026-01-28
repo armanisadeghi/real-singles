@@ -366,6 +366,7 @@ const Call = () => {
                 ) : (
                     <Text style={[styles.waitingText, { color: themedColors.secondaryText }]}>
                         {isJoined ? 'Waiting for remote user to join' : ''}
+                    </Text>
                 )}
                 {message ? <Text style={[styles.info, { backgroundColor: themedColors.warnBg, color: themedColors.text }]}>{message}</Text> : null}
             </ScrollView>

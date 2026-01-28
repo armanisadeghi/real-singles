@@ -12,6 +12,7 @@ import {
   Image,
   PermissionsAndroid,
   Platform,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
