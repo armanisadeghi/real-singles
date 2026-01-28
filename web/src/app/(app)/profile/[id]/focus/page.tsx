@@ -122,7 +122,7 @@ export default function ProfileFocusPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-dvh flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -130,7 +130,7 @@ export default function ProfileFocusPage() {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="min-h-dvh flex flex-col items-center justify-center p-4">
         <div className="text-6xl mb-4">😕</div>
         <h1 className="text-xl font-semibold text-gray-900 mb-2">Profile not found</h1>
         <p className="text-gray-600 mb-6">{error || "The profile you're looking for doesn't exist."}</p>

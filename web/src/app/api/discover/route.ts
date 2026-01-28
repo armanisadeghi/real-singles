@@ -344,17 +344,23 @@ export async function GET() {
     .order("scheduled_datetime", { ascending: true })
     .limit(5);
 
-  const Virtual = (virtualDating || []).map((session) => ({
-    ID: session.id,
-    Title: session.title,
-    Description: session.description || "",
-    Image: session.image_url || "",
-    ScheduledDate: session.scheduled_datetime?.split("T")[0] || "",
-    ScheduledTime: session.scheduled_datetime ? new Date(session.scheduled_datetime).toLocaleTimeString() : "",
-    Duration: session.duration_minutes,
-    MaxParticipants: session.max_participants,
-    Status: session.status,
-  }));
+  // Resolve speed dating image URLs (uses events bucket - same as regular events)
+  const Virtual = await Promise.all(
+    (virtualDating || []).map(async (session) => {
+      const imageUrl = await resolveStorageUrl(supabase, session.image_url, { bucket: "events" });
+      return {
+        ID: session.id,
+        Title: session.title,
+        Description: session.description || "",
+        Image: imageUrl,
+        ScheduledDate: session.scheduled_datetime?.split("T")[0] || "",
+        ScheduledTime: session.scheduled_datetime ? new Date(session.scheduled_datetime).toLocaleTimeString() : "",
+        Duration: session.duration_minutes,
+        MaxParticipants: session.max_participants,
+        Status: session.status,
+      };
+    })
+  );
 
   return NextResponse.json({
     success: true,

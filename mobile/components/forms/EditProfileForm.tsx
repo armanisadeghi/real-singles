@@ -786,7 +786,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             Personal Details
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <Image source={icons.back} resizeMode="contain" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
           </Animated.View>
         </TouchableOpacity>
 
@@ -816,11 +816,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 value={formData.Gender}
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
             </View>
@@ -857,11 +855,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 }
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
 
@@ -893,11 +889,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 }
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               /> */}
 
@@ -918,11 +912,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 style={pickerSelectStyles}
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
             </View>
@@ -940,11 +932,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 value={formData.HaveChild}
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
             </View>
@@ -962,11 +952,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 value={formData.WantChild}
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
             </View>
@@ -986,11 +974,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 value={formData.Education}
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
             </View>
@@ -1008,11 +994,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 value={formData.DatingIntentions}
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
             </View>
@@ -1036,7 +1020,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             Pick your Interest
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <Image source={icons.back} resizeMode="contain" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1078,11 +1062,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                           borderRadius: 50, // IMPORTANT for iOS
                         }}
                       >
-                        <Image
-                          source={icons.check}
-                          style={{ width: 20, height: 20 }}
-                          resizeMode="contain"
-                        />
+                        <PlatformIcon name="check" size={20} color="#fff" />
                         <Text style={{ color: "#fff" }}>{option.label}</Text>
                       </LinearBg>
                     ) : (
@@ -1124,7 +1104,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             Education and Job Details
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <Image source={icons.back} resizeMode="contain" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1176,7 +1156,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                       }}
                       className="p-2"
                     >
-                      <Image source={icons.remove} className="w-5 h-5" />
+                      <PlatformIcon name="close" size={20} color="#EF4444" />
                     </TouchableOpacity>
                   </View>
                 ))
@@ -1260,7 +1240,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         >
           <Text className="text-primary font-medium text-lg">Appearance</Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <Image source={icons.back} resizeMode="contain" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1352,11 +1332,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                               borderRadius: 50, // Needed for iOS masking
                             }}
                           >
-                            <Image
-                              source={icons.check}
-                              style={{ width: 20, height: 20 }}
-                              resizeMode="contain"
-                            />
+                            <PlatformIcon name="check" size={20} color="#fff" />
                             <Text style={{ color: "#fff" }}>{option.label}</Text>
                           </LinearBg>
                         ) : (
@@ -1398,7 +1374,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             Habit & Interests
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <Image source={icons.back} resizeMode="contain" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1422,11 +1398,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 value={formData.Smoking}
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
             </View>
@@ -1444,11 +1418,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 style={pickerSelectStyles}
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
             </View>
@@ -1466,11 +1438,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 value={formData.Drinks}
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
             </View>
@@ -1508,11 +1478,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                             borderRadius: 50,
                           }}
                         >
-                          <Image
-                            source={icons.check}
-                            style={{ width: 20, height: 20 }}
-                            resizeMode="contain"
-                          />
+                          <PlatformIcon name="check" size={20} color="#fff" />
                           <Text style={{ color: "#fff" }}>{option.label}</Text>
                         </LinearBg>
                       ) : (
@@ -1545,11 +1511,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 value={formData.Exercise}
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
             </View>
@@ -1571,7 +1535,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         >
           <Text className="text-primary font-medium text-lg">Ethnicity</Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <Image source={icons.back} resizeMode="contain" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1613,11 +1577,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                           borderRadius: 50, // For iOS masking
                         }}
                       >
-                        <Image
-                          source={icons.check}
-                          style={{ width: 20, height: 20 }}
-                          resizeMode="contain"
-                        />
+                        <PlatformIcon name="check" size={20} color="#fff" />
                         <Text style={{ color: "#fff" }}>{option.label}</Text>
                       </LinearBg>
                     ) : (
@@ -1654,7 +1614,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         >
           <Text className="text-primary font-medium text-lg">Language</Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <Image source={icons.back} resizeMode="contain" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
           </Animated.View>
         </TouchableOpacity>
         {language && (
@@ -1697,11 +1657,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                           borderRadius: 50,
                         }}
                       >
-                        <Image
-                          source={icons.check}
-                          style={{ width: 20, height: 20 }}
-                          resizeMode="contain"
-                        />
+                        <PlatformIcon name="check" size={20} color="#fff" />
                         <Text style={{ color: "#fff", textTransform: "capitalize" }}>
                           {option.label}
                         </Text>
@@ -1745,7 +1701,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         >
           <Text className="text-primary font-medium text-lg">Religion</Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <Image source={icons.back} resizeMode="contain" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
           </Animated.View>
         </TouchableOpacity>
         {religion && (
@@ -1783,11 +1739,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                           borderRadius: 50,
                         }}
                       >
-                        <Image
-                          source={icons.check}
-                          style={{ width: 20, height: 20 }}
-                          resizeMode="contain"
-                        />
+                        <PlatformIcon name="check" size={20} color="#fff" />
                         <Text style={{ color: "#fff", textTransform: "capitalize" }}>
                           {option.label}
                         </Text>
@@ -1830,7 +1782,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             Poltical Views
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <Image source={icons.back} resizeMode="contain" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1853,11 +1805,9 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                 style={pickerSelectStyles}
                 useNativeAndroidPickerStyle={true}
                 Icon={() => (
-                  <Image
-                    source={icons.down}
-                    style={{ width: 15, height: 15, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ marginRight: 15 }}>
+                    <PlatformIcon name="keyboard-arrow-down" size={15} color="#000" />
+                  </View>
                 )}
               />
             </View>
@@ -1880,7 +1830,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
         >
           <Text className="text-primary font-medium text-lg">Life Goals</Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <Image source={icons.back} resizeMode="contain" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
           </Animated.View>
         </TouchableOpacity>
 
@@ -1943,11 +1893,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
                                     borderRadius: 50,
                                   }}
                                 >
-                                  <Image
-                                    source={icons.check}
-                                    style={{ width: 16, height: 16 }}
-                                    resizeMode="contain"
-                                  />
+                                  <PlatformIcon name="check" size={16} color="#fff" />
                                   <Text style={{ color: "#fff", fontSize: 12 }}>
                                     {goal.label}
                                   </Text>
@@ -1996,7 +1942,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             In a few Words
           </Text>
           <Animated.View style={arrowAnimatedStyle}>
-            <Image source={icons.back} resizeMode="contain" />
+            <PlatformIcon name="keyboard-arrow-right" size={20} color="#000" />
           </Animated.View>
         </TouchableOpacity>
 

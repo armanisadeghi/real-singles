@@ -179,7 +179,7 @@ export default function DiscoveryProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-dvh flex items-center justify-center bg-white">
         <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -187,7 +187,7 @@ export default function DiscoveryProfilePage() {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-white">
+      <div className="min-h-dvh flex flex-col items-center justify-center p-6 bg-white">
         <div className="text-6xl mb-4">😕</div>
         <h1 className="text-xl font-semibold text-gray-900 mb-2">
           Profile not found

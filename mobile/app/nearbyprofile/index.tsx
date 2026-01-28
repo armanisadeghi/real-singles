@@ -6,7 +6,6 @@ import { User } from "@/types";
 import { requestPermissionWithExplanation } from "@/utils/permissions";
 import { getCurrentUserId, VIDEO_URL } from "@/utils/token";
 import * as Haptics from "expo-haptics";
-import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -379,10 +378,10 @@ export default function NearBy() {
           style={styles.mapControlButton}
           className="bg-white rounded-full shadow-md  mb-2"
         >
-          <MaterialIcons
+          <PlatformIcon
             name="location-on"
-            size={20}        // width/height ke liye size use karo
-            color="#B06D1E"  // tintColor ki jagah
+            size={20}
+            color="#B06D1E"
           />
         </TouchableOpacity>
 
@@ -468,9 +467,9 @@ export default function NearBy() {
                       {selectedUser?.DisplayName}
                     </Text>
                     <View className="flex-row items-center mt-1">
-                      <MaterialIcons
-                        name="location-on"   // Material icon for location
-                        size={16}            // adjust size as needed
+                      <PlatformIcon
+                        name="location-on"
+                        size={16}
                         color="#ffffff"
                         style={{ marginRight: 4 }}
                       />
@@ -489,17 +488,17 @@ export default function NearBy() {
                       setSelectedUser(null);
                     }}
                   >
-                    <MaterialIcons name="close" size={24} color="white" />
+                    <PlatformIcon name="close" size={24} color="white" />
                   </TouchableOpacity>
                 </View>
 
                 <View className="p-6 flex-1">
                   <View className="flex-row items-center mb-4">
-                    <MaterialIcons
-                      name="email"        // Material icon for email
-                      size={20}           // adjust size as needed
+                    <PlatformIcon
+                      name="mail"
+                      size={20}
                       color="#B06D1E"
-                      style={{ marginRight: 8 }} // replace mr-2
+                      style={{ marginRight: 8 }}
                     />
                     <Text className="text-gray flex-1">
                       {selectedUser?.Email}

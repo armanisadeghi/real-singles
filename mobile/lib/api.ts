@@ -224,22 +224,30 @@ export const updateUser = async (data: EditProfileFormData) => {
 
 /**
  * Check if email already exists
+ * Uses API endpoint instead of direct Supabase for SSOT compliance
  */
 export const checkEmailExist = async (emailData: FormData) => {
   const email = emailData.get("Email") as string || emailData.get("email") as string;
   
-  // Use Supabase directly for this check
-  const { data, error } = await supabase
-    .from("users")
-    .select("id")
-    .eq("email", email)
-    .single();
-
-  return {
-    success: true,
-    exists: !!data && !error,
-    msg: data ? "Email already exists" : "Email is available",
-  };
+  try {
+    const response = await apiRequest("/auth/check-email", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+    
+    return {
+      success: true,
+      exists: response?.exists ?? false,
+      msg: response?.message ?? "Email check completed",
+    };
+  } catch (error) {
+    console.error("Email check error:", error);
+    return {
+      success: false,
+      exists: false,
+      msg: "Failed to check email",
+    };
+  }
 };
 
 // ===========================================

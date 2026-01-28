@@ -208,7 +208,7 @@ END:VCALENDAR`;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-dvh bg-gray-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
@@ -216,7 +216,7 @@ END:VCALENDAR`;
 
   if (error || !event) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className="min-h-dvh bg-gray-50 flex flex-col items-center justify-center p-4">
         <p className="text-gray-600 mb-4">{error || "Event not found"}</p>
         <Link
           href="/events"
@@ -234,7 +234,7 @@ END:VCALENDAR`;
   const registeredUsers = event.interestedUsers?.filter(u => u.status === "registered") || [];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-dvh bg-gray-50 pb-24">
       {/* Hero Image */}
       <div className="relative h-64 sm:h-80 bg-gradient-to-br from-primary/30 to-purple-200">
         {event.EventImage && (

@@ -193,7 +193,7 @@ export default function HomePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-dvh bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
@@ -202,7 +202,7 @@ export default function HomePage() {
   // Error state
   if (error || !userInfo) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-dvh bg-background flex items-center justify-center p-4">
         <div className="text-center">
           <EmptyState
             title="Unable to load home data"
@@ -226,7 +226,7 @@ export default function HomePage() {
   const speedDating = homeData?.Virtual || [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       {/* Hero Section - Modern, Clean Design */}
       <section 
         className="relative bg-cover bg-center"
@@ -384,151 +384,6 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* Featured Videos Section */}
-        <section>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Featured Videos</h2>
-            <Link
-              href="/discover?filter=videos"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
-            >
-              View All
-            </Link>
-          </div>
-
-          {videos.length > 0 ? (
-            <div
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-              style={{
-                touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain'
-              }}
-            >
-              {videos.slice(0, 10).map((video) => (
-                <Link
-                  key={video.ID}
-                  href={`/profile/${video.ID}`}
-                  className="flex-shrink-0 w-32 group"
-                >
-                  <div className="relative aspect-[9/16] rounded-xl overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100">
-                    {video.VideoURL && (
-                      <video
-                        src={video.VideoURL}
-                        className="w-full h-full object-cover"
-                        muted
-                        playsInline
-                      />
-                    )}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-                      <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Video className="w-5 h-5 text-purple-500" />
-                      </div>
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
-                      <p className="text-white font-medium text-xs truncate">
-                        {video.Name}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-sm">No featured videos available</p>
-          )}
-        </section>
-
-        {/* Virtual Speed Dating Section */}
-        <section>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Virtual Speed Dating</h2>
-            <Link
-              href="/speed-dating"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
-            >
-              View All
-            </Link>
-          </div>
-
-          {speedDating.length > 0 ? (
-            <div
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-              style={{
-                touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain'
-              }}
-            >
-              {speedDating.slice(0, 10).map((session) => (
-                <Link
-                  key={session.ID}
-                  href={`/speed-dating/${session.ID}`}
-                  className="flex-shrink-0 w-60 sm:w-64 bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-4 border"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
-                      {session.Status}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-sm mb-1 truncate">{session.Title}</h3>
-                  <p className="text-gray-600 text-xs mb-2 line-clamp-2">
-                    {session.Description}
-                  </p>
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {session.ScheduledDate}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="w-3 h-3" />
-                      {session.MaxParticipants} max
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-sm">No virtual speed dating available</p>
-          )}
-        </section>
-
-        {/* Nearby Profiles Section */}
-        <section>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Nearby Profile</h2>
-            <Link
-              href="/discover?filter=nearby"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
-            >
-              View All
-            </Link>
-          </div>
-
-          {nearbyProfiles.length > 0 ? (
-            <div
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-              style={{
-                touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain'
-              }}
-            >
-              {nearbyProfiles.slice(0, 10).map((profile) => (
-                <div key={profile.ID || profile.id} className="flex-shrink-0 w-40 sm:w-44">
-                  <ProfileCard
-                    profile={formatProfileForCard(profile)}
-                    showActions={false}
-                    size="compact"
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-sm">No nearby profiles available</p>
-          )}
-        </section>
-
         {/* Events Section */}
         <section>
           <div className="flex justify-between items-center mb-4">
@@ -591,6 +446,168 @@ export default function HomePage() {
             </div>
           ) : (
             <p className="text-gray-500 text-sm">No events available</p>
+          )}
+        </section>
+
+        {/* Virtual Speed Dating Section */}
+        <section>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-primary">Virtual Speed Dating</h2>
+            <Link
+              href="/speed-dating"
+              className="text-sm font-medium underline text-gray-700 hover:text-primary"
+            >
+              View All
+            </Link>
+          </div>
+
+          {speedDating.length > 0 ? (
+            <div
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+              style={{
+                touchAction: 'pan-x',
+                overscrollBehaviorX: 'contain'
+              }}
+            >
+              {speedDating.slice(0, 10).map((session) => (
+                <Link
+                  key={session.ID}
+                  href={`/speed-dating/${session.ID}`}
+                  className="flex-shrink-0 w-72 bg-white rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden border group"
+                >
+                  {/* Image section - matches event card pattern */}
+                  {session.Image ? (
+                    <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 relative overflow-hidden">
+                      <img
+                        src={session.Image}
+                        alt=""
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {/* Status badge overlay */}
+                      <span className="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur-sm text-purple-700 text-xs font-medium rounded-full">
+                        {session.Status}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="aspect-video bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center relative">
+                      <Video className="w-12 h-12 text-white/80" />
+                      {/* Status badge overlay */}
+                      <span className="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur-sm text-purple-700 text-xs font-medium rounded-full">
+                        {session.Status}
+                      </span>
+                    </div>
+                  )}
+                  {/* Content section */}
+                  <div className="p-4">
+                    <h3 className="font-bold text-sm mb-1 truncate">{session.Title}</h3>
+                    <p className="text-gray-600 text-xs mb-2 line-clamp-2">
+                      {session.Description}
+                    </p>
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {session.ScheduledDate}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {session.MaxParticipants} max
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No virtual speed dating available</p>
+          )}
+        </section>
+
+        {/* Nearby Profiles Section */}
+        <section>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-primary">Nearby Profiles</h2>
+            <Link
+              href="/discover?filter=nearby"
+              className="text-sm font-medium underline text-gray-700 hover:text-primary"
+            >
+              View All
+            </Link>
+          </div>
+
+          {nearbyProfiles.length > 0 ? (
+            <div
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+              style={{
+                touchAction: 'pan-x',
+                overscrollBehaviorX: 'contain'
+              }}
+            >
+              {nearbyProfiles.slice(0, 10).map((profile) => (
+                <div key={profile.ID || profile.id} className="flex-shrink-0 w-40 sm:w-44">
+                  <ProfileCard
+                    profile={formatProfileForCard(profile)}
+                    showActions={false}
+                    size="compact"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No nearby profiles available</p>
+          )}
+        </section>
+
+        {/* Featured Videos Section */}
+        <section>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-primary">Featured Videos</h2>
+            <Link
+              href="/discover?filter=videos"
+              className="text-sm font-medium underline text-gray-700 hover:text-primary"
+            >
+              View All
+            </Link>
+          </div>
+
+          {videos.length > 0 ? (
+            <div
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+              style={{
+                touchAction: 'pan-x',
+                overscrollBehaviorX: 'contain'
+              }}
+            >
+              {videos.slice(0, 10).map((video) => (
+                <Link
+                  key={video.ID}
+                  href={`/profile/${video.ID}`}
+                  className="flex-shrink-0 w-32 group"
+                >
+                  <div className="relative aspect-[9/16] rounded-xl overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100">
+                    {video.VideoURL && (
+                      <video
+                        src={video.VideoURL}
+                        className="w-full h-full object-cover"
+                        muted
+                        playsInline
+                      />
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+                      <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Video className="w-5 h-5 text-purple-500" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
+                      <p className="text-white font-medium text-xs truncate">
+                        {video.Name}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No featured videos available</p>
           )}
         </section>
       </div>

@@ -8,7 +8,6 @@ import { fetchOtherProfile } from "@/lib/api";
 import { User } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import * as Haptics from "expo-haptics";
-import { MaterialIcons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useNavigationState } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -263,7 +262,7 @@ export default function ProfileDetail() {
         </View>
 
         <View style={styles.errorContent}>
-          <MaterialIcons name="error-outline" size={80} color="#FF6B6B" />
+          <PlatformIcon name="error-outline" size={80} color="#FF6B6B" />
           <Text style={styles.errorTitle}>Oops!</Text>
           <Text style={styles.errorMessage}>{error}</Text>
 
@@ -278,7 +277,7 @@ export default function ProfileDetail() {
               onPress={handleRetry}
               activeOpacity={0.8}
             >
-              <MaterialIcons name="refresh" size={20} color="#FFFFFF" />
+              <PlatformIcon name="refresh" size={20} color="#FFFFFF" />
               <Text style={styles.retryText}>Try Again</Text>
             </TouchableOpacity>
           </Animated.View>

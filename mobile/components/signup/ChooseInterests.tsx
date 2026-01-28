@@ -1,4 +1,5 @@
 import { images } from "@/constants/images";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { useDeviceSize } from "@/hooks/useResponsive";
 import { signupProps } from "@/types";
 import * as Haptics from "expo-haptics";
@@ -163,10 +164,9 @@ const ChooseInterests = ({ data, updateData, onNext, error }: signupProps) => {
                     zIndex: 10,
                   }}
                 >
-                  <Image
-                    source={require("../../assets/icons/check.png")}
-                    className="rounded-full w-8 h-8 bg-white"
-                  />
+                  <View className="rounded-full w-8 h-8 bg-white items-center justify-center">
+                    <PlatformIcon name="check" size={24} color="#F29A2C" />
+                  </View>
                 </View>
               )}
             </TouchableOpacity>

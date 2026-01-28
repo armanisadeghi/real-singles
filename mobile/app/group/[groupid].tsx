@@ -13,7 +13,7 @@ import {
 } from "@/services/agoraChatServices";
 import { getCurrentUserId, IMAGE_URL, MEDIA_BASE_URL, VIDEO_URL } from "@/utils/token";
 import * as Haptics from "expo-haptics";
-import { MaterialIcons } from "@expo/vector-icons";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Image, KeyboardAvoidingView, Modal, Platform, Text, TouchableOpacity, View } from "react-native";
@@ -475,7 +475,7 @@ export default function GroupChat() {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setShowMembers(false);
               }}>
-                <MaterialIcons name="close" size={24} color={'black'} />
+                <PlatformIcon name="close" size={24} color="#000" />
               </TouchableOpacity>
             </View>
 
@@ -608,7 +608,7 @@ export default function GroupChat() {
               alignItems: "center",
             }}
           >
-            <MaterialIcons name="group" size={22} color="#000" />
+            <PlatformIcon name="group" size={22} color="#000" />
           </TouchableOpacity>
         }
       />

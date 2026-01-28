@@ -148,19 +148,19 @@ export default function ChatInput({ onSend }: ChatInputProps) {
         <View className="border-[1px] border-border w-full my-4 rounded-full" />
         <View className="flex-row items-center justify-center gap-4">
           <TouchableOpacity className="flex-row items-center justify-center gap-2 bg-light-100 border border-border py-[6px] px-3 rounded-[50px]">
-            <Image source={icons.file} resizeMode="contain" />
+            <PlatformIcon name="attachment" size={14} color="#333" />
             <Text className="font-medium text-[10px] text-dark">File</Text>
           </TouchableOpacity>
           <TouchableOpacity className="flex-row items-center justify-center gap-2 bg-light-100 border border-border py-[6px] px-3 rounded-[50px]">
-            <Image source={icons.gallary} resizeMode="contain" />
+            <PlatformIcon name="photo-library" size={14} color="#333" />
             <Text className="font-medium text-[10px] text-dark">Photo</Text>
           </TouchableOpacity>
           <TouchableOpacity className="flex-row items-center justify-center gap-2 bg-light-100 border border-border py-[6px] px-3 rounded-[50px]">
-            <Image source={icons.camera} resizeMode="contain" />
+            <PlatformIcon name="camera" size={14} color="#333" />
             <Text className="font-medium text-[10px] text-dark">Camera</Text>
           </TouchableOpacity>
           <TouchableOpacity className="flex-row items-center justify-center gap-2 bg-light-100 border border-border py-[6px] px-3 rounded-[50px]">
-            <Image source={icons.video} resizeMode="contain" />
+            <PlatformIcon name="videocam" size={14} color="#333" />
             <Text className="font-medium text-[10px] text-dark">Video</Text>
           </TouchableOpacity>
         </View>

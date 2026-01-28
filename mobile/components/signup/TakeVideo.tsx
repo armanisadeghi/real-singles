@@ -1,4 +1,5 @@
 import { icons } from "@/constants/icons";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { CommonFileUpload } from "@/lib/api";
 import { signupProps } from "@/types";
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
@@ -405,7 +406,7 @@ return (
         onPress={toggleCameraFacing}
         disabled={recording || !cameraReady}
       >
-        <Image source={icons.flip} style={styles.flipIcon} />
+        <PlatformIcon name="flip-camera-ios" size={28} color="#fff" iosName="camera.rotate" />
       </TouchableOpacity>
 
       {recording ? (

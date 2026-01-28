@@ -64,8 +64,8 @@ export async function GET(
     );
   }
 
-  // Resolve image URL
-  const imageUrl = await resolveStorageUrl(adminSupabase, session.image_url);
+  // Resolve image URL (speed dating images use the events bucket)
+  const imageUrl = await resolveStorageUrl(adminSupabase, session.image_url, { bucket: "events" });
 
   return NextResponse.json({
     success: true,

@@ -2,6 +2,7 @@ import LinearBg from "@/components/LinearBg";
 import SociaLoginButtons from "@/components/SociaLoginButtons";
 import GradientButton from "@/components/ui/GradientButton";
 import { icons } from "@/constants/icons";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { signInWithEmail, resetPassword as supabaseResetPassword } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import * as Haptics from 'expo-haptics';
@@ -312,7 +313,7 @@ const Login = () => {
           {/* Email Input */}
           <View className="mb-4">
             <View className="flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
-              <Image source={icons.email} resizeMode="contain" />
+              <PlatformIcon name="mail" size={20} color="#666" />
               <TextInput
                 placeholder="Email or Phone Number"
                 placeholderTextColor="#B0B0B0"
@@ -347,7 +348,7 @@ const Login = () => {
           {/* Password Input */}
           <View className="mb-3">
             <View className="relative flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
-              <Image source={icons.lock} resizeMode="contain" />
+              <PlatformIcon name="lock" size={20} color="#666" />
               <TextInput
                 placeholder="Password"
                 placeholderTextColor="#B0B0B0"
@@ -374,10 +375,10 @@ const Login = () => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setShowPassword(!showPassword);
               }}>
-                <Image
-                  source={showPassword ? icons.eyeClosed : icons.eyeOpen}
-                  resizeMode="contain"
-                  style={{ width: 15, height: 15 }}
+                <PlatformIcon 
+                  name={showPassword ? "visibility-off" : "visibility"} 
+                  size={15} 
+                  color="#666" 
                 />
               </TouchableOpacity>
             </View>
@@ -412,11 +413,11 @@ const Login = () => {
           />
 
          <View className="flex-row justify-center items-center mt-6 mb-6 gap-2">
-            <Image source={icons.line} resizeMode="contain" />
-            <Text className="font-medium text-xs text-dark">
-              Or continue with{" "}
+            <View className="flex-1 h-[1px] bg-gray-300" />
+            <Text className="font-medium text-xs text-dark px-2">
+              Or continue with
             </Text>
-            <Image source={icons.line} resizeMode="contain" />
+            <View className="flex-1 h-[1px] bg-gray-300" />
           </View>
          <SociaLoginButtons />
 
@@ -523,7 +524,7 @@ const Login = () => {
 
                 <View className="mb-4">
                   <View className="flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
-                    <Image source={icons.email} resizeMode="contain" />
+                    <PlatformIcon name="mail" size={20} color="#666" />
                     <TextInput
                       placeholder="Enter your email"
                       placeholderTextColor="#B0B0B0"
@@ -660,7 +661,7 @@ const Login = () => {
 
                 <View className="mb-4">
                   <View className="relative flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
-                    <Image source={icons.lock} resizeMode="contain" />
+                    <PlatformIcon name="lock" size={20} color="#666" />
                     <TextInput
                       placeholder="New Password"
                       placeholderTextColor="#B0B0B0"
@@ -684,10 +685,10 @@ const Login = () => {
                         setShowPassword(!showPassword);
                       }}
                     >
-                      <Image
-                        source={showPassword ? icons.eyeClosed : icons.eyeOpen}
-                        resizeMode="contain"
-                        style={{ width: 15, height: 15 }}
+                      <PlatformIcon 
+                        name={showPassword ? "visibility-off" : "visibility"} 
+                        size={15} 
+                        color="#666" 
                       />
                     </TouchableOpacity>
                   </View>

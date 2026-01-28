@@ -11,10 +11,9 @@
 
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import ProfileListItem from "@/components/ui/ProfileListItem";
-import { COLORS, VERTICAL_SPACING } from "@/constants/designTokens";
 import { getMatches, getLikesReceived, sendMatchAction } from "@/lib/api";
 import { User } from "@/types";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useRouter, Href } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -26,7 +25,12 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
-import { Ionicons } from "@expo/vector-icons";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
+
+// Design colors
+const COLORS = {
+  primary: "#FF6B9D",
+} as const;
 
 // Tab types
 type TabType = "likes" | "matches";
@@ -182,7 +186,7 @@ export default function ConnectionsScreen() {
             position: "bottom",
             visibilityTime: 1500,
           });
-          router.push(`/chats/${result.conversation_id}`);
+          router.push(`/chat/${result.conversation_id}` as Href);
         } else {
           Toast.show({
             type: "success",
@@ -214,7 +218,7 @@ export default function ConnectionsScreen() {
   };
 
   const handleMessageMatch = (conversationId: string) => {
-    router.push(`/chats/${conversationId}`);
+    router.push(`/chat/${conversationId}` as Href);
   };
 
   // Render like item with action buttons
@@ -224,9 +228,8 @@ export default function ConnectionsScreen() {
     return (
       <View style={[styles.listItem, item.is_super_like && styles.superLikeItem]}>
         <ProfileListItem 
-          user={item} 
-          onPress={() => router.push(`/profiles/focus/${item.ID}`)}
-          style={{ flex: 1 }}
+          profile={item} 
+          onPress={() => router.push(`/profiles/focus/${item.ID}` as Href)}
         />
         <View style={styles.actionButtons}>
           <TouchableOpacity
@@ -234,7 +237,7 @@ export default function ConnectionsScreen() {
             onPress={() => handlePass(item.ID)}
             disabled={isLoading}
           >
-            <Ionicons name="close" size={20} color="#666" />
+            <PlatformIcon name="close" size={20} color="#666" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.likeButton}
@@ -244,7 +247,7 @@ export default function ConnectionsScreen() {
             {isLoading ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Ionicons name="heart" size={20} color="#fff" />
+              <PlatformIcon name="favorite" size={20} color="#fff" />
             )}
           </TouchableOpacity>
         </View>
@@ -256,16 +259,15 @@ export default function ConnectionsScreen() {
   const renderMatchItem = ({ item }: { item: User & { conversation_id?: string | null } }) => (
     <View style={styles.listItem}>
       <ProfileListItem 
-        user={item} 
-        onPress={() => router.push(`/profile/${item.ID}`)}
-        style={{ flex: 1 }}
+        profile={item} 
+        onPress={() => router.push(`/profiles/${item.ID}` as Href)}
       />
       {item.conversation_id && (
         <TouchableOpacity
           style={styles.messageButton}
           onPress={() => handleMessageMatch(item.conversation_id!)}
         >
-          <Ionicons name="chatbubble" size={20} color="#fff" />
+          <PlatformIcon name="chat" size={20} color="#fff" />
         </TouchableOpacity>
       )}
     </View>
@@ -273,7 +275,7 @@ export default function ConnectionsScreen() {
 
   const renderEmptyLikes = () => (
     <View style={styles.emptyContainer}>
-      <Ionicons name="thumbs-up-outline" size={64} color="#FFB347" />
+      <PlatformIcon name="thumb-up" size={64} color="#FFB347" />
       <Text style={styles.emptyTitle}>No new likes</Text>
       <Text style={styles.emptySubtitle}>
         When someone likes you, they'll appear here
@@ -283,7 +285,7 @@ export default function ConnectionsScreen() {
 
   const renderEmptyMatches = () => (
     <View style={styles.emptyContainer}>
-      <Ionicons name="heart-outline" size={64} color="#FF6B9D" />
+      <PlatformIcon name="favorite-border" size={64} color="#FF6B9D" />
       <Text style={styles.emptyTitle}>No matches yet</Text>
       <Text style={styles.emptySubtitle}>
         When you and someone else like each other, you'll match!
@@ -301,8 +303,8 @@ export default function ConnectionsScreen() {
           style={[styles.tab, activeTab === "likes" && styles.activeTab]}
           onPress={() => setActiveTab("likes")}
         >
-          <Ionicons 
-            name={activeTab === "likes" ? "thumbs-up" : "thumbs-up-outline"} 
+          <PlatformIcon 
+            name="thumb-up" 
             size={18} 
             color={activeTab === "likes" ? COLORS.primary : "#666"} 
           />
@@ -320,8 +322,8 @@ export default function ConnectionsScreen() {
           style={[styles.tab, activeTab === "matches" && styles.activeTab]}
           onPress={() => setActiveTab("matches")}
         >
-          <Ionicons 
-            name={activeTab === "matches" ? "heart" : "heart-outline"} 
+          <PlatformIcon 
+            name={activeTab === "matches" ? "favorite" : "favorite-border"} 
             size={18} 
             color={activeTab === "matches" ? COLORS.primary : "#666"} 
           />

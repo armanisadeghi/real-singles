@@ -7,8 +7,8 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F6EDE1] via-[#FFFAF2] to-white">
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="min-h-dvh bg-gradient-to-br from-[#F6EDE1] via-[#FFFAF2] to-white">
+      <div className="min-h-dvh flex flex-col items-center justify-center p-4">
         {/* Logo */}
         <Link href="/" className="mb-8">
           <Image

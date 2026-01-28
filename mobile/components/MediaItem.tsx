@@ -1,5 +1,5 @@
 import { IMAGE_URL } from "@/utils/token";
-import { MaterialIcons } from "@expo/vector-icons";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useState, useEffect } from "react";
 import { Image, Pressable, View } from "react-native";
@@ -113,7 +113,7 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
             alignItems: "center",
           }}
         >
-          <MaterialIcons
+          <PlatformIcon
             name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
             size={48}
             color="white"

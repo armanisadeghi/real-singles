@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import Link from "next/link";
 import { Calendar, Clock, Users, Video, MapPin } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -29,7 +30,7 @@ async function getSpeedDatingSessions() {
     .in("status", ["upcoming", "ongoing"])
     .order("session_date", { ascending: true });
 
-  // Get registration counts for each session
+  // Get registration counts for each session and resolve image URLs
   if (sessions) {
     const sessionsWithCounts = await Promise.all(
       sessions.map(async (session) => {
@@ -37,6 +38,9 @@ async function getSpeedDatingSessions() {
           .from("speed_dating_registrations")
           .select("*", { count: "exact", head: true })
           .eq("session_id", session.id);
+
+        // Resolve the image URL (speed dating images use the events bucket)
+        const resolvedImageUrl = await resolveStorageUrl(supabase, session.image_url, { bucket: "events" });
 
         // Map database fields to SpeedDatingSession interface
         const scheduledDate = session.scheduled_datetime ? new Date(session.scheduled_datetime) : new Date();
@@ -56,7 +60,7 @@ async function getSpeedDatingSessions() {
           status: (session.status || "upcoming") as "upcoming" | "ongoing" | "completed" | "cancelled",
           event_type: "virtual" as const,
           city: null,
-          image_url: session.image_url,
+          image_url: resolvedImageUrl || null,
           registration_count: count || 0,
         } as SpeedDatingSession;
       })

@@ -113,8 +113,8 @@ export async function GET(
     );
   }
 
-  // Resolve image URL
-  const imageUrl = await resolveStorageUrl(supabase, session.image_url);
+  // Resolve image URL (speed dating images use the events bucket)
+  const imageUrl = await resolveStorageUrl(supabase, session.image_url, { bucket: "events" });
 
   // Convert round_duration_seconds to minutes for display
   const roundDurationMinutes = session.round_duration_seconds 

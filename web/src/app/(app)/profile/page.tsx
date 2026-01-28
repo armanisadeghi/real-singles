@@ -102,7 +102,7 @@ export default async function MyProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-dvh bg-gray-50">
       {!hasProfile ? (
         /* Empty State - No Profile Yet */
         <div className="max-w-md mx-auto px-4 py-16">

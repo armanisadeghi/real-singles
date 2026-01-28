@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * Verify the current user is an admin or moderator
@@ -74,26 +75,32 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const formattedSessions = (sessions || []).map((session) => ({
-    id: session.id,
-    title: session.title,
-    description: session.description,
-    image_url: session.image_url,
-    scheduled_datetime: session.scheduled_datetime,
-    duration_minutes: session.duration_minutes,
-    round_duration_seconds: session.round_duration_seconds,
-    min_participants: session.min_participants,
-    max_participants: session.max_participants,
-    gender_preference: session.gender_preference,
-    age_min: session.age_min,
-    age_max: session.age_max,
-    status: session.status,
-    agora_channel_prefix: session.agora_channel_prefix,
-    created_at: session.created_at,
-    registration_count: Array.isArray(session.speed_dating_registrations)
-      ? session.speed_dating_registrations.length
-      : (session.speed_dating_registrations as { count: number })?.count || 0,
-  }));
+  // Resolve image URLs for all sessions (speed dating images use the events bucket)
+  const formattedSessions = await Promise.all(
+    (sessions || []).map(async (session) => {
+      const imageUrl = await resolveStorageUrl(adminSupabase, session.image_url, { bucket: "events" });
+      return {
+        id: session.id,
+        title: session.title,
+        description: session.description,
+        image_url: imageUrl || null,
+        scheduled_datetime: session.scheduled_datetime,
+        duration_minutes: session.duration_minutes,
+        round_duration_seconds: session.round_duration_seconds,
+        min_participants: session.min_participants,
+        max_participants: session.max_participants,
+        gender_preference: session.gender_preference,
+        age_min: session.age_min,
+        age_max: session.age_max,
+        status: session.status,
+        agora_channel_prefix: session.agora_channel_prefix,
+        created_at: session.created_at,
+        registration_count: Array.isArray(session.speed_dating_registrations)
+          ? session.speed_dating_registrations.length
+          : (session.speed_dating_registrations as { count: number })?.count || 0,
+      };
+    })
+  );
 
   return NextResponse.json({
     success: true,

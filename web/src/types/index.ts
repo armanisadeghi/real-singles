@@ -432,6 +432,58 @@ export type {
 } from "./db";
 
 // ============================================
+// LOOKING FOR / RELATIONSHIP OPTIONS
+// ============================================
+
+/**
+ * Looking for / relationship type options
+ * Synced with mobile/constants/options.ts
+ */
+export const LOOKING_FOR_OPTIONS = [
+  { value: "relationship", label: "Relationship" },
+  { value: "casual", label: "Something casual" },
+  { value: "marriage", label: "Marriage" },
+  { value: "not_sure", label: "Not sure yet" },
+] as const;
+
+// ============================================
+// EVENT OPTIONS (matches DB CHECK constraints)
+// ============================================
+
+/**
+ * Event type options - matches database CHECK constraint
+ * Synced with mobile/constants/options.ts
+ */
+export const EVENT_TYPE_OPTIONS = [
+  { value: "in_person", label: "In Person" },
+  { value: "virtual", label: "Virtual" },
+  { value: "speed_dating", label: "Speed Dating" },
+] as const;
+
+/**
+ * Event status options - matches database CHECK constraint
+ * Synced with mobile/constants/options.ts
+ */
+export const EVENT_STATUS_OPTIONS = [
+  { value: "draft", label: "Draft" },
+  { value: "upcoming", label: "Upcoming" },
+  { value: "ongoing", label: "Ongoing" },
+  { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
+] as const;
+
+/**
+ * Event attendee status options - matches database CHECK constraint
+ * Synced with mobile/constants/options.ts
+ */
+export const EVENT_ATTENDEE_STATUS_OPTIONS = [
+  { value: "interested", label: "Interested" },
+  { value: "registered", label: "Registered" },
+  { value: "attended", label: "Attended" },
+  { value: "cancelled", label: "Cancelled" },
+] as const;
+
+// ============================================
 // API RESPONSE TYPES
 // ============================================
 

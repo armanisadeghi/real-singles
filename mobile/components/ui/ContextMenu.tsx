@@ -18,8 +18,6 @@
 import React, { ReactNode, useState, useCallback } from 'react';
 import { Platform, ActionSheetIOS, View, TouchableOpacity, StyleProp, ViewStyle, Modal, Text, Pressable, StyleSheet } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-
 // Only import on iOS to avoid issues on Android
 let ContextMenuView: any = null;
 if (Platform.OS === 'ios') {

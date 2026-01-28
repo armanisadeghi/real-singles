@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import type { DbVirtualSpeedDating } from "@/types/db";
 
 // Type for registration from JOIN query
@@ -61,37 +62,42 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Format sessions
+  // Format sessions and resolve image URLs
   const typedSessions = (sessions || []) as SessionWithRegistrations[];
-  const formattedSessions = typedSessions.map((session) => {
-    const registrations = session.speed_dating_registrations || [];
-    const isUserRegistered = user 
-      ? registrations.some((r) => r.user_id === user.id)
-      : false;
-    const registeredCount = registrations.length;
-    const spotsAvailable = (session.max_participants ?? 0) - registeredCount;
+  const formattedSessions = await Promise.all(
+    typedSessions.map(async (session) => {
+      const registrations = session.speed_dating_registrations || [];
+      const isUserRegistered = user 
+        ? registrations.some((r) => r.user_id === user.id)
+        : false;
+      const registeredCount = registrations.length;
+      const spotsAvailable = (session.max_participants ?? 0) - registeredCount;
+      
+      // Resolve image URL (speed dating images use the events bucket)
+      const imageUrl = await resolveStorageUrl(supabase, session.image_url, { bucket: "events" });
 
-    return {
-      SessionID: session.id,
-      Title: session.title,
-      Description: session.description,
-      ImageURL: session.image_url,
-      ScheduledDateTime: session.scheduled_datetime,
-      DurationMinutes: session.duration_minutes,
-      RoundDurationSeconds: session.round_duration_seconds,
-      MinParticipants: session.min_participants,
-      MaxParticipants: session.max_participants,
-      CurrentParticipants: registeredCount,
-      SpotsAvailable: spotsAvailable,
-      GenderPreference: session.gender_preference,
-      AgeMin: session.age_min,
-      AgeMax: session.age_max,
-      Status: session.status,
-      AgoraChannelPrefix: session.agora_channel_prefix,
-      IsUserRegistered: isUserRegistered,
-      CreatedAt: session.created_at,
-    };
-  });
+      return {
+        SessionID: session.id,
+        Title: session.title,
+        Description: session.description,
+        ImageURL: imageUrl,
+        ScheduledDateTime: session.scheduled_datetime,
+        DurationMinutes: session.duration_minutes,
+        RoundDurationSeconds: session.round_duration_seconds,
+        MinParticipants: session.min_participants,
+        MaxParticipants: session.max_participants,
+        CurrentParticipants: registeredCount,
+        SpotsAvailable: spotsAvailable,
+        GenderPreference: session.gender_preference,
+        AgeMin: session.age_min,
+        AgeMax: session.age_max,
+        Status: session.status,
+        AgoraChannelPrefix: session.agora_channel_prefix,
+        IsUserRegistered: isUserRegistered,
+        CreatedAt: session.created_at,
+      };
+    })
+  );
 
   return NextResponse.json({
     success: true,

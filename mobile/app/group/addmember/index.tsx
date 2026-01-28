@@ -1,5 +1,6 @@
 import { styles } from "@/components/forms/ContactForm";
 import { icons } from "@/constants/icons";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { fetchUserProfile, getAgoraChatToken } from "@/lib/api";
 import { chatClient, getAllConversations, initChat, loginToChat } from "@/services/agoraChatServices";
 import * as Haptics from "expo-haptics";
@@ -312,7 +313,7 @@ export default function Addmember() {
                     {user.location ? <Text className="text-gray text-xs">{user.location}</Text> : null}
                   </View>
                   {members.includes(user.id) && (
-                    <Image source={icons.check} className="w-5 h-5" resizeMode="contain" />
+                    <PlatformIcon name="check" size={20} color="#22C55E" />
                   )}
                 </TouchableOpacity>
               )

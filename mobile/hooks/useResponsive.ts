@@ -60,7 +60,13 @@ export const useDeviceSize = () => {
     const isMedium = width >= BREAKPOINTS.medium && width < BREAKPOINTS.large;
     const isLarge = width >= BREAKPOINTS.large && width < BREAKPOINTS.xl;
     const isXL = width >= BREAKPOINTS.xl && width < BREAKPOINTS.tablet;
-    const isTablet = width >= BREAKPOINTS.tablet;
+    
+    // Android 16 requires adaptive layouts at 600dp, iOS uses 768px
+    // This ensures compliance with Android 16's mandatory adaptive layout requirements
+    const tabletBreakpoint = Platform.OS === 'android' 
+      ? BREAKPOINTS.adaptiveLayout  // 600dp for Android 16
+      : BREAKPOINTS.tablet;         // 768px for iOS
+    const isTablet = width >= tabletBreakpoint;
 
     // Responsive columns for grids
     const gridColumns = isTablet ? 4 : isXL ? 3 : 2;
