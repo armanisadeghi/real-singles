@@ -3,15 +3,60 @@ module.exports = {
   // NOTE: Update this to include the paths to all of your component files.
   content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
+  darkMode: "class", // NativeWind handles this automatically with useColorScheme
   theme: {
     extend: {
       colors: {
+        // Brand colors (same in light/dark)
         primary: "#B06D1E",
         secondary: "#F3961D33",
         accent: "#F29A2C",
-        background: "#FFFAF2",
-        border: "#EAEAEB",
         chatBg: "#F3961D",
+        
+        // Semantic colors - use these for theme-aware styling
+        // Light mode values (dark: variants override in dark mode)
+        background: {
+          DEFAULT: "#FFFAF2",
+          dark: "#000000",
+        },
+        surface: {
+          DEFAULT: "#FFFFFF",
+          dark: "#1C1B1F",
+        },
+        "surface-secondary": {
+          DEFAULT: "#F5F5F5",
+          dark: "#2C2C2E",
+        },
+        "surface-tertiary": {
+          DEFAULT: "#EEEEEE",
+          dark: "#3A3A3C",
+        },
+        
+        // Text colors
+        label: {
+          DEFAULT: "#000000",
+          dark: "#FFFFFF",
+        },
+        "label-secondary": {
+          DEFAULT: "#6B7280",
+          dark: "#9CA3AF",
+        },
+        "label-tertiary": {
+          DEFAULT: "#9CA3AF",
+          dark: "#6B7280",
+        },
+        
+        // Border/separator colors
+        border: {
+          DEFAULT: "#EAEAEB",
+          dark: "#3A3A3C",
+        },
+        separator: {
+          DEFAULT: "#E5E5EA",
+          dark: "#38383A",
+        },
+        
+        // Legacy - kept for backward compatibility
         gray: "#9A9CA0",
         dark: "#1D2733",
         light: {

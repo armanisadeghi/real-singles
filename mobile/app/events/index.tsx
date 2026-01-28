@@ -1,22 +1,22 @@
 import { EventCard, EventCardSkeleton } from "@/components/ui/EventCard";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { SPACING, TYPOGRAPHY, VERTICAL_SPACING } from "@/constants/designTokens";
-import { useSafeArea, useBottomSpacing, useHeaderSpacing } from "@/hooks/useResponsive";
+import { useBottomSpacing, useCardDimensions } from "@/hooks/useResponsive";
 import { EventCardProps } from "@/types";
 import * as Haptics from "expo-haptics";
 import { SymbolView } from "expo-symbols";
 import { Stack } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Platform,
   PlatformColor,
   RefreshControl,
   Text,
-  TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
+import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { apiRequest } from "@/lib/api";
 
 type FilterStatus = "upcoming" | "past";
@@ -25,11 +25,22 @@ export default function EventsPage() {
   const [events, setEvents] = useState<EventCardProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [filter, setFilter] = useState<FilterStatus>("upcoming");
+  const [filterIndex, setFilterIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  const safeArea = useSafeArea();
   const { contentPadding } = useBottomSpacing(true);
+  const { gap } = useCardDimensions(2, 1.18);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  
+  const filter: FilterStatus = filterIndex === 0 ? "upcoming" : "past";
+  
+  // Theme-aware colors for Android (iOS uses PlatformColor automatically)
+  const androidColors = {
+    background: isDark ? "#000000" : "#F9FAFB",
+    labelPrimary: isDark ? "#FFFFFF" : "#374151",
+    labelSecondary: isDark ? "#9CA3AF" : "#6B7280",
+  };
 
   const fetchEvents = useCallback(async (showRefresh = false) => {
     if (showRefresh) {
@@ -70,10 +81,10 @@ export default function EventsPage() {
     fetchEvents(true);
   }, [fetchEvents]);
 
-  const handleFilterChange = (newFilter: FilterStatus) => {
-    if (newFilter !== filter) {
+  const handleFilterChange = (index: number) => {
+    if (index !== filterIndex) {
       Haptics.selectionAsync();
-      setFilter(newFilter);
+      setFilterIndex(index);
     }
   };
 
@@ -81,137 +92,91 @@ export default function EventsPage() {
     ? (PlatformColor("systemPink") as unknown as string) 
     : "#B06D1E";
 
-  // Header component with filter tabs
-  const ListHeader = () => (
-    <View style={{ paddingBottom: VERTICAL_SPACING.md }}>
-      {/* Page Header */}
-      <View 
-        className="flex-row items-center" 
-        style={{ 
-          paddingHorizontal: SPACING.screenPadding, 
-          paddingTop: SPACING.md,
-          paddingBottom: SPACING.base,
-          gap: SPACING.md,
-        }}
-      >
+  // Native segmented control for filter (iOS) or simple tabs (Android)
+  const FilterControl = () => (
+    <View style={{ paddingHorizontal: SPACING.screenPadding, paddingVertical: SPACING.sm }}>
+      {Platform.OS === "ios" ? (
+        <SegmentedControl
+          values={["Upcoming", "Past"]}
+          selectedIndex={filterIndex}
+          onChange={(event) => handleFilterChange(event.nativeEvent.selectedSegmentIndex)}
+        />
+      ) : (
         <View 
-          className="rounded-full justify-center items-center"
-          style={{ 
-            width: 44, 
-            height: 44, 
-            backgroundColor: Platform.OS === "ios" 
-              ? (PlatformColor("systemPink") as unknown as string) + "20"
-              : "#B06D1E20"
-          }}
+          className="flex-row rounded-lg overflow-hidden"
+          style={{ backgroundColor: "#E5E7EB" }}
         >
-          {Platform.OS === "ios" ? (
-            <SymbolView
-              name="calendar"
-              style={{ width: 22, height: 22 }}
-              tintColor={primaryColor}
-            />
-          ) : (
-            <PlatformIcon name="event" size={22} color={primaryColor} />
-          )}
+          {["Upcoming", "Past"].map((label, index) => (
+            <View
+              key={label}
+              style={{
+                flex: 1,
+                backgroundColor: filterIndex === index ? primaryColor : "transparent",
+                paddingVertical: SPACING.sm,
+              }}
+              onTouchEnd={() => handleFilterChange(index)}
+            >
+              <Text
+                className="text-center font-medium"
+                style={{
+                  fontSize: 14,
+                  color: filterIndex === index ? "#FFFFFF" : "#4B5563",
+                }}
+              >
+                {label}
+              </Text>
+            </View>
+          ))}
         </View>
-        <View style={{ flex: 1 }}>
-          <Text className="font-bold text-gray-900" style={TYPOGRAPHY.h3}>
-            Events
-          </Text>
-          <Text className="text-gray-500" style={{ fontSize: 13 }}>
-            Discover and RSVP to upcoming events
-          </Text>
-        </View>
-      </View>
-
-      {/* Filter Tabs */}
-      <View 
-        className="flex-row"
-        style={{ 
-          paddingHorizontal: SPACING.screenPadding, 
-          gap: SPACING.sm,
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => handleFilterChange("upcoming")}
-          className="rounded-full"
-          style={{
-            paddingHorizontal: SPACING.base,
-            paddingVertical: SPACING.sm,
-            backgroundColor: filter === "upcoming" ? primaryColor : "#F3F4F6",
-          }}
-          activeOpacity={0.7}
-        >
-          <Text
-            className="font-medium"
-            style={{
-              fontSize: 14,
-              color: filter === "upcoming" ? "#FFFFFF" : "#4B5563",
-            }}
-          >
-            Upcoming
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleFilterChange("past")}
-          className="rounded-full"
-          style={{
-            paddingHorizontal: SPACING.base,
-            paddingVertical: SPACING.sm,
-            backgroundColor: filter === "past" ? primaryColor : "#F3F4F6",
-          }}
-          activeOpacity={0.7}
-        >
-          <Text
-            className="font-medium"
-            style={{
-              fontSize: 14,
-              color: filter === "past" ? "#FFFFFF" : "#4B5563",
-            }}
-          >
-            Past
-          </Text>
-        </TouchableOpacity>
-      </View>
+      )}
     </View>
   );
 
   // Empty state component
   const EmptyState = () => (
     <View 
-      className="items-center justify-center" 
+      className="items-center justify-center flex-1" 
       style={{ paddingVertical: VERTICAL_SPACING.xl * 2 }}
     >
       {Platform.OS === "ios" ? (
         <SymbolView
           name="calendar.badge.exclamationmark"
-          style={{ width: 64, height: 64, marginBottom: SPACING.md }}
-          tintColor={Platform.select({ 
-            ios: PlatformColor("secondaryLabel") as unknown as string, 
-            default: "#8E8E93" 
-          })}
+          style={{ width: 56, height: 56, marginBottom: SPACING.md }}
+          tintColor={PlatformColor("secondaryLabel") as unknown as string}
         />
       ) : (
         <PlatformIcon 
           name="event-busy" 
-          size={64} 
-          color="#8E8E93" 
+          size={56} 
+          color={androidColors.labelSecondary}
           style={{ marginBottom: SPACING.md }}
         />
       )}
       <Text 
-        className="font-semibold text-gray-700 text-center"
-        style={TYPOGRAPHY.body}
+        className="font-semibold text-center"
+        style={{
+          ...TYPOGRAPHY.body,
+          color: Platform.OS === "ios" 
+            ? (PlatformColor("label") as unknown as string)
+            : androidColors.labelPrimary,
+        }}
       >
-        {filter === "upcoming" ? "No upcoming events" : "No past events"}
+        {filter === "upcoming" ? "No Upcoming Events" : "No Past Events"}
       </Text>
       <Text 
-        className="text-gray-500 text-center"
-        style={{ fontSize: 14, marginTop: SPACING.xs, paddingHorizontal: SPACING.xl }}
+        className="text-center"
+        style={{ 
+          fontSize: 14, 
+          marginTop: SPACING.xs, 
+          paddingHorizontal: SPACING.xl,
+          color: Platform.OS === "ios" 
+            ? (PlatformColor("secondaryLabel") as unknown as string)
+            : androidColors.labelSecondary,
+        }}
       >
         {filter === "upcoming"
-          ? "Check back later for new events in your area"
-          : "Past events will appear here"}
+          ? "Check back later for new events"
+          : "Your past events will appear here"}
       </Text>
     </View>
   );
@@ -219,14 +184,14 @@ export default function EventsPage() {
   // Error state component
   const ErrorState = () => (
     <View 
-      className="items-center justify-center" 
+      className="items-center justify-center flex-1" 
       style={{ paddingVertical: VERTICAL_SPACING.xl * 2 }}
     >
       {Platform.OS === "ios" ? (
         <SymbolView
           name="exclamationmark.triangle"
           style={{ width: 48, height: 48, marginBottom: SPACING.md }}
-          tintColor="#EF4444"
+          tintColor={PlatformColor("systemRed") as unknown as string}
         />
       ) : (
         <PlatformIcon 
@@ -236,33 +201,42 @@ export default function EventsPage() {
           style={{ marginBottom: SPACING.md }}
         />
       )}
-      <Text className="text-red-500 text-center mb-4" style={TYPOGRAPHY.body}>
+      <Text 
+        className="text-center mb-4" 
+        style={{
+          ...TYPOGRAPHY.body,
+          color: Platform.OS === "ios" 
+            ? (PlatformColor("systemRed") as unknown as string)
+            : "#EF4444",
+        }}
+      >
         {error}
       </Text>
-      <TouchableOpacity
-        onPress={() => fetchEvents()}
-        className="rounded-full"
-        style={{
-          paddingHorizontal: SPACING.base,
-          paddingVertical: SPACING.sm,
-          backgroundColor: primaryColor,
-        }}
-        activeOpacity={0.7}
-      >
-        <Text className="text-white font-medium" style={{ fontSize: 14 }}>
-          Try Again
-        </Text>
-      </TouchableOpacity>
     </View>
   );
 
-  // Loading skeletons
+  // Loading skeletons in 2-column grid
   const LoadingSkeletons = () => (
-    <View style={{ paddingHorizontal: SPACING.screenPadding, gap: SPACING.md }}>
-      {[...Array(6)].map((_, i) => (
-        <EventCardSkeleton key={i} />
+    <View style={{ paddingHorizontal: SPACING.screenPadding }}>
+      {[0, 1, 2].map((rowIndex) => (
+        <View 
+          key={rowIndex}
+          style={{ 
+            flexDirection: "row", 
+            justifyContent: "space-between",
+            marginBottom: gap,
+          }}
+        >
+          <EventCardSkeleton />
+          <EventCardSkeleton />
+        </View>
       ))}
     </View>
+  );
+
+  // Render item for 2-column grid
+  const renderItem = ({ item }: { item: EventCardProps }) => (
+    <EventCard event={item} />
   );
 
   return (
@@ -273,26 +247,37 @@ export default function EventsPage() {
           headerLargeTitle: Platform.OS === "ios",
           headerLargeTitleShadowVisible: false,
           headerBlurEffect: Platform.OS === "ios" ? "regular" : undefined,
-          headerTransparent: Platform.OS === "ios",
+          // Don't use headerTransparent with large titles - it breaks content insets
         }}
       />
       
-      <View className="flex-1 bg-gray-50">
+      <View 
+        className="flex-1"
+        style={{
+          backgroundColor: Platform.OS === "ios" 
+            ? (PlatformColor("systemBackground") as unknown as string)
+            : androidColors.background,
+        }}
+      >
         {isLoading && !isRefreshing ? (
           <FlatList
+            key="loading-list"
             data={[]}
             renderItem={() => null}
-            ListHeaderComponent={ListHeader}
+            ListHeaderComponent={FilterControl}
             ListFooterComponent={LoadingSkeletons}
             contentContainerStyle={{ paddingBottom: contentPadding }}
+            contentInsetAdjustmentBehavior="automatic"
           />
         ) : error ? (
           <FlatList
+            key="error-list"
             data={[]}
             renderItem={() => null}
-            ListHeaderComponent={ListHeader}
+            ListHeaderComponent={FilterControl}
             ListFooterComponent={ErrorState}
-            contentContainerStyle={{ paddingBottom: contentPadding }}
+            contentContainerStyle={{ paddingBottom: contentPadding, flexGrow: 1 }}
+            contentInsetAdjustmentBehavior="automatic"
             refreshControl={
               <RefreshControl
                 refreshing={isRefreshing}
@@ -303,19 +288,23 @@ export default function EventsPage() {
           />
         ) : (
           <FlatList
+            key="events-list"
             data={events}
             keyExtractor={(item) => item.EventID}
-            renderItem={({ item }) => (
-              <View style={{ paddingHorizontal: SPACING.screenPadding }}>
-                <EventCard event={item} />
-              </View>
-            )}
-            ListHeaderComponent={ListHeader}
+            renderItem={renderItem}
+            numColumns={2}
+            ListHeaderComponent={FilterControl}
             ListEmptyComponent={EmptyState}
             contentContainerStyle={{
               paddingBottom: contentPadding,
-              gap: SPACING.md,
+              paddingHorizontal: SPACING.screenPadding,
+              flexGrow: 1,
             }}
+            columnWrapperStyle={{
+              justifyContent: "space-between",
+              marginBottom: gap,
+            }}
+            contentInsetAdjustmentBehavior="automatic"
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl

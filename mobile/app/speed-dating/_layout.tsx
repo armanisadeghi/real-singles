@@ -10,7 +10,7 @@ export default function SpeedDatingLayout() {
         headerLargeTitle: Platform.OS === "ios",
         headerLargeTitleShadowVisible: false,
         headerBlurEffect: Platform.OS === "ios" ? "regular" : undefined,
-        headerTransparent: Platform.OS === "ios",
+        // Don't use headerTransparent with large titles - it breaks content insets
       }}
     >
       <Stack.Screen

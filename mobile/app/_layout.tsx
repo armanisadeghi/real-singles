@@ -106,10 +106,10 @@ function RootLayoutNav() {
           headerTitleStyle: { fontWeight: '600', color: '#000000' },
           // Prevent "(tabs)" from showing as back button title
           headerBackTitle: 'Back',
-          // iOS Liquid Glass: Transparent header with blur effect
-          headerTransparent: Platform.OS === 'ios',
+          // iOS blur effect for navigation bar
           headerBlurEffect: Platform.OS === 'ios' ? 'systemMaterial' : undefined,
-          // Fallback for Android and when blur is not available
+          // Note: Don't use headerTransparent globally - it breaks content insets
+          // for screens with headerLargeTitle. Let native navigation handle layout.
           headerStyle: Platform.OS === 'ios' 
             ? undefined 
             : { backgroundColor: '#FFFFFF' },

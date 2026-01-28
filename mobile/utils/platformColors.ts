@@ -1,22 +1,87 @@
 /**
  * Platform Colors Utility
  * 
- * Provides platform-native colors that adapt to light/dark mode on iOS.
- * Uses PlatformColor on iOS and fallback colors on Android.
+ * Provides platform-native colors that adapt to light/dark mode.
+ * - iOS: Uses PlatformColor which adapts automatically
+ * - Android: Requires isDark parameter for proper dark mode support
  * 
  * Usage:
- * import { Colors } from '@/utils/platformColors';
+ * import { useAdaptiveColor, Colors } from '@/utils/platformColors';
  * 
+ * // In a component:
+ * const colorScheme = useColorScheme();
+ * const isDark = colorScheme === 'dark';
+ * const bgColor = useAdaptiveColor('systemBackground', '#FFFFFF', '#000000', isDark);
+ * 
+ * // Or use the Colors object (iOS-only automatic adaptation):
  * <View style={{ backgroundColor: Colors.background }} />
- * <Text style={{ color: Colors.label }} />
  */
 
-import { Platform, PlatformColor } from 'react-native';
+import { Platform, PlatformColor, useColorScheme } from 'react-native';
 
 /**
- * Get a platform-appropriate color
- * On iOS: Returns PlatformColor that adapts to light/dark mode
- * On Android: Returns the provided fallback color
+ * Get a platform-appropriate color with dark mode support
+ * On iOS: Returns PlatformColor that adapts to light/dark mode automatically
+ * On Android: Returns the appropriate color based on isDark parameter
+ * 
+ * @param iosColorName - iOS PlatformColor name (e.g., 'systemBackground')
+ * @param androidLight - Android light mode color
+ * @param androidDark - Android dark mode color
+ * @param isDark - Whether dark mode is active (required for Android)
+ */
+export function useAdaptiveColor(
+  iosColorName: string,
+  androidLight: string,
+  androidDark: string,
+  isDark: boolean
+): string {
+  if (Platform.OS === 'ios') {
+    return PlatformColor(iosColorName) as unknown as string;
+  }
+  return isDark ? androidDark : androidLight;
+}
+
+/**
+ * Hook to get all theme-aware colors
+ * Use this in components for full dark mode support on both platforms
+ */
+export function useSemanticColors() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  
+  return {
+    isDark,
+    // Backgrounds
+    background: useAdaptiveColor('systemBackground', '#FFFFFF', '#000000', isDark),
+    backgroundSecondary: useAdaptiveColor('secondarySystemBackground', '#F5F5F5', '#1C1C1E', isDark),
+    backgroundTertiary: useAdaptiveColor('tertiarySystemBackground', '#EEEEEE', '#2C2C2E', isDark),
+    surface: useAdaptiveColor('systemBackground', '#FFFFFF', '#1C1C1E', isDark),
+    surfaceSecondary: useAdaptiveColor('secondarySystemBackground', '#F5F5F5', '#2C2C2E', isDark),
+    
+    // Text/Labels
+    label: useAdaptiveColor('label', '#000000', '#FFFFFF', isDark),
+    labelSecondary: useAdaptiveColor('secondaryLabel', '#6B7280', '#9CA3AF', isDark),
+    labelTertiary: useAdaptiveColor('tertiaryLabel', '#9CA3AF', '#6B7280', isDark),
+    
+    // Separators/Borders
+    separator: useAdaptiveColor('separator', '#E5E5EA', '#38383A', isDark),
+    border: useAdaptiveColor('opaqueSeparator', '#EAEAEB', '#3A3A3C', isDark),
+    
+    // Skeleton loaders
+    skeleton: useAdaptiveColor('systemGray5', '#E5E7EB', '#3A3A3C', isDark),
+    
+    // System colors (mostly the same in light/dark)
+    systemBlue: useAdaptiveColor('systemBlue', '#007AFF', '#0A84FF', isDark),
+    systemGreen: useAdaptiveColor('systemGreen', '#34C759', '#30D158', isDark),
+    systemRed: useAdaptiveColor('systemRed', '#FF3B30', '#FF453A', isDark),
+    systemOrange: useAdaptiveColor('systemOrange', '#FF9500', '#FF9F0A', isDark),
+    systemPink: useAdaptiveColor('systemPink', '#FF2D55', '#FF375F', isDark),
+  };
+}
+
+/**
+ * Legacy: Get a platform-appropriate color (iOS adapts, Android uses light fallback)
+ * @deprecated Use useAdaptiveColor or useSemanticColors for proper dark mode support
  */
 function platformColor(iosColorName: string, androidFallback: string) {
   if (Platform.OS === 'ios') {
