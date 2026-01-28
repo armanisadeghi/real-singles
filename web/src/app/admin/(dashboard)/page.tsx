@@ -111,7 +111,9 @@ export default async function AdminDashboardPage() {
                 {getGreeting()}, Admin
               </h1>
               <p className="text-slate-400 max-w-lg">
-                Here&apos;s what&apos;s happening with RealSingles today. You have{" "}
+                Here&apos;s what&apos;s happening with RealSingles today.
+                <br />
+                You have{" "}
                 <span className="text-amber-400 font-medium">{stats.pendingReports} pending reports</span> to review.
               </p>
             </div>

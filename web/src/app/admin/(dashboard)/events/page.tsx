@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
-import { Calendar, Plus, Eye, Edit2, CalendarDays } from "lucide-react";
+import { Calendar, Eye, Edit2 } from "lucide-react";
 import { AdminPageHeader, AdminLinkButton } from "@/components/admin/AdminPageHeader";
 
 interface EventListItem {
@@ -91,14 +91,14 @@ export default async function AdminEventsPage() {
         title="Event Management"
         subtitle="Create and manage singles events"
         variant="hero"
-        icon={CalendarDays}
+        iconName="calendar-days"
         iconGradient="from-purple-500 to-purple-600"
         stat={{
           value: events.length,
           label: "Total Events",
         }}
       >
-        <AdminLinkButton href="/admin/events/create" icon={Plus}>
+        <AdminLinkButton href="/admin/events/create" iconName="plus">
           Create Event
         </AdminLinkButton>
       </AdminPageHeader>
@@ -117,7 +117,7 @@ export default async function AdminEventsPage() {
           <p className="text-slate-500 mb-6 max-w-sm mx-auto">
             Create your first event to start engaging with your community.
           </p>
-          <AdminLinkButton href="/admin/events/create" icon={Plus}>
+          <AdminLinkButton href="/admin/events/create" iconName="plus">
             Create Event
           </AdminLinkButton>
         </div>

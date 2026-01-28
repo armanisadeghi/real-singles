@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import Link from "next/link";
-import { User, Users, Search } from "lucide-react";
+import { User, Search } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 interface UserWithProfile {
@@ -105,7 +105,7 @@ export default async function AdminUsersPage() {
         title="User Management"
         subtitle="View and manage all registered users"
         variant="hero"
-        icon={Users}
+        iconName="users"
         iconGradient="from-blue-500 to-blue-600"
         stat={{
           value: users.length.toLocaleString(),

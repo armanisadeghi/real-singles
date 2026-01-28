@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageSquare, Target, Settings, ChevronRight, Cog } from "lucide-react";
+import { MessageSquare, Target, Settings, ChevronRight } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 const configSections = [
@@ -32,7 +32,7 @@ export default function AdminSettingsPage() {
         title="App Settings"
         subtitle="Configure app-wide settings, prompts, and other options that affect all users"
         variant="hero"
-        icon={Cog}
+        iconName="cog"
         iconGradient="from-slate-600 to-slate-700"
       />
 

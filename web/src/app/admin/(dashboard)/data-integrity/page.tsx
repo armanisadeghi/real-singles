@@ -7,13 +7,11 @@ import {
   AlertCircle,
   Info,
   User,
-  RefreshCw,
   ArrowRight,
   CheckCircle,
   Clock,
   Loader2,
   ShieldCheck,
-  Play,
 } from "lucide-react";
 import { DataIntegrityActions } from "./components/DataIntegrityActions";
 import { IssueTypeCard } from "./components/IssueTypeCard";
@@ -52,7 +50,7 @@ export default function DataIntegrityPage() {
           title="Data Integrity"
           subtitle="Monitor and fix data quality issues across user accounts"
           variant="hero"
-          icon={ShieldCheck}
+          iconName="shield-check"
           iconGradient="from-emerald-500 to-teal-500"
         />
 
@@ -82,7 +80,7 @@ export default function DataIntegrityPage() {
               </div>
             )}
 
-            <AdminButton onClick={runCheck} icon={Play} size="md">
+            <AdminButton onClick={runCheck} iconName="play" size="md">
               Start Integrity Check
             </AdminButton>
           </div>
@@ -148,7 +146,7 @@ export default function DataIntegrityPage() {
           title="Data Integrity"
           subtitle="Monitor and fix data quality issues across user accounts"
           variant="hero"
-          icon={ShieldCheck}
+          iconName="shield-check"
           iconGradient="from-emerald-500 to-teal-500"
         />
 
@@ -227,7 +225,7 @@ export default function DataIntegrityPage() {
         </span>
         <AdminButton
           variant="secondary"
-          icon={RefreshCw}
+          iconName="refresh-cw"
           onClick={runCheck}
           loading={loading}
         >

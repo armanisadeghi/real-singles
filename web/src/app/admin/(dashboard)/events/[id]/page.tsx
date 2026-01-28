@@ -235,14 +235,14 @@ export default function AdminEventDetailPage({
         <AdminLinkButton
           href={`/admin/events/${event.id}/edit`}
           variant="secondary"
-          icon={Edit2}
+          iconName="edit2"
         >
           Edit
         </AdminLinkButton>
         {event.status !== "cancelled" && (
           <AdminButton
             variant="danger"
-            icon={isCancelling ? undefined : XCircle}
+            iconName={isCancelling ? undefined : "x-circle"}
             onClick={handleCancelEvent}
             loading={isCancelling}
           >

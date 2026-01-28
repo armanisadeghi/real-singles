@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, Edit2, Trash2, Save, X, ChevronUp, ChevronDown, MessageSquare } from "lucide-react";
+import { Edit2, Trash2, Save, X, ChevronUp, ChevronDown, MessageSquare } from "lucide-react";
 import type { PromptDefinition } from "@/types";
 import { PROMPT_CATEGORIES } from "@/types";
 import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
@@ -206,7 +206,7 @@ export default function AdminPromptsPage() {
         subtitle="Manage the prompts users can answer on their profiles"
         showBack
       >
-        <AdminButton onClick={() => setShowNewForm(true)} icon={Plus}>
+        <AdminButton onClick={() => setShowNewForm(true)} iconName="plus">
           Add Prompt
         </AdminButton>
       </AdminPageHeader>
@@ -440,7 +440,7 @@ export default function AdminPromptsPage() {
             <MessageSquare className="w-8 h-8 text-slate-400" />
           </div>
           <p className="text-slate-600 mb-4">No prompts defined yet.</p>
-          <AdminButton onClick={() => setShowNewForm(true)} icon={Plus}>
+          <AdminButton onClick={() => setShowNewForm(true)} iconName="plus">
             Add your first prompt
           </AdminButton>
         </div>

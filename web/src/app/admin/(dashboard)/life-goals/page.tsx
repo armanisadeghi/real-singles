@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, Edit2, Trash2, Save, X, Target } from "lucide-react";
+import { Edit2, Trash2, Save, X, Target } from "lucide-react";
 import type { LifeGoalDefinition } from "@/types";
 import { LIFE_GOAL_CATEGORIES } from "@/types";
 import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
@@ -196,7 +196,7 @@ export default function AdminLifeGoalsPage() {
         subtitle="The League model - users select up to 10 goals for matching"
         showBack
       >
-        <AdminButton onClick={() => setShowNewForm(true)} icon={Plus}>
+        <AdminButton onClick={() => setShowNewForm(true)} iconName="plus">
           Add Life Goal
         </AdminButton>
       </AdminPageHeader>
@@ -411,7 +411,7 @@ export default function AdminLifeGoalsPage() {
             <Target className="w-8 h-8 text-slate-400" />
           </div>
           <p className="text-slate-600 mb-4">No life goals defined yet.</p>
-          <AdminButton onClick={() => setShowNewForm(true)} icon={Plus}>
+          <AdminButton onClick={() => setShowNewForm(true)} iconName="plus">
             Add your first life goal
           </AdminButton>
         </div>

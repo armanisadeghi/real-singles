@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Package, Plus, Gift } from "lucide-react";
+import { Package, Plus } from "lucide-react";
 import { AdminPageHeader, AdminLinkButton } from "@/components/admin/AdminPageHeader";
 
 interface Product {
@@ -34,7 +34,7 @@ export default async function AdminProductsPage() {
         title="Reward Products"
         subtitle="Manage products users can redeem with points"
         variant="hero"
-        icon={Gift}
+        iconName="gift"
         iconGradient="from-rose-500 to-pink-500"
         stat={{
           value: activeCount,

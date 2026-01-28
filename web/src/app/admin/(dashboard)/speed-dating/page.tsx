@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
-import { Video, Plus, Eye, Edit2, Users, Zap } from "lucide-react";
+import { Video, Eye, Edit2, Users } from "lucide-react";
 import { AdminPageHeader, AdminLinkButton } from "@/components/admin/AdminPageHeader";
 
 interface SpeedDatingSession {
@@ -114,14 +114,14 @@ export default async function AdminSpeedDatingPage() {
         title="Virtual Speed Dating"
         subtitle="Manage virtual speed dating sessions and registrations"
         variant="hero"
-        icon={Zap}
+        iconName="zap"
         iconGradient="from-cyan-500 to-blue-500"
         stat={{
           value: scheduledCount,
           label: "Scheduled Sessions",
         }}
       >
-        <AdminLinkButton href="/admin/speed-dating/create" icon={Plus}>
+        <AdminLinkButton href="/admin/speed-dating/create" iconName="plus">
           Create Session
         </AdminLinkButton>
       </AdminPageHeader>
@@ -140,7 +140,7 @@ export default async function AdminSpeedDatingPage() {
           <p className="text-slate-500 mb-6 max-w-sm mx-auto">
             Create your first speed dating session to help users connect.
           </p>
-          <AdminLinkButton href="/admin/speed-dating/create" icon={Plus}>
+          <AdminLinkButton href="/admin/speed-dating/create" iconName="plus">
             Create Session
           </AdminLinkButton>
         </div>

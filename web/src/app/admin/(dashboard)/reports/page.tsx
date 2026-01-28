@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
-import { AlertTriangle, FileWarning, CheckCircle, Clock } from "lucide-react";
+import { FileWarning, CheckCircle, Clock } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 interface Report {
@@ -52,7 +52,7 @@ export default async function AdminReportsPage() {
         title="User Reports"
         subtitle="Review and manage user-submitted reports"
         variant="hero"
-        icon={AlertTriangle}
+        iconName="alert-triangle"
         iconGradient="from-amber-500 to-orange-500"
         stat={{
           value: pendingCount,

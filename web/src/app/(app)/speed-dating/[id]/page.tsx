@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/LoadingSkeleton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { useToast } from "@/components/ui/Toast";
 import { cn } from "@/lib/utils";
 
 interface SpeedDatingSession {
@@ -63,6 +64,7 @@ function formatTime(timeStr: string) {
 
 export default function SpeedDatingDetailPage({ params }: PageProps) {
   const { id } = use(params);
+  const toast = useToast();
   const [session, setSession] = useState<SpeedDatingSession | null>(null);
   const [registrationCount, setRegistrationCount] = useState(0);
   const [isRegistered, setIsRegistered] = useState(false);
@@ -97,17 +99,19 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
         method: "POST",
       });
 
-      if (res.ok) {
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
         setIsRegistered(true);
         setRegistrationCount((prev) => prev + 1);
         setShowConfirm(false);
+        toast.success("You're registered! We'll send you a reminder before the session.");
       } else {
-        const error = await res.json();
-        alert(error.message || "Failed to register");
+        toast.error(data.msg || "Failed to register for this session");
       }
     } catch (error) {
       console.error("Error registering:", error);
-      alert("Failed to register");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setRegistering(false);
     }

@@ -554,14 +554,14 @@ export default function AdminUserDetailPage({ params }: PageProps) {
       >
         <AdminButton
           variant="secondary"
-          icon={User}
+          iconName="user"
           onClick={() => setShowEditProfileSheet(true)}
         >
           Edit Profile
         </AdminButton>
         <AdminButton
           variant="warning"
-          icon={Star}
+          iconName="star"
           onClick={() => setShowPointsSheet(true)}
         >
           Adjust Points
@@ -569,7 +569,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         {user.status === "active" ? (
           <AdminButton
             variant="warning"
-            icon={Ban}
+            iconName="ban"
             onClick={() => setShowSuspendConfirm(true)}
           >
             Suspend
@@ -577,7 +577,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         ) : user.status === "suspended" ? (
           <AdminButton
             variant="success"
-            icon={CheckCircle}
+            iconName="check-circle"
             onClick={() => handleStatusChange("active")}
             loading={actionLoading}
           >
@@ -586,7 +586,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         ) : null}
         <AdminButton
           variant="danger"
-          icon={Trash2}
+          iconName="trash2"
           onClick={() => setShowDeleteConfirm(true)}
         >
           Delete

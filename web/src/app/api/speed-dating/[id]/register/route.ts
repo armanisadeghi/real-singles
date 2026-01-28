@@ -62,8 +62,16 @@ export async function POST(
     );
   }
 
-  // Check if session is in the future
-  if (new Date(typedSession.scheduled_datetime) < new Date()) {
+  // Check if session has a valid datetime and is in the future
+  if (!typedSession.scheduled_datetime) {
+    return NextResponse.json(
+      { success: false, msg: "This session doesn't have a scheduled date" },
+      { status: 400 }
+    );
+  }
+
+  const sessionDate = new Date(typedSession.scheduled_datetime);
+  if (isNaN(sessionDate.getTime()) || sessionDate < new Date()) {
     return NextResponse.json(
       { success: false, msg: "This session has already started" },
       { status: 400 }

@@ -2,8 +2,51 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, LucideIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  LucideIcon,
+  Users,
+  Zap,
+  Cog,
+  CalendarDays,
+  AlertTriangle,
+  Gift,
+  ShieldCheck,
+  Plus,
+  Play,
+  RefreshCw,
+  User,
+  Star,
+  Ban,
+  CheckCircle,
+  Trash2,
+  XCircle,
+  Edit2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// Icon map to avoid passing React components across server/client boundary
+const iconMap = {
+  users: Users,
+  zap: Zap,
+  cog: Cog,
+  "calendar-days": CalendarDays,
+  "alert-triangle": AlertTriangle,
+  gift: Gift,
+  "shield-check": ShieldCheck,
+  plus: Plus,
+  play: Play,
+  "refresh-cw": RefreshCw,
+  user: User,
+  star: Star,
+  ban: Ban,
+  "check-circle": CheckCircle,
+  trash2: Trash2,
+  "x-circle": XCircle,
+  edit2: Edit2,
+} as const;
+
+export type IconName = keyof typeof iconMap;
 
 interface AdminPageHeaderProps {
   title: string;
@@ -16,8 +59,8 @@ interface AdminPageHeaderProps {
   children?: React.ReactNode;
   /** Whether to show as a hero section with gradient */
   variant?: "default" | "hero";
-  /** Icon to show in hero variant */
-  icon?: LucideIcon;
+  /** Icon name to show in hero variant (e.g., "users", "zap", "calendar-days") */
+  iconName?: IconName;
   /** Icon gradient colors for hero variant */
   iconGradient?: string;
   /** Additional stats to show in hero */
@@ -34,11 +77,12 @@ export function AdminPageHeader({
   backHref,
   children,
   variant = "default",
-  icon: Icon,
+  iconName,
   iconGradient = "from-blue-500 to-blue-600",
   stat,
 }: AdminPageHeaderProps) {
   const router = useRouter();
+  const Icon = iconName ? iconMap[iconName] : undefined;
 
   const handleBack = () => {
     if (backHref) {
@@ -146,7 +190,7 @@ export function AdminPageHeader({
 interface AdminButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "success" | "warning";
   size?: "sm" | "md";
-  icon?: LucideIcon;
+  iconName?: IconName;
   loading?: boolean;
   children: React.ReactNode;
 }
@@ -154,13 +198,14 @@ interface AdminButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 export function AdminButton({
   variant = "primary",
   size = "md",
-  icon: Icon,
+  iconName,
   loading,
   children,
   className,
   disabled,
   ...props
 }: AdminButtonProps) {
+  const Icon = iconName ? iconMap[iconName] : undefined;
   const variantClasses = {
     primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
     secondary: "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50",
@@ -201,7 +246,7 @@ interface AdminLinkButtonProps {
   href: string;
   variant?: "primary" | "secondary" | "danger" | "success" | "warning";
   size?: "sm" | "md";
-  icon?: LucideIcon;
+  iconName?: IconName;
   children: React.ReactNode;
   className?: string;
 }
@@ -210,10 +255,11 @@ export function AdminLinkButton({
   href,
   variant = "primary",
   size = "md",
-  icon: Icon,
+  iconName,
   children,
   className,
 }: AdminLinkButtonProps) {
+  const Icon = iconName ? iconMap[iconName] : undefined;
   const variantClasses = {
     primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
     secondary: "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50",
