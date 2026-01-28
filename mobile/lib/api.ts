@@ -422,10 +422,36 @@ export const getMatchStatus = async (userId: string) => {
 // ===========================================
 
 /**
- * Get all events
+ * Get all events - fetches both current (upcoming) and past events
+ * Returns data in format: { success, currentEvent, pastEvent }
  */
 export const getAllEvents = async () => {
-  return apiRequest("/events");
+  try {
+    // Fetch upcoming events and past events in parallel
+    const [upcomingRes, pastRes] = await Promise.all([
+      apiRequest("/events?status=upcoming&limit=20"),
+      apiRequest("/events?status=past&limit=20"),
+    ]);
+
+    // Process the responses
+    const currentEvent = upcomingRes?.success && upcomingRes?.data ? upcomingRes.data : [];
+    const pastEvent = pastRes?.success && pastRes?.data ? pastRes.data : [];
+
+    return {
+      success: true,
+      currentEvent,
+      pastEvent,
+      msg: "Events fetched successfully",
+    };
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    return {
+      success: false,
+      currentEvent: [],
+      pastEvent: [],
+      msg: "Failed to fetch events",
+    };
+  }
 };
 
 /**

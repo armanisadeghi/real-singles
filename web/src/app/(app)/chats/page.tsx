@@ -49,22 +49,74 @@ async function getConversations(): Promise<{
     return { conversations: [], userId: user.id };
   }
 
-  // Get participants for each conversation
+  // Get participants for each conversation with full data
   const conversationsWithParticipants: Conversation[] = await Promise.all(
     conversations.map(async (conv) => {
+      // Get participants with their last_read_at timestamp
       const { data: participants } = await supabase
         .from("conversation_participants")
         .select(
           `
           user_id,
+          last_read_at,
           user:user_id(display_name),
           profile:user_id(first_name, profile_image_url)
         `
         )
         .eq("conversation_id", conv.id);
 
-      // Get unread count (simplified - would need proper message tracking)
-      const unreadCount = 0; // TODO: Implement proper unread tracking
+      // Find current user's last_read_at
+      const currentParticipant = participants?.find((p) => p.user_id === user.id);
+      const lastReadAt = currentParticipant?.last_read_at || null;
+
+      // Get unread count: messages created after last_read_at by other users
+      let unreadCount = 0;
+      if (lastReadAt) {
+        const { count } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("conversation_id", conv.id)
+          .neq("sender_id", user.id)
+          .gt("created_at", lastReadAt);
+        unreadCount = count || 0;
+      } else {
+        // If never read, count all messages from others
+        const { count } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("conversation_id", conv.id)
+          .neq("sender_id", user.id);
+        unreadCount = count || 0;
+      }
+
+      // Get last message for preview
+      const { data: lastMessages } = await supabase
+        .from("messages")
+        .select("id, content, message_type, created_at, sender_id")
+        .eq("conversation_id", conv.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      const lastMessage = lastMessages?.[0] || null;
+      let lastMessagePreview: string | null = null;
+      
+      if (lastMessage) {
+        // Format message preview based on type
+        if (lastMessage.message_type === "text" && lastMessage.content) {
+          // Truncate long messages
+          lastMessagePreview = lastMessage.content.length > 50 
+            ? lastMessage.content.substring(0, 50) + "..." 
+            : lastMessage.content;
+        } else if (lastMessage.message_type === "image") {
+          lastMessagePreview = "📷 Photo";
+        } else if (lastMessage.message_type === "video") {
+          lastMessagePreview = "🎥 Video";
+        } else if (lastMessage.message_type === "audio") {
+          lastMessagePreview = "🎵 Audio";
+        } else if (lastMessage.message_type === "file") {
+          lastMessagePreview = "📎 File";
+        }
+      }
 
       // Resolve profile image URLs for participants
       const participantsWithUrls = await Promise.all(
@@ -89,8 +141,8 @@ async function getConversations(): Promise<{
         id: conv.id,
         type: (conv.type || "direct") as "direct" | "group",
         name: conv.group_name || null,
-        last_message: null, // TODO: Implement message fetching
-        last_message_at: conv.updated_at,
+        last_message: lastMessagePreview,
+        last_message_at: lastMessage?.created_at || conv.updated_at,
         unread_count: unreadCount,
         participants: participantsWithUrls,
       };

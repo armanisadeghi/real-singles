@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, MessageCircle, Heart, User } from "lucide-react";
+import { Home, Compass, MessageCircle, Users, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItemProps {
@@ -46,7 +46,7 @@ function NavItem({ href, icon: Icon, label, isActive }: NavItemProps) {
  * Mobile Bottom Navigation for Web
  *
  * Follows iOS/Android native patterns:
- * - 5 tabs matching native app (Home, Discover, Chats, Favorites, Profile)
+ * - 5 tabs: Home, Discover, Connections, Messages, Profile
  * - Always visible labels
  * - Active state with filled icons
  * - Safe area padding for notched devices
@@ -58,8 +58,8 @@ export function BottomNavigation() {
   const navItems = [
     { href: "/home", icon: Home, label: "Home" },
     { href: "/discover", icon: Compass, label: "Discover" },
-    { href: "/chats", icon: MessageCircle, label: "Chats" },
-    { href: "/favorites", icon: Heart, label: "Favorites" },
+    { href: "/connections", icon: Users, label: "Connections" },
+    { href: "/chats", icon: MessageCircle, label: "Messages" },
     { href: "/profile", icon: User, label: "Profile" },
   ];
 

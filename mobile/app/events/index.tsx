@@ -1,6 +1,7 @@
 import CurrentEventCard from "@/components/ui/CurrentEventCard";
 import PastEventCard from "@/components/ui/PastEventCard";
 import { getAllEvents } from "@/lib/api";
+import { EventCardProps } from "@/types";
 import { getCurrentUserId } from "@/utils/token";
 import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
@@ -17,9 +18,16 @@ import {
 } from "react-native";
 import { SymbolView } from "expo-symbols";
 
+interface EventsData {
+  success: boolean;
+  currentEvent: EventCardProps[];
+  pastEvent: EventCardProps[];
+  msg?: string;
+}
+
 export default function Events() {
   const router = useRouter();
-  const [data, setData] = useState<any[any]>([]);
+  const [data, setData] = useState<EventsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentUserid, setCurrentUserId] = useState<string | null>(null);

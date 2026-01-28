@@ -8,9 +8,10 @@
  */
 
 import { useEffect, useState } from "react";
-import { ProfileListItem } from "@/components/discovery/ProfileListItem";
-import { Loader2, Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Loader2, Heart, MessageCircle, CheckCircle, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface Match {
   user_id: string;
@@ -39,7 +40,46 @@ interface MatchesResponse {
   error?: string;
 }
 
+// Helper to format relative time
+function formatMatchedTime(dateString: string | null | undefined): string {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  return date.toLocaleDateString();
+}
+
+// Background colors for initials
+const BACKGROUND_COLORS = [
+  "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5",
+  "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50",
+];
+
+function getBgColor(seed: string): string {
+  const index = Math.abs(
+    seed.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % BACKGROUND_COLORS.length
+  );
+  return BACKGROUND_COLORS[index];
+}
+
+function getInitials(name?: string | null): string {
+  if (!name) return "?";
+  const parts = name.split(" ");
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return parts[0].charAt(0).toUpperCase() + parts[parts.length - 1].charAt(0).toUpperCase();
+}
+
 export default function MatchesPage() {
+  const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,23 +160,100 @@ export default function MatchesPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {matches.map((match) => (
-            <ProfileListItem
-              key={match.user_id}
-              profile={{
-                id: match.user_id,
-                user_id: match.user_id,
-                first_name: match.first_name,
-                last_name: match.last_name,
-                city: match.city,
-                state: match.state,
-                profile_image_url: match.profile_image_url,
-                is_verified: match.is_verified,
-                user: match.display_name ? { display_name: match.display_name } : null,
-              }}
-              navigateToFocus={false}
-            />
-          ))}
+          {matches.map((match) => {
+            const name = match.first_name || match.display_name || "Anonymous";
+            const location = [match.city, match.state].filter(Boolean).join(", ");
+            const bgColor = getBgColor(match.user_id);
+            const initials = getInitials(name);
+            const matchedTime = formatMatchedTime(match.matched_at);
+
+            return (
+              <div
+                key={match.user_id}
+                className="flex items-center gap-4 p-3 bg-white rounded-xl shadow-sm"
+              >
+                {/* Photo - Links to profile */}
+                <Link
+                  href={`/profile/${match.user_id}`}
+                  className="relative w-[72px] h-[72px] rounded-lg overflow-hidden flex-shrink-0 hover:opacity-90 transition-opacity"
+                >
+                  {match.profile_image_url ? (
+                    <img
+                      src={match.profile_image_url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div 
+                      className="w-full h-full flex items-center justify-center"
+                      style={{ backgroundColor: bgColor }}
+                    >
+                      <span className="text-2xl font-bold text-white">{initials}</span>
+                    </div>
+                  )}
+                </Link>
+
+                {/* Info - Links to profile */}
+                <Link 
+                  href={`/profile/${match.user_id}`}
+                  className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
+                >
+                  {/* Name */}
+                  <h3 className="text-base font-semibold text-gray-900 truncate">
+                    {name}
+                  </h3>
+
+                  {/* Location */}
+                  {location && (
+                    <p className="text-sm text-gray-500 truncate mt-0.5">
+                      {location}
+                    </p>
+                  )}
+
+                  {/* Badges Row */}
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                    {/* Verified Badge */}
+                    {match.is_verified && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
+                        <CheckCircle className="w-3 h-3" />
+                        Verified
+                      </span>
+                    )}
+
+                    {/* Matched Time */}
+                    {matchedTime && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-pink-50 text-pink-600 rounded-full text-xs font-medium">
+                        <Heart className="w-3 h-3" />
+                        Matched {matchedTime}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* Message Button */}
+                  {match.conversation_id ? (
+                    <button
+                      onClick={() => router.push(`/chats/${match.conversation_id}`)}
+                      className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 transition-colors shadow-sm"
+                      title="Send message"
+                    >
+                      <MessageCircle className="w-5 h-5" />
+                    </button>
+                  ) : (
+                    <Link
+                      href={`/profile/${match.user_id}`}
+                      className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                      title="View profile"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </Link>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

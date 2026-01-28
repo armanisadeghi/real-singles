@@ -10,6 +10,7 @@
     "lint": "eslint",
     "type-check": "tsc --noEmit",
     "seed:users": "tsx scripts/seed-test-users.ts",
+    "seed:events": "tsx scripts/seed-events.ts",
     "seed:cleanup": "tsx scripts/cleanup-test-users.ts",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "db:migrate:dry": "tsx scripts/db-migrate.ts --dry-run",

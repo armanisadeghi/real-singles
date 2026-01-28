@@ -7,7 +7,6 @@ import {
   Heart,
   MessageCircle,
   Share2,
-  Star,
   MapPin,
   Briefcase,
   CheckCircle,
@@ -73,8 +72,6 @@ interface ProfileData {
   WeirdestGift: string;
   PastEvent: string;
   is_verified: boolean;
-  RATINGS: number;
-  TotalRating: number;
   IsFavorite: number;
   FollowStatus: string;
   gallery: Array<{
@@ -97,19 +94,15 @@ export default function OtherProfilePage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
-  
-  // Review modal state
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewText, setReviewText] = useState("");
-  const [reviewRelationship, setReviewRelationship] = useState("other");
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   // Touch/swipe state for mobile photo navigation
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  // Fullscreen image viewer state (desktop)
+  const [showFullscreenImage, setShowFullscreenImage] = useState(false);
 
   // Fetch profile data
   useEffect(() => {
@@ -164,6 +157,24 @@ export default function OtherProfilePage() {
     }
   }, [photos.length]);
 
+  // Keyboard navigation for fullscreen viewer
+  useEffect(() => {
+    if (!showFullscreenImage) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowFullscreenImage(false);
+      } else if (e.key === 'ArrowRight') {
+        nextPhoto();
+      } else if (e.key === 'ArrowLeft') {
+        prevPhoto();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showFullscreenImage, nextPhoto, prevPhoto]);
+
   // Minimum swipe distance threshold (in pixels)
   const minSwipeDistance = 50;
 
@@ -216,8 +227,7 @@ export default function OtherProfilePage() {
   // Keyboard navigation for accessibility
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only handle if no modal is open and not in an input/textarea
-      if (showReviewModal) return;
+      // Only handle if not in an input/textarea
       const target = e.target as HTMLElement;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT") return;
 
@@ -233,7 +243,7 @@ export default function OtherProfilePage() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [prevPhoto, nextPhoto, showReviewModal]);
+  }, [prevPhoto, nextPhoto]);
 
   // Handle favorite toggle
   const handleToggleFavorite = async () => {
@@ -310,42 +320,6 @@ export default function OtherProfilePage() {
     });
   };
 
-  // Handle submit review
-  const handleSubmitReview = async () => {
-    if (!profile || reviewRating === 0) return;
-
-    setReviewSubmitting(true);
-    try {
-      const res = await fetch("/api/reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reviewed_user_id: profile.ID,
-          rating: reviewRating,
-          review_text: reviewText,
-          relationship: reviewRelationship,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        setShowReviewModal(false);
-        setReviewRating(0);
-        setReviewText("");
-        setReviewRelationship("other");
-        alert("Review submitted successfully! It will be visible after moderation.");
-      } else {
-        alert(data.msg || "Failed to submit review");
-      }
-    } catch (err) {
-      console.error("Error submitting review:", err);
-      alert("Failed to submit review. Please try again.");
-    } finally {
-      setReviewSubmitting(false);
-    }
-  };
-
   // Parse interests
   const interests = profile?.Interest?.split(",").map((i) => i.trim()).filter(Boolean) || [];
   const horoscopes = profile?.HSign?.split(",").map((h) => h.trim()).filter(Boolean) || [];
@@ -412,7 +386,7 @@ export default function OtherProfilePage() {
 
         {/* Photo Gallery */}
         <div
-          className="relative aspect-[3/4] sm:aspect-[4/3] md:aspect-[16/9] lg:aspect-[21/9] max-h-[500px] bg-gradient-to-br from-pink-100 to-purple-100 touch-none select-none"
+          className="relative aspect-[3/4] sm:aspect-[4/3] md:aspect-[4/3] lg:aspect-[16/10] max-h-[600px] mx-auto bg-gradient-to-br from-pink-100 to-purple-100 touch-none select-none"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -421,8 +395,9 @@ export default function OtherProfilePage() {
             <img
               src={photos[currentPhotoIndex]}
               alt=""
-              className="w-full h-full object-cover select-none"
+              className="w-full h-full object-cover select-none cursor-pointer"
               draggable={false}
+              onClick={() => setShowFullscreenImage(true)}
               style={{
                 transform: `translateX(${swipeOffset}px)`,
                 transition: isTransitioning ? 'transform 0.3s ease-out' : 'none',
@@ -530,14 +505,6 @@ export default function OtherProfilePage() {
                     <span>{profile.JobTitle}</span>
                   </div>
                 )}
-                {profile.RATINGS > 0 && (
-                  <div className="flex items-center gap-1.5">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span>
-                      {profile.RATINGS.toFixed(1)} ({profile.TotalRating} reviews)
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -594,14 +561,6 @@ export default function OtherProfilePage() {
             >
               <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
               Share
-            </button>
-
-            <button
-              onClick={() => setShowReviewModal(true)}
-              className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-amber-100 text-amber-700 rounded-full font-medium hover:bg-amber-200 transition-all text-sm sm:text-base"
-            >
-              <Star className="w-4 h-4 sm:w-5 sm:h-5" />
-              Review
             </button>
           </div>
         </div>
@@ -893,144 +852,88 @@ export default function OtherProfilePage() {
         </div>
       </div>
 
-      {/* Review Modal */}
-      {showReviewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowReviewModal(false)}
-          />
+      {/* Fullscreen Image Viewer */}
+      {showFullscreenImage && photos.length > 0 && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+          onClick={() => setShowFullscreenImage(false)}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setShowFullscreenImage(false)}
+            className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur rounded-full flex items-center justify-center transition-colors"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
 
-          {/* Modal */}
-          <div className="relative bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
-            {/* Header */}
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">
-                Write a Review
-              </h2>
-              <button
-                onClick={() => setShowReviewModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 space-y-6">
-              {/* User being reviewed */}
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 overflow-hidden">
-                  {profile?.Image ? (
-                    <img
-                      src={profile.Image}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-2xl">
-                      👤
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {profile?.DisplayName || profile?.FirstName || "User"}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Share your experience
-                  </p>
-                </div>
-              </div>
-
-              {/* Rating */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rating
-                </label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => setReviewRating(star)}
-                      className="p-1 hover:scale-110 transition-transform"
-                    >
-                      <Star
-                        className={cn(
-                          "w-8 h-8 transition-colors",
-                          star <= reviewRating
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300 hover:text-yellow-300"
-                        )}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Relationship */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  How do you know this person?
-                </label>
-                <select
-                  value={reviewRelationship}
-                  onChange={(e) => setReviewRelationship(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-base"
-                >
-                  <option value="date">Went on a date</option>
-                  <option value="matched">We matched</option>
-                  <option value="met">Met in person</option>
-                  <option value="event">Met at an event</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              {/* Review text */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Your Review (optional)
-                </label>
-                <textarea
-                  value={reviewText}
-                  onChange={(e) => setReviewText(e.target.value)}
-                  placeholder="Share your experience..."
-                  rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 resize-none text-base"
-                />
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="sticky bottom-0 bg-white border-t px-6 py-4 flex gap-3">
-              <button
-                onClick={() => setShowReviewModal(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-full font-medium hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmitReview}
-                disabled={reviewRating === 0 || reviewSubmitting}
-                className={cn(
-                  "flex-1 px-4 py-2.5 rounded-full font-medium flex items-center justify-center gap-2 transition-all",
-                  reviewRating === 0
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600"
-                )}
-              >
-                {reviewSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  "Submit Review"
-                )}
-              </button>
-            </div>
+          {/* Photo counter */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur px-4 py-1.5 rounded-full text-white text-sm font-medium">
+            {currentPhotoIndex + 1} / {photos.length}
           </div>
+
+          {/* Image container - click stops propagation to allow zoom */}
+          <div 
+            className="relative w-full h-full flex items-center justify-center p-4 sm:p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={photos[currentPhotoIndex]}
+              alt=""
+              className="max-w-full max-h-full object-contain select-none"
+              draggable={false}
+            />
+          </div>
+
+          {/* Navigation arrows */}
+          {photos.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prevPhoto();
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur rounded-full flex items-center justify-center transition-colors"
+              >
+                <ChevronLeft className="w-6 h-6 text-white" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  nextPhoto();
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur rounded-full flex items-center justify-center transition-colors"
+              >
+                <ChevronRight className="w-6 h-6 text-white" />
+              </button>
+            </>
+          )}
+
+          {/* Thumbnail strip at bottom */}
+          {photos.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-black/50 backdrop-blur p-2 rounded-xl">
+              {photos.map((photo, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentPhotoIndex(i);
+                  }}
+                  className={cn(
+                    "w-12 h-12 rounded-lg overflow-hidden transition-all",
+                    i === currentPhotoIndex
+                      ? "ring-2 ring-white ring-offset-2 ring-offset-black/50"
+                      : "opacity-60 hover:opacity-100"
+                  )}
+                >
+                  <img
+                    src={photo}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

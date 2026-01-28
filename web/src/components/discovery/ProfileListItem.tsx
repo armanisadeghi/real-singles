@@ -8,7 +8,7 @@
  */
 
 import Link from "next/link";
-import { MapPin, Star, CheckCircle, ChevronRight } from "lucide-react";
+import { MapPin, CheckCircle, ChevronRight } from "lucide-react";
 import { cn, calculateAge } from "@/lib/utils";
 
 interface ProfileListItemProps {
@@ -23,7 +23,6 @@ interface ProfileListItemProps {
     profile_image_url?: string | null;
     is_verified?: boolean | null;
     distance_km?: number | null;
-    rating?: number | null;
     user?: {
       display_name?: string | null;
     } | null;
@@ -130,14 +129,6 @@ export function ProfileListItem({
             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
               <CheckCircle className="w-3 h-3" />
               Verified
-            </span>
-          )}
-
-          {/* Rating Badge */}
-          {profile.rating !== undefined && profile.rating !== null && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
-              <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-              {profile.rating}
             </span>
           )}
 

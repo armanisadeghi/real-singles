@@ -19,6 +19,7 @@ const navItems = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/events", label: "Events" },
+  { href: "/admin/speed-dating", label: "Speed Dating" },
   { href: "/admin/reports", label: "Reports" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/data-integrity", label: "Data Integrity" },

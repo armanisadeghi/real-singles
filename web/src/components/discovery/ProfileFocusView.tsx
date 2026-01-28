@@ -22,6 +22,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn, calculateAge, formatHeight } from "@/lib/utils";
+import { MatchCelebrationModal } from "./MatchCelebrationModal";
+import { useToast } from "@/components/ui/Toast";
 
 interface ProfileData {
   id: string;
@@ -45,15 +47,26 @@ interface ProfileData {
   } | null;
 }
 
+interface MatchActionResult {
+  success: boolean;
+  is_mutual?: boolean;
+  conversation_id?: string | null;
+  msg?: string;
+}
+
 interface ProfileFocusViewProps {
   profile: ProfileData;
   gallery?: Array<{ media_url: string; media_type: string }>;
+  /** Current user's profile image for match celebration */
+  currentUserImage?: string | null;
+  /** Current user's name for match celebration */
+  currentUserName?: string;
   /** Callback when like action is triggered */
-  onLike?: (userId: string) => Promise<{ success: boolean; is_mutual?: boolean; msg?: string }>;
+  onLike?: (userId: string) => Promise<MatchActionResult>;
   /** Callback when pass action is triggered */
   onPass?: (userId: string) => Promise<{ success: boolean; msg?: string }>;
   /** Callback when super like action is triggered */
-  onSuperLike?: (userId: string) => Promise<{ success: boolean; is_mutual?: boolean; msg?: string }>;
+  onSuperLike?: (userId: string) => Promise<MatchActionResult>;
   /** Callback when close is triggered */
   onClose?: () => void;
   /** Whether this is a modal overlay */
@@ -84,6 +97,8 @@ function getInitials(name?: string | null): string {
 export function ProfileFocusView({
   profile,
   gallery = [],
+  currentUserImage,
+  currentUserName,
   onLike,
   onPass,
   onSuperLike,
@@ -91,9 +106,14 @@ export function ProfileFocusView({
   isModal = false,
 }: ProfileFocusViewProps) {
   const router = useRouter();
+  const toast = useToast();
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionComplete, setActionComplete] = useState<string | null>(null);
+
+  // Match celebration state
+  const [showMatchCelebration, setShowMatchCelebration] = useState(false);
+  const [matchConversationId, setMatchConversationId] = useState<string | null>(null);
 
   // Touch/swipe state
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -121,13 +141,19 @@ export function ProfileFocusView({
     }
   };
 
+  const handleMatchCelebrationClose = () => {
+    setShowMatchCelebration(false);
+    setMatchConversationId(null);
+    handleClose();
+  };
+
   const handleAction = async (action: "like" | "pass" | "super_like") => {
     if (!profile.user_id) return;
     
     setActionLoading(action);
     
     try {
-      let result: { success: boolean; is_mutual?: boolean; msg?: string } | undefined;
+      let result: MatchActionResult | { success: boolean; msg?: string } | undefined;
       switch (action) {
         case "like":
           result = onLike ? await onLike(profile.user_id) : { success: true };
@@ -142,16 +168,24 @@ export function ProfileFocusView({
 
       if (result?.success) {
         setActionComplete(action);
-        // Show match celebration if mutual
-        if (result.is_mutual) {
-          // Could show a match modal here
-          console.log("It's a match!");
+        
+        // Check if it's a mutual match
+        if ('is_mutual' in result && result.is_mutual && 'conversation_id' in result) {
+          // Show match celebration!
+          setMatchConversationId(result.conversation_id || null);
+          setShowMatchCelebration(true);
+        } else {
+          // Close after brief delay
+          setTimeout(handleClose, 800);
         }
-        // Close after brief delay
-        setTimeout(handleClose, 800);
+      } else {
+        // Show error toast
+        const errorMsg = result?.msg || "Action failed. Please try again.";
+        toast.error(errorMsg);
       }
     } catch (error) {
       console.error("Action failed:", error);
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setActionLoading(null);
     }
@@ -462,15 +496,34 @@ export function ProfileFocusView({
     </div>
   );
 
+  // Match celebration modal (shared across modal/non-modal modes)
+  const matchCelebration = (
+    <MatchCelebrationModal
+      isOpen={showMatchCelebration}
+      currentUserImage={currentUserImage}
+      currentUserName={currentUserName}
+      matchedUserImage={profile.profile_image_url}
+      matchedUserName={name}
+      conversationId={matchConversationId}
+      onClose={handleMatchCelebrationClose}
+    />
+  );
+
   if (isModal) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         {content}
+        {matchCelebration}
       </div>
     );
   }
 
-  return content;
+  return (
+    <>
+      {content}
+      {matchCelebration}
+    </>
+  );
 }
 
 export default ProfileFocusView;

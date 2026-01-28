@@ -13,6 +13,8 @@ import { X, Flag, Heart, Star, MapPin, Briefcase, CheckCircle, ArrowLeft } from 
 import { cn, calculateAge } from "@/lib/utils";
 import { PhotoCarousel } from "./PhotoCarousel";
 import { ProfileSectionRenderer } from "./ProfileSectionRenderer";
+import { MatchCelebrationModal } from "./MatchCelebrationModal";
+import { useToast } from "@/components/ui/Toast";
 
 interface Profile {
   id: string;
@@ -64,12 +66,23 @@ interface GalleryItem {
   is_primary?: boolean;
 }
 
+interface MatchActionResult {
+  success: boolean;
+  is_mutual?: boolean;
+  conversation_id?: string | null;
+  msg?: string;
+}
+
 interface DiscoveryProfileViewProps {
   profile: Profile;
   gallery?: GalleryItem[];
-  onLike?: (userId: string) => Promise<{ success: boolean; is_mutual?: boolean; msg?: string }>;
+  /** Current user's profile image for match celebration */
+  currentUserImage?: string | null;
+  /** Current user's name for match celebration */
+  currentUserName?: string;
+  onLike?: (userId: string) => Promise<MatchActionResult>;
   onPass?: (userId: string) => Promise<{ success: boolean; msg?: string }>;
-  onSuperLike?: (userId: string) => Promise<{ success: boolean; is_mutual?: boolean; msg?: string }>;
+  onSuperLike?: (userId: string) => Promise<MatchActionResult>;
   onReport?: (userId: string, reason: string) => Promise<{ success: boolean; msg?: string }>;
   onClose?: () => void;
 }
@@ -85,6 +98,8 @@ const REPORT_REASONS = [
 export function DiscoveryProfileView({
   profile,
   gallery = [],
+  currentUserImage,
+  currentUserName,
   onLike,
   onPass,
   onSuperLike,
@@ -92,8 +107,13 @@ export function DiscoveryProfileView({
   onClose,
 }: DiscoveryProfileViewProps) {
   const router = useRouter();
+  const toast = useToast();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
+  
+  // Match celebration state
+  const [showMatchCelebration, setShowMatchCelebration] = useState(false);
+  const [matchConversationId, setMatchConversationId] = useState<string | null>(null);
 
   // Get all images - filter out primary from gallery since it's already added as profile_image_url
   const images = [
@@ -118,7 +138,7 @@ export function DiscoveryProfileView({
       setActionLoading(action);
 
       try {
-        let result;
+        let result: MatchActionResult | { success: boolean; msg?: string } | undefined;
         switch (action) {
           case "like":
             result = onLike ? await onLike(profile.user_id) : { success: true };
@@ -132,16 +152,28 @@ export function DiscoveryProfileView({
         }
 
         if (result?.success) {
-          // Show feedback and close
-          setTimeout(handleClose, 500);
+          // Check if it's a mutual match
+          if ('is_mutual' in result && result.is_mutual && 'conversation_id' in result) {
+            // Show match celebration!
+            setMatchConversationId(result.conversation_id || null);
+            setShowMatchCelebration(true);
+          } else {
+            // Regular action - close after brief delay
+            setTimeout(handleClose, 500);
+          }
+        } else {
+          // Show error toast
+          const errorMsg = result?.msg || "Action failed. Please try again.";
+          toast.error(errorMsg);
         }
       } catch (error) {
         console.error("Action failed:", error);
+        toast.error("Something went wrong. Please try again.");
       } finally {
         setActionLoading(null);
       }
     },
-    [profile.user_id, onLike, onPass, onSuperLike, handleClose]
+    [profile.user_id, onLike, onPass, onSuperLike, handleClose, toast]
   );
 
   const handleReport = useCallback(
@@ -159,6 +191,13 @@ export function DiscoveryProfileView({
     },
     [profile.user_id, onReport]
   );
+
+  // Handle closing the match celebration
+  const handleMatchCelebrationClose = useCallback(() => {
+    setShowMatchCelebration(false);
+    setMatchConversationId(null);
+    handleClose();
+  }, [handleClose]);
 
   // Derived values for display
   const name = profile.first_name || profile.user?.display_name || "Anonymous";
@@ -417,6 +456,17 @@ export function DiscoveryProfileView({
           </div>
         </div>
       )}
+
+      {/* Match Celebration Modal */}
+      <MatchCelebrationModal
+        isOpen={showMatchCelebration}
+        currentUserImage={currentUserImage}
+        currentUserName={currentUserName}
+        matchedUserImage={profile.profile_image_url}
+        matchedUserName={name}
+        conversationId={matchConversationId}
+        onClose={handleMatchCelebrationClose}
+      />
     </div>
   );
 }

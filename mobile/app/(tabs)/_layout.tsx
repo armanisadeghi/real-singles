@@ -10,6 +10,13 @@ import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
  * DO NOT override platform defaults unless absolutely necessary.
  * Native components handle haptics, animations, accessibility, and safe areas automatically.
  * 
+ * Tab Structure (matches web):
+ * - Home: Dashboard with top matches, events, etc.
+ * - Discover: Browse potential matches
+ * - Connections: Likes You + Matches (hub for managing relationships)
+ * - Messages: Active conversations
+ * - Profile: User's own profile
+ * 
  * Icons:
  * - iOS: SF Symbols via 'sf' prop with default/selected states
  * - Android: Drawable resources via 'drawable' prop (uses system icons)
@@ -37,21 +44,21 @@ export default function TabLayout() {
         />
       </NativeTabs.Trigger>
 
-      {/* Chats Tab - Route: /chats */}
-      <NativeTabs.Trigger name="chats">
-        <Label>Chats</Label>
+      {/* Connections Tab - Route: /connections (Likes + Matches hub) */}
+      <NativeTabs.Trigger name="connections">
+        <Label>Connections</Label>
         <Icon 
-          sf={{ default: 'bubble.left.and.bubble.right', selected: 'bubble.left.and.bubble.right.fill' }}
-          drawable="ic_menu_send"
+          sf={{ default: 'person.2', selected: 'person.2.fill' }}
+          drawable="ic_menu_friendslist"
         />
       </NativeTabs.Trigger>
 
-      {/* Matches Tab - Route: /matches */}
-      <NativeTabs.Trigger name="matches">
-        <Label>Matches</Label>
+      {/* Messages Tab - Route: /chats */}
+      <NativeTabs.Trigger name="chats">
+        <Label>Messages</Label>
         <Icon 
-          sf={{ default: 'heart', selected: 'heart.fill' }}
-          drawable="ic_menu_star"
+          sf={{ default: 'bubble.left.and.bubble.right', selected: 'bubble.left.and.bubble.right.fill' }}
+          drawable="ic_menu_send"
         />
       </NativeTabs.Trigger>
 

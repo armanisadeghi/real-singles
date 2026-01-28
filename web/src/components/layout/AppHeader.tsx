@@ -60,11 +60,11 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
             <Link href="/discover" className="text-gray-600 hover:text-gray-900 font-medium">
               Discover
             </Link>
-            <Link href="/matches" className="text-gray-600 hover:text-gray-900 font-medium">
-              Matches
+            <Link href="/connections" className="text-gray-600 hover:text-gray-900 font-medium">
+              Connections
             </Link>
-            <Link href="/favorites" className="text-gray-600 hover:text-gray-900 font-medium">
-              Favorites
+            <Link href="/chats" className="text-gray-600 hover:text-gray-900 font-medium">
+              Messages
             </Link>
           </nav>
 
@@ -99,6 +99,12 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                 >
                   Edit Profile
+                </Link>
+                <Link
+                  href="/favorites"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Saved Profiles
                 </Link>
                 <Link
                   href="/settings"
