@@ -36,11 +36,15 @@ export default function ProfileDetail() {
   const isDark = colorScheme === 'dark';
   const colors = useThemeColors();
 
+  // Note: BottomSheet uses Reanimated which doesn't support PlatformColor objects.
+  // Use plain hex colors for BottomSheet backgrounds, PlatformColor for other native components.
   const themedColors = useMemo(() => ({
-    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
-    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    // For native components (Text, View, etc.) - can use PlatformColor
     text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
     secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    // For Reanimated components (BottomSheet) - must use plain colors
+    background: isDark ? '#000000' : '#FFFFFF',
+    secondaryBackground: isDark ? '#1C1C1E' : '#F2F2F7',
   }), [isDark, colors]);
 
   const { id } = useLocalSearchParams();
@@ -382,8 +386,10 @@ export default function ProfileDetail() {
         index={0}
         enablePanDownToClose={false}
         enableContentPanningGesture={true}
+        backgroundStyle={{ backgroundColor: themedColors.background }}
+        handleIndicatorStyle={{ backgroundColor: isDark ? '#4B5563' : '#CBD5E1' }}
       >
-        <BottomSheetView  style={{ backgroundColor: "transparent" }}> 
+        <BottomSheetView style={{ backgroundColor: themedColors.background }}> 
           {profile && (
             <ProfileDetails
               profile={profile}

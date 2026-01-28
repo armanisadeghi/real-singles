@@ -3,7 +3,6 @@ import LinearBg from "@/components/LinearBg";
 import NotificationBell from "@/components/NotificationBell";
 import ProfileListItem from "@/components/ui/ProfileListItem";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
-import { icons } from "@/constants/icons";
 import { ICON_SIZES, SPACING, TYPOGRAPHY, VERTICAL_SPACING } from "@/constants/designTokens";
 import { applyFilters, clearFilter, getHomeScreenData, getProfile, saveFilter } from "@/lib/api";
 import { User } from "@/types";
@@ -17,7 +16,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   Platform,
   PlatformColor,
   RefreshControl,
@@ -40,14 +38,11 @@ export default function Discover() {
   const isDark = colorScheme === 'dark';
   const colors = useThemeColors();
 
-  // Theme-aware colors using iOS PlatformColor for automatic dark mode adaptation
+  // Theme-aware colors
+  // Note: BottomSheet uses Reanimated which doesn't support PlatformColor objects.
+  // Use plain hex colors for BottomSheet backgrounds, PlatformColor for other native components.
   const themedColors = useMemo(() => ({
-    background: Platform.OS === 'ios' 
-      ? (PlatformColor('systemBackground') as unknown as string) 
-      : colors.background,
-    secondaryBackground: Platform.OS === 'ios' 
-      ? (PlatformColor('secondarySystemBackground') as unknown as string) 
-      : colors.surfaceContainer,
+    // For native components (Text, View, etc.) - can use PlatformColor
     text: Platform.OS === 'ios' 
       ? (PlatformColor('label') as unknown as string) 
       : colors.onSurface,
@@ -60,14 +55,16 @@ export default function Discover() {
     border: Platform.OS === 'ios' 
       ? (PlatformColor('separator') as unknown as string) 
       : colors.outline,
-    // Brand primary color that works in both modes
-    primary: Platform.OS === 'ios'
-      ? (PlatformColor('systemPink') as unknown as string)
-      : '#B06D1E',
-    // Handle indicator for bottom sheet
-    handleIndicator: Platform.OS === 'ios'
-      ? (PlatformColor('systemGray3') as unknown as string)
-      : (isDark ? '#4B5563' : '#CBD5E1'),
+    // Brand primary color - using plain color as it may be used in animated contexts
+    primary: isDark ? '#FF6B8A' : '#B06D1E',
+    // Native background for main content - uses PlatformColor for automatic adaptation
+    nativeBackground: Platform.OS === 'ios'
+      ? (PlatformColor('systemBackground') as unknown as string)
+      : colors.background,
+    // For Reanimated components (BottomSheet) - must use plain colors
+    background: isDark ? '#000000' : '#FFFFFF',
+    secondaryBackground: isDark ? '#1C1C1E' : '#F2F2F7',
+    handleIndicator: isDark ? '#4B5563' : '#CBD5E1',
   }), [isDark, colors]);
   
   const [loading, setLoading] = useState(false);
@@ -284,14 +281,17 @@ export default function Discover() {
 
   return (
     <>
-      <View className="flex-1 bg-background">
+      <View 
+        className="flex-1"
+        style={{ backgroundColor: themedColors.nativeBackground }}
+      >
         <Toast />
         
-        {/* Header */}
+        {/* Header - uses native PlatformColor for proper dark mode adaptation */}
         <View
           className="flex-row justify-between items-center rounded-b-xl z-30"
           style={{
-            backgroundColor: themedColors.background,
+            backgroundColor: themedColors.nativeBackground,
             paddingHorizontal: SPACING.screenPadding,
             paddingTop: headerTopPadding,
             paddingBottom: VERTICAL_SPACING.md,
@@ -299,7 +299,7 @@ export default function Discover() {
               ios: {
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.08,
+                shadowOpacity: isDark ? 0.2 : 0.08,
                 shadowRadius: 8,
               },
               android: {
@@ -324,11 +324,13 @@ export default function Discover() {
           </View>
 
           <View className="flex-row items-center" style={{ gap: SPACING.sm }}>
-            {/* Filter Button */}
+            {/* Filter Button - Uses SF Symbol on iOS */}
             <TouchableOpacity
               onPress={handleFilterPress}
-              className="rounded-full overflow-hidden"
+              activeOpacity={0.7}
               style={{
+                borderRadius: (ICON_SIZES.md + SPACING.md * 2) / 2,
+                overflow: 'hidden',
                 ...Platform.select({
                   ios: {
                     shadowColor: '#000',
@@ -341,21 +343,26 @@ export default function Discover() {
                   },
                 }),
               }}
-              activeOpacity={0.7}
             >
-              <LinearBg style={{ 
-                padding: SPACING.sm,
-                borderRadius: 9999,
-              }}>
-                <Image
-                  source={icons.filter}
-                  style={{ width: ICON_SIZES.sm, height: ICON_SIZES.sm }}
-                  resizeMode="contain"
+              <LinearBg 
+                style={{ 
+                  width: Math.max(ICON_SIZES.md + SPACING.md * 2, 44),
+                  height: Math.max(ICON_SIZES.md + SPACING.md * 2, 44),
+                  borderRadius: (ICON_SIZES.md + SPACING.md * 2) / 2,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <PlatformIcon
+                  name="filter-list"
+                  iosName="line.3.horizontal.decrease"
+                  size={ICON_SIZES.md}
+                  color="#ffffff"
                 />
               </LinearBg>
             </TouchableOpacity>
             
-            <NotificationBell />
+            <NotificationBell size={ICON_SIZES.md} />
           </View>
         </View>
 
@@ -410,7 +417,7 @@ export default function Discover() {
 
         {/* Content */}
         {loading && !refreshing ? (
-          <View className="flex-1 items-center justify-center" style={{ backgroundColor: themedColors.background }}>
+          <View className="flex-1 items-center justify-center" style={{ backgroundColor: themedColors.nativeBackground }}>
             <ActivityIndicator size="large" color={themedColors.primary} />
           </View>
         ) : (

@@ -5,8 +5,8 @@
  * Takes profile data and renders only filled sections in an engaging way.
  */
 
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useMemo } from "react";
+import { Platform, PlatformColor, StyleSheet, Text, useColorScheme, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { PlatformIcon } from "@/components/ui";
 import {
@@ -16,6 +16,7 @@ import {
   VERTICAL_SPACING,
 } from "@/constants/designTokens";
 import { User } from "@/types";
+import { useThemeColors } from "@/context/ThemeContext";
 
 // Values to hide - null, undefined, empty, or "prefer not to say" variations
 const HIDDEN_VALUES = [
@@ -101,6 +102,42 @@ export default function ProfileSectionRenderer({
   profile,
   showFull = true,
 }: ProfileSectionRendererProps) {
+  // Dark mode support
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
+  
+  // Theme-aware colors using iOS PlatformColor for automatic adaptation
+  const themedColors = useMemo(() => ({
+    text: Platform.OS === 'ios' 
+      ? (PlatformColor('label') as unknown as string) 
+      : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' 
+      ? (PlatformColor('secondaryLabel') as unknown as string) 
+      : colors.onSurfaceVariant,
+    tertiaryText: Platform.OS === 'ios'
+      ? (PlatformColor('tertiaryLabel') as unknown as string)
+      : (isDark ? '#6B7280' : '#9CA3AF'),
+    surface: Platform.OS === 'ios'
+      ? (PlatformColor('secondarySystemBackground') as unknown as string)
+      : colors.surfaceContainer,
+    // Brand color (stays same in both modes)
+    primary: '#B06D1E',
+    // Prompt card colors (warm tones that work in dark mode)
+    promptBackground: isDark ? '#422006' : '#FEF3C7',
+    promptLabel: isDark ? '#FBBF24' : '#92400E',
+    promptValue: isDark ? '#FDE68A' : '#78350F',
+    // Tag colors
+    tagBackground: Platform.OS === 'ios'
+      ? (PlatformColor('systemGray5') as unknown as string)
+      : (isDark ? '#374151' : '#F3F4F6'),
+    tagText: isDark ? '#E5E7EB' : '#374151',
+    // Detail item background
+    detailBackground: Platform.OS === 'ios'
+      ? (PlatformColor('tertiarySystemBackground') as unknown as string)
+      : (isDark ? '#1F2937' : '#F9FAFB'),
+  }), [isDark, colors]);
+
   const age = calculateAge(profile?.DOB);
   const height = formatHeight(profile?.Height);
   const interests = profile?.Interest?.split(",").map((i) => i.trim()).filter(Boolean) || [];
@@ -185,23 +222,23 @@ export default function ProfileSectionRenderer({
       {/* Basic Info Header */}
       <View style={styles.basicInfo}>
         <View style={styles.nameRow}>
-          <Text style={styles.name}>
+          <Text style={[styles.name, { color: themedColors.text }]}>
             {profile?.DisplayName || profile?.FirstName || "Anonymous"}
             {age && <Text style={styles.age}>, {age}</Text>}
           </Text>
           {profile?.is_verified && (
             <View style={styles.verifiedBadge}>
-              <PlatformIcon name="check-circle" size={20} color="#3B82F6" />
+              <PlatformIcon name="check-circle" size={20} color={Platform.OS === 'ios' ? (PlatformColor('systemBlue') as unknown as string) : '#3B82F6'} />
             </View>
           )}
         </View>
         
         {location && (
           <View style={styles.locationRow}>
-            <PlatformIcon name="location-on" size={16} color="#6B7280" />
-            <Text style={styles.locationText}>{location}</Text>
+            <PlatformIcon name="location-on" size={16} color={themedColors.secondaryText} />
+            <Text style={[styles.locationText, { color: themedColors.secondaryText }]}>{location}</Text>
             {profile?.distance_in_km && (
-              <Text style={styles.distanceText}>
+              <Text style={[styles.distanceText, { color: themedColors.tertiaryText }]}>
                 • {profile.distance_in_km.toFixed(1)} km away
               </Text>
             )}
@@ -210,8 +247,8 @@ export default function ProfileSectionRenderer({
         
         {shouldDisplay(profile?.JobTitle) && (
           <View style={styles.jobRow}>
-            <PlatformIcon name="work" size={16} color="#6B7280" />
-            <Text style={styles.jobText}>{profile.JobTitle}</Text>
+            <PlatformIcon name="work" size={16} color={themedColors.secondaryText} />
+            <Text style={[styles.jobText, { color: themedColors.secondaryText }]}>{profile.JobTitle}</Text>
           </View>
         )}
       </View>
@@ -219,20 +256,20 @@ export default function ProfileSectionRenderer({
       {/* About Section */}
       {shouldDisplay(profile?.About) && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About Me</Text>
-          <Text style={styles.aboutText}>{profile.About}</Text>
+          <Text style={[styles.sectionTitle, { color: themedColors.primary }]}>About Me</Text>
+          <Text style={[styles.aboutText, { color: themedColors.text }]}>{profile.About}</Text>
         </View>
       )}
       
       {/* Profile Prompts */}
       {prompts.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Get to Know Me</Text>
+          <Text style={[styles.sectionTitle, { color: themedColors.primary }]}>Get to Know Me</Text>
           <View style={styles.promptsContainer}>
             {prompts.map((prompt, index) => (
-              <View key={index} style={styles.promptCard}>
-                <Text style={styles.promptLabel}>{prompt.label}</Text>
-                <Text style={styles.promptValue}>{prompt.value}</Text>
+              <View key={index} style={[styles.promptCard, { backgroundColor: themedColors.promptBackground }]}>
+                <Text style={[styles.promptLabel, { color: themedColors.promptLabel }]}>{prompt.label}</Text>
+                <Text style={[styles.promptValue, { color: themedColors.promptValue }]}>{prompt.value}</Text>
               </View>
             ))}
           </View>
@@ -242,11 +279,11 @@ export default function ProfileSectionRenderer({
       {/* Interests */}
       {interests.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Interests</Text>
+          <Text style={[styles.sectionTitle, { color: themedColors.primary }]}>Interests</Text>
           <View style={styles.tagsContainer}>
             {interests.map((interest, index) => (
-              <View key={index} style={styles.tag}>
-                <Text style={styles.tagText}>{capitalize(interest)}</Text>
+              <View key={index} style={[styles.tag, { backgroundColor: themedColors.tagBackground }]}>
+                <Text style={[styles.tagText, { color: themedColors.tagText }]}>{capitalize(interest)}</Text>
               </View>
             ))}
           </View>
@@ -256,14 +293,14 @@ export default function ProfileSectionRenderer({
       {/* Lifestyle */}
       {lifestyleItems.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Lifestyle</Text>
+          <Text style={[styles.sectionTitle, { color: themedColors.primary }]}>Lifestyle</Text>
           <View style={styles.detailsGrid}>
             {lifestyleItems.map((item, index) => (
-              <View key={index} style={styles.detailItem}>
-                <PlatformIcon name={item.icon} size={18} color="#B06D1E" />
+              <View key={index} style={[styles.detailItem, { backgroundColor: themedColors.detailBackground }]}>
+                <PlatformIcon name={item.icon} size={18} color={themedColors.primary} />
                 <View style={styles.detailTextContainer}>
-                  <Text style={styles.detailLabel}>{item.label}</Text>
-                  <Text style={styles.detailValue}>{item.value}</Text>
+                  <Text style={[styles.detailLabel, { color: themedColors.secondaryText }]}>{item.label}</Text>
+                  <Text style={[styles.detailValue, { color: themedColors.text }]}>{item.value}</Text>
                 </View>
               </View>
             ))}
@@ -274,14 +311,14 @@ export default function ProfileSectionRenderer({
       {/* Background */}
       {backgroundItems.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Background</Text>
+          <Text style={[styles.sectionTitle, { color: themedColors.primary }]}>Background</Text>
           <View style={styles.detailsGrid}>
             {backgroundItems.map((item, index) => (
-              <View key={index} style={styles.detailItem}>
-                <PlatformIcon name={item.icon} size={18} color="#B06D1E" />
+              <View key={index} style={[styles.detailItem, { backgroundColor: themedColors.detailBackground }]}>
+                <PlatformIcon name={item.icon} size={18} color={themedColors.primary} />
                 <View style={styles.detailTextContainer}>
-                  <Text style={styles.detailLabel}>{item.label}</Text>
-                  <Text style={styles.detailValue}>{item.value}</Text>
+                  <Text style={[styles.detailLabel, { color: themedColors.secondaryText }]}>{item.label}</Text>
+                  <Text style={[styles.detailValue, { color: themedColors.text }]}>{item.value}</Text>
                 </View>
               </View>
             ))}
@@ -292,14 +329,14 @@ export default function ProfileSectionRenderer({
       {/* Family */}
       {familyItems.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Family</Text>
+          <Text style={[styles.sectionTitle, { color: themedColors.primary }]}>Family</Text>
           <View style={styles.detailsGrid}>
             {familyItems.map((item, index) => (
-              <View key={index} style={styles.detailItem}>
-                <PlatformIcon name={item.icon} size={18} color="#B06D1E" />
+              <View key={index} style={[styles.detailItem, { backgroundColor: themedColors.detailBackground }]}>
+                <PlatformIcon name={item.icon} size={18} color={themedColors.primary} />
                 <View style={styles.detailTextContainer}>
-                  <Text style={styles.detailLabel}>{item.label}</Text>
-                  <Text style={styles.detailValue}>{item.value}</Text>
+                  <Text style={[styles.detailLabel, { color: themedColors.secondaryText }]}>{item.label}</Text>
+                  <Text style={[styles.detailValue, { color: themedColors.text }]}>{item.value}</Text>
                 </View>
               </View>
             ))}
@@ -310,14 +347,14 @@ export default function ProfileSectionRenderer({
       {/* Vices */}
       {vicesItems.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Habits</Text>
+          <Text style={[styles.sectionTitle, { color: themedColors.primary }]}>Habits</Text>
           <View style={styles.detailsGrid}>
             {vicesItems.map((item, index) => (
-              <View key={index} style={styles.detailItem}>
-                <PlatformIcon name={item.icon} size={18} color="#B06D1E" />
+              <View key={index} style={[styles.detailItem, { backgroundColor: themedColors.detailBackground }]}>
+                <PlatformIcon name={item.icon} size={18} color={themedColors.primary} />
                 <View style={styles.detailTextContainer}>
-                  <Text style={styles.detailLabel}>{item.label}</Text>
-                  <Text style={styles.detailValue}>{item.value}</Text>
+                  <Text style={[styles.detailLabel, { color: themedColors.secondaryText }]}>{item.label}</Text>
+                  <Text style={[styles.detailValue, { color: themedColors.text }]}>{item.value}</Text>
                 </View>
               </View>
             ))}

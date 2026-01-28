@@ -1,6 +1,7 @@
 import { HomeHeaderMenu } from "@/components/home";
 import SideMenu from "@/components/SidebarMenu";
 import EventCard from "@/components/ui/EventCard";
+import { GlassChip } from "@/components/ui/GlassChip";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { PointsBadge } from "@/components/ui/PointsBadge";
 import ProfileCard from "@/components/ui/ProfileCard";
@@ -301,6 +302,7 @@ export default function Home() {
             </View>
           </View>
         </View>
+        {/* Quick Action Chips - Native iOS glass style with proper dark mode support */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -310,118 +312,48 @@ export default function Home() {
           }}
         >
           <View className="flex-row" style={{ gap: SPACING.sm }}>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/discover");
-              }}
-              className="border border-primary bg-secondary rounded-full"
-              style={{ 
-                paddingHorizontal: SPACING.base, 
-                paddingVertical: SPACING.sm,
-                minHeight: 36,
-                justifyContent: 'center',
-              }}
-              activeOpacity={0.7}
-            >
-              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>Discover</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push({
-                  pathname: "/topMatches",
-                  params: { category: "topMatches" },
-                });
-              }}
-              className="border border-primary bg-secondary rounded-full"
-              style={{ 
-                paddingHorizontal: SPACING.base, 
-                paddingVertical: SPACING.sm,
-                minHeight: 36,
-                justifyContent: 'center',
-              }}
-              activeOpacity={0.7}
-            >
-              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
-                Top Matches
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push({
-                  pathname: "/topMatches",
-                  params: { category: "featuredVideos" },
-                });
-              }}
-              className="border border-primary bg-secondary rounded-full"
-              style={{ 
-                paddingHorizontal: SPACING.base, 
-                paddingVertical: SPACING.sm,
-                minHeight: 36,
-                justifyContent: 'center',
-              }}
-              activeOpacity={0.7}
-            >
-              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
-                Videos
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/speed-dating");
-              }}
-              className="border border-primary bg-secondary rounded-full"
-              style={{ 
-                paddingHorizontal: SPACING.base, 
-                paddingVertical: SPACING.sm,
-                minHeight: 36,
-                justifyContent: 'center',
-              }}
-              activeOpacity={0.7}
-            >
-              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
-                Virtual Dates
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/nearbyprofile");
-              }}
-              className="border border-primary bg-secondary rounded-full"
-              style={{ 
-                paddingHorizontal: SPACING.base, 
-                paddingVertical: SPACING.sm,
-                minHeight: 36,
-                justifyContent: 'center',
-              }}
-              activeOpacity={0.7}
-            >
-              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
-                Nearby
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/events");
-              }}
-              className="border border-primary bg-secondary rounded-full"
-              style={{ 
-                paddingHorizontal: SPACING.base, 
-                paddingVertical: SPACING.sm,
-                minHeight: 36,
-                justifyContent: 'center',
-              }}
-              activeOpacity={0.7}
-            >
-              <Text className="font-medium" style={[TYPOGRAPHY.subheadline, { color: themedColors.text }]}>
-                Events
-              </Text>
-            </TouchableOpacity>
+            <GlassChip
+              label="Discover"
+              iosIcon="magnifyingglass"
+              androidIcon="search"
+              onPress={() => router.push("/discover")}
+            />
+            <GlassChip
+              label="Top Matches"
+              iosIcon="heart.fill"
+              androidIcon="favorite"
+              onPress={() => router.push({
+                pathname: "/topMatches",
+                params: { category: "topMatches" },
+              })}
+            />
+            <GlassChip
+              label="Videos"
+              iosIcon="play.rectangle.fill"
+              androidIcon="play-circle-outline"
+              onPress={() => router.push({
+                pathname: "/topMatches",
+                params: { category: "featuredVideos" },
+              })}
+            />
+            <GlassChip
+              label="Virtual Dates"
+              iosIcon="video.fill"
+              androidIcon="videocam"
+              onPress={() => router.push("/speed-dating")}
+            />
+            <GlassChip
+              label="Nearby"
+              iosIcon="location.fill"
+              androidIcon="location-on"
+              onPress={() => router.push("/nearbyprofile")}
+            />
+            <GlassChip
+              label="Events"
+              iosIcon="calendar"
+              androidIcon="event"
+              onPress={() => router.push("/events")}
+            />
           </View>
         </ScrollView>
         <View>

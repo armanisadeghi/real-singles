@@ -312,7 +312,7 @@ const Login = () => {
             <Text className="text-primary font-bold text-2xl mb-2">
               Welcome Back
             </Text>
-            <Text className="text-dark font-normal text-sm">
+            <Text className="text-label font-normal text-sm">
               Access your account by using your email and password
             </Text>
           </View>
@@ -328,7 +328,7 @@ const Login = () => {
 
           {/* Email Input */}
           <View className="mb-4">
-            <View className="flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
+            <View className="flex-row items-center justify-center py-2 px-4 gap-2 bg-surface-tertiary border-border rounded-[99]">
               <PlatformIcon name="mail" size={20} color={themedColors.secondaryText} />
               <TextInput
                 placeholder="Email or Phone Number"
@@ -363,7 +363,7 @@ const Login = () => {
 
           {/* Password Input */}
           <View className="mb-3">
-            <View className="relative flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
+            <View className="relative flex-row items-center justify-center py-2 px-4 gap-2 bg-surface-tertiary border-border rounded-[99]">
               <PlatformIcon name="lock" size={20} color={themedColors.secondaryText} />
               <TextInput
                 placeholder="Password"
@@ -374,7 +374,7 @@ const Login = () => {
                 autoComplete="password"
                 importantForAutofill="yes"
                 contextMenuHidden={true}
-                className="text-dark"
+                className="text-label"
                 style={{
                   flex: 1,
                   paddingLeft: 10,
@@ -415,7 +415,7 @@ const Login = () => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setShowForgotPasswordModal(true);
             }}>
-              <Text className="text-dark text-xs font-normal text-end mb-5 px-8">
+              <Text className="text-label text-xs font-normal text-end mb-5 px-8">
                 Forgot Password?
               </Text>
             </TouchableOpacity>
@@ -439,14 +439,14 @@ const Login = () => {
 
           {/* <TouchableOpacity className="flex-row justify-center items-center gap-2 my-2 bg-light-200 py-4 rounded-[99] border-border">
             <Image source={icons.facebook} resizeMode="contain" />
-            <Text className="text-gray font-medium text-xs">
+            <Text className="text-label-secondary font-medium text-xs">
               Continue with Facebook
             </Text>
           </TouchableOpacity> */}
         </View>
         
         <View className="flex-row justify-center items-center mt-10 mb-5">
-          <Text className="text-dark font-medium text-xs">
+          <Text className="text-label font-medium text-xs">
             Don&apos;t have an account?
           </Text>
           <TouchableOpacity onPress={() => {
@@ -464,14 +464,14 @@ const Login = () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             openModal(require("../../assets/docs/PrivacyPolicy.pdf"));
           }}>
-          <Text className="text-dark underline text-[12px] text-blue-400">Privacy Policy</Text>
+          <Text className="text-label underline text-[12px] text-blue-400">Privacy Policy</Text>
         </TouchableOpacity>
 
         <TouchableOpacity  onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             openModal(require("../../assets/docs/TermsConditions.pdf"));
           }}>
-          <Text className="text-dark underline text-[12px] text-blue-400">Terms & Conditions</Text>
+          <Text className="text-label underline text-[12px] text-blue-400">Terms & Conditions</Text>
         </TouchableOpacity>
       </View> 
       :
@@ -482,14 +482,14 @@ const Login = () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             goToPrivacy();
           }}>
-          <Text className="text-dark underline text-[12px] text-blue-400">Privacy Policy</Text>
+          <Text className="text-label underline text-[12px] text-blue-400">Privacy Policy</Text>
         </TouchableOpacity>
 
         <TouchableOpacity  onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             goToTerms();
           }}>
-          <Text className="text-dark underline text-[12px] text-blue-400">Terms & Conditions</Text>
+          <Text className="text-label underline text-[12px] text-blue-400">Terms & Conditions</Text>
         </TouchableOpacity>
       </View>
       }
@@ -521,13 +521,13 @@ const Login = () => {
                 }}
                 className="p-1"
               >
-                <Text className="text-gray-500 text-xl">×</Text>
+                <Text className="text-label-secondary text-xl">×</Text>
               </TouchableOpacity>
             </View>
 
             {!otpSent && !showResetPassword && (
               <>
-                <Text className="text-dark text-sm mb-6 text-center">
+                <Text className="text-label text-sm mb-6 text-center">
                   Please enter your valid email or Phone Number to send the
                   verification code.
                 </Text>
@@ -539,7 +539,7 @@ const Login = () => {
                 ) : null}
 
                 <View className="mb-4">
-                  <View className="flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
+                  <View className="flex-row items-center justify-center py-2 px-4 gap-2 bg-surface-tertiary border-border rounded-[99]">
                     <PlatformIcon name="mail" size={20} color={themedColors.secondaryText} />
                     <TextInput
                       placeholder="Enter your email"
@@ -565,13 +565,13 @@ const Login = () => {
 
                 <View className="flex-row gap-4 mt-2">
                   <TouchableOpacity
-                    className="flex-1 py-3 bg-light-100 rounded-full"
+                    className="flex-1 py-3 bg-surface-secondary rounded-full"
                     onPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setShowForgotPasswordModal(false);
                     }}
                   >
-                    <Text className="text-center text-gray-700 font-medium">
+                    <Text className="text-center text-label-secondary font-medium">
                       Cancel
                     </Text>
                   </TouchableOpacity>
@@ -596,7 +596,7 @@ const Login = () => {
 
             {otpSent && !showResetPassword && (
               <>
-                <Text className="text-dark text-sm mb-6 text-center">
+                <Text className="text-label text-sm mb-6 text-center">
                   A verification code has been sent to{" "}
                   <Text className="text-primary">{forgotEmail}</Text>. Please
                   check your email and enter the code below to activate your
@@ -610,7 +610,7 @@ const Login = () => {
                 ) : null}
 
                 <View className="mb-4">
-                  <View className="flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
+                  <View className="flex-row items-center justify-center py-2 px-4 gap-2 bg-surface-tertiary border-border rounded-[99]">
                     <TextInput
                       placeholder="Enter OTP"
                       placeholderTextColor={themedColors.placeholder}
@@ -634,14 +634,14 @@ const Login = () => {
 
                 <View className="flex-row gap-4 mt-2">
                   <TouchableOpacity
-                    className="flex-1 py-3 bg-light-100 rounded-full"
+                    className="flex-1 py-3 bg-surface-secondary rounded-full"
                     onPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setOtpSent(false);
                       setOtp("");
                     }}
                   >
-                    <Text className="text-center text-gray-700 font-medium">
+                    <Text className="text-center text-label-secondary font-medium">
                       Back
                     </Text>
                   </TouchableOpacity>
@@ -666,7 +666,7 @@ const Login = () => {
 
             {showResetPassword && (
               <>
-                <Text className="text-dark text-sm mb-6 text-center">
+                <Text className="text-label text-sm mb-6 text-center">
                   Create New password
                 </Text>
 
@@ -677,7 +677,7 @@ const Login = () => {
                 ) : null}
 
                 <View className="mb-4">
-                  <View className="relative flex-row items-center justify-center py-2 px-4 gap-2 bg-light-200 border-border rounded-[99]">
+                  <View className="relative flex-row items-center justify-center py-2 px-4 gap-2 bg-surface-tertiary border-border rounded-[99]">
                     <PlatformIcon name="lock" size={20} color={themedColors.secondaryText} />
                     <TextInput
                       placeholder="New Password"
@@ -714,14 +714,14 @@ const Login = () => {
 
                 <View className="flex-row gap-4 mt-2">
                   <TouchableOpacity
-                    className="flex-1 py-3 bg-light-100 rounded-full"
+                    className="flex-1 py-3 bg-surface-secondary rounded-full"
                     onPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setShowResetPassword(false);
                       setNewPassword("");
                     }}
                   >
-                    <Text className="text-center text-gray-700 font-medium">
+                    <Text className="text-center text-label-secondary font-medium">
                       Back
                     </Text>
                   </TouchableOpacity>

@@ -67,10 +67,10 @@ export default function Notification() {
       tintColor={"#C07618"}
       resizeMode="contain"
     />
-    <Text className="text-lg font-medium text-dark text-center mb-2">
+    <Text className="text-lg font-medium text-label text-center mb-2">
       No Notifications Yet
     </Text>
-    <Text className="text-sm text-gray-500 text-center max-w-[250px]">
+    <Text className="text-sm text-label-secondary text-center max-w-[250px]">
       You don&apos;t have any notifications at the moment. 
       We&apos;ll notify you when something new happens.
     </Text>

@@ -16,6 +16,7 @@ import {
   PlatformColor,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -26,10 +27,19 @@ export default function ProductDetail() {
   const [data, setData] = useState<ProductCardProps>();
   const [loading, setLoading] = useState(false);
   const colors = useThemeColors();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
-  const themedColors = {
+  // Note: BottomSheet uses Reanimated which doesn't support PlatformColor objects.
+  // Use plain hex colors for BottomSheet backgrounds, PlatformColor for other native components.
+  const themedColors = useMemo(() => ({
+    // For native components (Text, View, etc.) - can use PlatformColor
     text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
-  };
+    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
+    // For Reanimated components (BottomSheet) - must use plain colors
+    background: isDark ? '#000000' : '#FFFFFF',
+    secondaryBackground: isDark ? '#1C1C1E' : '#F2F2F7',
+  }), [isDark, colors]);
 
   const fetchProductDetails = async () => {
     setLoading(true);
@@ -117,12 +127,14 @@ export default function ProductDetail() {
           index={0}
           enablePanDownToClose={false}
           enableContentPanningGesture={false}
+          backgroundStyle={{ backgroundColor: themedColors.background }}
+          handleIndicatorStyle={{ backgroundColor: isDark ? '#4B5563' : '#CBD5E1' }}
         >
-          <BottomSheetScrollView className="relative">
+          <BottomSheetScrollView className="relative" style={{ backgroundColor: themedColors.background }}>
             {data && <ProductDetails product={data} />}
             <View className="flex-row justify-between gap-3 items-center px-4 my-5">
-              <TouchableOpacity onPress={handleRedeemForYou} className="border border-border bg-light-100 rounded-[50px] px-7 py-[14px]">
-                <Text className="text-gray text-base font-medium">
+              <TouchableOpacity onPress={handleRedeemForYou} className="border border-border bg-surface-secondary rounded-[50px] px-7 py-[14px]">
+                <Text className="text-label-secondary text-base font-medium">
                   Redeem for You
                 </Text>
               </TouchableOpacity>

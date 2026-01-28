@@ -187,11 +187,11 @@ const renderMessageItem = ({ item }: { item: MessageItem }) => (
       </View>
       <View className="flex-1 ml-3">
         <View className="flex-row justify-between items-center">
-          <Text className="font-medium text-base text-black">{item.name}</Text>
-          <Text className="text-gray text-xs">{item.time}</Text>
+          <Text className="font-medium text-base text-label">{item.name}</Text>
+          <Text className="text-label-secondary text-xs">{item.time}</Text>
         </View>
         <View className="flex-row justify-between items-center mt-1">
-          <Text numberOfLines={1} className="text-gray text-sm flex-1 pr-4">
+          <Text numberOfLines={1} className="text-label-secondary text-sm flex-1 pr-4">
             {item.message === "[Unsupported message]" ? "No messages yet" : item.message}
           </Text>
           {item.unread > 0 && (
@@ -293,7 +293,7 @@ const renderGroupItem = ({ item }: { item: GroupItem }) => (
         <View className="flex-row items-center">
           {/* LEFT: Group name */}
           <Text
-            className="font-medium text-base text-black flex-1 pr-2"
+            className="font-medium text-base text-label flex-1 pr-2"
             numberOfLines={2}
             ellipsizeMode="tail"
           >
@@ -301,17 +301,17 @@ const renderGroupItem = ({ item }: { item: GroupItem }) => (
           </Text>
 
           {/* RIGHT: Time */}
-          <Text className="text-gray-500 text-xs text-gray flex-shrink-0">
+          <Text className="text-label-secondary text-xs flex-shrink-0">
             {formatChatDate(item.CreatedDate || "")}
           </Text>
         </View>
 
         <View className="flex-row justify-between items-center mt-1">
-          <Text numberOfLines={1} className="text-gray text-sm flex-1">
+          <Text numberOfLines={1} className="text-label-secondary text-sm flex-1">
             {item.message === "[Unsupported message]" ? "No messages yet" : item.message}
           </Text>
           <View className="bg-gray-100 rounded-full px-2 py-0.5">
-            <Text className="text-gray-500 text-xs text-gray">{item.Members.length - 1} members</Text>
+            <Text className="text-label-secondary text-xs">{item.Members.length - 1} members</Text>
           </View>
         </View>
       </View>
@@ -336,7 +336,7 @@ const renderUserItem = ({
     }}
     className={`flex-row items-center mx-6 py-3 px-3 border mb-4 rounded-[10px] ${selectedUsers.includes(item.id)
       ? "bg-[#F3961D1F] border-primary"
-      : "bg-light-100 border-border"
+      : "bg-surface-secondary border-border"
       }`}
   >
     <Image
@@ -353,7 +353,7 @@ const renderUserItem = ({
         {/* <Text className="text-gray-500 text-xs">{item.time}</Text> */}
       </View>
       <View className="flex-row justify-between items-center mt-1">
-        <Text className="text-gray text-sm flex-1 pr-4">{item.location}</Text>
+        <Text className="text-label-secondary text-sm flex-1 pr-4">{item.location}</Text>
       </View>
     </View>
   </TouchableOpacity>
@@ -389,6 +389,7 @@ export default function Chats() {
   const isDark = colorScheme === 'dark';
   const colors = useThemeColors();
 
+  // Theme-aware colors - using PlatformColor for native iOS adaptation
   const themedColors = {
     background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
     secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
@@ -729,7 +730,7 @@ export default function Chats() {
 
   return (
     <>
-      <View className="relative flex-1 bg-background">
+      <View className="relative flex-1" style={{ backgroundColor: themedColors.background }}>
         <TouchableOpacity
           activeOpacity={0.7}
           className={`absolute z-50 shadow-lg shadow-primary/20 rounded-full overflow-hidden ${selectMode ? "hidden" : ""
@@ -919,7 +920,7 @@ export default function Chats() {
                         className="flex-1 text-sm"
                         style={{ color: themedColors.text }}
                         placeholder="Search Chat"
-                        placeholderTextColor={"#B0B0B0"}
+                        placeholderTextColor={themedColors.secondaryText}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                       />
@@ -958,7 +959,7 @@ export default function Chats() {
                         <TextInput
                           className="flex-1 text-sm"
                           placeholder="Search Chat"
-                          placeholderTextColor={"#B0B0B0"}
+                          placeholderTextColor={themedColors.secondaryText}
                           value={searchQuery}
                           onChangeText={setSearchQuery}
                           style={{ paddingVertical: 8, paddingHorizontal: 8, color: themedColors.text }}
@@ -1006,7 +1007,7 @@ export default function Chats() {
                         <TextInput
                           className="flex-1 text-sm"
                           placeholder="Search Group"
-                          placeholderTextColor={"#B0B0B0"}
+                          placeholderTextColor={themedColors.secondaryText}
                           value={searchQuery}
                           onChangeText={setSearchQuery}
                           style={{ paddingVertical: 8, paddingHorizontal: 8, color: themedColors.text }}

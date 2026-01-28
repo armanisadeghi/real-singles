@@ -43,12 +43,20 @@ export default function Profile() {
   const isDark = colorScheme === 'dark';
   const colors = useThemeColors();
 
+  // Note: BottomSheet uses Reanimated which doesn't support PlatformColor objects.
+  // Use plain hex colors for BottomSheet backgrounds, PlatformColor for other native components.
   const themedColors = {
-    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
-    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
+    // For native components (Text, View, etc.) - can use PlatformColor
     text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
     secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
     border: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outline,
+    // Native background for main content - uses PlatformColor for automatic adaptation
+    nativeBackground: Platform.OS === 'ios'
+      ? (PlatformColor('systemBackground') as unknown as string)
+      : colors.background,
+    // For Reanimated components (BottomSheet) - must use plain colors
+    background: isDark ? '#000000' : '#FFFFFF',
+    secondaryBackground: isDark ? '#1C1C1E' : '#F2F2F7',
   };
 
   const fetchProfile = async () => {
@@ -136,7 +144,7 @@ export default function Profile() {
   const isProfilePaused = profile?.profile_hidden || profile?.ProfileHidden;
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1" style={{ backgroundColor: themedColors.nativeBackground }}>
       <SideMenu
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
@@ -225,13 +233,15 @@ export default function Profile() {
         enablePanDownToClose={false}
         enableContentPanningGesture={true}
         onChange={handleSheetChanges}
+        backgroundStyle={{ backgroundColor: themedColors.background }}
+        handleIndicatorStyle={{ backgroundColor: isDark ? '#4B5563' : '#CBD5E1' }}
       >
-        <BottomSheetScrollView>
+        <BottomSheetScrollView style={{ backgroundColor: themedColors.background }}>
           {profile ? (
             <ProfileDetails profile={profile} me={true} />
           ) : (
-            <View style={{ padding: 20, alignItems: "center" }}>
-              <ActivityIndicator size="large" color="#B06D1E" />
+            <View style={{ padding: 20, alignItems: "center", backgroundColor: themedColors.background }}>
+              <ActivityIndicator size="large" color={themedColors.secondaryText} />
             </View>
           )}
         </BottomSheetScrollView>
