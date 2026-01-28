@@ -106,47 +106,36 @@ export default function HomePage() {
       <Header />
       <main className="flex-1 pt-[var(--header-height)]">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-[#F6EDE1] to-white py-20 sm:py-28 overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
+        <section className="relative min-h-[450px] lg:min-h-[500px] flex items-center overflow-hidden">
+          {/* Background Image */}
+          <div className="absolute inset-0">
             <Image
-              src="/images/hero/couple-beach.jpg"
-              alt=""
+              src="/images/marketing/hero/couple-beach-hero.jpg"
+              alt="Happy couple on beach"
               fill
-              className="object-cover"
+              className="object-cover object-center"
               priority
             />
+            {/* Gradient overlay - stronger on left for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#F6EDE1] via-[#F6EDE1]/90 to-[#F6EDE1]/40 lg:to-transparent" />
           </div>
           
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div className="text-center lg:text-left">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-                  Find Your <span className="text-brand-primary">True Connection</span>
-                </h1>
-                <p className="mt-6 text-xl text-gray-600 max-w-xl mx-auto lg:mx-0">
-                  Join Real Singles and discover genuine relationships in a supportive community of like-minded individuals.
-                </p>
-                <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <Link
-                    href="/register"
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-brand-primary-dark transition-all hover:scale-105"
-                  >
-                    Start Your Journey
-                    <ArrowRight className="w-5 h-5" />
-                  </Link>
-                </div>
-              </div>
-              
-              <div className="relative hidden lg:block">
-                <div className="relative aspect-[4/5] max-w-md mx-auto">
-                  <Image
-                    src="/images/app-mockup.png"
-                    alt="Real Singles App"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 w-full">
+            <div className="max-w-xl">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+                Find Your <span className="text-brand-primary">True Connection</span>
+              </h1>
+              <p className="mt-6 text-xl text-gray-700 max-w-lg">
+                Join Real Singles and discover genuine relationships in a supportive community of like-minded individuals.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/register"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-brand-primary-dark transition-all hover:scale-105"
+                >
+                  Start Your Journey
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
               </div>
             </div>
           </div>
