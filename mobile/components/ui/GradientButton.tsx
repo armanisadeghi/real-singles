@@ -12,7 +12,7 @@ import {
 import { COMPONENT_SIZES, TYPOGRAPHY, BORDER_RADIUS } from "@/constants/designTokens";
 
 interface GradientButtonProps extends TouchableOpacityProps {
-  colors?: string[];
+  colors?: readonly [string, string, ...string[]];
   start?: { x: number; y: number };
   end?: { x: number; y: number };
   containerStyle?: StyleProp<ViewStyle>;
