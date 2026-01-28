@@ -17,7 +17,8 @@
     "db:migrate:dry": "tsx scripts/db-migrate.ts --dry-run",
     "db:migrate:yes": "tsx scripts/db-migrate.ts --yes",
     "db:types": "tsx scripts/db-migrate.ts --types-only",
-    "db:status": "npx supabase migration list"
+    "db:status": "npx supabase migration list",
+    "logo:dark": "tsx scripts/create-dark-mode-logo.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
