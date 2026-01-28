@@ -16,7 +16,6 @@ import gender from "../assets/images/gender.png";
 import habit from "../assets/images/habit.png";
 import haveChildren from "../assets/images/haveChildren.png";
 import heart from "../assets/images/heart.png";
-import hero from "../assets/images/hero.png";
 import icon from "../assets/images/icon.png";
 import interest from "../assets/images/interest.png";
 import intro from "../assets/images/intro.png";
@@ -81,7 +80,6 @@ export const images = {
   religion,
   samrtmatch: smartmatch, // Backward compatibility alias
   smartmatch,
-  hero,
   signupSuccess,
   checkedSuccess,
   sports,

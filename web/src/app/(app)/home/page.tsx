@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { PointsBadge } from "@/components/rewards";
 import { ProfileCard } from "@/components/discovery";
-import { Avatar, EmptyState } from "@/components/ui";
+import { EmptyState } from "@/components/ui";
 import { SideMenu } from "@/components/navigation";
 
 // ============================================================================
@@ -227,62 +227,38 @@ export default function HomePage() {
 
   return (
     <div className="min-h-dvh bg-background">
-      {/* Hero Section - Modern, Clean Design */}
-      <section 
-        className="relative bg-cover bg-center"
-        style={{
-          backgroundImage: "linear-gradient(135deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%), url('/images/hero/homepage-hero.jpg')",
-          minHeight: "260px",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-8">
-          {/* Top Row - Profile, Notifications, Menu */}
-          <div className="flex justify-between items-center">
-            {/* Profile Avatar - Clean, no extra border styling */}
-            <Link 
-              href="/profile" 
-              className="block transform hover:scale-105 transition-transform duration-200"
-            >
-              <Avatar
-                src={userInfo.profileImage}
-                name={userInfo.displayName}
-                size="xl"
-                className="ring-2 ring-white/30 shadow-lg"
+      {/* Clean Native Header */}
+      <header className="bg-background border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center gap-4">
+            {/* Greeting */}
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground truncate">
+              Welcome back{userInfo.displayName ? `, ${userInfo.displayName.split(' ')[0]}` : ''}
+            </h1>
+            
+            {/* Right Actions: Points + Notifications + Menu */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <PointsBadge
+                points={userInfo.points}
+                size="sm"
+                href="/rewards"
               />
-            </Link>
-
-            {/* Right Actions - Modern pill buttons */}
-            <div className="flex items-center gap-3">
               <Link
                 href="/notifications"
-                className="p-2.5 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 transition-all duration-200 shadow-lg"
+                className="p-2.5 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
               >
-                <Bell className="w-5 h-5 text-white" />
+                <Bell className="w-5 h-5 text-foreground" />
               </Link>
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className="p-2.5 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 transition-all duration-200 shadow-lg"
+                className="p-2.5 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
               >
-                <Menu className="w-5 h-5 text-white" />
+                <Menu className="w-5 h-5 text-foreground" />
               </button>
             </div>
           </div>
-
-          {/* Hero Content - Title and Points Badge */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mt-10">
-            <div className="max-w-md">
-              <h1 className="text-3xl sm:text-4xl font-bold text-white leading-tight drop-shadow-lg">
-                Find Your Perfect Match
-              </h1>
-            </div>
-            <PointsBadge
-              points={userInfo.points}
-              size="md"
-              href="/rewards"
-            />
-          </div>
         </div>
-      </section>
+      </header>
 
       {/* Quick Action Pills with Refresh */}
       <section className="bg-white/95 backdrop-blur-sm sticky top-0 z-40 shadow-sm">

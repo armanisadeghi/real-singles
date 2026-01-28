@@ -1,13 +1,11 @@
 import { HomeHeaderMenu } from "@/components/home";
 import SideMenu from "@/components/SidebarMenu";
-import { Avatar } from "@/components/ui/Avatar";
 import EventCard from "@/components/ui/EventCard";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { PointsBadge } from "@/components/ui/PointsBadge";
 import ProfileCard from "@/components/ui/ProfileCard";
 import VideoCard from "@/components/ui/VideoCard";
 import VirtualDateCard from "@/components/ui/VirtualDateCard";
-import { images } from "@/constants/images";
 import { checkRedeemPoints, fetchUserProfile, getHomeScreenData } from "@/lib/api";
 import { EventCardProps, User } from "@/types";
 import { useAuth } from "@/utils/authContext";
@@ -21,8 +19,6 @@ import React, {
 } from "react";
 import {
   ActivityIndicator,
-  Image,
-  ImageBackground,
   Platform,
   RefreshControl,
   ScrollView,
@@ -240,76 +236,61 @@ export default function Home() {
             userName={profile?.DisplayName || "User"}
           />
         )}
-        <ImageBackground
-          source={images.hero}
-          resizeMode="cover"
-          style={{ minHeight: 244 + safeArea.top }}
+        {/* Clean Native Header */}
+        <View
+          className="bg-background"
+          style={{ 
+            paddingTop: headerTopPadding,
+            paddingHorizontal: SPACING.screenPadding,
+            paddingBottom: SPACING.md,
+          }}
         >
-          <View
-            className="flex-row justify-between items-start"
-            style={{ paddingHorizontal: SPACING.screenPadding, paddingTop: headerTopPadding }}
-          >
-            <TouchableOpacity 
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                router.push("/profile");
-              }}
+          {/* Header Row: Greeting + Actions */}
+          <View className="flex-row justify-between items-center">
+            {/* Greeting */}
+            <Text
+              className="text-foreground font-semibold"
+              style={TYPOGRAPHY.h2}
+              numberOfLines={1}
             >
-              <Avatar
-                src={profile?.Image}
-                name={profile?.DisplayName || "User"}
-                size="xl"
-                borderColor="#ffffff"
-                borderWidth={2}
-              />
-            </TouchableOpacity>
+              Welcome back{profile?.FirstName ? `, ${profile.FirstName}` : ''}
+            </Text>
+            
+            {/* Right Actions: Points + Notifications + Menu */}
             <View className="flex-row items-center" style={{ gap: SPACING.sm }}>
+              <PointsBadge
+                points={redeemPoints}
+                size="sm"
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push("/redeem");
+                }}
+              />
               <TouchableOpacity
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   router.push("/notification");
                 }}
-                className="rounded-full"
+                className="rounded-full bg-secondary"
                 style={{ 
                   padding: SPACING.sm,
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
                 }}
+                activeOpacity={0.7}
               >
                 <PlatformIcon
                   name="notifications"
                   size={ICON_SIZES.md}
-                  color="#ffffff"
+                  color={Platform.OS === 'ios' ? '#000000' : '#1C1B1F'}
                 />
               </TouchableOpacity>
               <HomeHeaderMenu
                 onShowMenu={() => setMenuVisible(true)}
-                iconColor="#ffffff"
-                backgroundColor="rgba(255, 255, 255, 0.15)"
+                iconColor={Platform.OS === 'ios' ? '#000000' : '#1C1B1F'}
+                backgroundColor="transparent"
               />
             </View>
           </View>
-          <View
-            className="flex-row justify-between items-start"
-            style={{ paddingHorizontal: SPACING.screenPadding, marginTop: VERTICAL_SPACING.lg }}
-          >
-            <View className="w-3/4">
-              <Text
-                className="font-bold text-white"
-                style={TYPOGRAPHY.h1}
-              >
-                Find Your Perfect Match
-              </Text>
-            </View>
-            <PointsBadge
-              points={redeemPoints}
-              size="md"
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/redeem");
-              }}
-            />
-          </View>
-        </ImageBackground>
+        </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
