@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { Play, RefreshCw, Settings2, FlaskConical } from "lucide-react";
+import { Play, RefreshCw, Settings2, FlaskConical, AlertTriangle } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { UserSelector } from "./components/UserSelector";
 import { AlgorithmPicker, type Algorithm } from "./components/AlgorithmPicker";
@@ -173,6 +173,20 @@ export default function AlgorithmSimulatorPage() {
         iconName="zap"
         iconGradient="from-purple-500 to-pink-500"
       />
+
+      {/* Admin Privileges Warning Banner */}
+      <div className="flex items-start gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl">
+        <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        <div className="flex-1">
+          <p className="text-sm font-medium text-amber-800">
+            This simulator uses admin privileges (bypasses RLS)
+          </p>
+          <p className="text-xs text-amber-700 mt-0.5">
+            Results may differ from production if the user&apos;s account status affects their ability to see profiles. 
+            Check the user&apos;s <code className="px-1 py-0.5 bg-amber-100 rounded">users.status</code> field if results differ from their actual discover page.
+          </p>
+        </div>
+      </div>
 
       {/* Configuration Section */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">

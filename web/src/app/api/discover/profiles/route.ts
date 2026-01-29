@@ -3,8 +3,9 @@ import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl, resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
 import {
   getDiscoverableCandidates,
-  getUserProfileContext,
+  getUserProfileContextWithError,
   userFiltersToDiscoveryFilters,
+  type DiscoveryEmptyReason,
 } from "@/lib/services/discovery";
 
 /**
@@ -43,15 +44,41 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get("limit") || "40"), 100);
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    // Get current user's profile context (gender, looking_for, location)
-    const userProfile = await getUserProfileContext(supabase, user.id);
+    // Check user's status first - this helps diagnose RLS issues
+    const { data: userData } = await supabase
+      .from("users")
+      .select("status")
+      .eq("id", user.id)
+      .single();
 
-    if (!userProfile) {
-      return NextResponse.json(
-        { error: "Profile not found" },
-        { status: 404 }
-      );
+    // Get current user's profile context (gender, looking_for, location)
+    const profileResult = await getUserProfileContextWithError(supabase, user.id);
+
+    if (!profileResult.profile) {
+      // Determine the reason for failure
+      let emptyReason: DiscoveryEmptyReason = "profile_not_found";
+      let errorMessage = "Profile not found";
+      
+      // If user record exists but profile read failed, it might be RLS
+      // (user.status != 'active' blocks reading their own profile)
+      if (userData && userData.status !== "active") {
+        emptyReason = "user_inactive";
+        errorMessage = `Your account is ${userData.status}. Please contact support.`;
+      }
+
+      // Return a response that the frontend can use to show appropriate UI
+      return NextResponse.json({
+        profiles: [],
+        isProfilePaused: false,
+        total: 0,
+        limit,
+        offset,
+        emptyReason,
+        error: errorMessage,
+      });
     }
+
+    const userProfile = profileResult.profile;
 
     // Check if user's profile is paused
     const { data: profileData } = await supabase
@@ -140,6 +167,8 @@ export async function GET(request: NextRequest) {
       total: result.total,
       limit,
       offset,
+      // Include emptyReason so frontend can show appropriate message
+      emptyReason: result.emptyReason,
     });
   } catch (error) {
     console.error("Discover profiles error:", error);

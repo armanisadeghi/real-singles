@@ -83,10 +83,19 @@ export interface DiscoverableProfile extends DbProfile {
   has_liked_me?: boolean;
 }
 
+export type DiscoveryEmptyReason =
+  | "incomplete_profile" // User hasn't set gender or looking_for
+  | "no_matches" // Normal case - just no profiles match criteria
+  | "profile_not_found" // User's profile doesn't exist
+  | "user_inactive" // User's status is not 'active'
+  | null; // Has profiles (not empty)
+
 export interface DiscoveryResult {
   profiles: DiscoverableProfile[];
   total: number;
   debug?: DiscoveryDebugInfo;
+  /** Reason why profiles array is empty (null if not empty) */
+  emptyReason?: DiscoveryEmptyReason;
 }
 
 export interface MutualMatch {
@@ -192,6 +201,7 @@ export async function getDiscoverableCandidates(
     return {
       profiles: [],
       total: 0,
+      emptyReason: "incomplete_profile",
       debug: includeDebugInfo ? {
         totalProfilesInDb: 0,
         excludedBySelf: 0,
@@ -531,6 +541,7 @@ export async function getDiscoverableCandidates(
   return {
     profiles: finalProfiles,
     total: count || finalProfiles.length,
+    emptyReason: finalProfiles.length === 0 ? "no_matches" : null,
     debug: debugInfo,
   };
 }
@@ -796,28 +807,56 @@ export function userFiltersToDiscoveryFilters(userFilters: DbUserFilters | null)
   };
 }
 
+export interface ProfileContextResult {
+  profile: UserProfileContext | null;
+  error?: "profile_not_found" | "user_inactive" | "rls_blocked";
+}
+
 /**
  * Get user profile context for discovery
+ * Returns profile context and error state for better diagnostics
  */
 export async function getUserProfileContext(
   supabase: SupabaseClient<Database>,
   userId: string
 ): Promise<UserProfileContext | null> {
-  const { data: profile } = await supabase
+  const result = await getUserProfileContextWithError(supabase, userId);
+  return result.profile;
+}
+
+/**
+ * Get user profile context with detailed error information
+ * Use this when you need to know WHY profile retrieval failed
+ */
+export async function getUserProfileContextWithError(
+  supabase: SupabaseClient<Database>,
+  userId: string
+): Promise<ProfileContextResult> {
+  const { data: profile, error } = await supabase
     .from("profiles")
     .select("gender, looking_for, latitude, longitude")
     .eq("user_id", userId)
     .single();
 
-  if (!profile) {
-    return null;
+  if (error || !profile) {
+    // Profile not found could be due to:
+    // 1. Profile doesn't exist
+    // 2. RLS blocking access (user's status is not 'active')
+    // We can't easily distinguish here without admin access, so we return a generic error
+    // The API layer should check user status separately if needed
+    return {
+      profile: null,
+      error: "profile_not_found",
+    };
   }
 
   return {
-    userId,
-    gender: profile.gender,
-    lookingFor: profile.looking_for,
-    latitude: profile.latitude,
-    longitude: profile.longitude,
+    profile: {
+      userId,
+      gender: profile.gender,
+      lookingFor: profile.looking_for,
+      latitude: profile.latitude,
+      longitude: profile.longitude,
+    },
   };
 }

@@ -3,9 +3,10 @@ import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl, resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
 import {
   getDiscoverableCandidates,
-  getUserProfileContext,
+  getUserProfileContextWithError,
   userFiltersToDiscoveryFilters,
   type DiscoverableProfile,
+  type DiscoveryEmptyReason,
 } from "@/lib/services/discovery";
 
 // ============================================================================
@@ -81,15 +82,41 @@ export async function GET() {
     );
   }
 
-  // Get user profile context for discovery
-  const userProfile = await getUserProfileContext(supabase, user.id);
+  // Check user's status first - this helps diagnose RLS issues
+  const { data: userData } = await supabase
+    .from("users")
+    .select("status")
+    .eq("id", user.id)
+    .single();
 
-  if (!userProfile) {
-    return NextResponse.json(
-      { success: false, msg: "Profile not found" },
-      { status: 404 }
-    );
+  // Get user profile context for discovery
+  const profileResult = await getUserProfileContextWithError(supabase, user.id);
+
+  if (!profileResult.profile) {
+    // Determine the reason for failure
+    let emptyReason: DiscoveryEmptyReason = "profile_not_found";
+    let errorMessage = "Profile not found";
+    
+    // If user record exists but profile read failed, it might be RLS
+    // (user.status != 'active' blocks reading their own profile)
+    if (userData && userData.status !== "active") {
+      emptyReason = "user_inactive";
+      errorMessage = `Your account is ${userData.status}. Please contact support.`;
+    }
+
+    return NextResponse.json({
+      success: false,
+      msg: errorMessage,
+      emptyReason,
+      TopMatch: [],
+      NearBy: [],
+      Videos: [],
+      event: [],
+      Virtual: [],
+    });
   }
+
+  const userProfile = profileResult.profile;
 
   // Get user's saved filters
   const { data: userFilters } = await supabase
@@ -335,6 +362,11 @@ export async function GET() {
     })
   );
 
+  // Determine emptyReason if TopMatch is empty
+  const emptyReason: DiscoveryEmptyReason = TopMatch.length === 0 
+    ? topMatchResult.emptyReason || "no_matches"
+    : null;
+
   return NextResponse.json({
     success: true,
     status: 200,
@@ -344,6 +376,7 @@ export async function GET() {
     event: formattedEvents,
     Virtual,
     baseImageUrl,
+    emptyReason,
     msg: "Home data fetched successfully",
   });
 }
