@@ -83,25 +83,17 @@ export function VideoRecorder({
     setState("requesting");
 
     try {
-      // Request permission
-      const hasPermission = await requestVideoPermission();
-      if (!hasPermission) {
+      // Request permission - returns stream directly to avoid state timing issues
+      const stream = await requestVideoPermission();
+      if (!stream) {
         setState("idle");
         return;
       }
 
       setState("ready");
 
-      // Small delay for UX
+      // Small delay for UX and to let video preview connect
       await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Get the stream (should be available after permission)
-      const stream = videoStream;
-      if (!stream) {
-        setError("Failed to get video stream");
-        setState("idle");
-        return;
-      }
 
       // Create MediaRecorder
       const recorder = new MediaRecorder(stream, { mimeType });

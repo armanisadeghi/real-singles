@@ -74,9 +74,9 @@ export function VoiceRecorder({
     setState("requesting");
 
     try {
-      // Request permission
-      const hasPermission = await requestAudioPermission();
-      if (!hasPermission) {
+      // Request permission - returns stream directly to avoid state timing issues
+      const stream = await requestAudioPermission();
+      if (!stream) {
         setState("idle");
         return;
       }
@@ -85,14 +85,6 @@ export function VoiceRecorder({
 
       // Small delay for UX
       await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // Get the stream (should be available after permission)
-      const stream = audioStream;
-      if (!stream) {
-        setError("Failed to get audio stream");
-        setState("idle");
-        return;
-      }
 
       // Create MediaRecorder
       const recorder = new MediaRecorder(stream, { mimeType });

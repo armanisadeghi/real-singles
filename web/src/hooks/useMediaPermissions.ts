@@ -13,8 +13,9 @@ export interface MediaPermissions {
   isSupported: boolean;
   
   // Request permission functions (should only be called after user interaction)
-  requestAudioPermission: () => Promise<boolean>;
-  requestVideoPermission: () => Promise<boolean>;
+  // Return the MediaStream directly to avoid React state timing issues
+  requestAudioPermission: () => Promise<MediaStream | null>;
+  requestVideoPermission: () => Promise<MediaStream | null>;
   
   // Active media streams (for cleanup)
   audioStream: MediaStream | null;
@@ -108,10 +109,11 @@ export function useMediaPermissions(): MediaPermissions {
 
   // Request audio permission (microphone)
   // Should only be called after user interaction (e.g., button click)
-  const requestAudioPermission = useCallback(async (): Promise<boolean> => {
+  // Returns the stream directly to avoid React state timing issues
+  const requestAudioPermission = useCallback(async (): Promise<MediaStream | null> => {
     if (!isSupported) {
       setError("Media recording is not supported in this browser");
-      return false;
+      return null;
     }
 
     setError(null);
@@ -131,7 +133,7 @@ export function useMediaPermissions(): MediaPermissions {
 
       setAudioStream(stream);
       setAudioPermission("granted");
-      return true;
+      return stream; // Return stream directly for immediate use
     } catch (err) {
       const error = err as Error;
       
@@ -146,16 +148,17 @@ export function useMediaPermissions(): MediaPermissions {
         setError(`Failed to access microphone: ${error.message}`);
       }
       
-      return false;
+      return null;
     }
   }, [isSupported, stopAudioStream]);
 
   // Request video permission (camera + microphone)
   // Should only be called after user interaction (e.g., button click)
-  const requestVideoPermission = useCallback(async (): Promise<boolean> => {
+  // Returns the stream directly to avoid React state timing issues
+  const requestVideoPermission = useCallback(async (): Promise<MediaStream | null> => {
     if (!isSupported) {
       setError("Media recording is not supported in this browser");
-      return false;
+      return null;
     }
 
     setError(null);
@@ -181,7 +184,7 @@ export function useMediaPermissions(): MediaPermissions {
       setVideoStream(stream);
       setVideoPermission("granted");
       setAudioPermission("granted"); // Video also gets audio
-      return true;
+      return stream; // Return stream directly for immediate use
     } catch (err) {
       const error = err as Error;
       
@@ -195,14 +198,14 @@ export function useMediaPermissions(): MediaPermissions {
       } else if (error.name === "OverconstrainedError") {
         // Try with less constraints
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
+          const fallbackStream = await navigator.mediaDevices.getUserMedia({
             video: true,
             audio: true,
           });
-          setVideoStream(stream);
+          setVideoStream(fallbackStream);
           setVideoPermission("granted");
           setAudioPermission("granted");
-          return true;
+          return fallbackStream;
         } catch {
           setError("Failed to access camera with the requested settings.");
         }
@@ -210,7 +213,7 @@ export function useMediaPermissions(): MediaPermissions {
         setError(`Failed to access camera: ${error.message}`);
       }
       
-      return false;
+      return null;
     }
   }, [isSupported, stopVideoStream]);
 
