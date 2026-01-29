@@ -46,6 +46,8 @@ export async function GET(request: NextRequest) {
   const offset = parseInt(searchParams.get("offset") || "0");
   const city = searchParams.get("city");
 
+  // Note: We filter primarily by date, not the status column.
+  // The status column may not be kept up-to-date, so we use start_datetime as the source of truth.
   let query = supabase
     .from("events")
     .select(`
@@ -63,7 +65,7 @@ export async function GET(request: NextRequest) {
       current_attendees
     `)
     .eq("is_public", true)
-    .eq("status", "upcoming")
+    .neq("status", "cancelled")
     .gte("start_datetime", getStartOfToday())
     .order("start_datetime", { ascending: true })
     .range(offset, offset + limit - 1);

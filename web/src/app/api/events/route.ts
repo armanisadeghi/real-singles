@@ -94,21 +94,32 @@ export async function GET(request: NextRequest) {
       event_attendees(user_id, status),
       users:created_by(display_name)
     `)
-    .eq("is_public", true)
-    .order("start_datetime", { ascending: true })
-    .range(offset, offset + limit - 1);
+    .eq("is_public", true);
 
   // Filter by status
+  // Note: We filter primarily by date, not the status column.
+  // The status column may not be kept up-to-date, so we use start_datetime as the source of truth.
   if (status === "upcoming") {
-    // Use start of today to include today's events
+    // Show events that haven't started yet (today or future)
+    // Exclude cancelled events, order by soonest first
     query = query
-      .in("status", ["upcoming", "ongoing"])
-      .gte("start_datetime", getStartOfToday());
+      .neq("status", "cancelled")
+      .gte("start_datetime", getStartOfToday())
+      .order("start_datetime", { ascending: true });
   } else if (status === "past") {
+    // Show events that have already started (before today)
+    // Exclude cancelled events, order by most recent first
     query = query
-      .eq("status", "completed")
-      .lt("start_datetime", getStartOfToday());
+      .neq("status", "cancelled")
+      .lt("start_datetime", getStartOfToday())
+      .order("start_datetime", { ascending: false });
+  } else {
+    // Default ordering for any other status filter
+    query = query.order("start_datetime", { ascending: true });
   }
+
+  // Apply pagination
+  query = query.range(offset, offset + limit - 1);
 
   // Filter by city
   if (city) {

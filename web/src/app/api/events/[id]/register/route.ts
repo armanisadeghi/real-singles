@@ -24,10 +24,10 @@ export async function POST(
     );
   }
 
-  // Check if event exists and is upcoming
+  // Check if event exists and is still accepting registrations
   const { data: event, error: eventError } = await supabase
     .from("events")
-    .select("id, status, max_attendees, current_attendees")
+    .select("id, status, max_attendees, current_attendees, start_datetime")
     .eq("id", eventId)
     .single();
 
@@ -38,9 +38,20 @@ export async function POST(
     );
   }
 
-  if (event.status !== "upcoming" && event.status !== "ongoing") {
+  // Check if event is cancelled
+  if (event.status === "cancelled") {
     return NextResponse.json(
-      { success: false, msg: "This event is no longer accepting registrations" },
+      { success: false, msg: "This event has been cancelled" },
+      { status: 400 }
+    );
+  }
+
+  // Check if event has already started (use date as source of truth)
+  const eventStartDate = new Date(event.start_datetime);
+  const now = new Date();
+  if (eventStartDate < now) {
+    return NextResponse.json(
+      { success: false, msg: "This event has already started and is no longer accepting registrations" },
       { status: 400 }
     );
   }

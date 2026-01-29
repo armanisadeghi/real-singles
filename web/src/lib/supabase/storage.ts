@@ -25,19 +25,25 @@ export const FILE_SIZE_LIMITS = {
   [STORAGE_BUCKETS.EVENTS]: 10 * 1024 * 1024, // 10MB
 } as const;
 
+// Allowed image MIME types (shared across buckets that accept images)
+export const ALLOWED_IMAGE_MIME_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+  "image/avif",
+  "image/heic",
+  "image/heif",
+] as const;
+
+// File input accept string for images (use this in <input type="file" accept="...">)
+export const IMAGE_ACCEPT_STRING = ALLOWED_IMAGE_MIME_TYPES.join(",");
+
 // Allowed MIME types per bucket
 export const ALLOWED_MIME_TYPES = {
-  [STORAGE_BUCKETS.AVATARS]: [
-    "image/png",
-    "image/jpeg",
-    "image/gif",
-    "image/webp",
-  ],
+  [STORAGE_BUCKETS.AVATARS]: ALLOWED_IMAGE_MIME_TYPES,
   [STORAGE_BUCKETS.GALLERY]: [
-    "image/png",
-    "image/jpeg",
-    "image/gif",
-    "image/webp",
+    ...ALLOWED_IMAGE_MIME_TYPES,
     "video/mp4",
     "video/quicktime",
     "video/webm",
@@ -48,12 +54,7 @@ export const ALLOWED_MIME_TYPES = {
     "audio/ogg",
     "audio/wav",
   ],
-  [STORAGE_BUCKETS.EVENTS]: [
-    "image/png",
-    "image/jpeg",
-    "image/gif",
-    "image/webp",
-  ],
+  [STORAGE_BUCKETS.EVENTS]: ALLOWED_IMAGE_MIME_TYPES,
 } as const;
 
 // Specific MIME types for voice prompts (subset of gallery)

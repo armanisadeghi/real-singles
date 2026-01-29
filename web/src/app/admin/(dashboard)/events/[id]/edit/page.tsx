@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Upload, X, CalendarDays } from "lucide-react";
 import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
+import { IMAGE_ACCEPT_STRING } from "@/lib/supabase/storage";
 
 interface EventFormData {
   title: string;
@@ -31,8 +32,10 @@ export default function AdminEditEventPage({
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [existingImagePath, setExistingImagePath] = useState<string | null>(null); // Store the raw path
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
   const [formData, setFormData] = useState<EventFormData>({
     title: "",
     description: "",
@@ -78,8 +81,13 @@ export default function AdminEditEventPage({
             is_public: event.is_public ?? true,
             status: event.status || "upcoming",
           });
-          setExistingImageUrl(event.image_url);
-          setImagePreview(event.image_url);
+          // Store the resolved URL for display and the raw path for saving
+          if (event.image_url) {
+            setExistingImageUrl(event.image_url);
+            // Also store the raw path from the database (before resolution)
+            // The API returns the resolved URL, but we need the original path
+            setExistingImagePath(event.raw_image_url || null);
+          }
         }
       }
     } catch (err) {
@@ -114,6 +122,9 @@ export default function AdminEditEventPage({
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+      setExistingImageUrl(null);
+      setExistingImagePath(null);
+      setImageRemoved(false); // Reset since we have a new image
     }
   };
 
@@ -121,6 +132,8 @@ export default function AdminEditEventPage({
     setImageFile(null);
     setImagePreview(null);
     setExistingImageUrl(null);
+    setExistingImagePath(null);
+    setImageRemoved(true); // Track that user explicitly removed the image
   };
 
   const validate = (): boolean => {
@@ -145,7 +158,9 @@ export default function AdminEditEventPage({
     setIsSubmitting(true);
 
     try {
-      let imageUrl = existingImageUrl;
+      // Determine the final image URL/path
+      // We want to save the storage PATH, not the resolved URL
+      let finalImagePath: string | null = existingImagePath;
 
       // Upload new image if there is one
       if (imageFile) {
@@ -161,16 +176,25 @@ export default function AdminEditEventPage({
 
         if (uploadRes.ok) {
           const uploadData = await uploadRes.json();
-          imageUrl = uploadData.path || imageUrl;
+          finalImagePath = uploadData.path || null;
+        } else {
+          const errorData = await uploadRes.json();
+          console.error("Upload failed:", errorData);
+          alert(errorData.error || "Failed to upload image");
+          setIsSubmitting(false);
+          return; // Stop here - don't save with broken image
         }
+      } else if (imageRemoved) {
+        // User explicitly removed the image without uploading a new one
+        finalImagePath = null;
       }
 
-      // Update event
+      // Update event with all data including image_url
       const eventData = {
         title: formData.title,
         description: formData.description || null,
         event_type: formData.event_type,
-        image_url: imageUrl,
+        image_url: finalImagePath, // Always include image_url in the update (use path, not URL)
         venue_name: formData.venue_name || null,
         address: formData.address || null,
         city: formData.city || null,
@@ -190,11 +214,12 @@ export default function AdminEditEventPage({
 
       const data = await res.json();
 
-      if (data.success) {
-        router.push(`/admin/events/${resolvedParams.id}`);
-      } else {
+      if (!data.success) {
         alert(data.error || "Failed to update event");
+        return;
       }
+
+      router.push(`/admin/events/${resolvedParams.id}`);
     } catch (err) {
       console.error("Error updating event:", err);
       alert("Failed to update event. Please try again.");
@@ -241,10 +266,10 @@ export default function AdminEditEventPage({
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Event Image
           </label>
-          {imagePreview ? (
+          {imagePreview || existingImageUrl ? (
             <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-100">
               <img
-                src={imagePreview}
+                src={imagePreview || existingImageUrl || ""}
                 alt="Preview"
                 className="w-full h-full object-cover"
               />
@@ -265,7 +290,7 @@ export default function AdminEditEventPage({
               <input
                 type="file"
                 className="hidden"
-                accept="image/*"
+                accept={IMAGE_ACCEPT_STRING}
                 onChange={handleImageChange}
               />
             </label>

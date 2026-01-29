@@ -40,10 +40,10 @@ async function registerForEvent(
   userId: string,
   eventId: string
 ): Promise<{ success: boolean; msg: string }> {
-  // Check if event exists and is upcoming
+  // Check if event exists and is still accepting registrations
   const { data: event, error: eventError } = await adminClient
     .from("events")
-    .select("id, title, status, max_attendees, current_attendees")
+    .select("id, title, status, max_attendees, current_attendees, start_datetime")
     .eq("id", eventId)
     .eq("is_public", true)
     .single();
@@ -52,8 +52,16 @@ async function registerForEvent(
     return { success: false, msg: "Event not found" };
   }
 
-  if (event.status !== "upcoming" && event.status !== "ongoing") {
-    return { success: false, msg: "This event is no longer accepting registrations" };
+  // Check if event is cancelled
+  if (event.status === "cancelled") {
+    return { success: false, msg: "This event has been cancelled" };
+  }
+
+  // Check if event has already started (use date as source of truth)
+  const eventStartDate = new Date(event.start_datetime);
+  const now = new Date();
+  if (eventStartDate < now) {
+    return { success: false, msg: "This event has already started and is no longer accepting registrations" };
   }
 
   // Check capacity

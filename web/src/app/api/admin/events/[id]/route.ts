@@ -58,7 +58,10 @@ export async function GET(
     return NextResponse.json({ error: "Event not found" }, { status: 404 });
   }
 
-  // Resolve image URL
+  // Store the raw path before resolving (for edit page to use when saving)
+  const rawImageUrl = event.image_url;
+  
+  // Resolve image URL for display
   const resolvedImageUrl = event.image_url
     ? await resolveStorageUrl(supabase, event.image_url, { bucket: "events" })
     : null;
@@ -81,6 +84,7 @@ export async function GET(
     event: {
       ...event,
       image_url: resolvedImageUrl,
+      raw_image_url: rawImageUrl, // Include raw path for edit page
     },
     attendeeCounts: {
       registered: registeredCount || 0,

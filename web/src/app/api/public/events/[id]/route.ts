@@ -66,8 +66,10 @@ export async function GET(
 
   const typedEvent = event as EventRow;
 
-  // Only show published/upcoming events publicly
-  if (typedEvent.status !== "upcoming" && typedEvent.status !== "ongoing") {
+  // Only show non-cancelled events publicly
+  // Note: We don't filter by status="upcoming" since status may not be kept up-to-date.
+  // Cancelled events should not be shown.
+  if (typedEvent.status === "cancelled") {
     return NextResponse.json(
       { success: false, msg: "Event not found" },
       { status: 404 }

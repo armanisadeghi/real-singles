@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2, Upload, X } from "lucide-react";
+import { IMAGE_ACCEPT_STRING } from "@/lib/supabase/storage";
 
 interface SessionFormData {
   title: string;
@@ -214,7 +215,7 @@ export default function AdminCreateSpeedDatingPage() {
               <input
                 type="file"
                 className="hidden"
-                accept="image/*"
+                accept={IMAGE_ACCEPT_STRING}
                 onChange={handleImageChange}
               />
             </label>

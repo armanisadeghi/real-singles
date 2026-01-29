@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Upload, X } from "lucide-react";
 import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
+import { IMAGE_ACCEPT_STRING } from "@/lib/supabase/storage";
 
 interface EventFormData {
   title: string;
@@ -143,14 +144,25 @@ export default function AdminCreateEventPage() {
           const uploadData = await uploadRes.json();
           const imagePath = uploadData.path || "";
 
-          // Step 3: Update event with image URL
+          // Step 3: Update event with image URL (use path, not full URL)
           if (imagePath) {
-            await fetch(`/api/admin/events/${eventId}`, {
+            const updateRes = await fetch(`/api/admin/events/${eventId}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ image_url: imagePath }),
             });
+            
+            if (!updateRes.ok) {
+              console.error("Failed to update event with image URL");
+              // Event was created but image wasn't saved - still redirect but warn
+              alert("Event created but image may not have been saved. Please edit the event to re-upload.");
+            }
           }
+        } else {
+          const errorData = await uploadRes.json();
+          console.error("Failed to upload image:", errorData);
+          // Event was created but image upload failed - still redirect but warn
+          alert("Event created but image upload failed: " + (errorData.error || "Unknown error"));
         }
       }
 
@@ -208,7 +220,7 @@ export default function AdminCreateEventPage() {
               <input
                 type="file"
                 className="hidden"
-                accept="image/*"
+                accept={IMAGE_ACCEPT_STRING}
                 onChange={handleImageChange}
               />
             </label>
