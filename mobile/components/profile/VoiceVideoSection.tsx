@@ -21,7 +21,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { useAudioPlayer } from 'expo-audio';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import * as Haptics from 'expo-haptics';
@@ -513,12 +513,14 @@ export function VoiceVideoSection({ onDataChange }: VoiceVideoSectionProps) {
   
   const navigateToVoiceRecorder = () => {
     hapticFeedback('tap');
-    router.push('/profile/record-voice' as const);
+    // Type assertion needed until expo-router types are regenerated
+    router.push('/profile/record-voice' as Href);
   };
   
   const navigateToVideoRecorder = () => {
     hapticFeedback('tap');
-    router.push('/profile/record-video' as const);
+    // Type assertion needed until expo-router types are regenerated
+    router.push('/profile/record-video' as Href);
   };
   
   return (
