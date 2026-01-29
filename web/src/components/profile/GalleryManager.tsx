@@ -67,18 +67,14 @@ function SortableGalleryItem({
   };
 
   // Handle tap on the item (for touch devices)
-  const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+  // The button is already hidden on hover devices via CSS, so we can trigger directly
+  const handleTap = useCallback((e: React.MouseEvent) => {
     // Don't trigger if we're dragging
     if (isDragging) return;
     
-    // Only trigger action sheet on touch devices
-    // We detect this by checking if the event is from a touch or if hover isn't supported
-    const isTouch = 'touches' in e || window.matchMedia('(hover: none)').matches;
-    if (isTouch) {
-      e.preventDefault();
-      e.stopPropagation();
-      onTapForActions(item);
-    }
+    e.preventDefault();
+    e.stopPropagation();
+    onTapForActions(item);
   }, [isDragging, item, onTapForActions]);
 
   return (
@@ -147,11 +143,20 @@ function SortableGalleryItem({
       </div>
 
       {/* Mobile Action Indicator - visible only on touch devices */}
-      <div className="absolute bottom-2 right-2 z-20 [@media(hover:hover)]:hidden">
-        <div className="bg-black/70 p-2 rounded-full backdrop-blur-sm">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onTapForActions(item);
+        }}
+        className="absolute bottom-2 right-2 z-20 [@media(hover:hover)]:hidden"
+        aria-label="Photo options"
+      >
+        <div className="bg-black/70 p-2 rounded-full backdrop-blur-sm active:bg-black/90 transition-colors">
           <MoreHorizontal className="w-4 h-4 text-white" />
         </div>
-      </div>
+      </button>
 
       {/* Drag Handle - desktop hover only */}
       <div
