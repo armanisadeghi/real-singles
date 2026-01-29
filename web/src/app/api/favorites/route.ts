@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import { resolveStorageUrl, resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
 import type { DbProfile, DbUser } from "@/types/db";
 
 // ============================================================================
@@ -136,6 +136,11 @@ export async function GET() {
         RATINGS: 0,
         TotalRating: 0,
         favorited_at: fav.created_at,
+        // Voice & Video Prompts
+        VoicePromptUrl: await resolveVoicePromptUrl(supabase, profile.voice_prompt_url),
+        VideoIntroUrl: await resolveVideoIntroUrl(supabase, profile.video_intro_url),
+        VoicePromptDurationSeconds: profile.voice_prompt_duration_seconds,
+        VideoIntroDurationSeconds: profile.video_intro_duration_seconds,
       };
     })
   );

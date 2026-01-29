@@ -57,6 +57,7 @@ import Animated, {
 import RNPickerSelect from "react-native-picker-select";
 import Toast from "react-native-toast-message";
 import LinearBg from "../LinearBg";
+import { VoiceVideoSection } from "../profile";
 
 const FS = FileSystem as unknown as {
   cacheDirectory: string;
@@ -786,6 +787,14 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             onChangeText={(text) => onChangeField("Country", text)}
           />
         </View>
+      </View>
+
+      {/* Voice & Video Section */}
+      <View
+        className="bg-white w-full rounded-[22px] px-[22px] py-[16px] flex-col mb-5"
+        style={styles.shadow}
+      >
+        <VoiceVideoSection />
       </View>
 
       <View

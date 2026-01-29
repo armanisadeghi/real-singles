@@ -10,6 +10,7 @@
 import Link from "next/link";
 import { MapPin, CheckCircle, ChevronRight } from "lucide-react";
 import { cn, calculateAge } from "@/lib/utils";
+import { MediaBadge } from "@/components/profile";
 
 interface ProfileListItemProps {
   profile: {
@@ -23,6 +24,9 @@ interface ProfileListItemProps {
     profile_image_url?: string | null;
     is_verified?: boolean | null;
     distance_km?: number | null;
+    // Voice & Video Prompts
+    voice_prompt_url?: string | null;
+    video_intro_url?: string | null;
     user?: {
       display_name?: string | null;
     } | null;
@@ -131,6 +135,13 @@ export function ProfileListItem({
               Verified
             </span>
           )}
+
+          {/* Media Badge */}
+          <MediaBadge
+            hasVoicePrompt={!!profile.voice_prompt_url}
+            hasVideoIntro={!!profile.video_intro_url}
+            size="sm"
+          />
 
           {/* Distance Badge */}
           {distanceString && (

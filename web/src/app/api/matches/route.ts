@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import { resolveStorageUrl, resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
 import { getMutualMatches } from "@/lib/services/discovery";
 import { z } from "zod";
 
@@ -341,6 +341,11 @@ export async function GET(request: NextRequest) {
           last_active_at: userData?.last_active_at,
           matched_at: match.matchedAt,
           conversation_id: match.conversationId || null,
+          // Voice & Video Prompts
+          voice_prompt_url: await resolveVoicePromptUrl(supabase, profile?.voice_prompt_url),
+          video_intro_url: await resolveVideoIntroUrl(supabase, profile?.video_intro_url),
+          voice_prompt_duration_seconds: profile?.voice_prompt_duration_seconds || null,
+          video_intro_duration_seconds: profile?.video_intro_duration_seconds || null,
         };
       })
     );

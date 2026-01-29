@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import { resolveStorageUrl, resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
 import {
   getDiscoverableCandidates,
   getUserProfileContext,
@@ -118,6 +118,11 @@ export async function GET(request: NextRequest) {
         pet_peeves: p.pet_peeves,
         nightclub_or_home: p.nightclub_or_home,
         past_event: p.past_event,
+        // Voice & Video Prompts
+        voice_prompt_url: await resolveVoicePromptUrl(supabase, p.voice_prompt_url),
+        video_intro_url: await resolveVideoIntroUrl(supabase, p.video_intro_url),
+        voice_prompt_duration_seconds: p.voice_prompt_duration_seconds,
+        video_intro_duration_seconds: p.video_intro_duration_seconds,
         user: p.user ? {
           display_name: p.user.display_name,
           status: p.user.status,

@@ -29,6 +29,7 @@ import {
   X,
 } from "lucide-react";
 import { cn, calculateAge, formatHeight } from "@/lib/utils";
+import { VoiceVideoDisplay } from "@/components/profile";
 
 interface ProfileData {
   ID: string;
@@ -74,6 +75,11 @@ interface ProfileData {
   is_verified: boolean;
   IsFavorite: number;
   FollowStatus: string;
+  // Voice & Video Prompts
+  VoicePromptUrl?: string;
+  VideoIntroUrl?: string;
+  VoicePromptDurationSeconds?: number | null;
+  VideoIntroDurationSeconds?: number | null;
   gallery: Array<{
     id: string;
     media_url: string;
@@ -578,6 +584,20 @@ export default function OtherProfilePage() {
                 <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">
                   {profile.About}
                 </p>
+              </section>
+            )}
+
+            {/* Voice & Video Section */}
+            {(profile.VoicePromptUrl || profile.VideoIntroUrl) && (
+              <section className="bg-white rounded-2xl p-6 shadow-sm">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Hear from {profile.DisplayName || profile.FirstName}</h2>
+                <VoiceVideoDisplay
+                  voicePromptUrl={profile.VoicePromptUrl}
+                  voicePromptDuration={profile.VoicePromptDurationSeconds}
+                  videoIntroUrl={profile.VideoIntroUrl}
+                  videoIntroDuration={profile.VideoIntroDurationSeconds}
+                  userName={profile.DisplayName || profile.FirstName || "User"}
+                />
               </section>
             )}
 

@@ -14,6 +14,7 @@ import {
   Info,
 } from "lucide-react";
 import { cn, calculateAge, formatHeight } from "@/lib/utils";
+import { MediaBadge } from "@/components/profile";
 
 interface ProfileCardProps {
   profile: {
@@ -30,6 +31,11 @@ interface ProfileCardProps {
     is_verified?: boolean | null;
     height_inches?: number | null;
     interests?: string[] | null;
+    // Voice & Video Prompts
+    voice_prompt_url?: string | null;
+    video_intro_url?: string | null;
+    voice_prompt_duration_seconds?: number | null;
+    video_intro_duration_seconds?: number | null;
     user?: {
       display_name?: string | null;
     } | null;
@@ -188,12 +194,25 @@ export function ProfileCard({
             </div>
           )}
           
-          {/* Verified Badge */}
-          {profile.is_verified && (
-            <div className="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-3 h-3 text-white" />
-            </div>
-          )}
+          {/* Badges row */}
+          <div className="absolute top-2 right-2 flex items-center gap-1">
+            {/* Media Badge */}
+            {(profile.voice_prompt_url || profile.video_intro_url) && (
+              <MediaBadge
+                hasVoicePrompt={!!profile.voice_prompt_url}
+                hasVideoIntro={!!profile.video_intro_url}
+                size="sm"
+                className="bg-white/90 backdrop-blur-sm"
+              />
+            )}
+            
+            {/* Verified Badge */}
+            {profile.is_verified && (
+              <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-3 h-3 text-white" />
+              </div>
+            )}
+          </div>
           
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -295,13 +314,26 @@ export function ProfileCard({
           </>
         )}
 
-        {/* Verified Badge */}
-        {profile.is_verified && (
-          <div className="absolute top-3 right-3 bg-blue-500 text-white px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 z-10">
-            <CheckCircle className="w-3 h-3" />
-            Verified
-          </div>
-        )}
+        {/* Top badges row */}
+        <div className="absolute top-3 right-3 flex items-center gap-2 z-10">
+          {/* Media Badge */}
+          {(profile.voice_prompt_url || profile.video_intro_url) && (
+            <MediaBadge
+              hasVoicePrompt={!!profile.voice_prompt_url}
+              hasVideoIntro={!!profile.video_intro_url}
+              size="md"
+              className="bg-white/90 backdrop-blur-sm shadow-sm"
+            />
+          )}
+          
+          {/* Verified Badge */}
+          {profile.is_verified && (
+            <div className="bg-blue-500 text-white px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              <CheckCircle className="w-3 h-3" />
+              Verified
+            </div>
+          )}
+        </div>
 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />

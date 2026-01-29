@@ -772,6 +772,62 @@ export const saveLink = async (linkData: FormData) => {
 };
 
 // ===========================================
+// VIDEO INTRO ENDPOINTS
+// ===========================================
+
+/**
+ * Get the current user's video intro
+ */
+export const getVideoIntro = async () => {
+  return apiRequest("/users/me/video-intro");
+};
+
+/**
+ * Upload a new video intro
+ * FormData should contain:
+ * - file: Video file (mp4, mov, webm)
+ * - duration: Duration in seconds (1-60)
+ */
+export const uploadVideoIntro = async (formData: FormData) => {
+  return apiFormDataRequest("/users/me/video-intro", formData);
+};
+
+/**
+ * Delete the current user's video intro
+ */
+export const deleteVideoIntro = async () => {
+  return apiRequest("/users/me/video-intro", { method: "DELETE" });
+};
+
+// ===========================================
+// VOICE PROMPT ENDPOINTS
+// ===========================================
+
+/**
+ * Get the current user's voice prompt
+ */
+export const getVoicePrompt = async () => {
+  return apiRequest("/users/me/voice-prompt");
+};
+
+/**
+ * Upload a new voice prompt
+ * FormData should contain:
+ * - file: Audio file (m4a, mp4, wav, webm)
+ * - duration: Duration in seconds (1-30)
+ */
+export const uploadVoicePrompt = async (formData: FormData) => {
+  return apiFormDataRequest("/users/me/voice-prompt", formData);
+};
+
+/**
+ * Delete the current user's voice prompt
+ */
+export const deleteVoicePrompt = async () => {
+  return apiRequest("/users/me/voice-prompt", { method: "DELETE" });
+};
+
+// ===========================================
 // BLOCK & REPORT ENDPOINTS
 // ===========================================
 

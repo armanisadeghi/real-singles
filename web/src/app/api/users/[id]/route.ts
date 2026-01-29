@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
 
 // Helper to convert storage path to public URL
 function getGalleryPublicUrl(path: string): string {
@@ -222,6 +223,12 @@ export async function GET(
     is_verified: profile?.is_verified || false,
     RATINGS: avgRating,
     TotalRating: reviews?.length || 0,
+    
+    // Voice & Video Prompts
+    VoicePromptUrl: await resolveVoicePromptUrl(supabase, profile?.voice_prompt_url),
+    VideoIntroUrl: await resolveVideoIntroUrl(supabase, profile?.video_intro_url),
+    VoicePromptDurationSeconds: profile?.voice_prompt_duration_seconds || null,
+    VideoIntroDurationSeconds: profile?.video_intro_duration_seconds || null,
     
     // Relationship to current user
     IsFavorite: isFavorite ? 1 : 0,

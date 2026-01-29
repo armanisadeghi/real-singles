@@ -88,6 +88,11 @@ interface ProfileDetail {
   is_photo_verified: boolean;
   can_start_matching?: boolean | null;
   profile_hidden?: boolean | null;
+  // Voice & Video Prompts
+  voice_prompt_url?: string | null;
+  voice_prompt_duration_seconds?: number | null;
+  video_intro_url?: string | null;
+  video_intro_duration_seconds?: number | null;
 }
 
 interface GalleryImage {
@@ -985,6 +990,41 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                     <div className="mt-4">
                       <p className="text-xs text-gray-500 mb-1">Bio</p>
                       <p className="text-sm bg-slate-50 rounded-lg p-3">{profile.bio}</p>
+                    </div>
+                  )}
+
+                  {/* Voice & Video Section */}
+                  {(profile?.voice_prompt_url || profile?.video_intro_url) && (
+                    <div className="mt-4">
+                      <p className="text-xs text-gray-500 mb-2">Voice & Video</p>
+                      <div className="flex flex-wrap gap-2">
+                        {profile?.voice_prompt_url && (
+                          <div className="flex items-center gap-2 px-3 py-2 bg-pink-50 rounded-lg">
+                            <Play className="w-4 h-4 text-pink-500" />
+                            <span className="text-sm text-pink-700">
+                              Voice Prompt
+                              {profile?.voice_prompt_duration_seconds && (
+                                <span className="text-pink-400 ml-1">
+                                  ({profile.voice_prompt_duration_seconds}s)
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        )}
+                        {profile?.video_intro_url && (
+                          <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 rounded-lg">
+                            <Sparkles className="w-4 h-4 text-indigo-500" />
+                            <span className="text-sm text-indigo-700">
+                              Video Intro
+                              {profile?.video_intro_duration_seconds && (
+                                <span className="text-indigo-400 ml-1">
+                                  ({profile.video_intro_duration_seconds}s)
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

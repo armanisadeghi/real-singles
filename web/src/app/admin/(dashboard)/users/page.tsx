@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { User, ArrowUpDown, Download, RefreshCw } from "lucide-react";
+import { User, ArrowUpDown, Download, RefreshCw, Mic, Video } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { UserFilters, type UserFilterState } from "@/components/admin/UserFilters";
 import { Pagination } from "@/components/admin/Pagination";
@@ -27,6 +27,9 @@ interface UserWithProfile {
     is_verified: boolean;
     profile_hidden: boolean;
     can_start_matching: boolean;
+    // Voice & Video Prompts
+    voice_prompt_url: string | null;
+    video_intro_url: string | null;
   } | null;
 }
 
@@ -401,6 +404,17 @@ export default function AdminUsersPage() {
                           {user.profiles?.profile_hidden && (
                             <span className="px-2 py-0.5 text-xs bg-slate-100 text-slate-700 rounded">
                               Hidden
+                            </span>
+                          )}
+                          {/* Media Badges */}
+                          {user.profiles?.voice_prompt_url && (
+                            <span className="px-2 py-0.5 text-xs bg-pink-100 text-pink-700 rounded flex items-center gap-0.5">
+                              <Mic className="w-3 h-3" />
+                            </span>
+                          )}
+                          {user.profiles?.video_intro_url && (
+                            <span className="px-2 py-0.5 text-xs bg-indigo-100 text-indigo-700 rounded flex items-center gap-0.5">
+                              <Video className="w-3 h-3" />
                             </span>
                           )}
                           {user.profiles?.age && (

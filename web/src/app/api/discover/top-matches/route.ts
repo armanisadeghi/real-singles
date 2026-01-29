@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import { resolveStorageUrl, resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
 import {
   getDiscoverableCandidates,
   getUserProfileContext,
@@ -35,6 +35,11 @@ interface FormattedProfile {
   TotalRating: number;
   distance_in_km?: number;
   has_liked_me?: boolean;
+  // Voice & Video Prompts
+  VoicePromptUrl: string;
+  VideoIntroUrl: string;
+  VoicePromptDurationSeconds: number | null;
+  VideoIntroDurationSeconds: number | null;
 }
 
 /**
@@ -184,6 +189,11 @@ export async function GET(request: Request) {
       TotalRating: 0,
       distance_in_km: profile.distance_km,
       has_liked_me: profile.has_liked_me,
+      // Voice & Video Prompts
+      VoicePromptUrl: await resolveVoicePromptUrl(supabase, profile.voice_prompt_url),
+      VideoIntroUrl: await resolveVideoIntroUrl(supabase, profile.video_intro_url),
+      VoicePromptDurationSeconds: profile.voice_prompt_duration_seconds,
+      VideoIntroDurationSeconds: profile.video_intro_duration_seconds,
     };
   };
 

@@ -100,7 +100,9 @@ export async function GET(request: NextRequest) {
           state,
           is_verified,
           profile_hidden,
-          can_start_matching
+          can_start_matching,
+          voice_prompt_url,
+          video_intro_url
         )
       `, { count: 'exact' });
 

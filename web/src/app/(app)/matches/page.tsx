@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Heart, MessageCircle, CheckCircle, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { MediaBadge } from "@/components/profile";
 
 interface Match {
   user_id: string;
@@ -30,6 +31,9 @@ interface Match {
   last_active_at?: string | null;
   matched_at?: string | null;
   conversation_id?: string | null;
+  // Voice & Video Prompts
+  voice_prompt_url?: string | null;
+  video_intro_url?: string | null;
 }
 
 interface MatchesResponse {
@@ -219,6 +223,13 @@ export default function MatchesPage() {
                         Verified
                       </span>
                     )}
+
+                    {/* Media Badge */}
+                    <MediaBadge
+                      hasVoicePrompt={!!match.voice_prompt_url}
+                      hasVideoIntro={!!match.video_intro_url}
+                      size="sm"
+                    />
 
                     {/* Matched Time */}
                     {matchedTime && (

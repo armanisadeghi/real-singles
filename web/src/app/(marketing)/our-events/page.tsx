@@ -3,6 +3,10 @@ import Link from "next/link";
 import { CalendarHeart, MapPin, Clock, ArrowRight, Video, Users, Sparkles } from "lucide-react";
 import { PageHero } from "@/components/marketing";
 
+// Force dynamic rendering - this page fetches from API routes which aren't
+// available during static build time
+export const dynamic = "force-dynamic";
+
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================

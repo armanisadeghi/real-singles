@@ -24,6 +24,7 @@ import {
 import { cn, calculateAge, formatHeight } from "@/lib/utils";
 import { MatchCelebrationModal } from "./MatchCelebrationModal";
 import { useToast } from "@/components/ui/Toast";
+import { VoiceVideoDisplay } from "@/components/profile";
 
 interface ProfileData {
   id: string;
@@ -42,6 +43,11 @@ interface ProfileData {
   gender?: string | null;
   zodiac_sign?: string | null;
   distance_km?: number | null;
+  // Voice & Video Prompts
+  voice_prompt_url?: string | null;
+  voice_prompt_duration_seconds?: number | null;
+  video_intro_url?: string | null;
+  video_intro_duration_seconds?: number | null;
   user?: {
     display_name?: string | null;
   } | null;
@@ -378,6 +384,19 @@ export function ProfileFocusView({
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-amber-700 mb-2">About</h3>
             <p className="text-gray-600 leading-relaxed">{profile.bio}</p>
+          </div>
+        )}
+
+        {/* Voice & Video Section */}
+        {(profile.voice_prompt_url || profile.video_intro_url) && (
+          <div className="mb-6">
+            <VoiceVideoDisplay
+              voicePromptUrl={profile.voice_prompt_url}
+              voicePromptDuration={profile.voice_prompt_duration_seconds}
+              videoIntroUrl={profile.video_intro_url}
+              videoIntroDuration={profile.video_intro_duration_seconds}
+              userName={name}
+            />
           </div>
         )}
 

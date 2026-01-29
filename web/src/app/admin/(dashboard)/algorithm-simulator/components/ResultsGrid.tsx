@@ -1,6 +1,6 @@
 "use client";
 
-import { User, MapPin, Check, X, Heart, Star, Calendar, Users, ArrowLeftRight, ArrowRight } from "lucide-react";
+import { User, MapPin, Check, X, Heart, Star, Calendar, Users, ArrowLeftRight, ArrowRight, Mic, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ProfileResult {
@@ -23,6 +23,9 @@ interface ProfileResult {
   conversation_id?: string;
   action?: string;
   liked_at?: string;
+  // Voice & Video Prompts
+  voice_prompt_url?: string | null;
+  video_intro_url?: string | null;
   _debug?: {
     gender_match: boolean;
     bidirectional_match: boolean;
@@ -206,6 +209,22 @@ function ProfileCard({
               <Star className="w-3 h-3 mr-0.5" />
               Super
             </span>
+          )}
+          
+          {/* Media badges */}
+          {(profile.voice_prompt_url || profile.video_intro_url) && (
+            <div className="flex items-center gap-0.5">
+              {profile.voice_prompt_url && (
+                <span className="inline-flex items-center px-1 py-0.5 rounded bg-pink-500/90 text-white text-xs">
+                  <Mic className="w-3 h-3" />
+                </span>
+              )}
+              {profile.video_intro_url && (
+                <span className="inline-flex items-center px-1 py-0.5 rounded bg-indigo-500/90 text-white text-xs">
+                  <Video className="w-3 h-3" />
+                </span>
+              )}
+            </div>
           )}
         </div>
 

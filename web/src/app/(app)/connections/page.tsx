@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Heart, Sparkles, MessageCircle, CheckCircle, ChevronRight, Crown, ThumbsUp } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { MediaBadge } from "@/components/profile";
 
 // ================== Interfaces ==================
 
@@ -33,6 +34,9 @@ interface Match {
   last_active_at?: string | null;
   matched_at?: string | null;
   conversation_id?: string | null;
+  // Voice & Video Prompts
+  voice_prompt_url?: string | null;
+  video_intro_url?: string | null;
 }
 
 interface Like {
@@ -52,6 +56,9 @@ interface Like {
   is_verified: boolean;
   profile_image_url?: string | null;
   last_active_at?: string | null;
+  // Voice & Video Prompts
+  voice_prompt_url?: string | null;
+  video_intro_url?: string | null;
 }
 
 // ================== Helpers ==================
@@ -281,6 +288,11 @@ function LikesYouTab() {
                     Verified
                   </span>
                 )}
+                <MediaBadge
+                  hasVoicePrompt={!!like.voice_prompt_url}
+                  hasVideoIntro={!!like.video_intro_url}
+                  size="sm"
+                />
                 {like.is_super_like && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
                     <Sparkles className="w-3 h-3" />
@@ -458,6 +470,11 @@ function MatchesTab() {
                     Verified
                   </span>
                 )}
+                <MediaBadge
+                  hasVoicePrompt={!!match.voice_prompt_url}
+                  hasVideoIntro={!!match.video_intro_url}
+                  size="sm"
+                />
                 {matchedTime && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-pink-50 text-pink-600 rounded-full text-xs font-medium">
                     <Heart className="w-3 h-3" />

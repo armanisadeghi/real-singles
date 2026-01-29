@@ -13,6 +13,7 @@ import {
   PauseCircle,
 } from "lucide-react";
 import { ReferralCard } from "@/components/profile/ReferralCard";
+import { VoiceVideoDisplayClient } from "./VoiceVideoDisplayClient";
 
 async function getMyProfile() {
   const supabase = await createClient();
@@ -66,9 +67,31 @@ async function getMyProfile() {
     profileImageUrl = signedData?.signedUrl || profileImageUrl;
   }
 
+  // Generate signed URLs for voice prompt and video intro
+  let voicePromptUrl = profile?.voice_prompt_url || null;
+  if (voicePromptUrl && !voicePromptUrl.startsWith("http")) {
+    const { data: signedData } = await supabase.storage
+      .from("gallery")
+      .createSignedUrl(voicePromptUrl, 3600);
+    voicePromptUrl = signedData?.signedUrl || voicePromptUrl;
+  }
+
+  let videoIntroUrl = profile?.video_intro_url || null;
+  if (videoIntroUrl && !videoIntroUrl.startsWith("http")) {
+    const { data: signedData } = await supabase.storage
+      .from("gallery")
+      .createSignedUrl(videoIntroUrl, 3600);
+    videoIntroUrl = signedData?.signedUrl || videoIntroUrl;
+  }
+
   return {
     user: { ...user, ...userData },
-    profile: profile ? { ...profile, profile_image_url: profileImageUrl } : null,
+    profile: profile ? { 
+      ...profile, 
+      profile_image_url: profileImageUrl,
+      voice_prompt_url: voicePromptUrl,
+      video_intro_url: videoIntroUrl,
+    } : null,
     gallery: galleryWithUrls,
   };
 }
@@ -270,6 +293,25 @@ export default async function MyProfilePage() {
                   <section className="bg-white rounded-2xl p-5 shadow-sm">
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">About</h3>
                     <p className="text-gray-700 leading-relaxed">{profile.bio}</p>
+                  </section>
+                )}
+
+                {/* Voice & Video Section */}
+                {(profile.voice_prompt_url || profile.video_intro_url) && (
+                  <section className="bg-white rounded-2xl p-5 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Voice & Video</h3>
+                      <Link href="/profile/edit#voice-video" className="text-sm text-pink-500 font-medium hover:text-pink-600">
+                        Edit
+                      </Link>
+                    </div>
+                    <VoiceVideoDisplayClient
+                      voicePromptUrl={profile.voice_prompt_url}
+                      voicePromptDuration={profile.voice_prompt_duration_seconds}
+                      videoIntroUrl={profile.video_intro_url}
+                      videoIntroDuration={profile.video_intro_duration_seconds}
+                      userName={profile.first_name || user.display_name || "You"}
+                    />
                   </section>
                 )}
 

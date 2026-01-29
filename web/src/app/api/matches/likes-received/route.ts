@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import { resolveStorageUrl, resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/matches/likes-received
@@ -114,7 +114,11 @@ export async function GET(request: NextRequest) {
         bio,
         is_verified,
         profile_image_url,
-        profile_hidden
+        profile_hidden,
+        voice_prompt_url,
+        voice_prompt_duration_seconds,
+        video_intro_url,
+        video_intro_duration_seconds
       `
       )
       .in("user_id", unactedLikerIds)
@@ -173,6 +177,11 @@ export async function GET(request: NextRequest) {
           is_verified: profile?.is_verified || false,
           profile_image_url: await resolveStorageUrl(supabase, profileImageUrl),
           last_active_at: userData?.last_active_at,
+          // Voice & Video Prompts
+          voice_prompt_url: await resolveVoicePromptUrl(supabase, profile?.voice_prompt_url),
+          video_intro_url: await resolveVideoIntroUrl(supabase, profile?.video_intro_url),
+          voice_prompt_duration_seconds: profile?.voice_prompt_duration_seconds || null,
+          video_intro_duration_seconds: profile?.video_intro_duration_seconds || null,
         };
       })
     );
