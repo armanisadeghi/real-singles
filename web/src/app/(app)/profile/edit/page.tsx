@@ -3,8 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { VoiceRecorder, VideoRecorder } from "@/components/profile";
+import { getExtensionFromMimeType } from "@/hooks/useMediaPermissions";
 import {
   GENDER_OPTIONS,
   BODY_TYPE_OPTIONS,
@@ -30,6 +32,190 @@ import {
 
 const AUTOSAVE_MIN_INTERVAL = 30000; // 30 seconds minimum between autosaves
 const IDLE_SAVE_DELAY = 10000; // 10 seconds of inactivity before considering a save
+
+/**
+ * Voice & Video Prompts Section
+ * Handles its own state and API calls separately from the main profile form
+ */
+function VoiceVideoSection() {
+  const [voicePromptUrl, setVoicePromptUrl] = useState<string | null>(null);
+  const [voicePromptDuration, setVoicePromptDuration] = useState<number | null>(null);
+  const [videoIntroUrl, setVideoIntroUrl] = useState<string | null>(null);
+  const [videoIntroDuration, setVideoIntroDuration] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load existing voice/video data
+  useEffect(() => {
+    const loadMediaData = async () => {
+      try {
+        // Fetch both in parallel
+        const [voiceRes, videoRes] = await Promise.all([
+          fetch("/api/users/me/voice-prompt"),
+          fetch("/api/users/me/video-intro"),
+        ]);
+
+        const voiceData = await voiceRes.json();
+        const videoData = await videoRes.json();
+
+        if (voiceData.success && voiceData.data) {
+          setVoicePromptUrl(voiceData.data.voicePromptUrl || null);
+          setVoicePromptDuration(voiceData.data.durationSeconds || null);
+        }
+
+        if (videoData.success && videoData.data) {
+          setVideoIntroUrl(videoData.data.videoIntroUrl || null);
+          setVideoIntroDuration(videoData.data.durationSeconds || null);
+        }
+      } catch (err) {
+        console.error("Failed to load voice/video data:", err);
+        setError("Failed to load media data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMediaData();
+  }, []);
+
+  // Handle voice prompt save
+  const handleVoiceSave = async (blob: Blob, duration: number) => {
+    const formData = new FormData();
+    const ext = getExtensionFromMimeType(blob.type);
+    formData.append("file", blob, `voice-prompt.${ext}`);
+    formData.append("duration", duration.toString());
+
+    const response = await fetch("/api/users/me/voice-prompt", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.msg || "Failed to save voice prompt");
+    }
+
+    setVoicePromptUrl(data.data.voicePromptUrl);
+    setVoicePromptDuration(data.data.durationSeconds);
+  };
+
+  // Handle voice prompt delete
+  const handleVoiceDelete = async () => {
+    const response = await fetch("/api/users/me/voice-prompt", {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.msg || "Failed to delete voice prompt");
+    }
+
+    setVoicePromptUrl(null);
+    setVoicePromptDuration(null);
+  };
+
+  // Handle video intro save
+  const handleVideoSave = async (blob: Blob, duration: number) => {
+    const formData = new FormData();
+    const ext = getExtensionFromMimeType(blob.type);
+    formData.append("file", blob, `video-intro.${ext}`);
+    formData.append("duration", duration.toString());
+
+    const response = await fetch("/api/users/me/video-intro", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.msg || "Failed to save video intro");
+    }
+
+    setVideoIntroUrl(data.data.videoIntroUrl);
+    setVideoIntroDuration(data.data.durationSeconds);
+  };
+
+  // Handle video intro delete
+  const handleVideoDelete = async () => {
+    const response = await fetch("/api/users/me/video-intro", {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.msg || "Failed to delete video intro");
+    }
+
+    setVideoIntroUrl(null);
+    setVideoIntroDuration(null);
+  };
+
+  if (loading) {
+    return (
+      <section className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">Voice & Video Prompts</h2>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="bg-white rounded-xl shadow-sm p-6">
+      <h2 className="text-lg font-semibold text-gray-900 mb-2">Voice & Video Prompts</h2>
+      <p className="text-sm text-gray-500 mb-4">
+        Add a personal touch to your profile with voice and video introductions.
+      </p>
+      
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg">
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Voice Prompt */}
+        <div className="border border-gray-200 rounded-xl overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+            <h3 className="font-medium text-gray-900">Voice Prompt</h3>
+            <p className="text-xs text-gray-500">Record up to 30 seconds</p>
+          </div>
+          <VoiceRecorder
+            existingUrl={voicePromptUrl}
+            existingDuration={voicePromptDuration}
+            onSave={handleVoiceSave}
+            onDelete={handleVoiceDelete}
+            maxDuration={30}
+          />
+        </div>
+
+        {/* Video Intro */}
+        <div className="border border-gray-200 rounded-xl overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+            <h3 className="font-medium text-gray-900">Video Introduction</h3>
+            <p className="text-xs text-gray-500">Record or upload up to 60 seconds</p>
+          </div>
+          <VideoRecorder
+            existingUrl={videoIntroUrl}
+            existingDuration={videoIntroDuration}
+            onSave={handleVideoSave}
+            onDelete={handleVideoDelete}
+            maxDuration={60}
+          />
+        </div>
+      </div>
+
+      <p className="text-xs text-gray-400 mt-4 text-center">
+        Voice and video prompts help you stand out and make better connections.
+      </p>
+    </section>
+  );
+}
 
 type ProfileState = {
   // Basic Info
@@ -294,31 +480,37 @@ export default function EditProfilePage() {
     lastSavedProfileRef.current = JSON.stringify(profile);
     lastAutosaveTimeRef.current = Date.now();
     pendingChangesRef.current = false;
-    
-    // Only update UI for manual saves
-    if (!isAutosave) {
-      setLastSaved(new Date());
-      setSaveStatus("saved");
-      setSuccess("Profile saved successfully!");
-      setSaving(false);
-      // Redirect to profile view page after manual save
-      setTimeout(() => {
-        router.push("/profile");
-      }, 1000);
-    }
 
     return true;
   }, [profile, hasChanges, router]);
 
-  // Manual save handler - cancels any pending autosave and performs a full save with UI feedback
-  const handleSave = useCallback(async () => {
+  // Manual save handler - cancels any pending autosave, saves if needed, and always navigates to profile
+  const handleSaveAndContinue = useCallback(async () => {
     if (autosaveTimerRef.current) {
       clearTimeout(autosaveTimerRef.current);
       autosaveTimerRef.current = null;
     }
     pendingChangesRef.current = false;
-    await performSave(false);
-  }, [performSave]);
+    
+    // If there are changes, save them first
+    if (hasChanges()) {
+      setSaving(true);
+      setSaveStatus("saving");
+      setError("");
+      
+      const success = await performSave(false);
+      if (!success) {
+        // performSave already handles error state, don't navigate on failure
+        return;
+      }
+    }
+    
+    // Always navigate to profile view, even if no changes needed saving
+    setSuccess("Profile saved!");
+    setSaving(false);
+    setSaveStatus("saved");
+    router.push("/profile");
+  }, [performSave, hasChanges, router]);
 
   // Load profile on mount
   useEffect(() => {
@@ -699,11 +891,11 @@ export default function EditProfilePage() {
             Manage Gallery
           </Link>
           <button
-            onClick={handleSave}
+            onClick={handleSaveAndContinue}
             disabled={saving || saveStatus === "saving"}
             className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
           >
-            {saving || saveStatus === "saving" ? "Saving..." : "Save Changes"}
+            {saving || saveStatus === "saving" ? "Saving..." : "Save & Continue"}
           </button>
         </div>
       </div>
@@ -1060,50 +1252,8 @@ export default function EditProfilePage() {
           )}
         </section>
 
-        {/* Voice & Video Prompts - Coming Soon */}
-        <section className="bg-white rounded-xl shadow-sm p-6 relative overflow-hidden">
-          <div className="absolute top-3 right-3 bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-1 rounded-full">
-            Coming Soon
-          </div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Voice & Video Prompts</h2>
-          <p className="text-sm text-gray-500 mb-4">
-            Add a personal touch to your profile with voice and video introductions.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-60 pointer-events-none">
-            {/* Voice Prompt Placeholder */}
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
-              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-pink-100 to-indigo-100 flex items-center justify-center">
-                <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
-              </div>
-              <h3 className="font-medium text-gray-900 mb-1">Voice Prompt</h3>
-              <p className="text-xs text-gray-500 mb-3">Record a 30-second voice intro</p>
-              <button className="px-4 py-2 bg-gray-100 text-gray-500 rounded-lg text-sm cursor-not-allowed">
-                Record Voice
-              </button>
-            </div>
-            
-            {/* Video Intro Placeholder */}
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
-              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-pink-100 to-indigo-100 flex items-center justify-center">
-                <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="font-medium text-gray-900 mb-1">Video Introduction</h3>
-              <p className="text-xs text-gray-500 mb-3">Upload a 30-60 second video</p>
-              <button className="px-4 py-2 bg-gray-100 text-gray-500 rounded-lg text-sm cursor-not-allowed">
-                Upload Video
-              </button>
-            </div>
-          </div>
-          <p className="text-xs text-gray-400 mt-4 text-center">
-            Voice and video prompts help you stand out and make better connections.
-            {/* TODO: Implement voice recording with Web Audio API */}
-            {/* TODO: Implement video upload with duration validation (max 60 seconds) */}
-          </p>
-        </section>
+        {/* Voice & Video Prompts */}
+        <VoiceVideoSection />
 
         {/* About Me */}
         <section className="bg-white rounded-xl shadow-sm p-6">
@@ -1260,11 +1410,11 @@ export default function EditProfilePage() {
         {/* Save Button (Bottom) */}
         <div className="flex justify-end">
           <button
-            onClick={handleSave}
+            onClick={handleSaveAndContinue}
             disabled={saving}
             className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50"
           >
-            {saving ? "Saving..." : "Save Changes"}
+            {saving ? "Saving..." : "Save & Continue"}
           </button>
         </div>
       </div>

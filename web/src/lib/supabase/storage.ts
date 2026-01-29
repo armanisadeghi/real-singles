@@ -40,6 +40,13 @@ export const ALLOWED_MIME_TYPES = {
     "image/webp",
     "video/mp4",
     "video/quicktime",
+    "video/webm",
+    // Audio types for voice prompts
+    "audio/webm",
+    "audio/mp4",
+    "audio/mpeg",
+    "audio/ogg",
+    "audio/wav",
   ],
   [STORAGE_BUCKETS.EVENTS]: [
     "image/png",
@@ -48,6 +55,22 @@ export const ALLOWED_MIME_TYPES = {
     "image/webp",
   ],
 } as const;
+
+// Specific MIME types for voice prompts (subset of gallery)
+export const VOICE_PROMPT_MIME_TYPES = [
+  "audio/webm",
+  "audio/mp4",
+  "audio/mpeg",
+  "audio/ogg",
+  "audio/wav",
+] as const;
+
+// Specific MIME types for video intros (subset of gallery)
+export const VIDEO_INTRO_MIME_TYPES = [
+  "video/mp4",
+  "video/quicktime",
+  "video/webm",
+] as const;
 
 /**
  * Get the public URL for a file in a public bucket
@@ -104,6 +127,24 @@ export function getGalleryPath(userId: string, filename: string): string {
  */
 export function getEventImagePath(eventId: string, filename: string): string {
   return `${eventId}/${filename}`;
+}
+
+/**
+ * Generate the storage path for a voice prompt
+ * Format: voice/{userId}/{timestamp}.{ext}
+ */
+export function getVoicePromptPath(userId: string, fileExtension: string): string {
+  const timestamp = Date.now();
+  return `voice/${userId}/${timestamp}.${fileExtension}`;
+}
+
+/**
+ * Generate the storage path for a video intro
+ * Format: video_intro/{userId}/{timestamp}.{ext}
+ */
+export function getVideoIntroPath(userId: string, fileExtension: string): string {
+  const timestamp = Date.now();
+  return `video_intro/${userId}/${timestamp}.${fileExtension}`;
 }
 
 /**

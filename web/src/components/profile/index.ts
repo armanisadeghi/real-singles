@@ -2,3 +2,8 @@ export { UserActions } from "./UserActions";
 export { PhotoUpload } from "./PhotoUpload";
 export { PhotoCropper } from "./PhotoCropper";
 export { GalleryManager, type GalleryItem } from "./GalleryManager";
+export { VoiceRecorder } from "./VoiceRecorder";
+export { VideoRecorder } from "./VideoRecorder";
+export { AudioWaveform } from "./AudioWaveform";
+export { MediaRecordingControls, type RecordingState } from "./MediaRecordingControls";
+export { VoiceVideoDisplay } from "./VoiceVideoDisplay";

@@ -104,3 +104,37 @@ export async function resolveProfileImageUrls<T extends { profile_image_url?: st
     }))
   );
 }
+
+/**
+ * Resolve a voice prompt URL.
+ * Voice prompts are stored in the gallery bucket under voice/{userId}/ prefix.
+ */
+export async function resolveVoicePromptUrl(
+  supabase: SupabaseClient,
+  path: string | null | undefined,
+  options?: { expiresIn?: number }
+): Promise<string> {
+  if (!path) return "";
+  // Voice prompts are stored in gallery bucket (private), need signed URL
+  return resolveStorageUrl(supabase, path, { 
+    ...options, 
+    bucket: "gallery" 
+  });
+}
+
+/**
+ * Resolve a video intro URL.
+ * Video intros are stored in the gallery bucket under video_intro/{userId}/ prefix.
+ */
+export async function resolveVideoIntroUrl(
+  supabase: SupabaseClient,
+  path: string | null | undefined,
+  options?: { expiresIn?: number }
+): Promise<string> {
+  if (!path) return "";
+  // Video intros are stored in gallery bucket (private), need signed URL
+  return resolveStorageUrl(supabase, path, { 
+    ...options, 
+    bucket: "gallery" 
+  });
+}
