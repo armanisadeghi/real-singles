@@ -1,17 +1,11 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
-import type { DbProfile } from "@/types/db";
-
-// Type for profile with JOIN data
-interface ProfileWithUser extends DbProfile {
-  users: {
-    id: string;
-    display_name: string | null;
-    status: string | null;
-    email: string;
-  } | null;
-}
+import {
+  getDiscoverableCandidates,
+  type DiscoverableProfile,
+  type UserProfileContext,
+} from "@/lib/services/discovery";
 
 // Type for formatted profile with distance
 interface FormattedProfileWithDistance {
@@ -39,12 +33,19 @@ interface FormattedProfileWithDistance {
   RATINGS: number;
   TotalRating: number;
   distance_in_km: number;
+  has_liked_me?: boolean;
 }
 
 /**
  * GET /api/discover/nearby
  * POST /api/discover/nearby
  * Get profiles near the user's location
+ * 
+ * Uses the shared discovery service for consistent filtering:
+ * - Bidirectional gender match
+ * - Profile eligibility
+ * - Proper exclusions (blocked, passed, mutual matches)
+ * 
  * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function GET(request: Request) {
@@ -73,7 +74,7 @@ async function handleNearbyRequest(request: Request) {
   // Get location from request body (POST) or query params (GET)
   let userLat: number | null = null;
   let userLon: number | null = null;
-  let maxDistance = 100; // Default 100 km
+  let maxDistanceMiles = 62; // Default ~100 km in miles
 
   if (request.method === "POST") {
     try {
@@ -81,7 +82,8 @@ async function handleNearbyRequest(request: Request) {
       userLat = formData.get("Latitude") ? parseFloat(formData.get("Latitude") as string) : null;
       userLon = formData.get("Longitude") ? parseFloat(formData.get("Longitude") as string) : null;
       if (formData.get("max_distance")) {
-        maxDistance = parseFloat(formData.get("max_distance") as string);
+        // Assume max_distance is in km, convert to miles
+        maxDistanceMiles = parseFloat(formData.get("max_distance") as string) / 1.60934;
       }
     } catch {
       // If formData fails, try JSON
@@ -89,7 +91,9 @@ async function handleNearbyRequest(request: Request) {
         const body = await request.json();
         userLat = body.Latitude ? parseFloat(body.Latitude) : null;
         userLon = body.Longitude ? parseFloat(body.Longitude) : null;
-        if (body.max_distance) maxDistance = parseFloat(body.max_distance);
+        if (body.max_distance) {
+          maxDistanceMiles = parseFloat(body.max_distance) / 1.60934;
+        }
       } catch {
         // No body provided
       }
@@ -99,16 +103,23 @@ async function handleNearbyRequest(request: Request) {
     userLat = searchParams.get("Latitude") ? parseFloat(searchParams.get("Latitude")!) : null;
     userLon = searchParams.get("Longitude") ? parseFloat(searchParams.get("Longitude")!) : null;
     if (searchParams.get("max_distance")) {
-      maxDistance = parseFloat(searchParams.get("max_distance")!);
+      maxDistanceMiles = parseFloat(searchParams.get("max_distance")!) / 1.60934;
     }
   }
 
-  // Get current user's profile for location AND looking_for preference
+  // Get current user's profile for location and looking_for preference
   const { data: currentUserProfile } = await supabase
     .from("profiles")
-    .select("latitude, longitude, looking_for")
+    .select("gender, looking_for, latitude, longitude")
     .eq("user_id", user.id)
     .single();
+
+  if (!currentUserProfile) {
+    return NextResponse.json(
+      { success: false, msg: "Profile not found" },
+      { status: 404 }
+    );
+  }
 
   // If no location provided in request, use user's profile location
   if (!userLat || !userLon) {
@@ -126,117 +137,69 @@ async function handleNearbyRequest(request: Request) {
     });
   }
 
-  // Get blocked users
-  const { data: blockedUsers } = await supabase
-    .from("blocks")
-    .select("blocker_id, blocked_id")
-    .or(`blocker_id.eq.${user.id},blocked_id.eq.${user.id}`);
+  // Build user profile context with location (possibly from request)
+  const userProfile: UserProfileContext = {
+    userId: user.id,
+    gender: currentUserProfile.gender,
+    lookingFor: currentUserProfile.looking_for,
+    latitude: userLat,
+    longitude: userLon,
+  };
 
-  const blockedIds = new Set<string>();
-  blockedUsers?.forEach((block) => {
-    if (block.blocker_id === user.id && block.blocked_id) {
-      blockedIds.add(block.blocked_id);
-    } else if (block.blocker_id) {
-      blockedIds.add(block.blocker_id);
-    }
+  // Get discoverable candidates using the SSOT service
+  const result = await getDiscoverableCandidates(supabase, {
+    userProfile,
+    filters: {
+      maxDistanceMiles,
+    },
+    pagination: { limit: 100, offset: 0 },
+    sortBy: "distance",
   });
-  blockedIds.add(user.id);
 
-  // Get user's favorites
-  const { data: favorites } = await supabase
-    .from("favorites")
-    .select("favorite_user_id")
-    .eq("user_id", user.id);
+  // Format profiles for mobile API response
+  const formatProfile = async (profile: DiscoverableProfile): Promise<FormattedProfileWithDistance | null> => {
+    // Only include profiles with valid distance
+    if (profile.distance_km === undefined) {
+      return null;
+    }
 
-  const favoriteIds = new Set(favorites?.map((f) => f.favorite_user_id).filter((id): id is string => id !== null) || []);
+    const imageUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
+    return {
+      ID: profile.user_id,
+      id: profile.user_id,
+      DisplayName: profile.user?.display_name || profile.first_name || "",
+      FirstName: profile.first_name || "",
+      LastName: profile.last_name || "",
+      Email: profile.user?.email || "",
+      DOB: profile.date_of_birth || "",
+      Gender: profile.gender || "",
+      Image: imageUrl,
+      livePicture: imageUrl,
+      About: profile.bio || "",
+      City: profile.city || "",
+      State: profile.state || "",
+      Height: profile.height_inches?.toString() || "",
+      BodyType: profile.body_type || "",
+      Ethnicity: profile.ethnicity || [],
+      Religion: profile.religion || "",
+      HSign: profile.zodiac_sign || "",
+      Interest: profile.interests?.join(", ") || "",
+      is_verified: profile.is_verified || false,
+      IsFavorite: profile.is_favorite ? 1 : 0,
+      RATINGS: 0,
+      TotalRating: 0,
+      distance_in_km: profile.distance_km,
+      has_liked_me: profile.has_liked_me,
+    };
+  };
 
-  // Get profiles with location
-  // Note: Removed strict status="active" filter to include new users (null status)
-  // Exclude hidden profiles (paused accounts, admin/moderator accounts)
-  let query = supabase
-    .from("profiles")
-    .select(`
-      *,
-      users!inner(id, display_name, status, email)
-    `)
-    .eq("profile_hidden", false)
-    .not("latitude", "is", null)
-    .not("longitude", "is", null);
-
-  if (blockedIds.size > 0) {
-    query = query.not("user_id", "in", `(${Array.from(blockedIds).join(",")})`);
-  }
-
-  // ALWAYS apply user's "looking_for" preference from their profile
-  // This is the core gender preference that determines who the user wants to see
-  if (currentUserProfile?.looking_for && currentUserProfile.looking_for.length > 0) {
-    query = query.in("gender", currentUserProfile.looking_for);
-  }
-
-  const { data: profiles, error } = await query.limit(100);
-
-  if (error) {
-    console.error("Error fetching nearby profiles:", error);
-    return NextResponse.json(
-      { success: false, msg: "Error fetching profiles" },
-      { status: 500 }
-    );
-  }
-
-  // Calculate distances and filter
-  const typedProfiles = (profiles || []) as ProfileWithUser[];
-  const profilesWithDistance: FormattedProfileWithDistance[] = await Promise.all(
-    typedProfiles.map(async (profile) => {
-      const R = 6371; // Earth's radius in km
-      const dLat = ((profile.latitude! - userLat!) * Math.PI) / 180;
-      const dLon = ((profile.longitude! - userLon!) * Math.PI) / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos((userLat! * Math.PI) / 180) *
-          Math.cos((profile.latitude! * Math.PI) / 180) *
-          Math.sin(dLon / 2) *
-          Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const distance = R * c;
-      
-      const imageUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
-
-      return {
-        ID: profile.user_id,
-        id: profile.user_id,
-        DisplayName: profile.users?.display_name || profile.first_name || "",
-        FirstName: profile.first_name || "",
-        LastName: profile.last_name || "",
-        Email: profile.users?.email || "",
-        DOB: profile.date_of_birth || "",
-        Gender: profile.gender || "",
-        Image: imageUrl,
-        livePicture: imageUrl,
-        About: profile.bio || "",
-        City: profile.city || "",
-        State: profile.state || "",
-        Height: profile.height_inches?.toString() || "",
-        BodyType: profile.body_type || "",
-        Ethnicity: profile.ethnicity || [],
-        Religion: profile.religion || "",
-        HSign: profile.zodiac_sign || "",
-        Interest: profile.interests?.join(", ") || "",
-        is_verified: profile.is_verified || false,
-        IsFavorite: favoriteIds.has(profile.user_id!) ? 1 : 0,
-        RATINGS: 0,
-        TotalRating: 0,
-        distance_in_km: Math.round(distance * 10) / 10,
-      };
-    })
-  );
-  
-  const filteredProfiles = profilesWithDistance
-    .filter((p) => p.distance_in_km <= maxDistance)
-    .sort((a, b) => a.distance_in_km - b.distance_in_km);
+  const formattedProfiles = (await Promise.all(
+    result.profiles.map(formatProfile)
+  )).filter((p): p is FormattedProfileWithDistance => p !== null);
 
   return NextResponse.json({
     success: true,
-    data: filteredProfiles,
+    data: formattedProfiles,
     msg: "Nearby profiles fetched successfully",
   });
 }

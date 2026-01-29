@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, use } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Star, Gift, ShoppingBag, Sparkles, Check } from "lucide-react";
 import { PointsBalance } from "@/components/rewards/PointsBalance";
@@ -40,6 +41,7 @@ const categoryColors = {
 
 export default function ProductDetailPage({ params }: PageProps) {
   const { id } = use(params);
+  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [userPoints, setUserPoints] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -147,13 +149,13 @@ export default function ProductDetailPage({ params }: PageProps) {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Back button */}
-      <Link
-        href="/rewards"
-        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+      <button
+        onClick={() => router.back()}
+        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Rewards
-      </Link>
+        <span className="text-sm font-medium">Back</span>
+      </button>
 
       {/* Success message */}
       {redeemed && (

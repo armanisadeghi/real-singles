@@ -15,6 +15,7 @@ import {
   ChevronRight,
   BadgeCheck,
   PauseCircle,
+  ArrowLeft,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -127,6 +128,15 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span className="text-sm font-medium">Back</span>
+      </button>
+
       <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
 
       <div className="space-y-6">

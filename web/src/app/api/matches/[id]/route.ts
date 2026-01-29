@@ -4,8 +4,11 @@ import { z } from "zod";
 
 /**
  * DELETE /api/matches/[id]
- * Unmatch a user - removes match records in both directions
- * Optionally archives the conversation (doesn't delete messages)
+ * Unmatch a user - soft-deletes match records and archives conversation
+ * Preserves history to prevent rediscovery
+ * 
+ * Query params (optional):
+ * - reason: string (e.g., "not_interested", "inappropriate", etc.)
  */
 export async function DELETE(
   request: NextRequest,
@@ -39,87 +42,52 @@ export async function DELETE(
       );
     }
 
-    // Prevent self-unmatching
-    if (targetUserId === user.id) {
-      return NextResponse.json(
-        { success: false, error: "Cannot unmatch yourself" },
-        { status: 400 }
-      );
-    }
+    // Get optional unmatch reason from query params
+    const { searchParams } = new URL(request.url);
+    const reason = searchParams.get("reason") ?? undefined;
 
-    // Check if there's an existing match
-    const { data: existingMatch, error: matchCheckError } = await supabase
-      .from("matches")
-      .select("id")
-      .or(
-        `and(user_id.eq.${user.id},target_user_id.eq.${targetUserId}),and(user_id.eq.${targetUserId},target_user_id.eq.${user.id})`
-      )
-      .limit(1)
-      .single();
+    // Use database function to soft-delete match (preserves history)
+    const { data: result, error: unmatchError } = await supabase.rpc(
+      "unmatch_user",
+      {
+        p_user_id: user.id,
+        p_target_user_id: targetUserId,
+        p_reason: reason,
+      }
+    );
 
-    if (matchCheckError && matchCheckError.code !== "PGRST116") {
-      console.error("Error checking match:", matchCheckError);
+    if (unmatchError) {
+      console.error("Unmatch error:", unmatchError);
       return NextResponse.json(
-        { success: false, error: "Failed to check match status" },
+        { success: false, error: "Failed to unmatch user" },
         { status: 500 }
       );
     }
 
-    if (!existingMatch) {
+    // The RPC function returns a JSON response
+    const unmatchResult = result as {
+      success: boolean;
+      error?: string;
+      unmatched_count?: number;
+      conversation_archived?: boolean;
+      conversation_id?: string;
+    };
+
+    if (!unmatchResult.success) {
       return NextResponse.json(
-        { success: false, error: "No match exists with this user" },
-        { status: 404 }
+        { success: false, error: unmatchResult.error || "Unmatch failed" },
+        { status: 400 }
       );
-    }
-
-    // Delete match records in both directions
-    const { error: deleteError1 } = await supabase
-      .from("matches")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("target_user_id", targetUserId);
-
-    if (deleteError1) {
-      console.error("Error deleting match (direction 1):", deleteError1);
-    }
-
-    const { error: deleteError2 } = await supabase
-      .from("matches")
-      .delete()
-      .eq("user_id", targetUserId)
-      .eq("target_user_id", user.id);
-
-    if (deleteError2) {
-      console.error("Error deleting match (direction 2):", deleteError2);
-    }
-
-    // Archive the conversation if it exists (set status to 'archived' rather than deleting)
-    // First, find the conversation between these two users
-    const { data: conversation, error: convError } = await supabase
-      .from("conversations")
-      .select("id")
-      .or(
-        `and(participant1_id.eq.${user.id},participant2_id.eq.${targetUserId}),and(participant1_id.eq.${targetUserId},participant2_id.eq.${user.id})`
-      )
-      .single();
-
-    if (conversation && !convError) {
-      // Archive the conversation by updating its status
-      // Note: If the conversations table doesn't have a status column, this will fail gracefully
-      const { error: archiveError } = await supabase
-        .from("conversations")
-        .update({ status: "archived", updated_at: new Date().toISOString() })
-        .eq("id", conversation.id);
-
-      if (archiveError) {
-        // If updating status fails (column might not exist), try soft delete via metadata
-        console.log("Could not archive conversation, status column may not exist");
-      }
     }
 
     return NextResponse.json({
       success: true,
       message: "Successfully unmatched",
+      data: {
+        unmatched_count: unmatchResult.unmatched_count,
+        conversation_archived: unmatchResult.conversation_archived,
+        conversation_id: unmatchResult.conversation_id,
+      },
     });
   } catch (error) {
     console.error("Unmatch error:", error);
@@ -156,23 +124,27 @@ export async function GET(
     }
 
     // Get match status from current user to target
-    const { data: myAction, error: myActionError } = await supabase
+    const { data: myAction } = await supabase
       .from("matches")
-      .select("action, created_at")
+      .select("action, created_at, is_unmatched, unmatched_at")
       .eq("user_id", user.id)
       .eq("target_user_id", targetUserId)
       .single();
 
     // Get match status from target to current user
-    const { data: theirAction, error: theirActionError } = await supabase
+    const { data: theirAction } = await supabase
       .from("matches")
-      .select("action, created_at")
+      .select("action, created_at, is_unmatched, unmatched_at")
       .eq("user_id", targetUserId)
       .eq("target_user_id", user.id)
       .single();
 
-    // Determine if it's a mutual match
+    // Check if either side has been unmatched
+    const isUnmatched = myAction?.is_unmatched || theirAction?.is_unmatched;
+
+    // Determine if it's a mutual match (only if not unmatched)
     const isMutual =
+      !isUnmatched &&
       myAction &&
       theirAction &&
       ["like", "super_like"].includes(myAction.action) &&
@@ -200,6 +172,8 @@ export async function GET(
         their_action: theirAction?.action || null,
         their_action_at: theirAction?.created_at || null,
         is_mutual: isMutual,
+        is_unmatched: isUnmatched || false,
+        unmatched_at: myAction?.unmatched_at || theirAction?.unmatched_at || null,
         conversation_id: conversationId,
       },
     });

@@ -136,6 +136,7 @@ export type Database = {
         Row: {
           conversation_id: string | null
           id: string
+          is_archived: boolean | null
           is_muted: boolean | null
           joined_at: string | null
           last_read_at: string | null
@@ -145,6 +146,7 @@ export type Database = {
         Insert: {
           conversation_id?: string | null
           id?: string
+          is_archived?: boolean | null
           is_muted?: boolean | null
           joined_at?: string | null
           last_read_at?: string | null
@@ -154,6 +156,7 @@ export type Database = {
         Update: {
           conversation_id?: string | null
           id?: string
+          is_archived?: boolean | null
           is_muted?: boolean | null
           joined_at?: string | null
           last_read_at?: string | null
@@ -459,27 +462,46 @@ export type Database = {
           action: string
           created_at: string | null
           id: string
+          is_unmatched: boolean | null
           target_user_id: string | null
+          unmatch_reason: string | null
+          unmatched_at: string | null
+          unmatched_by: string | null
           user_id: string | null
         }
         Insert: {
           action: string
           created_at?: string | null
           id?: string
+          is_unmatched?: boolean | null
           target_user_id?: string | null
+          unmatch_reason?: string | null
+          unmatched_at?: string | null
+          unmatched_by?: string | null
           user_id?: string | null
         }
         Update: {
           action?: string
           created_at?: string | null
           id?: string
+          is_unmatched?: boolean | null
           target_user_id?: string | null
+          unmatch_reason?: string | null
+          unmatched_at?: string | null
+          unmatched_by?: string | null
           user_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "matches_target_user_id_fkey"
             columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_unmatched_by_fkey"
+            columns: ["unmatched_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -2000,6 +2022,10 @@ export type Database = {
         Returns: number
       }
       gettransactionid: { Args: never; Returns: unknown }
+      has_unmatch_history: {
+        Args: { p_target_user_id: string; p_user_id: string }
+        Returns: boolean
+      }
       longtransactionsenabled: { Args: never; Returns: boolean }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
@@ -2623,6 +2649,10 @@ export type Database = {
         Returns: unknown
       }
       unlockrows: { Args: { "": string }; Returns: number }
+      unmatch_user: {
+        Args: { p_reason?: string; p_target_user_id: string; p_user_id: string }
+        Returns: Json
+      }
       updategeometrysrid: {
         Args: {
           catalogn_name: string

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Gift, Copy, Share2, Users, Trophy, CheckCircle } from "lucide-react";
+import { Gift, Copy, Share2, Users, Trophy, CheckCircle, ArrowLeft } from "lucide-react";
 import { getReferralLink, APP_NAME } from "@/lib/config";
+import { useRouter } from "next/navigation";
 
 interface ReferralStats {
   total_referrals: number;
@@ -26,6 +27,7 @@ interface ReferralData {
 }
 
 export default function ReferPage() {
+  const router = useRouter();
   const [data, setData] = useState<ReferralData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,6 +124,15 @@ export default function ReferPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
+      {/* Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span className="text-sm font-medium">Back</span>
+      </button>
+
       {/* Header */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full mb-4">

@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import {
+  getDiscoverableCandidates,
+  getUserProfileContext,
+  userFiltersToDiscoveryFilters,
+} from "@/lib/services/discovery";
 
 /**
  * GET /api/discover/profiles
  * Get profiles for the discovery grid (browse/like/pass flow)
  * 
  * This is the SSOT endpoint for browsing profiles.
- * Excludes: current user, blocked users, already acted-on users, paused profiles
+ * Uses the shared discovery service to ensure consistent filtering:
+ * - Bidirectional gender match
+ * - Profile eligibility (can_start_matching, not hidden, not suspended)
+ * - Excludes: current user, blocked users, already acted-on users, paused profiles
+ * - Excludes users who have passed/blocked the current user
+ * - Excludes mutual matches (already matched)
  * 
  * Query params:
  * - limit: number of profiles to return (default 40, max 100)
@@ -33,103 +43,96 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get("limit") || "40"), 100);
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    // Get current user's profile to check if paused
-    const { data: currentUserProfile } = await supabase
+    // Get current user's profile context (gender, looking_for, location)
+    const userProfile = await getUserProfileContext(supabase, user.id);
+
+    if (!userProfile) {
+      return NextResponse.json(
+        { error: "Profile not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if user's profile is paused
+    const { data: profileData } = await supabase
       .from("profiles")
       .select("profile_hidden")
       .eq("user_id", user.id)
       .single();
 
-    const isProfilePaused = currentUserProfile?.profile_hidden || false;
+    const isProfilePaused = profileData?.profile_hidden || false;
 
-    // Get blocked user IDs to exclude
-    const { data: blockedUsers } = await supabase
-      .from("blocks")
-      .select("blocked_id")
-      .eq("blocker_id", user.id);
+    // Get user's saved filters
+    const { data: userFilters } = await supabase
+      .from("user_filters")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
 
-    const blockedIds = blockedUsers?.map(b => b.blocked_id).filter((id): id is string => id !== null) || [];
+    // Convert to discovery filters
+    const filters = userFiltersToDiscoveryFilters(userFilters);
 
-    // Get profiles already liked/passed to exclude
-    const { data: matchedUsers } = await supabase
-      .from("matches")
-      .select("target_user_id")
-      .eq("user_id", user.id);
+    // Get discoverable candidates using the SSOT service
+    const result = await getDiscoverableCandidates(supabase, {
+      userProfile,
+      filters,
+      pagination: { limit, offset },
+    });
 
-    const matchedIds = matchedUsers?.map(m => m.target_user_id).filter((id): id is string => id !== null) || [];
-
-    // Build exclude list
-    const excludeIds = [user.id, ...blockedIds, ...matchedIds];
-
-    // Get profiles excluding current user, blocked users, and already matched
-    // Also exclude hidden/paused profiles
-    const { data: profiles, error: profilesError, count } = await supabase
-      .from("profiles")
-      .select(`
-        id,
-        user_id,
-        first_name,
-        last_name,
-        date_of_birth,
-        city,
-        state,
-        occupation,
-        bio,
-        profile_image_url,
-        is_verified,
-        height_inches,
-        body_type,
-        zodiac_sign,
-        interests,
-        education,
-        religion,
-        ethnicity,
-        languages,
-        has_kids,
-        wants_kids,
-        pets,
-        smoking,
-        drinking,
-        marijuana,
-        ideal_first_date,
-        non_negotiables,
-        way_to_heart,
-        craziest_travel_story,
-        worst_job,
-        dream_job,
-        after_work,
-        weirdest_gift,
-        pet_peeves,
-        nightclub_or_home,
-        past_event,
-        user:user_id(display_name, status)
-      `, { count: "exact" })
-      .not("user_id", "in", `(${excludeIds.join(",")})`)
-      .or("profile_hidden.is.null,profile_hidden.eq.false")
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (profilesError) {
-      console.error("Profiles query error:", profilesError);
-      return NextResponse.json(
-        { error: "Failed to fetch profiles" },
-        { status: 500 }
-      );
-    }
-
-    // Transform user array to single object and resolve storage URLs
+    // Resolve storage URLs for profile images
     const transformedProfiles = await Promise.all(
-      (profiles || []).map(async (p) => ({
-        ...p,
-        user: Array.isArray(p.user) ? p.user[0] ?? null : p.user,
+      result.profiles.map(async (p) => ({
+        id: p.id,
+        user_id: p.user_id,
+        first_name: p.first_name,
+        last_name: p.last_name,
+        date_of_birth: p.date_of_birth,
+        city: p.city,
+        state: p.state,
+        occupation: p.occupation,
+        bio: p.bio,
         profile_image_url: await resolveStorageUrl(supabase, p.profile_image_url),
+        is_verified: p.is_verified,
+        height_inches: p.height_inches,
+        body_type: p.body_type,
+        zodiac_sign: p.zodiac_sign,
+        interests: p.interests,
+        education: p.education,
+        religion: p.religion,
+        ethnicity: p.ethnicity,
+        languages: p.languages,
+        has_kids: p.has_kids,
+        wants_kids: p.wants_kids,
+        pets: p.pets,
+        smoking: p.smoking,
+        drinking: p.drinking,
+        marijuana: p.marijuana,
+        ideal_first_date: p.ideal_first_date,
+        non_negotiables: p.non_negotiables,
+        way_to_heart: p.way_to_heart,
+        craziest_travel_story: p.craziest_travel_story,
+        worst_job: p.worst_job,
+        dream_job: p.dream_job,
+        after_work: p.after_work,
+        weirdest_gift: p.weirdest_gift,
+        pet_peeves: p.pet_peeves,
+        nightclub_or_home: p.nightclub_or_home,
+        past_event: p.past_event,
+        user: p.user ? {
+          display_name: p.user.display_name,
+          status: p.user.status,
+        } : null,
+        // Additional fields from discovery service
+        distance_km: p.distance_km,
+        is_favorite: p.is_favorite,
+        has_liked_me: p.has_liked_me,
       }))
     );
 
     return NextResponse.json({
       profiles: transformedProfiles,
       isProfilePaused,
-      total: count || transformedProfiles.length,
+      total: result.total,
       limit,
       offset,
     });

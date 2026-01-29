@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, use } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -64,6 +65,7 @@ function formatTime(timeStr: string) {
 
 export default function SpeedDatingDetailPage({ params }: PageProps) {
   const { id } = use(params);
+  const router = useRouter();
   const toast = useToast();
   const [session, setSession] = useState<SpeedDatingSession | null>(null);
   const [registrationCount, setRegistrationCount] = useState(0);
@@ -180,13 +182,13 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Back button */}
-      <Link
-        href="/speed-dating"
-        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+      <button
+        onClick={() => router.back()}
+        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Speed Dating
-      </Link>
+        <span className="text-sm font-medium">Back</span>
+      </button>
 
       {/* Image */}
       <div className="aspect-video rounded-xl overflow-hidden mb-6">

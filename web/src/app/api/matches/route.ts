@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import { getMutualMatches } from "@/lib/services/discovery";
 import { z } from "zod";
 
 // Validation schema for match action
@@ -229,6 +230,8 @@ export async function POST(request: NextRequest) {
  * GET /api/matches
  * Get all mutual matches for the current user
  * 
+ * Uses the shared discovery service getMutualMatches() for consistent logic.
+ * 
  * Query params:
  * - limit: number of results (default 20, max 50)
  * - offset: pagination offset
@@ -256,14 +259,10 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 50);
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    // Get all users that the current user has liked
-    const { data: myLikes } = await supabase
-      .from("matches")
-      .select("target_user_id")
-      .eq("user_id", user.id)
-      .in("action", ["like", "super_like"]);
+    // Use the SSOT getMutualMatches function
+    const allMatches = await getMutualMatches(supabase, user.id);
 
-    if (!myLikes || myLikes.length === 0) {
+    if (allMatches.length === 0) {
       return NextResponse.json({
         matches: [],
         total: 0,
@@ -272,78 +271,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const likedUserIds = myLikes
-      .map((m) => m.target_user_id)
-      .filter((id): id is string => id !== null);
+    // Apply pagination
+    const paginatedMatches = allMatches.slice(offset, offset + limit);
 
-    // Find mutual matches (users who also liked us back)
-    const { data: mutualMatches, error: matchError } = await supabase
-      .from("matches")
-      .select("user_id, created_at")
-      .in("user_id", likedUserIds)
-      .eq("target_user_id", user.id)
-      .in("action", ["like", "super_like"])
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (matchError) {
-      console.error("Match query error:", matchError);
-      return NextResponse.json(
-        { error: "Failed to fetch matches" },
-        { status: 500 }
-      );
-    }
-
-    if (!mutualMatches || mutualMatches.length === 0) {
-      return NextResponse.json({
-        matches: [],
-        total: 0,
-        limit,
-        offset,
-      });
-    }
-
-    const matchedUserIds = mutualMatches
-      .map((m) => m.user_id)
-      .filter((id): id is string => id !== null);
-
-    // Get profiles for matched users (exclude hidden profiles)
-    const { data: profiles, error: profileError } = await supabase
-      .from("profiles")
-      .select(
-        `
-        user_id,
-        first_name,
-        last_name,
-        date_of_birth,
-        gender,
-        city,
-        state,
-        occupation,
-        bio,
-        is_verified,
-        profile_image_url,
-        profile_hidden
-      `
-      )
-      .in("user_id", matchedUserIds)
-      .eq("profile_hidden", false);
-
-    if (profileError) {
-      console.error("Profile query error:", profileError);
-      return NextResponse.json(
-        { error: "Failed to fetch profiles" },
-        { status: 500 }
-      );
-    }
-
-    // Get user data (last active, etc.)
-    const { data: users } = await supabase
-      .from("users")
-      .select("id, display_name, last_active_at")
-      .in("id", matchedUserIds);
-
-    // Get gallery photos for each user
+    // Get gallery photos for matched users
+    const matchedUserIds = paginatedMatches.map(m => m.userId);
+    
     const { data: galleries } = await supabase
       .from("user_gallery")
       .select("user_id, media_url, is_primary")
@@ -352,38 +285,18 @@ export async function GET(request: NextRequest) {
       .order("is_primary", { ascending: false })
       .order("display_order", { ascending: true });
 
-    // Get existing conversations with matched users
-    const { data: conversations } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id, user_id")
-      .eq("user_id", user.id);
+    // Get last_active_at for each user
+    const { data: users } = await supabase
+      .from("users")
+      .select("id, last_active_at")
+      .in("id", matchedUserIds);
 
-    let conversationMap: Record<string, string> = {};
-    if (conversations && conversations.length > 0) {
-      const convoIds = conversations.map((c) => c.conversation_id);
-      const { data: otherParticipants } = await supabase
-        .from("conversation_participants")
-        .select("conversation_id, user_id")
-        .in("conversation_id", convoIds)
-        .in("user_id", matchedUserIds);
-
-      if (otherParticipants) {
-        otherParticipants.forEach((p) => {
-          if (p.user_id && p.conversation_id) {
-            conversationMap[p.user_id] = p.conversation_id;
-          }
-        });
-      }
-    }
-
-    // Combine data (with async image URL conversion)
+    // Format matches with profile data and resolve URLs
     const matchesWithProfiles = await Promise.all(
-      matchedUserIds.map(async (matchedUserId) => {
-        const profile = profiles?.find((p) => p.user_id === matchedUserId);
-        const userData = users?.find((u) => u.id === matchedUserId);
-        const userGallery = galleries?.filter((g) => g.user_id === matchedUserId) || [];
-        const matchRecord = mutualMatches.find((m) => m.user_id === matchedUserId);
-        const conversationId = conversationMap[matchedUserId];
+      paginatedMatches.map(async (match) => {
+        const profile = match.profile;
+        const userGallery = galleries?.filter((g) => g.user_id === match.userId) || [];
+        const userData = users?.find((u) => u.id === match.userId);
 
         // Calculate age from date of birth
         let age: number | null = null;
@@ -398,7 +311,10 @@ export async function GET(request: NextRequest) {
         }
 
         // Convert profile image URL
-        const profileImageUrl = await resolveStorageUrl(supabase, profile?.profile_image_url);
+        const profileImageUrl = await resolveStorageUrl(
+          supabase, 
+          match.primaryPhoto || profile?.profile_image_url
+        );
         
         // Convert gallery URLs
         const galleryWithUrls = await Promise.all(
@@ -409,8 +325,8 @@ export async function GET(request: NextRequest) {
         );
 
         return {
-          user_id: matchedUserId,
-          display_name: userData?.display_name,
+          user_id: match.userId,
+          display_name: match.user?.display_name,
           first_name: profile?.first_name,
           last_name: profile?.last_name,
           age,
@@ -423,23 +339,15 @@ export async function GET(request: NextRequest) {
           profile_image_url: profileImageUrl,
           gallery: galleryWithUrls,
           last_active_at: userData?.last_active_at,
-          matched_at: matchRecord?.created_at,
-          conversation_id: conversationId || null,
+          matched_at: match.matchedAt,
+          conversation_id: match.conversationId || null,
         };
       })
     );
 
-    // Get total count for pagination
-    const { count } = await supabase
-      .from("matches")
-      .select("*", { count: "exact", head: true })
-      .in("user_id", likedUserIds)
-      .eq("target_user_id", user.id)
-      .in("action", ["like", "super_like"]);
-
     return NextResponse.json({
       matches: matchesWithProfiles,
-      total: count || matchesWithProfiles.length,
+      total: allMatches.length,
       limit,
       offset,
     });

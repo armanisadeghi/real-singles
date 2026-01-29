@@ -1,17 +1,12 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
-import type { DbProfile } from "@/types/db";
-
-// Type for profile with JOIN data
-interface ProfileWithUser extends DbProfile {
-  users: {
-    id: string;
-    display_name: string | null;
-    status: string | null;
-    email: string;
-  } | null;
-}
+import {
+  getDiscoverableCandidates,
+  getUserProfileContext,
+  type DiscoveryFilters,
+  type DiscoverableProfile,
+} from "@/lib/services/discovery";
 
 // Type for formatted profile with distance
 interface FormattedProfile {
@@ -39,11 +34,18 @@ interface FormattedProfile {
   RATINGS: number;
   TotalRating: number;
   distance_in_km?: number;
+  has_liked_me?: boolean;
 }
 
 /**
  * GET /api/discover/top-matches
- * Get all top matches with optional filter parameters
+ * Get top matches with optional filter parameters
+ * 
+ * Uses the shared discovery service for consistent filtering:
+ * - Bidirectional gender match
+ * - Profile eligibility
+ * - Proper exclusions (blocked, passed, mutual matches)
+ * 
  * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function GET(request: Request) {
@@ -62,9 +64,18 @@ export async function GET(request: Request) {
     );
   }
 
-  // Get filter parameters from query string
-  const filters = {
-    Gender: searchParams.get("Gender"),
+  // Get user profile context
+  const userProfile = await getUserProfileContext(supabase, user.id);
+
+  if (!userProfile) {
+    return NextResponse.json(
+      { success: false, msg: "Profile not found" },
+      { status: 404 }
+    );
+  }
+
+  // Parse filter parameters from query string
+  const queryFilters = {
     min_age: searchParams.get("min_age"),
     max_age: searchParams.get("max_age"),
     min_height: searchParams.get("min_height"),
@@ -79,220 +90,110 @@ export async function GET(request: Request) {
     Hsign: searchParams.get("Hsign"),
     Marijuana: searchParams.get("Marijuana"),
     Smoke: searchParams.get("Smoke"),
-    marital_status: searchParams.get("marital_status"),
-    looking_for: searchParams.get("looking_for"),
-    PoliticalView: searchParams.get("PoliticalView"),
-    min_distance: searchParams.get("min_distance"),
     max_distance: searchParams.get("max_distance"),
   };
 
-  // Get current user's profile for location and looking_for preference
-  const { data: currentUserProfile } = await supabase
-    .from("profiles")
-    .select("latitude, longitude, looking_for")
-    .eq("user_id", user.id)
-    .single();
+  // Convert query params to DiscoveryFilters format
+  const filters: DiscoveryFilters = {};
 
-  // Get blocked users
-  const { data: blockedUsers } = await supabase
-    .from("blocks")
-    .select("blocker_id, blocked_id")
-    .or(`blocker_id.eq.${user.id},blocked_id.eq.${user.id}`);
-
-  const blockedIds = new Set<string>();
-  blockedUsers?.forEach((block) => {
-    if (block.blocker_id === user.id && block.blocked_id) {
-      blockedIds.add(block.blocked_id);
-    } else if (block.blocker_id) {
-      blockedIds.add(block.blocker_id);
-    }
-  });
-  blockedIds.add(user.id);
-
-  // Get user's favorites
-  const { data: favorites } = await supabase
-    .from("favorites")
-    .select("favorite_user_id")
-    .eq("user_id", user.id);
-
-  const favoriteIds = new Set(favorites?.map((f) => f.favorite_user_id).filter((id): id is string => id !== null) || []);
-
-  // Build query with filters
-  // Note: Removed strict status="active" filter to include new users (null status)
-  // Exclude hidden profiles (paused accounts, admin/moderator accounts)
-  let query = supabase
-    .from("profiles")
-    .select(`
-      *,
-      users!inner(id, display_name, status, email)
-    `)
-    .eq("profile_hidden", false);
-
-  // Exclude blocked users (only if there are blocked users)
-  if (blockedIds.size > 0) {
-    query = query.not("user_id", "in", `(${Array.from(blockedIds).join(",")})`);
+  if (queryFilters.min_age) {
+    filters.minAge = parseInt(queryFilters.min_age);
   }
-
-  // ALWAYS apply user's "looking_for" preference from their profile
-  // This is the core gender preference that determines who the user wants to see
-  // It takes precedence over any filter parameters
-  if (currentUserProfile?.looking_for && currentUserProfile.looking_for.length > 0) {
-    query = query.in("gender", currentUserProfile.looking_for);
+  if (queryFilters.max_age) {
+    filters.maxAge = parseInt(queryFilters.max_age);
   }
-  // Note: The Gender filter parameter is intentionally ignored
-  // Gender preference comes ONLY from the user's profile looking_for field
-
-  if (filters.min_age || filters.max_age) {
-    const today = new Date();
-    if (filters.max_age) {
-      const minDate = new Date(today.getFullYear() - parseInt(filters.max_age), today.getMonth(), today.getDate());
-      query = query.gte("date_of_birth", minDate.toISOString().split("T")[0]);
-    }
-    if (filters.min_age) {
-      const maxDate = new Date(today.getFullYear() - parseInt(filters.min_age), today.getMonth(), today.getDate());
-      query = query.lte("date_of_birth", maxDate.toISOString().split("T")[0]);
-    }
+  if (queryFilters.min_height) {
+    // Convert feet to inches (input is in feet)
+    filters.minHeight = Math.round(parseFloat(queryFilters.min_height) * 12);
   }
-
-  if (filters.min_height) {
-    // Convert feet to inches (assuming input is in feet)
-    const minHeightInches = Math.round(parseFloat(filters.min_height) * 12);
-    query = query.gte("height_inches", minHeightInches);
+  if (queryFilters.max_height) {
+    filters.maxHeight = Math.round(parseFloat(queryFilters.max_height) * 12);
   }
-
-  if (filters.max_height) {
-    const maxHeightInches = Math.round(parseFloat(filters.max_height) * 12);
-    query = query.lte("height_inches", maxHeightInches);
+  if (queryFilters.max_distance) {
+    filters.maxDistanceMiles = parseFloat(queryFilters.max_distance);
   }
-
-  if (filters.BodyType) {
-    query = query.eq("body_type", filters.BodyType.toLowerCase());
+  if (queryFilters.BodyType) {
+    filters.bodyTypes = [queryFilters.BodyType.toLowerCase()];
   }
-
-  if (filters.Ethnicity) {
-    query = query.contains("ethnicity", [filters.Ethnicity]);
+  if (queryFilters.Ethnicity) {
+    filters.ethnicities = [queryFilters.Ethnicity];
   }
-
-  if (filters.Religion) {
-    query = query.eq("religion", filters.Religion);
+  if (queryFilters.Religion) {
+    filters.religions = [queryFilters.Religion];
   }
-
-  if (filters.Education) {
-    query = query.eq("education", filters.Education);
+  if (queryFilters.Education) {
+    filters.educationLevels = [queryFilters.Education];
   }
-
-  if (filters.Drinks) {
-    query = query.eq("drinking", filters.Drinks.toLowerCase());
-  }
-
-  if (filters.Smoke) {
-    query = query.eq("smoking", filters.Smoke.toLowerCase());
-  }
-
-  if (filters.Marijuana) {
-    query = query.eq("marijuana", filters.Marijuana.toLowerCase());
-  }
-
-  if (filters.HaveChild && filters.HaveChild !== "any") {
-    const hasKidsValue = filters.HaveChild === "Yes" || filters.HaveChild === "true" ? "Yes" : "No";
-    query = query.eq("has_kids", hasKidsValue);
-  }
-
-  if (filters.WantChild && filters.WantChild !== "any") {
-    query = query.eq("wants_kids", filters.WantChild);
-  }
-
-  if (filters.Hsign) {
-    const zodiacSigns = filters.Hsign.split(",").filter(Boolean);
+  if (queryFilters.Hsign) {
+    const zodiacSigns = queryFilters.Hsign.split(",").filter(Boolean);
     if (zodiacSigns.length > 0) {
-      query = query.in("zodiac_sign", zodiacSigns);
+      filters.zodiacSigns = zodiacSigns;
     }
   }
-
-  if (filters.PoliticalView) {
-    query = query.eq("political_views", filters.PoliticalView);
+  if (queryFilters.Smoke) {
+    filters.smoking = queryFilters.Smoke.toLowerCase();
+  }
+  if (queryFilters.Drinks) {
+    filters.drinking = queryFilters.Drinks.toLowerCase();
+  }
+  if (queryFilters.Marijuana) {
+    filters.marijuana = queryFilters.Marijuana.toLowerCase();
+  }
+  if (queryFilters.HaveChild && queryFilters.HaveChild !== "any") {
+    const hasKidsValue = queryFilters.HaveChild === "Yes" || queryFilters.HaveChild === "true" ? "Yes" : "No";
+    filters.hasKids = hasKidsValue;
+  }
+  if (queryFilters.WantChild && queryFilters.WantChild !== "any") {
+    filters.wantsKids = queryFilters.WantChild;
   }
 
-  // Execute query
-  const { data: profiles, error } = await query
-    .order("updated_at", { ascending: false })
-    .limit(50);
+  // Get discoverable candidates using the SSOT service
+  const result = await getDiscoverableCandidates(supabase, {
+    userProfile,
+    filters,
+    pagination: { limit: 50, offset: 0 },
+    sortBy: "recent",
+  });
 
-  if (error) {
-    console.error("Error fetching profiles:", error);
-    return NextResponse.json(
-      { success: false, msg: "Error fetching profiles" },
-      { status: 500 }
-    );
-  }
+  // Format profiles for mobile API response
+  const formatProfile = async (profile: DiscoverableProfile): Promise<FormattedProfile> => {
+    const imageUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
+    return {
+      ID: profile.user_id,
+      id: profile.user_id,
+      DisplayName: profile.user?.display_name || profile.first_name || "",
+      FirstName: profile.first_name || "",
+      LastName: profile.last_name || "",
+      Email: profile.user?.email || "",
+      DOB: profile.date_of_birth || "",
+      Gender: profile.gender || "",
+      Image: imageUrl,
+      livePicture: imageUrl,
+      About: profile.bio || "",
+      City: profile.city || "",
+      State: profile.state || "",
+      Height: profile.height_inches?.toString() || "",
+      BodyType: profile.body_type || "",
+      Ethnicity: profile.ethnicity || [],
+      Religion: profile.religion || "",
+      HSign: profile.zodiac_sign || "",
+      Interest: profile.interests?.join(", ") || "",
+      is_verified: profile.is_verified || false,
+      IsFavorite: profile.is_favorite ? 1 : 0,
+      RATINGS: 0,
+      TotalRating: 0,
+      distance_in_km: profile.distance_km,
+      has_liked_me: profile.has_liked_me,
+    };
+  };
 
-  // Format profiles and calculate distances
-  const typedProfiles = (profiles || []) as ProfileWithUser[];
-  const formattedProfiles: FormattedProfile[] = await Promise.all(
-    typedProfiles.map(async (profile) => {
-      const imageUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
-      const formatted: FormattedProfile = {
-        ID: profile.user_id,
-        id: profile.user_id,
-        DisplayName: profile.users?.display_name || profile.first_name || "",
-        FirstName: profile.first_name || "",
-        LastName: profile.last_name || "",
-        Email: profile.users?.email || "",
-        DOB: profile.date_of_birth || "",
-        Gender: profile.gender || "",
-        Image: imageUrl,
-        livePicture: imageUrl,
-        About: profile.bio || "",
-        City: profile.city || "",
-        State: profile.state || "",
-        Height: profile.height_inches?.toString() || "",
-        BodyType: profile.body_type || "",
-        Ethnicity: profile.ethnicity || [],
-        Religion: profile.religion || "",
-        HSign: profile.zodiac_sign || "",
-        Interest: profile.interests?.join(", ") || "",
-        is_verified: profile.is_verified || false,
-        IsFavorite: favoriteIds.has(profile.user_id!) ? 1 : 0,
-        RATINGS: 0,
-        TotalRating: 0,
-      };
-
-      // Calculate distance if both users have location
-      if (
-        currentUserProfile?.latitude &&
-        currentUserProfile?.longitude &&
-        profile.latitude &&
-        profile.longitude
-      ) {
-        const R = 6371; // Earth's radius in km
-        const dLat = ((profile.latitude - currentUserProfile.latitude) * Math.PI) / 180;
-        const dLon = ((profile.longitude - currentUserProfile.longitude) * Math.PI) / 180;
-        const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos((currentUserProfile.latitude * Math.PI) / 180) *
-            Math.cos((profile.latitude * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        formatted.distance_in_km = Math.round(R * c * 10) / 10;
-      }
-
-      return formatted;
-    })
+  const formattedProfiles = await Promise.all(
+    result.profiles.map(formatProfile)
   );
-
-  // Apply distance filter if specified
-  let filteredProfiles = formattedProfiles;
-  if (filters.max_distance) {
-    const maxDistanceKm = parseFloat(filters.max_distance) * 1.60934; // Convert miles to km
-    filteredProfiles = formattedProfiles.filter(
-      (p) => !p.distance_in_km || p.distance_in_km <= maxDistanceKm
-    );
-  }
 
   return NextResponse.json({
     success: true,
-    data: filteredProfiles,
+    data: formattedProfiles,
     msg: "Top matches fetched successfully",
   });
 }

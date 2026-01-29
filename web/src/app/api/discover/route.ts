@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
-import type { DbProfile, DbUser } from "@/types/db";
+import {
+  getDiscoverableCandidates,
+  getUserProfileContext,
+  userFiltersToDiscoveryFilters,
+  type DiscoverableProfile,
+} from "@/lib/services/discovery";
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
-
-/** Profile with joined user data from Supabase query */
-interface ProfileWithUser extends DbProfile {
-  users: Pick<DbUser, "id" | "display_name" | "status" | "email"> | null;
-}
 
 /** Formatted profile for mobile API response */
 interface FormattedProfile {
@@ -38,6 +38,7 @@ interface FormattedProfile {
   RATINGS: number;
   TotalRating: number;
   distance_in_km?: number;
+  has_liked_me?: boolean;
 }
 
 /** Video gallery item from database */
@@ -52,6 +53,12 @@ interface VideoGalleryRow {
 /**
  * GET /api/discover
  * Home screen aggregated data - Top Matches, Nearby, Videos, Events, Virtual Dating
+ * 
+ * Uses the shared discovery service for profile filtering to ensure:
+ * - Bidirectional gender match
+ * - Profile eligibility
+ * - Proper exclusions (blocked, passed, mutual matches)
+ * 
  * Supports both cookie auth (web) and Bearer token auth (mobile)
  */
 export async function GET() {
@@ -69,99 +76,45 @@ export async function GET() {
     );
   }
 
-  // Get current user's profile and filters
-  const { data: currentUserProfile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("user_id", user.id)
-    .single();
+  // Get user profile context for discovery
+  const userProfile = await getUserProfileContext(supabase, user.id);
 
+  if (!userProfile) {
+    return NextResponse.json(
+      { success: false, msg: "Profile not found" },
+      { status: 404 }
+    );
+  }
+
+  // Get user's saved filters
   const { data: userFilters } = await supabase
     .from("user_filters")
     .select("*")
     .eq("user_id", user.id)
     .single();
 
-  // Get blocked users (both directions)
-  const { data: blockedUsers } = await supabase
-    .from("blocks")
-    .select("blocker_id, blocked_id")
-    .or(`blocker_id.eq.${user.id},blocked_id.eq.${user.id}`);
+  const filters = userFiltersToDiscoveryFilters(userFilters);
 
-  const blockedIds = new Set<string>();
-  blockedUsers?.forEach((block) => {
-    if (block.blocker_id === user.id && block.blocked_id) {
-      blockedIds.add(block.blocked_id);
-    } else if (block.blocker_id) {
-      blockedIds.add(block.blocker_id);
-    }
-  });
-  blockedIds.add(user.id); // Exclude self
-
-  // Get user's favorites for marking
+  // Get favorites for marking
   const { data: favorites } = await supabase
     .from("favorites")
     .select("favorite_user_id")
     .eq("user_id", user.id);
 
-  const favoriteIds = new Set(favorites?.map((f) => f.favorite_user_id).filter((id): id is string => id !== null) || []);
+  const favoriteIds = new Set(
+    favorites?.map((f) => f.favorite_user_id).filter((id): id is string => id !== null) || []
+  );
 
-  // Build base query for profiles
-  // Note: Include users with "active" status OR null status (new users)
-  // This is more inclusive than requiring exactly "active"
-  // Exclude hidden profiles (paused accounts, admin/moderator accounts)
-  let profilesQuery = supabase
-    .from("profiles")
-    .select(`
-      *,
-      users!inner(id, display_name, status, email)
-    `)
-    .not("user_id", "in", `(${Array.from(blockedIds).join(",")})`)
-    .eq("profile_hidden", false);
-
-  // ALWAYS apply user's "looking_for" preference from their profile
-  // This is the core gender preference that determines who the user wants to see
-  if (currentUserProfile?.looking_for && currentUserProfile.looking_for.length > 0) {
-    profilesQuery = profilesQuery.in("gender", currentUserProfile.looking_for);
-  }
-
-  // Apply additional filters if they exist (but NOT gender - that comes from profile)
-  if (userFilters) {
-    if (userFilters.min_age || userFilters.max_age) {
-      const today = new Date();
-      if (userFilters.max_age) {
-        const minDate = new Date(today.getFullYear() - userFilters.max_age, today.getMonth(), today.getDate());
-        profilesQuery = profilesQuery.gte("date_of_birth", minDate.toISOString().split("T")[0]);
-      }
-      if (userFilters.min_age) {
-        const maxDate = new Date(today.getFullYear() - userFilters.min_age, today.getMonth(), today.getDate());
-        profilesQuery = profilesQuery.lte("date_of_birth", maxDate.toISOString().split("T")[0]);
-      }
-    }
-    // Note: Gender filter removed - it comes from user's profile looking_for preference
-    if (userFilters.min_height) {
-      profilesQuery = profilesQuery.gte("height_inches", userFilters.min_height);
-    }
-    if (userFilters.max_height) {
-      profilesQuery = profilesQuery.lte("height_inches", userFilters.max_height);
-    }
-  }
-
-  // Fetch top matches (limit 10)
-  const { data: topMatchProfiles } = await profilesQuery
-    .limit(10)
-    .order("updated_at", { ascending: false });
-
-  // Format profiles for mobile app (async to handle image URL conversion)
-  const formatProfile = async (profile: ProfileWithUser): Promise<FormattedProfile> => {
+  // Format profile for mobile API response
+  const formatProfile = async (profile: DiscoverableProfile): Promise<FormattedProfile> => {
     const imageUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
     return {
       ID: profile.user_id,
       id: profile.user_id,
-      DisplayName: profile.users?.display_name || profile.first_name || "",
+      DisplayName: profile.user?.display_name || profile.first_name || "",
       FirstName: profile.first_name || "",
       LastName: profile.last_name || "",
-      Email: profile.users?.email || "",
+      Email: profile.user?.email || "",
       DOB: profile.date_of_birth || "",
       Gender: profile.gender || "",
       Image: imageUrl,
@@ -176,63 +129,70 @@ export async function GET() {
       HSign: profile.zodiac_sign || "",
       Interest: profile.interests?.join(", ") || "",
       is_verified: profile.is_verified || false,
-      IsFavorite: profile.user_id && favoriteIds.has(profile.user_id) ? 1 : 0,
+      IsFavorite: profile.is_favorite ? 1 : 0,
       RATINGS: 0, // TODO: Calculate from reviews
       TotalRating: 0,
+      distance_in_km: profile.distance_km,
+      has_liked_me: profile.has_liked_me,
     };
   };
 
+  // ============================================================================
+  // TOP MATCHES - Use discovery service
+  // ============================================================================
+
+  const topMatchResult = await getDiscoverableCandidates(supabase, {
+    userProfile,
+    filters,
+    pagination: { limit: 10, offset: 0 },
+    sortBy: "recent",
+  });
+
   const TopMatch = await Promise.all(
-    ((topMatchProfiles || []) as ProfileWithUser[]).map(formatProfile)
+    topMatchResult.profiles.map(formatProfile)
   );
 
-  // Get nearby profiles (if user has location)
+  // ============================================================================
+  // NEARBY - Use discovery service with distance sort
+  // ============================================================================
+
   let NearBy: FormattedProfile[] = [];
-  if (currentUserProfile?.latitude && currentUserProfile?.longitude) {
-    // For now, just get profiles with location set (proper distance calculation would use PostGIS)
-    // Exclude hidden profiles (paused accounts, admin/moderator accounts)
-    let nearbyQuery = supabase
-      .from("profiles")
-      .select(`
-        *,
-        users!inner(id, display_name, status, email)
-      `)
-      .not("user_id", "in", `(${Array.from(blockedIds).join(",")})`)
-      .eq("profile_hidden", false)
-      .not("latitude", "is", null)
-      .not("longitude", "is", null);
-
-    // Apply looking_for preference to nearby profiles too
-    if (currentUserProfile?.looking_for && currentUserProfile.looking_for.length > 0) {
-      nearbyQuery = nearbyQuery.in("gender", currentUserProfile.looking_for);
-    }
-
-    const { data: nearbyProfiles } = await nearbyQuery.limit(10);
+  if (userProfile.latitude && userProfile.longitude) {
+    const nearbyResult = await getDiscoverableCandidates(supabase, {
+      userProfile,
+      filters: {
+        ...filters,
+        maxDistanceMiles: filters.maxDistanceMiles || 100, // Default 100 miles
+      },
+      pagination: { limit: 10, offset: 0 },
+      sortBy: "distance",
+    });
 
     NearBy = await Promise.all(
-      ((nearbyProfiles || []) as ProfileWithUser[]).map(async (profile) => {
-        const formatted = await formatProfile(profile);
-        // Simple distance calculation (for demo - real app would use PostGIS)
-        if (profile.latitude && profile.longitude && currentUserProfile.latitude && currentUserProfile.longitude) {
-          const R = 6371; // Earth's radius in km
-          const dLat = ((profile.latitude - currentUserProfile.latitude) * Math.PI) / 180;
-          const dLon = ((profile.longitude - currentUserProfile.longitude) * Math.PI) / 180;
-          const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos((currentUserProfile.latitude * Math.PI) / 180) *
-              Math.cos((profile.latitude * Math.PI) / 180) *
-              Math.sin(dLon / 2) *
-              Math.sin(dLon / 2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          const distance = R * c;
-          formatted.distance_in_km = Math.round(distance * 10) / 10;
-        }
-        return formatted;
-      })
+      nearbyResult.profiles.map(formatProfile)
     );
   }
 
-  // Get featured videos (profiles with videos in gallery)
+  // ============================================================================
+  // VIDEOS - Keep existing logic (not user-specific filtering)
+  // ============================================================================
+
+  // Get blocked users for video filtering
+  const { data: blockedUsers } = await supabase
+    .from("blocks")
+    .select("blocker_id, blocked_id")
+    .or(`blocker_id.eq.${user.id},blocked_id.eq.${user.id}`);
+
+  const blockedIds = new Set<string>();
+  blockedUsers?.forEach((block) => {
+    if (block.blocker_id === user.id && block.blocked_id) {
+      blockedIds.add(block.blocked_id);
+    } else if (block.blocker_id) {
+      blockedIds.add(block.blocker_id);
+    }
+  });
+  blockedIds.add(user.id);
+
   const { data: videoGallery } = await supabase
     .from("user_gallery")
     .select("id, user_id, media_url, thumbnail_url, created_at")
@@ -269,7 +229,6 @@ export async function GET() {
 
   const baseImageUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + "/storage/v1/object/public/";
   
-  // Generate signed URLs for videos
   const Videos = await Promise.all(
     ((videoGallery || []) as VideoGalleryRow[]).map(async (video) => {
       let videoUrl = video.media_url;
@@ -293,7 +252,10 @@ export async function GET() {
     })
   );
 
-  // Get upcoming events (use start of today to include today's events)
+  // ============================================================================
+  // EVENTS
+  // ============================================================================
+
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   
@@ -306,7 +268,6 @@ export async function GET() {
     .order("start_datetime", { ascending: true })
     .limit(5);
 
-  // Resolve event image URLs
   const formattedEvents = await Promise.all(
     (events || []).map(async (event) => {
       const eventImageUrl = await resolveStorageUrl(supabase, event.image_url, { bucket: "events" });
@@ -314,7 +275,7 @@ export async function GET() {
         EventID: event.id,
         EventName: event.title,
         EventDate: event.start_datetime?.split("T")[0] || "",
-        EventPrice: "0", // TODO: Add pricing to events
+        EventPrice: "0",
         StartTime: event.start_datetime ? new Date(event.start_datetime).toLocaleTimeString() : "",
         EndTime: event.end_datetime ? new Date(event.end_datetime).toLocaleTimeString() : "",
         Description: event.description || "",
@@ -335,7 +296,10 @@ export async function GET() {
     })
   );
 
-  // Get virtual speed dating sessions
+  // ============================================================================
+  // VIRTUAL SPEED DATING
+  // ============================================================================
+
   const { data: virtualDating } = await supabase
     .from("virtual_speed_dating")
     .select("*")
@@ -344,7 +308,6 @@ export async function GET() {
     .order("scheduled_datetime", { ascending: true })
     .limit(5);
 
-  // Resolve speed dating image URLs (uses events bucket - same as regular events)
   const Virtual = await Promise.all(
     (virtualDating || []).map(async (session) => {
       const imageUrl = await resolveStorageUrl(supabase, session.image_url, { bucket: "events" });
