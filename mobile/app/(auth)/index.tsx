@@ -2,6 +2,7 @@ import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import * as Haptics from 'expo-haptics';
 import {
   Image,
   Modal,
@@ -10,12 +11,11 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  useColorScheme,
   useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 export default function AuthHome() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -30,8 +30,7 @@ export default function AuthHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -141,7 +140,8 @@ export default function AuthHome() {
     <>
       <ScrollView className="flex-1" 
       style={{ backgroundColor: themedColors.background }}
-      contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }} >
+      contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }}
+      contentInsetAdjustmentBehavior="automatic" >
         <View className="mt-12">
           <Image
             source={isDark ? images.logoDark : images.logo}
@@ -150,7 +150,10 @@ export default function AuthHome() {
           <Text className="text-center mt-3 text-dark">
             Discover Amazing Features
           </Text>
-            <TouchableOpacity className="mt-3" onPress={() => router.push("/(auth)/login")}>
+            <TouchableOpacity className="mt-3" onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push("/(auth)/login");
+            }}>
               <Text className="text-center text-primary font-bold">
                 Get Started
               </Text>
@@ -160,7 +163,10 @@ export default function AuthHome() {
           {features.map((feature, index) => (
             <TouchableOpacity
               key={index}
-              onPress={() => openModal(feature)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                openModal(feature);
+              }}
               style={{ width: itemWidth, height: itemWidth }}
               className="relative flex flex-col justify-between items-center border-2 border-secondary overflow-hidden rounded-2xl md:rounded-3xl"
             >
@@ -192,7 +198,10 @@ export default function AuthHome() {
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="w-10/12 p-6 rounded-2xl" style={{ backgroundColor: themedColors.background }}>
             <View className="flex-row-reverse justify-between items-center mb-4">
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <TouchableOpacity onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setModalVisible(false);
+              }}>
                 <Image
                   source={icons.Close}
                   className="w-6 h-6"

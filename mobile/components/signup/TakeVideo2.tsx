@@ -1,17 +1,17 @@
 import { CommonFileUpload } from '@/lib/api';
-import { useThemeColors } from '@/context/ThemeContext';
+import { useThemeColors, useIsDarkMode } from '@/context/ThemeContext';
 import { signupProps } from '@/types';
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import * as FileSystem from "expo-file-system";
+import * as Haptics from 'expo-haptics';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, PermissionsAndroid, Platform, PlatformColor, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { ActivityIndicator, Alert, Linking, PermissionsAndroid, Platform, PlatformColor, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Video from 'react-native-video';
 import { Camera, useCameraDevice, useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
 import GradientButton from '../ui/GradientButton';
 
 const TakeVideo2 = ({ updateData, onNext }: signupProps) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -123,7 +123,10 @@ const TakeVideo2 = ({ updateData, onNext }: signupProps) => {
           <Text style={styles.permissionText}>Camera and Microphone Permissions Required</Text>
           <TouchableOpacity
             style={styles.permissionButton}
-            onPress={() => Linking.openSettings()}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              Linking.openSettings();
+            }}
           >
             <Text style={styles.permissionButtonText}>Go to Settings</Text>
           </TouchableOpacity>
@@ -134,6 +137,7 @@ const TakeVideo2 = ({ updateData, onNext }: signupProps) => {
   }
 
   const handleRetake = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     videoPathRef.current = null;
     forceUpdate();
   };
@@ -359,7 +363,10 @@ const TakeVideo2 = ({ updateData, onNext }: signupProps) => {
       <View style={styles.controlContainer}>
         <TouchableOpacity
           style={[styles.captureButton, isRecording && styles.recordingButton]}
-          onPress={isRecording ? stopRecording : startRecording}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            isRecording ? stopRecording() : startRecording();
+          }}
         >
           {isRecording ? (
             <Text style={styles.buttonText}>{'STOP'}</Text>

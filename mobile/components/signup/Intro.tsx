@@ -1,13 +1,12 @@
 import { images } from "@/constants/images";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { signupProps } from "@/types";
 import React, { useState } from "react";
-import { Image, Platform, PlatformColor, ScrollView, Text, TextInput, View, useColorScheme } from "react-native";
+import { Image, Platform, PlatformColor, ScrollView, Text, TextInput, View } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 const Intro = ({ data, updateData, onNext, error }: signupProps) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -31,7 +30,7 @@ const Intro = ({ data, updateData, onNext, error }: signupProps) => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
     <View className="mt-20 px-6 w-full">
       <View className="flex-row items-center justify-between px-2">
         <View className="">

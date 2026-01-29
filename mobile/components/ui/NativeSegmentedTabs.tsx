@@ -22,11 +22,11 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
   ViewStyle,
 } from "react-native";
 import { SPACING } from "@/constants/designTokens";
+import { useIsDarkMode } from "@/context/ThemeContext";
 
 interface NativeSegmentedTabsProps {
   /** Array of tab labels */
@@ -51,8 +51,7 @@ export function NativeSegmentedTabs({
   style,
   primaryColor = "#B06D1E",
 }: NativeSegmentedTabsProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = useIsDarkMode();
 
   const handleSelect = (index: number) => {
     if (index !== selectedIndex) {

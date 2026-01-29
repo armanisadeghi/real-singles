@@ -1,6 +1,7 @@
 import { images } from "@/constants/images";
 import { MARITAL_STATUS_OPTIONS } from "@/constants/options";
 import { signupProps } from "@/types";
+import * as Haptics from 'expo-haptics';
 import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import GradientButton from "../ui/GradientButton";
@@ -15,6 +16,7 @@ const MaritalStatus = ({
 const [validationError, setValidationError] = useState("");
 
   const handleSelect = (value: string) => {
+    Haptics.selectionAsync();
     updateData({MaritalStatus: value});
     setValidationError("");
   };
@@ -28,7 +30,7 @@ const [validationError, setValidationError] = useState("");
   }
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
     <View className="mt-20 px-6 w-full">
       <View className="flex-row items-center justify-between px-2">
         <View className="">

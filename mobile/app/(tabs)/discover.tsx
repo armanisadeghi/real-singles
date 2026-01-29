@@ -3,6 +3,7 @@ import LinearBg from "@/components/LinearBg";
 import NotificationBell from "@/components/NotificationBell";
 import ProfileListItem from "@/components/ui/ProfileListItem";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
+import { LiquidGlassView } from "@/components/ui/LiquidGlass";
 import { ICON_SIZES, SPACING, TYPOGRAPHY, VERTICAL_SPACING } from "@/constants/designTokens";
 import { applyFilters, clearFilter, getHomeScreenData, getProfile, saveFilter } from "@/lib/api";
 import { User } from "@/types";
@@ -21,10 +22,9 @@ import {
   RefreshControl,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import Toast from "react-native-toast-message";
 import { useSafeArea, useHeaderSpacing } from "@/hooks/useResponsive";
 
@@ -34,8 +34,7 @@ export default function Discover() {
   const { minimal: headerTopPadding } = useHeaderSpacing();
 
   // Dark mode support
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   // Theme-aware colors
@@ -424,6 +423,7 @@ export default function Discover() {
           <View className="flex-1" style={{ paddingTop: VERTICAL_SPACING.md }}>
           <FlatList
             data={discoverProfiles}
+            contentInsetAdjustmentBehavior="automatic"
             contentContainerStyle={{
               paddingBottom: 100,
               gap: VERTICAL_SPACING.xs,
@@ -493,6 +493,17 @@ export default function Discover() {
         backdropComponent={renderBackdrop}
         handleIndicatorStyle={{ backgroundColor: themedColors.handleIndicator }}
         backgroundStyle={{ backgroundColor: themedColors.background }}
+        backgroundComponent={({ style }) => (
+          <LiquidGlassView
+            style={style}
+            glassEffectStyle="regular"
+            fallbackColor={Platform.OS === 'ios'
+              ? (PlatformColor('secondarySystemBackground') as unknown as string)
+              : colors.surface}
+          >
+            {null}
+          </LiquidGlassView>
+        )}
       >
         <BottomSheetScrollView
           contentContainerStyle={{

@@ -1,14 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import React, { useState, useEffect } from "react";
-import { Platform, PlatformColor, ScrollView, Text, TextInput, View, useColorScheme } from "react-native";
+import { Platform, PlatformColor, ScrollView, Text, TextInput, View } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import GradientButton from "../ui/GradientButton";
 import { COUNTRY_OPTIONS, getZodiacFromDate, ZODIAC_OPTIONS } from "@/constants/options";
 
 const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -191,7 +190,7 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
 
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
     <View className="mt-20 px-6 w-full">
       <View className="flex-row items-center justify-between px-2">
         <View className="">

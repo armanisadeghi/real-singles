@@ -13,6 +13,7 @@ import { getProfile, updateProfile, getCurrentUser } from "@/lib/supabase";
 import { EditProfileFormData } from "@/types";
 import { useAuth } from "@/utils/authContext";
 import { useFocusEffect, useRouter } from "expo-router";
+import * as Haptics from 'expo-haptics';
 import React, { useCallback, useState, useRef, useEffect } from "react";
 import { 
   ActivityIndicator, 
@@ -503,7 +504,10 @@ const EditProfile = () => {
       <View className="flex-row justify-between items-center px-5 py-2 bg-background">
         <View>{renderSaveStatus()}</View>
         <TouchableOpacity 
-          onPress={handleSave} 
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            handleSave();
+          }} 
           disabled={saving || saveStatus === "saving"}
           style={{ paddingHorizontal: 16, paddingVertical: 8, opacity: saving ? 0.5 : 1 }}
         >
@@ -532,7 +536,7 @@ const EditProfile = () => {
       )}
 
       {/* Body */}
-      <ScrollView className="flex-1">
+      <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
         <View className="mt-8 px-6 pb-10">
           <EditProfileForm formData={formData} onChangeField={handleChange} />
         </View>

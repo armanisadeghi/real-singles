@@ -1,9 +1,10 @@
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { signupProps } from "@/types";
+import * as Haptics from 'expo-haptics';
 import React, { useState } from "react";
-import { Image, Platform, PlatformColor, ScrollView, Text, TouchableOpacity, View, useColorScheme } from "react-native";
+import { Image, Platform, PlatformColor, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 // Gender options that match database constraint
@@ -27,8 +28,7 @@ const Gender = ({
   onNext,
   error,
 }: signupProps) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -41,11 +41,13 @@ const Gender = ({
   const [step, setStep] = useState<"gender" | "looking_for">("gender");
 
   const handleGenderSelect = (value: string) => {
+    Haptics.selectionAsync();
     updateData({ Gender: value });
     setValidationError("");
   };
 
   const handleLookingForSelect = (value: string) => {
+    Haptics.selectionAsync();
     // "everyone" means both male and female
     if (value === "everyone") {
       updateData({ LookingFor: ["male", "female"] });
@@ -85,7 +87,7 @@ const Gender = ({
     data?.LookingFor?.includes("male") && data?.LookingFor?.includes("female");
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
       <View className="mt-20 px-6 w-full">
         <View className="flex-row items-center justify-between px-2">
           <View className="">

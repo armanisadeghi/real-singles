@@ -15,24 +15,22 @@
  * />
  */
 
-import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
-  AccessibilityInfo,
   Platform,
   PlatformColor,
   Pressable,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
   ViewStyle,
   TextStyle,
 } from "react-native";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { TYPOGRAPHY, SPACING, BORDER_RADIUS } from "@/constants/designTokens";
 import { PlatformIcon } from "./PlatformIcon";
+import { LiquidGlassView } from "./LiquidGlass";
 
 interface GlassChipProps {
   /** The label text displayed in the chip */
@@ -63,22 +61,8 @@ export function GlassChip({
   style,
   disabled = false,
 }: GlassChipProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
-  const [reduceTransparency, setReduceTransparency] = useState(false);
-
-  // Check accessibility preferences for reduced transparency (iOS only)
-  useEffect(() => {
-    if (Platform.OS === "ios") {
-      AccessibilityInfo.isReduceTransparencyEnabled().then(setReduceTransparency);
-      const subscription = AccessibilityInfo.addEventListener(
-        "reduceTransparencyChanged",
-        setReduceTransparency
-      );
-      return () => subscription.remove();
-    }
-  }, []);
 
   // Theme-aware colors using iOS PlatformColor for automatic adaptation
   const themedColors = useMemo(() => ({
@@ -130,7 +114,6 @@ export function GlassChip({
   };
 
   const config = sizeConfig[size];
-  const useGlass = Platform.OS === "ios" && !reduceTransparency;
   const showIcon = iosIcon || androidIcon;
   const textColor = selected ? themedColors.selectedText : themedColors.text;
 
@@ -202,31 +185,16 @@ export function GlassChip({
       accessibilityLabel={label}
       accessibilityState={{ selected, disabled }}
     >
-      {useGlass ? (
-        <BlurView
-          intensity={selected ? 80 : 60}
-          tint={isDark 
-            ? (selected ? "systemMaterialDark" : "systemUltraThinMaterialDark")
-            : (selected ? "systemMaterial" : "systemUltraThinMaterial")
-          }
-          style={styles.blurContainer}
-        >
-          {ChipContent}
-        </BlurView>
-      ) : (
-        <View
-          style={[
-            styles.solidContainer,
-            {
-              backgroundColor: selected
-                ? themedColors.selectedSolidBackground
-                : themedColors.solidBackground,
-            },
-          ]}
-        >
-          {ChipContent}
-        </View>
-      )}
+      <LiquidGlassView
+        style={styles.glassContainer}
+        fallbackColor={selected
+          ? themedColors.selectedSolidBackground
+          : themedColors.solidBackground}
+        isInteractive={true}
+        glassEffectStyle="clear"
+      >
+        {ChipContent}
+      </LiquidGlassView>
     </Pressable>
   );
 }
@@ -236,10 +204,7 @@ const styles = StyleSheet.create({
     opacity: Platform.OS === "ios" ? 0.7 : 1,
     transform: [{ scale: 0.98 }],
   },
-  blurContainer: {
-    flex: 1,
-  },
-  solidContainer: {
+  glassContainer: {
     flex: 1,
   },
 });

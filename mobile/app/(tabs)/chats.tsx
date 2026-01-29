@@ -20,10 +20,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   View
 } from "react-native";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { useBottomSpacing } from "@/hooks/useResponsive";
@@ -385,8 +384,7 @@ export default function Chats() {
   const headerHeight = Platform.OS === 'ios' ? 44 : 56;
 
   // Dark mode support
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   // Theme-aware colors - using PlatformColor for native iOS adaptation
@@ -913,6 +911,7 @@ export default function Chats() {
                   elevation: 5,
                 }}
                 contentContainerStyle={{ paddingBottom: 260 }}
+                contentInsetAdjustmentBehavior="automatic"
                 ListHeaderComponent={
                   <View className="px-6 py-5" >
                     <View className="flex-row items-center border border-border rounded-[10px]" style={{ backgroundColor: themedColors.secondaryBackground }}>
@@ -953,6 +952,7 @@ export default function Chats() {
                   )}
                   keyExtractor={(item) => item.id}
                   contentContainerStyle={{ paddingBottom: 400 }}
+                  contentInsetAdjustmentBehavior="automatic"
                   ListHeaderComponent={
                     <View className="px-6 py-5">
                       <View className="flex-row items-center border border-border rounded-[10px]" style={{ backgroundColor: themedColors.secondaryBackground }}>
@@ -1001,6 +1001,7 @@ export default function Chats() {
                     shadowRadius: 16,
                     elevation: 5,
                   }}
+                  contentInsetAdjustmentBehavior="automatic"
                   ListHeaderComponent={
                     <View className="px-6 py-5">
                       <View className="flex-row items-center border border-border rounded-[10px]" style={{ backgroundColor: themedColors.secondaryBackground }}>

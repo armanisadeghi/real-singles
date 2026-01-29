@@ -13,9 +13,9 @@ import {
   PlatformColor,
   RefreshControl,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
+import { useIsDarkMode } from "@/context/ThemeContext";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { apiRequest } from "@/lib/api";
 
@@ -30,8 +30,7 @@ export default function EventsPage() {
 
   const { contentPadding } = useBottomSpacing(true);
   const { gap } = useCardDimensions(2, 1.18);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = useIsDarkMode();
   
   const filter: FilterStatus = filterIndex === 0 ? "upcoming" : "past";
   

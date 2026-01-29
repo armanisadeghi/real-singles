@@ -20,7 +20,6 @@ import {
   StyleSheet,
   Text,
   View,
-  useColorScheme,
 } from "react-native";
 import { moderateScale, verticalScale } from "react-native-size-matters";
 import {
@@ -30,7 +29,7 @@ import {
   TYPOGRAPHY,
   VERTICAL_SPACING,
 } from "@/constants/designTokens";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
 
 // Background colors for initials (same as ProfileCard for consistency)
@@ -54,8 +53,7 @@ export default function ProfileListItem({
   onPress 
 }: ProfileListItemProps) {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
   
   // Theme-aware colors using iOS PlatformColor for automatic dark mode adaptation

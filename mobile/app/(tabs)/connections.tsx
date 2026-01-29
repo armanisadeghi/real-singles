@@ -34,10 +34,9 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import Toast from "react-native-toast-message";
 
 // Tab types
@@ -119,8 +118,7 @@ export default function ConnectionsScreen() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   // Dark mode support
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   // Theme colors using PlatformColor on iOS

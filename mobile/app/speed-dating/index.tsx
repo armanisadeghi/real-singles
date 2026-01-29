@@ -16,9 +16,9 @@ import {
   RefreshControl,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
+import { useIsDarkMode } from "@/context/ThemeContext";
 
 interface SpeedDatingSession {
   id: string;
@@ -46,8 +46,7 @@ interface SpeedDatingSession {
 
 export default function SpeedDatingPage() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = useIsDarkMode();
   const [sessions, setSessions] = useState<SpeedDatingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);

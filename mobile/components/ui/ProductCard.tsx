@@ -2,15 +2,15 @@ import { icons } from '@/constants/icons';
 import { ProductCardProps } from '@/types';
 import { VIDEO_URL } from '@/utils/token';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import React from 'react';
-import { Image, Platform, PlatformColor, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
-import { useThemeColors } from "@/context/ThemeContext";
+import { Image, Platform, PlatformColor, Text, TouchableOpacity, View } from 'react-native';
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 
 const ProductCard = ({product} : {product: ProductCardProps}) => {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -22,7 +22,10 @@ const ProductCard = ({product} : {product: ProductCardProps}) => {
   return (
     <TouchableOpacity
     activeOpacity={0.8}
-    onPress={() => router.push(`/redeem/product/${product?.ProductID}`)}
+    onPress={() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      router.push(`/redeem/product/${product?.ProductID}`);
+    }}
     className='rounded-lg overflow-hidden'
       style={[
         {

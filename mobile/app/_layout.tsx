@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as NavigationBar from 'expo-navigation-bar';
 import IncomingCall from "@/components/IncomingCall";
 import { CallProvider } from "@/context/CallContext";
-import { ThemeProvider, useTheme } from "@/context/ThemeContext";
+import { ThemeProvider, useTheme, useIsDarkMode } from "@/context/ThemeContext";
 import { AuthProvider, useAuth } from "@/utils/authContext";
 import {
   setupNotificationChannels,
@@ -15,7 +15,7 @@ import {
 } from "@/utils/notifications";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { Platform, StatusBar, useColorScheme } from "react-native";
+import { Platform, PlatformColor, StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -26,7 +26,7 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
+  const isDark = useIsDarkMode();
 
   const { isAuthenticated } = useAuth();
 
@@ -61,7 +61,7 @@ function RootLayoutNav() {
       NavigationBar.setBackgroundColorAsync('transparent');
       NavigationBar.setPositionAsync('absolute');
       // Set button style based on color scheme
-      NavigationBar.setButtonStyleAsync(colorScheme === 'dark' ? 'light' : 'dark');
+      NavigationBar.setButtonStyleAsync(isDark ? 'light' : 'dark');
     }
 
     // Listen for notifications received while app is foregrounded
@@ -93,9 +93,7 @@ function RootLayoutNav() {
       removeNotificationSubscription(notificationReceivedSubscription);
       removeNotificationSubscription(notificationResponseSubscription);
     };
-  }, [colorScheme]);
-
-  const isDark = colorScheme === 'dark';
+  }, [isDark]);
   
   return (
     <>
@@ -113,7 +111,9 @@ function RootLayoutNav() {
           // Header title adapts to light/dark mode
           headerTitleStyle: { 
             fontWeight: '600', 
-            color: isDark ? '#FFFFFF' : '#000000' 
+            color: Platform.OS === 'ios'
+              ? (PlatformColor('label') as unknown as string)
+              : isDark ? '#FFFFFF' : '#000000',
           },
           // Prevent "(tabs)" from showing as back button title
           headerBackTitle: 'Back',
@@ -121,10 +121,10 @@ function RootLayoutNav() {
           headerBlurEffect: Platform.OS === 'ios' ? 'systemMaterial' : undefined,
           // Note: Don't use headerTransparent globally - it breaks content insets
           // for screens with headerLargeTitle. Let native navigation handle layout.
-          // Android header background adapts to light/dark mode
+          // Android header background adapts to light/dark mode (iOS uses headerBlurEffect)
           headerStyle: Platform.OS === 'ios' 
             ? undefined 
-            : { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' },
+            : { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' }, // Android fallback keeps hardcoded for now
         }}
       >
         {/* Auth & Splash - No headers */}

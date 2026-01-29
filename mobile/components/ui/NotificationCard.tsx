@@ -1,6 +1,6 @@
 import { VIDEO_URL } from "@/utils/token";
-import { Image, Platform, PlatformColor, Text, useColorScheme, View } from "react-native";
-import { useThemeColors } from "@/context/ThemeContext";
+import { Image, Platform, PlatformColor, Text, View } from "react-native";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 // Updated interface to match API response
 interface Notification {
@@ -17,8 +17,7 @@ interface Notification {
 }
 
 const NotificationCard = ({ item }: { item: Notification }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {

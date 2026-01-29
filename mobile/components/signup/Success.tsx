@@ -1,7 +1,7 @@
 import { images } from '@/constants/images';
-import { useThemeColors } from '@/context/ThemeContext';
+import { useThemeColors, useIsDarkMode } from '@/context/ThemeContext';
 import React from 'react';
-import { Image, Platform, PlatformColor, Text, View, useColorScheme } from 'react-native';
+import { Image, Platform, PlatformColor, Text, View } from 'react-native';
 import GradientButton from '../ui/GradientButton';
 
 interface SuccessProps {
@@ -13,8 +13,7 @@ interface SuccessProps {
 }
 
 export default function Success({image, title, subTitle, desc, onPress} : SuccessProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {

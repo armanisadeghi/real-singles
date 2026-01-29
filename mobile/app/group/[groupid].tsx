@@ -3,7 +3,7 @@ import GroupConversation from "@/components/chat/GroupConversation";
 import { ScreenHeader, HeaderBackButton } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
 import { SPACING, TYPOGRAPHY, ICON_SIZES } from "@/constants/designTokens";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { fetchUserProfile } from "@/lib/api";
 import {
   chatClient,
@@ -17,7 +17,7 @@ import * as Haptics from "expo-haptics";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState, useMemo } from "react";
-import { ActivityIndicator, Alert, FlatList, Image, KeyboardAvoidingView, Modal, Platform, PlatformColor, Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Image, KeyboardAvoidingView, Modal, Platform, PlatformColor, Text, TouchableOpacity, View } from "react-native";
 
 export default function GroupChat() {
   const { groupid, name, image, members, createdBy } = useLocalSearchParams<{
@@ -29,8 +29,7 @@ export default function GroupChat() {
   }>();
 
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
   
   const themedColors = useMemo(() => ({
@@ -499,6 +498,7 @@ export default function GroupChat() {
             <FlatList
               data={groupMembers}
               keyExtractor={(item, index) => `${index}`}
+              contentInsetAdjustmentBehavior="automatic"
               renderItem={({ item }) => (
                 <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: themedColors.border }}>
                   {/* Profile Image / Icon */}

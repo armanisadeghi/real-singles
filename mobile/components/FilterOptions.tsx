@@ -29,10 +29,9 @@ import {
   Switch,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import RNPickerSelect from "react-native-picker-select";
 import Toast from "react-native-toast-message";
 import LinearBg from "./LinearBg";
@@ -79,8 +78,7 @@ export default function FilterOptions({
   onFilterChange,
   onClearFilters,
 }: FilterOptionsProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = useMemo(() => ({

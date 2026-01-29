@@ -90,6 +90,7 @@ export default function Redeem() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingRight: 15 }}
         ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
+        contentInsetAdjustmentBehavior="automatic"
         renderItem={({ item }) => (
           <View>
             <ProductCard product={item} />
@@ -136,6 +137,7 @@ export default function Redeem() {
               paddingHorizontal: 16,
             }}
             ListHeaderComponent={<CurrentEventsHeader />}
+            contentInsetAdjustmentBehavior="automatic"
           />
         </View>
       </View>

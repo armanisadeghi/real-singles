@@ -4,8 +4,8 @@ import { PlatformIcon } from "./PlatformIcon";
 import * as Haptics from 'expo-haptics';
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
-import { Image, Platform, PlatformColor, Text, TouchableOpacity, useColorScheme, View } from "react-native";
-import { useThemeColors } from "@/context/ThemeContext";
+import { Image, Platform, PlatformColor, Text, TouchableOpacity, View } from "react-native";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 // Define the interface for component props
 export interface EventCardProps {
@@ -53,8 +53,7 @@ const PastEventCard = (
   { pastEvent }: { pastEvent: EventCardProps } // Destructure pastEvent from props
 ) => {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {

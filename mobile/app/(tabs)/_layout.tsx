@@ -25,7 +25,7 @@ import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
  */
 export default function TabLayout() {
   return (
-    <NativeTabs>
+    <NativeTabs minimizeBehavior="onScrollDown">
       {/* Home Tab - Route: /home */}
       <NativeTabs.Trigger name="index">
         <Label>Home</Label>

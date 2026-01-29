@@ -16,9 +16,9 @@
  */
 
 import React, { ReactNode, useState, useCallback, useMemo } from 'react';
-import { Platform, ActionSheetIOS, View, TouchableOpacity, StyleProp, ViewStyle, Modal, Text, Pressable, StyleSheet, useColorScheme } from 'react-native';
+import { Platform, ActionSheetIOS, View, TouchableOpacity, StyleProp, ViewStyle, Modal, Text, Pressable, StyleSheet } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { useThemeColors } from '@/context/ThemeContext';
+import { useThemeColors, useIsDarkMode } from '@/context/ThemeContext';
 // Only import on iOS to avoid issues on Android
 let ContextMenuView: any = null;
 if (Platform.OS === 'ios') {
@@ -68,8 +68,7 @@ export function ContextMenu({
   style,
 }: ContextMenuProps) {
   const [menuVisible, setMenuVisible] = useState(false);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
   
   // Theme-aware colors for Android bottom sheet

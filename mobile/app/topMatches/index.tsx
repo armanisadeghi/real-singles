@@ -166,6 +166,7 @@ export default function TopMatches() {
               renderItem={renderItem}
               keyExtractor={(item, idx) => item.id ? item.id.toString() : idx.toString()}
               showsVerticalScrollIndicator={false}
+              contentInsetAdjustmentBehavior="automatic"
               ListEmptyComponent={() => (
                 <View className="flex-1 justify-center items-center py-20">
                   <Text className="text-gray">
@@ -189,6 +190,7 @@ export default function TopMatches() {
               renderItem={renderItem}
               keyExtractor={(item, idx) => item.id ? item.id.toString() : idx.toString()}
               showsVerticalScrollIndicator={false}
+              contentInsetAdjustmentBehavior="automatic"
               ListEmptyComponent={() => (
                 <View className="flex-1 justify-center items-center">
                   <Text className="text-gray">

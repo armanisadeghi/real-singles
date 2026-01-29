@@ -18,9 +18,8 @@ import {
   StyleProp, 
   View, 
   ViewStyle,
-  useColorScheme 
 } from 'react-native';
-import { useThemeColors } from '@/context/ThemeContext';
+import { useThemeColors, useIsDarkMode } from '@/context/ThemeContext';
 
 // Type for glass effect styles
 type GlassStyle = 'clear' | 'regular';
@@ -203,8 +202,7 @@ export function LiquidGlassHeader({
   transparent = true,
 }: LiquidGlassHeaderProps) {
   const { showGlass } = useLiquidGlass();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
   
   // Theme-aware fallback colors
@@ -261,8 +259,7 @@ export function LiquidGlassFAB({
   size = 56,
 }: LiquidGlassFABProps) {
   const { showGlass } = useLiquidGlass();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   
   // Theme-aware fallback color
   const fallbackBg = isDark 

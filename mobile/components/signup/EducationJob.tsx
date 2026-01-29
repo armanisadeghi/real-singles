@@ -1,8 +1,9 @@
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
+import * as Haptics from 'expo-haptics';
 import React, { useState } from "react";
-import { Image, Platform, PlatformColor, ScrollView, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
+import { Image, Platform, PlatformColor, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 const EducationJob = ({
@@ -11,8 +12,7 @@ const EducationJob = ({
   onNext,
   error,
 }: any) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -58,12 +58,13 @@ const EducationJob = ({
 
   // Add a function to add another school
   const handleAddSchool = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const newSchools = [...(data.School || []), ''];
     updateData({ School: newSchools });
   };
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
     <View className="mt-20 px-6 w-full">
       {/* Header section */}
       <View className="flex-row items-center justify-between px-2">
@@ -103,6 +104,7 @@ const EducationJob = ({
                 />
                 <TouchableOpacity 
                   onPress={() => {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
                     const newSchools = data.School.filter((_: string, i: number) => i !== index);
                     updateData({ School: newSchools });
                   }}
@@ -115,7 +117,10 @@ const EducationJob = ({
             ))
           ) : (
             <TouchableOpacity
-              onPress={() => updateData({ School: [''] })}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                updateData({ School: [''] });
+              }}
               className="bg-primary py-2 px-4 rounded-lg"
             >
               <Text className="text-white text-center">Add School</Text>

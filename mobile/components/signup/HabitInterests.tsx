@@ -1,6 +1,7 @@
 import { images } from "@/constants/images";
 import { DRINKING_OPTIONS, MARIJUANA_OPTIONS, SMOKING_OPTIONS, PETS_OPTIONS } from "@/constants/options";
 import { signupProps } from "@/types";
+import * as Haptics from 'expo-haptics';
 import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import GradientButton from "../ui/GradientButton";
@@ -9,18 +10,22 @@ const HabitInterests = ({ data, updateData, onNext, error }: signupProps) => {
   const [validationError, setValidationError] = useState("");
 
   const handleMarijuanaSelect = (value: string) => {
+    Haptics.selectionAsync();
     updateData({ Marijuana: value });
     setValidationError("");
   };
   const handleSmokingSelect = (value: string) => {
+    Haptics.selectionAsync();
     updateData({ Smoking: value });
     setValidationError("");
   };
   const handleDrinkingSelect = (value: string) => {
+    Haptics.selectionAsync();
     updateData({ Drinks: value });
     setValidationError("");
   };
   const handlePetsSelect = (value: string) => {
+    Haptics.selectionAsync();
     updateData({ Pets: value });
     setValidationError("");
   };
@@ -46,7 +51,7 @@ const HabitInterests = ({ data, updateData, onNext, error }: signupProps) => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
     <View className="mt-20 px-6 w-full">
       <View className="flex-row items-center justify-between px-2">
         <View className="">

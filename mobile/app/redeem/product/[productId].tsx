@@ -1,7 +1,8 @@
 import LinearBg from "@/components/LinearBg";
 import ProductDetails from "@/components/ProductDetails";
+import { LiquidGlassView } from "@/components/ui/LiquidGlass";
 import { images } from "@/constants/images";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { getProductsGiftDetail } from "@/lib/api";
 import { ProductCardProps } from "@/types";
 import { VIDEO_URL } from "@/utils/token";
@@ -16,7 +17,6 @@ import {
   PlatformColor,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -27,8 +27,7 @@ export default function ProductDetail() {
   const [data, setData] = useState<ProductCardProps>();
   const [loading, setLoading] = useState(false);
   const colors = useThemeColors();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
 
   // Note: BottomSheet uses Reanimated which doesn't support PlatformColor objects.
   // Use plain hex colors for BottomSheet backgrounds, PlatformColor for other native components.
@@ -129,6 +128,17 @@ export default function ProductDetail() {
           enableContentPanningGesture={false}
           backgroundStyle={{ backgroundColor: themedColors.background }}
           handleIndicatorStyle={{ backgroundColor: isDark ? '#4B5563' : '#CBD5E1' }}
+          backgroundComponent={({ style }) => (
+            <LiquidGlassView
+              style={style}
+              glassEffectStyle="regular"
+              fallbackColor={Platform.OS === 'ios'
+                ? (PlatformColor('secondarySystemBackground') as unknown as string)
+                : colors.surface}
+            >
+              {null}
+            </LiquidGlassView>
+          )}
         >
           <BottomSheetScrollView className="relative" style={{ backgroundColor: themedColors.background }}>
             {data && <ProductDetails product={data} />}

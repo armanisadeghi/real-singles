@@ -27,10 +27,9 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import Toast from "react-native-toast-message";
 import { useSafeArea, useBottomSpacing, useHeaderSpacing } from "@/hooks/useResponsive";
 import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES } from "@/constants/designTokens";
@@ -47,8 +46,7 @@ export default function Home() {
   const { minimal: headerTopPadding } = useHeaderSpacing();
 
   // Dark mode support
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -218,6 +216,7 @@ export default function Home() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1 bg-background"
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ paddingBottom: contentPadding }}
         refreshControl={
           <RefreshControl

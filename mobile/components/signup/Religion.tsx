@@ -1,6 +1,7 @@
 import { images } from "@/constants/images";
 import { RELIGION_OPTIONS } from "@/constants/options";
 import { signupProps } from "@/types";
+import * as Haptics from 'expo-haptics';
 import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import GradientButton from "../ui/GradientButton";
@@ -17,6 +18,7 @@ const Religion = ({ data, updateData, onNext, error }: signupProps) => {
     : [];
 
   const handleSelect = (value: string) => {
+    Haptics.selectionAsync();
     let updatedReligions: string[];
 
     if (selectedReligions.includes(value)) {
@@ -55,7 +57,7 @@ const Religion = ({ data, updateData, onNext, error }: signupProps) => {
   // };
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
     <View className="mt-20 px-6 w-full">
       <View className="flex-row items-center justify-between px-2">
         <View className="">

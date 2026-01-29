@@ -4,7 +4,7 @@ import { getProfileLink, APP_NAME } from "@/lib/config";
 import { User } from "@/types";
 import { removeToken } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -18,7 +18,6 @@ import {
   Share,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -43,8 +42,7 @@ export default function ProfileDetails({
   const [expanded, setExpanded] = useState(false);
   const router = useRouter();
   const [loadingLogout, setLoadingLogout] = useState(false);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -192,6 +190,7 @@ console.log("profile?.Height",profile?.Height);
     <ScrollView 
       className="px-4 mt-2"
       keyboardShouldPersistTaps="handled"
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
         flexGrow: 1, // fill the screen
       }}

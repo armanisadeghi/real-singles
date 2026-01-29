@@ -1,6 +1,7 @@
 import NotificationBell from "@/components/NotificationBell";
 import ProfileDetails from "@/components/ProfileDetails";
 import { PlatformIcon } from "@/components/ui";
+import { LiquidGlassView } from "@/components/ui/LiquidGlass";
 import ProfileImageHeader from "@/components/ui/ProfileImageHeader";
 import { BACKGROUND_COLORS } from "@/components/ui/ProfileCard";
 import { icons } from "@/constants/icons";
@@ -20,20 +21,18 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View
 } from "react-native";
 import Animated, { useSharedValue, withSpring, useAnimatedStyle, withSequence } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 export default function ProfileDetail() {
   const navState = useNavigationState((state) => state);
   const canGoBack = navState?.routes?.length > 1;
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   // Note: BottomSheet uses Reanimated which doesn't support PlatformColor objects.
@@ -388,6 +387,17 @@ export default function ProfileDetail() {
         enableContentPanningGesture={true}
         backgroundStyle={{ backgroundColor: themedColors.background }}
         handleIndicatorStyle={{ backgroundColor: isDark ? '#4B5563' : '#CBD5E1' }}
+        backgroundComponent={({ style }) => (
+          <LiquidGlassView
+            style={style}
+            glassEffectStyle="regular"
+            fallbackColor={Platform.OS === 'ios'
+              ? (PlatformColor('secondarySystemBackground') as unknown as string)
+              : colors.surface}
+          >
+            {null}
+          </LiquidGlassView>
+        )}
       >
         <BottomSheetView style={{ backgroundColor: themedColors.background }}> 
           {profile && (

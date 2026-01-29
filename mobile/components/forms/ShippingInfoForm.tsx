@@ -1,7 +1,7 @@
 import { acceptOrderRedeemPoints } from "@/lib/api";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import React, { useState } from "react";
-import { Platform, PlatformColor, StyleSheet, Text, TextInput, View, useColorScheme } from "react-native";
+import { Platform, PlatformColor, StyleSheet, Text, TextInput, View } from "react-native";
 import Toast from "react-native-toast-message";
 import GradientButton from "../ui/GradientButton";
 
@@ -28,8 +28,7 @@ interface ShippingInfoFormProps {
 }
 
 export default function ShippingInfoForm({ productId, selectedUsers, redeemForYou, productPoints, onSubmitSuccess }: ShippingInfoFormProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {

@@ -17,11 +17,10 @@ import {
   View,
   Image,
   Alert,
-  useColorScheme,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 interface SpeedDatingSession {
   id: string;
@@ -48,8 +47,7 @@ export default function SpeedDatingDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
   
   // Theme-aware colors
@@ -316,7 +314,7 @@ export default function SpeedDatingDetailScreen() {
         <NotificationBell />
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentInsetAdjustmentBehavior="automatic">
         {/* Image */}
         <View className="aspect-video bg-gradient-to-br from-purple-400 to-pink-500">
           {session.image_url ? (

@@ -5,7 +5,7 @@ import { User } from "@/types";
 import { authenticateForAccountDeletion, shouldUseBiometrics } from "@/utils/biometrics";
 import { IMAGE_URL, MEDIA_BASE_URL, removeToken } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
@@ -21,7 +21,6 @@ import {
   Switch,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -37,8 +36,7 @@ export default function Settings() {
   const [profileHidden, setProfileHidden] = useState(false);
   const [pauseLoading, setPauseLoading] = useState(false);
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
   
   const themedColors = useMemo(() => ({
@@ -357,7 +355,7 @@ export default function Settings() {
             />
           </Modal>}
 
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1 }} contentInsetAdjustmentBehavior="automatic">
           <View style={{ alignItems: 'center', marginTop: 32, marginBottom: 24 }}>
             <View style={{ borderRadius: 50, overflow: 'hidden', borderWidth: 2, borderColor: '#B06D1E' }}>
 

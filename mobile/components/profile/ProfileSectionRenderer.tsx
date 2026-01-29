@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from "react";
-import { Platform, PlatformColor, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { Platform, PlatformColor, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { PlatformIcon } from "@/components/ui";
 import {
@@ -16,7 +16,7 @@ import {
   VERTICAL_SPACING,
 } from "@/constants/designTokens";
 import { User } from "@/types";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 // Values to hide - null, undefined, empty, or "prefer not to say" variations
 const HIDDEN_VALUES = [
@@ -103,8 +103,7 @@ export default function ProfileSectionRenderer({
   showFull = true,
 }: ProfileSectionRendererProps) {
   // Dark mode support
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
   
   // Theme-aware colors using iOS PlatformColor for automatic adaptation

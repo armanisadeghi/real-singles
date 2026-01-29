@@ -1,15 +1,15 @@
 import { images } from "@/constants/images";
 import { BODY_TYPE_OPTIONS } from "@/constants/options";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { signupProps } from "@/types";
 import Slider from "@react-native-community/slider";
+import * as Haptics from 'expo-haptics';
 import React, { useState } from "react";
-import { Image, Platform, PlatformColor, ScrollView, Text, TouchableOpacity, View, useColorScheme } from "react-native";
+import { Image, Platform, PlatformColor, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 const Appearance = ({ data, updateData, onNext, error }: signupProps) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -23,6 +23,7 @@ const Appearance = ({ data, updateData, onNext, error }: signupProps) => {
 
 
   const handleSelect = (value: string) => {
+  Haptics.selectionAsync();
   let updatedSelection = Array.isArray(data?.BodyType) ? [...data.BodyType] : [];
 
   if (updatedSelection.includes(value)) {
@@ -75,7 +76,7 @@ const handleNext = () => {
   // };
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
     <View className="mt-20 px-6 w-full">
       <View className="flex-row items-center justify-between px-2">
         <View className="">

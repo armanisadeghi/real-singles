@@ -15,7 +15,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -31,7 +30,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import Toast from "react-native-toast-message";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 import PhotoCarousel from "@/components/ui/PhotoCarousel";
 import ProfileSectionRenderer from "@/components/profile/ProfileSectionRenderer";
@@ -70,8 +69,7 @@ export default function DiscoveryProfileView() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = useMemo(() => ({

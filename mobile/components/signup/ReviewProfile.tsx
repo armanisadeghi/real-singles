@@ -1,5 +1,6 @@
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
+import * as Haptics from 'expo-haptics';
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
@@ -11,7 +12,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  useColorScheme
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -33,8 +33,7 @@ const ReviewProfile = ({
   error,
   isSubmitted,
 }: ReviewProfileProps) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -74,7 +73,7 @@ const ReviewProfile = ({
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView className="px-4 mt-16 pb-16">
+      <ScrollView className="px-4 mt-16 pb-16" contentInsetAdjustmentBehavior="automatic">
         <Text className="text-2xl font-bold text-primary text-center mb-6">
           Review Your Profile
         </Text>
@@ -197,7 +196,10 @@ const ReviewProfile = ({
 
         <View className="flex-row gap-4 mt-4 mb-20">
           <TouchableOpacity
-            onPress={onBack}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onBack();
+            }}
             className="flex-1 py-3 px-4 rounded-full border border-border bg-light-100"
           >
             <Text className="text-gray text-center font-medium">Go Back</Text>
@@ -205,7 +207,10 @@ const ReviewProfile = ({
 
           {!isSubmitted &&
             <TouchableOpacity
-              onPress={onSubmit}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onSubmit();
+              }}
               disabled={isLoading}
               activeOpacity={0.7}
               style={{

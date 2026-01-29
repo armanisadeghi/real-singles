@@ -90,6 +90,7 @@ export default function Notification() {
             contentContainerStyle={{ padding: 16 }}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={<EmptyNotifications />}
+            contentInsetAdjustmentBehavior="automatic"
           />
         </View>
       </View>

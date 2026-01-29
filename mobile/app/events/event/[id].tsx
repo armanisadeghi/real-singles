@@ -5,12 +5,11 @@ import { EventCardProps } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import { addEventToCalendar } from "@/utils/permissions";
 import { PlatformIcon } from "@/components/ui";
+import { LiquidGlassView } from "@/components/ui/LiquidGlass";
 import * as Haptics from "expo-haptics";
-import { BlurView } from "expo-blur";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
-  AccessibilityInfo,
   ActivityIndicator,
   Alert,
   Dimensions,
@@ -24,9 +23,9 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
+import { useIsDarkMode, useThemeColors } from "@/context/ThemeContext";
 import MapView, { Marker } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -44,13 +43,12 @@ export default function EventDetail() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = useIsDarkMode();
+  const themeColors = useThemeColors();
   const [data, setData] = useState<EventCardProps>();
   const [loading, setLoading] = useState(false);
   const [isRsvpLoading, setIsRsvpLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [reduceTransparency, setReduceTransparency] = useState(false);
 
   // Theme colors
   const colors = {
@@ -86,13 +84,6 @@ export default function EventDetail() {
     avatarMoreBg: isDark ? "#48484A" : "#E0E0E0",
     avatarMoreText: isDark ? "#FFFFFF" : "#666666",
   };
-
-  // Check accessibility preferences for reduced transparency
-  useEffect(() => {
-    if (Platform.OS === "ios") {
-      AccessibilityInfo.isReduceTransparencyEnabled().then(setReduceTransparency);
-    }
-  }, []);
 
   // Generate consistent background color for events without images
   const bgColor = useMemo(() => {
@@ -487,35 +478,22 @@ export default function EventDetail() {
 
         {/* Floating Action Bar */}
         <View style={[styles.actionBarContainer, { paddingBottom: Math.max(insets.bottom + 8, 20) }]}>
-          {Platform.OS === "ios" && !reduceTransparency ? (
-            <BlurView
-              intensity={100}
-              tint={isDark ? "systemChromeMaterialDark" : "systemChromeMaterial"}
-              style={styles.actionBar}
-            >
-              <ActionBarContent
-                isRegistered={isRegistered}
-                isRsvpLoading={isRsvpLoading}
-                onShare={handleShare}
-                onCalendar={handleAddToCalendar}
-                onDirections={handleOpenInMaps}
-                onRsvp={handleRsvp}
-                isDark={isDark}
-              />
-            </BlurView>
-          ) : (
-            <View style={[styles.actionBar, styles.actionBarSolid, { backgroundColor: colors.secondaryBackground }]}>
-              <ActionBarContent
-                isRegistered={isRegistered}
-                isRsvpLoading={isRsvpLoading}
-                onShare={handleShare}
-                onCalendar={handleAddToCalendar}
-                onDirections={handleOpenInMaps}
-                onRsvp={handleRsvp}
-                isDark={isDark}
-              />
-            </View>
-          )}
+          <LiquidGlassView
+            style={styles.actionBar}
+            fallbackColor={Platform.OS === 'ios' ? undefined : themeColors.surface}
+            isInteractive={true}
+            glassEffectStyle="regular"
+          >
+            <ActionBarContent
+              isRegistered={isRegistered}
+              isRsvpLoading={isRsvpLoading}
+              onShare={handleShare}
+              onCalendar={handleAddToCalendar}
+              onDirections={handleOpenInMaps}
+              onRsvp={handleRsvp}
+              isDark={isDark}
+            />
+          </LiquidGlassView>
         </View>
       </View>
     </>

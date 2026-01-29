@@ -4,7 +4,7 @@ import { ScreenHeader, HeaderBackButton } from "@/components/ui/ScreenHeader";
 import { icons } from "@/constants/icons";
 import { SPACING, TYPOGRAPHY, ICON_SIZES } from "@/constants/designTokens";
 import { useCall } from "@/context/CallContext";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { getAgoraCallToken, blockUser, unblockUser, reportUser } from "@/lib/api";
 import { useChat } from "@/hooks/useSupabaseMessaging";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
@@ -15,13 +15,12 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState, useMemo } from "react";
-import { ActionSheetIOS, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, PlatformColor, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View } from "react-native";
+import { ActionSheetIOS, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, PlatformColor, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function ChatDetail() {
   const { userid: peerId, name, image, online, time } = useLocalSearchParams<{ userid: string, name: string, image: string, online: string, time: string }>();
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
   
   const themedColors = useMemo(() => ({

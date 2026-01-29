@@ -1,7 +1,7 @@
-import { useThemeColors } from '@/context/ThemeContext';
+import { useThemeColors, useIsDarkMode } from '@/context/ThemeContext';
 import { IMAGE_URL, MEDIA_BASE_URL } from '@/utils/token';
 import React, { memo } from 'react';
-import { Image, Platform, PlatformColor, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { Image, Platform, PlatformColor, ScrollView, Text, View } from 'react-native';
 
 interface Message {
   id: string;
@@ -18,8 +18,7 @@ interface ConversationProps {
 }
 
 const Conversation = ({ messages, currentUserId, contact }: ConversationProps) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -63,6 +62,7 @@ const Conversation = ({ messages, currentUserId, contact }: ConversationProps) =
   return (
     <ScrollView
       className="flex-1 px-4 py-4"
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ paddingBottom: 200 }}
       showsVerticalScrollIndicator={false}
     >

@@ -16,9 +16,9 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
+import { useIsDarkMode } from "@/context/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
 import Toast from "react-native-toast-message";
 
@@ -45,8 +45,7 @@ interface SpeedDatingSession {
 
 export default function SpeedDatingDetailScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = useIsDarkMode();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { contentPadding } = useBottomSpacing(true);
   

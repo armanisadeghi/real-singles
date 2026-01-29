@@ -14,13 +14,13 @@
  */
 
 import React, { ReactNode, useCallback } from "react";
-import { View, Text, TouchableOpacity, Platform, StyleSheet, ViewStyle, PlatformColor, useColorScheme } from "react-native";
+import { View, Text, TouchableOpacity, Platform, StyleSheet, ViewStyle, PlatformColor } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { PlatformIcon } from "./PlatformIcon";
 import { TYPOGRAPHY, SPACING, VERTICAL_SPACING, ICON_SIZES, SHADOWS, BORDER_RADIUS, Z_INDEX } from "@/constants/designTokens";
-import { LiquidGlassHeader } from "./LiquidGlass";
-import { useThemeColors } from "@/context/ThemeContext";
+import { LiquidGlassHeader, useLiquidGlass } from "./LiquidGlass";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 export interface ScreenHeaderProps {
   /** Screen title displayed in the center-left */
@@ -47,7 +47,7 @@ export interface ScreenHeaderProps {
   style?: ViewStyle;
   /** Whether to use absolute positioning (for overlay headers) */
   absolute?: boolean;
-  /** Use Liquid Glass effect on iOS (default: false) */
+  /** Use Liquid Glass effect on iOS (default: true on iOS 26+, false otherwise) */
   liquidGlass?: boolean;
 }
 
@@ -55,8 +55,6 @@ export interface ScreenHeaderProps {
  * Standard back button component used across all screens
  */
 export const HeaderBackButton = ({ onPress }: { onPress?: () => void }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
   const colors = useThemeColors();
   
   const handlePress = useCallback(() => {
@@ -121,12 +119,12 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   transparent = false,
   style,
   absolute = false,
-  liquidGlass = false,
+  liquidGlass,
 }) => {
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
+  const { showGlass: glassAvailable } = useLiquidGlass();
   
   // Theme-aware default background color
   const defaultBgColor = Platform.OS === 'ios'
@@ -143,7 +141,8 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   const headerHeight = Platform.OS === "ios" ? 44 : 56;
   
   // Determine if we should use Liquid Glass
-  const useGlass = liquidGlass && Platform.OS === 'ios';
+  // Default to true on iOS 26+ when Liquid Glass is available, unless explicitly disabled
+  const useGlass = Platform.OS === 'ios' && (liquidGlass ?? glassAvailable);
   
   const containerStyle: ViewStyle[] = [
     styles.container,

@@ -1,6 +1,6 @@
 import GradientButton from "@/components/ui/GradientButton";
 import { icons } from "@/constants/icons";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { getReferralLink, APP_NAME } from "@/lib/config";
 import { useAuth } from "@/utils/authContext";
 import * as Clipboard from "expo-clipboard";
@@ -15,14 +15,12 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View
 } from "react-native";
 
 export default function Refer() {
   const { user } = useAuth();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {

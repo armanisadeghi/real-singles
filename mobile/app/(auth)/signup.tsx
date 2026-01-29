@@ -27,8 +27,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, BackHandler, Platform, PlatformColor, ScrollView, Text, useColorScheme, View } from "react-native";
-import { useThemeColors } from "@/context/ThemeContext";
+import { ActivityIndicator, BackHandler, Platform, PlatformColor, ScrollView, Text, View } from "react-native";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 const getSections = (signupData: any, updateSignupData: any, goToNextSection: any, sectionError: any) => [
   {
@@ -253,8 +253,7 @@ const Signup = () => {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const router = useRouter();
   
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -567,7 +566,7 @@ const Signup = () => {
 
   if (loading) {
     return (
-      <ScrollView className="flex-1 bg-background">
+      <ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
         <View className="flex-1 items-center justify-center h-screen">
           <ActivityIndicator size="large" color="#B06D1E" />
           <Text className="mt-4 text-gray-600">Creating your profile...</Text>

@@ -1,6 +1,7 @@
 import ProfileDetails from "@/components/ProfileDetails";
 import SideMenu from "@/components/SidebarMenu";
 import ProfileImageHeader from "@/components/ui/ProfileImageHeader";
+import { LiquidGlassView } from "@/components/ui/LiquidGlass";
 import { icons } from "@/constants/icons";
 import { getProfile } from "@/lib/api";
 import { User } from "@/types";
@@ -22,10 +23,9 @@ import {
   PlatformColor,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View
 } from "react-native";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CircularProgress from "react-native-circular-progress-indicator";
 
@@ -39,8 +39,7 @@ export default function Profile() {
   const router = useRouter();
 
   // Dark mode support
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   // Note: BottomSheet uses Reanimated which doesn't support PlatformColor objects.
@@ -235,6 +234,17 @@ export default function Profile() {
         onChange={handleSheetChanges}
         backgroundStyle={{ backgroundColor: themedColors.background }}
         handleIndicatorStyle={{ backgroundColor: isDark ? '#4B5563' : '#CBD5E1' }}
+        backgroundComponent={({ style }) => (
+          <LiquidGlassView
+            style={style}
+            glassEffectStyle="regular"
+            fallbackColor={Platform.OS === 'ios'
+              ? (PlatformColor('secondarySystemBackground') as unknown as string)
+              : colors.surface}
+          >
+            {null}
+          </LiquidGlassView>
+        )}
       >
         <BottomSheetScrollView style={{ backgroundColor: themedColors.background }}>
           {profile ? (

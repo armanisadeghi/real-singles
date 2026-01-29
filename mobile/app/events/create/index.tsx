@@ -1,5 +1,5 @@
 import { createEvent } from "@/lib/api";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
 import React, { useState, useCallback, useMemo } from "react";
@@ -13,7 +13,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,8 +22,7 @@ import { SymbolView } from "expo-symbols";
 export default function CreateEvent() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
   
   const themedColors = useMemo(() => ({
@@ -161,6 +159,7 @@ export default function CreateEvent() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
       >
         <View style={{ paddingHorizontal: 16, paddingVertical: 24 }}>
           {/* Event Name */}

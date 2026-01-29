@@ -4,7 +4,7 @@ import { EventCardProps } from "@/types";
 import { addEventToCalendar } from "@/utils/permissions";
 import { VIDEO_URL } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -18,7 +18,6 @@ import {
   Share,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
   ActivityIndicator,
 } from "react-native";
@@ -78,8 +77,7 @@ export default function EventDetails({
   const [mapModalVisible, setMapModalVisible] = useState(false);
   const [isRsvpLoading, setIsRsvpLoading] = useState(false);
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {

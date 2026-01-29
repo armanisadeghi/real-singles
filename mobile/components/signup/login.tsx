@@ -1,9 +1,10 @@
 import { icons } from "@/constants/icons";
 import { supabase } from "@/lib/supabase";
 import { PlatformIcon } from "@/components/ui";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
+import * as Haptics from 'expo-haptics';
 import React, { useState } from "react";
-import { Image, Modal, Platform, PlatformColor, ScrollView, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
+import { Image, Modal, Platform, PlatformColor, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Pdf from "react-native-pdf";
 import { WebView } from "react-native-webview";
@@ -15,8 +16,7 @@ const SignupLogin = ({
   onNext,
   error,
 }: any) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -102,7 +102,7 @@ const SignupLogin = ({
 
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
     <View className="mt-20 px-6 w-full">
       <View className="flex-row justify-between items-center">
         <View className="w-3/4">
@@ -130,7 +130,10 @@ const SignupLogin = ({
                 ? "Privacy Policy"
                 : "Terms & Conditions"}
             </Text>
-            <TouchableOpacity onPress={() => setVisible(false)}>
+            <TouchableOpacity onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setVisible(false);
+            }}>
               <PlatformIcon name="close" size={24} color="#666" />
             </TouchableOpacity>
           </View>
@@ -155,7 +158,10 @@ const SignupLogin = ({
       <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
         <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-300">
           <Text className="text-lg font-semibold">{webViewTitle}</Text>
-          <TouchableOpacity onPress={() => setShowWebView(false)}>
+          <TouchableOpacity onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowWebView(false);
+          }}>
             <PlatformIcon name="close" size={24} color="#000" />
           </TouchableOpacity>
         </View>
@@ -238,7 +244,10 @@ const SignupLogin = ({
               importantForAutofill="yes"
               textContentType="newPassword"
             />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <TouchableOpacity onPress={() => {
+              Haptics.selectionAsync();
+              setShowPassword(!showPassword);
+            }}>
               <Image 
                 source={
                   showPassword 
@@ -278,7 +287,10 @@ const SignupLogin = ({
               importantForAutofill="yes"
               textContentType="newPassword"
             />
-            <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+            <TouchableOpacity onPress={() => {
+              Haptics.selectionAsync();
+              setShowConfirmPassword(!showConfirmPassword);
+            }}>
               <Image 
                 source={
                   showConfirmPassword 
@@ -316,7 +328,10 @@ const SignupLogin = ({
    {Platform.OS == 'ios' ?
 
     <View style={{ flexDirection: "row", alignItems: "center", marginTop: 20,  }}>
-      <TouchableOpacity onPress={() => setChecked(!checked)}>
+      <TouchableOpacity onPress={() => {
+        Haptics.selectionAsync();
+        setChecked(!checked);
+      }}>
         {checked ? (
           <PlatformIcon name="check-box" size={28} color="#C07618" />
         ) : (
@@ -345,7 +360,10 @@ const SignupLogin = ({
 
    :
    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 20 , marginRight: 5}}>
-      <TouchableOpacity onPress={() => setChecked(!checked)}>
+      <TouchableOpacity onPress={() => {
+        Haptics.selectionAsync();
+        setChecked(!checked);
+      }}>
         {checked ? (
           <PlatformIcon name="check-box" size={28} color="#C07618" />
         ) : (

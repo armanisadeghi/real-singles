@@ -1,9 +1,10 @@
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import { ICON_SIZES, SPACING } from "@/constants/designTokens";
+import { useIsDarkMode } from "@/context/ThemeContext";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
-import { Platform, PlatformColor, TouchableOpacity, useColorScheme } from "react-native";
+import { Platform, PlatformColor, TouchableOpacity } from "react-native";
 import LinearBg from "./LinearBg";
 
 interface NotificationBellProps {
@@ -23,8 +24,7 @@ export default function NotificationBell({
   showBackground = true 
 }: NotificationBellProps) {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   
   const handlePress = useCallback(() => {
     // Haptic feedback for navigation - light tap

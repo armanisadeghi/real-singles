@@ -1,9 +1,10 @@
 import { IMAGE_URL } from "@/utils/token";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { useVideoPlayer, VideoView } from "expo-video";
+import * as Haptics from 'expo-haptics';
 import React, { useState, useEffect } from "react";
-import { Image, Platform, PlatformColor, Pressable, useColorScheme, View } from "react-native";
+import { Image, Platform, PlatformColor, Pressable, View } from "react-native";
 
 interface MediaItemProps {
   item: string;
@@ -20,8 +21,7 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
   const mediaUri = isLocalFile || isFullUrl ? item : IMAGE_URL + item;
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -79,6 +79,7 @@ const MediaItem: React.FC<MediaItemProps> = ({ item, itemWidth }) => {
 
   const togglePlayback = () => {
     if (!player) return;
+    Haptics.selectionAsync();
     if (isPlaying) {
       player.pause();
     } else {

@@ -1,6 +1,6 @@
 import { icons } from "@/constants/icons";
 import { PlatformIcon } from "@/components/ui";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -10,7 +10,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
 import Animated, {
@@ -29,8 +28,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [toggledMenu, setToggledMenu] = useState(false);
 
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {

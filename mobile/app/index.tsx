@@ -1,19 +1,18 @@
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { useAuth } from "@/utils/authContext";
 import * as SplashScreen from "expo-splash-screen";
 import { useRouter } from "expo-router";
 import { useEffect, useState, useRef } from "react";
-import { Image, Platform, PlatformColor, ScrollView, StatusBar, View, useColorScheme } from "react-native";
+import { Image, Platform, PlatformColor, ScrollView, StatusBar, View } from "react-native";
 
 export default function Index() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [minDelayPassed, setMinDelayPassed] = useState(false);
   const hasNavigated = useRef(false);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {

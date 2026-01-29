@@ -17,14 +17,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   View
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Pdf from "react-native-pdf";
 import Toast from "react-native-toast-message";
 import { WebView } from "react-native-webview";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -37,8 +36,7 @@ const Login = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {

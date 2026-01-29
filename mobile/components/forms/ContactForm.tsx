@@ -1,5 +1,6 @@
 import { contactUs } from "@/lib/api";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
+import * as Haptics from 'expo-haptics';
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -11,7 +12,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 import LinearBg from "../LinearBg";
 
@@ -32,8 +32,7 @@ export const Label = ({ text, marginLeft }: { text: string, marginLeft?: string 
 );
 
 export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -165,7 +164,10 @@ export default function ContactForm({showMsg} : {showMsg?: (res: any) => void}) 
         </View>
       </View>
       <TouchableOpacity
-        onPress={handleSubmit}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          handleSubmit();
+        }}
         className="w-full mx-auto shadow-lg shadow-white rounded-[99] mt-10 mb-20 overflow-hidden"
       >
         <LinearBg className="px-6 py-5">

@@ -1,4 +1,5 @@
 import { ProductCardProps } from "@/types";
+import * as Haptics from 'expo-haptics';
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -30,7 +31,10 @@ export default function ProductDetails({ product }: { product: ProductCardProps 
 
           {product?.Description?.length > 120 && (
             <TouchableOpacity
-              onPress={() => setExpanded(!expanded)}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setExpanded(!expanded);
+              }}
               className="mt-1"
             >
               <Text className="text-[12px] text-primary font-normal leading-3 underline">

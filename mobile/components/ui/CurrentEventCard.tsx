@@ -5,8 +5,8 @@ import { PlatformIcon } from "./PlatformIcon";
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
-import { Image, Platform, PlatformColor, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
-import { useThemeColors } from "@/context/ThemeContext";
+import { Image, Platform, PlatformColor, Text, TouchableOpacity, View } from 'react-native';
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 // Array of background colors for random backgrounds
 const BACKGROUND_COLORS = [
@@ -31,8 +31,7 @@ const CurrentEventCard = ({currentEvent, currUserId}: {currentEvent: EventCardPr
   console.log("Current Event Card Props:", currentEvent);
   
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {

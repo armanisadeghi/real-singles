@@ -41,10 +41,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import Animated, { 
   useSharedValue, 
   withSpring, 
@@ -117,8 +116,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
   const [changingPassword, setChangingPassword] = useState(false);
 
   // Dark mode support
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   // Theme-aware colors

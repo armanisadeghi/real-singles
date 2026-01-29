@@ -20,7 +20,6 @@ import {
   StyleSheet,
   View,
   ViewToken,
-  useColorScheme,
   useWindowDimensions,
 } from "react-native";
 import { Image } from "expo-image";
@@ -29,7 +28,7 @@ import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";
 import FullScreenImageViewer from "./FullScreenImageViewer";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 interface PhotoCarouselProps {
   /** Array of image URLs */
@@ -73,8 +72,7 @@ export default function PhotoCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isViewerVisible, setIsViewerVisible] = useState(false);
   const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
   
   // Theme-aware placeholder colors
@@ -193,6 +191,7 @@ export default function PhotoCarousel({
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         bounces={false}
+        contentInsetAdjustmentBehavior="automatic"
         onMomentumScrollEnd={handleMomentumScrollEnd}
         onViewableItemsChanged={handleViewableItemsChanged}
         viewabilityConfig={{

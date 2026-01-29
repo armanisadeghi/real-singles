@@ -306,6 +306,7 @@ export default function AppGallery() {
               keyExtractor={(item, index) => `${index}`}
               columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 20, }}
               contentContainerStyle={{ paddingHorizontal: horizontalPadding, }}
+              contentInsetAdjustmentBehavior="automatic"
             />
           </View>
         )}

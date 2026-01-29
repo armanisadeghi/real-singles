@@ -657,13 +657,12 @@ import {
   Text,
   TouchableOpacity,
   View,
-  useColorScheme,
   useWindowDimensions,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { moderateScale, scale, verticalScale } from "react-native-size-matters";
 import { useDeviceSize } from "@/hooks/useResponsive";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import GradientButton from "../ui/GradientButton";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
 
@@ -671,8 +670,7 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const { gridColumns } = useDeviceSize();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -898,6 +896,7 @@ const TakePhoto = ({ data, updateData, onNext, error }: signupProps) => {
               data={images}
               numColumns={gridColumns}
               keyExtractor={(item, index) => index.toString()}
+              contentInsetAdjustmentBehavior="automatic"
               columnWrapperStyle={{ justifyContent: "space-between" }}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: verticalScale(70) }}

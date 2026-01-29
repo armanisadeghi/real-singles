@@ -10,12 +10,12 @@ import {
   PlatformColor,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
 import { SymbolView } from "expo-symbols";
 import { SPACING } from "@/constants/designTokens";
 import { useCardDimensions } from "@/hooks/useResponsive";
+import { useIsDarkMode } from "@/context/ThemeContext";
 
 interface EventCardComponentProps {
   event: EventCardProps;
@@ -32,8 +32,7 @@ interface EventCardComponentProps {
  */
 export function EventCard({ event }: EventCardComponentProps) {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = useIsDarkMode();
   
   // Match ProfileCard width for consistent horizontal scroll layout
   const { width: cardWidth } = useCardDimensions(2, 1.18);
@@ -207,8 +206,7 @@ export function EventCard({ event }: EventCardComponentProps) {
  */
 export function EventCardSkeleton() {
   const { width: cardWidth } = useCardDimensions(2, 1.18);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = useIsDarkMode();
   
   // Theme-aware skeleton colors
   const skeletonBg = Platform.OS === "ios"

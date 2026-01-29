@@ -24,23 +24,22 @@
  * </FloatingActionBar>
  */
 
-import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext } from "react";
 import {
-  AccessibilityInfo,
   ActivityIndicator,
   Platform,
   PlatformColor,
   Pressable,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
   ViewStyle,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useIsDarkMode, useThemeColors } from "@/context/ThemeContext";
 import { PlatformIcon } from "./PlatformIcon";
+import { LiquidGlassView } from "./LiquidGlass";
 
 // Context for sharing theme colors
 const ActionBarContext = createContext<{
@@ -79,23 +78,8 @@ interface PrimaryButtonProps {
 // Main FloatingActionBar component
 function FloatingActionBar({ children, style }: FloatingActionBarProps) {
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-  const [reduceTransparency, setReduceTransparency] = useState(false);
-
-  // Check accessibility preferences for reduced transparency
-  useEffect(() => {
-    if (Platform.OS === "ios") {
-      AccessibilityInfo.isReduceTransparencyEnabled().then(setReduceTransparency);
-    }
-  }, []);
-
-  // Theme colors
-  const colors = {
-    secondaryBackground: Platform.OS === "ios"
-      ? PlatformColor("secondarySystemBackground") as unknown as string
-      : isDark ? "#1C1C1E" : "#F5F5F5",
-  };
+  const isDark = useIsDarkMode();
+  const colors = useThemeColors();
 
   const iconColor = Platform.OS === "ios"
     ? (PlatformColor("systemBlue") as unknown as string)
@@ -126,19 +110,14 @@ function FloatingActionBar({ children, style }: FloatingActionBarProps) {
 
   return (
     <View style={[containerStyle, style]}>
-      {Platform.OS === "ios" && !reduceTransparency ? (
-        <BlurView
-          intensity={100}
-          tint={isDark ? "systemChromeMaterialDark" : "systemChromeMaterial"}
-          style={styles.actionBar}
-        >
-          {ActionBarContent}
-        </BlurView>
-      ) : (
-        <View style={[styles.actionBar, styles.actionBarSolid, { backgroundColor: colors.secondaryBackground }]}>
-          {ActionBarContent}
-        </View>
-      )}
+      <LiquidGlassView
+        style={styles.actionBar}
+        fallbackColor={Platform.OS === 'ios' ? undefined : colors.surface}
+        isInteractive={true}
+        glassEffectStyle="regular"
+      >
+        {ActionBarContent}
+      </LiquidGlassView>
     </View>
   );
 }

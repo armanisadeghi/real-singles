@@ -15,11 +15,10 @@ import {
   ImageSourcePropType,
   Platform,
   PlatformColor,
-  useColorScheme,
 } from "react-native";
 import { COMPONENT_SIZES, TYPOGRAPHY, BORDER_RADIUS } from "@/constants/designTokens";
 import { getImageUrl } from "@/utils/token";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 
 type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 
@@ -145,8 +144,7 @@ export function Avatar({
 }: AvatarProps) {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
   
   // Theme-aware colors for online indicator

@@ -14,13 +14,12 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
-    useColorScheme
+    View
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { useThemeColors } from '@/context/ThemeContext';
+import { useThemeColors, useIsDarkMode } from '@/context/ThemeContext';
 // Import Agora SDK
 import {
     ChannelProfileType,
@@ -36,8 +35,7 @@ import {
 const Call = () => {
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const colorScheme = useColorScheme();
-    const isDark = colorScheme === 'dark';
+    const isDark = useIsDarkMode();
     const colors = useThemeColors();
     
     // Theme-aware colors for debug screen

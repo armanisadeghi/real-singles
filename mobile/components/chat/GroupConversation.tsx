@@ -1,6 +1,6 @@
-import { useThemeColors } from '@/context/ThemeContext';
+import { useThemeColors, useIsDarkMode } from '@/context/ThemeContext';
 import React, { memo } from 'react';
-import { Platform, PlatformColor, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { Platform, PlatformColor, ScrollView, Text, View } from 'react-native';
 
 interface Message {
   id: string;
@@ -16,8 +16,7 @@ interface GroupConversationProps {
 }
 
 const GroupConversation = ({ messages, currentUserId }: GroupConversationProps) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -48,6 +47,7 @@ const GroupConversation = ({ messages, currentUserId }: GroupConversationProps) 
   return (
     <ScrollView
       className="flex-1 px-4 py-4"
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ paddingBottom: 200 }}
       showsVerticalScrollIndicator={false}
     >

@@ -1,19 +1,18 @@
 import { images } from "@/constants/images";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
-import { useThemeColors } from "@/context/ThemeContext";
+import { useThemeColors, useIsDarkMode } from "@/context/ThemeContext";
 import { useDeviceSize } from "@/hooks/useResponsive";
 import { signupProps } from "@/types";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, Image, Platform, PlatformColor, ScrollView, Text, TouchableOpacity, View, useColorScheme, useWindowDimensions } from "react-native";
+import { FlatList, Image, Platform, PlatformColor, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import GradientButton from "../ui/GradientButton";
 
 const ChooseInterests = ({ data, updateData, onNext, error }: signupProps) => {
   const { width: screenWidth } = useWindowDimensions();
   const { gridColumns } = useDeviceSize();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = useIsDarkMode();
   const colors = useThemeColors();
 
   const themedColors = {
@@ -95,7 +94,7 @@ const ChooseInterests = ({ data, updateData, onNext, error }: signupProps) => {
   const cardWidth = useMemo(() => (screenWidth - 60 - 12 * (gridColumns - 1)) / gridColumns, [screenWidth, gridColumns]);
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
     <View className="mt-20 px-6 w-full">
       <View className="flex-row items-center justify-between gap-7 px-2">
         <View className="flex-1">
@@ -115,6 +114,7 @@ const ChooseInterests = ({ data, updateData, onNext, error }: signupProps) => {
           key={`interests-${gridColumns}`}
           data={chooseInterestsOptions}
           numColumns={gridColumns}
+          contentInsetAdjustmentBehavior="automatic"
           columnWrapperStyle={{
             justifyContent: "space-between",
             marginBottom: 12
