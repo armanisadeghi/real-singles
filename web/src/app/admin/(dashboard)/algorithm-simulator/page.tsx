@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { Play, RefreshCw, Settings2, FlaskConical } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { UserSelector } from "./components/UserSelector";
@@ -99,6 +100,9 @@ interface SimulationResult {
 }
 
 export default function AlgorithmSimulatorPage() {
+  const searchParams = useSearchParams();
+  const initialUserId = searchParams.get("user_id");
+  
   const [selectedUser, setSelectedUser] = useState<UserOption | null>(null);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<Algorithm>("discover-profiles");
   const [filters, setFilters] = useState<Filters>({});
@@ -191,6 +195,7 @@ export default function AlgorithmSimulatorPage() {
               <UserSelector
                 selectedUser={selectedUser}
                 onSelectUser={setSelectedUser}
+                initialUserId={initialUserId}
               />
             </div>
           </section>

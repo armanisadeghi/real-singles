@@ -278,6 +278,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
+    const userId = searchParams.get("user_id"); // Support fetching a specific user
     const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
 
     const supabase = createAdminClient();
@@ -299,8 +300,12 @@ export async function GET(request: NextRequest) {
       .order("updated_at", { ascending: false })
       .limit(limit);
 
+    // Fetch specific user by ID if provided
+    if (userId) {
+      query = query.eq("user_id", userId);
+    }
     // Apply search filter if provided
-    if (search) {
+    else if (search) {
       query = query.or(
         `first_name.ilike.%${search}%,last_name.ilike.%${search}%,users.email.ilike.%${search}%,users.display_name.ilike.%${search}%`
       );

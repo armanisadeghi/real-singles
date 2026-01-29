@@ -22,14 +22,42 @@ interface UserOption {
 interface UserSelectorProps {
   selectedUser: UserOption | null;
   onSelectUser: (user: UserOption | null) => void;
+  initialUserId?: string | null;
 }
 
-export function UserSelector({ selectedUser, onSelectUser }: UserSelectorProps) {
+export function UserSelector({ selectedUser, onSelectUser, initialUserId }: UserSelectorProps) {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(!!initialUserId);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch initial user if initialUserId is provided
+  useEffect(() => {
+    if (!initialUserId || selectedUser) return;
+
+    const fetchInitialUser = async () => {
+      setInitialLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.set("user_id", initialUserId);
+
+        const response = await fetch(`/api/admin/algorithm-simulator?${params}`);
+        const data = await response.json();
+        
+        if (data.success && data.users.length > 0) {
+          onSelectUser(data.users[0]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch initial user:", error);
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    fetchInitialUser();
+  }, [initialUserId, selectedUser, onSelectUser]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -85,6 +113,18 @@ export function UserSelector({ selectedUser, onSelectUser }: UserSelectorProps) 
     if (!lookingFor || lookingFor.length === 0) return "Not set";
     return lookingFor.map(g => g.charAt(0).toUpperCase() + g.slice(1)).join(", ");
   };
+
+  if (initialLoading) {
+    return (
+      <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+        <div className="w-16 h-16 rounded-2xl bg-slate-200 animate-pulse" />
+        <div className="flex-1 space-y-2">
+          <div className="h-5 w-32 bg-slate-200 rounded animate-pulse" />
+          <div className="h-4 w-48 bg-slate-200 rounded animate-pulse" />
+        </div>
+      </div>
+    );
+  }
 
   if (selectedUser) {
     return (
