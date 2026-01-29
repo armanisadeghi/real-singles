@@ -63,7 +63,7 @@ async function getPublicEvents(): Promise<PublicEvent[]> {
     const baseUrl = getBaseUrl();
     
     const res = await fetch(`${baseUrl}/api/public/events?limit=12`, {
-      cache: "no-store", // Always fetch fresh data
+      next: { revalidate: 300 }, // Revalidate every 5 minutes
     });
 
     if (!res.ok) {
@@ -84,7 +84,7 @@ async function getPublicSpeedDating(): Promise<PublicSpeedDating[]> {
     const baseUrl = getBaseUrl();
     
     const res = await fetch(`${baseUrl}/api/public/speed-dating?limit=12`, {
-      cache: "no-store",
+      next: { revalidate: 300 }, // Revalidate every 5 minutes
     });
 
     if (!res.ok) {
