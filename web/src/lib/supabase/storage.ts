@@ -36,26 +36,12 @@ export const ALLOWED_IMAGE_MIME_TYPES = [
   "image/heif",
 ] as const;
 
-// File input accept string for images (use this in <input type="file" accept="...">)
-export const IMAGE_ACCEPT_STRING = ALLOWED_IMAGE_MIME_TYPES.join(",");
-
-// Allowed MIME types per bucket
-export const ALLOWED_MIME_TYPES = {
-  [STORAGE_BUCKETS.AVATARS]: ALLOWED_IMAGE_MIME_TYPES,
-  [STORAGE_BUCKETS.GALLERY]: [
-    ...ALLOWED_IMAGE_MIME_TYPES,
-    "video/mp4",
-    "video/quicktime",
-    "video/webm",
-    // Audio types for voice prompts
-    "audio/webm",
-    "audio/mp4",
-    "audio/mpeg",
-    "audio/ogg",
-    "audio/wav",
-  ],
-  [STORAGE_BUCKETS.EVENTS]: ALLOWED_IMAGE_MIME_TYPES,
-} as const;
+// Specific MIME types for video intros (subset of gallery)
+export const VIDEO_INTRO_MIME_TYPES = [
+  "video/mp4",
+  "video/quicktime",
+  "video/webm",
+] as const;
 
 // Specific MIME types for voice prompts (subset of gallery)
 export const VOICE_PROMPT_MIME_TYPES = [
@@ -66,12 +52,21 @@ export const VOICE_PROMPT_MIME_TYPES = [
   "audio/wav",
 ] as const;
 
-// Specific MIME types for video intros (subset of gallery)
-export const VIDEO_INTRO_MIME_TYPES = [
-  "video/mp4",
-  "video/quicktime",
-  "video/webm",
-] as const;
+// File input accept strings (use these in <input type="file" accept="...">)
+export const IMAGE_ACCEPT_STRING = ALLOWED_IMAGE_MIME_TYPES.join(",");
+export const VIDEO_ACCEPT_STRING = VIDEO_INTRO_MIME_TYPES.join(",");
+export const IMAGE_AND_VIDEO_ACCEPT_STRING = [...ALLOWED_IMAGE_MIME_TYPES, ...VIDEO_INTRO_MIME_TYPES].join(",");
+
+// Allowed MIME types per bucket
+export const ALLOWED_MIME_TYPES = {
+  [STORAGE_BUCKETS.AVATARS]: ALLOWED_IMAGE_MIME_TYPES,
+  [STORAGE_BUCKETS.GALLERY]: [
+    ...ALLOWED_IMAGE_MIME_TYPES,
+    ...VIDEO_INTRO_MIME_TYPES,
+    ...VOICE_PROMPT_MIME_TYPES,
+  ],
+  [STORAGE_BUCKETS.EVENTS]: ALLOWED_IMAGE_MIME_TYPES,
+} as const;
 
 /**
  * Get the public URL for a file in a public bucket

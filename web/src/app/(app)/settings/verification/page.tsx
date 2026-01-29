@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { IMAGE_ACCEPT_STRING } from "@/lib/supabase/storage";
 
 export default function VerificationSettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -463,7 +464,7 @@ export default function VerificationSettingsPage() {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    accept={IMAGE_ACCEPT_STRING}
                     onChange={handleFileSelect}
                     className="hidden"
                   />

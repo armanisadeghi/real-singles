@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Video, Play, Pause, Loader2, Upload, X } from "lucide-react";
 import { useMediaPermissions, getSupportedVideoMimeType, getExtensionFromMimeType } from "@/hooks/useMediaPermissions";
 import { MediaRecordingControls, type RecordingState } from "./MediaRecordingControls";
-import { VIDEO_INTRO_MIME_TYPES } from "@/lib/supabase/storage";
+import { VIDEO_INTRO_MIME_TYPES, VIDEO_ACCEPT_STRING } from "@/lib/supabase/storage";
 
 interface VideoRecorderProps {
   /** Existing video intro URL (for preview) */
@@ -310,7 +310,7 @@ export function VideoRecorder({
       <input
         ref={fileInputRef}
         type="file"
-        accept={VIDEO_INTRO_MIME_TYPES.join(",")}
+        accept={VIDEO_ACCEPT_STRING}
         onChange={handleFileSelect}
         className="hidden"
       />

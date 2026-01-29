@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Upload, Image as ImageIcon, Video, Loader2 } from "lucide-react";
 import { PhotoCropper } from "./PhotoCropper";
 import { cn } from "@/lib/utils";
+import { IMAGE_ACCEPT_STRING, IMAGE_AND_VIDEO_ACCEPT_STRING } from "@/lib/supabase/storage";
 
 interface PhotoUploadProps {
   onUploadComplete: (url: string, type: "image" | "video") => void;
@@ -217,7 +218,7 @@ export function PhotoUpload({
         <input
           ref={fileInputRef}
           type="file"
-          accept={`image/*${acceptVideo ? ",video/*" : ""}`}
+          accept={acceptVideo ? IMAGE_AND_VIDEO_ACCEPT_STRING : IMAGE_ACCEPT_STRING}
           onChange={handleFileSelect}
           className="hidden"
           disabled={isUploading}

@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Send, Image, Smile, Paperclip, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { IMAGE_AND_VIDEO_ACCEPT_STRING } from "@/lib/supabase/storage";
 
 interface MessageInputProps {
   onSend: (content: string, type?: "text" | "image" | "video", mediaUrl?: string) => void;
@@ -177,7 +178,7 @@ export function MessageInput({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*,video/*"
+          accept={IMAGE_AND_VIDEO_ACCEPT_STRING}
           onChange={handleFileSelect}
           className="hidden"
         />
