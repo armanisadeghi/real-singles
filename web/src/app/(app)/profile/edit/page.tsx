@@ -28,7 +28,8 @@ import {
   getZodiacFromDate,
 } from "@/types";
 
-const AUTOSAVE_DELAY = 5000; // 5 seconds
+const AUTOSAVE_MIN_INTERVAL = 30000; // 30 seconds minimum between autosaves
+const IDLE_SAVE_DELAY = 10000; // 10 seconds of inactivity before considering a save
 
 type ProfileState = {
   // Basic Info
@@ -125,6 +126,9 @@ export default function EditProfilePage() {
   const lastSavedProfileRef = useRef<string>("");
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoadRef = useRef(true);
+  const lastAutosaveTimeRef = useRef<number>(0);
+  const pendingChangesRef = useRef(false);
+  const isSavingRef = useRef(false); // Track if a save is in progress to prevent overlapping
 
   // Form state
   const [profile, setProfile] = useState<ProfileState>({
@@ -181,22 +185,31 @@ export default function EditProfilePage() {
     return currentJson !== lastSavedProfileRef.current;
   }, [profile]);
 
-  // Save function
+  // Save function - isAutosave=true means silent background save with no UI disruption
   const performSave = useCallback(async (isAutosave = false) => {
     if (!hasChanges()) {
       return true;
     }
 
+    // Prevent overlapping saves
+    if (isSavingRef.current) {
+      return false;
+    }
+
+    isSavingRef.current = true;
+
+    // Only update UI for manual saves - autosave is completely silent
     if (!isAutosave) {
       setSaving(true);
+      setSaveStatus("saving");
+      setError("");
     }
-    setSaveStatus("saving");
-    setError("");
 
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
+      isSavingRef.current = false;
       router.push("/login");
       return false;
     }
@@ -265,20 +278,27 @@ export default function EditProfilePage() {
       .from("profiles")
       .upsert(profileData, { onConflict: "user_id" });
 
+    isSavingRef.current = false;
+
     if (upsertError) {
-      setError(upsertError.message);
-      setSaveStatus("error");
+      // Only show error for manual saves
       if (!isAutosave) {
+        setError(upsertError.message);
+        setSaveStatus("error");
         setSaving(false);
       }
       return false;
     }
 
+    // Update tracking refs
     lastSavedProfileRef.current = JSON.stringify(profile);
-    setLastSaved(new Date());
-    setSaveStatus("saved");
+    lastAutosaveTimeRef.current = Date.now();
+    pendingChangesRef.current = false;
     
+    // Only update UI for manual saves
     if (!isAutosave) {
+      setLastSaved(new Date());
+      setSaveStatus("saved");
       setSuccess("Profile saved successfully!");
       setSaving(false);
       // Redirect to profile view page after manual save
@@ -290,12 +310,13 @@ export default function EditProfilePage() {
     return true;
   }, [profile, hasChanges, router]);
 
-  // Manual save handler
+  // Manual save handler - cancels any pending autosave and performs a full save with UI feedback
   const handleSave = useCallback(async () => {
     if (autosaveTimerRef.current) {
       clearTimeout(autosaveTimerRef.current);
       autosaveTimerRef.current = null;
     }
+    pendingChangesRef.current = false;
     await performSave(false);
   }, [performSave]);
 
@@ -411,33 +432,89 @@ export default function EditProfilePage() {
     isInitialLoadRef.current = false;
   };
 
-  // Autosave effect
+  // Silent autosave function - respects minimum interval, completely non-intrusive
+  const attemptSilentAutosave = useCallback(() => {
+    if (isInitialLoadRef.current || loading || isSavingRef.current) {
+      return;
+    }
+
+    if (!hasChanges()) {
+      return;
+    }
+
+    const now = Date.now();
+    const timeSinceLastSave = now - lastAutosaveTimeRef.current;
+
+    // Only autosave if minimum interval has passed
+    if (timeSinceLastSave >= AUTOSAVE_MIN_INTERVAL) {
+      performSave(true);
+    } else {
+      // Schedule save for when interval allows
+      pendingChangesRef.current = true;
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+      const timeUntilAllowed = AUTOSAVE_MIN_INTERVAL - timeSinceLastSave;
+      autosaveTimerRef.current = setTimeout(() => {
+        if (pendingChangesRef.current && hasChanges()) {
+          performSave(true);
+        }
+      }, timeUntilAllowed);
+    }
+  }, [loading, hasChanges, performSave]);
+
+  // Track changes for status indicator only (no auto-triggering saves)
   useEffect(() => {
     if (isInitialLoadRef.current || loading) {
       return;
     }
 
-    if (!hasChanges()) {
-      setSaveStatus("saved");
+    if (hasChanges()) {
+      setSaveStatus("unsaved");
+      pendingChangesRef.current = true;
+    }
+  }, [profile, loading, hasChanges]);
+
+  // Autosave on blur (when user leaves a field) - but only after idle period
+  useEffect(() => {
+    if (isInitialLoadRef.current || loading) {
       return;
     }
 
-    setSaveStatus("unsaved");
-
-    if (autosaveTimerRef.current) {
-      clearTimeout(autosaveTimerRef.current);
-    }
-
-    autosaveTimerRef.current = setTimeout(() => {
-      performSave(true);
-    }, AUTOSAVE_DELAY);
-
-    return () => {
-      if (autosaveTimerRef.current) {
-        clearTimeout(autosaveTimerRef.current);
+    const handleBlur = (e: FocusEvent) => {
+      // Only trigger if the user is moving away from an input/select/textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA') {
+        // Schedule save after idle delay (user has stopped interacting)
+        if (autosaveTimerRef.current) {
+          clearTimeout(autosaveTimerRef.current);
+        }
+        autosaveTimerRef.current = setTimeout(() => {
+          attemptSilentAutosave();
+        }, IDLE_SAVE_DELAY);
       }
     };
-  }, [profile, loading, hasChanges, performSave]);
+
+    document.addEventListener('focusout', handleBlur);
+    return () => document.removeEventListener('focusout', handleBlur);
+  }, [loading, attemptSilentAutosave]);
+
+  // Autosave when page visibility changes (tab switching, minimizing)
+  useEffect(() => {
+    if (isInitialLoadRef.current || loading) {
+      return;
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && hasChanges()) {
+        // Save immediately when user leaves the tab
+        performSave(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [loading, hasChanges, performSave]);
 
   // Save on page unload
   useEffect(() => {
