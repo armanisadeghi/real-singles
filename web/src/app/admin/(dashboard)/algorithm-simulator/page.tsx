@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Play, RefreshCw } from "lucide-react";
+import { Play, RefreshCw, Settings2, FlaskConical } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { UserSelector } from "./components/UserSelector";
 import { AlgorithmPicker, type Algorithm } from "./components/AlgorithmPicker";
 import { FilterConfig, type Filters } from "./components/FilterConfig";
 import { DebugPanel } from "./components/DebugPanel";
 import { ResultsGrid } from "./components/ResultsGrid";
+import { cn } from "@/lib/utils";
 
 interface UserOption {
   user_id: string;
@@ -157,6 +158,8 @@ export default function AlgorithmSimulatorPage() {
     return [];
   };
 
+  const showFilters = !["mutual-matches", "likes-received"].includes(selectedAlgorithm);
+
   return (
     <div className="space-y-6">
       <AdminPageHeader
@@ -167,69 +170,162 @@ export default function AlgorithmSimulatorPage() {
         iconGradient="from-purple-500 to-pink-500"
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Configuration */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UserSelector
-              selectedUser={selectedUser}
-              onSelectUser={setSelectedUser}
-            />
-            <AlgorithmPicker
-              selected={selectedAlgorithm}
-              onSelect={setSelectedAlgorithm}
-            />
-          </div>
+      {/* Configuration Section */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        {/* Main Configuration - Takes 3 columns */}
+        <div className="xl:col-span-3 space-y-5">
+          {/* Step 1: User Selection */}
+          <section className="bg-white rounded-2xl border border-slate-200/60 shadow-sm">
+            <div className="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white rounded-t-2xl">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-600 text-white text-sm font-bold">
+                  1
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900">Select Test User</h3>
+                  <p className="text-xs text-slate-500">Choose a user to simulate the algorithm for</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-5">
+              <UserSelector
+                selectedUser={selectedUser}
+                onSelectUser={setSelectedUser}
+              />
+            </div>
+          </section>
 
-          {/* Only show filters for discovery algorithms */}
-          {!["mutual-matches", "likes-received"].includes(selectedAlgorithm) && (
-            <FilterConfig
-              filters={filters}
-              onChange={setFilters}
-            />
+          {/* Step 2: Algorithm Selection */}
+          <section className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-7 h-7 rounded-full bg-purple-600 text-white text-sm font-bold">
+                  2
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900">Choose Algorithm</h3>
+                  <p className="text-xs text-slate-500">Select which matching algorithm to test</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-5">
+              <AlgorithmPicker
+                selected={selectedAlgorithm}
+                onSelect={setSelectedAlgorithm}
+              />
+            </div>
+          </section>
+
+          {/* Step 3: Filters (conditional) */}
+          {showFilters && (
+            <section className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-7 h-7 rounded-full bg-amber-500 text-white text-sm font-bold">
+                    3
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-slate-900">Configure Filters</h3>
+                    <p className="text-xs text-slate-500">Optional - narrow down results with specific criteria</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-amber-50">
+                    <Settings2 className="w-4 h-4 text-amber-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="p-5">
+                <FilterConfig
+                  filters={filters}
+                  onChange={setFilters}
+                />
+              </div>
+            </section>
           )}
 
-          {/* Run Button */}
-          <div className="flex items-center gap-3">
+          {/* Run Button Section */}
+          <div className="flex items-center gap-4 p-5 bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl">
             <button
               onClick={runSimulation}
               disabled={!selectedUser || loading}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className={cn(
+                "group relative flex items-center gap-3 px-8 py-4 rounded-xl font-semibold text-base",
+                "transition-all duration-300",
+                "[transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900",
+                selectedUser && !loading ? [
+                  "bg-gradient-to-r from-green-500 to-emerald-500",
+                  "text-white shadow-lg shadow-green-500/30",
+                  "hover:shadow-xl hover:shadow-green-500/40",
+                  "hover:scale-[1.02]",
+                  "focus-visible:ring-green-400",
+                ] : [
+                  "bg-slate-700 text-slate-400",
+                  "cursor-not-allowed",
+                ]
+              )}
             >
               {loading ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  Running...
+                  <RefreshCw className="w-5 h-5 animate-spin" />
+                  <span>Running Simulation...</span>
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4" />
-                  Run Simulation
+                  <div className={cn(
+                    "p-2 rounded-lg transition-colors",
+                    selectedUser ? "bg-white/20" : "bg-slate-600"
+                  )}>
+                    <FlaskConical className="w-5 h-5" />
+                  </div>
+                  <span>Run Simulation</span>
+                  <Play className={cn(
+                    "w-5 h-5 transition-transform duration-300",
+                    selectedUser && !loading && "group-hover:translate-x-1"
+                  )} />
                 </>
               )}
             </button>
             
-            {error && (
-              <p className="text-sm text-red-600">{error}</p>
-            )}
+            <div className="flex-1 flex items-center gap-3">
+              {error && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/30">
+                  <span className="w-2 h-2 rounded-full bg-red-400" />
+                  <p className="text-sm text-red-200">{error}</p>
+                </div>
+              )}
+              
+              {!selectedUser && !error && (
+                <p className="text-sm text-slate-400">
+                  Select a user above to enable simulation
+                </p>
+              )}
+              
+              {selectedUser && !loading && !error && (
+                <p className="text-sm text-slate-400">
+                  Ready to test <span className="text-white font-medium">{selectedAlgorithm}</span> algorithm
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Right Column - Debug Panel */}
-        <div>
-          <DebugPanel
-            userProfile={result?.userProfile ? {
-              userId: result.userProfile.userId,
-              gender: result.userProfile.gender,
-              lookingFor: result.userProfile.lookingFor,
-              city: result.userProfile.city,
-              state: result.userProfile.state,
-              canStartMatching: result.userProfile.canStartMatching,
-            } : null}
-            debug={result?.debug || null}
-            total={result?.total || 0}
-            loading={loading}
-          />
+        {/* Debug Panel - Takes 1 column */}
+        <div className="xl:col-span-1">
+          <div className="sticky top-6">
+            <DebugPanel
+              userProfile={result?.userProfile ? {
+                userId: result.userProfile.userId,
+                gender: result.userProfile.gender,
+                lookingFor: result.userProfile.lookingFor,
+                city: result.userProfile.city,
+                state: result.userProfile.state,
+                canStartMatching: result.userProfile.canStartMatching,
+              } : null}
+              debug={result?.debug || null}
+              total={result?.total || 0}
+              loading={loading}
+            />
+          </div>
         </div>
       </div>
 

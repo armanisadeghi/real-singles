@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Search, User, Check, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Search, User, Check, X, ChevronRight, MapPin, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface UserOption {
   user_id: string;
@@ -28,6 +29,7 @@ export function UserSelector({ selectedUser, onSelectUser }: UserSelectorProps) 
   const [users, setUsers] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -54,6 +56,17 @@ export function UserSelector({ selectedUser, onSelectUser }: UserSelectorProps) 
     return () => clearTimeout(debounce);
   }, [search]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const getUserDisplayName = (user: UserOption) => {
     if (user.first_name && user.last_name) {
       return `${user.first_name} ${user.last_name}`;
@@ -73,83 +86,164 @@ export function UserSelector({ selectedUser, onSelectUser }: UserSelectorProps) 
     return lookingFor.map(g => g.charAt(0).toUpperCase() + g.slice(1)).join(", ");
   };
 
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4">
-      <h3 className="text-sm font-semibold text-slate-700 mb-3">Select User to Simulate</h3>
-      
-      {selectedUser ? (
-        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center overflow-hidden shrink-0">
-            {selectedUser.profile_image_url ? (
-              <img
-                src={selectedUser.profile_image_url}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <User className="w-6 h-6 text-white" />
+  if (selectedUser) {
+    return (
+      <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200/60">
+          {/* User Avatar */}
+          <div className="relative shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center overflow-hidden shadow-lg shadow-blue-500/20">
+              {selectedUser.profile_image_url ? (
+                <img
+                  src={selectedUser.profile_image_url}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User className="w-8 h-8 text-white" />
+              )}
+            </div>
+            {selectedUser.can_start_matching && (
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-green-500 border-2 border-white flex items-center justify-center">
+                <Check className="w-3.5 h-3.5 text-white" />
+              </div>
             )}
           </div>
+          
+          {/* User Info */}
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-slate-900 truncate">
+            <p className="font-semibold text-slate-900 text-lg truncate">
               {getUserDisplayName(selectedUser)}
             </p>
-            <p className="text-xs text-slate-500 truncate">{selectedUser.email}</p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+            <p className="text-sm text-slate-500 truncate">{selectedUser.email}</p>
+            <div className="flex items-center gap-3 mt-2">
+              <span className={cn(
+                "inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold",
+                selectedUser.gender === "male" 
+                  ? "bg-blue-100 text-blue-700" 
+                  : selectedUser.gender === "female"
+                  ? "bg-pink-100 text-pink-700"
+                  : "bg-slate-100 text-slate-700"
+              )}>
                 {formatGender(selectedUser.gender)}
               </span>
-              <span className="text-xs text-slate-500">
-                → {formatLookingFor(selectedUser.looking_for)}
+              <ChevronRight className="w-4 h-4 text-slate-400" />
+              <span className="text-sm font-medium text-slate-700">
+                {formatLookingFor(selectedUser.looking_for)}
               </span>
             </div>
+            {selectedUser.city && (
+              <div className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-500">
+                <MapPin className="w-3.5 h-3.5" />
+                {selectedUser.city}, {selectedUser.state}
+              </div>
+            )}
           </div>
+          
+          {/* Clear Button */}
           <button
             onClick={() => onSelectUser(null)}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            className={cn(
+              "p-2.5 rounded-xl transition-all duration-200",
+              "text-slate-400 hover:text-red-500",
+              "bg-white/60 hover:bg-red-50",
+              "border border-transparent hover:border-red-200",
+              "[transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
+              "hover:scale-110"
+            )}
+            title="Clear selection"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
-      ) : (
-        <div className="relative">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search by name or email..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setIsOpen(true);
-              }}
-              onFocus={() => setIsOpen(true)}
-              className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
-            />
-          </div>
+      </div>
+    );
+  }
 
-          {isOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-80 overflow-y-auto">
-              {loading ? (
-                <div className="p-4 text-center text-sm text-slate-500">
-                  Loading...
-                </div>
-              ) : users.length === 0 ? (
-                <div className="p-4 text-center text-sm text-slate-500">
-                  No users found
-                </div>
-              ) : (
-                users.map((user) => (
-                  <button
-                    key={user.user_id}
-                    onClick={() => {
-                      onSelectUser(user);
-                      setIsOpen(false);
-                      setSearch("");
-                    }}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 border-b border-slate-100 last:border-0 text-left"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center overflow-hidden shrink-0">
+  return (
+    <div ref={containerRef} className="relative">
+      {/* Search Input */}
+      <div className="relative">
+        <Search className={cn(
+          "absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors",
+          isOpen ? "text-blue-500" : "text-slate-400"
+        )} />
+        <input
+          type="text"
+          placeholder="Search users by name or email..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          className={cn(
+            "w-full pl-12 pr-4 py-3.5 rounded-xl text-sm",
+            "bg-slate-50 border-2 border-transparent",
+            "placeholder:text-slate-400",
+            "focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10",
+            "outline-none transition-all duration-200"
+          )}
+        />
+        {loading && (
+          <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 animate-spin" />
+        )}
+      </div>
+
+      {/* Dropdown */}
+      {isOpen && (
+        <div className={cn(
+          "absolute z-20 mt-2 w-full",
+          "bg-white border border-slate-200 rounded-xl",
+          "shadow-xl shadow-slate-200/50",
+          "max-h-[400px] overflow-hidden",
+          "animate-in fade-in slide-in-from-top-2 duration-200"
+        )}>
+          {loading && users.length === 0 ? (
+            <div className="flex items-center justify-center gap-3 p-8 text-slate-500">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="text-sm">Searching users...</span>
+            </div>
+          ) : users.length === 0 ? (
+            <div className="p-8 text-center">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-100 flex items-center justify-center">
+                <User className="w-6 h-6 text-slate-400" />
+              </div>
+              <p className="text-sm font-medium text-slate-700">No users found</p>
+              <p className="text-xs text-slate-500 mt-1">Try a different search term</p>
+            </div>
+          ) : (
+            <div className="overflow-y-auto max-h-[380px]">
+              <div className="px-3 py-2 bg-slate-50 border-b border-slate-100">
+                <p className="text-xs font-medium text-slate-500">
+                  {users.length} user{users.length !== 1 ? 's' : ''} found
+                </p>
+              </div>
+              {users.map((user, index) => (
+                <button
+                  key={user.user_id}
+                  onClick={() => {
+                    onSelectUser(user);
+                    setIsOpen(false);
+                    setSearch("");
+                  }}
+                  className={cn(
+                    "w-full flex items-center gap-3 p-3",
+                    "hover:bg-blue-50/50 transition-colors",
+                    "text-left group",
+                    index !== users.length - 1 && "border-b border-slate-100"
+                  )}
+                >
+                  <div className="relative shrink-0">
+                    <div className={cn(
+                      "w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden",
+                      "bg-gradient-to-br",
+                      user.gender === "male" 
+                        ? "from-blue-400 to-indigo-500" 
+                        : user.gender === "female"
+                        ? "from-pink-400 to-rose-500"
+                        : "from-slate-400 to-slate-500"
+                    )}>
                       {user.profile_image_url ? (
                         <img
                           src={user.profile_image_url}
@@ -157,35 +251,46 @@ export function UserSelector({ selectedUser, onSelectUser }: UserSelectorProps) 
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <User className="w-5 h-5 text-white" />
+                        <User className="w-6 h-6 text-white" />
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">
-                        {getUserDisplayName(user)}
-                      </p>
-                      <p className="text-xs text-slate-500 truncate">{user.email}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${
-                          user.gender === "male" ? "bg-blue-100 text-blue-700" :
-                          user.gender === "female" ? "bg-pink-100 text-pink-700" :
-                          "bg-slate-100 text-slate-700"
-                        }`}>
-                          {formatGender(user.gender)}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-blue-700 transition-colors">
+                      {getUserDisplayName(user)}
+                    </p>
+                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={cn(
+                        "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium",
+                        user.gender === "male" 
+                          ? "bg-blue-100 text-blue-700" 
+                          : user.gender === "female"
+                          ? "bg-pink-100 text-pink-700"
+                          : "bg-slate-100 text-slate-700"
+                      )}>
+                        {formatGender(user.gender)}
+                      </span>
+                      {user.can_start_matching ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600">
+                          <Check className="w-3 h-3" />
+                          Eligible
                         </span>
-                        {user.can_start_matching ? (
-                          <span className="inline-flex items-center gap-0.5 text-xs text-green-600">
-                            <Check className="w-3 h-3" />
-                            Can match
-                          </span>
-                        ) : (
-                          <span className="text-xs text-amber-600">Incomplete</span>
-                        )}
-                      </div>
+                      ) : (
+                        <span className="text-xs font-medium text-amber-600">Incomplete</span>
+                      )}
+                      {user.city && (
+                        <span className="text-xs text-slate-400 truncate">
+                          {user.city}
+                        </span>
+                      )}
                     </div>
-                  </button>
-                ))
-              )}
+                  </div>
+                  
+                  <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
+                </button>
+              ))}
             </div>
           )}
         </div>

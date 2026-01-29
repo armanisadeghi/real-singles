@@ -1,6 +1,7 @@
 "use client";
 
-import { Sparkles, Home, Filter, MapPin, Heart, ThumbsUp } from "lucide-react";
+import { Sparkles, Home, Filter, MapPin, Heart, ThumbsUp, Zap, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export type Algorithm = 
   | "discover-profiles"
@@ -13,53 +14,67 @@ export type Algorithm =
 interface AlgorithmOption {
   id: Algorithm;
   name: string;
+  shortName: string;
   description: string;
   icon: React.ReactNode;
   category: "discovery" | "matches";
+  gradient: string;
 }
 
 const algorithms: AlgorithmOption[] = [
   {
     id: "discover-profiles",
     name: "Discover Profiles",
-    description: "Main discovery grid - profiles for browse/like/pass",
-    icon: <Sparkles className="w-4 h-4" />,
+    shortName: "Discover",
+    description: "Main discovery grid - profiles for browse/like/pass actions",
+    icon: <Sparkles className="w-5 h-5" />,
     category: "discovery",
+    gradient: "from-violet-500 to-purple-600",
   },
   {
     id: "discover-home",
     name: "Home Screen",
-    description: "Aggregated home data - top matches preview",
-    icon: <Home className="w-4 h-4" />,
+    shortName: "Home",
+    description: "Aggregated home data with top matches preview",
+    icon: <Home className="w-5 h-5" />,
     category: "discovery",
+    gradient: "from-blue-500 to-cyan-500",
   },
   {
     id: "top-matches",
     name: "Top Matches",
-    description: "Filtered matches with preference options",
-    icon: <Filter className="w-4 h-4" />,
+    shortName: "Top",
+    description: "Filtered matches based on preference options",
+    icon: <Zap className="w-5 h-5" />,
     category: "discovery",
+    gradient: "from-amber-500 to-orange-500",
   },
   {
     id: "nearby",
     name: "Nearby",
+    shortName: "Near",
     description: "Location-based profiles sorted by distance",
-    icon: <MapPin className="w-4 h-4" />,
+    icon: <MapPin className="w-5 h-5" />,
     category: "discovery",
+    gradient: "from-emerald-500 to-teal-500",
   },
   {
     id: "mutual-matches",
     name: "Mutual Matches",
-    description: "Users who both liked each other",
-    icon: <Heart className="w-4 h-4" />,
+    shortName: "Mutual",
+    description: "Users who both liked each other - established connections",
+    icon: <Heart className="w-5 h-5" />,
     category: "matches",
+    gradient: "from-pink-500 to-rose-500",
   },
   {
     id: "likes-received",
     name: "Likes Received",
-    description: "Users who have liked this user (pending action)",
-    icon: <ThumbsUp className="w-4 h-4" />,
+    shortName: "Likes",
+    description: "Users who have liked this user, pending user's action",
+    icon: <ThumbsUp className="w-5 h-5" />,
     category: "matches",
+    gradient: "from-fuchsia-500 to-pink-500",
   },
 ];
 
@@ -71,88 +86,143 @@ interface AlgorithmPickerProps {
 export function AlgorithmPicker({ selected, onSelect }: AlgorithmPickerProps) {
   const discoveryAlgorithms = algorithms.filter((a) => a.category === "discovery");
   const matchAlgorithms = algorithms.filter((a) => a.category === "matches");
+  const selectedAlgo = algorithms.find((a) => a.id === selected);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4">
-      <h3 className="text-sm font-semibold text-slate-700 mb-3">Select Algorithm</h3>
-      
-      <div className="space-y-4">
-        {/* Discovery Algorithms */}
-        <div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
-            Discovery
-          </p>
-          <div className="grid grid-cols-2 gap-2">
+    <div className="space-y-4">
+      {/* Category Tabs */}
+      <div className="flex gap-6">
+        {/* Discovery Section */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-1.5 rounded-lg bg-gradient-to-br from-violet-500/10 to-purple-600/10">
+              <Search className="w-4 h-4 text-violet-600" />
+            </div>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Discovery Algorithms
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
             {discoveryAlgorithms.map((algo) => (
-              <button
+              <AlgorithmButton
                 key={algo.id}
-                onClick={() => onSelect(algo.id)}
-                className={`flex items-start gap-2 p-3 rounded-lg border text-left transition-all ${
-                  selected === algo.id
-                    ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
-                    : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                }`}
-              >
-                <div className={`p-1.5 rounded-md ${
-                  selected === algo.id
-                    ? "bg-blue-100 text-blue-600"
-                    : "bg-slate-100 text-slate-500"
-                }`}>
-                  {algo.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium truncate ${
-                    selected === algo.id ? "text-blue-900" : "text-slate-900"
-                  }`}>
-                    {algo.name}
-                  </p>
-                  <p className="text-xs text-slate-500 line-clamp-2">
-                    {algo.description}
-                  </p>
-                </div>
-              </button>
+                algo={algo}
+                isSelected={selected === algo.id}
+                onSelect={onSelect}
+              />
             ))}
           </div>
         </div>
 
-        {/* Match Algorithms */}
-        <div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
-            Matches
-          </p>
-          <div className="grid grid-cols-2 gap-2">
+        {/* Divider */}
+        <div className="w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent" />
+
+        {/* Matches Section */}
+        <div className="flex-shrink-0">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-1.5 rounded-lg bg-gradient-to-br from-pink-500/10 to-rose-600/10">
+              <Heart className="w-4 h-4 text-pink-600" />
+            </div>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Match Algorithms
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
             {matchAlgorithms.map((algo) => (
-              <button
+              <AlgorithmButton
                 key={algo.id}
-                onClick={() => onSelect(algo.id)}
-                className={`flex items-start gap-2 p-3 rounded-lg border text-left transition-all ${
-                  selected === algo.id
-                    ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
-                    : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                }`}
-              >
-                <div className={`p-1.5 rounded-md ${
-                  selected === algo.id
-                    ? "bg-blue-100 text-blue-600"
-                    : "bg-slate-100 text-slate-500"
-                }`}>
-                  {algo.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium truncate ${
-                    selected === algo.id ? "text-blue-900" : "text-slate-900"
-                  }`}>
-                    {algo.name}
-                  </p>
-                  <p className="text-xs text-slate-500 line-clamp-2">
-                    {algo.description}
-                  </p>
-                </div>
-              </button>
+                algo={algo}
+                isSelected={selected === algo.id}
+                onSelect={onSelect}
+              />
             ))}
           </div>
         </div>
       </div>
+
+      {/* Selected Algorithm Detail Card */}
+      {selectedAlgo && (
+        <div 
+          className={cn(
+            "relative overflow-hidden rounded-xl p-4",
+            "bg-gradient-to-r",
+            selectedAlgo.gradient,
+            "shadow-lg",
+            // Animation
+            "animate-in fade-in slide-in-from-bottom-2 duration-200"
+          )}
+        >
+          <div className="relative z-10 flex items-start gap-4">
+            <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
+              <div className="text-white">
+                {selectedAlgo.icon}
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-lg font-semibold text-white">
+                {selectedAlgo.name}
+              </h4>
+              <p className="text-sm text-white/80 mt-0.5">
+                {selectedAlgo.description}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm">
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              <span className="text-xs font-medium text-white">Selected</span>
+            </div>
+          </div>
+          
+          {/* Decorative background pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/30" />
+            <div className="absolute -left-5 -bottom-10 w-32 h-32 rounded-full bg-white/20" />
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function AlgorithmButton({
+  algo,
+  isSelected,
+  onSelect,
+}: {
+  algo: AlgorithmOption;
+  isSelected: boolean;
+  onSelect: (id: Algorithm) => void;
+}) {
+  return (
+    <button
+      onClick={() => onSelect(algo.id)}
+      className={cn(
+        "group relative flex items-center gap-2 px-4 py-2.5 rounded-xl",
+        "font-medium text-sm transition-all duration-200",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+        isSelected ? [
+          "bg-gradient-to-r shadow-md",
+          algo.gradient,
+          "text-white",
+          "focus-visible:ring-white",
+          "scale-[1.02]",
+        ] : [
+          "bg-white border border-slate-200",
+          "text-slate-700 hover:text-slate-900",
+          "hover:border-slate-300 hover:shadow-sm",
+          "hover:scale-[1.02]",
+          "focus-visible:ring-blue-500",
+        ],
+        // Spring animation timing
+        "[transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]"
+      )}
+    >
+      <span className={cn(
+        "transition-colors duration-200",
+        isSelected ? "text-white" : "text-slate-500 group-hover:text-slate-700"
+      )}>
+        {algo.icon}
+      </span>
+      <span>{algo.name}</span>
+    </button>
   );
 }

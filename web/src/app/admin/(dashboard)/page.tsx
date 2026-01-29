@@ -14,6 +14,9 @@ import {
   Activity,
   Clock,
   ChevronRight,
+  Mail,
+  Zap,
+  Settings,
 } from "lucide-react";
 
 async function getStats() {
@@ -297,6 +300,36 @@ export default async function AdminDashboardPage() {
             </Link>
 
             <Link
+              href="/admin/email"
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50/50
+                hover:border-indigo-200 hover:bg-indigo-50/50 hover:shadow-sm
+                [transition:all_200ms_cubic-bezier(0.34,1.56,0.64,1)]"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm
+                group-hover:scale-110 group-hover:shadow-md group-hover:shadow-indigo-500/25 transition-all duration-300">
+                <Mail className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-700 transition-colors">
+                Email
+              </span>
+            </Link>
+
+            <Link
+              href="/admin/speed-dating"
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50/50
+                hover:border-cyan-200 hover:bg-cyan-50/50 hover:shadow-sm
+                [transition:all_200ms_cubic-bezier(0.34,1.56,0.64,1)]"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-sm
+                group-hover:scale-110 group-hover:shadow-md group-hover:shadow-cyan-500/25 transition-all duration-300">
+                <Activity className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm font-medium text-slate-700 group-hover:text-cyan-700 transition-colors">
+                Speed Dating
+              </span>
+            </Link>
+
+            <Link
               href="/admin/products"
               className="group flex flex-col items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50/50
                 hover:border-rose-200 hover:bg-rose-50/50 hover:shadow-sm
@@ -327,17 +360,32 @@ export default async function AdminDashboardPage() {
             </Link>
 
             <Link
-              href="/admin/speed-dating"
+              href="/admin/algorithm-simulator"
               className="group flex flex-col items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50/50
-                hover:border-cyan-200 hover:bg-cyan-50/50 hover:shadow-sm
+                hover:border-violet-200 hover:bg-violet-50/50 hover:shadow-sm
                 [transition:all_200ms_cubic-bezier(0.34,1.56,0.64,1)]"
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-sm
-                group-hover:scale-110 group-hover:shadow-md group-hover:shadow-cyan-500/25 transition-all duration-300">
-                <Activity className="w-5 h-5 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-sm
+                group-hover:scale-110 group-hover:shadow-md group-hover:shadow-violet-500/25 transition-all duration-300">
+                <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-sm font-medium text-slate-700 group-hover:text-cyan-700 transition-colors">
-                Speed Dating
+              <span className="text-sm font-medium text-slate-700 group-hover:text-violet-700 transition-colors">
+                Algorithm Sim
+              </span>
+            </Link>
+
+            <Link
+              href="/admin/settings"
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50/50
+                hover:border-slate-300 hover:bg-slate-100/50 hover:shadow-sm
+                [transition:all_200ms_cubic-bezier(0.34,1.56,0.64,1)]"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center shadow-sm
+                group-hover:scale-110 group-hover:shadow-md group-hover:shadow-slate-500/25 transition-all duration-300">
+                <Settings className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">
+                Settings
               </span>
             </Link>
           </div>
