@@ -886,6 +886,7 @@ export type Database = {
           after_work: string | null
           bio: string | null
           body_type: string | null
+          can_start_matching: boolean | null
           city: string | null
           company: string | null
           country: string | null
@@ -960,6 +961,7 @@ export type Database = {
           after_work?: string | null
           bio?: string | null
           body_type?: string | null
+          can_start_matching?: boolean | null
           city?: string | null
           company?: string | null
           country?: string | null
@@ -1034,6 +1036,7 @@ export type Database = {
           after_work?: string | null
           bio?: string | null
           body_type?: string | null
+          can_start_matching?: boolean | null
           city?: string | null
           company?: string | null
           country?: string | null
@@ -1840,6 +1843,12 @@ export type Database = {
             }
             Returns: string
           }
+      calculate_can_start_matching: {
+        Args: {
+          profile_record: Database["public"]["Tables"]["profiles"]["Row"]
+        }
+        Returns: boolean
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {

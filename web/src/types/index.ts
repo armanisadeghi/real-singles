@@ -523,7 +523,8 @@ export interface ProfileCompletionStatus {
   skippedFields: string[];
   preferNotFields: string[];
   nextField: ProfileField | null;
-  canStartMatching: boolean;
+  canStartMatching: boolean; // Calculated value for backwards compatibility
+  canStartMatchingDb: boolean; // Database-stored value (source of truth, maintained by triggers)
   isComplete: boolean;
   fields: ProfileField[];
 }

@@ -238,6 +238,9 @@ export async function GET() {
     success: true,
     data: {
       ...completion,
+      // Include the database-stored can_start_matching value (source of truth)
+      // This is automatically maintained by database triggers
+      canStartMatchingDb: profile?.can_start_matching || false,
       // Include field definitions so clients know what to show
       fields: PROFILE_FIELDS.map(f => ({
         key: f.key,

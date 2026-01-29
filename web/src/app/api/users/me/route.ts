@@ -253,6 +253,8 @@ export async function GET() {
     ProfileCompletionSkipped: profile?.profile_completion_skipped || [],
     ProfileCompletionPreferNot: profile?.profile_completion_prefer_not || [],
     ProfileCompletedAt: profile?.profile_completed_at || "",
+    CanStartMatching: profile?.can_start_matching || false,
+    can_start_matching: profile?.can_start_matching || false, // Alias
     
     // Stats & Points
     RATINGS: 0, // TODO: Calculate from reviews
