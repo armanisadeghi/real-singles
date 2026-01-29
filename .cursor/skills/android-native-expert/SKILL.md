@@ -203,32 +203,40 @@ Material Icons use snake_case: `favorite`, `home`, `search`, `settings`, `chat_b
 
 ## Spring Animations (M3 Expressive Feel)
 
-**Always use spring physics** with `react-native-reanimated`:
+**Always use spring physics** with `react-native-reanimated`. Values derived from official `material-components-android` v1.13.0+ spring tokens.
 
 ```tsx
 import { withSpring } from 'react-native-reanimated';
 
-// M3 Expressive spring config
-const M3_SPRING = {
-  damping: 15,
-  stiffness: 150,
-  mass: 1,
-  overshootClamping: false,
-};
+// === M3 EXPRESSIVE SPATIAL SPRINGS (position, size, shape) ===
+// dampingRatio 0.9 = slight bounce (the M3 Expressive signature)
 
-// Use case configs
-const BUTTON_SPRING = { damping: 20, stiffness: 300 };
-const CARD_SPRING = { damping: 12, stiffness: 180 };
-const SHEET_SPRING = { damping: 18, stiffness: 200 };
-const DISMISSAL_SPRING = { damping: 20, stiffness: 200, mass: 0.8 };
+// Small components: switches, buttons, checkboxes, chips, FABs
+const M3_FAST_SPATIAL = { stiffness: 1400, damping: 67, mass: 1 };
+
+// Medium: bottom sheets, nav drawers, cards, dialogs
+const M3_DEFAULT_SPATIAL = { stiffness: 700, damping: 48, mass: 1 };
+
+// Full-screen: page transitions, shared element transitions
+const M3_SLOW_SPATIAL = { stiffness: 300, damping: 31, mass: 1 };
+
+// === M3 EXPRESSIVE EFFECTS SPRINGS (color, opacity) ===
+// dampingRatio 1.0 = critically damped (no bounce)
+
+const M3_FAST_EFFECTS = { stiffness: 3800, damping: 123, mass: 1 };
+const M3_DEFAULT_EFFECTS = { stiffness: 1600, damping: 80, mass: 1 };
+const M3_SLOW_EFFECTS = { stiffness: 800, damping: 57, mass: 1 };
 
 // Usage
-sv.value = withSpring(targetValue, M3_SPRING);
+sv.value = withSpring(targetValue, M3_DEFAULT_SPATIAL); // Move/resize
+opacity.value = withSpring(1, M3_DEFAULT_EFFECTS);       // Fade in
 ```
 
-**Note:** React Native Reanimated uses `damping`/`stiffness`/`mass`. Android native uses `dampingRatio` (0-1) / `stiffness`. The configs above are RN Reanimated values that approximate M3 feel.
+**Speed selection:** Fast = small components, Default = partial-screen, Slow = full-screen.
+**Type selection:** Spatial = position/size/shape (bounces), Effects = color/opacity (no bounce).
 
 **Note:** `stiffness/damping` (physics) and `duration/dampingRatio` (duration) cannot be mixed.
+**Ref:** See `docs/ANDROID_16_UX_RESEARCH.md` Section 7 & 9 for full derivation and per-component mapping.
 
 ---
 
@@ -278,12 +286,34 @@ const paperTheme = {
 
 ## Haptic Feedback
 
-**Add haptics to all interactive elements:**
+**Add haptics to all interactive elements.** On Android, prefer `performAndroidHapticsAsync` for native Material-consistent feedback (no VIBRATE permission needed):
 
 ```tsx
+import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
-// Action mappings
+// === ANDROID-NATIVE HAPTICS (preferred on Android) ===
+// Uses View.performHapticFeedback under the hood
+
+// Slider/picker ticks
+Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Segment_Tick);           // Discrete choices
+Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Segment_Frequent_Tick);  // Many rapid choices
+
+// Toggles
+Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Toggle_On);
+Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Toggle_Off);
+
+// Actions
+Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Confirm);       // Success
+Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Reject);        // Failure
+Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Virtual_Key);   // Button tap
+Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Context_Click); // Long press menu
+
+// Text
+Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Text_Handle_Move); // Cursor drag
+Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Clock_Tick);       // Clock tick
+
+// === CROSS-PLATFORM FALLBACK (use on iOS, or when Android-specific not needed) ===
 Haptics.selectionAsync();                                    // Toggle, select
 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);     // Button tap
 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);    // Card press
@@ -291,7 +321,18 @@ Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);     // Major action
 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+
+// === PLATFORM-SPECIFIC PATTERN ===
+const hapticConfirm = () => {
+  if (Platform.OS === 'android') {
+    Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Confirm);
+  } else {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }
+};
 ```
+
+**Ref:** See `docs/ANDROID_16_UX_RESEARCH.md` Section 4 & 5 for full haptic mapping table and Android 16 PWLE API details.
 
 ---
 
