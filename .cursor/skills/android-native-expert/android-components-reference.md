@@ -80,6 +80,23 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 ## Haptics (expo-haptics)
 
+**Android-native** (preferred -- uses `performAndroidHapticsAsync`):
+
+| Action | Android Code |
+|--------|-------------|
+| Slider tick (discrete) | `performAndroidHapticsAsync(AndroidHaptics.Segment_Tick)` |
+| Slider tick (rapid) | `performAndroidHapticsAsync(AndroidHaptics.Segment_Frequent_Tick)` |
+| Toggle on | `performAndroidHapticsAsync(AndroidHaptics.Toggle_On)` |
+| Toggle off | `performAndroidHapticsAsync(AndroidHaptics.Toggle_Off)` |
+| Button tap | `performAndroidHapticsAsync(AndroidHaptics.Virtual_Key)` |
+| Success | `performAndroidHapticsAsync(AndroidHaptics.Confirm)` |
+| Error | `performAndroidHapticsAsync(AndroidHaptics.Reject)` |
+| Long press menu | `performAndroidHapticsAsync(AndroidHaptics.Context_Click)` |
+| Text cursor drag | `performAndroidHapticsAsync(AndroidHaptics.Text_Handle_Move)` |
+| Clock tick | `performAndroidHapticsAsync(AndroidHaptics.Clock_Tick)` |
+
+**Cross-platform** (fallback for iOS or generic use):
+
 | Action | Code |
 |--------|------|
 | Toggle | `selectionAsync()` |
@@ -110,13 +127,26 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 ## Spring Presets (react-native-reanimated)
 
-| Use | Config |
-|-----|--------|
-| Button feedback | `{ damping: 20, stiffness: 300 }` |
-| Card expand | `{ damping: 12, stiffness: 180 }` |
-| Sheet animation | `{ damping: 18, stiffness: 200 }` |
-| Dismissal | `{ damping: 20, stiffness: 200, mass: 0.8 }` |
-| Default M3 | `{ damping: 15, stiffness: 150, mass: 1 }` |
+**M3 Expressive tokens** (from `material-components-android` v1.13.0+ Motion.md):
+
+| Token | Config | Use Case |
+|-------|--------|----------|
+| Fast Spatial | `{ stiffness: 1400, damping: 67, mass: 1 }` | Switches, buttons, chips, FABs |
+| Default Spatial | `{ stiffness: 700, damping: 48, mass: 1 }` | Bottom sheets, drawers, cards |
+| Slow Spatial | `{ stiffness: 300, damping: 31, mass: 1 }` | Full-screen transitions |
+| Fast Effects | `{ stiffness: 3800, damping: 123, mass: 1 }` | Small component color/opacity |
+| Default Effects | `{ stiffness: 1600, damping: 80, mass: 1 }` | Medium element color/opacity |
+| Slow Effects | `{ stiffness: 800, damping: 57, mass: 1 }` | Full-screen color/opacity |
+
+**Spatial** = position/size/shape (dampingRatio 0.9, slight bounce). **Effects** = color/opacity (dampingRatio 1.0, no bounce).
+
+**Reanimated 4 built-in presets** (alternative):
+
+| Preset | Config | Feel |
+|--------|--------|------|
+| GentleSpringConfig | `{ damping: 120, mass: 4, stiffness: 900 }` | Smooth, no bounce |
+| SnappySpringConfig | `{ damping: 110, mass: 4, stiffness: 900, overshootClamping: true }` | Fast, responsive |
+| WigglySpringConfig | `{ damping: 90, mass: 4, stiffness: 900 }` | Bouncy, playful |
 
 ---
 
