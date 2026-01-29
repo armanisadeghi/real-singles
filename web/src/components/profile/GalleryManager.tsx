@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   DndContext,
   closestCenter,
@@ -17,8 +17,9 @@ import {
   useSortable,
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Trash2, Star, Video as VideoIcon, Image as ImageIcon, GripVertical, Loader2 } from "lucide-react";
+import { Trash2, Star, Video as VideoIcon, Image as ImageIcon, GripVertical, Loader2, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BottomSheet } from "@/components/ui/BottomSheet";
 
 export interface GalleryItem {
   id: string;
@@ -42,11 +43,13 @@ function SortableGalleryItem({
   item,
   onSetPrimary,
   onDelete,
+  onTapForActions,
   isDeleting,
 }: {
   item: GalleryItem;
   onSetPrimary: (id: string) => void;
   onDelete: (id: string) => void;
+  onTapForActions: (item: GalleryItem) => void;
   isDeleting: boolean;
 }) {
   const {
@@ -63,6 +66,21 @@ function SortableGalleryItem({
     transition,
   };
 
+  // Handle tap on the item (for touch devices)
+  const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    // Don't trigger if we're dragging
+    if (isDragging) return;
+    
+    // Only trigger action sheet on touch devices
+    // We detect this by checking if the event is from a touch or if hover isn't supported
+    const isTouch = 'touches' in e || window.matchMedia('(hover: none)').matches;
+    if (isTouch) {
+      e.preventDefault();
+      e.stopPropagation();
+      onTapForActions(item);
+    }
+  }, [isDragging, item, onTapForActions]);
+
   return (
     <div
       ref={setNodeRef}
@@ -73,6 +91,15 @@ function SortableGalleryItem({
         item.is_primary && "ring-4 ring-pink-500 ring-offset-2"
       )}
     >
+      {/* Tap target for mobile - covers the whole card */}
+      <button
+        type="button"
+        onClick={handleTap}
+        className="absolute inset-0 z-10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-inset
+          [@media(hover:hover)]:hidden"
+        aria-label={`Manage ${item.media_type}: ${item.is_primary ? 'Primary' : ''}`}
+      />
+
       {/* Media */}
       {item.media_type === "video" ? (
         <video
@@ -98,14 +125,14 @@ function SortableGalleryItem({
 
       {/* Primary Badge */}
       {item.is_primary && (
-        <div className="absolute top-2 left-2 bg-pink-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+        <div className="absolute top-2 left-2 bg-pink-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 z-20">
           <Star className="w-3 h-3 fill-white" />
           Primary
         </div>
       )}
 
       {/* Media Type Badge */}
-      <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+      <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 z-20">
         {item.media_type === "video" ? (
           <>
             <VideoIcon className="w-3 h-3" />
@@ -119,19 +146,28 @@ function SortableGalleryItem({
         )}
       </div>
 
-      {/* Drag Handle */}
+      {/* Mobile Action Indicator - visible only on touch devices */}
+      <div className="absolute bottom-2 right-2 z-20 [@media(hover:hover)]:hidden">
+        <div className="bg-black/70 p-2 rounded-full backdrop-blur-sm">
+          <MoreHorizontal className="w-4 h-4 text-white" />
+        </div>
+      </div>
+
+      {/* Drag Handle - desktop hover only */}
       <div
         {...attributes}
         {...listeners}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-move"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-move z-30
+          [@media(hover:none)]:hidden"
       >
         <div className="bg-black/70 p-3 rounded-full">
           <GripVertical className="w-6 h-6 text-white" />
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+      {/* Action Buttons - desktop hover only */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity z-30
+        [@media(hover:none)]:hidden">
         <div className="flex gap-2">
           {!item.is_primary && item.media_type === "image" && (
             <button
@@ -167,9 +203,17 @@ export function GalleryManager({
 }: GalleryManagerProps) {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(items);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  // State for mobile action sheet
+  const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+  const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      // Require a bit of movement before drag starts to allow tap on mobile
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -199,6 +243,8 @@ export function GalleryManager({
   };
 
   const handleSetPrimary = async (itemId: string) => {
+    setIsActionSheetOpen(false);
+    setSelectedItem(null);
     await onSetPrimary(itemId);
   };
 
@@ -207,6 +253,8 @@ export function GalleryManager({
       return;
     }
 
+    setIsActionSheetOpen(false);
+    setSelectedItem(null);
     setDeletingId(itemId);
     try {
       await onDelete(itemId);
@@ -214,6 +262,17 @@ export function GalleryManager({
       setDeletingId(null);
     }
   };
+
+  // Handle tap on item (opens action sheet on mobile)
+  const handleTapForActions = useCallback((item: GalleryItem) => {
+    setSelectedItem(item);
+    setIsActionSheetOpen(true);
+  }, []);
+
+  const closeActionSheet = useCallback(() => {
+    setIsActionSheetOpen(false);
+    setSelectedItem(null);
+  }, []);
 
   if (galleryItems.length === 0) {
     return (
@@ -229,13 +288,16 @@ export function GalleryManager({
 
   return (
     <div className="space-y-4">
-      {/* Instructions */}
+      {/* Instructions - different for desktop vs mobile */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-800 font-medium mb-2">Gallery Tips:</p>
         <ul className="text-xs text-blue-700 space-y-1">
           <li>• Drag and drop to reorder photos</li>
           <li>• Your first photo will be your main profile picture</li>
-          <li>• Hover over photos to see action buttons</li>
+          {/* Desktop tip */}
+          <li className="hidden [@media(hover:hover)]:block">• Hover over photos to see action buttons</li>
+          {/* Mobile tip */}
+          <li className="[@media(hover:hover)]:hidden">• Tap any photo to set it as primary or delete it</li>
           <li>• Videos cannot be set as primary (only photos)</li>
         </ul>
       </div>
@@ -254,6 +316,7 @@ export function GalleryManager({
                 item={item}
                 onSetPrimary={handleSetPrimary}
                 onDelete={handleDelete}
+                onTapForActions={handleTapForActions}
                 isDeleting={deletingId === item.id}
               />
             ))}
@@ -267,6 +330,83 @@ export function GalleryManager({
           <p className="text-sm text-gray-600 mt-2">Updating gallery...</p>
         </div>
       )}
+
+      {/* Mobile Action Sheet */}
+      <BottomSheet
+        isOpen={isActionSheetOpen}
+        onClose={closeActionSheet}
+        title="Photo Actions"
+        showClose={false}
+      >
+        <div className="px-4 py-2">
+          {/* Preview thumbnail */}
+          {selectedItem && (
+            <div className="flex items-center gap-4 pb-4 mb-4 border-b">
+              <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                {selectedItem.media_type === "video" ? (
+                  <video
+                    src={selectedItem.media_url}
+                    className="w-full h-full object-cover"
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    src={selectedItem.media_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">
+                  {selectedItem.media_type === "video" ? "Video" : "Photo"}
+                </p>
+                {selectedItem.is_primary && (
+                  <p className="text-sm text-pink-600 flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-pink-600" />
+                    Primary photo
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="space-y-2 pb-4">
+            {/* Set as Primary - only for non-primary images */}
+            {selectedItem && !selectedItem.is_primary && selectedItem.media_type === "image" && (
+              <button
+                onClick={() => handleSetPrimary(selectedItem.id)}
+                className="w-full flex items-center gap-3 px-4 py-3.5 bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-800 rounded-xl font-medium transition-colors min-h-[52px]"
+              >
+                <Star className="w-5 h-5" />
+                Set as Primary Photo
+              </button>
+            )}
+
+            {/* Delete button */}
+            {selectedItem && (
+              <button
+                onClick={() => handleDelete(selectedItem.id)}
+                disabled={deletingId === selectedItem.id}
+                className="w-full flex items-center gap-3 px-4 py-3.5 bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 rounded-xl font-medium transition-colors disabled:opacity-50 min-h-[52px]"
+              >
+                <Trash2 className="w-5 h-5" />
+                Delete {selectedItem.media_type === "video" ? "Video" : "Photo"}
+              </button>
+            )}
+
+            {/* Cancel button */}
+            <button
+              onClick={closeActionSheet}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-xl font-medium transition-colors min-h-[52px]"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 }
