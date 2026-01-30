@@ -205,7 +205,7 @@ export async function DELETE() {
       max_age: 99,
       min_height: null,
       max_height: null,
-      max_distance_miles: 100,
+      max_distance_miles: 500, // 500 miles = essentially nationwide
       gender: null,
       body_types: null,
       ethnicities: null,

@@ -19,9 +19,27 @@ interface UserOption {
   profile_image_url: string | null;
 }
 
+interface UserFilters {
+  minAge?: number;
+  maxAge?: number;
+  minHeight?: number;
+  maxHeight?: number;
+  maxDistanceMiles?: number;
+  bodyTypes?: string[];
+  ethnicities?: string[];
+  religions?: string[];
+  educationLevels?: string[];
+  zodiacSigns?: string[];
+  smoking?: string;
+  drinking?: string;
+  marijuana?: string;
+  hasKids?: string;
+  wantsKids?: string;
+}
+
 interface UserSelectorProps {
   selectedUser: UserOption | null;
-  onSelectUser: (user: UserOption | null) => void;
+  onSelectUser: (user: UserOption | null, filters?: UserFilters | null) => void;
   initialUserId?: string | null;
 }
 
@@ -47,7 +65,8 @@ export function UserSelector({ selectedUser, onSelectUser, initialUserId }: User
         const data = await response.json();
         
         if (data.success && data.users.length > 0) {
-          onSelectUser(data.users[0]);
+          // Pass both user and their saved filters
+          onSelectUser(data.users[0], data.userFilters || null);
         }
       } catch (error) {
         console.error("Failed to fetch initial user:", error);
@@ -58,6 +77,30 @@ export function UserSelector({ selectedUser, onSelectUser, initialUserId }: User
 
     fetchInitialUser();
   }, [initialUserId, selectedUser, onSelectUser]);
+
+  // Fetch filters when selecting a user from dropdown
+  const handleSelectUser = async (user: UserOption) => {
+    setIsOpen(false);
+    setSearch("");
+    
+    // Fetch the user's filters
+    try {
+      const params = new URLSearchParams();
+      params.set("user_id", user.user_id);
+      
+      const response = await fetch(`/api/admin/algorithm-simulator?${params}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        onSelectUser(user, data.userFilters || null);
+      } else {
+        onSelectUser(user, null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch user filters:", error);
+      onSelectUser(user, null);
+    }
+  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -262,11 +305,7 @@ export function UserSelector({ selectedUser, onSelectUser, initialUserId }: User
               {users.map((user, index) => (
                 <button
                   key={user.user_id}
-                  onClick={() => {
-                    onSelectUser(user);
-                    setIsOpen(false);
-                    setSearch("");
-                  }}
+                  onClick={() => handleSelectUser(user)}
                   className={cn(
                     "w-full flex items-center gap-3 p-3",
                     "hover:bg-blue-50/50 transition-colors",

@@ -623,27 +623,27 @@ async function createTestUser(userData: TestUserData, userNumber: number, totalU
       console.log(`${progress}   ✓ Profile created`);
     }
 
-    // 4. Create user_filters with varied preferences
+    // 4. Create user_filters with inclusive defaults (most users want broad discovery)
     const ageRange = {
-      min: Math.max(18, randomInt(22, 35)),
-      max: randomInt(40, 60),
+      min: Math.max(18, randomInt(21, 28)),
+      max: randomInt(55, 99), // More inclusive max age
     };
     
     const filterData = {
       user_id: userId,
       min_age: ageRange.min,
       max_age: ageRange.max,
-      max_distance_miles: randomElement([25, 50, 100, 150, 200]),
-      min_height: Math.random() > 0.5 ? randomInt(60, 66) : null,
-      max_height: Math.random() > 0.5 ? randomInt(72, 84) : null,
+      max_distance_miles: randomElement([100, 200, 300, 500, 500]), // Weighted toward 500 (nationwide)
+      min_height: null, // No height restrictions by default
+      max_height: null, // No height restrictions by default
       gender: lookingFor,
-      body_types: Math.random() > 0.6 ? randomElements(BODY_TYPES, 2, 4) : null,
-      ethnicities: Math.random() > 0.7 ? randomElements(ETHNICITIES, 2, 4) : null,
-      religions: Math.random() > 0.7 ? randomElements(RELIGIONS, 2, 4) : null,
-      education_levels: Math.random() > 0.6 ? randomElements(EDUCATION_LEVELS, 2, 4) : null,
-      has_kids: randomElement(["any", "yes", "no"]),
-      wants_kids: randomElement(["any", "yes", "no", "maybe"]),
-      smoking: Math.random() > 0.5 ? randomElement(["any", "never", "occasionally"]) : "any",
+      body_types: null, // Accept all body types by default
+      ethnicities: null, // Accept all ethnicities by default
+      religions: null, // Accept all religions by default
+      education_levels: null, // Accept all education levels by default
+      has_kids: null, // Accept any - no restriction
+      wants_kids: null, // Accept any - no restriction
+      smoking: null, // Accept any - no restriction
     };
 
     const { error: filterError } = await supabase

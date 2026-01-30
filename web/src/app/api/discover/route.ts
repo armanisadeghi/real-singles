@@ -199,7 +199,7 @@ export async function GET() {
       userProfile,
       filters: {
         ...filters,
-        maxDistanceMiles: filters.maxDistanceMiles || 100, // Default 100 miles
+        maxDistanceMiles: filters.maxDistanceMiles || 500, // Default 500 miles (nationwide)
       },
       pagination: { limit: 10, offset: 0 },
       sortBy: "distance",

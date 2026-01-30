@@ -46,10 +46,10 @@ export interface FilterValues {
 
 const defaultFilters: FilterValues = {
   minAge: 18,
-  maxAge: 50,
+  maxAge: 99, // Fully inclusive by default
   minHeight: 48, // 4'0"
   maxHeight: 84, // 7'0"
-  maxDistance: 50,
+  maxDistance: 500, // 500 miles - essentially nationwide by default
   // Note: Gender preference is NOT a filter - it comes from user's profile "looking_for" field
   bodyType: [],
   education: [],
@@ -164,12 +164,13 @@ export function FilterPanel({
         {/* Distance */}
         <section>
           <h3 className="font-medium text-gray-900 mb-3">
-            Maximum Distance: {filters.maxDistance} miles
+            Maximum Distance: {filters.maxDistance >= 500 ? "Nationwide" : `${filters.maxDistance} miles`}
           </h3>
           <input
             type="range"
-            min={1}
-            max={100}
+            min={10}
+            max={500}
+            step={10}
             value={filters.maxDistance}
             onChange={(e) =>
               setFilters({ ...filters, maxDistance: Number(e.target.value) })
@@ -177,8 +178,11 @@ export function FilterPanel({
             className="w-full accent-pink-500"
           />
           <div className="flex justify-between text-xs text-gray-400 mt-1">
-            <span>1 mi</span>
+            <span>10 mi</span>
+            <span>50 mi</span>
             <span>100 mi</span>
+            <span>250 mi</span>
+            <span>Nationwide</span>
           </div>
         </section>
 

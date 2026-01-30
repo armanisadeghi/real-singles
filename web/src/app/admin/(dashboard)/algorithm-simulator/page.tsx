@@ -106,9 +106,30 @@ export default function AlgorithmSimulatorPage() {
   const [selectedUser, setSelectedUser] = useState<UserOption | null>(null);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<Algorithm>("discover-profiles");
   const [filters, setFilters] = useState<Filters>({});
+  const [userFiltersLoaded, setUserFiltersLoaded] = useState(false);
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Handle user selection with their filters
+  const handleSelectUser = (user: UserOption | null, userFilters?: Filters | null) => {
+    setSelectedUser(user);
+    setResult(null); // Clear previous results
+    
+    if (user && userFilters) {
+      // Load the user's saved filters
+      setFilters(userFilters);
+      setUserFiltersLoaded(true);
+    } else if (!user) {
+      // Clear filters when user is deselected
+      setFilters({});
+      setUserFiltersLoaded(false);
+    } else {
+      // User selected but no filters found
+      setFilters({});
+      setUserFiltersLoaded(false);
+    }
+  };
 
   const runSimulation = useCallback(async () => {
     if (!selectedUser) {
@@ -208,7 +229,7 @@ export default function AlgorithmSimulatorPage() {
             <div className="p-5">
               <UserSelector
                 selectedUser={selectedUser}
-                onSelectUser={setSelectedUser}
+                onSelectUser={handleSelectUser}
                 initialUserId={initialUserId}
               />
             </div>
@@ -245,10 +266,21 @@ export default function AlgorithmSimulatorPage() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-slate-900">Configure Filters</h3>
-                    <p className="text-xs text-slate-500">Optional - narrow down results with specific criteria</p>
+                    <p className="text-xs text-slate-500">
+                      {userFiltersLoaded 
+                        ? "Loaded from user's saved preferences — adjust to test different scenarios"
+                        : "Optional — narrow down results with specific criteria"}
+                    </p>
                   </div>
-                  <div className="p-2 rounded-lg bg-amber-50">
-                    <Settings2 className="w-4 h-4 text-amber-600" />
+                  <div className="flex items-center gap-2">
+                    {userFiltersLoaded && (
+                      <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-lg">
+                        User&apos;s Filters Loaded
+                      </span>
+                    )}
+                    <div className="p-2 rounded-lg bg-amber-50">
+                      <Settings2 className="w-4 h-4 text-amber-600" />
+                    </div>
                   </div>
                 </div>
               </div>

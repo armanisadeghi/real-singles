@@ -321,6 +321,37 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // If fetching a specific user, also get their saved filters
+    let userFilters = null;
+    if (userId && profiles && profiles.length > 0) {
+      const { data: filters } = await supabase
+        .from("user_filters")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      
+      if (filters) {
+        // Convert database format to API format
+        userFilters = {
+          minAge: filters.min_age ?? undefined,
+          maxAge: filters.max_age ?? undefined,
+          minHeight: filters.min_height ?? undefined,
+          maxHeight: filters.max_height ?? undefined,
+          maxDistanceMiles: filters.max_distance_miles ?? undefined,
+          bodyTypes: filters.body_types ?? undefined,
+          ethnicities: filters.ethnicities ?? undefined,
+          religions: filters.religions ?? undefined,
+          educationLevels: filters.education_levels ?? undefined,
+          zodiacSigns: filters.zodiac_signs ?? undefined,
+          smoking: filters.smoking ?? undefined,
+          drinking: filters.drinking ?? undefined,
+          marijuana: filters.marijuana ?? undefined,
+          hasKids: filters.has_kids ?? undefined,
+          wantsKids: filters.wants_kids ?? undefined,
+        };
+      }
+    }
+
     // Resolve profile image URLs
     const usersWithUrls = await Promise.all(
       (profiles || []).map(async (p) => {
@@ -345,6 +376,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       users: usersWithUrls,
+      // Include user filters when fetching a specific user
+      ...(userFilters && { userFilters }),
     });
   } catch (error) {
     console.error("Error fetching users for simulator:", error);
