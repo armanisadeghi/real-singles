@@ -75,6 +75,7 @@ export async function GET(
   // Check if current user has favorited this profile
   let isFavorite = false;
   let followStatus = "not_following";
+  let isMatched = false;
 
   if (currentUser) {
     // Check favorite status
@@ -111,6 +112,28 @@ export async function GET(
         { status: 403 }
       );
     }
+
+    // Check mutual match status
+    // A mutual match exists when both users have liked each other
+    const { data: currentUserLike } = await supabase
+      .from("matches")
+      .select("id")
+      .eq("user_id", currentUser.id)
+      .eq("target_user_id", targetUserId)
+      .in("action", ["like", "super_like"])
+      .eq("is_unmatched", false)
+      .maybeSingle();
+
+    const { data: targetUserLike } = await supabase
+      .from("matches")
+      .select("id")
+      .eq("user_id", targetUserId)
+      .eq("target_user_id", currentUser.id)
+      .in("action", ["like", "super_like"])
+      .eq("is_unmatched", false)
+      .maybeSingle();
+
+    isMatched = !!(currentUserLike && targetUserLike);
   }
 
   // Get average rating
@@ -233,6 +256,7 @@ export async function GET(
     // Relationship to current user
     IsFavorite: isFavorite ? 1 : 0,
     FollowStatus: followStatus,
+    IsMatched: isMatched,
     
     // Gallery with signed URLs (generated below)
     gallery: galleryWithUrls,

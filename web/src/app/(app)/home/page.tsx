@@ -346,6 +346,7 @@ export default function HomePage() {
                     profile={formatProfileForCard(profile)}
                     showActions={false}
                     size="compact"
+                    linkBasePath="/discover/profile"
                   />
                 </div>
               ))}
@@ -507,6 +508,7 @@ export default function HomePage() {
                     profile={formatProfileForCard(profile)}
                     showActions={false}
                     size="compact"
+                    linkBasePath="/discover/profile"
                   />
                 </div>
               ))}

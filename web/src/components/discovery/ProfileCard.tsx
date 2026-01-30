@@ -56,6 +56,8 @@ interface ProfileCardProps {
   size?: "compact" | "normal" | "large";
   /** Custom class name */
   className?: string;
+  /** Base path for profile links (default: /profile, use /discover/profile for unmatched profiles) */
+  linkBasePath?: string;
 }
 
 export function ProfileCard({
@@ -68,6 +70,7 @@ export function ProfileCard({
   actionLoading = false,
   size = "normal",
   className,
+  linkBasePath = "/profile",
 }: ProfileCardProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -173,7 +176,7 @@ export function ProfileCard({
   if (size === "compact") {
     return (
       <Link
-        href={profile.user_id ? `/profile/${profile.user_id}` : "#"}
+        href={profile.user_id ? `${linkBasePath}/${profile.user_id}` : "#"}
         className={cn(
           "block relative bg-white rounded-xl shadow-sm overflow-hidden group",
           "transition-all duration-200 hover:shadow-md",
@@ -253,7 +256,7 @@ export function ProfileCard({
         onTouchEnd={onTouchEnd}
       >
         <Link
-          href={profile.user_id ? `/profile/${profile.user_id}` : "#"}
+          href={profile.user_id ? `${linkBasePath}/${profile.user_id}` : "#"}
           className="block w-full h-full"
         >
           {photos.length > 0 ? (
@@ -438,7 +441,7 @@ export function ProfileCard({
 
           {/* Info Button */}
           <Link
-            href={profile.user_id ? `/profile/${profile.user_id}` : "#"}
+            href={profile.user_id ? `${linkBasePath}/${profile.user_id}` : "#"}
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center",
               "bg-white border-2 border-gray-200 text-gray-500",

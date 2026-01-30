@@ -75,6 +75,7 @@ interface ProfileData {
   is_verified: boolean;
   IsFavorite: number;
   FollowStatus: string;
+  IsMatched: boolean;
   // Voice & Video Prompts
   VoicePromptUrl?: string;
   VideoIntroUrl?: string;
@@ -123,6 +124,13 @@ export default function OtherProfilePage() {
         const data = await res.json();
 
         if (data.success) {
+          // If not matched, redirect to the discover profile page
+          // The discover profile page allows liking/passing, while this page is for matched users only
+          if (!data.data.IsMatched) {
+            router.replace(`/discover/profile/${userId}`);
+            return;
+          }
+          
           setProfile(data.data);
           setIsFavorite(data.data.IsFavorite === 1);
         } else {
@@ -137,7 +145,7 @@ export default function OtherProfilePage() {
     }
 
     fetchProfile();
-  }, [userId]);
+  }, [userId, router]);
 
   // Build photo array (deduplicated to avoid showing primary image twice)
   const photos = profile
