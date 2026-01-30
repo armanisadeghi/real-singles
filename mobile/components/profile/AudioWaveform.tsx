@@ -5,7 +5,7 @@
  * Uses the audio metering data from expo-audio to display an animated waveform.
  * 
  * Supports:
- * - Platform-specific colors (iOS PlatformColor, Android Material You)
+ * - Theme colors from ThemeContext (Reanimated requires actual strings, not PlatformColor)
  * - Accessibility (respects reduced motion)
  * - Dark/light mode
  */
@@ -14,7 +14,6 @@ import React, { useEffect, useRef } from 'react';
 import {
   AccessibilityInfo,
   Platform,
-  PlatformColor,
   StyleProp,
   View,
   ViewStyle,
@@ -171,18 +170,11 @@ export function AudioWaveform({
     return () => subscription.remove();
   }, []);
   
-  // Platform-specific default colors
-  const primaryColor = color || (
-    Platform.OS === 'ios'
-      ? (PlatformColor('systemPink') as unknown as string)
-      : colors.primary
-  );
+  // Theme colors for Reanimated - must be actual strings, not PlatformColor objects
+  // Reanimated cannot process PlatformColor native objects in animated styles
+  const primaryColor = color || colors.primary;
   
-  const mutedColor = secondaryColor || (
-    Platform.OS === 'ios'
-      ? (PlatformColor('systemGray4') as unknown as string)
-      : colors.surfaceContainerHighest
-  );
+  const mutedColor = secondaryColor || colors.surfaceContainerHighest;
   
   // Generate bars
   const bars = Array.from({ length: BAR_COUNT }, (_, i) => i);

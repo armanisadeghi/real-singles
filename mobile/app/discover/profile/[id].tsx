@@ -74,13 +74,21 @@ export default function DiscoveryProfileView() {
   const isDark = colorScheme === 'dark';
   const colors = useThemeColors();
 
-  const themedColors = useMemo(() => ({
-    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
-    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
-    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
-    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
-    separator: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outlineVariant,
-  }), [isDark, colors]);
+  // Colors for regular Views - PlatformColor works here
+  const viewColors = useMemo(() => ({
+    background: Platform.OS === 'ios' ? PlatformColor('systemBackground') : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? PlatformColor('secondarySystemBackground') : colors.surfaceContainer,
+    text: Platform.OS === 'ios' ? PlatformColor('label') : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? PlatformColor('secondaryLabel') : colors.onSurfaceVariant,
+    separator: Platform.OS === 'ios' ? PlatformColor('separator') : colors.outlineVariant,
+  }), [colors]);
+
+  // Colors for Reanimated Animated.View - must be actual strings, not PlatformColor objects
+  // Reanimated cannot process PlatformColor native objects
+  const animatedColors = useMemo(() => ({
+    separator: isDark ? '#38383A' : '#C6C6C8', // iOS opaque separator equivalents
+    actionBarBg: isDark ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+  }), [isDark]);
   
   // Calculate visible photo height (below safe area)
   // PhotoCarousel will add safe area inset to this for total height
@@ -266,7 +274,7 @@ export default function DiscoveryProfileView() {
   
   if (loading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: themedColors.background }]}>
+      <View style={[styles.loadingContainer, { backgroundColor: viewColors.background }]}>
         <ActivityIndicator size="large" color="#B06D1E" />
       </View>
     );
@@ -277,7 +285,7 @@ export default function DiscoveryProfileView() {
   }
   
   return (
-    <View style={[styles.container, { backgroundColor: themedColors.background }]}>
+    <View style={[styles.container, { backgroundColor: viewColors.background }]}>
       <Toast />
       
       {/* Main scrollable content */}
@@ -339,8 +347,8 @@ export default function DiscoveryProfileView() {
           styles.actionBar,
           { 
             paddingBottom: Math.max(insets.bottom, 8) + 8,
-            backgroundColor: isDark ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
-            borderTopColor: themedColors.separator,
+            backgroundColor: animatedColors.actionBarBg,
+            borderTopColor: animatedColors.separator,
           },
         ]}
       >
@@ -349,7 +357,7 @@ export default function DiscoveryProfileView() {
           <Pressable
             onPress={() => handleAction("pass")}
             disabled={actionLoading !== null}
-            style={[styles.actionButton, styles.passButton, { backgroundColor: themedColors.background }]}
+            style={[styles.actionButton, styles.passButton, { backgroundColor: viewColors.background }]}
           >
             {actionLoading === "pass" ? (
               <ActivityIndicator size="small" color="#EF4444" />
@@ -364,7 +372,7 @@ export default function DiscoveryProfileView() {
           <Pressable
             onPress={() => handleAction("super_like")}
             disabled={actionLoading !== null}
-            style={[styles.actionButton, styles.superLikeButton, { backgroundColor: themedColors.background }]}
+            style={[styles.actionButton, styles.superLikeButton, { backgroundColor: viewColors.background }]}
           >
             {actionLoading === "super_like" ? (
               <ActivityIndicator size="small" color="#3B82F6" />
@@ -397,10 +405,10 @@ export default function DiscoveryProfileView() {
             style={styles.reportBackdrop}
             onPress={() => setShowReportSheet(false)}
           />
-          <View style={[styles.reportSheet, { paddingBottom: insets.bottom + 20, backgroundColor: themedColors.background }]}>
-            <View style={[styles.reportHandle, { backgroundColor: themedColors.separator }]} />
-            <Text style={[styles.reportTitle, { color: themedColors.text }]}>Report this profile</Text>
-            <Text style={[styles.reportSubtitle, { color: themedColors.secondaryText }]}>
+          <View style={[styles.reportSheet, { paddingBottom: insets.bottom + 20, backgroundColor: viewColors.background }]}>
+            <View style={[styles.reportHandle, { backgroundColor: viewColors.separator }]} />
+            <Text style={[styles.reportTitle, { color: viewColors.text }]}>Report this profile</Text>
+            <Text style={[styles.reportSubtitle, { color: viewColors.secondaryText }]}>
               Why are you reporting {profile.DisplayName || "this user"}?
             </Text>
             
@@ -417,10 +425,10 @@ export default function DiscoveryProfileView() {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   handleReport(reason);
                 }}
-                style={[styles.reportOption, { borderBottomColor: themedColors.separator }]}
+                style={[styles.reportOption, { borderBottomColor: viewColors.separator }]}
               >
-                <Text style={[styles.reportOptionText, { color: themedColors.text }]}>{reason}</Text>
-                <PlatformIcon name="chevron-right" size={20} color={themedColors.secondaryText} />
+                <Text style={[styles.reportOptionText, { color: viewColors.text }]}>{reason}</Text>
+                <PlatformIcon name="chevron-right" size={20} color={viewColors.secondaryText} />
               </Pressable>
             ))}
             
@@ -431,7 +439,7 @@ export default function DiscoveryProfileView() {
               }}
               style={styles.reportCancel}
             >
-              <Text style={[styles.reportCancelText, { color: themedColors.secondaryText }]}>Cancel</Text>
+              <Text style={[styles.reportCancelText, { color: viewColors.secondaryText }]}>Cancel</Text>
             </Pressable>
           </View>
         </View>
@@ -443,13 +451,13 @@ export default function DiscoveryProfileView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor applied inline with themedColors.background
+    // backgroundColor applied inline with viewColors.background
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    // backgroundColor applied inline with themedColors.background
+    // backgroundColor applied inline with viewColors.background
   },
   scrollView: {
     flex: 1,
@@ -511,7 +519,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    // backgroundColor applied inline with themedColors.background
+    // backgroundColor applied inline with viewColors.background
     borderWidth: 1.5,
     borderColor: "#FECACA", // Semantic red border - keeps visibility in both modes
   },
@@ -519,7 +527,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    // backgroundColor applied inline with themedColors.background
+    // backgroundColor applied inline with viewColors.background
     borderWidth: 1.5,
     borderColor: "#BFDBFE", // Semantic blue border - keeps visibility in both modes
   },
@@ -539,7 +547,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   reportSheet: {
-    // backgroundColor applied inline with themedColors.background
+    // backgroundColor applied inline with viewColors.background
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: SPACING.lg,
@@ -547,20 +555,20 @@ const styles = StyleSheet.create({
   reportHandle: {
     width: 40,
     height: 4,
-    // backgroundColor applied inline with themedColors.separator
+    // backgroundColor applied inline with viewColors.separator
     borderRadius: 2,
     alignSelf: "center",
     marginBottom: SPACING.lg,
   },
   reportTitle: {
     ...TYPOGRAPHY.h3,
-    // color applied inline with themedColors.text
+    // color applied inline with viewColors.text
     textAlign: "center",
     marginBottom: SPACING.xs,
   },
   reportSubtitle: {
     ...TYPOGRAPHY.subheadline,
-    // color applied inline with themedColors.secondaryText
+    // color applied inline with viewColors.secondaryText
     textAlign: "center",
     marginBottom: SPACING.lg,
   },
@@ -570,11 +578,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    // borderBottomColor applied inline with themedColors.separator
+    // borderBottomColor applied inline with viewColors.separator
   },
   reportOptionText: {
     ...TYPOGRAPHY.body,
-    // color applied inline with themedColors.text
+    // color applied inline with viewColors.text
   },
   reportCancel: {
     marginTop: SPACING.lg,
@@ -583,6 +591,6 @@ const styles = StyleSheet.create({
   },
   reportCancelText: {
     ...TYPOGRAPHY.bodySemibold,
-    // color applied inline with themedColors.secondaryText
+    // color applied inline with viewColors.secondaryText
   },
 });

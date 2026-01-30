@@ -1,7 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { SymbolView, SFSymbol } from 'expo-symbols';
 import React from 'react';
-import { Platform, StyleProp, ViewStyle, PlatformColor, useColorScheme } from 'react-native';
+import { Platform, StyleProp, ViewStyle, PlatformColor, useColorScheme, ColorValue } from 'react-native';
 
 /**
  * SF Symbol name mappings for iOS
@@ -170,9 +170,9 @@ export interface PlatformIconProps {
    */
   size?: number;
   /**
-   * Icon color - accepts hex, rgb, or named colors
+   * Icon color - accepts hex, rgb, named colors, or PlatformColor
    */
-  color?: string;
+  color?: ColorValue;
   /**
    * Optional SF Symbol name override for iOS
    * Use this when automatic mapping doesn't provide the desired symbol
@@ -218,10 +218,10 @@ export function PlatformIcon({
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   
-  // Theme-aware default color
-  const iconColor = color ?? (
+  // Theme-aware default color - uses PlatformColor on iOS for system adaptation
+  const iconColor: ColorValue = color ?? (
     Platform.OS === 'ios' 
-      ? (PlatformColor('label') as unknown as string)
+      ? PlatformColor('label')
       : (isDark ? '#FFFFFF' : '#000000')
   );
   

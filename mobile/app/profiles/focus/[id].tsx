@@ -61,19 +61,27 @@ export default function ProfileFocusView() {
   const isDark = colorScheme === 'dark';
   const colors = useThemeColors();
 
-  const themedColors = useMemo(() => ({
-    background: Platform.OS === 'ios' ? (PlatformColor('systemBackground') as unknown as string) : colors.background,
-    secondaryBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainer,
-    tertiaryBackground: Platform.OS === 'ios' ? (PlatformColor('tertiarySystemBackground') as unknown as string) : colors.surfaceContainerLow,
-    text: Platform.OS === 'ios' ? (PlatformColor('label') as unknown as string) : colors.onSurface,
-    secondaryText: Platform.OS === 'ios' ? (PlatformColor('secondaryLabel') as unknown as string) : colors.onSurfaceVariant,
-    separator: Platform.OS === 'ios' ? (PlatformColor('separator') as unknown as string) : colors.outlineVariant,
+  // Colors for regular Views - PlatformColor works here
+  const viewColors = useMemo(() => ({
+    background: Platform.OS === 'ios' ? PlatformColor('systemBackground') : colors.background,
+    secondaryBackground: Platform.OS === 'ios' ? PlatformColor('secondarySystemBackground') : colors.surfaceContainer,
+    tertiaryBackground: Platform.OS === 'ios' ? PlatformColor('tertiarySystemBackground') : colors.surfaceContainerLow,
+    text: Platform.OS === 'ios' ? PlatformColor('label') : colors.onSurface,
+    secondaryText: Platform.OS === 'ios' ? PlatformColor('secondaryLabel') : colors.onSurfaceVariant,
+    separator: Platform.OS === 'ios' ? PlatformColor('separator') : colors.outlineVariant,
     // System colors for actions
-    systemRed: Platform.OS === 'ios' ? (PlatformColor('systemRed') as unknown as string) : '#EF4444',
-    systemBlue: Platform.OS === 'ios' ? (PlatformColor('systemBlue') as unknown as string) : '#3B82F6',
-    systemPink: Platform.OS === 'ios' ? (PlatformColor('systemPink') as unknown as string) : '#B06D1E',
-    systemGray4: Platform.OS === 'ios' ? (PlatformColor('systemGray4') as unknown as string) : isDark ? '#3A3A3C' : '#D1D1D6',
+    systemRed: Platform.OS === 'ios' ? PlatformColor('systemRed') : '#EF4444',
+    systemBlue: Platform.OS === 'ios' ? PlatformColor('systemBlue') : '#3B82F6',
+    systemPink: Platform.OS === 'ios' ? PlatformColor('systemPink') : '#B06D1E',
+    systemGray4: Platform.OS === 'ios' ? PlatformColor('systemGray4') : isDark ? '#3A3A3C' : '#D1D1D6',
   }), [isDark, colors]);
+
+  // Colors for Reanimated Animated.View - must be actual strings, not PlatformColor objects
+  // Reanimated cannot process PlatformColor native objects
+  const animatedColors = useMemo(() => ({
+    separator: isDark ? '#38383A' : '#C6C6C8', // iOS opaque separator equivalents
+    actionBarBg: isDark ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+  }), [isDark]);
   
   // Calculate visible photo height (below safe area)
   // We add insets.top to get the total height for edge-to-edge display
@@ -247,8 +255,8 @@ export default function ProfileFocusView() {
 
   if (loading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: themedColors.background }]}>
-        <ActivityIndicator size="large" color={themedColors.systemPink} />
+      <View style={[styles.loadingContainer, { backgroundColor: viewColors.background }]}>
+        <ActivityIndicator size="large" color={viewColors.systemPink} />
       </View>
     );
   }
@@ -258,7 +266,7 @@ export default function ProfileFocusView() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: themedColors.background }]}>
+    <View style={[styles.container, { backgroundColor: viewColors.background }]}>
       <Toast />
 
       {/* Photo Section */}
@@ -311,7 +319,7 @@ export default function ProfileFocusView() {
             </Text>
             {profile.livePicture && (
               <View style={styles.verifiedBadge}>
-                <PlatformIcon name="check-circle" iosName="checkmark.seal.fill" size={20} color={themedColors.systemBlue} />
+                <PlatformIcon name="check-circle" iosName="checkmark.seal.fill" size={20} color={viewColors.systemBlue} />
               </View>
             )}
           </View>
@@ -337,7 +345,7 @@ export default function ProfileFocusView() {
 
       {/* Info Section */}
       <ScrollView
-        style={[styles.infoSection, { backgroundColor: themedColors.background }]}
+        style={[styles.infoSection, { backgroundColor: viewColors.background }]}
         contentContainerStyle={styles.infoContent}
         showsVerticalScrollIndicator={false}
       >
@@ -345,7 +353,7 @@ export default function ProfileFocusView() {
         {profile.About && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>About</Text>
-            <Text style={[styles.aboutText, { color: themedColors.secondaryText }]}>{profile.About}</Text>
+            <Text style={[styles.aboutText, { color: viewColors.secondaryText }]}>{profile.About}</Text>
           </View>
         )}
 
@@ -370,23 +378,23 @@ export default function ProfileFocusView() {
           <Text style={styles.sectionTitle}>Info</Text>
           <View style={styles.quickInfoGrid}>
             {profile.Gender && (
-              <View style={[styles.quickInfoItem, { backgroundColor: themedColors.secondaryBackground }]}>
-                <Text style={[styles.quickInfoLabel, { color: themedColors.secondaryText }]}>Gender</Text>
-                <Text style={[styles.quickInfoValue, { color: themedColors.text }]}>
+              <View style={[styles.quickInfoItem, { backgroundColor: viewColors.secondaryBackground }]}>
+                <Text style={[styles.quickInfoLabel, { color: viewColors.secondaryText }]}>Gender</Text>
+                <Text style={[styles.quickInfoValue, { color: viewColors.text }]}>
                   {profile.Gender.charAt(0).toUpperCase() + profile.Gender.slice(1)}
                 </Text>
               </View>
             )}
             {profile.Height && (
-              <View style={[styles.quickInfoItem, { backgroundColor: themedColors.secondaryBackground }]}>
-                <Text style={[styles.quickInfoLabel, { color: themedColors.secondaryText }]}>Height</Text>
-                <Text style={[styles.quickInfoValue, { color: themedColors.text }]}>{Number(profile.Height).toFixed(1)} ft</Text>
+              <View style={[styles.quickInfoItem, { backgroundColor: viewColors.secondaryBackground }]}>
+                <Text style={[styles.quickInfoLabel, { color: viewColors.secondaryText }]}>Height</Text>
+                <Text style={[styles.quickInfoValue, { color: viewColors.text }]}>{Number(profile.Height).toFixed(1)} ft</Text>
               </View>
             )}
             {profile.HSign && (
-              <View style={[styles.quickInfoItem, { backgroundColor: themedColors.secondaryBackground }]}>
-                <Text style={[styles.quickInfoLabel, { color: themedColors.secondaryText }]}>Zodiac</Text>
-                <Text style={[styles.quickInfoValue, { color: themedColors.text }]}>
+              <View style={[styles.quickInfoItem, { backgroundColor: viewColors.secondaryBackground }]}>
+                <Text style={[styles.quickInfoLabel, { color: viewColors.secondaryText }]}>Zodiac</Text>
+                <Text style={[styles.quickInfoValue, { color: viewColors.text }]}>
                   {profile.HSign.charAt(0).toUpperCase() + profile.HSign.slice(1)}
                 </Text>
               </View>
@@ -403,8 +411,8 @@ export default function ProfileFocusView() {
         entering={SlideInDown.springify()}
         style={[styles.actionBar, { 
           paddingBottom: Math.max(insets.bottom, 8) + 8,
-          backgroundColor: isDark ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
-          borderTopColor: themedColors.separator,
+          backgroundColor: animatedColors.actionBarBg,
+          borderTopColor: animatedColors.separator,
         }]}
       >
         <View style={styles.actionButtons}>
@@ -413,16 +421,16 @@ export default function ProfileFocusView() {
             style={({ pressed }) => [
               styles.actionButton, 
               styles.passButton, 
-              { backgroundColor: themedColors.background, borderColor: themedColors.systemGray4 },
+              { backgroundColor: viewColors.background, borderColor: viewColors.systemGray4 },
               pressed && styles.buttonPressed,
             ]}
             onPress={() => handleAction("pass")}
             disabled={actionLoading !== null}
           >
             {actionLoading === "pass" ? (
-              <ActivityIndicator size="small" color={themedColors.systemRed} />
+              <ActivityIndicator size="small" color={viewColors.systemRed} />
             ) : (
-              <PlatformIcon name="close" iosName="xmark" size={24} color={themedColors.systemRed} />
+              <PlatformIcon name="close" iosName="xmark" size={24} color={viewColors.systemRed} />
             )}
           </Pressable>
 
@@ -431,16 +439,16 @@ export default function ProfileFocusView() {
             style={({ pressed }) => [
               styles.actionButton, 
               styles.superLikeButton, 
-              { backgroundColor: themedColors.background, borderColor: themedColors.systemGray4 },
+              { backgroundColor: viewColors.background, borderColor: viewColors.systemGray4 },
               pressed && styles.buttonPressed,
             ]}
             onPress={() => handleAction("super_like")}
             disabled={actionLoading !== null}
           >
             {actionLoading === "super_like" ? (
-              <ActivityIndicator size="small" color={themedColors.systemBlue} />
+              <ActivityIndicator size="small" color={viewColors.systemBlue} />
             ) : (
-              <PlatformIcon name="star" iosName="star.fill" size={18} color={themedColors.systemBlue} />
+              <PlatformIcon name="star" iosName="star.fill" size={18} color={viewColors.systemBlue} />
             )}
           </Pressable>
 
@@ -449,7 +457,7 @@ export default function ProfileFocusView() {
             style={({ pressed }) => [
               styles.actionButton, 
               styles.likeButton,
-              { backgroundColor: themedColors.systemPink },
+              { backgroundColor: viewColors.systemPink },
               pressed && styles.buttonPressed,
             ]}
             onPress={() => handleAction("like")}
@@ -470,13 +478,13 @@ export default function ProfileFocusView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor applied inline with themedColors.background
+    // backgroundColor applied inline with viewColors.background
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    // backgroundColor applied inline with themedColors.background
+    // backgroundColor applied inline with viewColors.background
   },
   photoSection: {
     width: "100%",
@@ -567,7 +575,7 @@ const styles = StyleSheet.create({
   },
   infoSection: {
     flex: 1,
-    // backgroundColor applied inline with themedColors.background
+    // backgroundColor applied inline with viewColors.background
   },
   infoContent: {
     padding: SPACING.lg,
@@ -582,7 +590,7 @@ const styles = StyleSheet.create({
   },
   aboutText: {
     ...TYPOGRAPHY.body,
-    // color applied inline with themedColors.secondaryText
+    // color applied inline with viewColors.secondaryText
     lineHeight: 22,
   },
   interestsContainer: {
@@ -607,7 +615,7 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   quickInfoItem: {
-    // backgroundColor applied inline with themedColors.secondaryBackground
+    // backgroundColor applied inline with viewColors.secondaryBackground
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.md,
@@ -615,12 +623,12 @@ const styles = StyleSheet.create({
   },
   quickInfoLabel: {
     ...TYPOGRAPHY.caption2,
-    // color applied inline with themedColors.secondaryText
+    // color applied inline with viewColors.secondaryText
     marginBottom: 2,
   },
   quickInfoValue: {
     ...TYPOGRAPHY.subheadline,
-    // color applied inline with themedColors.text
+    // color applied inline with viewColors.text
     fontWeight: "500",
   },
   actionBar: {
@@ -672,7 +680,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    // backgroundColor applied inline with themedColors.systemPink
+    // backgroundColor applied inline with viewColors.systemPink
   },
   buttonPressed: {
     opacity: 0.7,
