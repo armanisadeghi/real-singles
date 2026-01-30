@@ -43,37 +43,42 @@ async function getConversation(conversationId: string) {
   }
 
   // Get all participants
-  const { data: participants } = await supabase
+  const { data: participantRows } = await supabase
     .from("conversation_participants")
-    .select(
-      `
-      user_id,
-      user:user_id(display_name),
-      profile:user_id(first_name, profile_image_url)
-    `
-    )
+    .select("user_id")
     .eq("conversation_id", conversationId);
 
-  // For now, we'll load messages client-side via the ChatThread component
-  // In production, you might want to use Agora Chat SDK or real-time subscriptions
+  const participantIds = (participantRows || [])
+    .map((p) => p.user_id)
+    .filter((id): id is string => id !== null);
 
-  // Resolve profile image URLs for participants
+  // Fetch user and profile data separately (FK join doesn't work for profiles)
+  const { data: users } = await supabase
+    .from("users")
+    .select("id, display_name, last_active_at")
+    .in("id", participantIds);
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("user_id, first_name, profile_image_url")
+    .in("user_id", participantIds);
+
+  // Resolve profile image URLs and combine data
   const participantsWithUrls = await Promise.all(
-    (participants || [])
-      .filter((p) => p.user_id !== null)
-      .map(async (p) => {
-        const profile = p.profile as { first_name?: string | null; profile_image_url?: string | null } | null;
-        const resolvedUrl = profile?.profile_image_url
-          ? await resolveStorageUrl(supabase, profile.profile_image_url)
-          : null;
-        return {
-          user_id: p.user_id!,
-          user: p.user as { display_name?: string | null } | null,
-          profile: profile
-            ? { ...profile, profile_image_url: resolvedUrl }
-            : null,
-        };
-      })
+    participantIds.map(async (participantId) => {
+      const userData = users?.find((u) => u.id === participantId);
+      const profileData = profiles?.find((p) => p.user_id === participantId);
+      const resolvedUrl = profileData?.profile_image_url
+        ? await resolveStorageUrl(supabase, profileData.profile_image_url)
+        : null;
+      return {
+        user_id: participantId,
+        user: userData ? { display_name: userData.display_name } : null,
+        profile: profileData
+          ? { first_name: profileData.first_name, profile_image_url: resolvedUrl }
+          : null,
+      };
+    })
   );
 
   return {

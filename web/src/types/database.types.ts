@@ -2026,6 +2026,10 @@ export type Database = {
         Args: { p_target_user_id: string; p_user_id: string }
         Returns: boolean
       }
+      is_conversation_participant: {
+        Args: { p_conversation_id: string; p_user_id: string }
+        Returns: boolean
+      }
       longtransactionsenabled: { Args: never; Returns: boolean }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
