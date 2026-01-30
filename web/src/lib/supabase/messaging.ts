@@ -88,6 +88,14 @@ export type TypingCallback = (typingUsers: TypingUser[]) => void;
 export class MessagingService {
   private supabase = createClient();
   private channels = new Map<string, RealtimeChannel>();
+  private subscribedChannels = new Set<string>();
+
+  /**
+   * Get the Supabase client (single instance per service)
+   */
+  private getSupabase() {
+    return this.supabase;
+  }
 
   /**
    * Get or create a channel for a conversation
@@ -119,8 +127,10 @@ export class MessagingService {
     const channel = this.channels.get(channelName);
 
     if (channel) {
-      this.supabase.removeChannel(channel);
+      const client = this.getSupabase();
+      client.removeChannel(channel);
       this.channels.delete(channelName);
+      this.subscribedChannels.delete(channelName);
       console.log(`[Messaging] Removed channel: ${channelName}`);
     }
   }
@@ -129,11 +139,13 @@ export class MessagingService {
    * Remove all active channels (call on logout/cleanup)
    */
   removeAllChannels(): void {
+    const client = this.getSupabase();
     this.channels.forEach((channel, name) => {
-      this.supabase.removeChannel(channel);
+      client.removeChannel(channel);
       console.log(`[Messaging] Removed channel: ${name}`);
     });
     this.channels.clear();
+    this.subscribedChannels.clear();
   }
 
   // ============================================
@@ -172,7 +184,8 @@ export class MessagingService {
 
     console.log(`[Messaging] Sending message to conversation ${conversationId}`);
 
-    const { data, error } = await this.supabase
+    const supabase = this.getSupabase();
+    const { data, error } = await supabase
       .from("messages")
       .insert(messageData)
       .select()
@@ -184,6 +197,19 @@ export class MessagingService {
     }
 
     console.log(`[Messaging] Message sent successfully:`, data.id);
+
+    // Broadcast the message to all channel subscribers for immediate delivery
+    // This ensures real-time delivery even if postgres_changes RLS filtering fails
+    const channel = this.channels.get(`conversation:${conversationId}`);
+    if (channel) {
+      channel.send({
+        type: "broadcast",
+        event: "new_message",
+        payload: data as Message,
+      });
+      console.log(`[Messaging] Broadcast message to channel`);
+    }
+
     return data as Message;
   }
 
@@ -199,8 +225,9 @@ export class MessagingService {
     }
   ): Promise<Message[]> {
     const limit = options?.limit || 50;
+    const supabase = this.getSupabase();
 
-    let query = this.supabase
+    let query = supabase
       .from("messages")
       .select("*")
       .eq("conversation_id", conversationId)
@@ -286,9 +313,25 @@ export class MessagingService {
    * Returns an unsubscribe function
    */
   subscribeToMessages(conversationId: string, onMessage: MessageCallback): () => void {
+    const channelName = `conversation:${conversationId}`;
     const channel = this.getOrCreateChannel(conversationId);
+    
+    // Check if already subscribed (to avoid duplicate subscriptions)
+    const isAlreadySubscribed = this.subscribedChannels.has(channelName);
 
-    // Subscribe to postgres_changes for messages
+    // Subscribe to broadcast events (immediate delivery from sender)
+    channel.on(
+      "broadcast",
+      { event: "new_message" },
+      (payload) => {
+        console.log(`[Messaging] Broadcast message received:`, payload.payload?.id);
+        if (payload.payload) {
+          onMessage(payload.payload as Message);
+        }
+      }
+    );
+
+    // Also subscribe to postgres_changes as backup (for messages from other sources)
     channel.on(
       "postgres_changes",
       {
@@ -298,12 +341,12 @@ export class MessagingService {
         filter: `conversation_id=eq.${conversationId}`,
       },
       (payload) => {
-        console.log(`[Messaging] New message received:`, payload.new.id);
+        console.log(`[Messaging] postgres_changes INSERT received:`, payload.new.id);
         onMessage(payload.new as Message);
       }
     );
 
-    // Also subscribe to updates (for edits and deletes)
+    // Subscribe to updates (for edits and deletes)
     channel.on(
       "postgres_changes",
       {
@@ -318,14 +361,23 @@ export class MessagingService {
       }
     );
 
-    // Subscribe to the channel
-    channel.subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-        console.log(`[Messaging] Subscribed to conversation ${conversationId}`);
-      } else if (status === "CHANNEL_ERROR") {
-        console.error(`[Messaging] Channel error for conversation ${conversationId}`);
-      }
-    });
+    // Only subscribe if not already subscribed
+    if (!isAlreadySubscribed) {
+      channel.subscribe((status, err) => {
+        if (status === "SUBSCRIBED") {
+          console.log(`[Messaging] Subscribed to conversation ${conversationId}`);
+          this.subscribedChannels.add(channelName);
+        } else if (status === "CHANNEL_ERROR") {
+          console.error(`[Messaging] Channel error for conversation ${conversationId}:`, err);
+        } else if (status === "TIMED_OUT") {
+          console.error(`[Messaging] Channel timed out for conversation ${conversationId}`);
+        } else {
+          console.log(`[Messaging] Channel status: ${status} for ${conversationId}`);
+        }
+      });
+    } else {
+      console.log(`[Messaging] Channel already subscribed: ${channelName}`);
+    }
 
     // Return unsubscribe function
     return () => {
@@ -446,7 +498,8 @@ export class MessagingService {
    * Mark messages as read in a conversation
    */
   async markConversationAsRead(conversationId: string, userId: string): Promise<void> {
-    const { error } = await this.supabase
+    const supabase = this.getSupabase();
+    const { error } = await supabase
       .from("conversation_participants")
       .update({ last_read_at: new Date().toISOString() })
       .eq("conversation_id", conversationId)
