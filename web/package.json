@@ -33,6 +33,7 @@
     "expo-notifications": "^0.32.16",
     "lucide-react": "^0.563.0",
     "next": "16.1.4",
+    "qrcode.react": "^4.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-image-crop": "^11.0.10",

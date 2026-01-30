@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Gift, Copy, Share2, Users, Trophy, CheckCircle, ArrowLeft } from "lucide-react";
+import { Gift, Copy, Share2, Users, Trophy, CheckCircle, ArrowLeft, QrCode } from "lucide-react";
 import { getReferralLink, APP_NAME } from "@/lib/config";
 import { useRouter } from "next/navigation";
+import { QRCodeModal } from "@/components/profile/QRCodeModal";
 
 interface ReferralStats {
   total_referrals: number;
@@ -32,6 +33,7 @@ export default function ReferPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
+  const [showQRModal, setShowQRModal] = useState(false);
 
   useEffect(() => {
     fetchReferralData();
@@ -187,14 +189,23 @@ export default function ReferPage() {
           </button>
         </div>
 
-        {/* Share Button */}
-        <button
-          onClick={handleShare}
-          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold py-3 px-6 rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg shadow-amber-500/25"
-        >
-          <Share2 className="w-5 h-5" />
-          Share with Friends
-        </button>
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          <button
+            onClick={handleShare}
+            className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold py-3 px-6 rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg shadow-amber-500/25"
+          >
+            <Share2 className="w-5 h-5" />
+            Share Link
+          </button>
+          <button
+            onClick={() => setShowQRModal(true)}
+            className="flex items-center justify-center w-14 h-14 bg-white rounded-xl border border-amber-200 hover:bg-amber-50 transition-colors"
+            title="Show QR Code"
+          >
+            <QrCode className="w-6 h-6 text-amber-600" />
+          </button>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -291,11 +302,11 @@ export default function ReferPage() {
         <ol className="space-y-3">
           <li className="flex gap-3">
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-medium">1</span>
-            <p className="text-gray-600">Share your unique referral link with friends</p>
+            <p className="text-gray-600">Share your unique referral link or QR code with friends</p>
           </li>
           <li className="flex gap-3">
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-medium">2</span>
-            <p className="text-gray-600">They sign up using your link</p>
+            <p className="text-gray-600">They sign up using your link or scan your QR code</p>
           </li>
           <li className="flex gap-3">
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-medium">3</span>
@@ -303,6 +314,15 @@ export default function ReferPage() {
           </li>
         </ol>
       </div>
+
+      {/* QR Code Modal */}
+      {data?.referral_code && (
+        <QRCodeModal
+          isOpen={showQRModal}
+          onClose={() => setShowQRModal(false)}
+          referralCode={data.referral_code}
+        />
+      )}
     </div>
   );
 }

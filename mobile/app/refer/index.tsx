@@ -1,11 +1,15 @@
 import GradientButton from "@/components/ui/GradientButton";
+import QRCodeSheet from "@/components/referral/QRCodeSheet";
 import { icons } from "@/constants/icons";
 import { useThemeColors } from "@/context/ThemeContext";
 import { getReferralLink, APP_NAME } from "@/lib/config";
 import { useAuth } from "@/utils/authContext";
+import BottomSheet from "@gorhom/bottom-sheet";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
-import React from "react";
+import { SymbolView } from "expo-symbols";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import React, { useCallback, useRef, useState } from "react";
 import {
   Alert,
   Image,
@@ -24,6 +28,21 @@ export default function Refer() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const colors = useThemeColors();
+  const qrSheetRef = useRef<BottomSheet>(null);
+  const [showQRSheet, setShowQRSheet] = useState(false);
+
+  const handleShowQRCode = useCallback(() => {
+    if (Platform.OS === 'android') {
+      Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Virtual_Key);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setShowQRSheet(true);
+  }, []);
+
+  const handleCloseQRSheet = useCallback(() => {
+    setShowQRSheet(false);
+  }, []);
 
   const themedColors = {
     cardBackground: Platform.OS === 'ios' ? (PlatformColor('secondarySystemBackground') as unknown as string) : colors.surfaceContainerLow,
@@ -138,19 +157,46 @@ export default function Refer() {
               <Text style={{ color: themedColors.text }} className="text-[11px] font-medium" numberOfLines={1}>{referralLink || 'Not Available'}</Text>
             </TouchableOpacity>
 
-            <GradientButton
-              text="Share with Friends"
-              containerStyle={{
-                marginVertical: 30,
-                width: "80%",
-                marginHorizontal: "auto",
-                paddingVertical: 15
-              }}
-              onPress={handleReferFriend}
-            />
+            {/* Action Buttons */}
+            <View style={styles.actionButtons}>
+              <GradientButton
+                text="Share Link"
+                containerStyle={styles.shareButton}
+                onPress={handleReferFriend}
+              />
+              <TouchableOpacity 
+                onPress={handleShowQRCode}
+                style={[styles.qrButton, { backgroundColor: themedColors.inputBackground, borderColor: themedColors.border }]}
+                activeOpacity={0.7}
+              >
+                {Platform.OS === 'ios' ? (
+                  <SymbolView
+                    name="qrcode"
+                    tintColor={themedColors.text}
+                    style={{ width: 24, height: 24 }}
+                    type="hierarchical"
+                  />
+                ) : (
+                  <MaterialIcons
+                    name="qr-code"
+                    size={24}
+                    color={themedColors.text}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
+
+      {/* QR Code Bottom Sheet */}
+      {showQRSheet && referralCode && (
+        <QRCodeSheet
+          ref={qrSheetRef}
+          referralCode={referralCode}
+          onClose={handleCloseQRSheet}
+        />
+      )}
     </>
   );
 }
@@ -162,5 +208,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 5,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginTop: 24,
+    marginBottom: 20,
+    paddingHorizontal: '10%',
+  },
+  shareButton: {
+    flex: 1,
+    paddingVertical: 14,
+  },
+  qrButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
