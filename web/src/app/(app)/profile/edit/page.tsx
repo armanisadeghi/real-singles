@@ -235,11 +235,12 @@ type ProfileState = {
   body_type: string;
   ethnicity: string[];
   
-  // Location
-  city: string;
-  state: string;
+  // Location (order: Country, State, City)
   country: string;
+  state: string;
+  city: string;
   zip_code: string;
+  hometown: string;
   
   // Lifestyle
   marital_status: string;
@@ -331,10 +332,11 @@ export default function EditProfilePage() {
     height_inches: 6,
     body_type: "",
     ethnicity: [],
-    city: "",
-    state: "",
     country: "",
+    state: "",
+    city: "",
     zip_code: "",
+    hometown: "",
     marital_status: "",
     religion: "",
     political_views: "",
@@ -420,10 +422,11 @@ export default function EditProfilePage() {
       body_type: profile.body_type || null,
       ethnicity: profile.ethnicity.length > 0 ? profile.ethnicity : null,
       // Location
-      city: profile.city || null,
-      state: profile.state || null,
       country: profile.country || null,
+      state: profile.state || null,
+      city: profile.city || null,
       zip_code: profile.zip_code || null,
+      hometown: profile.hometown || null,
       // Lifestyle
       marital_status: profile.marital_status || null,
       religion: profile.religion || null,
@@ -581,10 +584,11 @@ export default function EditProfilePage() {
         height_inches: inches,
         body_type: existingProfile.body_type || "",
         ethnicity: existingProfile.ethnicity || [],
-        city: existingProfile.city || "",
-        state: existingProfile.state || "",
         country: existingProfile.country || "",
+        state: existingProfile.state || "",
+        city: existingProfile.city || "",
         zip_code: existingProfile.zip_code || "",
+        hometown: existingProfile.hometown || "",
         marital_status: existingProfile.marital_status || "",
         religion: existingProfile.religion || "",
         political_views: existingProfile.political_views || "",
@@ -805,20 +809,25 @@ export default function EditProfilePage() {
     }
   };
 
-  // Reusable select component
+  // Reusable select component with optional required indicator
   const SelectField = ({ 
     label, 
     value, 
     onChange, 
-    options 
+    options,
+    required = false,
   }: { 
     label: string; 
     value: string; 
     onChange: (value: string) => void; 
     options: readonly { value: string; label: string }[];
+    required?: boolean;
   }) => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -832,20 +841,25 @@ export default function EditProfilePage() {
     </div>
   );
 
-  // Reusable multi-select chips component
+  // Reusable multi-select chips component with optional required indicator
   const MultiSelectChips = ({ 
     label, 
     selected, 
     options, 
-    onToggle 
+    onToggle,
+    required = false,
   }: { 
     label: string; 
     selected: string[]; 
     options: readonly { value: string; label: string }[];
     onToggle: (value: string) => void;
+    required?: boolean;
   }) => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
       <div className="flex flex-wrap gap-2">
         {options.map(opt => (
           <button
@@ -918,7 +932,9 @@ export default function EditProfilePage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Info</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                First Name<span className="text-red-500 ml-1">*</span>
+              </label>
               <input
                 type="text"
                 value={profile.first_name}
@@ -927,7 +943,9 @@ export default function EditProfilePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Last Name<span className="text-red-500 ml-1">*</span>
+              </label>
               <input
                 type="text"
                 value={profile.last_name}
@@ -936,7 +954,9 @@ export default function EditProfilePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date of Birth<span className="text-red-500 ml-1">*</span>
+              </label>
               <input
                 type="date"
                 value={profile.date_of_birth}
@@ -949,6 +969,7 @@ export default function EditProfilePage() {
               value={profile.gender}
               onChange={(value) => setProfile(prev => ({ ...prev, gender: value }))}
               options={GENDER_OPTIONS}
+              required
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -965,21 +986,24 @@ export default function EditProfilePage() {
               value={profile.marital_status}
               onChange={(value) => setProfile(prev => ({ ...prev, marital_status: value }))}
               options={MARITAL_STATUS_OPTIONS}
+              required
             />
             <SelectField
               label="Dating Intentions"
               value={profile.dating_intentions}
               onChange={(value) => setProfile(prev => ({ ...prev, dating_intentions: value }))}
               options={DATING_INTENTIONS_OPTIONS}
+              required
             />
           </div>
 
           <div className="mt-4">
             <MultiSelectChips
-              label="Looking For"
+              label="I'm interested in"
               selected={profile.looking_for}
               options={GENDER_OPTIONS}
               onToggle={(value) => toggleArrayField("looking_for", value)}
+              required
             />
           </div>
         </section>
@@ -1034,6 +1058,21 @@ export default function EditProfilePage() {
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Location</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SelectField
+              label="Country"
+              value={profile.country}
+              onChange={(value) => setProfile(prev => ({ ...prev, country: value }))}
+              options={COUNTRY_OPTIONS}
+            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">State/Province</label>
+              <input
+                type="text"
+                value={profile.state}
+                onChange={(e) => setProfile(prev => ({ ...prev, state: e.target.value }))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
               <input
@@ -1044,26 +1083,21 @@ export default function EditProfilePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-              <input
-                type="text"
-                value={profile.state}
-                onChange={(e) => setProfile(prev => ({ ...prev, state: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-            </div>
-            <SelectField
-              label="Country"
-              value={profile.country}
-              onChange={(value) => setProfile(prev => ({ ...prev, country: value }))}
-              options={COUNTRY_OPTIONS}
-            />
-            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
               <input
                 type="text"
                 value={profile.zip_code}
                 onChange={(e) => setProfile(prev => ({ ...prev, zip_code: e.target.value }))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Hometown</label>
+              <input
+                type="text"
+                value={profile.hometown}
+                onChange={(e) => setProfile(prev => ({ ...prev, hometown: e.target.value }))}
+                placeholder="Where did you grow up?"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
@@ -1158,13 +1192,13 @@ export default function EditProfilePage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Family</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <SelectField
-              label="Do you have kids?"
+              label="Do you have children?"
               value={profile.has_kids}
               onChange={(value) => setProfile(prev => ({ ...prev, has_kids: value }))}
               options={HAS_KIDS_OPTIONS}
             />
             <SelectField
-              label="Do you want kids?"
+              label="Do you want children?"
               value={profile.wants_kids}
               onChange={(value) => setProfile(prev => ({ ...prev, wants_kids: value }))}
               options={WANTS_KIDS_OPTIONS}

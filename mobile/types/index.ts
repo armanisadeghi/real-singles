@@ -189,6 +189,7 @@ export interface EditProfileFormData {
   State?: string;
   Country?: string;
   Zipcode?: string;
+  Hometown?: string; // Free-text, where user grew up
   
   // Dating
   DatingIntentions?: string; // life_partner, long_term, long_term_open, figuring_out, prefer_not_to_say

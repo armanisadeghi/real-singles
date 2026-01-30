@@ -16,6 +16,8 @@
  * 3. Add the value to the OPTIONS array below
  * 
  * For entity types, prefer importing directly from @/types/db
+ * 
+ * @updated migration: 00023_profile_field_updates.sql
  */
 
 import type { 
@@ -34,6 +36,7 @@ import type {
   DbReligion,
   DbPolitical,
   DbZodiac,
+  DbPets,
   TypedOption,
 } from "./db-constraints";
 
@@ -54,9 +57,10 @@ export type {
   DbReligion,
   DbPolitical,
   DbZodiac,
+  DbPets,
 } from "./db-constraints";
 
-export { REQUIRED_FIELDS, SKIPPABLE_FIELDS } from "./db-constraints";
+export { REQUIRED_FIELDS, SKIPPABLE_FIELDS, OPTIONAL_FIELDS } from "./db-constraints";
 
 // ============================================
 // TYPE-SAFE OPTIONS (Constrained by DB types)
@@ -84,7 +88,6 @@ export const BODY_TYPE_OPTIONS: readonly TypedOption<DbBodyType>[] = [
   { value: "muscular", label: "Muscular" },
   { value: "curvy", label: "Curvy" },
   { value: "plus_size", label: "A few extra pounds" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 /** @constraint DbMaritalStatus - see db-constraints.ts */
@@ -93,33 +96,36 @@ export const MARITAL_STATUS_OPTIONS: readonly TypedOption<DbMaritalStatus>[] = [
   { value: "separated", label: "Currently Separated" },
   { value: "divorced", label: "Divorced" },
   { value: "widowed", label: "Widow/Widower" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-/** @constraint DbHasKids - see db-constraints.ts */
+/**
+ * Has Kids options - "Do you have children"
+ * @constraint DbHasKids - see db-constraints.ts
+ */
 export const HAS_KIDS_OPTIONS: readonly TypedOption<DbHasKids>[] = [
   { value: "no", label: "No" },
   { value: "yes_live_at_home", label: "Yes (Live at home)" },
   { value: "yes_live_away", label: "Yes (Live away)" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
+  { value: "yes_shared", label: "Yes (Shared)" },
 ] as const;
 
-/** @constraint DbWantsKids - see db-constraints.ts */
+/**
+ * Wants Kids options - "Do you want children"
+ * @constraint DbWantsKids - see db-constraints.ts
+ */
 export const WANTS_KIDS_OPTIONS: readonly TypedOption<DbWantsKids>[] = [
   { value: "no", label: "No" },
-  { value: "definitely", label: "Definitely" },
-  { value: "someday", label: "Someday" },
-  { value: "ok_if_partner_has", label: "No (but OK if partner has)" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
+  { value: "no_ok_if_partner_has", label: "No (OK if partner has)" },
+  { value: "yes", label: "Yes" },
+  { value: "not_sure", label: "Not sure" },
 ] as const;
 
 /** @constraint DbSmoking - see db-constraints.ts */
 export const SMOKING_OPTIONS: readonly TypedOption<DbSmoking>[] = [
-  { value: "no", label: "No" },
+  { value: "never", label: "Never" },
   { value: "occasionally", label: "Yes (Occasionally)" },
   { value: "daily", label: "Yes (Daily)" },
   { value: "trying_to_quit", label: "Trying to quit" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 /** @constraint DbDrinking - see db-constraints.ts */
@@ -128,15 +134,13 @@ export const DRINKING_OPTIONS: readonly TypedOption<DbDrinking>[] = [
   { value: "social", label: "Social" },
   { value: "moderate", label: "Moderately" },
   { value: "regular", label: "Regular" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 /** @constraint DbMarijuana - see db-constraints.ts */
 export const MARIJUANA_OPTIONS: readonly TypedOption<DbMarijuana>[] = [
-  { value: "no", label: "No" },
+  { value: "never", label: "Never" },
   { value: "occasionally", label: "Occasionally" },
   { value: "yes", label: "Yes" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 /** @constraint DbExercise - see db-constraints.ts */
@@ -145,7 +149,6 @@ export const EXERCISE_OPTIONS: readonly TypedOption<DbExercise>[] = [
   { value: "sometimes", label: "Sometimes" },
   { value: "regularly", label: "Regularly" },
   { value: "daily", label: "Daily" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 /**
@@ -157,18 +160,17 @@ export const DATING_INTENTIONS_OPTIONS: readonly TypedOption<DbDatingIntentions>
   { value: "long_term", label: "Long-term Relationship" },
   { value: "long_term_open", label: "Long-term, Open to Short" },
   { value: "figuring_out", label: "Figuring Out My Goals" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 /** @constraint DbEducation - see db-constraints.ts */
 export const EDUCATION_OPTIONS: readonly TypedOption<DbEducation>[] = [
   { value: "high_school", label: "High School" },
+  { value: "trade_school", label: "Trade School" },
   { value: "some_college", label: "Some College" },
   { value: "associate", label: "Associate Degree" },
   { value: "bachelor", label: "Bachelor's Degree" },
   { value: "graduate", label: "Graduate Degree" },
   { value: "phd", label: "PhD/Post-doctoral" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 /** @constraint DbEthnicity - see db-constraints.ts */
@@ -187,31 +189,34 @@ export const ETHNICITY_OPTIONS: readonly TypedOption<DbEthnicity>[] = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
-/** @constraint DbReligion - see db-constraints.ts */
+/**
+ * Religion options - split Christian/LDS/Protestant into separate options
+ * @constraint DbReligion - see db-constraints.ts
+ */
 export const RELIGION_OPTIONS: readonly TypedOption<DbReligion>[] = [
   { value: "adventist", label: "Adventist" },
   { value: "agnostic", label: "Agnostic" },
   { value: "atheist", label: "Atheist" },
   { value: "buddhist", label: "Buddhist" },
   { value: "catholic", label: "Catholic" },
-  { value: "christian", label: "Christian/LDS/Protestant" },
+  { value: "christian", label: "Christian" },
+  { value: "lds", label: "LDS (Mormon)" },
+  { value: "protestant", label: "Protestant" },
   { value: "hindu", label: "Hindu" },
   { value: "jewish", label: "Jewish" },
-  { value: "muslim", label: "Muslim/Islam" },
+  { value: "muslim", label: "Muslim" },
   { value: "spiritual", label: "Spiritual but not religious" },
   { value: "other", label: "Other" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 /** @constraint DbPolitical - see db-constraints.ts */
 export const POLITICAL_OPTIONS: readonly TypedOption<DbPolitical>[] = [
-  { value: "no_answer", label: "No answer" },
+  { value: "not_political", label: "Not political" },
   { value: "undecided", label: "Undecided" },
   { value: "conservative", label: "Conservative" },
   { value: "liberal", label: "Liberal" },
   { value: "libertarian", label: "Libertarian" },
   { value: "moderate", label: "Moderate" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 /** @constraint DbZodiac - see db-constraints.ts */
@@ -309,11 +314,18 @@ export const COUNTRY_OPTIONS = [
   { value: "NZ", label: "New Zealand" },
 ] as const;
 
-export const PETS_OPTIONS = [
-  { value: "none", label: "None" },
+/**
+ * Pets options - multi-select allowed
+ * @constraint DbPets - see db-constraints.ts
+ */
+export const PETS_OPTIONS: readonly TypedOption<DbPets>[] = [
   { value: "dog", label: "Dog" },
   { value: "cat", label: "Cat" },
+  { value: "fish", label: "Fish" },
   { value: "other", label: "Other" },
+  { value: "dont_have_but_love", label: "Don't have but love" },
+  { value: "pet_free", label: "Pet-free" },
+  { value: "allergic", label: "Allergic to pets" },
 ] as const;
 
 export const LANGUAGE_OPTIONS = [
@@ -436,7 +448,7 @@ export type {
 // ============================================
 
 /**
- * Looking for / relationship type options
+ * "I'm interested in" options (formerly "Looking for")
  * Synced with mobile/constants/options.ts
  */
 export const LOOKING_FOR_OPTIONS = [

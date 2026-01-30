@@ -8,23 +8,27 @@
  * - Web types (web/src/types/db-constraints.ts)
  * - Web OPTIONS (web/src/types/index.ts)
  * 
- * REQUIRED vs SKIPPABLE FIELDS:
- * - REQUIRED (no prefer_not_to_say): gender
- * - SKIPPABLE (has prefer_not_to_say): body_type, smoking, drinking, marijuana,
+ * REQUIRED vs OPTIONAL FIELDS:
+ * - REQUIRED (no null allowed): gender
+ * - OPTIONAL (can be null): body_type, smoking, drinking, marijuana,
  *   exercise, marital_status, has_kids, wants_kids, dating_intentions, education,
- *   ethnicity, religion, political
+ *   ethnicity, religion, political, pets, hometown
+ * 
+ * Note: "Prefer not to say" options have been removed. Users can simply leave
+ * fields empty/null if they don't want to answer.
  * 
  * To add a new option value:
  * 1. Create a migration to update the DB CHECK constraint
  * 2. Add the value to the type in web/src/types/db-constraints.ts
  * 3. Add the value to web/src/types/index.ts
  * 4. Add the value to this file
+ * 
+ * @updated migration: 00023_profile_field_updates.sql
  */
 
 /**
  * Gender options - REQUIRED field for matching algorithm
  * Users MUST select a gender to be shown to potential matches.
- * Do NOT add "prefer_not_to_say" - this field cannot be skipped.
  */
 export const GENDER_OPTIONS = [
   { label: "Male", value: "male" },
@@ -41,7 +45,6 @@ export const BODY_TYPE_OPTIONS = [
   { label: "Muscular", value: "muscular" },
   { label: "Curvy", value: "curvy" },
   { label: "A few extra pounds", value: "plus_size" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Marital status options - matches database CHECK constraint
@@ -50,33 +53,36 @@ export const MARITAL_STATUS_OPTIONS = [
   { label: "Currently Separated", value: "separated" },
   { label: "Divorced", value: "divorced" },
   { label: "Widow/Widower", value: "widowed" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
-// Has kids options - matches database CHECK constraint
+/**
+ * Has kids options - "Do you have children"
+ * Matches database CHECK constraint
+ */
 export const HAS_KIDS_OPTIONS = [
   { label: "No", value: "no" },
   { label: "Yes (Live at home)", value: "yes_live_at_home" },
   { label: "Yes (Live away)", value: "yes_live_away" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
+  { label: "Yes (Shared)", value: "yes_shared" },
 ];
 
-// Wants kids options - matches database CHECK constraint
+/**
+ * Wants kids options - "Do you want children"
+ * Matches database CHECK constraint
+ */
 export const WANTS_KIDS_OPTIONS = [
   { label: "No", value: "no" },
-  { label: "Definitely", value: "definitely" },
-  { label: "Someday", value: "someday" },
-  { label: "No (but OK if partner has)", value: "ok_if_partner_has" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
+  { label: "No (OK if partner has)", value: "no_ok_if_partner_has" },
+  { label: "Yes", value: "yes" },
+  { label: "Not sure", value: "not_sure" },
 ];
 
 // Smoking options - matches database CHECK constraint
 export const SMOKING_OPTIONS = [
-  { label: "No", value: "no" },
+  { label: "Never", value: "never" },
   { label: "Yes (Occasionally)", value: "occasionally" },
   { label: "Yes (Daily)", value: "daily" },
   { label: "Trying to quit", value: "trying_to_quit" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Drinking options - matches database CHECK constraint
@@ -85,15 +91,13 @@ export const DRINKING_OPTIONS = [
   { label: "Social", value: "social" },
   { label: "Moderately", value: "moderate" },
   { label: "Regular", value: "regular" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Marijuana options - matches database CHECK constraint
 export const MARIJUANA_OPTIONS = [
-  { label: "No", value: "no" },
+  { label: "Never", value: "never" },
   { label: "Occasionally", value: "occasionally" },
   { label: "Yes", value: "yes" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Exercise options - matches database CHECK constraint
@@ -102,18 +106,17 @@ export const EXERCISE_OPTIONS = [
   { label: "Sometimes", value: "sometimes" },
   { label: "Regularly", value: "regularly" },
   { label: "Daily", value: "daily" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Education options
 export const EDUCATION_OPTIONS = [
   { label: "High School", value: "high_school" },
+  { label: "Trade School", value: "trade_school" },
   { label: "Some College", value: "some_college" },
   { label: "Associate Degree", value: "associate" },
   { label: "Bachelor's Degree", value: "bachelor" },
   { label: "Graduate Degree", value: "graduate" },
   { label: "PhD/Post-doctoral", value: "phd" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Ethnicity options (multi-select allowed)
@@ -132,31 +135,33 @@ export const ETHNICITY_OPTIONS = [
   { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
-// Religion options
+/**
+ * Religion options - split Christian/LDS/Protestant into separate options
+ */
 export const RELIGION_OPTIONS = [
   { label: "Adventist", value: "adventist" },
   { label: "Agnostic", value: "agnostic" },
   { label: "Atheist", value: "atheist" },
   { label: "Buddhist", value: "buddhist" },
   { label: "Catholic", value: "catholic" },
-  { label: "Christian/LDS/Protestant", value: "christian" },
+  { label: "Christian", value: "christian" },
+  { label: "LDS (Mormon)", value: "lds" },
+  { label: "Protestant", value: "protestant" },
   { label: "Hindu", value: "hindu" },
   { label: "Jewish", value: "jewish" },
-  { label: "Muslim/Islam", value: "muslim" },
+  { label: "Muslim", value: "muslim" },
   { label: "Spiritual but not religious", value: "spiritual" },
   { label: "Other", value: "other" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Political views options
 export const POLITICAL_OPTIONS = [
-  { label: "No answer", value: "no_answer" },
+  { label: "Not political", value: "not_political" },
   { label: "Undecided", value: "undecided" },
   { label: "Conservative", value: "conservative" },
   { label: "Liberal", value: "liberal" },
   { label: "Libertarian", value: "libertarian" },
   { label: "Moderate", value: "moderate" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Zodiac sign options
@@ -177,10 +182,13 @@ export const ZODIAC_OPTIONS = [
 
 // Pets options (multi-select allowed)
 export const PETS_OPTIONS = [
-  { label: "None", value: "none" },
   { label: "Dog", value: "dog" },
   { label: "Cat", value: "cat" },
+  { label: "Fish", value: "fish" },
   { label: "Other", value: "other" },
+  { label: "Don't have but love", value: "dont_have_but_love" },
+  { label: "Pet-free", value: "pet_free" },
+  { label: "Allergic to pets", value: "allergic" },
 ];
 
 // Language options (multi-select allowed)
@@ -307,7 +315,9 @@ export const COUNTRY_OPTIONS = [
   { label: "New Zealand", value: "NZ" },
 ];
 
-// Looking for / relationship type options
+/**
+ * "I'm interested in" options (formerly "Looking for")
+ */
 export const LOOKING_FOR_OPTIONS = [
   { label: "Relationship", value: "relationship" },
   { label: "Something casual", value: "casual" },
@@ -321,7 +331,6 @@ export const DATING_INTENTIONS_OPTIONS = [
   { label: "Long-term Relationship", value: "long_term" },
   { label: "Long-term, Open to Short", value: "long_term_open" },
   { label: "Figuring Out My Goals", value: "figuring_out" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Event type options - matches database CHECK constraint

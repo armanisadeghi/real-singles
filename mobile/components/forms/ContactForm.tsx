@@ -22,12 +22,13 @@ interface Formdata {
   Message: string;
 }
 
-export const Label = ({ text, marginLeft }: { text: string, marginLeft?: string }) => (
+export const Label = ({ text, marginLeft, required }: { text: string, marginLeft?: string, required?: boolean }) => (
   <Text
     className={`text-[12px] text-gray font-normal mb-1 ${marginLeft ? `ml-${marginLeft}` : ""}`}
     style={{ fontFamily: "SF Pro Display" }}
   >
     {text}
+    {required && <Text style={{ color: '#EF4444' }}> *</Text>}
   </Text>
 );
 

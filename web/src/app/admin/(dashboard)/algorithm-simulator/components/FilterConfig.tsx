@@ -27,14 +27,16 @@ interface FilterConfigProps {
   onChange: (filters: Filters) => void;
 }
 
-const BODY_TYPES = ["slim", "athletic", "average", "curvy", "heavyset"];
-const ETHNICITIES = ["asian", "black", "hispanic", "middle eastern", "mixed", "native american", "pacific islander", "white", "other"];
-const RELIGIONS = ["agnostic", "atheist", "buddhist", "catholic", "christian", "hindu", "jewish", "muslim", "spiritual", "other"];
-const EDUCATION_LEVELS = ["high school", "some college", "associate", "bachelor", "master", "doctorate", "professional"];
+const BODY_TYPES = ["slim", "athletic", "average", "muscular", "curvy", "plus_size"];
+const ETHNICITIES = ["white", "latino", "black", "asian", "native_american", "east_indian", "pacific_islander", "middle_eastern", "armenian", "mixed", "other"];
+const RELIGIONS = ["adventist", "agnostic", "atheist", "buddhist", "catholic", "christian", "lds", "protestant", "hindu", "jewish", "muslim", "spiritual", "other"];
+const EDUCATION_LEVELS = ["high_school", "trade_school", "some_college", "associate", "bachelor", "graduate", "phd"];
 const ZODIAC_SIGNS = ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"];
-const LIFESTYLE_OPTIONS = ["yes", "no", "sometimes", "socially"];
-const KIDS_OPTIONS = ["Yes", "No"];
-const WANTS_KIDS_OPTIONS = ["definitely", "maybe", "no", "have and want more"];
+const SMOKING_OPTIONS = ["never", "occasionally", "daily", "trying_to_quit"];
+const DRINKING_OPTIONS = ["never", "social", "moderate", "regular"];
+const MARIJUANA_OPTIONS = ["never", "occasionally", "yes"];
+const HAS_KIDS_OPTIONS = ["no", "yes_live_at_home", "yes_live_away", "yes_shared"];
+const WANTS_KIDS_OPTIONS = ["no", "no_ok_if_partner_has", "yes", "not_sure"];
 
 export function FilterConfig({ filters, onChange }: FilterConfigProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -181,30 +183,30 @@ export function FilterConfig({ filters, onChange }: FilterConfigProps) {
             <div className="grid grid-cols-3 lg:grid-cols-5 gap-4">
               <SingleSelect
                 label="Smoking"
-                options={LIFESTYLE_OPTIONS}
+                options={SMOKING_OPTIONS}
                 value={filters.smoking}
                 onChange={(v) => updateFilter("smoking", v || undefined)}
               />
               <SingleSelect
                 label="Drinking"
-                options={LIFESTYLE_OPTIONS}
+                options={DRINKING_OPTIONS}
                 value={filters.drinking}
                 onChange={(v) => updateFilter("drinking", v || undefined)}
               />
               <SingleSelect
                 label="Marijuana"
-                options={LIFESTYLE_OPTIONS}
+                options={MARIJUANA_OPTIONS}
                 value={filters.marijuana}
                 onChange={(v) => updateFilter("marijuana", v || undefined)}
               />
               <SingleSelect
-                label="Has Kids"
-                options={KIDS_OPTIONS}
+                label="Has Children"
+                options={HAS_KIDS_OPTIONS}
                 value={filters.hasKids}
                 onChange={(v) => updateFilter("hasKids", v || undefined)}
               />
               <SingleSelect
-                label="Wants Kids"
+                label="Wants Children"
                 options={WANTS_KIDS_OPTIONS}
                 value={filters.wantsKids}
                 onChange={(v) => updateFilter("wantsKids", v || undefined)}

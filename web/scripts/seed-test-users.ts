@@ -179,17 +179,17 @@ const LAST_NAMES = [
 // Options arrays
 const BODY_TYPES = ["slim", "athletic", "average", "muscular", "curvy", "plus_size"];
 const ETHNICITIES = ["white", "latino", "black", "asian", "mixed", "middle_eastern", "east_indian"];
-const RELIGIONS = ["christian", "catholic", "jewish", "muslim", "buddhist", "hindu", "agnostic", "atheist", "spiritual"];
-const POLITICAL_VIEWS = ["conservative", "liberal", "moderate", "libertarian", "no_answer"];
-const EDUCATION_LEVELS = ["high_school", "some_college", "associate", "bachelor", "graduate", "phd"];
+const RELIGIONS = ["christian", "lds", "protestant", "catholic", "jewish", "muslim", "buddhist", "hindu", "agnostic", "atheist", "spiritual", "adventist", "other"];
+const POLITICAL_VIEWS = ["conservative", "liberal", "moderate", "libertarian", "undecided", "not_political"];
+const EDUCATION_LEVELS = ["high_school", "trade_school", "some_college", "associate", "bachelor", "graduate", "phd"];
 const MARITAL_STATUSES = ["never_married", "divorced", "separated", "widowed"];
-const SMOKING_OPTIONS = ["no", "occasionally", "daily", "trying_to_quit"];
+const SMOKING_OPTIONS = ["never", "occasionally", "daily", "trying_to_quit"];
 const DRINKING_OPTIONS = ["never", "social", "moderate", "regular"];
-const MARIJUANA_OPTIONS = ["no", "occasionally", "yes"];
+const MARIJUANA_OPTIONS = ["never", "occasionally", "yes"];
 const EXERCISE_OPTIONS = ["never", "sometimes", "regularly", "daily"];
-const HAS_KIDS_OPTIONS = ["no", "yes_live_at_home", "yes_live_away"];
-const WANTS_KIDS_OPTIONS = ["no", "definitely", "someday", "ok_if_partner_has"];
-const PETS_OPTIONS = ["none", "dog", "cat", "other"];
+const HAS_KIDS_OPTIONS = ["no", "yes_live_at_home", "yes_live_away", "yes_shared"];
+const WANTS_KIDS_OPTIONS = ["no", "no_ok_if_partner_has", "yes", "not_sure"];
+const PETS_OPTIONS = ["dog", "cat", "fish", "other", "dont_have_but_love", "pet_free", "allergic"];
 const ZODIAC_SIGNS = ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"];
 
 // ============================================

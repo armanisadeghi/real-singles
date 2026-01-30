@@ -13,10 +13,11 @@
  * not defined in these types.
  * 
  * @see web/supabase/migrations/ for corresponding CHECK constraints
+ * @updated migration: 00023_profile_field_updates.sql
  */
 
 // ============================================
-// REQUIRED FIELDS (cannot have prefer_not_to_say)
+// REQUIRED FIELDS (cannot be null/skipped)
 // ============================================
 
 /**
@@ -26,12 +27,12 @@
 export type DbGender = "male" | "female" | "non-binary" | "other";
 
 // ============================================
-// OPTIONAL FIELDS (can have prefer_not_to_say)
+// OPTIONAL FIELDS (can be null, no prefer_not_to_say)
 // ============================================
 
 /**
- * Body Type - Optional, can be skipped
- * @constraint profiles_body_type_check (migration: 00005, updated 00014)
+ * Body Type - Optional
+ * @constraint profiles_body_type_check (migration: 00023)
  */
 export type DbBodyType = 
   | "slim" 
@@ -39,101 +40,93 @@ export type DbBodyType =
   | "average" 
   | "muscular" 
   | "curvy" 
-  | "plus_size"
-  | "prefer_not_to_say";
+  | "plus_size";
 
 /**
- * Marital Status - Optional, can be skipped
- * @constraint profiles_marital_status_check (migration: 00005)
+ * Marital Status - Optional
+ * @constraint profiles_marital_status_check (migration: 00023)
  */
 export type DbMaritalStatus = 
   | "never_married" 
   | "separated" 
   | "divorced" 
-  | "widowed"
-  | "prefer_not_to_say";
+  | "widowed";
 
 /**
- * Has Kids - Sensitive, can be skipped
- * @constraint profiles_has_kids_check (migration: 00005, updated 00006000)
+ * Has Kids - "Do you have children"
+ * @constraint profiles_has_kids_check (migration: 00023)
  */
 export type DbHasKids = 
   | "no" 
   | "yes_live_at_home" 
   | "yes_live_away"
-  | "prefer_not_to_say";
+  | "yes_shared";
 
 /**
- * Wants Kids - Sensitive, can be skipped
- * @constraint profiles_wants_kids_check (migration: 00005, updated 00006000)
+ * Wants Kids - "Do you want children"
+ * @constraint profiles_wants_kids_check (migration: 00023)
  */
 export type DbWantsKids = 
   | "no" 
-  | "definitely" 
-  | "someday" 
-  | "ok_if_partner_has"
-  | "prefer_not_to_say";
+  | "no_ok_if_partner_has" 
+  | "yes" 
+  | "not_sure";
 
 /**
- * Smoking - Optional lifestyle, can be skipped
- * @constraint profiles_smoking_check (migration: 00005, updated 00014)
+ * Smoking - Optional lifestyle
+ * @constraint profiles_smoking_check (migration: 00023)
  */
 export type DbSmoking = 
-  | "no" 
+  | "never" 
   | "occasionally" 
   | "daily" 
-  | "trying_to_quit"
-  | "prefer_not_to_say";
+  | "trying_to_quit";
 
 /**
- * Drinking - Optional lifestyle, can be skipped
- * @constraint profiles_drinking_check (migration: 00005, updated 00014)
+ * Drinking - Optional lifestyle
+ * @constraint profiles_drinking_check (migration: 00023)
  */
 export type DbDrinking = 
   | "never" 
   | "social" 
   | "moderate" 
-  | "regular"
-  | "prefer_not_to_say";
+  | "regular";
 
 /**
- * Marijuana - Sensitive, can be skipped
- * @constraint profiles_marijuana_check (migration: 00005, updated 00006000)
+ * Marijuana - Optional lifestyle
+ * @constraint profiles_marijuana_check (migration: 00023)
  */
 export type DbMarijuana = 
-  | "no" 
+  | "never" 
   | "yes" 
-  | "occasionally"
-  | "prefer_not_to_say";
+  | "occasionally";
 
 /**
- * Exercise - Optional lifestyle, can be skipped
- * @constraint profiles_exercise_check (migration: 00001, updated 00014)
+ * Exercise - Optional lifestyle
+ * @constraint profiles_exercise_check (migration: 00023)
  */
 export type DbExercise = 
   | "never" 
   | "sometimes" 
   | "regularly" 
-  | "daily"
-  | "prefer_not_to_say";
+  | "daily";
 
 /**
- * Dating Intentions - Optional, can be skipped
- * @constraint profiles_dating_intentions_check (migration: 00008)
+ * Dating Intentions - Optional
+ * @constraint profiles_dating_intentions_check (migration: 00023)
  */
 export type DbDatingIntentions = 
   | "life_partner" 
   | "long_term" 
   | "long_term_open" 
-  | "figuring_out"
-  | "prefer_not_to_say";
+  | "figuring_out";
 
 // ============================================
 // UNCONSTRAINED FIELDS (no DB CHECK, but typed for consistency)
 // ============================================
 
 /**
- * Education - No DB constraint, but should be consistent
+ * Education - No DB constraint
  */
 export type DbEducation = 
   | "high_school" 
@@ -142,7 +135,7 @@ export type DbEducation =
   | "bachelor" 
   | "graduate" 
   | "phd"
-  | "prefer_not_to_say";
+  | "trade_school";
 
 /**
  * Ethnicity - No DB constraint, stored as TEXT[]
@@ -163,6 +156,7 @@ export type DbEthnicity =
 
 /**
  * Religion - No DB constraint
+ * Split Christian/LDS/Protestant into separate options
  */
 export type DbReligion = 
   | "adventist" 
@@ -170,25 +164,37 @@ export type DbReligion =
   | "atheist" 
   | "buddhist" 
   | "catholic" 
-  | "christian" 
+  | "christian"
+  | "lds"
+  | "protestant"
   | "hindu" 
   | "jewish" 
   | "muslim" 
   | "spiritual" 
-  | "other"
-  | "prefer_not_to_say";
+  | "other";
 
 /**
  * Political Views - No DB constraint
  */
 export type DbPolitical = 
-  | "no_answer" 
   | "undecided" 
   | "conservative" 
   | "liberal" 
   | "libertarian" 
   | "moderate"
-  | "prefer_not_to_say";
+  | "not_political";
+
+/**
+ * Pets - No DB constraint, stored as TEXT[]
+ */
+export type DbPets = 
+  | "dog" 
+  | "cat" 
+  | "fish"
+  | "other"
+  | "dont_have_but_love"
+  | "pet_free"
+  | "allergic";
 
 /**
  * Zodiac Sign - No DB constraint, calculated from DOB
@@ -242,11 +248,16 @@ export function createOptions<T extends string>(
 // ============================================
 
 /**
- * Categorizes fields by whether they can be skipped
+ * Required fields that cannot be null
  */
 export const REQUIRED_FIELDS = ["gender"] as const;
 
-export const SKIPPABLE_FIELDS = [
+/**
+ * Optional fields that can be null (user can skip them)
+ * Note: These no longer have "prefer_not_to_say" options,
+ * users simply leave them null/unset if they don't want to answer
+ */
+export const OPTIONAL_FIELDS = [
   "body_type",
   "marital_status", 
   "has_kids",
@@ -260,7 +271,13 @@ export const SKIPPABLE_FIELDS = [
   "ethnicity",
   "religion",
   "political_views",
+  "pets",
+  "hometown",
 ] as const;
 
 export type RequiredField = typeof REQUIRED_FIELDS[number];
-export type SkippableField = typeof SKIPPABLE_FIELDS[number];
+export type OptionalField = typeof OPTIONAL_FIELDS[number];
+
+// Legacy alias for backwards compatibility
+export const SKIPPABLE_FIELDS = OPTIONAL_FIELDS;
+export type SkippableField = OptionalField;

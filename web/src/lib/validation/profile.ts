@@ -11,6 +11,8 @@
  * 4. index.ts OPTIONS arrays are type-checked against the same types
  * 
  * This ensures compile-time AND runtime consistency.
+ * 
+ * @updated migration: 00023_profile_field_updates.sql
  */
 
 import { z } from "zod";
@@ -30,59 +32,60 @@ import type {
   DbReligion,
   DbPolitical,
   DbZodiac,
+  DbPets,
 } from "@/types/db-constraints";
 
 // ============================================
 // CONSTRAINED FIELD SCHEMAS (have DB CHECK constraints)
 // ============================================
 
-// Gender - REQUIRED, CHECK constraint, NO prefer_not_to_say
+// Gender - REQUIRED, CHECK constraint
 const genderValues: [DbGender, ...DbGender[]] = ["male", "female", "non-binary", "other"];
 export const GenderSchema = z.enum(genderValues);
 export type Gender = z.infer<typeof GenderSchema>;
 
-// Body Type - CHECK constraint
-const bodyTypeValues: [DbBodyType, ...DbBodyType[]] = ["slim", "athletic", "average", "muscular", "curvy", "plus_size", "prefer_not_to_say"];
+// Body Type - CHECK constraint (no prefer_not_to_say)
+const bodyTypeValues: [DbBodyType, ...DbBodyType[]] = ["slim", "athletic", "average", "muscular", "curvy", "plus_size"];
 export const BodyTypeSchema = z.enum(bodyTypeValues);
 export type BodyType = z.infer<typeof BodyTypeSchema>;
 
-// Marital Status - CHECK constraint
-const maritalStatusValues: [DbMaritalStatus, ...DbMaritalStatus[]] = ["never_married", "separated", "divorced", "widowed", "prefer_not_to_say"];
+// Marital Status - CHECK constraint (no prefer_not_to_say)
+const maritalStatusValues: [DbMaritalStatus, ...DbMaritalStatus[]] = ["never_married", "separated", "divorced", "widowed"];
 export const MaritalStatusSchema = z.enum(maritalStatusValues);
 export type MaritalStatus = z.infer<typeof MaritalStatusSchema>;
 
-// Has Kids - CHECK constraint
-const hasKidsValues: [DbHasKids, ...DbHasKids[]] = ["no", "yes_live_at_home", "yes_live_away", "prefer_not_to_say"];
+// Has Kids - CHECK constraint (no prefer_not_to_say, added yes_shared)
+const hasKidsValues: [DbHasKids, ...DbHasKids[]] = ["no", "yes_live_at_home", "yes_live_away", "yes_shared"];
 export const HasKidsSchema = z.enum(hasKidsValues);
 export type HasKids = z.infer<typeof HasKidsSchema>;
 
-// Wants Kids - CHECK constraint
-const wantsKidsValues: [DbWantsKids, ...DbWantsKids[]] = ["no", "definitely", "someday", "ok_if_partner_has", "prefer_not_to_say"];
+// Wants Kids - CHECK constraint (restructured)
+const wantsKidsValues: [DbWantsKids, ...DbWantsKids[]] = ["no", "no_ok_if_partner_has", "yes", "not_sure"];
 export const WantsKidsSchema = z.enum(wantsKidsValues);
 export type WantsKids = z.infer<typeof WantsKidsSchema>;
 
-// Smoking - CHECK constraint
-const smokingValues: [DbSmoking, ...DbSmoking[]] = ["no", "occasionally", "daily", "trying_to_quit", "prefer_not_to_say"];
+// Smoking - CHECK constraint (no -> never, no prefer_not_to_say)
+const smokingValues: [DbSmoking, ...DbSmoking[]] = ["never", "occasionally", "daily", "trying_to_quit"];
 export const SmokingSchema = z.enum(smokingValues);
 export type Smoking = z.infer<typeof SmokingSchema>;
 
-// Drinking - CHECK constraint
-const drinkingValues: [DbDrinking, ...DbDrinking[]] = ["never", "social", "moderate", "regular", "prefer_not_to_say"];
+// Drinking - CHECK constraint (no prefer_not_to_say)
+const drinkingValues: [DbDrinking, ...DbDrinking[]] = ["never", "social", "moderate", "regular"];
 export const DrinkingSchema = z.enum(drinkingValues);
 export type Drinking = z.infer<typeof DrinkingSchema>;
 
-// Marijuana - CHECK constraint
-const marijuanaValues: [DbMarijuana, ...DbMarijuana[]] = ["no", "yes", "occasionally", "prefer_not_to_say"];
+// Marijuana - CHECK constraint (no -> never, no prefer_not_to_say)
+const marijuanaValues: [DbMarijuana, ...DbMarijuana[]] = ["never", "yes", "occasionally"];
 export const MarijuanaSchema = z.enum(marijuanaValues);
 export type Marijuana = z.infer<typeof MarijuanaSchema>;
 
-// Exercise - CHECK constraint
-const exerciseValues: [DbExercise, ...DbExercise[]] = ["never", "sometimes", "regularly", "daily", "prefer_not_to_say"];
+// Exercise - CHECK constraint (no prefer_not_to_say)
+const exerciseValues: [DbExercise, ...DbExercise[]] = ["never", "sometimes", "regularly", "daily"];
 export const ExerciseSchema = z.enum(exerciseValues);
 export type Exercise = z.infer<typeof ExerciseSchema>;
 
-// Dating Intentions - CHECK constraint
-const datingIntentionsValues: [DbDatingIntentions, ...DbDatingIntentions[]] = ["life_partner", "long_term", "long_term_open", "figuring_out", "prefer_not_to_say"];
+// Dating Intentions - CHECK constraint (no prefer_not_to_say)
+const datingIntentionsValues: [DbDatingIntentions, ...DbDatingIntentions[]] = ["life_partner", "long_term", "long_term_open", "figuring_out"];
 export const DatingIntentionsSchema = z.enum(datingIntentionsValues);
 export type DatingIntentions = z.infer<typeof DatingIntentionsSchema>;
 
@@ -90,25 +93,30 @@ export type DatingIntentions = z.infer<typeof DatingIntentionsSchema>;
 // UNCONSTRAINED FIELD SCHEMAS (no DB CHECK, but typed for consistency)
 // ============================================
 
-// Education - no DB constraint
-const educationValues: [DbEducation, ...DbEducation[]] = ["high_school", "some_college", "associate", "bachelor", "graduate", "phd", "prefer_not_to_say"];
+// Education - no DB constraint (added trade_school, no prefer_not_to_say)
+const educationValues: [DbEducation, ...DbEducation[]] = ["high_school", "trade_school", "some_college", "associate", "bachelor", "graduate", "phd"];
 export const EducationSchema = z.enum(educationValues);
 export type Education = z.infer<typeof EducationSchema>;
 
-// Ethnicity - no DB constraint, stored as TEXT[]
+// Ethnicity - no DB constraint, stored as TEXT[] (keeps prefer_not_to_say)
 const ethnicityValues: [DbEthnicity, ...DbEthnicity[]] = ["white", "latino", "black", "asian", "native_american", "east_indian", "pacific_islander", "middle_eastern", "armenian", "mixed", "other", "prefer_not_to_say"];
 export const EthnicitySchema = z.enum(ethnicityValues);
 export type Ethnicity = z.infer<typeof EthnicitySchema>;
 
-// Religion - no DB constraint
-const religionValues: [DbReligion, ...DbReligion[]] = ["adventist", "agnostic", "atheist", "buddhist", "catholic", "christian", "hindu", "jewish", "muslim", "spiritual", "other", "prefer_not_to_say"];
+// Religion - no DB constraint (split christian, no prefer_not_to_say)
+const religionValues: [DbReligion, ...DbReligion[]] = ["adventist", "agnostic", "atheist", "buddhist", "catholic", "christian", "lds", "protestant", "hindu", "jewish", "muslim", "spiritual", "other"];
 export const ReligionSchema = z.enum(religionValues);
 export type Religion = z.infer<typeof ReligionSchema>;
 
-// Political Views - no DB constraint
-const politicalValues: [DbPolitical, ...DbPolitical[]] = ["no_answer", "undecided", "conservative", "liberal", "libertarian", "moderate", "prefer_not_to_say"];
+// Political Views - no DB constraint (removed no_answer, added not_political, no prefer_not_to_say)
+const politicalValues: [DbPolitical, ...DbPolitical[]] = ["not_political", "undecided", "conservative", "liberal", "libertarian", "moderate"];
 export const PoliticalSchema = z.enum(politicalValues);
 export type Political = z.infer<typeof PoliticalSchema>;
+
+// Pets - no DB constraint (restructured)
+const petsValues: [DbPets, ...DbPets[]] = ["dog", "cat", "fish", "other", "dont_have_but_love", "pet_free", "allergic"];
+export const PetsSchema = z.enum(petsValues);
+export type Pets = z.infer<typeof PetsSchema>;
 
 // Zodiac Sign - no DB constraint
 const zodiacValues: [DbZodiac, ...DbZodiac[]] = ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"];
@@ -146,6 +154,7 @@ export const ProfileUpdateSchema = z.object({
   Zipcode: z.string().max(20).optional(), // Mobile alias
   Latitude: z.union([z.string(), z.number()]).optional(),
   Longitude: z.union([z.string(), z.number()]).optional(),
+  Hometown: z.string().max(100).optional(), // NEW: Free-text hometown field
   
   // Physical
   Height: z.union([z.string(), z.number()]).optional(),
@@ -180,6 +189,13 @@ export const ProfileUpdateSchema = z.object({
   HasKids: HasKidsSchema.optional(),
   WantsKids: WantsKidsSchema.optional(),
   WantChild: WantsKidsSchema.optional(), // Mobile alias
+  
+  // Pets (can be string or array for multi-select)
+  Pets: z.union([
+    PetsSchema,
+    z.array(PetsSchema),
+    z.string(), // Allow comma-separated string
+  ]).optional(),
 }).passthrough(); // Allow additional fields for prompts, etc.
 
 export type ProfileUpdate = z.infer<typeof ProfileUpdateSchema>;

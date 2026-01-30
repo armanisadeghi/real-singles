@@ -47,6 +47,7 @@ CREATE POLICY "Users can read conversation participants" ON conversation_partici
 -- The old policy only allowed users to add themselves, but when creating
 -- a conversation we need to add the other participant too
 DROP POLICY IF EXISTS "Users can join conversations" ON conversation_participants;
+DROP POLICY IF EXISTS "Users can add participants to conversations" ON conversation_participants;
 
 CREATE POLICY "Users can add participants to conversations" ON conversation_participants
   FOR INSERT WITH CHECK (

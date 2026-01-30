@@ -925,6 +925,7 @@ export type Database = {
           gender: string | null
           has_kids: string | null
           height_inches: number | null
+          hometown: string | null
           id: string
           id_document_url: string | null
           id_verified_at: string | null
@@ -1000,6 +1001,7 @@ export type Database = {
           gender?: string | null
           has_kids?: string | null
           height_inches?: number | null
+          hometown?: string | null
           id?: string
           id_document_url?: string | null
           id_verified_at?: string | null
@@ -1075,6 +1077,7 @@ export type Database = {
           gender?: string | null
           has_kids?: string | null
           height_inches?: number | null
+          hometown?: string | null
           id?: string
           id_document_url?: string | null
           id_verified_at?: string | null

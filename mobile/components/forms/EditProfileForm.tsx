@@ -751,8 +751,31 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
           </View>
         </View>
 
-        {/* City and State */}
+        {/* Country */}
+        <View>
+          <Label text="Country" />
+          <TextInput
+            placeholder="United States"
+            placeholderTextColor={"#A0A0A0"}
+            className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
+            value={formData.Country}
+            onChangeText={(text) => onChangeField("Country", text)}
+          />
+        </View>
+
+        {/* State and City */}
         <View className="flex-row gap-3">
+          <View className="flex-1">
+            <Label text="State/Province" />
+            <TextInput
+              placeholder="CA"
+              placeholderTextColor={"#A0A0A0"}
+              className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
+              value={formData.State}
+              onChangeText={(text) => onChangeField("State", text)}
+            />
+          </View>
+
           <View className="flex-1">
             <Label text="City" />
             <TextInput
@@ -763,28 +786,17 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               onChangeText={(text) => onChangeField("City", text)}
             />
           </View>
-
-          <View className="flex-1">
-            <Label text="State" />
-            <TextInput
-              placeholder="CA"
-              placeholderTextColor={"#A0A0A0"}
-              className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
-              value={formData.State}
-              onChangeText={(text) => onChangeField("State", text)}
-            />
-          </View>
         </View>
 
-        {/* Country */}
+        {/* Hometown */}
         <View>
-          <Label text="Country" />
+          <Label text="Hometown" />
           <TextInput
-            placeholder="United States"
+            placeholder="Where did you grow up?"
             placeholderTextColor={"#A0A0A0"}
             className="border border-border bg-light-100 rounded-full px-[15px] py-[12px] text-black"
-            value={formData.Country}
-            onChangeText={(text) => onChangeField("Country", text)}
+            value={formData.Hometown}
+            onChangeText={(text) => onChangeField("Hometown", text)}
           />
         </View>
       </View>
@@ -851,7 +863,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
             </View>
 
             <View>
-              <Label text="Looking for..." marginLeft="" />
+              <Label text="I'm interested in" marginLeft="" required />
 
               <RNPickerSelect
                 onValueChange={(value) => {
@@ -946,7 +958,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               />
             </View>
             <View>
-              <Label text="Have Children" />
+              <Label text="Do you have children?" />
               <RNPickerSelect
                 onValueChange={(value) => onChangeField("HaveChild", value)}
                 items={HAS_KIDS_OPTIONS}
@@ -966,7 +978,7 @@ const EditProfileForm = ({ formData, onChangeField }: ProfileFormViewProps) => {
               />
             </View>
             <View>
-              <Label text="Want Children" />
+              <Label text="Do you want children?" />
               <RNPickerSelect
                 onValueChange={(value) => onChangeField("WantChild", value)}
                 items={WANTS_KIDS_OPTIONS}
