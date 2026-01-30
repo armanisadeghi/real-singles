@@ -161,10 +161,6 @@ export default function RewardsPage() {
           {/* Category Tabs */}
           <div
             className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide"
-            style={{
-              touchAction: 'pan-x',
-              overscrollBehaviorX: 'contain'
-            }}
           >
             {categories.map((cat) => {
               const Icon = cat.icon;

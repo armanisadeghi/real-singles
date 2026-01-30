@@ -392,7 +392,7 @@ export default function OtherProfilePage() {
 
         {/* Photo Gallery */}
         <div
-          className="relative aspect-[3/4] sm:aspect-[4/3] md:aspect-[4/3] lg:aspect-[16/10] max-h-[600px] mx-auto bg-gradient-to-br from-pink-100 to-purple-100 touch-none select-none"
+          className="relative aspect-[3/4] sm:aspect-[4/3] md:aspect-[4/3] lg:aspect-[16/10] max-h-[600px] mx-auto bg-gradient-to-br from-pink-100 to-purple-100 touch-pan-y select-none"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -523,10 +523,6 @@ export default function OtherProfilePage() {
         <div className="max-w-4xl mx-auto px-2 sm:px-4 py-3">
           <div
             className="flex items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide sm:justify-center"
-            style={{
-              touchAction: 'pan-x',
-              overscrollBehaviorX: 'contain'
-            }}
           >
             <button
               onClick={handleToggleFavorite}

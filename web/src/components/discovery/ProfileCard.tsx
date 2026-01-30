@@ -247,7 +247,7 @@ export function ProfileCard({
     >
       {/* Photo Section */}
       <div
-        className="relative aspect-[3/4] bg-gradient-to-br from-pink-100 to-purple-100 touch-none select-none"
+        className="relative aspect-[3/4] bg-gradient-to-br from-pink-100 to-purple-100 touch-pan-y select-none"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}

@@ -281,10 +281,6 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div
             className="flex gap-2 overflow-x-auto scrollbar-hide"
-            style={{
-              touchAction: 'pan-x',
-              overscrollBehaviorX: 'contain'
-            }}
           >
             <Link
               href="/discover"
@@ -343,10 +339,6 @@ export default function HomePage() {
           {topMatches.length > 0 ? (
             <div
               className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-              style={{
-                touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain'
-              }}
             >
               {topMatches.slice(0, 10).map((profile) => (
                 <div key={profile.ID || profile.id} className="flex-shrink-0 w-40 sm:w-44">
@@ -378,10 +370,6 @@ export default function HomePage() {
           {events.length > 0 ? (
             <div
               className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-              style={{
-                touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain'
-              }}
             >
               {events.slice(0, 10).map((event) => (
                 <Link
@@ -443,10 +431,6 @@ export default function HomePage() {
           {speedDating.length > 0 ? (
             <div
               className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-              style={{
-                touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain'
-              }}
             >
               {speedDating.slice(0, 10).map((session) => (
                 <Link
@@ -516,10 +500,6 @@ export default function HomePage() {
           {nearbyProfiles.length > 0 ? (
             <div
               className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-              style={{
-                touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain'
-              }}
             >
               {nearbyProfiles.slice(0, 10).map((profile) => (
                 <div key={profile.ID || profile.id} className="flex-shrink-0 w-40 sm:w-44">
@@ -551,10 +531,6 @@ export default function HomePage() {
           {videos.length > 0 ? (
             <div
               className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-              style={{
-                touchAction: 'pan-x',
-                overscrollBehaviorX: 'contain'
-              }}
             >
               {videos.slice(0, 10).map((video) => (
                 <Link

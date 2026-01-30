@@ -149,7 +149,7 @@ export function PhotoCarousel({
   return (
     <>
       <div
-        className={cn("relative overflow-hidden h-[var(--carousel-height)] touch-none select-none", className)}
+        className={cn("relative overflow-hidden h-[var(--carousel-height)] touch-pan-y select-none", className)}
         style={heightStyle}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
