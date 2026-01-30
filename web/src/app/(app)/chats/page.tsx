@@ -52,21 +52,29 @@ async function getConversations(): Promise<{
   // Get participants for each conversation with full data
   const conversationsWithParticipants: Conversation[] = await Promise.all(
     conversations.map(async (conv) => {
-      // Get participants with their last_read_at timestamp
-      const { data: participants } = await supabase
+      // Get participant records
+      const { data: participantRows } = await supabase
         .from("conversation_participants")
-        .select(
-          `
-          user_id,
-          last_read_at,
-          user:user_id(display_name),
-          profile:user_id(first_name, profile_image_url)
-        `
-        )
+        .select("user_id, last_read_at")
         .eq("conversation_id", conv.id);
 
+      const participantIds = (participantRows || [])
+        .map((p) => p.user_id)
+        .filter((id): id is string => id !== null);
+
+      // Fetch user and profile data separately (FK join doesn't work for profiles)
+      const { data: users } = await supabase
+        .from("users")
+        .select("id, display_name")
+        .in("id", participantIds);
+
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, first_name, profile_image_url")
+        .in("user_id", participantIds);
+
       // Find current user's last_read_at
-      const currentParticipant = participants?.find((p) => p.user_id === user.id);
+      const currentParticipant = participantRows?.find((p) => p.user_id === user.id);
       const lastReadAt = currentParticipant?.last_read_at || null;
 
       // Get unread count: messages created after last_read_at by other users
@@ -118,23 +126,22 @@ async function getConversations(): Promise<{
         }
       }
 
-      // Resolve profile image URLs for participants
+      // Combine participant data with resolved profile image URLs
       const participantsWithUrls = await Promise.all(
-        (participants || [])
-          .filter((p) => p.user_id !== null)
-          .map(async (p) => {
-            const profile = p.profile as { first_name?: string | null; profile_image_url?: string | null } | null;
-            const resolvedUrl = profile?.profile_image_url
-              ? await resolveStorageUrl(supabase, profile.profile_image_url)
-              : null;
-            return {
-              user_id: p.user_id!,
-              user: p.user as { display_name?: string | null } | null,
-              profile: profile
-                ? { ...profile, profile_image_url: resolvedUrl }
-                : null,
-            };
-          })
+        participantIds.map(async (participantId) => {
+          const userData = users?.find((u) => u.id === participantId);
+          const profileData = profiles?.find((p) => p.user_id === participantId);
+          const resolvedUrl = profileData?.profile_image_url
+            ? await resolveStorageUrl(supabase, profileData.profile_image_url)
+            : null;
+          return {
+            user_id: participantId,
+            user: userData ? { display_name: userData.display_name } : null,
+            profile: profileData
+              ? { first_name: profileData.first_name, profile_image_url: resolvedUrl }
+              : null,
+          };
+        })
       );
 
       return {
