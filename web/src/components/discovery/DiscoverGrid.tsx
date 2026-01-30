@@ -215,68 +215,63 @@ export function DiscoverGrid({ initialProfiles, isProfilePaused = false }: Disco
         </div>
       )}
       
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Discover</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Find your perfect match
-          </p>
+      {/* Header - View Controls */}
+      <div className="flex items-center justify-between gap-3 mb-8">
+        {/* View mode tabs */}
+        <div className="flex items-center gap-0.5 bg-gray-100/80 backdrop-blur-sm rounded-full p-1 shadow-sm">
+          <button
+            onClick={() => setViewMode("all")}
+            className={cn(
+              "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap",
+              "transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
+              viewMode === "all"
+                ? "bg-white text-gray-900 shadow-md"
+                : "text-gray-500 hover:text-gray-700"
+            )}
+          >
+            <Sparkles className="w-4 h-4" />
+            All
+          </button>
+          <button
+            onClick={() => setViewMode("top-matches")}
+            className={cn(
+              "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap",
+              "transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
+              viewMode === "top-matches"
+                ? "bg-white text-gray-900 shadow-md"
+                : "text-gray-500 hover:text-gray-700"
+            )}
+          >
+            <Heart className="w-4 h-4" />
+            Top
+          </button>
+          <button
+            onClick={() => setViewMode("nearby")}
+            className={cn(
+              "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap",
+              "transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
+              viewMode === "nearby"
+                ? "bg-white text-gray-900 shadow-md"
+                : "text-gray-500 hover:text-gray-700"
+            )}
+          >
+            <MapPin className="w-4 h-4" />
+            Nearby
+          </button>
         </div>
 
-        {/* View Mode Tabs & Filter Button */}
-        <div className="flex items-center gap-3">
-          {/* View mode tabs - scrollable on mobile */}
-          <div
-            className="flex items-center gap-1 bg-gray-100 rounded-full p-1 overflow-x-auto"
-          >
-            <button
-              onClick={() => setViewMode("all")}
-              className={cn(
-                "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                viewMode === "all"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              )}
-            >
-              <Sparkles className="w-4 h-4" />
-              All
-            </button>
-            <button
-              onClick={() => setViewMode("top-matches")}
-              className={cn(
-                "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                viewMode === "top-matches"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              )}
-            >
-              <Heart className="w-4 h-4" />
-              Top Matches
-            </button>
-            <button
-              onClick={() => setViewMode("nearby")}
-              className={cn(
-                "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                viewMode === "nearby"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              )}
-            >
-              <MapPin className="w-4 h-4" />
-              Nearby
-            </button>
-          </div>
-
-          {/* Filter button */}
+        {/* Filter controls */}
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setIsFilterOpen(true)}
             disabled={isFiltering}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-full transition-colors shrink-0",
+              "flex items-center justify-center gap-2 min-h-[40px] px-4 rounded-full",
+              "transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
+              "active:scale-[0.97]",
               filtersApplied
-                ? "bg-pink-500 text-white hover:bg-pink-600"
-                : "border border-gray-300 text-gray-700 hover:bg-gray-50",
+                ? "bg-pink-500 text-white shadow-md shadow-pink-500/25 hover:bg-pink-600"
+                : "bg-white text-gray-600 shadow-sm border border-gray-200/80 hover:border-gray-300 hover:text-gray-900",
               isFiltering && "opacity-50 cursor-not-allowed"
             )}
           >
@@ -285,20 +280,24 @@ export function DiscoverGrid({ initialProfiles, isProfilePaused = false }: Disco
             ) : (
               <SlidersHorizontal className="w-4 h-4" />
             )}
-            <span className="hidden sm:inline">
-              {filtersApplied ? "Filters Active" : "Filters"}
+            <span className="hidden sm:inline text-sm font-medium">
+              {filtersApplied ? "Filtered" : "Filters"}
             </span>
           </button>
 
-          {/* Clear Filters button */}
           {filtersApplied && (
             <button
               onClick={handleClearFilters}
               disabled={isFiltering}
-              className="flex items-center gap-1 px-3 py-2 text-gray-500 hover:text-gray-700 transition-colors shrink-0"
+              className={cn(
+                "flex items-center justify-center w-10 h-10 rounded-full",
+                "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700",
+                "transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
+                "active:scale-[0.95]"
+              )}
+              title="Clear filters"
             >
               <X className="w-4 h-4" />
-              <span className="hidden sm:inline text-sm">Clear</span>
             </button>
           )}
         </div>
@@ -338,20 +337,23 @@ export function DiscoverGrid({ initialProfiles, isProfilePaused = false }: Disco
 export function DiscoverGridSkeleton() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex justify-between items-center mb-6">
-        <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
-        <div className="h-10 w-24 bg-gray-200 rounded-full animate-pulse" />
+      {/* Header skeleton */}
+      <div className="flex items-center justify-between gap-3 mb-8">
+        <div className="h-11 w-[200px] bg-gray-100 rounded-full animate-pulse" />
+        <div className="h-10 w-24 bg-gray-100 rounded-full animate-pulse" />
       </div>
+      
+      {/* Profile list skeleton */}
       <div className="max-w-2xl mx-auto space-y-3">
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="flex items-center gap-4 p-3 bg-white rounded-xl shadow-sm">
-            <div className="w-[72px] h-[72px] bg-gray-200 rounded-lg animate-pulse" />
+            <div className="w-[72px] h-[72px] bg-gray-100 rounded-lg animate-pulse" />
             <div className="flex-1 space-y-2">
-              <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
-              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+              <div className="h-5 w-32 bg-gray-100 rounded animate-pulse" />
+              <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
               <div className="flex gap-2">
-                <div className="h-5 w-16 bg-gray-200 rounded-full animate-pulse" />
-                <div className="h-5 w-12 bg-gray-200 rounded-full animate-pulse" />
+                <div className="h-5 w-16 bg-gray-100 rounded-full animate-pulse" />
+                <div className="h-5 w-12 bg-gray-100 rounded-full animate-pulse" />
               </div>
             </div>
           </div>

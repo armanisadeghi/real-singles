@@ -519,10 +519,10 @@ export default function ConnectionsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  // Get tab from URL or default to "likes"
+  // Get tab from URL or default to "matches"
   const tabParam = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState<TabType>(
-    tabParam === "matches" ? "matches" : "likes"
+    tabParam === "likes" ? "likes" : "matches"
   );
 
   // Update URL when tab changes
@@ -540,18 +540,6 @@ export default function ConnectionsPage() {
       {/* Tab Navigation */}
       <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
         <button
-          onClick={() => handleTabChange("likes")}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium transition-all",
-            activeTab === "likes"
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-600 hover:text-gray-900"
-          )}
-        >
-          <ThumbsUp className="w-4 h-4" />
-          Likes You
-        </button>
-        <button
           onClick={() => handleTabChange("matches")}
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium transition-all",
@@ -562,6 +550,18 @@ export default function ConnectionsPage() {
         >
           <Heart className="w-4 h-4" />
           Matches
+        </button>
+        <button
+          onClick={() => handleTabChange("likes")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium transition-all",
+            activeTab === "likes"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          )}
+        >
+          <ThumbsUp className="w-4 h-4" />
+          Likes You
         </button>
       </div>
 
