@@ -80,22 +80,43 @@ export function useMessages({
 
         // Subscribe to new messages
         unsubscribe = messagingService.subscribeToMessages(conversationId, (newMessage) => {
-          if (!mounted) return;
+          if (!mounted) {
+            console.log('[useMessages] Received message but component unmounted, ignoring');
+            return;
+          }
+
+          console.log('[useMessages] 📩 Received new message:', {
+            id: newMessage.id,
+            client_message_id: newMessage.client_message_id,
+            sender_id: newMessage.sender_id,
+            status: newMessage.status,
+          });
 
           setMessages((prev) => {
             // Check for duplicates (by id or client_message_id)
-            const exists = prev.some(
-              (m) =>
-                m.id === newMessage.id ||
-                (m.client_message_id &&
-                  m.client_message_id === newMessage.client_message_id)
+            const existsByMsgId = prev.some((m) => m.id === newMessage.id);
+            const existsByClientId = prev.some(
+              (m) => m.client_message_id && 
+                     newMessage.client_message_id && 
+                     m.client_message_id === newMessage.client_message_id
             );
+            const exists = existsByMsgId || existsByClientId;
+
+            console.log('[useMessages] Duplicate check:', {
+              existsByMsgId,
+              existsByClientId,
+              exists,
+              newMessageId: newMessage.id,
+              newClientId: newMessage.client_message_id,
+            });
 
             if (exists) {
               // Update existing message (e.g., optimistic update)
+              console.log('[useMessages] Updating existing message');
               return prev.map((m) =>
                 m.id === newMessage.id ||
                 (m.client_message_id &&
+                  newMessage.client_message_id &&
                   m.client_message_id === newMessage.client_message_id)
                   ? newMessage
                   : m
@@ -103,6 +124,7 @@ export function useMessages({
             }
 
             // Add new message
+            console.log('[useMessages] Adding new message to list');
             return [...prev, newMessage];
           });
 
@@ -137,7 +159,7 @@ export function useMessages({
     async (content: string) => {
       if (!content.trim() || !conversationId || !currentUserId) return;
 
-      // Create optimistic message
+      // Create optimistic message with a unique client ID
       const clientMessageId = `${currentUserId}_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`;
@@ -157,9 +179,21 @@ export function useMessages({
       setMessages((prev) => [...prev, optimisticMessage]);
 
       try {
-        // Send the actual message
-        await messagingService.sendMessage(conversationId, currentUserId, content);
-        // The subscription will handle updating/replacing the optimistic message
+        // Send the actual message with the SAME clientMessageId for matching
+        const sentMessage = await messagingService.sendMessage(
+          conversationId, 
+          currentUserId, 
+          content,
+          { clientMessageId } // Pass the same ID for optimistic update matching
+        );
+        
+        // Immediately update the optimistic message with the real one
+        // This ensures the update happens even if realtime is delayed
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.client_message_id === clientMessageId ? sentMessage : m
+          )
+        );
       } catch (err) {
         console.error("[useMessages] Send error:", err);
         // Update optimistic message to failed

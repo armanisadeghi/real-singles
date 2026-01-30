@@ -89,6 +89,20 @@ export class MessagingService {
   private supabase = createClient();
   private channels = new Map<string, RealtimeChannel>();
   private subscribedChannels = new Set<string>();
+  private messageHandlersAdded = new Set<string>(); // Track if message handlers were added
+
+  constructor() {
+    // Log initial auth state for debugging
+    this.supabase.auth.getSession().then(({ data, error }) => {
+      if (error) {
+        console.error('[Messaging] Auth error on init:', error);
+      } else if (data.session) {
+        console.log('[Messaging] Authenticated user:', data.session.user.id);
+      } else {
+        console.warn('[Messaging] No active session on init');
+      }
+    });
+  }
 
   /**
    * Get the Supabase client (single instance per service)
@@ -131,6 +145,7 @@ export class MessagingService {
       client.removeChannel(channel);
       this.channels.delete(channelName);
       this.subscribedChannels.delete(channelName);
+      this.messageHandlersAdded.delete(`msg:${conversationId}`);
       console.log(`[Messaging] Removed channel: ${channelName}`);
     }
   }
@@ -146,6 +161,7 @@ export class MessagingService {
     });
     this.channels.clear();
     this.subscribedChannels.clear();
+    this.messageHandlersAdded.clear();
   }
 
   // ============================================
@@ -165,10 +181,12 @@ export class MessagingService {
       mediaThumbnailUrl?: string;
       mediaMetadata?: Json;
       replyToId?: string;
+      clientMessageId?: string; // Allow passing from hook for optimistic update matching
     }
   ): Promise<Message> {
-    // Generate a client-side ID for optimistic updates and deduplication
-    const clientMessageId = `${senderId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Use provided client-side ID or generate one for deduplication
+    const clientMessageId = options?.clientMessageId || 
+      `${senderId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const messageData: MessageInsert = {
       conversation_id: conversationId,
@@ -200,14 +218,25 @@ export class MessagingService {
 
     // Broadcast the message to all channel subscribers for immediate delivery
     // This ensures real-time delivery even if postgres_changes RLS filtering fails
-    const channel = this.channels.get(`conversation:${conversationId}`);
-    if (channel) {
-      channel.send({
-        type: "broadcast",
-        event: "new_message",
-        payload: data as Message,
-      });
-      console.log(`[Messaging] Broadcast message to channel`);
+    const channelName = `conversation:${conversationId}`;
+    const channel = this.channels.get(channelName);
+    const isChannelSubscribed = this.subscribedChannels.has(channelName);
+    
+    if (channel && isChannelSubscribed) {
+      try {
+        const result = await channel.send({
+          type: "broadcast",
+          event: "new_message",
+          payload: data as Message,
+        });
+        console.log(`[Messaging] 📡 Broadcast sent to ${channelName}, result:`, result);
+      } catch (err) {
+        console.error(`[Messaging] ⚠️ Broadcast failed for ${channelName}:`, err);
+      }
+    } else {
+      console.warn(`[Messaging] ⚠️ Cannot broadcast - channel: ${!!channel}, subscribed: ${isChannelSubscribed}`);
+      console.log(`[Messaging] Available channels:`, Array.from(this.channels.keys()));
+      console.log(`[Messaging] Subscribed channels:`, Array.from(this.subscribedChannels));
     }
 
     return data as Message;
@@ -316,22 +345,32 @@ export class MessagingService {
     const channelName = `conversation:${conversationId}`;
     const channel = this.getOrCreateChannel(conversationId);
     
-    // Check if already subscribed (to avoid duplicate subscriptions)
-    const isAlreadySubscribed = this.subscribedChannels.has(channelName);
+    // Check if message handlers were already added for this conversation
+    const handlersKey = `msg:${conversationId}`;
+    if (this.messageHandlersAdded.has(handlersKey)) {
+      console.log(`[Messaging] Message handlers already added for ${channelName}, skipping`);
+      return () => {
+        this.messageHandlersAdded.delete(handlersKey);
+        this.removeChannel(conversationId);
+      };
+    }
+    
+    console.log(`[Messaging] Setting up message subscription for ${channelName}`);
+    this.messageHandlersAdded.add(handlersKey);
 
     // Subscribe to broadcast events (immediate delivery from sender)
     channel.on(
       "broadcast",
       { event: "new_message" },
       (payload) => {
-        console.log(`[Messaging] Broadcast message received:`, payload.payload?.id);
+        console.log(`[Messaging] 📨 Broadcast message received:`, payload.payload?.id);
         if (payload.payload) {
           onMessage(payload.payload as Message);
         }
       }
     );
 
-    // Also subscribe to postgres_changes as backup (for messages from other sources)
+    // Subscribe to postgres_changes for INSERT (for messages from other participants)
     channel.on(
       "postgres_changes",
       {
@@ -341,7 +380,7 @@ export class MessagingService {
         filter: `conversation_id=eq.${conversationId}`,
       },
       (payload) => {
-        console.log(`[Messaging] postgres_changes INSERT received:`, payload.new.id);
+        console.log(`[Messaging] 📬 postgres_changes INSERT received:`, payload.new.id);
         onMessage(payload.new as Message);
       }
     );
@@ -356,31 +395,38 @@ export class MessagingService {
         filter: `conversation_id=eq.${conversationId}`,
       },
       (payload) => {
-        console.log(`[Messaging] Message updated:`, payload.new.id);
+        console.log(`[Messaging] ✏️ Message updated:`, payload.new.id);
         onMessage(payload.new as Message);
       }
     );
 
-    // Only subscribe if not already subscribed
+    // Subscribe if not already subscribed
+    const isAlreadySubscribed = this.subscribedChannels.has(channelName);
     if (!isAlreadySubscribed) {
       channel.subscribe((status, err) => {
         if (status === "SUBSCRIBED") {
-          console.log(`[Messaging] Subscribed to conversation ${conversationId}`);
+          console.log(`[Messaging] ✓ Successfully subscribed to ${channelName}`);
           this.subscribedChannels.add(channelName);
         } else if (status === "CHANNEL_ERROR") {
-          console.error(`[Messaging] Channel error for conversation ${conversationId}:`, err);
+          console.error(`[Messaging] ✗ Channel error for ${channelName}:`, err);
+          this.subscribedChannels.delete(channelName);
         } else if (status === "TIMED_OUT") {
-          console.error(`[Messaging] Channel timed out for conversation ${conversationId}`);
+          console.error(`[Messaging] ✗ Channel timed out for ${channelName}`);
+          this.subscribedChannels.delete(channelName);
+        } else if (status === "CLOSED") {
+          console.log(`[Messaging] Channel closed for ${channelName}`);
+          this.subscribedChannels.delete(channelName);
         } else {
-          console.log(`[Messaging] Channel status: ${status} for ${conversationId}`);
+          console.log(`[Messaging] Channel status: ${status} for ${channelName}`);
         }
       });
     } else {
-      console.log(`[Messaging] Channel already subscribed: ${channelName}`);
+      console.log(`[Messaging] Channel ${channelName} already subscribed, adding handlers only`);
     }
 
     // Return unsubscribe function
     return () => {
+      this.messageHandlersAdded.delete(handlersKey);
       this.removeChannel(conversationId);
     };
   }
@@ -402,8 +448,11 @@ export class MessagingService {
     setTyping: (isTyping: boolean) => void;
     unsubscribe: () => void;
   } {
+    const channelName = `conversation:${conversationId}`;
     const channel = this.getOrCreateChannel(conversationId);
     let typingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    console.log(`[Messaging] Setting up typing subscription for ${channelName}`);
 
     // Track presence for typing
     channel.on("presence", { event: "sync" }, () => {
@@ -431,18 +480,32 @@ export class MessagingService {
       onTypingUpdate(typingUsers);
     });
 
-    // Subscribe to the channel
-    channel.subscribe(async (status) => {
-      if (status === "SUBSCRIBED") {
-        // Track own presence (initially not typing)
-        await channel.track({
-          user_id: currentUserId,
-          display_name: displayName,
-          is_typing: false,
-          last_typed_at: Date.now(),
-        });
-      }
-    });
+    // Subscribe only if not already subscribed (channel might be shared with message subscription)
+    const isAlreadySubscribed = this.subscribedChannels.has(channelName);
+    if (!isAlreadySubscribed) {
+      channel.subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          console.log(`[Messaging] ✓ Typing channel subscribed: ${channelName}`);
+          this.subscribedChannels.add(channelName);
+          // Track own presence (initially not typing)
+          await channel.track({
+            user_id: currentUserId,
+            display_name: displayName,
+            is_typing: false,
+            last_typed_at: Date.now(),
+          });
+        }
+      });
+    } else {
+      // Channel already subscribed, just track presence
+      console.log(`[Messaging] Channel ${channelName} already subscribed, tracking presence only`);
+      channel.track({
+        user_id: currentUserId,
+        display_name: displayName,
+        is_typing: false,
+        last_typed_at: Date.now(),
+      });
+    }
 
     // Function to update typing status
     const setTyping = async (isTyping: boolean) => {
