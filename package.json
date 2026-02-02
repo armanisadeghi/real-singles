@@ -4,6 +4,9 @@
   "private": true,
   "description": "RealSingles - Dating App Monorepo",
   "scripts": {
+    "dev": "pnpm --filter realsingles-web dev",
+    "ios": "pnpm --filter realsingles-mobile dev:ios",
+    "android": "pnpm --filter realsingles-mobile dev:android",
     "type-check": "pnpm -r --parallel type-check",
     "type-check:web": "pnpm --filter realsingles-web type-check",
     "type-check:mobile": "pnpm --filter realsingles-mobile type-check",

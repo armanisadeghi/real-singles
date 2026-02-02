@@ -79,7 +79,7 @@ export default async function AppLayout({
       <BottomNavigation />
 
       {/* Main Content */}
-      <main className="pb-20 md:pb-0">
+      <main id="main-content" className="pb-20 md:pb-0" tabIndex={-1}>
         {children}
       </main>
     </div>

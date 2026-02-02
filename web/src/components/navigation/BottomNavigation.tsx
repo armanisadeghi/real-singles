@@ -16,9 +16,11 @@ function NavItem({ href, icon: Icon, label, isActive }: NavItemProps) {
   return (
     <Link
       href={href}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
         "flex flex-col items-center justify-center flex-1 py-2 min-h-[56px] transition-colors",
         "active:bg-gray-100 touch-manipulation",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-pink-500",
         isActive ? "text-pink-600" : "text-gray-500"
       )}
     >
@@ -29,6 +31,7 @@ function NavItem({ href, icon: Icon, label, isActive }: NavItemProps) {
         )}
         strokeWidth={isActive ? 2.5 : 2}
         fill={isActive ? "currentColor" : "none"}
+        aria-hidden="true"
       />
       <span
         className={cn(
@@ -81,6 +84,7 @@ export function BottomNavigation() {
 
   return (
     <nav
+      aria-label="Main navigation"
       className={cn(
         "md:hidden fixed bottom-0 left-0 right-0 z-50",
         "bg-white/95 backdrop-blur-lg",
@@ -88,7 +92,7 @@ export function BottomNavigation() {
         "pb-[env(safe-area-inset-bottom)]"
       )}
     >
-      <div className="flex items-stretch">
+      <div className="flex items-stretch" role="list">
         {navItems.map((item) => (
           <NavItem
             key={item.href}

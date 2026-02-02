@@ -313,23 +313,23 @@ function LikesYouTab() {
               <button
                 onClick={() => like.user_id && handlePass(like.user_id)}
                 disabled={isLoading}
-                className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors disabled:opacity-50"
-                title="Pass"
+                aria-label={`Pass on ${name}`}
+                className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
               >
-                <span className="text-lg">✕</span>
+                <span className="text-lg" aria-hidden="true">✕</span>
               </button>
               
               {/* Like Back */}
               <button
                 onClick={() => like.user_id && handleLikeBack(like.user_id)}
                 disabled={isLoading}
-                className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 transition-colors shadow-sm disabled:opacity-50"
-                title="Like back"
+                aria-label={`Like ${name} back`}
+                className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 transition-colors shadow-sm disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
                 ) : (
-                  <Heart className="w-5 h-5" />
+                  <Heart className="w-5 h-5" aria-hidden="true" />
                 )}
               </button>
             </div>
@@ -489,18 +489,18 @@ function MatchesTab() {
               {match.conversation_id ? (
                 <button
                   onClick={() => router.push(`/chats/${match.conversation_id}`)}
-                  className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 transition-colors shadow-sm"
-                  title="Send message"
+                  aria-label={`Message ${name}`}
+                  className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
                 >
-                  <MessageCircle className="w-5 h-5" />
+                  <MessageCircle className="w-5 h-5" aria-hidden="true" />
                 </button>
               ) : (
                 <Link
                   href={`/profile/${match.user_id}`}
-                  className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors"
-                  title="View profile"
+                  aria-label={`View ${name}'s profile`}
+                  className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-5 h-5" aria-hidden="true" />
                 </Link>
               )}
             </div>
@@ -538,35 +538,54 @@ export default function ConnectionsPage() {
       <p className="text-gray-500 mb-6">Your likes and matches</p>
 
       {/* Tab Navigation */}
-      <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
+      <div 
+        role="tablist" 
+        aria-label="Connections tabs"
+        className="flex bg-gray-100 rounded-xl p-1 mb-6"
+      >
         <button
+          role="tab"
+          id="tab-matches"
+          aria-selected={activeTab === "matches"}
+          aria-controls="tabpanel-matches"
           onClick={() => handleTabChange("matches")}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium transition-all",
+            "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
             activeTab === "matches"
               ? "bg-white text-gray-900 shadow-sm"
               : "text-gray-600 hover:text-gray-900"
           )}
         >
-          <Heart className="w-4 h-4" />
+          <Heart className="w-4 h-4" aria-hidden="true" />
           Matches
         </button>
         <button
+          role="tab"
+          id="tab-likes"
+          aria-selected={activeTab === "likes"}
+          aria-controls="tabpanel-likes"
           onClick={() => handleTabChange("likes")}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium transition-all",
+            "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
             activeTab === "likes"
               ? "bg-white text-gray-900 shadow-sm"
               : "text-gray-600 hover:text-gray-900"
           )}
         >
-          <ThumbsUp className="w-4 h-4" />
+          <ThumbsUp className="w-4 h-4" aria-hidden="true" />
           Likes You
         </button>
       </div>
 
       {/* Tab Content */}
-      {activeTab === "likes" ? <LikesYouTab /> : <MatchesTab />}
+      <div
+        role="tabpanel"
+        id={activeTab === "likes" ? "tabpanel-likes" : "tabpanel-matches"}
+        aria-labelledby={activeTab === "likes" ? "tab-likes" : "tab-matches"}
+        tabIndex={0}
+      >
+        {activeTab === "likes" ? <LikesYouTab /> : <MatchesTab />}
+      </div>
     </div>
   );
 }

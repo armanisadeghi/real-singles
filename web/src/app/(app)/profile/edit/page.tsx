@@ -159,7 +159,7 @@ function VoiceVideoSection() {
       <section className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-2">Voice & Video Prompts</h2>
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+          <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
         </div>
       </section>
     );
@@ -770,7 +770,7 @@ export default function EditProfilePage() {
       case "saving":
         return (
           <div className="flex items-center text-sm text-gray-500">
-            <svg className="animate-spin h-4 w-4 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin h-4 w-4 mr-2 text-brand-primary" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
@@ -816,22 +816,27 @@ export default function EditProfilePage() {
     onChange, 
     options,
     required = false,
+    id,
   }: { 
     label: string; 
     value: string; 
     onChange: (value: string) => void; 
     options: readonly { value: string; label: string }[];
     required?: boolean;
+    id: string;
   }) => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-red-500 ml-1" aria-hidden="true">*</span>}
+        {required && <span className="sr-only">(required)</span>}
       </label>
       <select
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        aria-required={required}
+        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
       >
         <option value="">Select...</option>
         {options.map(opt => (
@@ -848,47 +853,58 @@ export default function EditProfilePage() {
     options, 
     onToggle,
     required = false,
+    id,
   }: { 
     label: string; 
     selected: string[]; 
     options: readonly { value: string; label: string }[];
     onToggle: (value: string) => void;
     required?: boolean;
+    id: string;
   }) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+    <fieldset>
+      <legend className="block text-sm font-medium text-gray-700 mb-2">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      <div className="flex flex-wrap gap-2">
-        {options.map(opt => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => onToggle(opt.value)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              selected.includes(opt.value)
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
+        {required && <span className="text-red-500 ml-1" aria-hidden="true">*</span>}
+        {required && <span className="sr-only">(required)</span>}
+      </legend>
+      <div 
+        role="group" 
+        aria-label={label}
+        className="flex flex-wrap gap-2"
+      >
+        {options.map(opt => {
+          const isSelected = selected.includes(opt.value);
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onToggle(opt.value)}
+              aria-pressed={isSelected}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 ${
+                isSelected
+                  ? "bg-brand-primary text-white shadow-sm"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm"
+              }`}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
       </div>
-    </div>
+    </fieldset>
   );
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Back Button */}
-      <button
-        onClick={() => router.back()}
-        className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+      {/* Back Button - uses Link for proper semantics */}
+      <Link
+        href="/profile"
+        className="mb-6 inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 rounded-lg"
       >
-        <ArrowLeft className="w-5 h-5" />
-        <span className="text-sm font-medium">Back</span>
-      </button>
+        <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+        <span className="text-sm font-medium">Back to Profile</span>
+      </Link>
 
       <div className="flex justify-between items-center mb-8">
         <div>
@@ -900,14 +916,14 @@ export default function EditProfilePage() {
         <div className="flex gap-3">
           <Link
             href="/profile/gallery"
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors"
+            className="px-4 py-2.5 bg-brand-secondary text-white rounded-lg hover:bg-brand-secondary-dark font-medium transition-all duration-200 shadow-sm hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-secondary focus-visible:ring-offset-2"
           >
             Manage Gallery
           </Link>
           <button
             onClick={handleSaveAndContinue}
             disabled={saving || saveStatus === "saving"}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+            className="px-6 py-2.5 bg-brand-primary text-white rounded-lg hover:bg-brand-primary-dark font-medium transition-all duration-200 shadow-sm hover:shadow disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
             {saving || saveStatus === "saving" ? "Saving..." : "Save & Continue"}
           </button>
@@ -928,43 +944,53 @@ export default function EditProfilePage() {
 
       <div className="space-y-8">
         {/* Basic Info */}
-        <section className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Info</h2>
+        <section className="bg-white rounded-xl shadow-sm p-6" aria-labelledby="basic-info-heading">
+          <h2 id="basic-info-heading" className="text-lg font-semibold text-gray-900 mb-4">Basic Info</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                First Name<span className="text-red-500 ml-1">*</span>
+              <label htmlFor="first-name" className="block text-sm font-medium text-gray-700 mb-1">
+                First Name<span className="text-red-500 ml-1" aria-hidden="true">*</span>
+                <span className="sr-only">(required)</span>
               </label>
               <input
+                id="first-name"
                 type="text"
                 value={profile.first_name}
                 onChange={(e) => setProfile(prev => ({ ...prev, first_name: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                aria-required="true"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Last Name<span className="text-red-500 ml-1">*</span>
+              <label htmlFor="last-name" className="block text-sm font-medium text-gray-700 mb-1">
+                Last Name<span className="text-red-500 ml-1" aria-hidden="true">*</span>
+                <span className="sr-only">(required)</span>
               </label>
               <input
+                id="last-name"
                 type="text"
                 value={profile.last_name}
                 onChange={(e) => setProfile(prev => ({ ...prev, last_name: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                aria-required="true"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date of Birth<span className="text-red-500 ml-1">*</span>
+              <label htmlFor="date-of-birth" className="block text-sm font-medium text-gray-700 mb-1">
+                Date of Birth<span className="text-red-500 ml-1" aria-hidden="true">*</span>
+                <span className="sr-only">(required)</span>
               </label>
               <input
+                id="date-of-birth"
                 type="date"
                 value={profile.date_of_birth}
                 onChange={(e) => setProfile(prev => ({ ...prev, date_of_birth: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                aria-required="true"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <SelectField
+              id="gender"
               label="Gender"
               value={profile.gender}
               onChange={(value) => setProfile(prev => ({ ...prev, gender: value }))}
@@ -982,6 +1008,7 @@ export default function EditProfilePage() {
               </div>
             </div>
             <SelectField
+              id="marital-status"
               label="Marital Status"
               value={profile.marital_status}
               onChange={(value) => setProfile(prev => ({ ...prev, marital_status: value }))}
@@ -989,6 +1016,7 @@ export default function EditProfilePage() {
               required
             />
             <SelectField
+              id="dating-intentions"
               label="Dating Intentions"
               value={profile.dating_intentions}
               onChange={(value) => setProfile(prev => ({ ...prev, dating_intentions: value }))}
@@ -999,6 +1027,7 @@ export default function EditProfilePage() {
 
           <div className="mt-4">
             <MultiSelectChips
+              id="looking-for"
               label="I'm interested in"
               selected={profile.looking_for}
               options={GENDER_OPTIONS}
@@ -1019,7 +1048,7 @@ export default function EditProfilePage() {
                 <select
                   value={profile.height_feet}
                   onChange={(e) => setProfile(prev => ({ ...prev, height_feet: parseInt(e.target.value) }))}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg bg-white"
                 >
                   {[4, 5, 6, 7].map(f => (
                     <option key={f} value={f}>{f}&apos;</option>
@@ -1028,7 +1057,7 @@ export default function EditProfilePage() {
                 <select
                   value={profile.height_inches}
                   onChange={(e) => setProfile(prev => ({ ...prev, height_inches: parseInt(e.target.value) }))}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg bg-white"
                 >
                   {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => (
                     <option key={i} value={i}>{i}&quot;</option>
@@ -1037,6 +1066,7 @@ export default function EditProfilePage() {
               </div>
             </div>
             <SelectField
+              id="body-type"
               label="Body Type"
               value={profile.body_type}
               onChange={(value) => setProfile(prev => ({ ...prev, body_type: value }))}
@@ -1046,6 +1076,7 @@ export default function EditProfilePage() {
           
           <div className="mt-4">
             <MultiSelectChips
+              id="ethnicity"
               label="Ethnicity"
               selected={profile.ethnicity}
               options={ETHNICITY_OPTIONS}
@@ -1059,92 +1090,103 @@ export default function EditProfilePage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Location</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <SelectField
+              id="country"
               label="Country"
               value={profile.country}
               onChange={(value) => setProfile(prev => ({ ...prev, country: value }))}
               options={COUNTRY_OPTIONS}
             />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">State/Province</label>
+              <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">State/Province</label>
               <input
+                id="state"
                 type="text"
                 value={profile.state}
                 onChange={(e) => setProfile(prev => ({ ...prev, state: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">City</label>
               <input
+                id="city"
                 type="text"
                 value={profile.city}
                 onChange={(e) => setProfile(prev => ({ ...prev, city: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+              <label htmlFor="zip-code" className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
               <input
+                id="zip-code"
                 type="text"
                 value={profile.zip_code}
                 onChange={(e) => setProfile(prev => ({ ...prev, zip_code: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Hometown</label>
+              <label htmlFor="hometown" className="block text-sm font-medium text-gray-700 mb-1">Hometown</label>
               <input
+                id="hometown"
                 type="text"
                 value={profile.hometown}
                 onChange={(e) => setProfile(prev => ({ ...prev, hometown: e.target.value }))}
                 placeholder="Where did you grow up?"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
           </div>
         </section>
 
         {/* Lifestyle */}
-        <section className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Lifestyle</h2>
+        <section className="bg-white rounded-xl shadow-sm p-6" aria-labelledby="lifestyle-heading">
+          <h2 id="lifestyle-heading" className="text-lg font-semibold text-gray-900 mb-4">Lifestyle</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
+              <label htmlFor="occupation" className="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
               <input
+                id="occupation"
                 type="text"
                 value={profile.occupation}
                 onChange={(e) => setProfile(prev => ({ ...prev, occupation: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+              <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">Company</label>
               <input
+                id="company"
                 type="text"
                 value={profile.company}
                 onChange={(e) => setProfile(prev => ({ ...prev, company: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <SelectField
+              id="education"
               label="Education"
               value={profile.education}
               onChange={(value) => setProfile(prev => ({ ...prev, education: value }))}
               options={EDUCATION_OPTIONS}
             />
             <SelectField
+              id="religion"
               label="Religion"
               value={profile.religion}
               onChange={(value) => setProfile(prev => ({ ...prev, religion: value }))}
               options={RELIGION_OPTIONS}
             />
             <SelectField
+              id="political-views"
               label="Political Views"
               value={profile.political_views}
               onChange={(value) => setProfile(prev => ({ ...prev, political_views: value }))}
               options={POLITICAL_OPTIONS}
             />
             <SelectField
+              id="exercise"
               label="Exercise"
               value={profile.exercise}
               onChange={(value) => setProfile(prev => ({ ...prev, exercise: value }))}
@@ -1154,6 +1196,7 @@ export default function EditProfilePage() {
 
           <div className="mt-4">
             <MultiSelectChips
+              id="languages"
               label="Languages"
               selected={profile.languages}
               options={LANGUAGE_OPTIONS}
@@ -1167,18 +1210,21 @@ export default function EditProfilePage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Habits</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <SelectField
+              id="smoking"
               label="Smoking"
               value={profile.smoking}
               onChange={(value) => setProfile(prev => ({ ...prev, smoking: value }))}
               options={SMOKING_OPTIONS}
             />
             <SelectField
+              id="drinking"
               label="Drinking"
               value={profile.drinking}
               onChange={(value) => setProfile(prev => ({ ...prev, drinking: value }))}
               options={DRINKING_OPTIONS}
             />
             <SelectField
+              id="marijuana"
               label="Marijuana"
               value={profile.marijuana}
               onChange={(value) => setProfile(prev => ({ ...prev, marijuana: value }))}
@@ -1192,12 +1238,14 @@ export default function EditProfilePage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Family</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <SelectField
+              id="has-kids"
               label="Do you have children?"
               value={profile.has_kids}
               onChange={(value) => setProfile(prev => ({ ...prev, has_kids: value }))}
               options={HAS_KIDS_OPTIONS}
             />
             <SelectField
+              id="wants-kids"
               label="Do you want children?"
               value={profile.wants_kids}
               onChange={(value) => setProfile(prev => ({ ...prev, wants_kids: value }))}
@@ -1207,6 +1255,7 @@ export default function EditProfilePage() {
           
           <div className="mt-4">
             <MultiSelectChips
+              id="pets"
               label="Pets"
               selected={profile.pets}
               options={PETS_OPTIONS}
@@ -1216,9 +1265,10 @@ export default function EditProfilePage() {
         </section>
 
         {/* Interests */}
-        <section className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Interests</h2>
+        <section className="bg-white rounded-xl shadow-sm p-6" aria-labelledby="interests-heading">
+          <h2 id="interests-heading" className="text-lg font-semibold text-gray-900 mb-4">Interests</h2>
           <MultiSelectChips
+            id="interests"
             label="Select your interests"
             selected={profile.interests}
             options={INTEREST_OPTIONS}
@@ -1261,11 +1311,11 @@ export default function EditProfilePage() {
                             }}
                             disabled={!canSelect && !isSelected}
                             title={goal.description}
-                            className={`px-3 py-2 text-sm rounded-full border transition-colors ${
+                            className={`px-3 py-2 text-sm rounded-full border transition-all duration-200 ${
                               isSelected
-                                ? "bg-indigo-100 border-indigo-500 text-indigo-700"
+                                ? "bg-brand-primary/10 border-brand-primary text-brand-primary font-medium"
                                 : canSelect
-                                ? "border-gray-300 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50"
+                                ? "border-gray-200 text-gray-700 hover:border-brand-primary/50 hover:bg-brand-primary/5"
                                 : "border-gray-200 text-gray-400 cursor-not-allowed"
                             }`}
                           >
@@ -1290,152 +1340,166 @@ export default function EditProfilePage() {
         <VoiceVideoSection />
 
         {/* About Me */}
-        <section className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">About Me</h2>
+        <section className="bg-white rounded-xl shadow-sm p-6" aria-labelledby="about-me-heading">
+          <h2 id="about-me-heading" className="text-lg font-semibold text-gray-900 mb-4">About Me</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+              <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
               <textarea
+                id="bio"
                 value={profile.bio}
                 onChange={(e) => setProfile(prev => ({ ...prev, bio: e.target.value }))}
                 rows={4}
                 placeholder="Tell us about yourself..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">What I&apos;m Looking For</label>
+              <label htmlFor="looking-for-description" className="block text-sm font-medium text-gray-700 mb-1">What I&apos;m Looking For</label>
               <textarea
+                id="looking-for-description"
                 value={profile.looking_for_description}
                 onChange={(e) => setProfile(prev => ({ ...prev, looking_for_description: e.target.value }))}
                 rows={3}
                 placeholder="Describe your ideal match..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
           </div>
         </section>
 
         {/* Profile Prompts */}
-        <section className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Get to Know Me</h2>
+        <section className="bg-white rounded-xl shadow-sm p-6" aria-labelledby="prompts-heading">
+          <h2 id="prompts-heading" className="text-lg font-semibold text-gray-900 mb-4">Get to Know Me</h2>
           <p className="text-sm text-gray-500 mb-4">Answer these prompts to help others learn more about you.</p>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">My ideal first date starts with... and ends with...</label>
+              <label htmlFor="ideal-first-date" className="block text-sm font-medium text-gray-700 mb-1">My ideal first date starts with... and ends with...</label>
               <textarea
+                id="ideal-first-date"
                 value={profile.ideal_first_date}
                 onChange={(e) => setProfile(prev => ({ ...prev, ideal_first_date: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">My top non-negotiables</label>
+              <label htmlFor="non-negotiables" className="block text-sm font-medium text-gray-700 mb-1">My top non-negotiables</label>
               <textarea
+                id="non-negotiables"
                 value={profile.non_negotiables}
                 onChange={(e) => setProfile(prev => ({ ...prev, non_negotiables: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">The way to my heart is through...</label>
+              <label htmlFor="way-to-heart" className="block text-sm font-medium text-gray-700 mb-1">The way to my heart is through...</label>
               <textarea
+                id="way-to-heart"
                 value={profile.way_to_heart}
                 onChange={(e) => setProfile(prev => ({ ...prev, way_to_heart: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">After work, you can find me...</label>
+              <label htmlFor="after-work" className="block text-sm font-medium text-gray-700 mb-1">After work, you can find me...</label>
               <textarea
+                id="after-work"
                 value={profile.after_work}
                 onChange={(e) => setProfile(prev => ({ ...prev, after_work: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nightclub or night at home?</label>
+              <label htmlFor="nightclub-or-home" className="block text-sm font-medium text-gray-700 mb-1">Nightclub or night at home?</label>
               <input
+                id="nightclub-or-home"
                 type="text"
                 value={profile.nightclub_or_home}
                 onChange={(e) => setProfile(prev => ({ ...prev, nightclub_or_home: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">My pet peeves</label>
+              <label htmlFor="pet-peeves" className="block text-sm font-medium text-gray-700 mb-1">My pet peeves</label>
               <textarea
+                id="pet-peeves"
                 value={profile.pet_peeves}
                 onChange={(e) => setProfile(prev => ({ ...prev, pet_peeves: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Craziest travel story</label>
+              <label htmlFor="craziest-travel-story" className="block text-sm font-medium text-gray-700 mb-1">Craziest travel story</label>
               <textarea
+                id="craziest-travel-story"
                 value={profile.craziest_travel_story}
                 onChange={(e) => setProfile(prev => ({ ...prev, craziest_travel_story: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Weirdest gift I&apos;ve received</label>
+              <label htmlFor="weirdest-gift" className="block text-sm font-medium text-gray-700 mb-1">Weirdest gift I&apos;ve received</label>
               <textarea
+                id="weirdest-gift"
                 value={profile.weirdest_gift}
                 onChange={(e) => setProfile(prev => ({ ...prev, weirdest_gift: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">The worst job I ever had</label>
+              <label htmlFor="worst-job" className="block text-sm font-medium text-gray-700 mb-1">The worst job I ever had</label>
               <textarea
+                id="worst-job"
                 value={profile.worst_job}
                 onChange={(e) => setProfile(prev => ({ ...prev, worst_job: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">The job I&apos;d do for no money</label>
+              <label htmlFor="dream-job" className="block text-sm font-medium text-gray-700 mb-1">The job I&apos;d do for no money</label>
               <textarea
+                id="dream-job"
                 value={profile.dream_job}
                 onChange={(e) => setProfile(prev => ({ ...prev, dream_job: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
           </div>
         </section>
 
         {/* Social Links */}
-        <section className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Social Links</h2>
+        <section className="bg-white rounded-xl shadow-sm p-6" aria-labelledby="social-links-heading">
+          <h2 id="social-links-heading" className="text-lg font-semibold text-gray-900 mb-4">Social Links</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Social Link 1</label>
+              <label htmlFor="social-link-1" className="block text-sm font-medium text-gray-700 mb-1">Social Link 1</label>
               <input
+                id="social-link-1"
                 type="url"
                 value={profile.social_link_1}
                 onChange={(e) => setProfile(prev => ({ ...prev, social_link_1: e.target.value }))}
                 placeholder="https://..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Social Link 2</label>
+              <label htmlFor="social-link-2" className="block text-sm font-medium text-gray-700 mb-1">Social Link 2</label>
               <input
+                id="social-link-2"
                 type="url"
                 value={profile.social_link_2}
                 onChange={(e) => setProfile(prev => ({ ...prev, social_link_2: e.target.value }))}
                 placeholder="https://..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               />
             </div>
           </div>
@@ -1446,7 +1510,7 @@ export default function EditProfilePage() {
           <button
             onClick={handleSaveAndContinue}
             disabled={saving}
-            className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50"
+            className="px-8 py-3 bg-gradient-to-r from-brand-primary to-brand-primary-dark text-white font-medium rounded-lg hover:from-brand-primary-light hover:to-brand-primary transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
             {saving ? "Saving..." : "Save & Continue"}
           </button>

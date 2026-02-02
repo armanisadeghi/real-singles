@@ -173,6 +173,15 @@ export default function DiscoveryProfilePage() {
     return response.json();
   }, []);
 
+  const handleBlock = useCallback(async (targetUserId: string) => {
+    const response = await fetch("/api/blocks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ blocked_user_id: targetUserId }),
+    });
+    return response.json();
+  }, []);
+
   const handleClose = useCallback(() => {
     router.back();
   }, [router]);
@@ -213,6 +222,7 @@ export default function DiscoveryProfilePage() {
       onPass={handlePass}
       onSuperLike={handleSuperLike}
       onReport={handleReport}
+      onBlock={handleBlock}
       onClose={handleClose}
     />
   );

@@ -9,12 +9,14 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { X, Flag, Heart, Star, MapPin, Briefcase, CheckCircle, ArrowLeft } from "lucide-react";
+import { X, MoreHorizontal, Heart, Star, MapPin, Briefcase, CheckCircle, ArrowLeft, Undo2, Share, Ban, Flag } from "lucide-react";
 import { cn, calculateAge } from "@/lib/utils";
 import { PhotoCarousel } from "./PhotoCarousel";
 import { ProfileSectionRenderer } from "./ProfileSectionRenderer";
 import { MatchCelebrationModal } from "./MatchCelebrationModal";
 import { useToast } from "@/components/ui/Toast";
+import { ActionMenu, type ActionMenuItem } from "@/components/ui/ActionMenu";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { VoiceVideoDisplay } from "@/components/profile";
 
 interface Profile {
@@ -90,6 +92,7 @@ interface DiscoveryProfileViewProps {
   onPass?: (userId: string) => Promise<{ success: boolean; msg?: string }>;
   onSuperLike?: (userId: string) => Promise<MatchActionResult>;
   onReport?: (userId: string, reason: string) => Promise<{ success: boolean; msg?: string }>;
+  onBlock?: (userId: string) => Promise<{ success: boolean; msg?: string }>;
   onClose?: () => void;
 }
 
@@ -101,6 +104,45 @@ const REPORT_REASONS = [
   "Other",
 ];
 
+/**
+ * Trigger haptic feedback on supported devices
+ * Uses the Vibration API for a native-feeling touch response
+ * 
+ * @param type - The type of haptic feedback:
+ *   - 'light': Quick tap (10ms) - for selections, toggles
+ *   - 'medium': Standard press (20ms) - for button presses
+ *   - 'heavy': Strong feedback (30ms) - for important actions like like/pass
+ *   - 'success': Double pulse - for successful actions
+ *   - 'error': Triple short pulse - for errors
+ */
+function triggerHaptic(type: 'light' | 'medium' | 'heavy' | 'success' | 'error' = 'medium') {
+  // Check if Vibration API is supported (mobile browsers)
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    const patterns: Record<string, number | number[]> = {
+      light: 10,
+      medium: 20,
+      heavy: 30,
+      success: [15, 50, 15], // Two pulses
+      error: [10, 30, 10, 30, 10], // Three short pulses
+    };
+    
+    try {
+      navigator.vibrate(patterns[type]);
+    } catch {
+      // Silently fail if vibration is not permitted
+    }
+  }
+}
+
+/**
+ * Check if the device is likely a touch device
+ * Used to conditionally apply touch-specific styles
+ */
+function isTouchDevice() {
+  if (typeof window === 'undefined') return false;
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+}
+
 export function DiscoveryProfileView({
   profile,
   gallery = [],
@@ -110,12 +152,18 @@ export function DiscoveryProfileView({
   onPass,
   onSuperLike,
   onReport,
+  onBlock,
   onClose,
 }: DiscoveryProfileViewProps) {
   const router = useRouter();
   const toast = useToast();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
+  
+  // Action menu state
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  const [blockLoading, setBlockLoading] = useState(false);
   
   // Match celebration state
   const [showMatchCelebration, setShowMatchCelebration] = useState(false);
@@ -190,13 +238,135 @@ export function DiscoveryProfileView({
         const result = await onReport(profile.user_id, reason);
         if (result?.success) {
           setShowReportModal(false);
+          toast.success("Report submitted. Thank you for helping keep our community safe.");
         }
       } catch (error) {
         console.error("Report failed:", error);
+        toast.error("Failed to submit report. Please try again.");
       }
     },
-    [profile.user_id, onReport]
+    [profile.user_id, onReport, toast]
   );
+
+  // Handle share action
+  const handleShare = useCallback(async () => {
+    const displayName = profile.first_name || profile.user?.display_name || "Someone";
+    const shareUrl = typeof window !== "undefined" 
+      ? `${window.location.origin}/discover/profile/${profile.user_id}`
+      : "";
+    
+    const shareData = {
+      title: `Check out ${displayName} on RealSingles`,
+      text: `I found ${displayName} on RealSingles - a dating app for people who want something real.`,
+      url: shareUrl,
+    };
+
+    try {
+      // Use Web Share API if available
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        toast.success("Shared successfully!");
+      } else {
+        // Fallback: Copy link to clipboard
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Profile link copied to clipboard!");
+      }
+    } catch (error) {
+      // User cancelled share or error occurred
+      if ((error as Error).name !== "AbortError") {
+        console.error("Share failed:", error);
+        // Try clipboard fallback
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          toast.success("Profile link copied to clipboard!");
+        } catch {
+          toast.error("Failed to share. Please try again.");
+        }
+      }
+    }
+    setShowActionMenu(false);
+  }, [profile.first_name, profile.user?.display_name, profile.user_id, toast]);
+
+  // Handle block action
+  const handleBlock = useCallback(async () => {
+    if (!profile.user_id) return;
+
+    setBlockLoading(true);
+    try {
+      if (onBlock) {
+        const result = await onBlock(profile.user_id);
+        if (result?.success) {
+          toast.success("User blocked. You won't see them again.");
+          setShowBlockConfirm(false);
+          // Navigate away after blocking
+          setTimeout(handleClose, 500);
+        } else {
+          toast.error(result?.msg || "Failed to block user. Please try again.");
+        }
+      } else {
+        // Fallback: call API directly if no handler provided
+        const response = await fetch("/api/blocks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ blocked_user_id: profile.user_id }),
+        });
+        const result = await response.json();
+        if (result?.success) {
+          toast.success("User blocked. You won't see them again.");
+          setShowBlockConfirm(false);
+          setTimeout(handleClose, 500);
+        } else {
+          toast.error(result?.msg || "Failed to block user. Please try again.");
+        }
+      }
+    } catch (error) {
+      console.error("Block failed:", error);
+      toast.error("Failed to block user. Please try again.");
+    } finally {
+      setBlockLoading(false);
+    }
+  }, [profile.user_id, onBlock, toast, handleClose]);
+
+  // Action menu items
+  const actionMenuItems: ActionMenuItem[] = [
+    {
+      id: "share",
+      label: "Share Profile",
+      icon: Share,
+      description: "Send this profile to a friend",
+    },
+    {
+      id: "block",
+      label: "Block",
+      icon: Ban,
+      variant: "destructive",
+      description: "Stop seeing this person",
+    },
+    {
+      id: "report",
+      label: "Report",
+      icon: Flag,
+      variant: "destructive",
+      description: "Report inappropriate behavior",
+    },
+  ];
+
+  // Handle action menu selection
+  const handleActionMenuSelect = useCallback((itemId: string) => {
+    setShowActionMenu(false);
+    
+    switch (itemId) {
+      case "share":
+        handleShare();
+        break;
+      case "block":
+        setShowBlockConfirm(true);
+        break;
+      case "report":
+        setShowReportModal(true);
+        break;
+    }
+  }, [handleShare]);
 
   // Handle closing the match celebration
   const handleMatchCelebrationClose = useCallback(() => {
@@ -237,71 +407,126 @@ export function DiscoveryProfileView({
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
 
-            {/* Report button */}
+            {/* More actions button */}
             <button
-              onClick={() => setShowReportModal(true)}
+              onClick={() => setShowActionMenu(true)}
               className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
+              aria-label="More actions"
             >
-              <Flag className="w-4 h-4 text-white" />
+              <MoreHorizontal className="w-5 h-5 text-white" />
             </button>
           </div>
 
-          {/* Desktop: Action bar below photo */}
-          <div className="hidden md:flex items-center justify-center gap-4 py-4">
-            {/* Pass Button */}
+          {/* Desktop: Action bar below photo - Enhanced hover effects */}
+          <div className="hidden md:flex items-center justify-center gap-3 py-4">
+            {/* Pass Button (X) - leftmost */}
             <button
               onClick={() => handleAction("pass")}
               disabled={actionLoading !== null}
               className={cn(
-                "w-12 h-12 rounded-full flex items-center justify-center transition-all",
-                "bg-white border border-red-200 text-red-500",
-                "hover:border-red-400 hover:bg-red-50 hover:scale-105",
-                "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-                "shadow-sm"
+                "w-11 h-11 rounded-full flex items-center justify-center",
+                "bg-white text-red-500 border-2 border-red-300",
+                "shadow-sm",
+                // Smooth transitions for all properties
+                "transition-all duration-200 ease-out",
+                // Hover state - scale up, elevate shadow, shift colors
+                "hover:scale-110 hover:border-red-400 hover:bg-red-50",
+                "hover:shadow-lg hover:shadow-red-200/50",
+                // Active/click state
+                "active:scale-95 active:shadow-sm",
+                // Disabled state
+                "disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
               )}
+              aria-label="Pass on this profile"
             >
               {actionLoading === "pass" ? (
-                <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
               ) : (
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 transition-transform group-hover:rotate-90" />
               )}
             </button>
 
-            {/* Super Like Button */}
+            {/* 
+             * UNDO BUTTON (Desktop)
+             * TODO: Implement undo functionality - see mobile action bar comments for full implementation plan
+             */}
+            <button
+              onClick={() => {
+                console.log("[UNDO] Undo functionality not yet implemented");
+                console.log("[UNDO] This should undo the last like/pass action");
+                toast.info("Undo feature coming soon!");
+              }}
+              disabled={actionLoading !== null}
+              className={cn(
+                "w-11 h-11 rounded-full flex items-center justify-center",
+                "bg-white text-gray-600 border-2 border-gray-300",
+                "shadow-sm",
+                // Smooth transitions for all properties
+                "transition-all duration-200 ease-out",
+                // Hover state - scale up, elevate shadow, shift colors
+                "hover:scale-110 hover:border-gray-400 hover:bg-gray-50",
+                "hover:shadow-lg hover:shadow-gray-200/50 hover:text-gray-700",
+                // Active/click state
+                "active:scale-95 active:shadow-sm",
+                // Disabled state
+                "disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
+              )}
+              aria-label="Undo last action"
+            >
+              <Undo2 className="w-4 h-4" />
+            </button>
+
+            {/* Super Like Button (Star) */}
             <button
               onClick={() => handleAction("super_like")}
               disabled={actionLoading !== null}
               className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                "bg-white border border-blue-200 text-blue-500",
-                "hover:border-blue-400 hover:bg-blue-50 hover:scale-105",
-                "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-                "shadow-sm"
+                "w-11 h-11 rounded-full flex items-center justify-center",
+                "bg-white text-amber-500 border-2 border-amber-300",
+                "shadow-sm",
+                // Smooth transitions for all properties
+                "transition-all duration-200 ease-out",
+                // Hover state - scale up, elevate shadow, glow effect
+                "hover:scale-110 hover:border-amber-400 hover:bg-amber-50",
+                "hover:shadow-lg hover:shadow-amber-200/50",
+                // Active/click state
+                "active:scale-95 active:shadow-sm",
+                // Disabled state
+                "disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
               )}
+              aria-label="Super like this profile"
             >
               {actionLoading === "super_like" ? (
-                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Star className="w-5 h-5" />
+                <Star className="w-5 h-5 transition-transform hover:rotate-12" fill="currentColor" />
               )}
             </button>
 
-            {/* Like Button */}
+            {/* Like Button (Heart) - rightmost */}
             <button
               onClick={() => handleAction("like")}
               disabled={actionLoading !== null}
               className={cn(
-                "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+                "w-11 h-11 rounded-full flex items-center justify-center",
                 "bg-amber-500 text-white",
-                "hover:bg-amber-600 hover:scale-105",
-                "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-                "shadow-sm"
+                "shadow-sm",
+                // Smooth transitions for all properties
+                "transition-all duration-200 ease-out",
+                // Hover state - scale up, elevate shadow, brighten
+                "hover:scale-110 hover:bg-amber-400",
+                "hover:shadow-lg hover:shadow-amber-300/50",
+                // Active/click state
+                "active:scale-95 active:bg-amber-600 active:shadow-sm",
+                // Disabled state
+                "disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
               )}
+              aria-label="Like this profile"
             >
               {actionLoading === "like" ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Heart className="w-6 h-6" />
+                <Heart className="w-5 h-5 transition-transform hover:scale-110" fill="currentColor" />
               )}
             </button>
           </div>
@@ -379,60 +604,143 @@ export function DiscoveryProfileView({
         </div>
       </div>
 
-      {/* Mobile Action Bar - fixed at bottom */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/98 border-t border-gray-200 pb-[env(safe-area-inset-bottom)]">
-        <div className="flex items-center justify-center gap-5 py-3 px-4">
-          {/* Pass Button */}
+      {/* Mobile Action Bar - fixed floating buttons at bottom (no backdrop) 
+          Enhanced with haptic feedback and native-feeling touch interactions */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 pb-[env(safe-area-inset-bottom)] z-40">
+        <div className="flex items-center justify-center gap-4 py-4 px-4">
+          {/* Pass Button (X) - leftmost */}
           <button
-            onClick={() => handleAction("pass")}
+            onTouchStart={() => triggerHaptic('light')}
+            onClick={() => {
+              triggerHaptic('heavy');
+              handleAction("pass");
+            }}
             disabled={actionLoading !== null}
             className={cn(
-              "w-12 h-12 rounded-full flex items-center justify-center transition-all",
-              "bg-white border border-red-200 text-red-500",
-              "active:scale-95 disabled:opacity-50",
-              "shadow-sm"
+              "w-12 h-12 rounded-full flex items-center justify-center",
+              "bg-white text-red-500 border-2 border-red-300",
+              "shadow-lg",
+              // Touch-optimized transitions
+              "transition-all duration-150 ease-out",
+              // Active/pressed state - scale down and change background
+              "active:scale-90 active:bg-red-50 active:border-red-400 active:shadow-md",
+              // Disabled state
+              "disabled:opacity-50 disabled:active:scale-100",
+              // Prevent text selection and optimize touch
+              "select-none touch-manipulation"
             )}
+            aria-label="Pass on this profile"
           >
             {actionLoading === "pass" ? (
               <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
             ) : (
-              <X className="w-6 h-6" />
+              <X className="w-6 h-6 transition-transform active:scale-110" />
             )}
           </button>
 
-          {/* Super Like Button */}
+          {/* 
+           * UNDO BUTTON
+           * TODO: Implement undo functionality
+           * 
+           * This button should undo the last like/pass action the user took.
+           * Implementation requirements:
+           * 1. Store the last action (like/pass/super_like) and target user ID in state or context
+           * 2. Create an API endpoint: DELETE /api/matches/:targetUserId or POST /api/matches/undo
+           * 3. The API should remove the most recent match_action record for the current user
+           * 4. After undo, navigate back to that profile or show it again in the discovery feed
+           * 5. Consider adding a time limit (e.g., can only undo within 5 seconds)
+           * 6. Consider limiting undo usage (e.g., 3 undos per day for free users)
+           * 
+           * Related files that may need updates:
+           * - web/src/app/api/matches/route.ts (add undo endpoint)
+           * - mobile/app/discover/profile/[id].tsx (add undo to mobile)
+           * - Discovery feed pages to track last action
+           */}
           <button
-            onClick={() => handleAction("super_like")}
+            onTouchStart={() => triggerHaptic('light')}
+            onClick={() => {
+              triggerHaptic('medium');
+              // TODO: Implement undo functionality - see comments above for implementation plan
+              console.log("[UNDO] Undo functionality not yet implemented");
+              console.log("[UNDO] This should undo the last like/pass action");
+              toast.info("Undo feature coming soon!");
+            }}
             disabled={actionLoading !== null}
             className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-              "bg-white border border-blue-200 text-blue-500",
-              "active:scale-95 disabled:opacity-50",
-              "shadow-sm"
+              "w-12 h-12 rounded-full flex items-center justify-center",
+              "bg-white text-gray-600 border-2 border-gray-300",
+              "shadow-lg",
+              // Touch-optimized transitions
+              "transition-all duration-150 ease-out",
+              // Active/pressed state
+              "active:scale-90 active:bg-gray-100 active:border-gray-400 active:shadow-md",
+              // Disabled state
+              "disabled:opacity-50 disabled:active:scale-100",
+              // Prevent text selection and optimize touch
+              "select-none touch-manipulation"
             )}
+            aria-label="Undo last action"
+          >
+            <Undo2 className="w-5 h-5 transition-transform active:scale-110" />
+          </button>
+
+          {/* Super Like Button (Star) */}
+          <button
+            onTouchStart={() => triggerHaptic('light')}
+            onClick={() => {
+              triggerHaptic('heavy');
+              handleAction("super_like");
+            }}
+            disabled={actionLoading !== null}
+            className={cn(
+              "w-12 h-12 rounded-full flex items-center justify-center",
+              "bg-white text-amber-500 border-2 border-amber-300",
+              "shadow-lg",
+              // Touch-optimized transitions
+              "transition-all duration-150 ease-out",
+              // Active/pressed state
+              "active:scale-90 active:bg-amber-50 active:border-amber-400 active:shadow-md",
+              // Disabled state
+              "disabled:opacity-50 disabled:active:scale-100",
+              // Prevent text selection and optimize touch
+              "select-none touch-manipulation"
+            )}
+            aria-label="Super like this profile"
           >
             {actionLoading === "super_like" ? (
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Star className="w-5 h-5" />
+              <Star className="w-6 h-6 transition-transform active:scale-110" fill="currentColor" />
             )}
           </button>
 
-          {/* Like Button */}
+          {/* Like Button (Heart) - rightmost */}
           <button
-            onClick={() => handleAction("like")}
+            onTouchStart={() => triggerHaptic('light')}
+            onClick={() => {
+              triggerHaptic('success');
+              handleAction("like");
+            }}
             disabled={actionLoading !== null}
             className={cn(
-              "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+              "w-12 h-12 rounded-full flex items-center justify-center",
               "bg-amber-500 text-white",
-              "active:scale-95 disabled:opacity-50",
-              "shadow-sm"
+              "shadow-lg",
+              // Touch-optimized transitions
+              "transition-all duration-150 ease-out",
+              // Active/pressed state - darker background, scale down
+              "active:scale-90 active:bg-amber-600 active:shadow-md",
+              // Disabled state
+              "disabled:opacity-50 disabled:active:scale-100",
+              // Prevent text selection and optimize touch
+              "select-none touch-manipulation"
             )}
+            aria-label="Like this profile"
           >
             {actionLoading === "like" ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Heart className="w-6 h-6" />
+              <Heart className="w-6 h-6 transition-transform active:scale-110" fill="currentColor" />
             )}
           </button>
         </div>
@@ -486,6 +794,27 @@ export function DiscoveryProfileView({
         matchedUserName={name}
         conversationId={matchConversationId}
         onClose={handleMatchCelebrationClose}
+      />
+
+      {/* Action Menu (Share, Block, Report) */}
+      <ActionMenu
+        isOpen={showActionMenu}
+        onClose={() => setShowActionMenu(false)}
+        onSelect={handleActionMenuSelect}
+        items={actionMenuItems}
+      />
+
+      {/* Block Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showBlockConfirm}
+        onClose={() => setShowBlockConfirm(false)}
+        onConfirm={handleBlock}
+        title={`Block ${profile.first_name || "this user"}?`}
+        message="They won't be able to see your profile or contact you. You can unblock them later from Settings."
+        confirmLabel="Block"
+        cancelLabel="Cancel"
+        variant="danger"
+        loading={blockLoading}
       />
     </div>
   );
