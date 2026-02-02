@@ -192,7 +192,7 @@ export interface EditProfileFormData {
   Hometown?: string; // Free-text, where user grew up
   
   // Dating
-  DatingIntentions?: string; // life_partner, long_term, long_term_open, figuring_out, prefer_not_to_say
+  DatingIntentions?: string; // long_term, long_term_open, short_term_open, short_term, figuring_out
   
   // Lifestyle
   MaritalStatus?: string;
