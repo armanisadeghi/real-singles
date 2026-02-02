@@ -54,10 +54,13 @@ export function ActionMenu({
   // Handle open/close with animation
   useEffect(() => {
     if (isOpen) {
-      // Calculate scrollbar width to prevent layout shift
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      document.body.style.overflow = "hidden";
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      // Only lock scroll on mobile (bottom sheet behavior)
+      // Desktop dropdown doesn't need scroll lock
+      const isMobile = window.matchMedia("(max-width: 767px)").matches;
+      
+      if (isMobile) {
+        document.body.style.overflow = "hidden";
+      }
       
       // Trigger enter animation
       requestAnimationFrame(() => {
@@ -66,12 +69,10 @@ export function ActionMenu({
     } else {
       setIsVisible(false);
       document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
     }
 
     return () => {
       document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
     };
   }, [isOpen]);
 

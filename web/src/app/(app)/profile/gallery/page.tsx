@@ -215,35 +215,29 @@ export default function GalleryPage() {
 
   return (
     <div className="min-h-dvh bg-gray-50">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-6">
+        {/* Compact Header */}
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2 min-w-0">
             <Link
               href="/profile/edit"
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className="flex items-center justify-center w-8 h-8 -ml-1 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              aria-label="Back to edit profile"
             >
-              <ArrowLeft className="w-6 h-6" />
+              <ArrowLeft className="w-5 h-5" />
             </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Manage Gallery</h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Upload and manage your photos and videos
-              </p>
-            </div>
+            <h1 className="text-lg font-semibold text-gray-900">Gallery</h1>
           </div>
 
           {/* Stats */}
-          <div className="hidden sm:flex items-center gap-4 px-4 py-2 bg-white rounded-lg shadow-sm border">
-            <div className="text-center">
-              <p className="text-lg font-bold text-pink-600">{photoCount}/10</p>
-              <p className="text-xs text-gray-500">Photos</p>
-            </div>
-            <div className="w-px h-8 bg-gray-200" />
-            <div className="text-center">
-              <p className="text-lg font-bold text-purple-600">{videoCount}/1</p>
-              <p className="text-xs text-gray-500">Videos</p>
-            </div>
+          <div className="flex items-center gap-3 text-sm">
+            <span className="text-gray-600">
+              <span className="font-semibold text-pink-600">{photoCount}</span>/10 photos
+            </span>
+            <span className="text-gray-300">|</span>
+            <span className="text-gray-600">
+              <span className="font-semibold text-purple-600">{videoCount}</span>/1 video
+            </span>
           </div>
         </div>
 
@@ -251,7 +245,7 @@ export default function GalleryPage() {
         {message && (
           <div
             className={cn(
-              "mb-6 p-4 rounded-lg border flex items-start gap-3",
+              "mb-4 p-3 rounded-lg border flex items-start gap-2 text-sm",
               message.type === "success"
                 ? "bg-green-50 border-green-200 text-green-800"
                 : "bg-red-50 border-red-200 text-red-800"
@@ -263,8 +257,8 @@ export default function GalleryPage() {
         )}
 
         {/* Upload Section */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Upload New Media</h2>
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-3">Upload New Media</h2>
           <PhotoUpload
             onUploadComplete={handleUploadComplete}
             maxPhotos={10}
@@ -277,8 +271,8 @@ export default function GalleryPage() {
 
         {/* Gallery Section */}
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Your Gallery</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold text-gray-900">Your Gallery</h2>
             {gallery.length > 0 && (
               <p className="text-sm text-gray-600">
                 {gallery.length} item{gallery.length !== 1 ? "s" : ""}
@@ -301,18 +295,6 @@ export default function GalleryPage() {
           )}
         </div>
 
-        {/* Mobile Stats */}
-        <div className="sm:hidden mt-6 flex justify-center gap-6 py-4 bg-white rounded-lg shadow-sm border">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-pink-600">{photoCount}/10</p>
-            <p className="text-xs text-gray-500">Photos</p>
-          </div>
-          <div className="w-px bg-gray-200" />
-          <div className="text-center">
-            <p className="text-2xl font-bold text-purple-600">{videoCount}/1</p>
-            <p className="text-xs text-gray-500">Videos</p>
-          </div>
-        </div>
       </div>
     </div>
   );

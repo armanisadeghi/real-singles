@@ -127,21 +127,22 @@ export default function BlockedUsersPage() {
 
   return (
     <div className="min-h-dvh bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link
-            href="/settings"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Blocked Users</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              {blockedUsers.length} user{blockedUsers.length !== 1 ? "s" : ""} blocked
-            </p>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-6">
+        {/* Compact Header */}
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2 min-w-0">
+            <Link
+              href="/settings"
+              className="flex items-center justify-center w-8 h-8 -ml-1 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              aria-label="Back to settings"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <h1 className="text-lg font-semibold text-gray-900">Blocked</h1>
           </div>
+          <span className="text-sm text-gray-500">
+            {blockedUsers.length} user{blockedUsers.length !== 1 ? "s" : ""}
+          </span>
         </div>
 
         {/* Success Message */}

@@ -404,3 +404,103 @@ export function getZodiacFromDate(dateString: string): string | null {
   
   return null;
 }
+
+// ============================================
+// LABEL LOOKUP UTILITIES
+// ============================================
+// Use these functions to get human-readable labels from database values.
+// This ensures consistent display across all UI components.
+
+type OptionType = { value: string; label: string };
+
+/**
+ * Get the human-readable label for any option value.
+ * Falls back to title-cased value with underscores replaced by spaces if not found.
+ * 
+ * @param value - The database value (e.g., "christian_catholic", "long_term_open")
+ * @param optionsArray - The OPTIONS array to search (e.g., RELIGION_OPTIONS)
+ * @returns The label (e.g., "Christian/Catholic", "Long term, open to short")
+ */
+export function getOptionLabel(
+  value: string | null | undefined,
+  optionsArray: readonly OptionType[]
+): string {
+  if (!value) return "";
+  const option = optionsArray.find(opt => opt.value === value);
+  if (option) return option.label;
+  // Fallback: title case with underscores as spaces
+  return value
+    .split("_")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+/**
+ * Pre-configured label getters for common fields.
+ * Import and use directly: getGenderLabel("male") => "Male"
+ */
+export const getGenderLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, GENDER_OPTIONS);
+
+export const getBodyTypeLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, BODY_TYPE_OPTIONS);
+
+export const getMaritalStatusLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, MARITAL_STATUS_OPTIONS);
+
+export const getHasKidsLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, HAS_KIDS_OPTIONS);
+
+export const getWantsKidsLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, WANTS_KIDS_OPTIONS);
+
+export const getSmokingLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, SMOKING_OPTIONS);
+
+export const getDrinkingLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, DRINKING_OPTIONS);
+
+export const getMarijuanaLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, MARIJUANA_OPTIONS);
+
+export const getExerciseLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, EXERCISE_OPTIONS);
+
+export const getDatingIntentionsLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, DATING_INTENTIONS_OPTIONS);
+
+export const getEducationLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, EDUCATION_OPTIONS);
+
+export const getEthnicityLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, ETHNICITY_OPTIONS);
+
+export const getReligionLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, RELIGION_OPTIONS);
+
+export const getPoliticalLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, POLITICAL_OPTIONS);
+
+export const getZodiacLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, ZODIAC_OPTIONS);
+
+export const getPetsLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, PETS_OPTIONS);
+
+/**
+ * Format an array of values to their labels (for multi-select fields like ethnicity).
+ */
+export function getOptionLabels(
+  values: string[] | string | null | undefined,
+  optionsArray: readonly OptionType[]
+): string {
+  if (!values) return "";
+  const valuesArray = Array.isArray(values) ? values : values.split(",").map(v => v.trim());
+  return valuesArray
+    .map(v => getOptionLabel(v, optionsArray))
+    .filter(Boolean)
+    .join(", ");
+}
+
+export const getEthnicityLabels = (values: string[] | string | null | undefined) => 
+  getOptionLabels(values, ETHNICITY_OPTIONS);

@@ -896,36 +896,38 @@ export default function EditProfilePage() {
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Back Button - uses Link for proper semantics */}
-      <Link
-        href="/profile"
-        className="mb-6 inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 rounded-lg"
-      >
-        <ArrowLeft className="w-5 h-5" aria-hidden="true" />
-        <span className="text-sm font-medium">Back to Profile</span>
-      </Link>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-6">
+      {/* Compact Header Bar */}
+      <div className="flex items-center justify-between gap-3 mb-4">
+        {/* Left: Back + Title */}
+        <div className="flex items-center gap-2 min-w-0">
+          <Link
+            href="/profile"
+            className="flex items-center justify-center w-8 h-8 -ml-1 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+            aria-label="Back to profile"
+          >
+            <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+          </Link>
+          <h1 className="text-lg font-semibold text-gray-900">Edit</h1>
+        </div>
 
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>
-          <div className="mt-1">
+        {/* Right: Action Buttons + Status */}
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:block mr-1">
             <SaveStatusIndicator />
           </div>
-        </div>
-        <div className="flex gap-3">
           <Link
             href="/profile/gallery"
-            className="px-4 py-2.5 bg-brand-secondary text-white rounded-lg hover:bg-brand-secondary-dark font-medium transition-all duration-200 shadow-sm hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-secondary focus-visible:ring-offset-2"
+            className="px-3 py-1.5 text-sm font-medium text-brand-secondary border border-brand-secondary rounded-full hover:bg-brand-secondary hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-secondary focus-visible:ring-offset-1"
           >
-            Manage Gallery
+            Gallery
           </Link>
           <button
             onClick={handleSaveAndContinue}
             disabled={saving || saveStatus === "saving"}
-            className="px-6 py-2.5 bg-brand-primary text-white rounded-lg hover:bg-brand-primary-dark font-medium transition-all duration-200 shadow-sm hover:shadow disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            className="px-3 py-1.5 text-sm font-medium text-white bg-brand-primary rounded-full hover:bg-brand-primary-dark transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-1"
           >
-            {saving || saveStatus === "saving" ? "Saving..." : "Save & Continue"}
+            {saving || saveStatus === "saving" ? "Saving..." : "Save"}
           </button>
         </div>
       </div>

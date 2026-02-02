@@ -12,6 +12,19 @@ import {
 import { ReferralCard } from "@/components/profile/ReferralCard";
 import { ShareButton } from "@/components/profile/ShareButton";
 import { VoiceVideoDisplayClient } from "./VoiceVideoDisplayClient";
+import {
+  getEducationLabel,
+  getReligionLabel,
+  getZodiacLabel,
+  getDatingIntentionsLabel,
+  getSmokingLabel,
+  getDrinkingLabel,
+  getExerciseLabel,
+  getWantsKidsLabel,
+  getBodyTypeLabel,
+  getMaritalStatusLabel,
+  getEthnicityLabels,
+} from "@/types";
 
 async function getMyProfile() {
   const supabase = await createClient();
@@ -391,19 +404,19 @@ export default async function MyProfilePage() {
                       <DetailRow label="Height" value={formatHeight(profile.height_inches)} />
                     )}
                     {profile.body_type && (
-                      <DetailRow label="Body Type" value={profile.body_type} />
+                      <DetailRow label="Body Type" value={getBodyTypeLabel(profile.body_type)} />
                     )}
                     {profile.education && (
-                      <DetailRow label="Education" value={profile.education} />
+                      <DetailRow label="Education" value={getEducationLabel(profile.education)} />
                     )}
                     {profile.religion && (
-                      <DetailRow label="Religion" value={profile.religion} />
+                      <DetailRow label="Religion" value={getReligionLabel(profile.religion)} />
                     )}
                     {profile.zodiac_sign && (
-                      <DetailRow label="Zodiac" value={profile.zodiac_sign} />
+                      <DetailRow label="Zodiac" value={getZodiacLabel(profile.zodiac_sign)} />
                     )}
                     {profile.dating_intentions && (
-                      <DetailRow label="Looking For" value={profile.dating_intentions.replace(/_/g, " ")} />
+                      <DetailRow label="Looking For" value={getDatingIntentionsLabel(profile.dating_intentions)} />
                     )}
                   </div>
                 </section>
@@ -414,16 +427,16 @@ export default async function MyProfilePage() {
                     <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 sm:mb-4">Lifestyle</h3>
                     <div className="space-y-2.5 sm:space-y-3">
                       {profile.smoking && (
-                        <DetailRow label="Smoking" value={profile.smoking} />
+                        <DetailRow label="Smoking" value={getSmokingLabel(profile.smoking)} />
                       )}
                       {profile.drinking && (
-                        <DetailRow label="Drinking" value={profile.drinking} />
+                        <DetailRow label="Drinking" value={getDrinkingLabel(profile.drinking)} />
                       )}
                       {profile.exercise && (
-                        <DetailRow label="Exercise" value={profile.exercise} />
+                        <DetailRow label="Exercise" value={getExerciseLabel(profile.exercise)} />
                       )}
                       {profile.wants_kids && (
-                        <DetailRow label="Wants Kids" value={profile.wants_kids.replace(/_/g, " ")} />
+                        <DetailRow label="Wants Kids" value={getWantsKidsLabel(profile.wants_kids)} />
                       )}
                     </div>
                   </section>

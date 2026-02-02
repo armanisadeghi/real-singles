@@ -126,17 +126,18 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Back Button - uses Link for proper semantics */}
-      <Link
-        href="/profile"
-        className="mb-6 inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 rounded-lg"
-      >
-        <ArrowLeft className="w-5 h-5" aria-hidden="true" />
-        <span className="text-sm font-medium">Back to Profile</span>
-      </Link>
-
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-6">
+      {/* Compact Header */}
+      <div className="flex items-center gap-2 mb-4">
+        <Link
+          href="/profile"
+          className="flex items-center justify-center w-8 h-8 -ml-1 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+          aria-label="Back to profile"
+        >
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+        </Link>
+        <h1 className="text-lg font-semibold text-gray-900">Settings</h1>
+      </div>
 
       <div className="space-y-6">
         {/* Quick Links */}

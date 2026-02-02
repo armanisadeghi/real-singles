@@ -128,21 +128,17 @@ export default function PrivacySettingsPage() {
 
   return (
     <div className="min-h-dvh bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-6">
+        {/* Compact Header */}
+        <div className="flex items-center gap-2 mb-4">
           <Link
             href="/settings"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="flex items-center justify-center w-8 h-8 -ml-1 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            aria-label="Back to settings"
           >
-            <ArrowLeft className="w-6 h-6" />
+            <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Privacy Settings</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Control what others can see about you
-            </p>
-          </div>
+          <h1 className="text-lg font-semibold text-gray-900">Privacy</h1>
         </div>
 
         {/* Success Message */}

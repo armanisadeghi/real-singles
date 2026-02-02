@@ -30,6 +30,18 @@ import {
 } from "lucide-react";
 import { cn, calculateAge, formatHeight } from "@/lib/utils";
 import { VoiceVideoDisplay } from "@/components/profile";
+import {
+  getBodyTypeLabel,
+  getEducationLabel,
+  getReligionLabel,
+  getDatingIntentionsLabel,
+  getSmokingLabel,
+  getDrinkingLabel,
+  getMarijuanaLabel,
+  getHasKidsLabel,
+  getWantsKidsLabel,
+  getEthnicityLabels,
+} from "@/types";
 
 interface ProfileData {
   ID: string;
@@ -762,21 +774,21 @@ export default function OtherProfilePage() {
                   <InfoRow
                     icon={<Sparkles className="w-4 h-4" />}
                     label="Body Type"
-                    value={profile.BodyType}
+                    value={getBodyTypeLabel(profile.BodyType)}
                   />
                 )}
                 {profile.Ethnicity?.length > 0 && (
                   <InfoRow
                     icon={<Sparkles className="w-4 h-4" />}
                     label="Ethnicity"
-                    value={Array.isArray(profile.Ethnicity) ? profile.Ethnicity.join(", ") : profile.Ethnicity}
+                    value={getEthnicityLabels(profile.Ethnicity)}
                   />
                 )}
                 {profile.DatingIntentions && (
                   <InfoRow
                     icon={<Heart className="w-4 h-4" />}
                     label="Looking For"
-                    value={profile.DatingIntentions.replace(/_/g, " ")}
+                    value={getDatingIntentionsLabel(profile.DatingIntentions)}
                   />
                 )}
               </div>
@@ -792,35 +804,35 @@ export default function OtherProfilePage() {
                   <InfoRow
                     icon={<GraduationCap className="w-4 h-4" />}
                     label="Education"
-                    value={profile.Education}
+                    value={getEducationLabel(profile.Education)}
                   />
                 )}
                 {profile.Religion && (
                   <InfoRow
                     icon={<Church className="w-4 h-4" />}
                     label="Religion"
-                    value={profile.Religion}
+                    value={getReligionLabel(profile.Religion)}
                   />
                 )}
                 {profile.Smoking && (
                   <InfoRow
                     icon={<Cigarette className="w-4 h-4" />}
                     label="Smoking"
-                    value={profile.Smoking}
+                    value={getSmokingLabel(profile.Smoking)}
                   />
                 )}
                 {profile.Drinks && (
                   <InfoRow
                     icon={<Wine className="w-4 h-4" />}
                     label="Drinking"
-                    value={profile.Drinks}
+                    value={getDrinkingLabel(profile.Drinks)}
                   />
                 )}
                 {profile.Marijuana && (
                   <InfoRow
                     icon={<Cannabis className="w-4 h-4" />}
                     label="Marijuana"
-                    value={profile.Marijuana}
+                    value={getMarijuanaLabel(profile.Marijuana)}
                   />
                 )}
               </div>
@@ -834,14 +846,14 @@ export default function OtherProfilePage() {
                   <InfoRow
                     icon={<Baby className="w-4 h-4" />}
                     label="Has Children"
-                    value={profile.HaveChild}
+                    value={getHasKidsLabel(profile.HaveChild)}
                   />
                 )}
                 {profile.WantChild && (
                   <InfoRow
                     icon={<Baby className="w-4 h-4" />}
                     label="Wants Children"
-                    value={profile.WantChild}
+                    value={getWantsKidsLabel(profile.WantChild)}
                   />
                 )}
                 {profile.Pets && (

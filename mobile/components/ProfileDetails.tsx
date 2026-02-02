@@ -1,4 +1,15 @@
 import { icons } from "@/constants/icons";
+import {
+  getBodyTypeLabel,
+  getEducationLabel,
+  getReligionLabel,
+  getEthnicityLabels,
+  getSmokingLabel,
+  getDrinkingLabel,
+  getMarijuanaLabel,
+  getHasKidsLabel,
+  getWantsKidsLabel,
+} from "@/constants/options";
 import { saveLink, toggleFavorite } from "@/lib/api";
 import { getProfileLink, APP_NAME } from "@/lib/config";
 import { User } from "@/types";
@@ -405,8 +416,8 @@ console.log("profile?.Height",profile?.Height);
               <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                 Body Type
               </Text>
-              <Text className="text-dark leading-5 text-xs font-normal capitalize">
-                {profile.BodyType.replace(/_/g, " ")}
+              <Text className="text-dark leading-5 text-xs font-normal">
+                {getBodyTypeLabel(profile.BodyType)}
               </Text>
             </View>
           )}
@@ -415,8 +426,8 @@ console.log("profile?.Height",profile?.Height);
               <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                 Education
               </Text>
-              <Text className="text-dark leading-5 text-xs font-normal capitalize">
-                {profile.Education.replace(/_/g, " ")}
+              <Text className="text-dark leading-5 text-xs font-normal">
+                {getEducationLabel(profile.Education)}
               </Text>
             </View>
           )}
@@ -425,8 +436,8 @@ console.log("profile?.Height",profile?.Height);
               <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                 Religion
               </Text>
-              <Text className="text-dark leading-5 text-xs font-normal capitalize">
-                {profile.Religion}
+              <Text className="text-dark leading-5 text-xs font-normal">
+                {getReligionLabel(profile.Religion)}
               </Text>
             </View>
           )}
@@ -435,10 +446,8 @@ console.log("profile?.Height",profile?.Height);
               <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                 Ethnicity
               </Text>
-              <Text className="text-dark leading-5 text-xs font-normal capitalize">
-                {Array.isArray(profile.Ethnicity) 
-                  ? profile.Ethnicity.map(e => e.replace(/_/g, " ")).join(", ")
-                  : profile.Ethnicity.replace(/_/g, " ")}
+              <Text className="text-dark leading-5 text-xs font-normal">
+                {getEthnicityLabels(profile.Ethnicity)}
               </Text>
             </View>
           )}
@@ -457,8 +466,8 @@ console.log("profile?.Height",profile?.Height);
                 <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                   Smoking
                 </Text>
-                <Text className="text-dark leading-5 text-xs font-normal capitalize">
-                  {profile.Smoking.replace(/_/g, " ")}
+                <Text className="text-dark leading-5 text-xs font-normal">
+                  {getSmokingLabel(profile.Smoking)}
                 </Text>
               </View>
             )}
@@ -467,8 +476,8 @@ console.log("profile?.Height",profile?.Height);
                 <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                   Drinking
                 </Text>
-                <Text className="text-dark leading-5 text-xs font-normal capitalize">
-                  {profile.Drinks.replace(/_/g, " ")}
+                <Text className="text-dark leading-5 text-xs font-normal">
+                  {getDrinkingLabel(profile.Drinks)}
                 </Text>
               </View>
             )}
@@ -477,8 +486,8 @@ console.log("profile?.Height",profile?.Height);
                 <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                   Marijuana
                 </Text>
-                <Text className="text-dark leading-5 text-xs font-normal capitalize">
-                  {profile.Marijuana.replace(/_/g, " ")}
+                <Text className="text-dark leading-5 text-xs font-normal">
+                  {getMarijuanaLabel(profile.Marijuana)}
                 </Text>
               </View>
             )}
@@ -487,8 +496,8 @@ console.log("profile?.Height",profile?.Height);
                 <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                   Has Kids
                 </Text>
-                <Text className="text-dark leading-5 text-xs font-normal capitalize">
-                  {profile.HaveChild.replace(/_/g, " ")}
+                <Text className="text-dark leading-5 text-xs font-normal">
+                  {getHasKidsLabel(profile.HaveChild)}
                 </Text>
               </View>
             )}
@@ -497,8 +506,8 @@ console.log("profile?.Height",profile?.Height);
                 <Text className="text-xs leading-5 font-normal" style={{ color: themedColors.secondaryText }}>
                   Wants Kids
                 </Text>
-                <Text className="text-dark leading-5 text-xs font-normal capitalize">
-                  {profile.WantChild.replace(/_/g, " ")}
+                <Text className="text-dark leading-5 text-xs font-normal">
+                  {getWantsKidsLabel(profile.WantChild)}
                 </Text>
               </View>
             )}
