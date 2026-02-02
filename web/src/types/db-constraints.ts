@@ -113,12 +113,13 @@ export type DbExercise =
 
 /**
  * Dating Intentions - Optional
- * @constraint profiles_dating_intentions_check (migration: 00023)
+ * @constraint profiles_dating_intentions_check (migration: 00024)
  */
 export type DbDatingIntentions = 
-  | "life_partner" 
   | "long_term" 
   | "long_term_open" 
+  | "short_term_open"
+  | "short_term"
   | "figuring_out";
 
 // ============================================
@@ -156,22 +157,23 @@ export type DbEthnicity =
 
 /**
  * Religion - No DB constraint
- * Split Christian/LDS/Protestant into separate options
+ * Christian denominations consolidated with prefix (migration: 00024)
  */
 export type DbReligion = 
   | "adventist" 
   | "agnostic" 
   | "atheist" 
   | "buddhist" 
-  | "catholic" 
-  | "christian"
-  | "lds"
-  | "protestant"
+  | "christian_catholic" 
+  | "christian_lds"
+  | "christian_protestant"
+  | "christian_orthodox"
   | "hindu" 
   | "jewish" 
   | "muslim" 
   | "spiritual" 
-  | "other";
+  | "other"
+  | "prefer_not_to_say";
 
 /**
  * Political Views - No DB constraint

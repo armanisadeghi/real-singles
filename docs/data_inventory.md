@@ -355,18 +355,18 @@
 ### 2.9 dating_intentions
 - **Purpose:** User's relationship goals
 - **DB Column:** `profiles.dating_intentions`
-- **DB Type:** TEXT CHECK (dating_intentions IN ('life_partner', 'long_term', 'long_term_open', 'figuring_out', 'prefer_not_to_say'))
+- **DB Type:** TEXT CHECK (dating_intentions IN ('long_term', 'long_term_open', 'short_term_open', 'short_term', 'figuring_out'))
 - **API Field:** `DatingIntentions`
 - **Editable:** Yes
-- **Options:**
+- **Options:** (updated migration 00024)
   | Value | Display |
   |-------|---------|
-  | life_partner | Life Partner |
-  | long_term | Long-term Relationship |
-  | long_term_open | Long-term, Open to Short |
-  | figuring_out | Figuring Out My Goals |
-  | prefer_not_to_say | Prefer not to say |
-- **Status:** `PARTIAL` - Missing from mobile UI
+  | long_term | Long term |
+  | long_term_open | Long term, open to short |
+  | short_term_open | Short term, open to long |
+  | short_term | Short term |
+  | figuring_out | Still figuring it out |
+- **Status:** `FULL`
 
 | Layer | Status |
 |-------|--------|
@@ -515,24 +515,26 @@
 - **DB Type:** TEXT
 - **API Field:** `Religion`
 - **Editable:** Yes
-- **Options:**
+- **Options:** (updated migration 00024)
   | Value | Display |
   |-------|---------|
   | adventist | Adventist |
   | agnostic | Agnostic |
   | atheist | Atheist |
   | buddhist | Buddhist |
-  | catholic | Catholic |
-  | christian | Christian/LDS/Protestant |
+  | christian_catholic | Christian/Catholic |
+  | christian_lds | Christian/LDS |
+  | christian_protestant | Christian/Protestant |
+  | christian_orthodox | Christian/Orthodox |
   | hindu | Hindu |
   | jewish | Jewish |
-  | muslim | Muslim/Islam |
-  | spiritual | Spiritual but not religious |
+  | muslim | Muslim |
+  | spiritual | Spiritual |
   | other | Other |
   | prefer_not_to_say | Prefer not to say |
 - **Status:** `FULL`
 
-**Note:** Single select (not multi-select).
+**Note:** Single select (not multi-select). Christian denominations consolidated with prefix.
 
 ---
 

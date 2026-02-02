@@ -136,22 +136,24 @@ export const ETHNICITY_OPTIONS = [
 ];
 
 /**
- * Religion options - split Christian/LDS/Protestant into separate options
+ * Religion options - Christian denominations consolidated with prefix
+ * @updated migration: 00024_update_options.sql
  */
 export const RELIGION_OPTIONS = [
   { label: "Adventist", value: "adventist" },
   { label: "Agnostic", value: "agnostic" },
   { label: "Atheist", value: "atheist" },
   { label: "Buddhist", value: "buddhist" },
-  { label: "Catholic", value: "catholic" },
-  { label: "Christian", value: "christian" },
-  { label: "LDS (Mormon)", value: "lds" },
-  { label: "Protestant", value: "protestant" },
+  { label: "Christian/Catholic", value: "christian_catholic" },
+  { label: "Christian/LDS", value: "christian_lds" },
+  { label: "Christian/Protestant", value: "christian_protestant" },
+  { label: "Christian/Orthodox", value: "christian_orthodox" },
   { label: "Hindu", value: "hindu" },
   { label: "Jewish", value: "jewish" },
   { label: "Muslim", value: "muslim" },
-  { label: "Spiritual but not religious", value: "spiritual" },
+  { label: "Spiritual", value: "spiritual" },
   { label: "Other", value: "other" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
 // Political views options
@@ -326,11 +328,13 @@ export const LOOKING_FOR_OPTIONS = [
 ];
 
 // Dating intentions - critical for serious-dater positioning (The League, Hinge model)
+// @updated migration: 00024_update_options.sql
 export const DATING_INTENTIONS_OPTIONS = [
-  { label: "Life Partner", value: "life_partner" },
-  { label: "Long-term Relationship", value: "long_term" },
-  { label: "Long-term, Open to Short", value: "long_term_open" },
-  { label: "Figuring Out My Goals", value: "figuring_out" },
+  { label: "Long term", value: "long_term" },
+  { label: "Long term, open to short", value: "long_term_open" },
+  { label: "Short term, open to long", value: "short_term_open" },
+  { label: "Short term", value: "short_term" },
+  { label: "Still figuring it out", value: "figuring_out" },
 ];
 
 // Event type options - matches database CHECK constraint

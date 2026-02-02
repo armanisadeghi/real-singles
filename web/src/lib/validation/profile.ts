@@ -84,8 +84,8 @@ const exerciseValues: [DbExercise, ...DbExercise[]] = ["never", "sometimes", "re
 export const ExerciseSchema = z.enum(exerciseValues);
 export type Exercise = z.infer<typeof ExerciseSchema>;
 
-// Dating Intentions - CHECK constraint (no prefer_not_to_say)
-const datingIntentionsValues: [DbDatingIntentions, ...DbDatingIntentions[]] = ["life_partner", "long_term", "long_term_open", "figuring_out"];
+// Dating Intentions - CHECK constraint (migration: 00024)
+const datingIntentionsValues: [DbDatingIntentions, ...DbDatingIntentions[]] = ["long_term", "long_term_open", "short_term_open", "short_term", "figuring_out"];
 export const DatingIntentionsSchema = z.enum(datingIntentionsValues);
 export type DatingIntentions = z.infer<typeof DatingIntentionsSchema>;
 
@@ -103,8 +103,8 @@ const ethnicityValues: [DbEthnicity, ...DbEthnicity[]] = ["white", "latino", "bl
 export const EthnicitySchema = z.enum(ethnicityValues);
 export type Ethnicity = z.infer<typeof EthnicitySchema>;
 
-// Religion - no DB constraint (split christian, no prefer_not_to_say)
-const religionValues: [DbReligion, ...DbReligion[]] = ["adventist", "agnostic", "atheist", "buddhist", "catholic", "christian", "lds", "protestant", "hindu", "jewish", "muslim", "spiritual", "other"];
+// Religion - no DB constraint (Christian denominations consolidated, migration: 00024)
+const religionValues: [DbReligion, ...DbReligion[]] = ["adventist", "agnostic", "atheist", "buddhist", "christian_catholic", "christian_lds", "christian_protestant", "christian_orthodox", "hindu", "jewish", "muslim", "spiritual", "other", "prefer_not_to_say"];
 export const ReligionSchema = z.enum(religionValues);
 export type Religion = z.infer<typeof ReligionSchema>;
 

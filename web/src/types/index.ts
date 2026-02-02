@@ -154,12 +154,14 @@ export const EXERCISE_OPTIONS: readonly TypedOption<DbExercise>[] = [
 /**
  * Dating intentions - critical for serious-dater positioning (The League, Hinge model)
  * @constraint DbDatingIntentions - see db-constraints.ts
+ * @updated migration: 00024_update_options.sql
  */
 export const DATING_INTENTIONS_OPTIONS: readonly TypedOption<DbDatingIntentions>[] = [
-  { value: "life_partner", label: "Life Partner" },
-  { value: "long_term", label: "Long-term Relationship" },
-  { value: "long_term_open", label: "Long-term, Open to Short" },
-  { value: "figuring_out", label: "Figuring Out My Goals" },
+  { value: "long_term", label: "Long term" },
+  { value: "long_term_open", label: "Long term, open to short" },
+  { value: "short_term_open", label: "Short term, open to long" },
+  { value: "short_term", label: "Short term" },
+  { value: "figuring_out", label: "Still figuring it out" },
 ] as const;
 
 /** @constraint DbEducation - see db-constraints.ts */
@@ -190,23 +192,25 @@ export const ETHNICITY_OPTIONS: readonly TypedOption<DbEthnicity>[] = [
 ] as const;
 
 /**
- * Religion options - split Christian/LDS/Protestant into separate options
+ * Religion options - Christian denominations consolidated with prefix
  * @constraint DbReligion - see db-constraints.ts
+ * @updated migration: 00024_update_options.sql
  */
 export const RELIGION_OPTIONS: readonly TypedOption<DbReligion>[] = [
   { value: "adventist", label: "Adventist" },
   { value: "agnostic", label: "Agnostic" },
   { value: "atheist", label: "Atheist" },
   { value: "buddhist", label: "Buddhist" },
-  { value: "catholic", label: "Catholic" },
-  { value: "christian", label: "Christian" },
-  { value: "lds", label: "LDS (Mormon)" },
-  { value: "protestant", label: "Protestant" },
+  { value: "christian_catholic", label: "Christian/Catholic" },
+  { value: "christian_lds", label: "Christian/LDS" },
+  { value: "christian_protestant", label: "Christian/Protestant" },
+  { value: "christian_orthodox", label: "Christian/Orthodox" },
   { value: "hindu", label: "Hindu" },
   { value: "jewish", label: "Jewish" },
   { value: "muslim", label: "Muslim" },
-  { value: "spiritual", label: "Spiritual but not religious" },
+  { value: "spiritual", label: "Spiritual" },
   { value: "other", label: "Other" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ] as const;
 
 /** @constraint DbPolitical - see db-constraints.ts */

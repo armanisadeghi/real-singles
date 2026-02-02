@@ -925,6 +925,7 @@ export type Database = {
           gender: string | null
           has_kids: string | null
           height_inches: number | null
+          hometown: string | null
           id: string
           id_document_url: string | null
           id_verified_at: string | null
@@ -1000,6 +1001,7 @@ export type Database = {
           gender?: string | null
           has_kids?: string | null
           height_inches?: number | null
+          hometown?: string | null
           id?: string
           id_document_url?: string | null
           id_verified_at?: string | null
@@ -1075,6 +1077,7 @@ export type Database = {
           gender?: string | null
           has_kids?: string | null
           height_inches?: number | null
+          hometown?: string | null
           id?: string
           id_document_url?: string | null
           id_verified_at?: string | null
@@ -2024,6 +2027,10 @@ export type Database = {
       gettransactionid: { Args: never; Returns: unknown }
       has_unmatch_history: {
         Args: { p_target_user_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_conversation_participant: {
+        Args: { p_conversation_id: string; p_user_id: string }
         Returns: boolean
       }
       longtransactionsenabled: { Args: never; Returns: boolean }

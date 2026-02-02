@@ -179,7 +179,8 @@ const LAST_NAMES = [
 // Options arrays
 const BODY_TYPES = ["slim", "athletic", "average", "muscular", "curvy", "plus_size"];
 const ETHNICITIES = ["white", "latino", "black", "asian", "mixed", "middle_eastern", "east_indian"];
-const RELIGIONS = ["christian", "lds", "protestant", "catholic", "jewish", "muslim", "buddhist", "hindu", "agnostic", "atheist", "spiritual", "adventist", "other"];
+// Religion options - Christian denominations consolidated with prefix (migration: 00024)
+const RELIGIONS = ["christian_catholic", "christian_lds", "christian_protestant", "christian_orthodox", "jewish", "muslim", "buddhist", "hindu", "agnostic", "atheist", "spiritual", "adventist", "other", "prefer_not_to_say"];
 const POLITICAL_VIEWS = ["conservative", "liberal", "moderate", "libertarian", "undecided", "not_political"];
 const EDUCATION_LEVELS = ["high_school", "trade_school", "some_college", "associate", "bachelor", "graduate", "phd"];
 const MARITAL_STATUSES = ["never_married", "divorced", "separated", "widowed"];

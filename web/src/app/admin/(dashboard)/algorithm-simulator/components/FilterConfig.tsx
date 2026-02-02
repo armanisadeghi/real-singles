@@ -29,7 +29,8 @@ interface FilterConfigProps {
 
 const BODY_TYPES = ["slim", "athletic", "average", "muscular", "curvy", "plus_size"];
 const ETHNICITIES = ["white", "latino", "black", "asian", "native_american", "east_indian", "pacific_islander", "middle_eastern", "armenian", "mixed", "other"];
-const RELIGIONS = ["adventist", "agnostic", "atheist", "buddhist", "catholic", "christian", "lds", "protestant", "hindu", "jewish", "muslim", "spiritual", "other"];
+// Religion options - Christian denominations consolidated with prefix (migration: 00024)
+const RELIGIONS = ["adventist", "agnostic", "atheist", "buddhist", "christian_catholic", "christian_lds", "christian_protestant", "christian_orthodox", "hindu", "jewish", "muslim", "spiritual", "other", "prefer_not_to_say"];
 const EDUCATION_LEVELS = ["high_school", "trade_school", "some_college", "associate", "bachelor", "graduate", "phd"];
 const ZODIAC_SIGNS = ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"];
 const SMOKING_OPTIONS = ["never", "occasionally", "daily", "trying_to_quit"];
