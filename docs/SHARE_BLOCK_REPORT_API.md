@@ -1,6 +1,65 @@
-# Share, Block, and Report APIs
+# Share, Block, Report, and Undo APIs
 
-Quick reference for UI integration of share, block, and report functionality.
+Quick reference for UI integration of share, block, report, and undo functionality.
+
+---
+
+## Undo API
+
+### Check Undo Availability
+```
+GET /api/matches/undo
+```
+**Auth:** Required
+
+**Response (action available):**
+```json
+{
+  "success": true,
+  "can_undo": true,
+  "last_action": {
+    "action": "like",
+    "target_user_id": "uuid",
+    "created_at": "2025-01-15T10:30:00Z",
+    "seconds_remaining": 245
+  }
+}
+```
+
+**Response (no action):**
+```json
+{
+  "success": true,
+  "can_undo": false,
+  "msg": "No recent action to undo"
+}
+```
+
+### Undo Last Action
+```
+POST /api/matches/undo
+Content-Type: application/json
+
+{
+  "target_user_id": "uuid"
+}
+```
+**Auth:** Required
+
+**Response:**
+```json
+{
+  "success": true,
+  "undone_action": "like",
+  "target_user_id": "uuid",
+  "msg": "Successfully undid like action"
+}
+```
+
+**Constraints:**
+- Actions can only be undone within **5 minutes**
+- Mutual matches **cannot** be undone
+- Only your own actions can be undone
 
 ---
 
@@ -204,14 +263,52 @@ GET /api/public/profile/{user_id}
 3. Use native share sheet if available (`navigator.share`)
 4. Fallback: copy to clipboard with toast
 
+### Undo Flow
+1. User takes action (like/pass/super_like) on profile X
+2. Action is recorded in localStorage via `useMatchUndo` hook
+3. User navigates to next profile
+4. Undo button shows active state with countdown (5 min window, shows seconds when <30s)
+5. User clicks undo → API deletes the match record
+6. Navigate to `/discover/profile/{target_user_id}` for a fresh start
+
 ### Existing UI Components
 - `DiscoveryProfileView.tsx` already has report modal with predefined reasons
+- `DiscoveryProfileView.tsx` has undo button with timer indicator
 - Settings > Blocked Users page can use `GET /api/blocks` for list
 - Admin reports page at `/admin/reports` for moderation
+
+### Client-Side Hook
+```typescript
+import { useMatchUndo } from "@/hooks/useMatchUndo";
+
+const { canUndo, secondsRemaining, lastAction, recordAction, performUndo } = useMatchUndo();
+
+// Record after successful action
+if (result.success && !result.is_mutual) {
+  recordAction(targetUserId, userName, "like");
+}
+
+// Perform undo
+const result = await performUndo();
+if (result.success) {
+  router.push(`/discover/profile/${result.targetUserId}`);
+}
+```
 
 ---
 
 ## Database Tables
+
+### matches (for undo)
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| user_id | uuid | User who took the action |
+| target_user_id | uuid | User action was taken on |
+| action | text | like/pass/super_like |
+| created_at | timestamp | When action was taken |
+
+*Note: Undo deletes the match record. Only actions within 5 minutes can be undone.*
 
 ### blocks
 | Column | Type | Description |
