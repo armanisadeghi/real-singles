@@ -9,6 +9,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { DiscoveryProfileView } from "@/components/discovery/DiscoveryProfileView";
+import { useMatchUndo } from "@/hooks/useMatchUndo";
 
 interface Profile {
   id: string;
@@ -68,6 +69,9 @@ export default function DiscoveryProfilePage() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Undo hook for tracking and undoing actions
+  const { canUndo, secondsRemaining, lastAction, recordAction, performUndo } = useMatchUndo();
 
   // Fetch profile data
   useEffect(() => {
@@ -136,15 +140,27 @@ export default function DiscoveryProfilePage() {
     }
   }, [userId]);
 
-  // Action handlers
+  // Get the display name for recording actions
+  const getDisplayName = useCallback(() => {
+    return profile?.first_name || profile?.user?.display_name || "User";
+  }, [profile]);
+
+  // Action handlers - now record actions for undo
   const handleLike = useCallback(async (targetUserId: string) => {
     const response = await fetch("/api/matches", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ target_user_id: targetUserId, action: "like" }),
     });
-    return response.json();
-  }, []);
+    const result = await response.json();
+    
+    // Record for undo (only if not a mutual match - can't undo mutual matches)
+    if (result.success && !result.is_mutual) {
+      recordAction(targetUserId, getDisplayName(), "like");
+    }
+    
+    return result;
+  }, [recordAction, getDisplayName]);
 
   const handlePass = useCallback(async (targetUserId: string) => {
     const response = await fetch("/api/matches", {
@@ -152,8 +168,15 @@ export default function DiscoveryProfilePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ target_user_id: targetUserId, action: "pass" }),
     });
-    return response.json();
-  }, []);
+    const result = await response.json();
+    
+    // Record for undo
+    if (result.success) {
+      recordAction(targetUserId, getDisplayName(), "pass");
+    }
+    
+    return result;
+  }, [recordAction, getDisplayName]);
 
   const handleSuperLike = useCallback(async (targetUserId: string) => {
     const response = await fetch("/api/matches", {
@@ -161,8 +184,15 @@ export default function DiscoveryProfilePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ target_user_id: targetUserId, action: "super_like" }),
     });
-    return response.json();
-  }, []);
+    const result = await response.json();
+    
+    // Record for undo (only if not a mutual match)
+    if (result.success && !result.is_mutual) {
+      recordAction(targetUserId, getDisplayName(), "super_like");
+    }
+    
+    return result;
+  }, [recordAction, getDisplayName]);
 
   const handleReport = useCallback(async (targetUserId: string, reason: string) => {
     const response = await fetch("/api/reports", {
@@ -224,6 +254,12 @@ export default function DiscoveryProfilePage() {
       onReport={handleReport}
       onBlock={handleBlock}
       onClose={handleClose}
+      undoState={{
+        canUndo,
+        secondsRemaining,
+        targetUserName: lastAction?.targetUserName,
+      }}
+      onUndo={performUndo}
     />
   );
 }

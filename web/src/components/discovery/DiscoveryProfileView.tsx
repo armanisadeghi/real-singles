@@ -81,6 +81,15 @@ interface MatchActionResult {
   msg?: string;
 }
 
+interface UndoState {
+  /** Whether undo is available */
+  canUndo: boolean;
+  /** Seconds remaining before undo expires */
+  secondsRemaining: number;
+  /** Name of the user whose action can be undone */
+  targetUserName?: string;
+}
+
 interface DiscoveryProfileViewProps {
   profile: Profile;
   gallery?: GalleryItem[];
@@ -94,6 +103,10 @@ interface DiscoveryProfileViewProps {
   onReport?: (userId: string, reason: string) => Promise<{ success: boolean; msg?: string }>;
   onBlock?: (userId: string) => Promise<{ success: boolean; msg?: string }>;
   onClose?: () => void;
+  /** Undo state - shows if undo is available for a previous action */
+  undoState?: UndoState;
+  /** Handler for undo action - returns the target user ID to navigate to */
+  onUndo?: () => Promise<{ success: boolean; targetUserId?: string; error?: string }>;
 }
 
 const REPORT_REASONS = [
@@ -145,6 +158,8 @@ export function DiscoveryProfileView({
   onReport,
   onBlock,
   onClose,
+  undoState,
+  onUndo,
 }: DiscoveryProfileViewProps) {
   const router = useRouter();
   const toast = useToast();
@@ -160,6 +175,37 @@ export function DiscoveryProfileView({
   // Match celebration state
   const [showMatchCelebration, setShowMatchCelebration] = useState(false);
   const [matchConversationId, setMatchConversationId] = useState<string | null>(null);
+
+  // Undo handler
+  const handleUndo = useCallback(async () => {
+    if (!onUndo || !undoState?.canUndo) {
+      toast.info("No recent action to undo");
+      return;
+    }
+
+    setActionLoading("undo");
+    triggerHaptic("medium");
+
+    try {
+      const result = await onUndo();
+      
+      if (result.success && result.targetUserId) {
+        toast.success(`Undid action on ${undoState.targetUserName || "previous profile"}`);
+        triggerHaptic("success");
+        // Navigate back to the profile
+        router.push(`/discover/profile/${result.targetUserId}`);
+      } else {
+        toast.error(result.error || "Failed to undo");
+        triggerHaptic("error");
+      }
+    } catch (error) {
+      console.error("Undo failed:", error);
+      toast.error("Failed to undo. Please try again.");
+      triggerHaptic("error");
+    } finally {
+      setActionLoading(null);
+    }
+  }, [onUndo, undoState, toast, router]);
 
   // Get all images - filter out primary from gallery since it's already added as profile_image_url
   const images = [
@@ -450,26 +496,21 @@ export function DiscoveryProfileView({
               )}
             </button>
 
-            {/* 
-             * UNDO BUTTON (Desktop)
-             * TODO: Implement undo functionality - see mobile action bar comments for full implementation plan
-             */}
+            {/* Undo Button (Desktop) */}
             <button
-              onClick={() => {
-                console.log("[UNDO] Undo functionality not yet implemented");
-                console.log("[UNDO] This should undo the last like/pass action");
-                toast.info("Undo feature coming soon!");
-              }}
-              disabled={actionLoading !== null}
+              onClick={handleUndo}
+              disabled={actionLoading !== null || !undoState?.canUndo}
+              title={undoState?.canUndo ? `Undo (${undoState.secondsRemaining}s)` : "No action to undo"}
               className={cn(
-                "w-11 h-11 rounded-full flex items-center justify-center",
-                "bg-white text-gray-600 border-2 border-gray-300",
+                "w-11 h-11 rounded-full flex items-center justify-center relative",
+                "bg-white border-2",
                 "shadow-sm",
                 // Smooth transitions for all properties
                 "transition-all duration-200 ease-out",
-                // Hover state - scale up, elevate shadow, shift colors
-                "hover:scale-110 hover:border-gray-400 hover:bg-gray-50",
-                "hover:shadow-lg hover:shadow-gray-200/50 hover:text-gray-700",
+                // Conditional styling based on undo availability
+                undoState?.canUndo
+                  ? "text-amber-600 border-amber-300 hover:scale-110 hover:border-amber-400 hover:bg-amber-50 hover:shadow-lg hover:shadow-amber-200/50"
+                  : "text-gray-400 border-gray-200 cursor-not-allowed",
                 // Active/click state
                 "active:scale-95 active:shadow-sm",
                 // Disabled state
@@ -477,7 +518,17 @@ export function DiscoveryProfileView({
               )}
               aria-label="Undo last action"
             >
-              <Undo2 className="w-4 h-4" />
+              {actionLoading === "undo" ? (
+                <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Undo2 className="w-4 h-4" />
+              )}
+              {/* Timer indicator */}
+              {undoState?.canUndo && undoState.secondsRemaining <= 30 && (
+                <span className="absolute -bottom-1 -right-1 text-[10px] bg-amber-500 text-white rounded-full w-4 h-4 flex items-center justify-center font-medium">
+                  {undoState.secondsRemaining}
+                </span>
+              )}
             </button>
 
             {/* Super Like Button (Star) */}
@@ -642,42 +693,21 @@ export function DiscoveryProfileView({
             )}
           </button>
 
-          {/* 
-           * UNDO BUTTON
-           * TODO: Implement undo functionality
-           * 
-           * This button should undo the last like/pass action the user took.
-           * Implementation requirements:
-           * 1. Store the last action (like/pass/super_like) and target user ID in state or context
-           * 2. Create an API endpoint: DELETE /api/matches/:targetUserId or POST /api/matches/undo
-           * 3. The API should remove the most recent match_action record for the current user
-           * 4. After undo, navigate back to that profile or show it again in the discovery feed
-           * 5. Consider adding a time limit (e.g., can only undo within 5 seconds)
-           * 6. Consider limiting undo usage (e.g., 3 undos per day for free users)
-           * 
-           * Related files that may need updates:
-           * - web/src/app/api/matches/route.ts (add undo endpoint)
-           * - mobile/app/discover/profile/[id].tsx (add undo to mobile)
-           * - Discovery feed pages to track last action
-           */}
+          {/* Undo Button (Mobile) */}
           <button
             onTouchStart={() => triggerHaptic('light')}
-            onClick={() => {
-              triggerHaptic('medium');
-              // TODO: Implement undo functionality - see comments above for implementation plan
-              console.log("[UNDO] Undo functionality not yet implemented");
-              console.log("[UNDO] This should undo the last like/pass action");
-              toast.info("Undo feature coming soon!");
-            }}
-            disabled={actionLoading !== null}
+            onClick={handleUndo}
+            disabled={actionLoading !== null || !undoState?.canUndo}
             className={cn(
-              "w-12 h-12 rounded-full flex items-center justify-center",
-              "bg-white text-gray-600 border-2 border-gray-300",
+              "w-12 h-12 rounded-full flex items-center justify-center relative",
+              "bg-white border-2",
               "shadow-lg",
               // Touch-optimized transitions
               "transition-all duration-150 ease-out",
-              // Active/pressed state
-              "active:scale-90 active:bg-gray-100 active:border-gray-400 active:shadow-md",
+              // Conditional styling based on undo availability
+              undoState?.canUndo
+                ? "text-amber-600 border-amber-300 active:scale-90 active:bg-amber-50 active:border-amber-400 active:shadow-md"
+                : "text-gray-400 border-gray-200",
               // Disabled state
               "disabled:opacity-50 disabled:active:scale-100",
               // Prevent text selection and optimize touch
@@ -685,7 +715,17 @@ export function DiscoveryProfileView({
             )}
             aria-label="Undo last action"
           >
-            <Undo2 className="w-5 h-5 transition-transform active:scale-110" />
+            {actionLoading === "undo" ? (
+              <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Undo2 className="w-5 h-5 transition-transform active:scale-110" />
+            )}
+            {/* Timer indicator */}
+            {undoState?.canUndo && undoState.secondsRemaining <= 30 && (
+              <span className="absolute -bottom-0.5 -right-0.5 text-[10px] bg-amber-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                {undoState.secondsRemaining}
+              </span>
+            )}
           </button>
 
           {/* Super Like Button (Star) */}
