@@ -4,10 +4,10 @@
  * ActionMenu Component
  * 
  * iOS 16-style action sheet / action menu for contextual actions.
- * Displays as a bottom sheet on mobile and a centered modal on desktop.
+ * Displays as a bottom sheet on mobile and a dropdown on desktop.
  */
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
@@ -34,6 +34,8 @@ interface ActionMenuProps {
   title?: string;
   /** Optional message below the title */
   message?: string;
+  /** Position for desktop dropdown (defaults to top-right) */
+  anchorPosition?: { top: number; right: number } | null;
 }
 
 export function ActionMenu({
@@ -43,9 +45,11 @@ export function ActionMenu({
   items,
   title,
   message,
+  anchorPosition,
 }: ActionMenuProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Handle open/close with animation
   useEffect(() => {
@@ -101,11 +105,8 @@ export function ActionMenu({
   // Handle backdrop click (clicking anywhere outside the menu)
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent) => {
-      // Close on any click on the backdrop (not just e.target === e.currentTarget)
-      // This ensures clicking anywhere outside closes the menu
-      if (e.target === e.currentTarget) {
-        handleClose();
-      }
+      // Close when clicking the backdrop overlay
+      handleClose();
     },
     [handleClose]
   );
@@ -123,30 +124,36 @@ export function ActionMenu({
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-end justify-center md:items-center",
+        "fixed inset-0 z-50",
         "transition-opacity duration-200 ease-out",
         isVisible ? "opacity-100" : "opacity-0"
       )}
-      onClick={handleBackdropClick}
     >
-      {/* Backdrop */}
+      {/* Backdrop - clicking here closes the menu */}
       <div 
         className={cn(
-          "absolute inset-0 bg-black/40 backdrop-blur-[2px]",
+          "absolute inset-0 cursor-pointer",
+          "bg-black/40 backdrop-blur-[2px]",
+          "md:bg-black/10 md:backdrop-blur-none",
           "transition-opacity duration-200 ease-out",
           isVisible ? "opacity-100" : "opacity-0"
-        )} 
+        )}
+        onClick={handleBackdropClick}
       />
 
-      {/* Menu Container */}
+      {/* Mobile: Bottom sheet */}
       <div 
+        ref={menuRef}
         className={cn(
-          "relative w-full max-w-sm mx-4 mb-4 md:mb-0 flex flex-col gap-2",
+          "md:hidden",
+          "fixed bottom-0 left-0 right-0 mx-4 mb-4",
+          "flex flex-col gap-2",
           "transition-all duration-200 ease-out",
           isVisible 
-            ? "opacity-100 translate-y-0 scale-100" 
-            : "opacity-0 translate-y-8 md:translate-y-0 md:scale-95"
+            ? "opacity-100 translate-y-0" 
+            : "opacity-0 translate-y-8"
         )}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Main Action Group */}
         <div className="bg-white/95 backdrop-blur-xl rounded-2xl overflow-hidden shadow-xl">
@@ -179,38 +186,22 @@ export function ActionMenu({
                     item.variant !== "destructive" && "text-gray-900"
                   )}
                 >
-                  {/* Icon */}
                   {Icon && (
                     <div className="w-5 h-5 flex items-center justify-center">
                       {item.loading ? (
-                        <div
-                          className={cn(
-                            "w-4 h-4 border-2 border-t-transparent rounded-full animate-spin",
-                            item.variant === "destructive"
-                              ? "border-red-600"
-                              : "border-gray-600"
-                          )}
-                        />
+                        <div className={cn(
+                          "w-4 h-4 border-2 border-t-transparent rounded-full animate-spin",
+                          item.variant === "destructive" ? "border-red-600" : "border-gray-600"
+                        )} />
                       ) : (
                         <Icon className="w-5 h-5" />
                       )}
                     </div>
                   )}
-
-                  {/* Label & Description */}
                   <div className="flex-1 text-left">
-                    <span
-                      className={cn(
-                        "text-base font-medium",
-                        !Icon && "pl-0"
-                      )}
-                    >
-                      {item.label}
-                    </span>
+                    <span className="text-base font-medium">{item.label}</span>
                     {item.description && (
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {item.description}
-                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
                     )}
                   </div>
                 </button>
@@ -231,6 +222,60 @@ export function ActionMenu({
         >
           Cancel
         </button>
+      </div>
+
+      {/* Desktop: Dropdown positioned near trigger */}
+      <div 
+        className={cn(
+          "hidden md:block",
+          "absolute w-56",
+          "transition-all duration-150 ease-out origin-top-right",
+          isVisible 
+            ? "opacity-100 scale-100" 
+            : "opacity-0 scale-95"
+        )}
+        style={{
+          top: anchorPosition?.top ?? 60,
+          right: anchorPosition?.right ?? 16,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="bg-white rounded-xl overflow-hidden shadow-2xl ring-1 ring-black/5">
+          {/* Action Items - compact for desktop */}
+          <div className="py-1">
+            {items.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleItemClick(item)}
+                  disabled={item.disabled || item.loading}
+                  className={cn(
+                    "w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors",
+                    "hover:bg-gray-100 active:bg-gray-200",
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    item.variant === "destructive" && "text-red-600",
+                    item.variant !== "destructive" && "text-gray-700"
+                  )}
+                >
+                  {Icon && (
+                    <div className="w-4 h-4 flex items-center justify-center">
+                      {item.loading ? (
+                        <div className={cn(
+                          "w-3 h-3 border-2 border-t-transparent rounded-full animate-spin",
+                          item.variant === "destructive" ? "border-red-600" : "border-gray-600"
+                        )} />
+                      ) : (
+                        <Icon className="w-4 h-4" />
+                      )}
+                    </div>
+                  )}
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

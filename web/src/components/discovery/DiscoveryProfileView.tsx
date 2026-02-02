@@ -134,15 +134,6 @@ function triggerHaptic(type: 'light' | 'medium' | 'heavy' | 'success' | 'error' 
   }
 }
 
-/**
- * Check if the device is likely a touch device
- * Used to conditionally apply touch-specific styles
- */
-function isTouchDevice() {
-  if (typeof window === 'undefined') return false;
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-}
-
 export function DiscoveryProfileView({
   profile,
   gallery = [],
@@ -162,6 +153,7 @@ export function DiscoveryProfileView({
   
   // Action menu state
   const [showActionMenu, setShowActionMenu] = useState(false);
+  const [menuAnchorPosition, setMenuAnchorPosition] = useState<{ top: number; right: number } | null>(null);
   const [showBlockConfirm, setShowBlockConfirm] = useState(false);
   const [blockLoading, setBlockLoading] = useState(false);
   
@@ -249,10 +241,14 @@ export function DiscoveryProfileView({
   );
 
   // Handle share action
+  // Uses the public share URL (/p/{user_id}) which shows a limited profile for non-authenticated users
+  // and redirects authenticated users to the full profile
   const handleShare = useCallback(async () => {
     const displayName = profile.first_name || profile.user?.display_name || "Someone";
+    // Use the public share page URL - this shows limited profile for non-authenticated users
+    // and redirects authenticated users to /discover/profile/{id}
     const shareUrl = typeof window !== "undefined" 
-      ? `${window.location.origin}/discover/profile/${profile.user_id}`
+      ? `${window.location.origin}/p/${profile.user_id}`
       : "";
     
     const shareData = {
@@ -262,7 +258,7 @@ export function DiscoveryProfileView({
     };
 
     try {
-      // Use Web Share API if available
+      // Use Web Share API if available (native share sheet on mobile)
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
         toast.success("Shared successfully!");
@@ -409,7 +405,15 @@ export function DiscoveryProfileView({
 
             {/* More actions button */}
             <button
-              onClick={() => setShowActionMenu(true)}
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                // Position the menu below the button, aligned to the right
+                setMenuAnchorPosition({
+                  top: rect.bottom + 8,
+                  right: window.innerWidth - rect.right,
+                });
+                setShowActionMenu(true);
+              }}
               className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
               aria-label="More actions"
             >
@@ -802,6 +806,7 @@ export function DiscoveryProfileView({
         onClose={() => setShowActionMenu(false)}
         onSelect={handleActionMenuSelect}
         items={actionMenuItems}
+        anchorPosition={menuAnchorPosition}
       />
 
       {/* Block Confirmation Modal */}
