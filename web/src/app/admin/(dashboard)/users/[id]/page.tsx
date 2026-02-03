@@ -25,6 +25,7 @@ import {
   MessageCircle,
   Play,
   Sparkles,
+  ChevronDown,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/LoadingSkeleton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -293,7 +294,7 @@ function SortableGalleryItem({
 
   return (
     <div ref={setNodeRef} style={style} className="relative group">
-      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-neutral-800">
         <img
           src={image.media_url}
           alt={`Gallery ${image.display_order + 1}`}
@@ -307,7 +308,7 @@ function SortableGalleryItem({
         <div className="flex gap-2">
           <button
             onClick={() => onEdit(image.display_order)}
-            className="px-3 py-1 bg-white text-gray-900 rounded text-sm font-medium hover:bg-gray-100"
+            className="px-3 py-1 bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-neutral-800"
           >
             Edit
           </button>
@@ -332,9 +333,9 @@ function SortableGalleryItem({
       <div
         {...attributes}
         {...listeners}
-        className="absolute top-2 right-2 p-1 bg-white rounded shadow cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute top-2 right-2 p-1 bg-white dark:bg-neutral-900 rounded shadow dark:shadow-black/30 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
       >
-        <GripVertical className="w-4 h-4 text-gray-500" />
+        <GripVertical className="w-4 h-4 text-gray-500 dark:text-gray-400" />
       </div>
       {/* Order badge */}
       <div className="absolute top-2 left-2">
@@ -377,6 +378,9 @@ export default function AdminUserDetailPage({ params }: PageProps) {
   const [editingImageIndex, setEditingImageIndex] = useState<number | null>(null);
   const [pointsAmount, setPointsAmount] = useState(0);
   const [pointsReason, setPointsReason] = useState("");
+  const [showRoleChangeConfirm, setShowRoleChangeConfirm] = useState(false);
+  const [newRole, setNewRole] = useState<"user" | "admin" | "moderator">("user");
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   
   // Edit profile form state - comprehensive state for all fields
   const [editForm, setEditForm] = useState<Partial<ProfileDetail>>({});
@@ -476,6 +480,21 @@ export default function AdminUserDetailPage({ params }: PageProps) {
     fetchInteractions();
   }, [fetchData, fetchInteractions]);
 
+  // Close role dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showRoleDropdown && !target.closest('.role-dropdown-container')) {
+        setShowRoleDropdown(false);
+      }
+    };
+
+    if (showRoleDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showRoleDropdown]);
+
   const handleStatusChange = async (newStatus: "active" | "suspended") => {
     setActionLoading(true);
     try {
@@ -497,6 +516,37 @@ export default function AdminUserDetailPage({ params }: PageProps) {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleRoleChange = async () => {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole }),
+      });
+
+      if (res.ok) {
+        setUser((prev) => (prev ? { ...prev, role: newRole } : null));
+        setShowRoleChangeConfirm(false);
+        setShowRoleDropdown(false);
+      } else {
+        const errorData = await res.json();
+        alert(`Failed to update role: ${errorData.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Error updating role:", error);
+      alert("Failed to update role");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const openRoleChangeConfirm = (role: "user" | "admin" | "moderator") => {
+    setNewRole(role);
+    setShowRoleChangeConfirm(true);
+    setShowRoleDropdown(false);
   };
 
   const handleDelete = async () => {
@@ -686,7 +736,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
             <Skeleton className="h-4 w-32" />
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6">
+        <div className="bg-white dark:bg-neutral-950 rounded-2xl border border-slate-200/80 dark:border-neutral-700 p-6">
           <div className="flex items-start gap-6">
             <Skeleton className="w-24 h-24 rounded-full" />
             <div className="flex-1 space-y-3">
@@ -708,10 +758,10 @@ export default function AdminUserDetailPage({ params }: PageProps) {
           subtitle="The requested user could not be found"
           showBack
         />
-        <div className="text-center py-12 bg-white rounded-2xl border border-slate-200/80">
-          <User className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-          <p className="text-slate-600 mb-4">This user may have been deleted or doesn&apos;t exist.</p>
-          <Link href="/admin/users" className="text-blue-600 hover:text-blue-700 font-medium">
+        <div className="text-center py-12 bg-white dark:bg-neutral-950 rounded-2xl border border-slate-200/80 dark:border-neutral-700">
+          <User className="w-12 h-12 text-slate-300 dark:text-neutral-600 mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-gray-400 mb-4">This user may have been deleted or doesn&apos;t exist.</p>
+          <Link href="/admin/users" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
             View all users
           </Link>
         </div>
@@ -720,15 +770,15 @@ export default function AdminUserDetailPage({ params }: PageProps) {
   }
 
   const statusColors = {
-    active: "bg-emerald-100 text-emerald-800",
-    suspended: "bg-red-100 text-red-800",
-    deleted: "bg-slate-100 text-slate-800",
+    active: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400",
+    suspended: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400",
+    deleted: "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-gray-300",
   };
 
   const roleColors = {
-    admin: "bg-purple-100 text-purple-800",
-    moderator: "bg-blue-100 text-blue-800",
-    user: "bg-slate-100 text-slate-800",
+    admin: "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400",
+    moderator: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400",
+    user: "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-gray-300",
   };
 
   const userName = profile?.first_name && profile?.last_name
@@ -809,8 +859,8 @@ export default function AdminUserDetailPage({ params }: PageProps) {
       )}
 
       {/* Tab Navigation */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <div className="border-b border-slate-200 overflow-x-auto">
+      <div className="bg-white dark:bg-neutral-950 rounded-2xl border border-slate-200/80 dark:border-neutral-700 shadow-sm overflow-hidden">
+        <div className="border-b border-slate-200 dark:border-neutral-700 overflow-x-auto">
           <nav className="flex min-w-max px-4" role="tablist">
             {TABS.map((tab) => {
               const Icon = tab.icon;
@@ -847,8 +897,8 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   className={cn(
                     "flex items-center gap-2 px-4 py-3 border-b-2 text-sm font-medium transition-colors whitespace-nowrap",
                     isActive
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                      ? "border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400"
+                      : "border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-300 hover:border-slate-300 dark:hover:border-neutral-600"
                   )}
                 >
                   <Icon className="w-4 h-4" />
@@ -858,8 +908,8 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                       className={cn(
                         "px-1.5 py-0.5 text-xs font-medium rounded-full",
                         isActive
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-slate-100 text-slate-600"
+                          ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+                          : "bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-gray-400"
                       )}
                     >
                       {count}
@@ -894,7 +944,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 {/* Info */}
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                       {profile?.first_name && profile?.last_name
                         ? `${profile.first_name} ${profile.last_name}`
                         : user.display_name || "No Name"}
@@ -907,17 +957,53 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                     >
                       {user.status}
                     </span>
-                    <span
-                      className={cn(
-                        "px-2 py-0.5 text-xs font-medium rounded-full",
-                        roleColors[user.role]
+                    <div className="relative role-dropdown-container">
+                      <button
+                        onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                        className={cn(
+                          "flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors",
+                          roleColors[user.role],
+                          "hover:opacity-80"
+                        )}
+                      >
+                        {user.role}
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+                      {showRoleDropdown && (
+                        <div className="absolute top-full left-0 mt-1 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-lg shadow-lg dark:shadow-black/30 z-10 min-w-[120px]">
+                          <button
+                            onClick={() => openRoleChangeConfirm("user")}
+                            className={cn(
+                              "w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-neutral-800 first:rounded-t-lg last:rounded-b-lg transition-colors text-gray-900 dark:text-gray-100",
+                              user.role === "user" && "bg-blue-50 dark:bg-blue-900/30 font-medium"
+                            )}
+                          >
+                            User
+                          </button>
+                          <button
+                            onClick={() => openRoleChangeConfirm("moderator")}
+                            className={cn(
+                              "w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-neutral-800 first:rounded-t-lg last:rounded-b-lg transition-colors text-gray-900 dark:text-gray-100",
+                              user.role === "moderator" && "bg-blue-50 dark:bg-blue-900/30 font-medium"
+                            )}
+                          >
+                            Moderator
+                          </button>
+                          <button
+                            onClick={() => openRoleChangeConfirm("admin")}
+                            className={cn(
+                              "w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-neutral-800 first:rounded-t-lg last:rounded-b-lg transition-colors text-gray-900 dark:text-gray-100",
+                              user.role === "admin" && "bg-blue-50 dark:bg-blue-900/30 font-medium"
+                            )}
+                          >
+                            Admin
+                          </button>
+                        </div>
                       )}
-                    >
-                      {user.role}
-                    </span>
+                    </div>
                   </div>
 
-                  <div className="space-y-1 text-sm text-gray-600">
+                  <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4" />
                       {user.email}
@@ -940,25 +1026,25 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   {/* Verification badges */}
                   <div className="flex items-center gap-2 mt-3">
                     {profile?.is_verified && (
-                      <span className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                      <span className="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium">
                         <CheckCircle className="w-3 h-3" />
                         Verified
                       </span>
                     )}
                     {profile?.is_photo_verified && (
-                      <span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                      <span className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-medium">
                         <Image className="w-3 h-3" />
                         Photo Verified
                       </span>
                     )}
                     {profile?.can_start_matching && (
-                      <span className="flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
+                      <span className="flex items-center gap-1 px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-medium">
                         <Heart className="w-3 h-3" />
                         Can Match
                       </span>
                     )}
                     {profile?.profile_hidden && (
-                      <span className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
+                      <span className="flex items-center gap-1 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-medium">
                         <AlertCircle className="w-3 h-3" />
                         Profile Hidden
                       </span>
@@ -980,26 +1066,26 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   </div>
 
                   {/* Account info */}
-                  <div className="bg-slate-50 rounded-lg p-4">
-                    <h4 className="font-medium text-slate-700 mb-2 text-sm">Account Info</h4>
+                  <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-4">
+                    <h4 className="font-medium text-slate-700 dark:text-gray-300 mb-2 text-sm">Account Info</h4>
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Joined</span>
-                        <span className="font-medium">
+                        <span className="text-slate-500 dark:text-gray-400">Joined</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">
                           {new Date(user.created_at).toLocaleDateString()}
                         </span>
                       </div>
                       {user.last_active_at && (
                         <div className="flex justify-between">
-                          <span className="text-slate-500">Last Active</span>
-                          <span className="font-medium">
+                          <span className="text-slate-500 dark:text-gray-400">Last Active</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">
                             {new Date(user.last_active_at).toLocaleDateString()}
                           </span>
                         </div>
                       )}
                       <div className="flex justify-between">
-                        <span className="text-slate-500">User ID</span>
-                        <span className="font-mono text-[10px]">{user.id.slice(0, 12)}...</span>
+                        <span className="text-slate-500 dark:text-gray-400">User ID</span>
+                        <span className="font-mono text-[10px] text-gray-900 dark:text-gray-100">{user.id.slice(0, 12)}...</span>
                       </div>
                     </div>
                   </div>
@@ -1011,57 +1097,57 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <div className="lg:col-span-2 space-y-6">
                   {/* Basic Info Section */}
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-4">Basic Information</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Basic Information</h3>
                     <div className="grid sm:grid-cols-2 gap-4">
                       {profile?.date_of_birth && (
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <p className="text-xs text-gray-500">Age</p>
-                          <p className="font-medium">
+                        <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Age</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100">
                             {calculateAge(profile.date_of_birth)} years old
                           </p>
                         </div>
                       )}
                       {profile?.gender && (
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <p className="text-xs text-gray-500">Gender</p>
-                          <p className="font-medium capitalize">{profile.gender}</p>
+                        <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Gender</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.gender}</p>
                         </div>
                       )}
                       {profile?.zodiac_sign && (
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <p className="text-xs text-gray-500">Zodiac Sign</p>
-                          <p className="font-medium capitalize">{profile.zodiac_sign}</p>
+                        <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Zodiac Sign</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.zodiac_sign}</p>
                         </div>
                       )}
                       {profile?.dating_intentions && (
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <p className="text-xs text-gray-500">Dating Intentions</p>
-                          <p className="font-medium capitalize">{profile.dating_intentions.replace(/_/g, " ")}</p>
+                        <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Dating Intentions</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.dating_intentions.replace(/_/g, " ")}</p>
                         </div>
                       )}
                       {profile?.marital_status && (
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <p className="text-xs text-gray-500">Marital Status</p>
-                          <p className="font-medium capitalize">{profile.marital_status.replace(/_/g, " ")}</p>
+                        <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Marital Status</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.marital_status.replace(/_/g, " ")}</p>
                         </div>
                       )}
                       {profile?.looking_for && profile.looking_for.length > 0 && (
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <p className="text-xs text-gray-500">Looking For</p>
-                          <p className="font-medium capitalize">{profile.looking_for.join(", ")}</p>
+                        <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Looking For</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.looking_for.join(", ")}</p>
                         </div>
                       )}
                     </div>
                     {profile?.bio && (
                       <div className="mt-4">
-                        <p className="text-xs text-gray-500 mb-1">Bio</p>
-                        <p className="text-sm bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{profile.bio}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Bio</p>
+                        <p className="text-sm bg-slate-50 dark:bg-neutral-800 text-gray-900 dark:text-gray-100 rounded-lg p-3 whitespace-pre-wrap">{profile.bio}</p>
                       </div>
                     )}
                     {profile?.looking_for_description && (
                       <div className="mt-4">
-                        <p className="text-xs text-gray-500 mb-1">Looking For Description</p>
-                        <p className="text-sm bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{profile.looking_for_description}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Looking For Description</p>
+                        <p className="text-sm bg-slate-50 dark:bg-neutral-800 text-gray-900 dark:text-gray-100 rounded-lg p-3 whitespace-pre-wrap">{profile.looking_for_description}</p>
                       </div>
                     )}
                   </div>
@@ -1069,26 +1155,26 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   {/* Physical Attributes */}
                   {(profile?.height_inches || profile?.body_type || (profile?.ethnicity && profile.ethnicity.length > 0)) && (
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-4">Physical Attributes</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Physical Attributes</h3>
                       <div className="grid sm:grid-cols-2 gap-4">
                         {profile?.height_inches && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Height</p>
-                            <p className="font-medium">
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Height</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">
                               {Math.floor(profile.height_inches / 12)}&apos;{profile.height_inches % 12}&quot;
                             </p>
                           </div>
                         )}
                         {profile?.body_type && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Body Type</p>
-                            <p className="font-medium capitalize">{profile.body_type.replace(/_/g, " ")}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Body Type</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.body_type.replace(/_/g, " ")}</p>
                           </div>
                         )}
                         {profile?.ethnicity && profile.ethnicity.length > 0 && (
-                          <div className="bg-slate-50 rounded-lg p-3 sm:col-span-2">
-                            <p className="text-xs text-gray-500">Ethnicity</p>
-                            <p className="font-medium capitalize">{profile.ethnicity.join(", ")}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3 sm:col-span-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Ethnicity</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.ethnicity.join(", ")}</p>
                           </div>
                         )}
                       </div>
@@ -1098,36 +1184,36 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   {/* Location */}
                   {(profile?.city || profile?.state || profile?.country || profile?.hometown) && (
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-4">Location</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Location</h3>
                       <div className="grid sm:grid-cols-2 gap-4">
                         {profile?.city && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">City</p>
-                            <p className="font-medium">{profile.city}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">City</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.city}</p>
                           </div>
                         )}
                         {profile?.state && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">State</p>
-                            <p className="font-medium">{profile.state}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">State</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.state}</p>
                           </div>
                         )}
                         {profile?.country && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Country</p>
-                            <p className="font-medium">{profile.country}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Country</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.country}</p>
                           </div>
                         )}
                         {profile?.zip_code && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">ZIP Code</p>
-                            <p className="font-medium">{profile.zip_code}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">ZIP Code</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.zip_code}</p>
                           </div>
                         )}
                         {profile?.hometown && (
-                          <div className="bg-slate-50 rounded-lg p-3 sm:col-span-2">
-                            <p className="text-xs text-gray-500">Hometown</p>
-                            <p className="font-medium">{profile.hometown}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3 sm:col-span-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Hometown</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.hometown}</p>
                           </div>
                         )}
                       </div>
@@ -1137,30 +1223,30 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   {/* Career & Education */}
                   {(profile?.occupation || profile?.company || profile?.education || (profile?.schools && profile.schools.length > 0)) && (
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-4">Career & Education</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Career & Education</h3>
                       <div className="grid sm:grid-cols-2 gap-4">
                         {profile?.occupation && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Occupation</p>
-                            <p className="font-medium">{profile.occupation}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Occupation</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.occupation}</p>
                           </div>
                         )}
                         {profile?.company && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Company</p>
-                            <p className="font-medium">{profile.company}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Company</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.company}</p>
                           </div>
                         )}
                         {profile?.education && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Education</p>
-                            <p className="font-medium capitalize">{profile.education.replace(/_/g, " ")}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Education</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.education.replace(/_/g, " ")}</p>
                           </div>
                         )}
                         {profile?.schools && profile.schools.length > 0 && (
-                          <div className="bg-slate-50 rounded-lg p-3 sm:col-span-2">
-                            <p className="text-xs text-gray-500">Schools</p>
-                            <p className="font-medium">{profile.schools.join(", ")}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3 sm:col-span-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Schools</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.schools.join(", ")}</p>
                           </div>
                         )}
                       </div>
@@ -1170,30 +1256,30 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   {/* Lifestyle */}
                   {(profile?.religion || profile?.political_views || profile?.exercise || (profile?.languages && profile.languages.length > 0)) && (
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-4">Lifestyle</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Lifestyle</h3>
                       <div className="grid sm:grid-cols-2 gap-4">
                         {profile?.religion && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Religion</p>
-                            <p className="font-medium capitalize">{profile.religion}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Religion</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.religion}</p>
                           </div>
                         )}
                         {profile?.political_views && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Political Views</p>
-                            <p className="font-medium capitalize">{profile.political_views.replace(/_/g, " ")}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Political Views</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.political_views.replace(/_/g, " ")}</p>
                           </div>
                         )}
                         {profile?.exercise && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Exercise</p>
-                            <p className="font-medium capitalize">{profile.exercise}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Exercise</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.exercise}</p>
                           </div>
                         )}
                         {profile?.languages && profile.languages.length > 0 && (
-                          <div className="bg-slate-50 rounded-lg p-3 sm:col-span-2">
-                            <p className="text-xs text-gray-500">Languages</p>
-                            <p className="font-medium">{profile.languages.join(", ")}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3 sm:col-span-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Languages</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.languages.join(", ")}</p>
                           </div>
                         )}
                       </div>
@@ -1203,24 +1289,24 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   {/* Habits */}
                   {(profile?.smoking || profile?.drinking || profile?.marijuana) && (
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-4">Habits</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Habits</h3>
                       <div className="grid sm:grid-cols-3 gap-4">
                         {profile?.smoking && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Smoking</p>
-                            <p className="font-medium capitalize">{profile.smoking}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Smoking</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.smoking}</p>
                           </div>
                         )}
                         {profile?.drinking && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Drinking</p>
-                            <p className="font-medium capitalize">{profile.drinking}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Drinking</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.drinking}</p>
                           </div>
                         )}
                         {profile?.marijuana && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Marijuana</p>
-                            <p className="font-medium capitalize">{profile.marijuana}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Marijuana</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.marijuana}</p>
                           </div>
                         )}
                       </div>
@@ -1230,24 +1316,24 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   {/* Family */}
                   {(profile?.has_kids || profile?.wants_kids || (profile?.pets && profile.pets.length > 0)) && (
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-4">Family</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Family</h3>
                       <div className="grid sm:grid-cols-2 gap-4">
                         {profile?.has_kids && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Has Kids</p>
-                            <p className="font-medium capitalize">{profile.has_kids.replace(/_/g, " ")}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Has Kids</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.has_kids.replace(/_/g, " ")}</p>
                           </div>
                         )}
                         {profile?.wants_kids && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500">Wants Kids</p>
-                            <p className="font-medium capitalize">{profile.wants_kids.replace(/_/g, " ")}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Wants Kids</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.wants_kids.replace(/_/g, " ")}</p>
                           </div>
                         )}
                         {profile?.pets && profile.pets.length > 0 && (
-                          <div className="bg-slate-50 rounded-lg p-3 sm:col-span-2">
-                            <p className="text-xs text-gray-500">Pets</p>
-                            <p className="font-medium capitalize">{profile.pets.join(", ")}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3 sm:col-span-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Pets</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{profile.pets.join(", ")}</p>
                           </div>
                         )}
                       </div>
@@ -1257,13 +1343,13 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   {/* Interests & Goals */}
                   {((profile?.interests && profile.interests.length > 0) || (profile?.life_goals && profile.life_goals.length > 0)) && (
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-4">Interests & Goals</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Interests & Goals</h3>
                       {profile?.interests && profile.interests.length > 0 && (
                         <div className="mb-4">
-                          <p className="text-xs text-gray-500 mb-2">Interests</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Interests</p>
                           <div className="flex flex-wrap gap-2">
                             {profile.interests.map((interest, idx) => (
-                              <span key={idx} className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">
+                              <span key={idx} className="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 rounded-full text-sm">
                                 {interest}
                               </span>
                             ))}
@@ -1272,10 +1358,10 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                       )}
                       {profile?.life_goals && profile.life_goals.length > 0 && (
                         <div>
-                          <p className="text-xs text-gray-500 mb-2">Life Goals</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Life Goals</p>
                           <div className="flex flex-wrap gap-2">
                             {profile.life_goals.map((goal, idx) => (
-                              <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                              <span key={idx} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-sm">
                                 {goal}
                               </span>
                             ))}
@@ -1291,72 +1377,72 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                     profile?.worst_job || profile?.dream_job || profile?.craziest_travel_story ||
                     profile?.weirdest_gift || profile?.past_event) && (
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-4">Profile Prompts</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Profile Prompts</h3>
                       <div className="space-y-3">
                         {profile?.ideal_first_date && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Ideal First Date</p>
-                            <p className="text-sm whitespace-pre-wrap">{profile.ideal_first_date}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Ideal First Date</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{profile.ideal_first_date}</p>
                           </div>
                         )}
                         {profile?.non_negotiables && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Non-Negotiables</p>
-                            <p className="text-sm whitespace-pre-wrap">{profile.non_negotiables}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Non-Negotiables</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{profile.non_negotiables}</p>
                           </div>
                         )}
                         {profile?.way_to_heart && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Way to My Heart</p>
-                            <p className="text-sm whitespace-pre-wrap">{profile.way_to_heart}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Way to My Heart</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{profile.way_to_heart}</p>
                           </div>
                         )}
                         {profile?.after_work && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">After Work</p>
-                            <p className="text-sm whitespace-pre-wrap">{profile.after_work}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">After Work</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{profile.after_work}</p>
                           </div>
                         )}
                         {profile?.nightclub_or_home && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Nightclub or Home</p>
-                            <p className="text-sm">{profile.nightclub_or_home}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Nightclub or Home</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100">{profile.nightclub_or_home}</p>
                           </div>
                         )}
                         {profile?.pet_peeves && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Pet Peeves</p>
-                            <p className="text-sm whitespace-pre-wrap">{profile.pet_peeves}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Pet Peeves</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{profile.pet_peeves}</p>
                           </div>
                         )}
                         {profile?.worst_job && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Worst Job</p>
-                            <p className="text-sm whitespace-pre-wrap">{profile.worst_job}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Worst Job</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{profile.worst_job}</p>
                           </div>
                         )}
                         {profile?.dream_job && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Dream Job</p>
-                            <p className="text-sm whitespace-pre-wrap">{profile.dream_job}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Dream Job</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{profile.dream_job}</p>
                           </div>
                         )}
                         {profile?.craziest_travel_story && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Craziest Travel Story</p>
-                            <p className="text-sm whitespace-pre-wrap">{profile.craziest_travel_story}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Craziest Travel Story</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{profile.craziest_travel_story}</p>
                           </div>
                         )}
                         {profile?.weirdest_gift && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Weirdest Gift</p>
-                            <p className="text-sm whitespace-pre-wrap">{profile.weirdest_gift}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Weirdest Gift</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{profile.weirdest_gift}</p>
                           </div>
                         )}
                         {profile?.past_event && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Past Event</p>
-                            <p className="text-sm whitespace-pre-wrap">{profile.past_event}</p>
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Past Event</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{profile.past_event}</p>
                           </div>
                         )}
                       </div>
@@ -1366,20 +1452,20 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   {/* Social Links */}
                   {(profile?.social_link_1 || profile?.social_link_2) && (
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-4">Social Links</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Social Links</h3>
                       <div className="space-y-2">
                         {profile?.social_link_1 && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Social Link 1</p>
-                            <a href={profile.social_link_1} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline break-all">
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Social Link 1</p>
+                            <a href={profile.social_link_1} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline break-all">
                               {profile.social_link_1}
                             </a>
                           </div>
                         )}
                         {profile?.social_link_2 && (
-                          <div className="bg-slate-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Social Link 2</p>
-                            <a href={profile.social_link_2} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline break-all">
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Social Link 2</p>
+                            <a href={profile.social_link_2} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline break-all">
                               {profile.social_link_2}
                             </a>
                           </div>
@@ -1391,15 +1477,15 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   {/* Voice & Video Section */}
                   {(profile?.voice_prompt_url || profile?.video_intro_url) && (
                     <div className="mt-4">
-                      <p className="text-xs text-gray-500 mb-2">Voice & Video</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Voice & Video</p>
                       <div className="flex flex-wrap gap-2">
                         {profile?.voice_prompt_url && (
-                          <div className="flex items-center gap-2 px-3 py-2 bg-pink-50 rounded-lg">
-                            <Play className="w-4 h-4 text-pink-500" />
-                            <span className="text-sm text-pink-700">
+                          <div className="flex items-center gap-2 px-3 py-2 bg-pink-50 dark:bg-pink-900/30 rounded-lg">
+                            <Play className="w-4 h-4 text-pink-500 dark:text-pink-400" />
+                            <span className="text-sm text-pink-700 dark:text-pink-400">
                               Voice Prompt
                               {profile?.voice_prompt_duration_seconds && (
-                                <span className="text-pink-400 ml-1">
+                                <span className="text-pink-400 dark:text-pink-500 ml-1">
                                   ({profile.voice_prompt_duration_seconds}s)
                                 </span>
                               )}
@@ -1407,12 +1493,12 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                           </div>
                         )}
                         {profile?.video_intro_url && (
-                          <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 rounded-lg">
-                            <Sparkles className="w-4 h-4 text-indigo-500" />
-                            <span className="text-sm text-indigo-700">
+                          <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                            <Sparkles className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                            <span className="text-sm text-indigo-700 dark:text-indigo-400">
                               Video Intro
                               {profile?.video_intro_duration_seconds && (
-                                <span className="text-indigo-400 ml-1">
+                                <span className="text-indigo-400 dark:text-indigo-500 ml-1">
                                   ({profile.video_intro_duration_seconds}s)
                                 </span>
                               )}
@@ -1438,7 +1524,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                             }}
                           />
                         </div>
-                        <div className="flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium h-fit">
+                        <div className="flex items-center gap-1 px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-medium h-fit">
                           <Shield className="w-3 h-3" />
                           Selfie Uploaded
                         </div>
@@ -1492,7 +1578,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
           {activeTab === "likes-received" && (
             interactionsLoading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400" />
               </div>
             ) : interactions ? (
               <InteractionGrid
@@ -1510,7 +1596,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
           {activeTab === "likes-given" && (
             interactionsLoading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400" />
               </div>
             ) : interactions ? (
               <InteractionGrid
@@ -1528,7 +1614,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
           {activeTab === "matches" && (
             interactionsLoading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400" />
               </div>
             ) : interactions ? (
               <MatchGrid matches={interactions.mutual_matches} />
@@ -1539,20 +1625,20 @@ export default function AdminUserDetailPage({ params }: PageProps) {
           {activeTab === "passes" && (
             interactionsLoading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400" />
               </div>
             ) : interactions ? (
               <div className="space-y-8">
                 {/* Passes Received */}
                 <div>
-                  <h4 className="text-sm font-medium text-slate-700 mb-4 flex items-center gap-2">
-                    <HeartOff className="w-4 h-4 text-slate-400" />
+                  <h4 className="text-sm font-medium text-slate-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                    <HeartOff className="w-4 h-4 text-slate-400 dark:text-gray-500" />
                     Users who passed on this person ({interactions.passes_received.length})
                   </h4>
                   <InteractionGrid
                     items={interactions.passes_received}
                     direction="received"
-                    emptyIcon={<HeartOff className="w-8 h-8 text-slate-300" />}
+                    emptyIcon={<HeartOff className="w-8 h-8 text-slate-300 dark:text-neutral-600" />}
                     emptyTitle="No passes received"
                     emptyDescription="No users have passed on this person yet."
                   />
@@ -1567,7 +1653,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   <InteractionGrid
                     items={interactions.passes_given}
                     direction="given"
-                    emptyIcon={<HeartOff className="w-8 h-8 text-slate-300" />}
+                    emptyIcon={<HeartOff className="w-8 h-8 text-slate-300 dark:text-neutral-600" />}
                     emptyTitle="No passes given"
                     emptyDescription="This user hasn't passed on anyone yet."
                   />
@@ -1580,7 +1666,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
           {activeTab === "blocks" && (
             interactionsLoading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400" />
               </div>
             ) : interactions ? (
               <BlocksPanel
@@ -1629,6 +1715,17 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         loading={actionLoading}
       />
 
+      <ConfirmModal
+        isOpen={showRoleChangeConfirm}
+        onClose={() => setShowRoleChangeConfirm(false)}
+        onConfirm={handleRoleChange}
+        title="Change User Role"
+        message={`Are you sure you want to change this user's role from "${user.role}" to "${newRole}"? This will affect their access permissions.`}
+        confirmLabel="Change Role"
+        variant="warning"
+        loading={actionLoading}
+      />
+
       {/* Points Adjustment Sheet */}
       <BottomSheet
         isOpen={showPointsSheet}
@@ -1637,46 +1734,46 @@ export default function AdminUserDetailPage({ params }: PageProps) {
       >
         <div className="p-4 space-y-4">
           <div>
-            <p className="text-sm text-gray-500 mb-1">Current Balance</p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Current Balance</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {formatPoints(user.points_balance)} points
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Amount to Add/Remove
             </label>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPointsAmount((prev) => prev - 100)}
-                className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200"
+                className="p-2 bg-gray-100 dark:bg-neutral-800 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700"
               >
-                <Minus className="w-5 h-5" />
+                <Minus className="w-5 h-5 text-gray-900 dark:text-gray-100" />
               </button>
               <input
                 type="number"
                 value={pointsAmount}
                 onChange={(e) => setPointsAmount(Number(e.target.value))}
-                className="flex-1 px-4 py-2 border rounded-lg text-center text-xl font-bold"
+                className="flex-1 px-4 py-2 border dark:border-neutral-700 rounded-lg text-center text-xl font-bold bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               />
               <button
                 onClick={() => setPointsAmount((prev) => prev + 100)}
-                className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200"
+                className="p-2 bg-gray-100 dark:bg-neutral-800 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-5 h-5 text-gray-900 dark:text-gray-100" />
               </button>
             </div>
-            <p className="text-center text-sm text-gray-500 mt-2">
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
               New balance:{" "}
-              <span className="font-bold">
+              <span className="font-bold text-gray-900 dark:text-gray-100">
                 {formatPoints(user.points_balance + pointsAmount)}
               </span>
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Reason (optional)
             </label>
             <input
@@ -1684,7 +1781,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
               value={pointsReason}
               onChange={(e) => setPointsReason(e.target.value)}
               placeholder="e.g., Bonus for referral, Compensation"
-              className="w-full px-4 py-2 border rounded-lg"
+              className="w-full px-4 py-2 border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
         </div>
@@ -1703,7 +1800,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
               "flex-1 px-4 py-3 rounded-lg font-medium",
               pointsAmount !== 0
                 ? "bg-yellow-500 text-white hover:bg-yellow-600"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-200 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
             )}
           >
             {actionLoading ? "Saving..." : "Save Changes"}
@@ -1720,15 +1817,15 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         <div className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto space-y-6">
           {/* Basic Info */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Basic Information</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Basic Information</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">First Name</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
                 <input
                   type="text"
                   value={editForm.first_name || ""}
                   onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -1737,7 +1834,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="text"
                   value={editForm.last_name || ""}
                   onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -1746,7 +1843,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="date"
                   value={editForm.date_of_birth || ""}
                   onChange={(e) => setEditForm({ ...editForm, date_of_birth: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -1754,7 +1851,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <select
                   value={editForm.gender || ""}
                   onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {GENDER_OPTIONS.map(opt => (
@@ -1767,7 +1864,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <select
                   value={editForm.zodiac_sign || ""}
                   onChange={(e) => setEditForm({ ...editForm, zodiac_sign: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {ZODIAC_OPTIONS.map(opt => (
@@ -1780,7 +1877,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <select
                   value={editForm.dating_intentions || ""}
                   onChange={(e) => setEditForm({ ...editForm, dating_intentions: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {DATING_INTENTIONS_OPTIONS.map(opt => (
@@ -1793,7 +1890,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <select
                   value={editForm.marital_status || ""}
                   onChange={(e) => setEditForm({ ...editForm, marital_status: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {MARITAL_STATUS_OPTIONS.map(opt => (
@@ -1837,7 +1934,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
           {/* Physical */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Physical Attributes</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Physical Attributes</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Height (inches)</label>
@@ -1845,7 +1942,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="number"
                   value={editForm.height_inches || ""}
                   onChange={(e) => setEditForm({ ...editForm, height_inches: e.target.value ? parseInt(e.target.value) : null })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -1853,7 +1950,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <select
                   value={editForm.body_type || ""}
                   onChange={(e) => setEditForm({ ...editForm, body_type: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {BODY_TYPE_OPTIONS.map(opt => (
@@ -1871,7 +1968,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                     ethnicity: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
                   })}
                   placeholder="white, asian"
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -1879,14 +1976,14 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
           {/* Location */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Location</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Location</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Country</label>
                 <select
                   value={editForm.country || ""}
                   onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {COUNTRY_OPTIONS.map(opt => (
@@ -1900,7 +1997,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="text"
                   value={editForm.state || ""}
                   onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -1909,7 +2006,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="text"
                   value={editForm.city || ""}
                   onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -1918,7 +2015,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="text"
                   value={editForm.zip_code || ""}
                   onChange={(e) => setEditForm({ ...editForm, zip_code: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div className="col-span-2">
@@ -1927,7 +2024,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="text"
                   value={editForm.hometown || ""}
                   onChange={(e) => setEditForm({ ...editForm, hometown: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -1935,7 +2032,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
           {/* Career & Education */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Career & Education</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Career & Education</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Occupation</label>
@@ -1943,7 +2040,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="text"
                   value={editForm.occupation || ""}
                   onChange={(e) => setEditForm({ ...editForm, occupation: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -1952,7 +2049,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="text"
                   value={editForm.company || ""}
                   onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -1960,7 +2057,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <select
                   value={editForm.education || ""}
                   onChange={(e) => setEditForm({ ...editForm, education: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {EDUCATION_OPTIONS.map(opt => (
@@ -1977,7 +2074,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                     ...editForm, 
                     schools: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
                   })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -1985,14 +2082,14 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
           {/* Lifestyle */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Lifestyle</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Lifestyle</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Religion</label>
                 <select
                   value={editForm.religion || ""}
                   onChange={(e) => setEditForm({ ...editForm, religion: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {RELIGION_OPTIONS.map(opt => (
@@ -2005,7 +2102,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <select
                   value={editForm.political_views || ""}
                   onChange={(e) => setEditForm({ ...editForm, political_views: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {POLITICAL_OPTIONS.map(opt => (
@@ -2018,7 +2115,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <select
                   value={editForm.exercise || ""}
                   onChange={(e) => setEditForm({ ...editForm, exercise: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {EXERCISE_OPTIONS.map(opt => (
@@ -2035,7 +2132,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                     ...editForm, 
                     languages: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
                   })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -2043,14 +2140,14 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
           {/* Habits */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Habits</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Habits</h4>
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Smoking</label>
                 <select
                   value={editForm.smoking || ""}
                   onChange={(e) => setEditForm({ ...editForm, smoking: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {SMOKING_OPTIONS.map(opt => (
@@ -2063,7 +2160,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <select
                   value={editForm.drinking || ""}
                   onChange={(e) => setEditForm({ ...editForm, drinking: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {DRINKING_OPTIONS.map(opt => (
@@ -2076,7 +2173,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <select
                   value={editForm.marijuana || ""}
                   onChange={(e) => setEditForm({ ...editForm, marijuana: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {MARIJUANA_OPTIONS.map(opt => (
@@ -2089,14 +2186,14 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
           {/* Family */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Family</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Family</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Has Kids</label>
                 <select
                   value={editForm.has_kids || ""}
                   onChange={(e) => setEditForm({ ...editForm, has_kids: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {HAS_KIDS_OPTIONS.map(opt => (
@@ -2109,7 +2206,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 <select
                   value={editForm.wants_kids || ""}
                   onChange={(e) => setEditForm({ ...editForm, wants_kids: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select...</option>
                   {WANTS_KIDS_OPTIONS.map(opt => (
@@ -2126,7 +2223,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                     ...editForm, 
                     pets: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
                   })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -2134,7 +2231,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
           {/* Interests & Goals */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Interests & Goals</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Interests & Goals</h4>
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Interests (comma-separated)</label>
@@ -2145,7 +2242,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                     ...editForm, 
                     interests: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
                   })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -2157,7 +2254,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                     ...editForm, 
                     life_goals: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
                   })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -2165,7 +2262,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
           {/* Profile Prompts */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Profile Prompts</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Profile Prompts</h4>
             <div className="space-y-3">
               {[
                 { key: "ideal_first_date", label: "Ideal First Date" },
@@ -2186,7 +2283,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                     value={(editForm[key as keyof ProfileDetail] as string) || ""}
                     onChange={(e) => setEditForm({ ...editForm, [key]: e.target.value })}
                     rows={2}
-                    className="w-full px-3 py-2 text-sm border rounded-lg"
+                    className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                   />
                 </div>
               ))}
@@ -2195,7 +2292,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
           {/* Social Links */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Social Links</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Social Links</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Social Link 1</label>
@@ -2203,7 +2300,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="url"
                   value={editForm.social_link_1 || ""}
                   onChange={(e) => setEditForm({ ...editForm, social_link_1: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -2212,7 +2309,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="url"
                   value={editForm.social_link_2 || ""}
                   onChange={(e) => setEditForm({ ...editForm, social_link_2: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -2220,7 +2317,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
           {/* Media URLs */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Media URLs</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Media URLs</h4>
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Profile Image URL</label>
@@ -2229,7 +2326,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   value={editProfileImageUrl}
                   onChange={(e) => setEditProfileImageUrl(e.target.value)}
                   placeholder="https://..."
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
                 {editProfileImageUrl && (
                   <div className="mt-2">
@@ -2250,7 +2347,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="url"
                   value={editForm.voice_prompt_url || ""}
                   onChange={(e) => setEditForm({ ...editForm, voice_prompt_url: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -2259,7 +2356,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="url"
                   value={editForm.video_intro_url || ""}
                   onChange={(e) => setEditForm({ ...editForm, video_intro_url: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -2268,7 +2365,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="url"
                   value={editForm.verification_selfie_url || ""}
                   onChange={(e) => setEditForm({ ...editForm, verification_selfie_url: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -2276,7 +2373,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
           {/* Status Flags */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Status Flags</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Status Flags</h4>
             <div className="space-y-2">
               <label className="flex items-center gap-2">
                 <input
@@ -2372,7 +2469,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
             </div>
           )}
 
-          <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-700">
+          <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg text-sm text-blue-700 dark:text-blue-400">
             <p className="font-medium mb-1">Tip: Use Unsplash URLs</p>
             <p>Format: https://images.unsplash.com/photo-[ID]?w=800&h=800&fit=crop&crop=face</p>
           </div>
