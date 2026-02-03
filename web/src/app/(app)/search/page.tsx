@@ -62,7 +62,7 @@ type EmptyReason =
   | "user_inactive"
   | null;
 
-interface DiscoverResponse {
+interface SearchApiResponse {
   profiles: Profile[];
   isProfilePaused: boolean;
   total: number;
@@ -83,7 +83,7 @@ export default function SearchPage() {
     async function fetchProfiles() {
       try {
         const response = await fetch("/api/discover/profiles");
-        const data: DiscoverResponse = await response.json();
+        const data: SearchApiResponse = await response.json();
 
         // Even non-ok responses now return structured data
         setProfiles(data.profiles || []);

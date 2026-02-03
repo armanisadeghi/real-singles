@@ -55,7 +55,7 @@ export default async function FavoritesPage() {
             href="/search"
             className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700"
           >
-            Discover Profiles
+            Search Profiles
           </a>
         </div>
       ) : (

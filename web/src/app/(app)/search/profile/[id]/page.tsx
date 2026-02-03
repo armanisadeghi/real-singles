@@ -60,7 +60,7 @@ interface GalleryItem {
   media_type: string;
 }
 
-export default function DiscoveryProfilePage() {
+export default function SearchProfilePage() {
   const params = useParams();
   const router = useRouter();
   const userId = params.id as string;
