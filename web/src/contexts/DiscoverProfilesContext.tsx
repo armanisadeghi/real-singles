@@ -127,7 +127,7 @@ interface DiscoverProfilesContextValue extends DiscoverProfilesState {
 // =============================================================================
 
 type DiscoverAction =
-  | { type: "INITIALIZE"; profile: DiscoverProfile | null; emptyReason?: DiscoverProfilesState["emptyReason"] }
+  | { type: "INITIALIZE"; profile: DiscoverProfile | null; emptyReason?: DiscoverProfilesState["emptyReason"]; lazyLoad?: boolean }
   | { type: "SET_LOADING"; isLoading: boolean }
   | { type: "SET_FETCHING"; isFetching: boolean }
   | { type: "ADD_PROFILES"; profiles: DiscoverProfile[]; hasMore: boolean; offset: number }
@@ -167,6 +167,20 @@ function discoverReducer(state: DiscoverProfilesState, action: DiscoverAction): 
           offset: 1,
           isLoading: false,
           isInitialized: true,
+          emptyReason: null,
+        };
+      }
+      // No profile - check if this is lazy load mode (no SSR profile, will fetch on demand)
+      // or an actual empty state (user has incomplete profile, etc.)
+      if (action.lazyLoad) {
+        // Lazy load mode - no profile yet but allow fetching
+        return {
+          ...state,
+          profiles: [],
+          currentIndex: 0,
+          isLoading: false,
+          isInitialized: true,
+          hasMore: true, // Allow auto-fetch to trigger
           emptyReason: null,
         };
       }
@@ -294,12 +308,15 @@ interface DiscoverProfilesProviderProps {
   initialProfile?: DiscoverProfile | null;
   /** Empty reason if no initial profile */
   initialEmptyReason?: DiscoverProfilesState["emptyReason"];
+  /** If true, will fetch profiles on demand instead of requiring SSR profile */
+  lazyLoad?: boolean;
 }
 
 export function DiscoverProfilesProvider({
   children,
   initialProfile,
   initialEmptyReason,
+  lazyLoad = false,
 }: DiscoverProfilesProviderProps) {
   const [state, dispatch] = useReducer(discoverReducer, initialState);
   
@@ -316,9 +333,10 @@ export function DiscoverProfilesProvider({
         type: "INITIALIZE", 
         profile: initialProfile || null,
         emptyReason: initialEmptyReason,
+        lazyLoad: lazyLoad && !initialProfile && !initialEmptyReason,
       });
     }
-  }, [initialProfile, initialEmptyReason]);
+  }, [initialProfile, initialEmptyReason, lazyLoad]);
 
   // Fetch more profiles from API
   const fetchMoreProfiles = useCallback(async () => {

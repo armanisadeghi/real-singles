@@ -114,16 +114,101 @@ export async function GET(request: NextRequest) {
     .select("id, display_name, last_active_at")
     .in("id", Array.from(allParticipantIds));
 
-  // Format conversations (with async image URL conversion)
+  // ============================================================================
+  // BATCH FETCH: Get last messages and unread counts for ALL conversations at once
+  // This replaces N+1 queries (2 queries per conversation) with just 2 total queries
+  // ============================================================================
+
+  // Get last messages for all conversations in one query
+  // We fetch recent messages and deduplicate in JS (more efficient than N queries)
+  const { data: allMessages } = await supabase
+    .from("messages")
+    .select("conversation_id, content, message_type, created_at, sender_id")
+    .in("conversation_id", conversationIds)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false });
+
+  // Build a map of conversation_id -> last message
+  const lastMessageMap = new Map<string, typeof allMessages extends (infer T)[] | null ? T : never>();
+  if (allMessages) {
+    for (const msg of allMessages) {
+      if (msg.conversation_id && !lastMessageMap.has(msg.conversation_id)) {
+        lastMessageMap.set(msg.conversation_id, msg);
+      }
+    }
+  }
+
+  // Build participation map for quick lookup of last_read_at
+  const participationMap = new Map<string, { last_read_at: string | null; is_muted: boolean }>();
+  conversations?.forEach((conv) => {
+    const myPart = conv.conversation_participants?.find((p) => p.user_id === user.id);
+    if (myPart) {
+      participationMap.set(conv.id, {
+        last_read_at: myPart.last_read_at,
+        is_muted: myPart.is_muted || false,
+      });
+    }
+  });
+
+  // Calculate unread counts from the messages we already fetched
+  // Group messages by conversation and count those after last_read_at from other users
+  const unreadCountMap = new Map<string, number>();
+  if (allMessages) {
+    for (const msg of allMessages) {
+      if (!msg.conversation_id || msg.sender_id === user.id) continue;
+      
+      const participation = participationMap.get(msg.conversation_id);
+      const lastReadAt = participation?.last_read_at;
+      
+      // Count as unread if message is from another user and after last_read_at (or no last_read_at)
+      const isUnread = !lastReadAt || new Date(msg.created_at!) > new Date(lastReadAt);
+      
+      if (isUnread) {
+        unreadCountMap.set(msg.conversation_id, (unreadCountMap.get(msg.conversation_id) || 0) + 1);
+      }
+    }
+  }
+
+  // Pre-resolve all profile image URLs in parallel
+  const profileImageUrls = new Map<string, string>();
+  const imageUrlPromises: Promise<void>[] = [];
+  
+  profiles?.forEach((profile) => {
+    if (profile.user_id && profile.profile_image_url) {
+      imageUrlPromises.push(
+        resolveStorageUrl(supabase, profile.profile_image_url).then((url) => {
+          profileImageUrls.set(profile.user_id!, url);
+        })
+      );
+    }
+  });
+  await Promise.all(imageUrlPromises);
+
+  // Helper function to format message preview
+  const formatMessagePreview = (msg: { message_type: string | null; content: string | null } | null): string | null => {
+    if (!msg) return null;
+    if (msg.message_type === "text" && msg.content) {
+      return msg.content.length > 50 ? msg.content.substring(0, 50) + "..." : msg.content;
+    } else if (msg.message_type === "image") {
+      return "📷 Photo";
+    } else if (msg.message_type === "video") {
+      return "🎥 Video";
+    } else if (msg.message_type === "audio") {
+      return "🎵 Audio";
+    } else if (msg.message_type === "file") {
+      return "📎 File";
+    }
+    return null;
+  };
+
+  // Format conversations - now synchronous since we pre-fetched everything
   const formattedConversations = await Promise.all(
     (conversations || []).map(async (conv) => {
       const participants = conv.conversation_participants || [];
       const otherParticipants = participants.filter(
         (p) => p.user_id && p.user_id !== user.id
       );
-      const myParticipation = participants.find(
-        (p) => p.user_id === user.id
-      );
+      const myParticipation = participationMap.get(conv.id);
 
       // Get other user info for direct chats
       const otherUserIds = otherParticipants.map((p) => p.user_id).filter((id): id is string => id !== null);
@@ -140,78 +225,33 @@ export async function GET(request: NextRequest) {
         displayName = otherUser?.display_name || 
           `${otherProfile?.first_name || ""} ${otherProfile?.last_name || ""}`.trim() || 
           "User";
-        displayImage = await resolveStorageUrl(supabase, otherProfile?.profile_image_url);
+        displayImage = profileImageUrls.get(otherProfile?.user_id || "") || "";
       }
 
-      // Get last message for this conversation
-      const { data: lastMessages } = await supabase
-        .from("messages")
-        .select("id, content, message_type, created_at, sender_id")
-        .eq("conversation_id", conv.id)
-        .order("created_at", { ascending: false })
-        .limit(1);
+      // Get last message from pre-fetched map
+      const lastMessage = lastMessageMap.get(conv.id) || null;
+      const lastMessagePreview = formatMessagePreview(lastMessage);
 
-      const lastMessage = lastMessages?.[0] || null;
-      let lastMessagePreview: string | null = null;
-      
-      if (lastMessage) {
-        // Format message preview based on type
-        if (lastMessage.message_type === "text" && lastMessage.content) {
-          lastMessagePreview = lastMessage.content.length > 50 
-            ? lastMessage.content.substring(0, 50) + "..." 
-            : lastMessage.content;
-        } else if (lastMessage.message_type === "image") {
-          lastMessagePreview = "📷 Photo";
-        } else if (lastMessage.message_type === "video") {
-          lastMessagePreview = "🎥 Video";
-        } else if (lastMessage.message_type === "audio") {
-          lastMessagePreview = "🎵 Audio";
-        } else if (lastMessage.message_type === "file") {
-          lastMessagePreview = "📎 File";
-        }
-      }
+      // Get unread count from pre-calculated map
+      const unreadCount = unreadCountMap.get(conv.id) || 0;
 
-      // Calculate unread count
-      const lastReadAt = myParticipation?.last_read_at || null;
-      let unreadCount = 0;
-      
-      if (lastReadAt) {
-        const { count } = await supabase
-          .from("messages")
-          .select("id", { count: "exact", head: true })
-          .eq("conversation_id", conv.id)
-          .neq("sender_id", user.id)
-          .gt("created_at", lastReadAt);
-        unreadCount = count || 0;
-      } else {
-        // If never read, count all messages from others
-        const { count } = await supabase
-          .from("messages")
-          .select("id", { count: "exact", head: true })
-          .eq("conversation_id", conv.id)
-          .neq("sender_id", user.id);
-        unreadCount = count || 0;
-      }
-
-      // Convert participant profile images
-      const formattedParticipants = await Promise.all(
-        otherParticipants
-          .filter((p) => p.user_id !== null)
-          .map(async (p) => {
-            const profile = profiles?.find((pr) => pr.user_id === p.user_id);
-            const userData = users?.find((u) => u.id === p.user_id);
-            const profileImage = await resolveStorageUrl(supabase, profile?.profile_image_url);
-            return {
-              UserID: p.user_id!,
-              DisplayName: userData?.display_name || profile?.first_name || "User",
-              FirstName: profile?.first_name || "",
-              LastName: profile?.last_name || "",
-              ProfileImage: profileImage,
-              LastActiveAt: userData?.last_active_at,
-              Role: p.role || "member",
-            };
-          })
-      );
+      // Format participants using pre-resolved image URLs
+      const formattedParticipants = otherParticipants
+        .filter((p) => p.user_id !== null)
+        .map((p) => {
+          const profile = profiles?.find((pr) => pr.user_id === p.user_id);
+          const userData = users?.find((u) => u.id === p.user_id);
+          const profileImage = profileImageUrls.get(p.user_id!) || "";
+          return {
+            UserID: p.user_id!,
+            DisplayName: userData?.display_name || profile?.first_name || "User",
+            FirstName: profile?.first_name || "",
+            LastName: profile?.last_name || "",
+            ProfileImage: profileImage,
+            LastActiveAt: userData?.last_active_at,
+            Role: p.role || "member",
+          };
+        });
 
       return {
         ConversationID: conv.id,

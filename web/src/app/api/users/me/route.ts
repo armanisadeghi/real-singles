@@ -29,26 +29,51 @@ export async function GET() {
     );
   }
 
-  // Get user record
-  const { data: userData, error: userError } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  // Parallelize all queries for better performance
+  const [userResult, profileResult, galleryResult] = await Promise.all([
+    // Get user record - select only needed fields
+    supabase
+      .from("users")
+      .select("id, phone, username, display_name, points_balance, referral_code, status, role")
+      .eq("id", user.id)
+      .single(),
 
-  // Get profile data
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("user_id", user.id)
-    .single();
+    // Get profile data - select only needed fields
+    supabase
+      .from("profiles")
+      .select(`
+        first_name, last_name, date_of_birth, gender, looking_for, zodiac_sign, bio,
+        looking_for_description, dating_intentions, profile_image_url,
+        city, state, country, zip_code, latitude, longitude, hometown,
+        height_inches, body_type, ethnicity,
+        marital_status, religion, political_views, education, occupation, company, schools, languages,
+        smoking, drinking, marijuana, exercise,
+        has_kids, wants_kids, pets,
+        interests, life_goals,
+        ideal_first_date, non_negotiables, worst_job, dream_job, nightclub_or_home, pet_peeves,
+        after_work, way_to_heart, craziest_travel_story, weirdest_gift, past_event,
+        voice_prompt_url, video_intro_url, voice_prompt_duration_seconds, video_intro_duration_seconds,
+        social_link_1, social_link_2,
+        is_verified, verified_at, verification_selfie_url,
+        is_photo_verified, photo_verified_at, is_id_verified, id_verified_at,
+        profile_completion_step, profile_completion_skipped, profile_completion_prefer_not, profile_completed_at,
+        can_start_matching, profile_hidden
+      `)
+      .eq("user_id", user.id)
+      .single(),
 
-  // Get gallery images
-  const { data: gallery } = await supabase
-    .from("user_gallery")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("display_order", { ascending: true });
+    // Get gallery images - select only needed fields
+    supabase
+      .from("user_gallery")
+      .select("id, media_url, media_type, thumbnail_url, is_primary, display_order, caption")
+      .eq("user_id", user.id)
+      .order("display_order", { ascending: true }),
+  ]);
+
+  const userData = userResult.data;
+  const userError = userResult.error;
+  const profile = profileResult.data;
+  const gallery = galleryResult.data;
 
   // Generate signed URLs for gallery items
   const galleryWithUrls = await Promise.all(

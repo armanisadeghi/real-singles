@@ -7,9 +7,12 @@
  * - Likes You: People who liked you
  * - Likes Sent: People you've liked (waiting for response)
  * - Matches: New matches without conversations yet
+ * 
+ * Uses TanStack Query for caching - same data is shared across tabs,
+ * eliminating duplicate API calls and providing instant tab switching.
  */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Heart, Sparkles, MessageCircle, CheckCircle, Users } from "lucide-react";
 import Link from "next/link";
@@ -17,6 +20,13 @@ import { cn } from "@/lib/utils";
 import { MediaBadge } from "@/components/profile";
 import { Avatar } from "@/components/ui/Avatar";
 import { GlassTabs, type Tab } from "@/components/glass";
+import { 
+  useLikesReceived, 
+  useLikesSent, 
+  useMatches, 
+  useUserProfile,
+  useMatchAction,
+} from "@/hooks/queries";
 
 // ================== Interfaces ==================
 
@@ -194,57 +204,22 @@ function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoo
 
 function LikesYouTab() {
   const router = useRouter();
-  const [likes, setLikes] = useState<Like[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [userProfileImage, setUserProfileImage] = useState<string | null>(null);
+  
+  // Use TanStack Query hooks - automatically cached and deduplicated
+  const { data: likesData, isLoading: loading, error, refetch } = useLikesReceived();
+  const { data: profileData } = useUserProfile();
+  const matchAction = useMatchAction();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [likesRes, profileRes] = await Promise.all([
-          fetch("/api/matches/likes-received"),
-          fetch("/api/users/me"),
-        ]);
-        
-        const likesData = await likesRes.json();
-        const profileData = await profileRes.json();
-
-        if (!likesRes.ok) {
-          setError(likesData.error || "Failed to load likes");
-          return;
-        }
-
-        setLikes(likesData.likes || []);
-        // API returns ProfileImageUrl at top level
-        setUserProfileImage(profileData.ProfileImageUrl || profileData.Image || null);
-      } catch (err) {
-        console.error("Error fetching likes:", err);
-        setError("Failed to load likes. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
+  const likes = likesData?.likes || [];
+  const userProfileImage = profileData?.ProfileImageUrl || null;
 
   const handleLikeBack = async (userId: string) => {
     setActionLoading(userId);
     try {
-      const response = await fetch("/api/matches", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ target_user_id: userId, action: "like" }),
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        setLikes((prev) => prev.filter((l) => l.user_id !== userId));
-        if (data.is_mutual && data.conversation_id) {
-          router.push(`/chats/${data.conversation_id}`);
-        }
+      const result = await matchAction.mutateAsync({ targetUserId: userId, action: "like" });
+      if (result.is_mutual && result.conversation_id) {
+        router.push(`/chats/${result.conversation_id}`);
       }
     } catch (err) {
       console.error("Error liking back:", err);
@@ -256,16 +231,7 @@ function LikesYouTab() {
   const handlePass = async (userId: string) => {
     setActionLoading(userId);
     try {
-      const response = await fetch("/api/matches", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ target_user_id: userId, action: "pass" }),
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        setLikes((prev) => prev.filter((l) => l.user_id !== userId));
-      }
+      await matchAction.mutateAsync({ targetUserId: userId, action: "pass" });
     } catch (err) {
       console.error("Error passing:", err);
     } finally {
@@ -284,9 +250,11 @@ function LikesYouTab() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+        <p className="text-red-600 dark:text-red-400 mb-4">
+          {error instanceof Error ? error.message : "Failed to load likes"}
+        </p>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => refetch()}
           className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700"
         >
           Try Again
@@ -398,39 +366,12 @@ function LikesYouTab() {
 // ================== Likes Sent Tab ==================
 
 function LikesSentTab() {
-  const [likes, setLikes] = useState<Like[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userProfileImage, setUserProfileImage] = useState<string | null>(null);
+  // Use TanStack Query hooks - automatically cached and deduplicated
+  const { data: likesData, isLoading: loading, error, refetch } = useLikesSent();
+  const { data: profileData } = useUserProfile();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [likesRes, profileRes] = await Promise.all([
-          fetch("/api/matches/likes-sent"),
-          fetch("/api/users/me"),
-        ]);
-        
-        const likesData = await likesRes.json();
-        const profileData = await profileRes.json();
-
-        if (!likesRes.ok) {
-          setError(likesData.error || "Failed to load sent likes");
-          return;
-        }
-
-        setLikes(likesData.likes || []);
-        setUserProfileImage(profileData.ProfileImageUrl || profileData.Image || null);
-      } catch (err) {
-        console.error("Error fetching sent likes:", err);
-        setError("Failed to load sent likes. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
+  const likes = likesData?.likes || [];
+  const userProfileImage = profileData?.ProfileImageUrl || null;
 
   if (loading) {
     return (
@@ -443,9 +384,11 @@ function LikesSentTab() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+        <p className="text-red-600 dark:text-red-400 mb-4">
+          {error instanceof Error ? error.message : "Failed to load sent likes"}
+        </p>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => refetch()}
           className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700"
         >
           Try Again
@@ -536,45 +479,15 @@ function LikesSentTab() {
 // ================== Matches Tab (New matches without conversations) ==================
 
 function MatchesTab() {
-  const router = useRouter();
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userProfileImage, setUserProfileImage] = useState<string | null>(null);
+  // Use TanStack Query hooks - automatically cached and deduplicated
+  const { data: matchesData, isLoading: loading, error, refetch } = useMatches();
+  const { data: profileData } = useUserProfile();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [matchesRes, profileRes] = await Promise.all([
-          fetch("/api/matches"),
-          fetch("/api/users/me"),
-        ]);
-        
-        const matchesData = await matchesRes.json();
-        const profileData = await profileRes.json();
-
-        if (!matchesRes.ok) {
-          setError(matchesData.error || "Failed to load matches");
-          return;
-        }
-
-        // Filter to only new matches (no conversation yet)
-        const newMatches = (matchesData.matches || []).filter(
-          (m: Match) => !m.conversation_id
-        );
-        
-        setMatches(newMatches);
-        setUserProfileImage(profileData.ProfileImageUrl || profileData.Image || null);
-      } catch (err) {
-        console.error("Error fetching matches:", err);
-        setError("Failed to load matches. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
+  // Filter to only new matches (no conversation yet)
+  const matches = (matchesData?.matches || []).filter(
+    (m: Match) => !m.conversation_id
+  );
+  const userProfileImage = profileData?.ProfileImageUrl || null;
 
   if (loading) {
     return (
@@ -587,9 +500,11 @@ function MatchesTab() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+        <p className="text-red-600 dark:text-red-400 mb-4">
+          {error instanceof Error ? error.message : "Failed to load matches"}
+        </p>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => refetch()}
           className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700"
         >
           Try Again

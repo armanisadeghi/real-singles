@@ -4,7 +4,8 @@
  * AppProviders - Client-side providers for authenticated app section
  * 
  * This component wraps the authenticated (app) routes and provides:
- * - DiscoverProfilesProvider with SSR-initialized first profile
+ * - TanStack Query for client-side caching and request deduplication
+ * - DiscoverProfilesProvider with lazy-loaded first profile
  * - User context for current user data
  * 
  * Separated from root Providers because it requires authenticated user context
@@ -16,6 +17,7 @@ import {
   DiscoverProfilesProvider,
   type DiscoverProfile,
 } from "@/contexts/DiscoverProfilesContext";
+import { QueryProvider } from "./QueryProvider";
 
 // =============================================================================
 // CURRENT USER CONTEXT
@@ -48,6 +50,8 @@ interface AppProvidersProps {
   initialDiscoverProfile?: DiscoverProfile | null;
   /** Reason for empty state if no initial profile */
   initialDiscoverEmptyReason?: DiscoverEmptyReason;
+  /** If true, will fetch discover profiles on demand instead of requiring SSR profile */
+  lazyLoadDiscover?: boolean;
 }
 
 export function AppProviders({
@@ -55,15 +59,19 @@ export function AppProviders({
   currentUser,
   initialDiscoverProfile,
   initialDiscoverEmptyReason,
+  lazyLoadDiscover = false,
 }: AppProvidersProps) {
   return (
-    <CurrentUserContext.Provider value={currentUser}>
-      <DiscoverProfilesProvider
-        initialProfile={initialDiscoverProfile}
-        initialEmptyReason={initialDiscoverEmptyReason}
-      >
-        {children}
-      </DiscoverProfilesProvider>
-    </CurrentUserContext.Provider>
+    <QueryProvider>
+      <CurrentUserContext.Provider value={currentUser}>
+        <DiscoverProfilesProvider
+          initialProfile={initialDiscoverProfile}
+          initialEmptyReason={initialDiscoverEmptyReason}
+          lazyLoad={lazyLoadDiscover}
+        >
+          {children}
+        </DiscoverProfilesProvider>
+      </CurrentUserContext.Provider>
+    </QueryProvider>
   );
 }

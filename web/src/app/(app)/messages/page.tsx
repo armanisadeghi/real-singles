@@ -7,14 +7,16 @@
  * - New Matches (horizontal carousel) - matches without conversations
  * - Messages (vertical list) - active conversations
  * 
- * Refreshes data on mount, visibility change, and focus to ensure fresh state.
+ * Uses TanStack Query for caching and automatic request deduplication.
+ * Data stays fresh with configurable stale times and optional background refetch.
  */
 
-import { useEffect, useState, useCallback } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { Heart, Camera, Mic, Video } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { Avatar } from "@/components/ui/Avatar";
+import { useMatches, useConversations } from "@/hooks/queries";
 
 // ============================================================================
 // Types
@@ -275,64 +277,37 @@ function ConversationRow({ conversation }: ConversationRowProps) {
 // ============================================================================
 
 export default function MessagesPage() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [newMatches, setNewMatches] = useState<Match[]>([]);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  // Use TanStack Query hooks - handles caching, deduplication, and background refetch
+  const { 
+    data: matchesData, 
+    isLoading: matchesLoading, 
+    error: matchesError,
+    refetch: refetchMatches,
+  } = useMatches();
+  
+  const { 
+    data: conversationsData, 
+    isLoading: conversationsLoading, 
+    error: conversationsError,
+    refetch: refetchConversations,
+  } = useConversations();
 
-  // Fetch all data
-  const refreshData = useCallback(async () => {
-    try {
-      const [matchesRes, conversationsRes] = await Promise.all([
-        fetch("/api/matches"),
-        fetch("/api/conversations"),
-      ]);
+  // Filter matches to only those without conversations
+  const newMatches = useMemo(() => {
+    return (matchesData?.matches || []).filter(
+      (m: Match) => !m.conversation_id
+    );
+  }, [matchesData]);
 
-      if (!matchesRes.ok || !conversationsRes.ok) {
-        throw new Error("Failed to load data");
-      }
+  const conversations = conversationsData?.data || [];
+  const loading = matchesLoading || conversationsLoading;
+  const error = matchesError || conversationsError;
 
-      const matchesData = await matchesRes.json();
-      const conversationsData = await conversationsRes.json();
-
-      // Filter matches to only those without conversations
-      const matchesWithoutConversation = (matchesData.matches || []).filter(
-        (m: Match) => !m.conversation_id
-      );
-
-      setNewMatches(matchesWithoutConversation);
-      setConversations(conversationsData.data || []);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching messages data:", err);
-      setError("Failed to load messages. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Initial load and refresh on visibility/focus change
-  useEffect(() => {
-    refreshData();
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        refreshData();
-      }
-    };
-
-    const handleFocus = () => {
-      refreshData();
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleFocus);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleFocus);
-    };
-  }, [refreshData]);
+  // Refresh function for error retry
+  const refreshData = () => {
+    refetchMatches();
+    refetchConversations();
+  };
 
   // Loading state
   if (loading) {
@@ -363,12 +338,11 @@ export default function MessagesPage() {
   if (error) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+        <p className="text-red-600 dark:text-red-400 mb-4">
+          {error instanceof Error ? error.message : "Failed to load messages. Please try again."}
+        </p>
         <button
-          onClick={() => {
-            setLoading(true);
-            refreshData();
-          }}
+          onClick={refreshData}
           className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
         >
           Try Again

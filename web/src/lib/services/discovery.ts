@@ -219,51 +219,87 @@ export async function getDiscoverableCandidates(
 
   // ==========================================================================
   // STEP 1: Get exclusion lists (blocks, passes, likes, mutual matches)
+  // All queries are PARALLELIZED for ~6x faster execution
   // ==========================================================================
 
-  // Get users current user has blocked
-  const { data: blockedByMe } = await supabase
-    .from("blocks")
-    .select("blocked_id")
-    .eq("blocker_id", userProfile.userId);
-  
-  // Get users who have blocked current user
-  const { data: blockedMe } = await supabase
-    .from("blocks")
-    .select("blocker_id")
-    .eq("blocked_id", userProfile.userId);
+  const [
+    blockedByMeResult,
+    blockedMeResult,
+    myActionsResult,
+    unmatchedUsersResult,
+    passedOnMeResult,
+    likedMeResult,
+    myLikesResult,
+    favoritesResult,
+  ] = await Promise.all([
+    // Get users current user has blocked
+    supabase
+      .from("blocks")
+      .select("blocked_id")
+      .eq("blocker_id", userProfile.userId),
+    
+    // Get users who have blocked current user
+    supabase
+      .from("blocks")
+      .select("blocker_id")
+      .eq("blocked_id", userProfile.userId),
 
-  // Get all users current user has acted on (like, pass, super_like)
-  // Excludes unmatched users to prevent rediscovery
-  const { data: myActions } = await supabase
-    .from("matches")
-    .select("target_user_id")
-    .eq("user_id", userProfile.userId)
-    .eq("is_unmatched", false);
+    // Get all users current user has acted on (like, pass, super_like)
+    // Excludes unmatched users to prevent rediscovery
+    supabase
+      .from("matches")
+      .select("target_user_id")
+      .eq("user_id", userProfile.userId)
+      .eq("is_unmatched", false),
 
-  // Get users who have unmatchedwith current user (bidirectional unmatch history)
-  const { data: unmatchedUsers } = await supabase
-    .from("matches")
-    .select("target_user_id, user_id")
-    .or(
-      `and(user_id.eq.${userProfile.userId},is_unmatched.eq.true),and(target_user_id.eq.${userProfile.userId},is_unmatched.eq.true)`
-    );
+    // Get users who have unmatched with current user (bidirectional unmatch history)
+    supabase
+      .from("matches")
+      .select("target_user_id, user_id")
+      .or(
+        `and(user_id.eq.${userProfile.userId},is_unmatched.eq.true),and(target_user_id.eq.${userProfile.userId},is_unmatched.eq.true)`
+      ),
 
-  // Get users who have PASSED on current user (they rejected us)
-  const { data: passedOnMe } = await supabase
-    .from("matches")
-    .select("user_id")
-    .eq("target_user_id", userProfile.userId)
-    .eq("action", "pass")
-    .eq("is_unmatched", false);
+    // Get users who have PASSED on current user (they rejected us)
+    supabase
+      .from("matches")
+      .select("user_id")
+      .eq("target_user_id", userProfile.userId)
+      .eq("action", "pass")
+      .eq("is_unmatched", false),
 
-  // Get users who have LIKED current user (for "has_liked_me" flag and mutual detection)
-  const { data: likedMe } = await supabase
-    .from("matches")
-    .select("user_id, action")
-    .eq("target_user_id", userProfile.userId)
-    .in("action", ["like", "super_like"])
-    .eq("is_unmatched", false);
+    // Get users who have LIKED current user (for "has_liked_me" flag and mutual detection)
+    supabase
+      .from("matches")
+      .select("user_id, action")
+      .eq("target_user_id", userProfile.userId)
+      .in("action", ["like", "super_like"])
+      .eq("is_unmatched", false),
+
+    // Get my likes (for mutual match detection)
+    supabase
+      .from("matches")
+      .select("target_user_id")
+      .eq("user_id", userProfile.userId)
+      .in("action", ["like", "super_like"])
+      .eq("is_unmatched", false),
+
+    // Get favorites for marking
+    supabase
+      .from("favorites")
+      .select("favorite_user_id")
+      .eq("user_id", userProfile.userId),
+  ]);
+
+  // Extract data from results
+  const blockedByMe = blockedByMeResult.data;
+  const blockedMe = blockedMeResult.data;
+  const myActions = myActionsResult.data;
+  const unmatchedUsers = unmatchedUsersResult.data;
+  const passedOnMe = passedOnMeResult.data;
+  const likedMe = likedMeResult.data;
+  const myLikes = myLikesResult.data;
+  const favorites = favoritesResult.data;
 
   // Build exclusion sets
   const blockedIds = new Set<string>([
@@ -295,15 +331,6 @@ export async function getDiscoverableCandidates(
     likedMe?.map(m => [m.user_id!, m.action]) || []
   );
 
-  // Find mutual matches (I liked them AND they liked me)
-  // We need to check my "like" actions against who liked me
-  const { data: myLikes } = await supabase
-    .from("matches")
-    .select("target_user_id")
-    .eq("user_id", userProfile.userId)
-    .in("action", ["like", "super_like"])
-    .eq("is_unmatched", false);
-
   const myLikedIds = new Set<string>(
     myLikes?.map(m => m.target_user_id).filter((id): id is string => id !== null) || []
   );
@@ -324,12 +351,6 @@ export async function getDiscoverableCandidates(
     ...unmatchedIds, // Prevent rediscovery of unmatched users
     // Note: mutualMatchIds are already in actedOnIds (since I liked them)
   ]);
-
-  // Get favorites for marking
-  const { data: favorites } = await supabase
-    .from("favorites")
-    .select("favorite_user_id")
-    .eq("user_id", userProfile.userId);
 
   const favoriteIds = new Set<string>(
     favorites?.map(f => f.favorite_user_id).filter((id): id is string => id !== null) || []
