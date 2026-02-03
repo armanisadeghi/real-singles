@@ -47,7 +47,7 @@ export function ProductCard({
   const Icon = categoryIcons[product.category] || Gift;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 overflow-hidden hover:shadow-md dark:hover:shadow-black/30 transition-shadow">
       {/* Image */}
       <div className="aspect-square relative">
         {product.image_url ? (
@@ -91,13 +91,13 @@ export function ProductCard({
       {/* Content */}
       <div className="p-4">
         <Link href={`/rewards/${product.id}`}>
-          <h3 className="font-semibold text-gray-900 hover:text-pink-600 transition-colors line-clamp-1">
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 hover:text-pink-600 dark:hover:text-pink-400 transition-colors line-clamp-1">
             {product.name}
           </h3>
         </Link>
 
         {product.description && (
-          <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
             {product.description}
           </p>
         )}
@@ -107,13 +107,13 @@ export function ProductCard({
           <div>
             <div className="flex items-center gap-1.5">
               <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-              <span className="font-bold text-gray-900">
+              <span className="font-bold text-gray-900 dark:text-gray-100">
                 {formatPoints(product.points_cost)}
               </span>
-              <span className="text-sm text-gray-500">pts</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">pts</span>
             </div>
             {product.retail_value && (
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                 ${product.retail_value.toFixed(2)} value
               </p>
             )}
@@ -127,7 +127,7 @@ export function ProductCard({
                 "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                 canAfford && product.is_active
                   ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 active:scale-95"
-                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
               )}
             >
               {loading ? "..." : canAfford ? "Redeem" : "Not enough pts"}

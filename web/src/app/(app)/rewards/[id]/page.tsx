@@ -128,12 +128,12 @@ export default function ProductDetailPage({ params }: PageProps) {
   if (!product) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Product Not Found
         </h1>
         <Link
           href="/rewards"
-          className="text-pink-600 hover:text-pink-700 font-medium"
+          className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 font-medium"
         >
           Back to Rewards Shop
         </Link>
@@ -151,7 +151,7 @@ export default function ProductDetailPage({ params }: PageProps) {
       {/* Back button */}
       <button
         onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span className="text-sm font-medium">Back</span>
@@ -159,13 +159,13 @@ export default function ProductDetailPage({ params }: PageProps) {
 
       {/* Success message */}
       {redeemed && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-            <Check className="w-5 h-5 text-green-600" />
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+            <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <p className="font-medium text-green-800">Successfully Redeemed!</p>
-            <p className="text-sm text-green-600">
+            <p className="font-medium text-green-800 dark:text-green-300">Successfully Redeemed!</p>
+            <p className="text-sm text-green-600 dark:text-green-400">
               Check your email for redemption details.
             </p>
           </div>
@@ -199,33 +199,33 @@ export default function ProductDetailPage({ params }: PageProps) {
             <span
               className={cn(
                 "inline-block px-3 py-1 rounded-full text-sm font-medium",
-                "bg-gray-100 text-gray-700"
+                "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300"
               )}
             >
               {product.category.replace("_", " ")}
             </span>
           </div>
 
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {product.name}
           </h1>
 
           <div className="flex items-center gap-2 mb-4">
             <Star className="w-6 h-6 text-yellow-500 fill-yellow-500" />
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {formatPoints(product.points_cost)}
             </span>
-            <span className="text-gray-500">points</span>
+            <span className="text-gray-500 dark:text-gray-400">points</span>
           </div>
 
           {product.retail_value && (
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               Retail value: ${product.retail_value.toFixed(2)}
             </p>
           )}
 
           {product.description && (
-            <p className="text-gray-600 mb-6">{product.description}</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">{product.description}</p>
           )}
 
           {/* Stock status */}
@@ -233,7 +233,7 @@ export default function ProductDetailPage({ params }: PageProps) {
             <p
               className={cn(
                 "text-sm font-medium mb-4",
-                inStock ? "text-green-600" : "text-red-600"
+                inStock ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
               )}
             >
               {inStock
@@ -253,7 +253,7 @@ export default function ProductDetailPage({ params }: PageProps) {
               "w-full py-3 rounded-xl font-semibold text-lg transition-all",
               canAfford && inStock && product.is_active && !redeemed
                 ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 shadow-lg hover:shadow-xl active:scale-[0.98]"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-200 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
             )}
           >
             {redeemed
@@ -266,7 +266,7 @@ export default function ProductDetailPage({ params }: PageProps) {
           </button>
 
           {!canAfford && !redeemed && (
-            <p className="text-center text-sm text-gray-500 mt-3">
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-3">
               Earn more points by referring friends, leaving reviews, and
               attending events!
             </p>

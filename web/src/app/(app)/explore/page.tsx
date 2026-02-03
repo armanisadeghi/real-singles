@@ -135,7 +135,7 @@ function EventCard({ event }: { event: ApiEvent }) {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+        <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
           {event.EventName}
         </h3>
         <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
@@ -203,7 +203,7 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
       case "full":
         return "bg-amber-500 dark:bg-amber-600 text-white";
       default:
-        return "bg-primary/10 text-primary";
+        return "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300";
     }
   };
 
@@ -248,7 +248,7 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+        <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
           {session.Title}
         </h3>
         <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
@@ -280,14 +280,14 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
 function ComingSoonSection() {
   return (
     <div className="relative rounded-2xl border border-dashed border-border/60 bg-muted/20 p-6 sm:p-8">
-      <div className="absolute top-3 right-3 px-2.5 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full flex items-center gap-1">
+      <div className="absolute top-3 right-3 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-semibold rounded-full flex items-center gap-1">
         <Sparkles className="w-3 h-3" />
         Coming Soon
       </div>
 
       <div className="flex flex-col items-center text-center max-w-sm mx-auto pt-2">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-4">
-          <Video className="w-7 h-7 text-primary/50" />
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 dark:from-amber-900/30 to-amber-50 dark:to-amber-950/20 flex items-center justify-center mb-4">
+          <Video className="w-7 h-7 text-amber-400 dark:text-amber-500" />
         </div>
         <p className="text-muted-foreground text-sm">
           Expert dating tips and relationship advice videos coming soon.
@@ -357,7 +357,7 @@ export default function ExplorePage() {
   if (isLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-7 h-7 text-primary animate-spin" />
+        <Loader2 className="w-7 h-7 text-pink-500 animate-spin" />
       </div>
     );
   }

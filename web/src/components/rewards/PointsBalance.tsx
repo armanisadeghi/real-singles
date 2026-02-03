@@ -78,22 +78,22 @@ interface PointsHistoryProps {
 }
 
 const transactionConfig = {
-  referral: { icon: Users, color: "text-green-500", bg: "bg-green-100" },
-  review: { icon: Star, color: "text-yellow-500", bg: "bg-yellow-100" },
-  event: { icon: Calendar, color: "text-purple-500", bg: "bg-purple-100" },
-  redemption: { icon: Gift, color: "text-pink-500", bg: "bg-pink-100" },
+  referral: { icon: Users, color: "text-green-500 dark:text-green-400", bg: "bg-green-100 dark:bg-green-900/30" },
+  review: { icon: Star, color: "text-yellow-500 dark:text-yellow-400", bg: "bg-yellow-100 dark:bg-yellow-900/30" },
+  event: { icon: Calendar, color: "text-purple-500 dark:text-purple-400", bg: "bg-purple-100 dark:bg-purple-900/30" },
+  redemption: { icon: Gift, color: "text-pink-500 dark:text-pink-400", bg: "bg-pink-100 dark:bg-pink-900/30" },
   admin_adjustment: {
     icon: TrendingUp,
-    color: "text-blue-500",
-    bg: "bg-blue-100",
+    color: "text-blue-500 dark:text-blue-400",
+    bg: "bg-blue-100 dark:bg-blue-900/30",
   },
 };
 
 export function PointsHistory({ transactions }: PointsHistoryProps) {
   if (transactions.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        <Star className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <Star className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
         <p>No transactions yet</p>
         <p className="text-sm mt-1">
           Earn points by referring friends, leaving reviews, and more!
@@ -103,7 +103,7 @@ export function PointsHistory({ transactions }: PointsHistoryProps) {
   }
 
   return (
-    <div className="divide-y">
+    <div className="divide-y divide-gray-200 dark:divide-neutral-700">
       {transactions.map((tx) => {
         const config = transactionConfig[tx.type] || transactionConfig.referral;
         const Icon = config.icon;
@@ -121,13 +121,13 @@ export function PointsHistory({ transactions }: PointsHistoryProps) {
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-900 capitalize">
+              <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">
                 {tx.type.replace("_", " ")}
               </p>
               {tx.description && (
-                <p className="text-sm text-gray-500 truncate">{tx.description}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{tx.description}</p>
               )}
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                 {new Date(tx.created_at).toLocaleDateString()}
               </p>
             </div>
@@ -135,7 +135,7 @@ export function PointsHistory({ transactions }: PointsHistoryProps) {
             <div
               className={cn(
                 "font-bold shrink-0",
-                isPositive ? "text-green-600" : "text-red-600"
+                isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
               )}
             >
               {isPositive ? "+" : ""}

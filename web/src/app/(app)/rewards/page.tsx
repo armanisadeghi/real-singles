@@ -107,8 +107,8 @@ export default function RewardsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Rewards Shop</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Rewards Shop</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Redeem your points for exclusive rewards
           </p>
         </div>
@@ -118,8 +118,8 @@ export default function RewardsPage() {
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors",
             showHistory
-              ? "bg-pink-100 text-pink-700"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              ? "bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400"
+              : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
           )}
         >
           <History className="w-4 h-4" />
@@ -136,8 +136,8 @@ export default function RewardsPage() {
 
       {showHistory ? (
         /* Points History View */
-        <div className="bg-white rounded-xl shadow-sm p-4">
-          <h2 className="font-semibold text-gray-900 mb-4">Transaction History</h2>
+        <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 p-4">
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Transaction History</h2>
           {loading ? (
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -173,7 +173,7 @@ export default function RewardsPage() {
                     "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
                     isActive
                       ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-sm"
-                      : "bg-white text-gray-700 hover:bg-gray-100 border"
+                      : "bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800 border border-gray-200 dark:border-neutral-700"
                   )}
                 >
                   <Icon className="w-4 h-4" />

@@ -59,14 +59,14 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
       />
 
       {/* Modal Content */}
-      <div className="relative bg-white rounded-3xl shadow-2xl mx-4 max-w-sm w-full animate-in zoom-in-95 fade-in duration-300 overflow-hidden">
+      <div className="relative bg-white dark:bg-neutral-900 rounded-3xl shadow-2xl dark:shadow-black/40 mx-4 max-w-sm w-full animate-in zoom-in-95 fade-in duration-300 overflow-hidden">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors z-10"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors z-10"
           aria-label="Close"
         >
-          <X className="w-5 h-5 text-gray-400" />
+          <X className="w-5 h-5 text-gray-400 dark:text-gray-500" />
         </button>
 
         {/* Animated ripple effect container */}
@@ -77,7 +77,7 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
             <div 
               className={cn(
                 "absolute inset-0 rounded-full border-[3px]",
-                feature === "call" ? "border-green-300" : "border-blue-300"
+                feature === "call" ? "border-green-300 dark:border-green-600" : "border-blue-300 dark:border-blue-600"
               )}
               style={{
                 animation: 'ripple 2.5s ease-out infinite',
@@ -88,7 +88,7 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
             <div 
               className={cn(
                 "absolute inset-0 rounded-full border-[3px]",
-                feature === "call" ? "border-green-300" : "border-blue-300"
+                feature === "call" ? "border-green-300 dark:border-green-600" : "border-blue-300 dark:border-blue-600"
               )}
               style={{
                 animation: 'ripple 2.5s ease-out infinite 0.8s',
@@ -99,7 +99,7 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
             <div 
               className={cn(
                 "absolute inset-0 rounded-full border-[3px]",
-                feature === "call" ? "border-green-300" : "border-blue-300"
+                feature === "call" ? "border-green-300 dark:border-green-600" : "border-blue-300 dark:border-blue-600"
               )}
               style={{
                 animation: 'ripple 2.5s ease-out infinite 1.6s',
@@ -109,13 +109,13 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
             {/* Static background circles */}
             <div className={cn(
               "absolute inset-4 rounded-full",
-              feature === "call" ? "bg-green-100/80" : "bg-blue-100/80"
+              feature === "call" ? "bg-green-100/80 dark:bg-green-900/40" : "bg-blue-100/80 dark:bg-blue-900/40"
             )} />
             <div className={cn(
               "absolute inset-10 rounded-full",
-              feature === "call" ? "bg-green-50" : "bg-blue-50"
+              feature === "call" ? "bg-green-50 dark:bg-green-950/50" : "bg-blue-50 dark:bg-blue-950/50"
             )} />
-            <div className="absolute inset-14 rounded-full bg-white" />
+            <div className="absolute inset-14 rounded-full bg-white dark:bg-neutral-900" />
             
             {/* Icon container */}
             <div className={cn(
@@ -145,13 +145,13 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
           {/* Title */}
           <h2 
             id="coming-soon-title"
-            className="text-xl font-semibold text-gray-900 mb-2 text-center"
+            className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 text-center"
           >
             {title} Coming Soon
           </h2>
 
           {/* Description */}
-          <p className="text-gray-500 text-center text-sm mb-6 max-w-xs">
+          <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-6 max-w-xs">
             {description}
           </p>
 

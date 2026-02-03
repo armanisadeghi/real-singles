@@ -208,19 +208,19 @@ END:VCALENDAR`;
 
   if (isLoading) {
     return (
-      <div className="min-h-dvh bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="min-h-dvh bg-gray-50 dark:bg-neutral-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
       </div>
     );
   }
 
   if (error || !event) {
     return (
-      <div className="min-h-dvh bg-gray-50 flex flex-col items-center justify-center p-4">
-        <p className="text-gray-600 mb-4">{error || "Event not found"}</p>
+      <div className="min-h-dvh bg-gray-50 dark:bg-neutral-950 flex flex-col items-center justify-center p-4">
+        <p className="text-gray-600 dark:text-gray-400 mb-4">{error || "Event not found"}</p>
         <Link
           href="/events"
-          className="px-4 py-2 bg-primary text-white rounded-full font-medium hover:bg-primary/90 transition-colors"
+          className="px-4 py-2 bg-pink-500 text-white rounded-full font-medium hover:bg-pink-600 transition-colors"
         >
           Back to Events
         </Link>
@@ -234,9 +234,9 @@ END:VCALENDAR`;
   const registeredUsers = event.interestedUsers?.filter(u => u.status === "registered") || [];
 
   return (
-    <div className="min-h-dvh bg-gray-50 pb-24">
+    <div className="min-h-dvh bg-gray-50 dark:bg-neutral-950 pb-24">
       {/* Hero Image */}
-      <div className="relative h-64 sm:h-80 bg-gradient-to-br from-primary/30 to-purple-200">
+      <div className="relative h-64 sm:h-80 bg-gradient-to-br from-amber-100 dark:from-amber-900/30 to-purple-100 dark:to-purple-900/30">
         {event.EventImage && (
           <img
             src={event.EventImage}
@@ -248,26 +248,26 @@ END:VCALENDAR`;
         {/* Back button */}
         <button
           onClick={() => router.back()}
-          className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-sm hover:bg-white transition-colors"
+          className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 dark:bg-neutral-800/90 backdrop-blur flex items-center justify-center shadow-sm hover:bg-white dark:hover:bg-neutral-700 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-700" />
+          <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
         </button>
 
         {/* Action buttons */}
         <div className="absolute top-4 right-4 flex gap-2">
           <button
             onClick={handleShare}
-            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-sm hover:bg-white transition-colors"
+            className="w-10 h-10 rounded-full bg-white/90 dark:bg-neutral-800/90 backdrop-blur flex items-center justify-center shadow-sm hover:bg-white dark:hover:bg-neutral-700 transition-colors"
             title="Share"
           >
-            <Share2 className="w-5 h-5 text-gray-700" />
+            <Share2 className="w-5 h-5 text-gray-700 dark:text-gray-300" />
           </button>
           <button
             onClick={handleAddToCalendar}
-            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-sm hover:bg-white transition-colors"
+            className="w-10 h-10 rounded-full bg-white/90 dark:bg-neutral-800/90 backdrop-blur flex items-center justify-center shadow-sm hover:bg-white dark:hover:bg-neutral-700 transition-colors"
             title="Add to Calendar"
           >
-            <CalendarPlus className="w-5 h-5 text-gray-700" />
+            <CalendarPlus className="w-5 h-5 text-gray-700 dark:text-gray-300" />
           </button>
         </div>
       </div>
@@ -275,15 +275,15 @@ END:VCALENDAR`;
       {/* Content */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 -mt-8 relative z-10">
         {/* Main card */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 p-6 mb-6">
           {/* Title and RSVP */}
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 {event.EventName}
               </h1>
               {event.HostedBy && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Hosted by {event.HostedBy}
                 </p>
               )}
@@ -294,8 +294,8 @@ END:VCALENDAR`;
               disabled={isRsvpLoading || event.Status === "cancelled"}
               className={`flex-shrink-0 px-6 py-2.5 rounded-full font-medium transition-all flex items-center gap-2 ${
                 isRegistered
-                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  : "bg-primary text-white hover:bg-primary/90"
+                  ? "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
+                  : "bg-pink-500 text-white hover:bg-pink-600"
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isRsvpLoading ? (
@@ -308,14 +308,14 @@ END:VCALENDAR`;
           {/* Event info */}
           <div className="grid gap-4 mb-6">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-gray-900 dark:text-gray-100">
                   {formatDate(event.EventDate)}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {event.StartTime}
                   {event.EndTime && ` - ${event.EndTime}`}
                 </p>
@@ -324,20 +324,20 @@ END:VCALENDAR`;
 
             {fullAddress && (
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{event.VenueName || location}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{event.VenueName || location}</p>
                   {event.Street && (
-                    <p className="text-sm text-gray-500">{event.Street}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{event.Street}</p>
                   )}
                   {event.VenueName && location && (
-                    <p className="text-sm text-gray-500">{location}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{location}</p>
                   )}
                   <button
                     onClick={openInMaps}
-                    className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"
+                    className="text-sm text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 mt-1"
                   >
                     Open in Maps
                     <ExternalLink className="w-3 h-3" />
@@ -347,15 +347,15 @@ END:VCALENDAR`;
             )}
 
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Users className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+                <Users className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-gray-900 dark:text-gray-100">
                   {event.CurrentAttendees} attending
                 </p>
                 {event.MaxAttendees && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {event.MaxAttendees - event.CurrentAttendees} spots left
                   </p>
                 )}
@@ -365,9 +365,9 @@ END:VCALENDAR`;
 
           {/* Description */}
           {event.Description && (
-            <div className="border-t pt-6">
-              <h2 className="font-semibold text-gray-900 mb-3">About this event</h2>
-              <p className="text-gray-600 whitespace-pre-wrap">
+            <div className="border-t border-gray-200 dark:border-neutral-700 pt-6">
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">About this event</h2>
+              <p className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
                 {event.Description}
               </p>
             </div>
@@ -376,8 +376,8 @@ END:VCALENDAR`;
 
         {/* Attendees */}
         {registeredUsers.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="font-semibold text-gray-900 mb-4">
+          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 p-6">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">
               Who's going ({registeredUsers.length})
             </h2>
             <div className="flex flex-wrap gap-3">
@@ -385,20 +385,20 @@ END:VCALENDAR`;
                 <Link
                   key={user.user_id}
                   href={`/profile/${user.user_id}`}
-                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
                 >
                   <Avatar
                     src={user.profile_image_url}
                     name={user.display_name}
                     size="sm"
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
                     {user.display_name}
                   </span>
                 </Link>
               ))}
               {registeredUsers.length > 12 && (
-                <div className="flex items-center px-3 text-sm text-gray-500">
+                <div className="flex items-center px-3 text-sm text-gray-500 dark:text-gray-400">
                   +{registeredUsers.length - 12} more
                 </div>
               )}

@@ -194,7 +194,7 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div className="min-h-dvh bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
       </div>
     );
   }
@@ -291,37 +291,37 @@ export default function HomePage() {
           >
             <Link
               href="/search"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
+              className="flex-shrink-0 px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:border-amber-300 dark:hover:border-amber-700/60 rounded-full font-medium text-sm transition-colors"
             >
               Discover
             </Link>
             <Link
               href="/matches"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
+              className="flex-shrink-0 px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:border-amber-300 dark:hover:border-amber-700/60 rounded-full font-medium text-sm transition-colors"
             >
               Top Matches
             </Link>
             <Link
               href="/search?filter=videos"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
+              className="flex-shrink-0 px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:border-amber-300 dark:hover:border-amber-700/60 rounded-full font-medium text-sm transition-colors"
             >
               Videos
             </Link>
             <Link
               href="/speed-dating"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
+              className="flex-shrink-0 px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:border-amber-300 dark:hover:border-amber-700/60 rounded-full font-medium text-sm transition-colors"
             >
               Virtual Dates
             </Link>
             <Link
               href="/search?filter=nearby"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
+              className="flex-shrink-0 px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:border-amber-300 dark:hover:border-amber-700/60 rounded-full font-medium text-sm transition-colors"
             >
               Nearby
             </Link>
             <Link
               href="/events"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
+              className="flex-shrink-0 px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:border-amber-300 dark:hover:border-amber-700/60 rounded-full font-medium text-sm transition-colors"
             >
               Events
             </Link>
@@ -334,10 +334,10 @@ export default function HomePage() {
         {/* Top Matches Section */}
         <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Top Matches</h2>
+            <h2 className="text-xl font-bold text-amber-700 dark:text-amber-400">Top Matches</h2>
             <Link
               href="/matches"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
+              className="text-sm font-medium underline text-gray-700 dark:text-gray-300 hover:text-amber-700 dark:hover:text-amber-400"
             >
               View All
             </Link>
@@ -359,17 +359,17 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">No top matches available</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">No top matches available</p>
           )}
         </section>
 
         {/* Events Section */}
         <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Events</h2>
+            <h2 className="text-xl font-bold text-amber-700 dark:text-amber-400">Events</h2>
             <Link
               href="/events"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
+              className="text-sm font-medium underline text-gray-700 dark:text-gray-300 hover:text-amber-700 dark:hover:text-amber-400"
             >
               View All
             </Link>
@@ -420,17 +420,17 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">No events available</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">No events available</p>
           )}
         </section>
 
         {/* Virtual Speed Dating Section */}
         <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Virtual Speed Dating</h2>
+            <h2 className="text-xl font-bold text-amber-700 dark:text-amber-400">Virtual Speed Dating</h2>
             <Link
               href="/speed-dating"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
+              className="text-sm font-medium underline text-gray-700 dark:text-gray-300 hover:text-amber-700 dark:hover:text-amber-400"
             >
               View All
             </Link>
@@ -444,18 +444,18 @@ export default function HomePage() {
                 <Link
                   key={session.ID}
                   href={`/speed-dating/${session.ID}`}
-                  className="flex-shrink-0 w-72 bg-white rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden border group"
+                  className="flex-shrink-0 w-72 bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 hover:shadow-md dark:hover:shadow-black/30 transition-all overflow-hidden border border-gray-200 dark:border-neutral-700 group"
                 >
                   {/* Image section - matches event card pattern */}
                   {session.Image ? (
-                    <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 relative overflow-hidden">
+                    <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 relative overflow-hidden">
                       <img
                         src={session.Image}
                         alt={session.Title || "Speed dating session"}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       {/* Status badge overlay */}
-                      <span className="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur-sm text-purple-700 text-xs font-medium rounded-full">
+                      <span className="absolute top-2 right-2 px-2 py-1 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
                         {session.Status}
                       </span>
                     </div>
@@ -463,18 +463,18 @@ export default function HomePage() {
                     <div className="aspect-video bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center relative">
                       <Video className="w-12 h-12 text-white/80" />
                       {/* Status badge overlay */}
-                      <span className="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur-sm text-purple-700 text-xs font-medium rounded-full">
+                      <span className="absolute top-2 right-2 px-2 py-1 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
                         {session.Status}
                       </span>
                     </div>
                   )}
                   {/* Content section */}
                   <div className="p-4">
-                    <h3 className="font-bold text-sm mb-1 truncate">{session.Title}</h3>
-                    <p className="text-gray-600 text-xs mb-2 line-clamp-2">
+                    <h3 className="font-bold text-sm mb-1 truncate text-gray-900 dark:text-gray-100">{session.Title}</h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-xs mb-2 line-clamp-2">
                       {session.Description}
                     </p>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {session.ScheduledDate}
@@ -489,17 +489,17 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">No virtual speed dating available</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">No virtual speed dating available</p>
           )}
         </section>
 
         {/* Nearby Profiles Section */}
         <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Nearby Profiles</h2>
+            <h2 className="text-xl font-bold text-amber-700 dark:text-amber-400">Nearby Profiles</h2>
             <Link
               href="/search?filter=nearby"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
+              className="text-sm font-medium underline text-gray-700 dark:text-gray-300 hover:text-amber-700 dark:hover:text-amber-400"
             >
               View All
             </Link>
@@ -521,17 +521,17 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">No nearby profiles available</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">No nearby profiles available</p>
           )}
         </section>
 
         {/* Featured Videos Section */}
         <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Featured Videos</h2>
+            <h2 className="text-xl font-bold text-amber-700 dark:text-amber-400">Featured Videos</h2>
             <Link
               href="/search?filter=videos"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
+              className="text-sm font-medium underline text-gray-700 dark:text-gray-300 hover:text-amber-700 dark:hover:text-amber-400"
             >
               View All
             </Link>

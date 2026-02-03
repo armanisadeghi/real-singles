@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Send, Plus, X } from "lucide-react";
+import { Plus, X, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IMAGE_AND_VIDEO_ACCEPT_STRING } from "@/lib/supabase/storage";
 
@@ -13,19 +13,19 @@ interface MessageInputProps {
 }
 
 /**
- * iOS-style floating message input
+ * iOS Messages-style input
  * 
- * Features:
- * - Floating design without background
- * - Clean, centered alignment
+ * Design:
+ * - Three floating elements: plus button, input pill, send button
+ * - No outer container/background wrapping the elements
+ * - Input is a standalone rounded pill
  * - 16px min font-size (prevents iOS zoom)
- * - Uniform icon sizes
  */
 export function MessageInput({
   onSend,
   onTyping,
   disabled = false,
-  placeholder = "Type a message",
+  placeholder = "Message",
 }: MessageInputProps) {
   const [message, setMessage] = useState("");
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
@@ -96,7 +96,7 @@ export function MessageInput({
     // Auto-resize textarea
     const textarea = e.target;
     textarea.style.height = "auto";
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 100)}px`;
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,10 +152,10 @@ export function MessageInput({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-      <div className="pointer-events-auto px-3 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2">
+      <div className="pointer-events-auto px-2 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-xl">
         {/* Attached image preview */}
         {attachedImage && (
-          <div className="mb-2 ml-12">
+          <div className="mb-2 ml-11">
             <div className="relative inline-block">
               <img
                 src={attachedImage}
@@ -172,86 +172,78 @@ export function MessageInput({
           </div>
         )}
 
-        {/* Input row - CSS glass effect (compatible with position: fixed) */}
-        <div
-          className={cn(
-            "rounded-3xl overflow-hidden",
-            "bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl backdrop-saturate-150",
-            "border border-white/30 dark:border-white/10",
-            "shadow-lg shadow-black/10 dark:shadow-black/30"
-          )}
+        {/* Input row - floating elements */}
+        <form 
+          onSubmit={handleSubmit} 
+          className="flex items-end gap-1.5"
         >
-          <form 
-            onSubmit={handleSubmit} 
-            className="flex items-center gap-2 h-12 px-2"
+          {/* Plus button - floating */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={disabled || isUploading}
+            className={cn(
+              "w-8 h-8 mb-0.5 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
+              "bg-blue-500 text-white",
+              (disabled || isUploading) && "opacity-50"
+            )}
           >
-            {/* Plus button for attachments */}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={disabled || isUploading}
+            {isUploading ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Plus className="w-5 h-5" strokeWidth={2.5} />
+            )}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={IMAGE_AND_VIDEO_ACCEPT_STRING}
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+
+          {/* Text input pill - standalone with border */}
+          <div className="flex-1 relative">
+            <textarea
+              ref={inputRef}
+              value={message}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              disabled={disabled}
+              rows={1}
+              inputMode="text"
+              enterKeyHint="send"
               className={cn(
-                "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
-                "bg-blue-500 dark:bg-blue-600 text-white",
-                (disabled || isUploading) && "opacity-50"
+                "w-full min-h-[36px] pl-3 pr-10 py-2 resize-none",
+                "bg-gray-100 dark:bg-neutral-800",
+                "rounded-[18px] border border-gray-200 dark:border-neutral-700",
+                "text-[16px] leading-[20px] text-gray-900 dark:text-gray-100",
+                "focus:outline-none focus:border-gray-300 dark:focus:border-neutral-600",
+                "disabled:opacity-50",
+                "placeholder:text-gray-400 dark:placeholder:text-gray-500"
               )}
-            >
-              {isUploading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Plus className="w-5 h-5" strokeWidth={2.5} />
-              )}
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={IMAGE_AND_VIDEO_ACCEPT_STRING}
-              onChange={handleFileSelect}
-              className="hidden"
+              style={{ 
+                maxHeight: "120px",
+                touchAction: "manipulation",
+              }}
             />
-
-            {/* Text input - More rounded pill style */}
-            <div className="flex-1 flex items-center">
-              <textarea
-                ref={inputRef}
-                value={message}
-                onChange={handleChange}
-                onKeyDown={handleKeyDown}
-                placeholder={placeholder}
-                disabled={disabled}
-                rows={1}
-                inputMode="text"
-                enterKeyHint="send"
-                className={cn(
-                  "w-full h-9 px-4 py-2 bg-gray-100 dark:bg-neutral-800 rounded-full resize-none overflow-hidden",
-                  "text-[16px] leading-[1.4] text-gray-900 dark:text-gray-100",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500/30",
-                  "disabled:opacity-50",
-                  "placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                )}
-                style={{ 
-                  minHeight: "36px", 
-                  maxHeight: "100px",
-                  touchAction: "manipulation",
-                }}
-              />
-            </div>
-
-            {/* Send button */}
+            
+            {/* Send button - inside input on the right */}
             <button
               type="submit"
               disabled={!canSend}
               className={cn(
-                "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
+                "absolute right-1 bottom-1 w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
                 canSend
-                  ? "bg-blue-500 dark:bg-blue-600 text-white"
-                  : "bg-gray-200 dark:bg-neutral-700 text-gray-400 dark:text-gray-500"
+                  ? "bg-blue-500 text-white"
+                  : "bg-transparent text-gray-300 dark:text-gray-600"
               )}
             >
-              <Send className="w-4 h-4" />
+              <ArrowUp className="w-4 h-4" strokeWidth={2.5} />
             </button>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   );
