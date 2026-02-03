@@ -442,7 +442,7 @@ export function SearchProfileView({
   const location = [profile.city, profile.state].filter(Boolean).join(", ");
 
   return (
-    <div className="h-dvh bg-gray-50 flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-30 bg-gray-50 flex flex-col overflow-hidden">
       {/* Centered container for desktop */}
       <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-center md:py-8 md:px-4 md:gap-6 max-w-6xl mx-auto w-full min-h-0 overflow-hidden">
         
