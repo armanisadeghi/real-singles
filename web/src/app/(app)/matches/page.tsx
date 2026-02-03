@@ -147,17 +147,17 @@ export default function MatchesPage() {
       <p className="text-gray-500 mb-6">People you've matched with</p>
 
       {matches.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl shadow-sm">
-          <div className="flex items-center justify-center mb-4">
-            <Heart className="w-16 h-16 text-pink-300" />
+        <div className="text-center py-8 sm:py-12 bg-white dark:bg-neutral-900 rounded-xl shadow-sm">
+          <div className="flex items-center justify-center mb-3">
+            <Heart className="w-12 h-12 sm:w-14 sm:h-14 text-pink-300 dark:text-pink-400" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No matches yet</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1.5">No matches yet</h2>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-5 px-4">
             Start liking profiles to find your matches!
           </p>
           <Link
             href="/search"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
+            className="inline-block px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
           >
             Search Profiles
           </Link>

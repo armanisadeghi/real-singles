@@ -356,8 +356,8 @@ export default function ExplorePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-7 h-7 text-pink-500 animate-spin" />
+      <div className="min-h-[40vh] sm:min-h-[50vh] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 sm:w-7 sm:h-7 text-pink-500 animate-spin" />
       </div>
     );
   }
@@ -365,7 +365,7 @@ export default function ExplorePage() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center p-4">
+      <div className="min-h-[40vh] sm:min-h-[50vh] flex items-center justify-center p-4">
         <div className="text-center">
           <EmptyState
             title="Unable to load content"
@@ -376,7 +376,7 @@ export default function ExplorePage() {
               setIsLoading(true);
               fetchData();
             }}
-            className="mt-4 px-5 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors"
+            className="mt-3 px-5 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             Try Again
           </button>

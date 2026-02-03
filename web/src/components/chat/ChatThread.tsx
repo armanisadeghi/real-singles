@@ -171,94 +171,89 @@ export function ChatThread({
     <>
       {/* Full-screen chat container - explicit viewport dimensions to override scrollbar-gutter */}
       <div className="fixed top-0 left-0 w-screen h-screen flex flex-col bg-white dark:bg-neutral-950 overflow-hidden">
-        {/* iOS-style Header - Translucent with blur */}
-        <header className="shrink-0 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl pt-[env(safe-area-inset-top)] z-40 border-b border-gray-100 dark:border-neutral-800">
-          <div className="flex items-center gap-3 px-2 py-2 h-[52px]">
-            {/* Back button - iOS chevron style */}
+        {/* iOS 26-style Header - Three floating elements, transparent */}
+        <header className="absolute top-0 left-0 right-0 pt-[env(safe-area-inset-top)] z-40 pointer-events-none">
+          <div className="relative flex items-start justify-between px-3 py-2.5">
+            {/* Left: Back button */}
             <Link
               href="/chats"
-              className="flex items-center justify-center w-10 h-10 -ml-1 rounded-full active:bg-gray-100/80 dark:active:bg-neutral-800/80 transition-colors text-blue-500 dark:text-blue-400"
+              className="pointer-events-auto flex items-center justify-center w-10 h-10 rounded-full bg-gray-200/70 dark:bg-neutral-700/70 backdrop-blur-xl active:bg-gray-300/80 dark:active:bg-neutral-600/80 transition-colors"
             >
-              <ChevronLeft className="w-7 h-7" strokeWidth={2.5} />
+              <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-gray-200" strokeWidth={2.5} />
             </Link>
 
-            {/* Clickable Avatar - navigates to profile */}
-            {conversationType === "direct" && otherParticipant ? (
-              <Link
-                href={`/profile/${otherParticipant.user_id}`}
-                className="shrink-0 flex items-center active:opacity-80 transition-opacity"
-              >
-                <Avatar
-                  src={displayImage}
-                  name={displayName}
-                  size="sm"
-                  showOnlineIndicator={true}
-                  isOnline={isOnline}
-                />
-              </Link>
-            ) : (
-              <div className="shrink-0 flex items-center">
-                <Avatar
-                  src={displayImage}
-                  name={displayName}
-                  size="sm"
-                />
-              </div>
-            )}
-
-            {/* Name - also clickable for direct chats */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
+            {/* Center: Avatar + Name pill overlapping */}
+            <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
               {conversationType === "direct" && otherParticipant ? (
                 <Link
                   href={`/profile/${otherParticipant.user_id}`}
-                  className="block active:opacity-70 transition-opacity"
+                  className="flex flex-col items-center active:opacity-80 transition-opacity"
                 >
-                  <h2 className="font-semibold text-gray-900 dark:text-gray-100 truncate text-[16px] leading-tight">
-                    {displayName}
-                  </h2>
-                  {/* Online status - only show when online */}
-                  {isOnline && (
-                    <p className="text-[12px] text-gray-500 dark:text-gray-400">Active now</p>
-                  )}
+                  {/* Avatar */}
+                  <div className="relative z-10">
+                    <Avatar
+                      src={displayImage}
+                      name={displayName}
+                      size="lg"
+                      showOnlineIndicator={false}
+                    />
+                    {/* Online indicator dot */}
+                    {isOnline && (
+                      <span className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-neutral-950 rounded-full" />
+                    )}
+                  </div>
+                  {/* Name pill - overlaps avatar with negative margin */}
+                  <div className="-mt-3 px-3 py-1 bg-gray-200/70 dark:bg-neutral-700/70 backdrop-blur-xl rounded-full flex items-center gap-0.5">
+                    <span className="text-[14px] font-semibold text-gray-900 dark:text-gray-100">
+                      {displayName}
+                    </span>
+                    <ChevronLeft className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400 rotate-180" strokeWidth={2.5} />
+                  </div>
                 </Link>
               ) : (
-                <>
-                  <h2 className="font-semibold text-gray-900 dark:text-gray-100 truncate text-[16px] leading-tight">
-                    {displayName}
-                  </h2>
-                  {conversationType === "group" && (
-                    <p className="text-[12px] text-gray-500 dark:text-gray-400">{participants.length} members</p>
-                  )}
-                </>
+                <div className="flex flex-col items-center">
+                  <div className="relative z-10">
+                    <Avatar
+                      src={displayImage}
+                      name={displayName}
+                      size="lg"
+                    />
+                  </div>
+                  <div className="-mt-3 px-3 py-1 bg-gray-200/70 dark:bg-neutral-700/70 backdrop-blur-xl rounded-full">
+                    <span className="text-[14px] font-semibold text-gray-900 dark:text-gray-100">
+                      {displayName}
+                    </span>
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* Action buttons - Call & Video */}
-            <div className="flex items-center shrink-0">
+            {/* Right: Call & Video buttons - same style as back button */}
+            <div className="pointer-events-auto flex items-center gap-1.5">
               <button 
                 onClick={handleCallClick}
-                className="flex items-center justify-center w-10 h-10 rounded-full active:bg-gray-100/80 dark:active:bg-neutral-800/80 transition-colors text-blue-500 dark:text-blue-400"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200/70 dark:bg-neutral-700/70 backdrop-blur-xl active:bg-gray-300/80 dark:active:bg-neutral-600/80 transition-colors"
                 aria-label="Voice call"
               >
-                <Phone className="w-6 h-6" />
+                <Phone className="w-5 h-5 text-gray-700 dark:text-gray-200" />
               </button>
               <button 
                 onClick={handleVideoClick}
-                className="flex items-center justify-center w-10 h-10 rounded-full active:bg-gray-100/80 dark:active:bg-neutral-800/80 transition-colors text-blue-500 dark:text-blue-400"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200/70 dark:bg-neutral-700/70 backdrop-blur-xl active:bg-gray-300/80 dark:active:bg-neutral-600/80 transition-colors"
                 aria-label="Video call"
               >
-                <Video className="w-6 h-6" />
+                <Video className="w-5 h-5 text-gray-700 dark:text-gray-200" />
               </button>
             </div>
           </div>
         </header>
 
-        {/* Messages Area - Scrollbar at right edge */}
+        {/* Messages Area - Scrollbar at right edge, padding for floating header */}
         <div
           ref={containerRef}
           className="flex-1 w-full overflow-y-auto overscroll-contain scrollbar-thin"
         >
-          <div className="pl-4 pr-1 py-3 pb-24">
+          <div className="pl-4 pr-1 pt-[100px] pb-24">
             {loading ? (
               <div className="space-y-3 py-2">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -266,14 +261,14 @@ export function ChatThread({
                 ))}
               </div>
             ) : messages.length === 0 ? (
-              <div className="h-full min-h-[50vh] flex flex-col items-center justify-center text-center px-2">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/50 dark:to-purple-900/50 flex items-center justify-center mb-4">
-                  <span className="text-3xl">👋</span>
+              <div className="h-full min-h-[35vh] sm:min-h-[40vh] flex flex-col items-center justify-center text-center px-2">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/50 dark:to-purple-900/50 flex items-center justify-center mb-3">
+                  <span className="text-2xl sm:text-3xl">👋</span>
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 text-sm sm:text-base">
                   Start the conversation
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-[240px]">
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-[220px] sm:max-w-[240px]">
                   Send a message to {displayName} to get things started!
                 </p>
               </div>

@@ -19,6 +19,8 @@ interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
   showAvatar?: boolean;
+  /** Whether avatars are enabled for this conversation (group chats) */
+  avatarsEnabled?: boolean;
   senderName?: string;
   senderImage?: string | null;
 }
@@ -27,6 +29,7 @@ export function MessageBubble({
   message,
   isOwn,
   showAvatar = false,
+  avatarsEnabled = false,
   senderName,
   senderImage,
 }: MessageBubbleProps) {
@@ -75,8 +78,8 @@ export function MessageBubble({
           />
         </div>
       )}
-      {/* Spacer when avatar should show but this isn't the first message */}
-      {!showAvatar && !isOwn && (
+      {/* Spacer when in avatar mode (group chat) but this message doesn't show its avatar */}
+      {avatarsEnabled && !showAvatar && !isOwn && (
         <div className="w-8 shrink-0" />
       )}
 
@@ -230,6 +233,7 @@ export function MessageGroup({
                     message={message}
                     isOwn={isOwn}
                     showAvatar={showAvatar}
+                    avatarsEnabled={showAvatars}
                     senderName={sender?.name}
                     senderImage={sender?.image}
                   />

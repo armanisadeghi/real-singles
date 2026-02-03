@@ -384,19 +384,19 @@ export default function MessagesPage() {
   // Empty state
   if (isEmpty) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <div className="flex items-center justify-center mb-4">
-          <Heart className="w-16 h-16 text-pink-300 dark:text-pink-400" />
+      <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12 text-center">
+        <div className="flex items-center justify-center mb-3">
+          <Heart className="w-12 h-12 sm:w-14 sm:h-14 text-pink-300 dark:text-pink-400" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
           No matches yet
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-5">
           Start exploring to find your matches!
         </p>
         <Link
           href="/discover"
-          className="inline-block px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-medium hover:from-pink-600 hover:to-rose-600 transition-colors"
+          className="inline-block px-5 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-medium rounded-xl hover:from-pink-600 hover:to-rose-600 transition-colors"
         >
           Start Discovering
         </Link>

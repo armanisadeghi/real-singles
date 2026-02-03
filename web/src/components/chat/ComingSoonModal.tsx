@@ -70,13 +70,13 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
         </button>
 
         {/* Animated ripple effect container */}
-        <div className="flex flex-col items-center pt-12 pb-8 px-6">
+        <div className="flex flex-col items-center pt-8 pb-6 px-5">
           {/* Ripple animation */}
-          <div className="relative w-40 h-40 flex items-center justify-center mb-6">
+          <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center mb-4 sm:mb-5">
             {/* Ripple ring 1 - outermost */}
             <div 
               className={cn(
-                "absolute inset-0 rounded-full border-[3px]",
+                "absolute inset-0 rounded-full border-2 sm:border-[3px]",
                 feature === "call" ? "border-green-300 dark:border-green-600" : "border-blue-300 dark:border-blue-600"
               )}
               style={{
@@ -87,7 +87,7 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
             {/* Ripple ring 2 */}
             <div 
               className={cn(
-                "absolute inset-0 rounded-full border-[3px]",
+                "absolute inset-0 rounded-full border-2 sm:border-[3px]",
                 feature === "call" ? "border-green-300 dark:border-green-600" : "border-blue-300 dark:border-blue-600"
               )}
               style={{
@@ -98,7 +98,7 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
             {/* Ripple ring 3 */}
             <div 
               className={cn(
-                "absolute inset-0 rounded-full border-[3px]",
+                "absolute inset-0 rounded-full border-2 sm:border-[3px]",
                 feature === "call" ? "border-green-300 dark:border-green-600" : "border-blue-300 dark:border-blue-600"
               )}
               style={{
@@ -108,23 +108,23 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
             
             {/* Static background circles */}
             <div className={cn(
-              "absolute inset-4 rounded-full",
+              "absolute inset-2 sm:inset-3 rounded-full",
               feature === "call" ? "bg-green-100/80 dark:bg-green-900/40" : "bg-blue-100/80 dark:bg-blue-900/40"
             )} />
             <div className={cn(
-              "absolute inset-10 rounded-full",
+              "absolute inset-6 sm:inset-8 rounded-full",
               feature === "call" ? "bg-green-50 dark:bg-green-950/50" : "bg-blue-50 dark:bg-blue-950/50"
             )} />
-            <div className="absolute inset-14 rounded-full bg-white dark:bg-neutral-900" />
+            <div className="absolute inset-9 sm:inset-12 rounded-full bg-white dark:bg-neutral-900" />
             
             {/* Icon container */}
             <div className={cn(
-              "relative w-16 h-16 rounded-full flex items-center justify-center shadow-lg z-10",
+              "relative w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-lg z-10",
               feature === "call" 
                 ? "bg-gradient-to-br from-green-400 to-green-600" 
                 : "bg-gradient-to-br from-blue-400 to-blue-600"
             )}>
-              <Icon className="w-8 h-8 text-white" />
+              <Icon className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
           </div>
 
@@ -145,13 +145,13 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
           {/* Title */}
           <h2 
             id="coming-soon-title"
-            className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 text-center"
+            className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1.5 text-center"
           >
             {title} Coming Soon
           </h2>
 
           {/* Description */}
-          <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-6 max-w-xs">
+          <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-5 max-w-xs">
             {description}
           </p>
 
@@ -159,7 +159,7 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
           <button
             onClick={onClose}
             className={cn(
-              "w-full py-3.5 rounded-full font-semibold text-white transition-all active:scale-[0.98]",
+              "w-full py-3 rounded-full font-semibold text-white transition-all active:scale-[0.98]",
               feature === "call"
                 ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
                 : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"

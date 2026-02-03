@@ -107,12 +107,12 @@ interface EmptyStateBoostProps {
 
 function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoostProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4">
+    <div className="flex flex-col items-center justify-center py-6 sm:py-10 px-4">
       {/* Animated radar/signal circles with profile photo */}
-      <div className="relative w-64 h-64 flex items-center justify-center mb-8">
+      <div className="relative w-44 h-44 sm:w-56 sm:h-56 flex items-center justify-center mb-5 sm:mb-6">
         {/* Ripple ring 1 - outermost */}
         <div 
-          className="absolute inset-0 rounded-full border-[3px] border-pink-300 dark:border-pink-500/50"
+          className="absolute inset-0 rounded-full border-2 sm:border-[3px] border-pink-300 dark:border-pink-500/50"
           style={{
             animation: 'ripple 2.5s ease-out infinite',
           }}
@@ -120,7 +120,7 @@ function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoo
         
         {/* Ripple ring 2 */}
         <div 
-          className="absolute inset-0 rounded-full border-[3px] border-pink-300 dark:border-pink-500/50"
+          className="absolute inset-0 rounded-full border-2 sm:border-[3px] border-pink-300 dark:border-pink-500/50"
           style={{
             animation: 'ripple 2.5s ease-out infinite 0.8s',
           }}
@@ -128,19 +128,19 @@ function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoo
         
         {/* Ripple ring 3 */}
         <div 
-          className="absolute inset-0 rounded-full border-[3px] border-pink-300 dark:border-pink-500/50"
+          className="absolute inset-0 rounded-full border-2 sm:border-[3px] border-pink-300 dark:border-pink-500/50"
           style={{
             animation: 'ripple 2.5s ease-out infinite 1.6s',
           }}
         />
         
         {/* Static background circles - more visible */}
-        <div className="absolute inset-4 rounded-full bg-pink-100/80 dark:bg-pink-900/30" />
-        <div className="absolute inset-12 rounded-full bg-pink-50 dark:bg-pink-950/40" />
-        <div className="absolute inset-20 rounded-full bg-white dark:bg-neutral-900" />
+        <div className="absolute inset-3 sm:inset-4 rounded-full bg-pink-100/80 dark:bg-pink-900/30" />
+        <div className="absolute inset-8 sm:inset-10 rounded-full bg-pink-50 dark:bg-pink-950/40" />
+        <div className="absolute inset-14 sm:inset-16 rounded-full bg-white dark:bg-neutral-900" />
         
         {/* Profile photo container */}
-        <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white dark:border-neutral-800 shadow-xl dark:shadow-black/30 z-10">
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-[3px] sm:border-4 border-white dark:border-neutral-800 shadow-xl dark:shadow-black/30 z-10">
           {userProfileImage ? (
             <img
               src={userProfileImage}
@@ -149,7 +149,7 @@ function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoo
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center">
-              <Users className="w-10 h-10 text-white" />
+              <Users className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
             </div>
           )}
         </div>
@@ -170,19 +170,19 @@ function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoo
       `}</style>
 
       {/* Title */}
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 text-center">
+      <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1.5 text-center">
         {title}
       </h2>
 
       {/* Description */}
-      <p className="text-gray-500 dark:text-gray-400 text-center max-w-xs mb-6">
+      <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 text-center max-w-xs mb-5">
         {description}
       </p>
 
       {/* Boost CTA */}
       <Link
         href="/boost"
-        className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-pink-600 transition-all active:scale-95"
+        className="px-6 py-2.5 sm:px-8 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-pink-600 transition-all active:scale-95"
       >
         Boost me
       </Link>

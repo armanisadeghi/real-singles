@@ -45,15 +45,15 @@ export default async function FavoritesPage() {
       <p className="text-gray-500 mb-6">Profiles you've saved</p>
 
       {favorites.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl shadow-sm">
-          <div className="text-6xl mb-4">⭐</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No favorites yet</h2>
-          <p className="text-gray-600 mb-6">
+        <div className="text-center py-8 sm:py-12 bg-white dark:bg-neutral-900 rounded-xl shadow-sm">
+          <div className="text-4xl sm:text-5xl mb-3">⭐</div>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1.5">No favorites yet</h2>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-5 px-4">
             Save profiles you like to your favorites!
           </p>
           <a
             href="/search"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700"
+            className="inline-block px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-medium rounded-lg hover:from-amber-600 hover:to-amber-700"
           >
             Search Profiles
           </a>
