@@ -8,10 +8,22 @@ import {
   Sparkles,
   Camera,
   PauseCircle,
+  Eye,
+  Plus,
+  ChevronRight,
+  TrendingUp,
+  Mic,
+  Video,
+  Image as ImageIcon,
+  ShieldCheck,
+  BadgeCheck,
+  IdCard,
 } from "lucide-react";
 import { ReferralCard } from "@/components/profile/ReferralCard";
 import { ShareButton } from "@/components/profile/ShareButton";
+import { ProfileCompletionBadge } from "@/components/profile/ProfileCompletionBadge";
 import { VoiceVideoDisplayClient } from "./VoiceVideoDisplayClient";
+import { ProfilePreviewButton } from "./ProfilePreviewButton";
 import {
   getEducationLabel,
   getReligionLabel,
@@ -30,6 +42,120 @@ import {
   getPoliticalLabel,
   getPetsLabel,
 } from "@/types";
+import { cn } from "@/lib/utils";
+
+// Server-side completion calculation (mirrors API logic)
+interface CompletionField {
+  key: string;
+  step: number;
+  required: boolean;
+}
+
+// Complete field list for profile completion calculation
+// This MUST match the API at /api/profile/completion
+const COMPLETION_FIELDS: CompletionField[] = [
+  // Required fields
+  { key: "first_name", step: 1, required: true },
+  { key: "date_of_birth", step: 2, required: true },
+  { key: "gender", step: 3, required: true },
+  { key: "looking_for", step: 4, required: true },
+  // Physical
+  { key: "height_inches", step: 7, required: false },
+  { key: "body_type", step: 7, required: false },
+  { key: "ethnicity", step: 8, required: false },
+  // Relationship
+  { key: "dating_intentions", step: 9, required: false },
+  { key: "marital_status", step: 9, required: false },
+  // Location
+  { key: "country", step: 10, required: false },
+  { key: "city", step: 10, required: false },
+  { key: "state", step: 10, required: false },
+  { key: "hometown", step: 10, required: false },
+  // Career
+  { key: "occupation", step: 11, required: false },
+  { key: "company", step: 11, required: false },
+  { key: "education", step: 12, required: false },
+  { key: "schools", step: 12, required: false },
+  // Beliefs
+  { key: "religion", step: 13, required: false },
+  { key: "political_views", step: 13, required: false },
+  // Lifestyle
+  { key: "exercise", step: 14, required: false },
+  { key: "languages", step: 15, required: false },
+  // Habits
+  { key: "smoking", step: 16, required: false },
+  { key: "drinking", step: 16, required: false },
+  { key: "marijuana", step: 16, required: false },
+  // Family
+  { key: "has_kids", step: 17, required: false },
+  { key: "wants_kids", step: 17, required: false },
+  { key: "pets", step: 18, required: false },
+  // Personality
+  { key: "interests", step: 19, required: false },
+  { key: "life_goals", step: 20, required: false },
+  { key: "zodiac_sign", step: 2, required: false },
+  // About
+  { key: "bio", step: 21, required: false },
+  { key: "looking_for_description", step: 22, required: false },
+  // Prompts (11 total)
+  { key: "ideal_first_date", step: 23, required: false },
+  { key: "non_negotiables", step: 24, required: false },
+  { key: "way_to_heart", step: 25, required: false },
+  { key: "after_work", step: 26, required: false },
+  { key: "nightclub_or_home", step: 27, required: false },
+  { key: "pet_peeves", step: 28, required: false },
+  { key: "craziest_travel_story", step: 29, required: false },
+  { key: "weirdest_gift", step: 30, required: false },
+  { key: "worst_job", step: 31, required: false },
+  { key: "dream_job", step: 32, required: false },
+  { key: "past_event", step: 32, required: false },
+  // Social
+  { key: "social_link_1", step: 33, required: false },
+  { key: "social_link_2", step: 33, required: false },
+  // Media (voice & video)
+  { key: "voice_prompt_url", step: 34, required: false },
+  { key: "video_intro_url", step: 34, required: false },
+  // Verification
+  { key: "verification_selfie_url", step: 6, required: false },
+];
+
+function hasValue(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string" && value.trim() === "") return false;
+  if (Array.isArray(value) && value.length === 0) return false;
+  return true;
+}
+
+function calculateProfileCompletion(
+  profile: Record<string, unknown>,
+  photoCount: number
+): { percentage: number; completedCount: number; totalCount: number; incompleteFields: string[] } {
+  const skippedFields = (profile.profile_completion_skipped as string[]) || [];
+  const preferNotFields = (profile.profile_completion_prefer_not as string[]) || [];
+  
+  let completedCount = 0;
+  const incompleteFields: string[] = [];
+  
+  for (const field of COMPLETION_FIELDS) {
+    const value = profile[field.key];
+    const isPreferNot = preferNotFields.includes(field.key);
+    
+    if (hasValue(value) || isPreferNot) {
+      completedCount++;
+    } else {
+      incompleteFields.push(field.key);
+    }
+  }
+  
+  // Photos count as 1 field
+  const hasPhotos = hasValue(profile.profile_image_url) || photoCount > 0;
+  if (hasPhotos) completedCount++;
+  
+  const totalCount = COMPLETION_FIELDS.length + 1; // +1 for photos
+  const percentage = Math.round((completedCount / totalCount) * 100);
+  
+  return { percentage, completedCount, totalCount, incompleteFields };
+}
 
 async function getMyProfile() {
   const supabase = await createClient();
@@ -54,6 +180,9 @@ async function getMyProfile() {
     .select("*")
     .eq("user_id", user.id)
     .order("display_order");
+
+  // Count photos (images only, not videos)
+  const photoCount = (gallery || []).filter(g => g.media_type === "image").length;
 
   // Generate signed URLs for gallery items
   const galleryWithUrls = await Promise.all(
@@ -100,6 +229,11 @@ async function getMyProfile() {
     videoIntroUrl = signedData?.signedUrl || videoIntroUrl;
   }
 
+  // Calculate completion
+  const completion = profile 
+    ? calculateProfileCompletion(profile, photoCount)
+    : { percentage: 0, completedCount: 0, totalCount: COMPLETION_FIELDS.length + 1, incompleteFields: [] };
+
   return {
     user: { ...user, ...userData },
     profile: profile ? { 
@@ -109,6 +243,8 @@ async function getMyProfile() {
       video_intro_url: videoIntroUrl,
     } : null,
     gallery: galleryWithUrls,
+    photoCount,
+    completion,
   };
 }
 
@@ -130,8 +266,16 @@ export default async function MyProfilePage() {
     redirect("/login");
   }
 
-  const { user, profile, gallery } = data;
+  const { user, profile, gallery, photoCount, completion } = data;
   const hasProfile = profile !== null;
+
+  // Completion color based on percentage
+  const getCompletionColor = (pct: number) => {
+    if (pct < 33) return "text-red-500";
+    if (pct < 66) return "text-orange-500";
+    if (pct < 100) return "text-green-500";
+    return "text-pink-500";
+  };
 
   // Format height helper
   const formatHeight = (inches: number) => {
@@ -244,26 +388,32 @@ export default async function MyProfilePage() {
                     </p>
                   )}
 
-                  {/* Action Buttons */}
+                  {/* Action Buttons - Icon only for compact fit */}
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <Link
                       href="/profile/edit"
-                      className="inline-flex items-center justify-center gap-1 h-8 px-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-medium rounded-full hover:from-pink-600 hover:to-rose-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97] shadow-md shadow-pink-500/20"
+                      className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full hover:from-pink-600 hover:to-rose-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97] shadow-md shadow-pink-500/20"
+                      title="Edit Profile"
                     >
-                      <Edit3 className="w-3.5 h-3.5" />
-                      <span>Edit</span>
+                      <Edit3 className="w-4 h-4" />
                     </Link>
                     <Link
                       href="/settings"
-                      className="inline-flex items-center justify-center gap-1 h-8 px-3 bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400 text-sm font-medium rounded-full hover:bg-gray-200 dark:hover:bg-neutral-700 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97]"
+                      className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-neutral-700 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97]"
+                      title="Settings"
                     >
-                      <Settings className="w-3.5 h-3.5" />
-                      <span>Settings</span>
+                      <Settings className="w-4 h-4" />
                     </Link>
                     <ShareButton
                       referralCode={user.referral_code || ""}
-                      className="h-8 px-3 text-sm"
-                      labelVisibility="always"
+                      className="h-8 w-8 !px-0"
+                      labelVisibility="never"
+                    />
+                    <ProfilePreviewButton
+                      profile={profile}
+                      gallery={gallery}
+                      userName={profile.first_name || user.display_name || "You"}
+                      iconOnly
                     />
                   </div>
                 </div>
@@ -271,32 +421,49 @@ export default async function MyProfilePage() {
             </div>
           </div>
 
-          {/* Stats Bar - Compact & Refined */}
+          {/* Stats Bar - 4 columns with completion score */}
           <div className="bg-gray-50/80 dark:bg-neutral-900/80 backdrop-blur-sm border-b dark:border-neutral-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-3 divide-x divide-gray-200 dark:divide-neutral-700">
+              <div className="grid grid-cols-4 divide-x divide-gray-200 dark:divide-neutral-700">
                 <div className="py-3 sm:py-4 text-center">
-                  <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+                  <div className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
                     {user.points_balance || 0}
                   </div>
-                  <div className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Points</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Points</div>
                 </div>
                 <div className="py-3 sm:py-4 text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{gallery.length}</div>
-                  <div className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Photos</div>
+                  <div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{photoCount}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Photos</div>
                 </div>
                 <div className="py-3 sm:py-4 text-center">
-                  <div className="flex items-center justify-center h-7 sm:h-8">
+                  <div className="flex items-center justify-center h-6 sm:h-8">
                     {profile.is_verified ? (
                       <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                     ) : (
-                      <span className="text-xl sm:text-2xl font-bold text-gray-300 dark:text-gray-600">—</span>
+                      <span className="text-lg sm:text-2xl font-bold text-gray-300 dark:text-gray-600">—</span>
                     )}
                   </div>
-                  <div className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Verified</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Verified</div>
                 </div>
+                <Link 
+                  href="/onboarding?resume=true"
+                  className="py-3 sm:py-4 text-center hover:bg-gray-100/50 dark:hover:bg-neutral-800/50 transition-colors"
+                >
+                  <div className={cn(
+                    "text-lg sm:text-2xl font-bold",
+                    getCompletionColor(completion.percentage)
+                  )}>
+                    {completion.percentage}
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Complete</div>
+                </Link>
               </div>
             </div>
+          </div>
+
+          {/* Profile Completion Badge */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <ProfileCompletionBadge variant="expanded" />
           </div>
 
           {/* Main Content */}
@@ -305,111 +472,46 @@ export default async function MyProfilePage() {
               {/* Left Column - Main Content */}
               <div className="min-w-0 space-y-6">
                 {/* About */}
-                {profile.bio && (
-                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">About</h3>
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">About</h3>
+                    <Link href="/profile/edit" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                  </div>
+                  {profile.bio ? (
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-[15px] lg:text-base whitespace-pre-wrap">{profile.bio}</p>
-                  </section>
-                )}
+                  ) : (
+                    <AddFieldPrompt label="Tell others about yourself" href="/onboarding?resume=true" />
+                  )}
+                </section>
 
-                {/* Profile Prompts */}
-                {(profile.ideal_first_date || profile.non_negotiables || profile.way_to_heart || 
-                  profile.after_work || profile.pet_peeves || profile.nightclub_or_home ||
-                  profile.worst_job || profile.dream_job || profile.craziest_travel_story ||
-                  profile.weirdest_gift || profile.past_event) && (
-                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">My Profile</h3>
-                      <Link 
-                        href="/profile/edit" 
-                        className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors"
-                      >
-                        Edit
-                      </Link>
-                    </div>
-                    <div className="space-y-6">
-                      {profile.ideal_first_date && (
-                        <PromptAnswer 
-                          question="My ideal first date" 
-                          answer={profile.ideal_first_date} 
-                        />
-                      )}
-                      {profile.non_negotiables && (
-                        <PromptAnswer 
-                          question="My non-negotiables" 
-                          answer={profile.non_negotiables} 
-                        />
-                      )}
-                      {profile.way_to_heart && (
-                        <PromptAnswer 
-                          question="The way to my heart" 
-                          answer={profile.way_to_heart} 
-                        />
-                      )}
-                      {profile.after_work && (
-                        <PromptAnswer 
-                          question="After work you'll find me" 
-                          answer={profile.after_work} 
-                        />
-                      )}
-                      {profile.pet_peeves && (
-                        <PromptAnswer 
-                          question="My pet peeves" 
-                          answer={profile.pet_peeves} 
-                        />
-                      )}
-                      {profile.nightclub_or_home && (
-                        <PromptAnswer 
-                          question="Nightclub or cozy night in?" 
-                          answer={profile.nightclub_or_home} 
-                        />
-                      )}
-                      {profile.worst_job && (
-                        <PromptAnswer 
-                          question="Worst job I've had" 
-                          answer={profile.worst_job} 
-                        />
-                      )}
-                      {profile.dream_job && (
-                        <PromptAnswer 
-                          question="My dream job" 
-                          answer={profile.dream_job} 
-                        />
-                      )}
-                      {profile.craziest_travel_story && (
-                        <PromptAnswer 
-                          question="Craziest travel story" 
-                          answer={profile.craziest_travel_story} 
-                        />
-                      )}
-                      {profile.weirdest_gift && (
-                        <PromptAnswer 
-                          question="Weirdest gift I've received" 
-                          answer={profile.weirdest_gift} 
-                        />
-                      )}
-                      {profile.past_event && (
-                        <PromptAnswer 
-                          question="Past event I'd attend" 
-                          answer={profile.past_event} 
-                        />
-                      )}
-                    </div>
-                  </section>
-                )}
+                {/* Profile Prompts - Always show all */}
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Profile Prompts</h3>
+                    <Link href="/profile/edit" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                  </div>
+                  <div className="space-y-6">
+                    <PromptField question="My ideal first date" answer={profile.ideal_first_date} />
+                    <PromptField question="My non-negotiables" answer={profile.non_negotiables} />
+                    <PromptField question="The way to my heart" answer={profile.way_to_heart} />
+                    <PromptField question="After work you'll find me" answer={profile.after_work} />
+                    <PromptField question="My pet peeves" answer={profile.pet_peeves} />
+                    <PromptField question="Nightclub or cozy night in?" answer={profile.nightclub_or_home} />
+                    <PromptField question="Worst job I've had" answer={profile.worst_job} />
+                    <PromptField question="My dream job" answer={profile.dream_job} />
+                    <PromptField question="Craziest travel story" answer={profile.craziest_travel_story} />
+                    <PromptField question="Weirdest gift I've received" answer={profile.weirdest_gift} />
+                    <PromptField question="Past event I'd attend" answer={profile.past_event} />
+                  </div>
+                </section>
 
-                {/* Voice & Video Section */}
-                {(profile.voice_prompt_url || profile.video_intro_url) && (
-                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Voice & Video</h3>
-                      <Link 
-                        href="/profile/edit#voice-video" 
-                        className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors"
-                      >
-                        Edit
-                      </Link>
-                    </div>
+                {/* Voice & Video Section - Always show */}
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Voice & Video</h3>
+                    <Link href="/profile/edit#voice-video" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                  </div>
+                  {profile.voice_prompt_url || profile.video_intro_url ? (
                     <VoiceVideoDisplayClient
                       voicePromptUrl={profile.voice_prompt_url}
                       voicePromptDuration={profile.voice_prompt_duration_seconds}
@@ -417,83 +519,120 @@ export default async function MyProfilePage() {
                       videoIntroDuration={profile.video_intro_duration_seconds}
                       userName={profile.first_name || user.display_name || "You"}
                     />
-                  </section>
-                )}
-
-                {/* Gallery */}
-                {gallery.length > 0 && (
-                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Gallery</h3>
-                      <Link 
-                        href="/profile/gallery" 
-                        className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors"
-                      >
-                        Manage
-                      </Link>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 lg:gap-3">
-                      {gallery.slice(0, 6).map((item) => {
-                        const isVideo = item.media_type === "video";
-                        return (
-                          <div key={item.id} className="aspect-square rounded-xl lg:rounded-2xl overflow-hidden bg-gray-100 dark:bg-neutral-800 shadow-sm">
-                            {isVideo ? (
-                              <video src={item.media_url} className="w-full h-full object-cover" muted playsInline />
-                            ) : (
-                              <img 
-                                src={item.media_url} 
-                                alt="Gallery photo" 
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 ease-out" 
-                              />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {gallery.length > 6 && (
-                      <Link 
-                        href="/profile/gallery" 
-                        className="block text-center text-sm text-gray-500 dark:text-gray-400 font-medium mt-4 hover:text-pink-500 dark:hover:text-pink-400 transition-colors"
-                      >
-                        +{gallery.length - 6} more
-                      </Link>
+                  ) : null}
+                  <div className="space-y-3 mt-3">
+                    {!profile.voice_prompt_url && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-neutral-800 rounded-xl">
+                        <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                          <Mic className="w-5 h-5 text-pink-500" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Voice Prompt</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Record a 30-second voice intro</p>
+                        </div>
+                        <Link href="/profile/edit#voice-video" className="text-sm text-pink-500 font-medium flex items-center gap-1 hover:text-pink-600">
+                          <Plus className="w-4 h-4" /> Add
+                        </Link>
+                      </div>
                     )}
-                  </section>
-                )}
+                    {!profile.video_intro_url && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-neutral-800 rounded-xl">
+                        <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                          <Video className="w-5 h-5 text-purple-500" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Video Intro</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Record a 60-second video intro</p>
+                        </div>
+                        <Link href="/profile/edit#voice-video" className="text-sm text-pink-500 font-medium flex items-center gap-1 hover:text-pink-600">
+                          <Plus className="w-4 h-4" /> Add
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </section>
 
-                {/* Interests */}
-                {profile.interests && (profile.interests as string[]).length > 0 && (
-                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Interests</h3>
+                {/* Gallery - Always show */}
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Gallery ({photoCount} photos)</h3>
+                    <Link href="/profile/gallery" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Manage</Link>
+                  </div>
+                  {gallery.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-3 gap-2 lg:gap-3">
+                        {gallery.slice(0, 6).map((item) => {
+                          const isVideo = item.media_type === "video";
+                          return (
+                            <div key={item.id} className="aspect-square rounded-xl lg:rounded-2xl overflow-hidden bg-gray-100 dark:bg-neutral-800 shadow-sm">
+                              {isVideo ? (
+                                <video src={item.media_url} className="w-full h-full object-cover" muted playsInline />
+                              ) : (
+                                <img src={item.media_url} alt="Gallery photo" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 ease-out" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {gallery.length > 6 && (
+                        <Link href="/profile/gallery" className="block text-center text-sm text-gray-500 dark:text-gray-400 font-medium mt-4 hover:text-pink-500 dark:hover:text-pink-400 transition-colors">
+                          +{gallery.length - 6} more
+                        </Link>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-neutral-800 rounded-xl">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <ImageIcon className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Add Photos</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Upload photos to your gallery</p>
+                      </div>
+                      <Link href="/profile/gallery" className="text-sm text-pink-500 font-medium flex items-center gap-1 hover:text-pink-600">
+                        <Plus className="w-4 h-4" /> Add
+                      </Link>
+                    </div>
+                  )}
+                </section>
+
+                {/* Interests - Always show */}
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Interests</h3>
+                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                  </div>
+                  {profile.interests && (profile.interests as string[]).length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {(profile.interests as string[]).map((interest) => (
-                        <span
-                          key={interest}
-                          className="px-4 py-2 bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/30 dark:to-purple-900/30 text-pink-700 dark:text-pink-300 rounded-full text-sm font-semibold border border-pink-100 dark:border-pink-800"
-                        >
+                        <span key={interest} className="px-4 py-2 bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/30 dark:to-purple-900/30 text-pink-700 dark:text-pink-300 rounded-full text-sm font-semibold border border-pink-100 dark:border-pink-800">
                           {interest}
                         </span>
                       ))}
                     </div>
-                  </section>
-                )}
+                  ) : (
+                    <AddFieldPrompt label="Add your interests" href="/onboarding?resume=true" />
+                  )}
+                </section>
 
-                {/* Life Goals */}
-                {profile.life_goals && (profile.life_goals as string[]).length > 0 && (
-                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Life Goals</h3>
+                {/* Life Goals - Always show */}
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Life Goals</h3>
+                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                  </div>
+                  {profile.life_goals && (profile.life_goals as string[]).length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {(profile.life_goals as string[]).map((goal) => (
-                        <span
-                          key={goal}
-                          className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold border border-blue-100 dark:border-blue-800"
-                        >
+                        <span key={goal} className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold border border-blue-100 dark:border-blue-800">
                           {goal}
                         </span>
                       ))}
                     </div>
-                  </section>
-                )}
+                  ) : (
+                    <AddFieldPrompt label="Add your life goals" href="/onboarding?resume=true" />
+                  )}
+                </section>
               </div>
 
               {/* Right Column - Sidebar */}
@@ -503,146 +642,128 @@ export default async function MyProfilePage() {
                   <ReferralCard referralCode={user.referral_code} />
                 )}
 
-                {/* Basic Details */}
+                {/* Verification Status - Always show */}
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
-                  <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">About Me</h3>
+                  <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Verification</h3>
                   <div className="space-y-3">
-                    {profile.gender && (
-                      <DetailRow label="Gender" value={getGenderLabel(profile.gender)} />
-                    )}
-                    {profile.height_inches && (
-                      <DetailRow label="Height" value={formatHeight(profile.height_inches)} />
-                    )}
-                    {profile.body_type && (
-                      <DetailRow label="Body Type" value={getBodyTypeLabel(profile.body_type)} />
-                    )}
-                    {profile.ethnicity && profile.ethnicity.length > 0 && (
-                      <DetailRow label="Ethnicity" value={getEthnicityLabels(profile.ethnicity)} />
-                    )}
-                    {profile.marital_status && (
-                      <DetailRow label="Marital Status" value={getMaritalStatusLabel(profile.marital_status)} />
-                    )}
-                    {profile.zodiac_sign && (
-                      <DetailRow label="Zodiac" value={getZodiacLabel(profile.zodiac_sign)} />
-                    )}
-                    {profile.hometown && (
-                      <DetailRow label="Hometown" value={profile.hometown} />
-                    )}
+                    <VerificationRow 
+                      icon={<ShieldCheck className="w-5 h-5" />}
+                      label="Selfie Verification" 
+                      verified={profile.is_verified || false}
+                      href="/onboarding?resume=true"
+                    />
+                    <VerificationRow 
+                      icon={<BadgeCheck className="w-5 h-5" />}
+                      label="Photo Verified" 
+                      verified={profile.is_photo_verified || false}
+                      href="/profile/edit"
+                    />
+                    <VerificationRow 
+                      icon={<IdCard className="w-5 h-5" />}
+                      label="ID Verified" 
+                      verified={profile.is_id_verified || false}
+                      href="/profile/edit"
+                      premium
+                    />
                   </div>
                 </section>
 
-                {/* Education & Career */}
-                {(profile.education || profile.occupation || profile.company || (profile.schools && profile.schools.length > 0)) && (
-                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Education & Career</h3>
-                    <div className="space-y-3">
-                      {profile.education && (
-                        <DetailRow label="Education" value={getEducationLabel(profile.education)} />
-                      )}
-                      {profile.schools && profile.schools.length > 0 && (
-                        <DetailRow label="Schools" value={(profile.schools as string[]).join(", ")} />
-                      )}
-                      {profile.occupation && (
-                        <DetailRow label="Occupation" value={profile.occupation} />
-                      )}
-                      {profile.company && (
-                        <DetailRow label="Company" value={profile.company} />
-                      )}
-                    </div>
-                  </section>
-                )}
+                {/* About Me - Always show all fields */}
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">About Me</h3>
+                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                  </div>
+                  <div className="space-y-3">
+                    <DetailRowWithAdd label="Gender" value={profile.gender ? getGenderLabel(profile.gender) : null} />
+                    <DetailRowWithAdd label="Height" value={profile.height_inches ? formatHeight(profile.height_inches) : null} />
+                    <DetailRowWithAdd label="Body Type" value={profile.body_type ? getBodyTypeLabel(profile.body_type) : null} />
+                    <DetailRowWithAdd label="Ethnicity" value={profile.ethnicity && profile.ethnicity.length > 0 ? getEthnicityLabels(profile.ethnicity) : null} />
+                    <DetailRowWithAdd label="Marital Status" value={profile.marital_status ? getMaritalStatusLabel(profile.marital_status) : null} />
+                    <DetailRowWithAdd label="Zodiac" value={profile.zodiac_sign ? getZodiacLabel(profile.zodiac_sign) : null} />
+                    <DetailRowWithAdd label="Hometown" value={profile.hometown || null} />
+                    <DetailRowWithAdd label="Dating Intentions" value={profile.dating_intentions ? getDatingIntentionsLabel(profile.dating_intentions) : null} />
+                  </div>
+                </section>
 
-                {/* Lifestyle */}
-                {(profile.smoking || profile.drinking || profile.marijuana || profile.exercise || 
-                  profile.has_kids || profile.wants_kids || (profile.pets && profile.pets.length > 0)) && (
-                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Lifestyle</h3>
-                    <div className="space-y-3">
-                      {profile.smoking && (
-                        <DetailRow label="Smoking" value={getSmokingLabel(profile.smoking)} />
-                      )}
-                      {profile.drinking && (
-                        <DetailRow label="Drinking" value={getDrinkingLabel(profile.drinking)} />
-                      )}
-                      {profile.marijuana && (
-                        <DetailRow label="Marijuana" value={getMarijuanaLabel(profile.marijuana)} />
-                      )}
-                      {profile.exercise && (
-                        <DetailRow label="Exercise" value={getExerciseLabel(profile.exercise)} />
-                      )}
-                      {profile.has_kids && (
-                        <DetailRow label="Has Kids" value={getHasKidsLabel(profile.has_kids)} />
-                      )}
-                      {profile.wants_kids && (
-                        <DetailRow label="Wants Kids" value={getWantsKidsLabel(profile.wants_kids)} />
-                      )}
-                      {profile.pets && profile.pets.length > 0 && (
-                        <DetailRow 
-                          label="Pets" 
-                          value={(profile.pets as string[]).map(p => getPetsLabel(p)).join(", ")} 
-                        />
-                      )}
-                    </div>
-                  </section>
-                )}
+                {/* Education & Career - Always show all fields */}
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Education & Career</h3>
+                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                  </div>
+                  <div className="space-y-3">
+                    <DetailRowWithAdd label="Education" value={profile.education ? getEducationLabel(profile.education) : null} />
+                    <DetailRowWithAdd label="Schools" value={profile.schools && profile.schools.length > 0 ? (profile.schools as string[]).join(", ") : null} />
+                    <DetailRowWithAdd label="Occupation" value={profile.occupation || null} />
+                    <DetailRowWithAdd label="Company" value={profile.company || null} />
+                  </div>
+                </section>
 
-                {/* Additional Info */}
-                {(profile.religion || profile.political_views || profile.dating_intentions || 
-                  (profile.languages && profile.languages.length > 0) || 
-                  (profile.looking_for && profile.looking_for.length > 0)) && (
-                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Additional Info</h3>
-                    <div className="space-y-3">
-                      {profile.religion && (
-                        <DetailRow label="Religion" value={getReligionLabel(profile.religion)} />
-                      )}
-                      {profile.political_views && (
-                        <DetailRow label="Politics" value={getPoliticalLabel(profile.political_views)} />
-                      )}
-                      {profile.dating_intentions && (
-                        <DetailRow label="Dating Intentions" value={getDatingIntentionsLabel(profile.dating_intentions)} />
-                      )}
-                      {profile.looking_for && profile.looking_for.length > 0 && (
-                        <DetailRow 
-                          label="Looking For" 
-                          value={(profile.looking_for as string[]).join(", ")} 
-                        />
-                      )}
-                      {profile.languages && profile.languages.length > 0 && (
-                        <DetailRow label="Languages" value={(profile.languages as string[]).join(", ")} />
-                      )}
-                    </div>
-                  </section>
-                )}
+                {/* Lifestyle - Always show all fields */}
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Lifestyle</h3>
+                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                  </div>
+                  <div className="space-y-3">
+                    <DetailRowWithAdd label="Smoking" value={profile.smoking ? getSmokingLabel(profile.smoking) : null} />
+                    <DetailRowWithAdd label="Drinking" value={profile.drinking ? getDrinkingLabel(profile.drinking) : null} />
+                    <DetailRowWithAdd label="Marijuana" value={profile.marijuana ? getMarijuanaLabel(profile.marijuana) : null} />
+                    <DetailRowWithAdd label="Exercise" value={profile.exercise ? getExerciseLabel(profile.exercise) : null} />
+                  </div>
+                </section>
 
-                {/* Social Links */}
-                {(profile.social_link_1 || profile.social_link_2) && (
-                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Social Links</h3>
-                    <div className="space-y-2">
-                      {profile.social_link_1 && (
-                        <a 
-                          href={profile.social_link_1} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-sm text-pink-500 hover:text-pink-600 font-medium break-all"
-                        >
-                          {profile.social_link_1}
-                        </a>
-                      )}
-                      {profile.social_link_2 && (
-                        <a 
-                          href={profile.social_link_2} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-sm text-pink-500 hover:text-pink-600 font-medium break-all"
-                        >
-                          {profile.social_link_2}
-                        </a>
-                      )}
-                    </div>
-                  </section>
-                )}
+                {/* Family - Always show all fields */}
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Family</h3>
+                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                  </div>
+                  <div className="space-y-3">
+                    <DetailRowWithAdd label="Has Kids" value={profile.has_kids ? getHasKidsLabel(profile.has_kids) : null} />
+                    <DetailRowWithAdd label="Wants Kids" value={profile.wants_kids ? getWantsKidsLabel(profile.wants_kids) : null} />
+                    <DetailRowWithAdd label="Pets" value={profile.pets && profile.pets.length > 0 ? (profile.pets as string[]).map(p => getPetsLabel(p)).join(", ") : null} />
+                  </div>
+                </section>
+
+                {/* Additional Info - Always show all fields */}
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Additional Info</h3>
+                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                  </div>
+                  <div className="space-y-3">
+                    <DetailRowWithAdd label="Religion" value={profile.religion ? getReligionLabel(profile.religion) : null} />
+                    <DetailRowWithAdd label="Politics" value={profile.political_views ? getPoliticalLabel(profile.political_views) : null} />
+                    <DetailRowWithAdd label="Looking For" value={profile.looking_for && profile.looking_for.length > 0 ? (profile.looking_for as string[]).map(g => getGenderLabel(g)).join(", ") : null} />
+                    <DetailRowWithAdd label="Languages" value={profile.languages && profile.languages.length > 0 ? (profile.languages as string[]).join(", ") : null} />
+                  </div>
+                </section>
+
+                {/* Social Links - Always show */}
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Social Links</h3>
+                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                  </div>
+                  <div className="space-y-2">
+                    {profile.social_link_1 ? (
+                      <a href={profile.social_link_1} target="_blank" rel="noopener noreferrer" className="block text-sm text-pink-500 hover:text-pink-600 font-medium break-all">
+                        {profile.social_link_1}
+                      </a>
+                    ) : (
+                      <DetailRowWithAdd label="Social Link 1" value={null} />
+                    )}
+                    {profile.social_link_2 ? (
+                      <a href={profile.social_link_2} target="_blank" rel="noopener noreferrer" className="block text-sm text-pink-500 hover:text-pink-600 font-medium break-all">
+                        {profile.social_link_2}
+                      </a>
+                    ) : (
+                      <DetailRowWithAdd label="Social Link 2" value={null} />
+                    )}
+                  </div>
+                </section>
               </div>
             </div>
           </div>
@@ -652,22 +773,94 @@ export default async function MyProfilePage() {
   );
 }
 
-// Helper component for detail rows
-function DetailRow({ label, value }: { label: string; value: string }) {
+// Helper component for "Add" field prompts
+function AddFieldPrompt({ label, href }: { label: string; href: string }) {
+  return (
+    <Link 
+      href={href}
+      className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 hover:text-pink-500 dark:hover:text-pink-400 transition-colors group"
+    >
+      <Plus className="w-4 h-4" />
+      <span>{label}</span>
+      <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 -ml-1 transition-opacity" />
+    </Link>
+  );
+}
+
+// Helper component for detail rows with "Add" indicator
+function DetailRowWithAdd({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-sm text-gray-500 dark:text-gray-400 font-medium shrink-0">{label}</span>
-      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize text-right break-words">{value}</span>
+      {value ? (
+        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize text-right break-words">{value}</span>
+      ) : (
+        <Link href="/onboarding?resume=true" className="text-sm text-gray-300 dark:text-gray-600 hover:text-pink-500 dark:hover:text-pink-400 flex items-center gap-1 transition-colors">
+          <Plus className="w-3.5 h-3.5" />
+          <span>Add</span>
+        </Link>
+      )}
     </div>
   );
 }
 
-// Helper component for prompt answers
-function PromptAnswer({ question, answer }: { question: string; answer: string }) {
+// Helper component for prompt fields (always show, with "Add" if empty)
+function PromptField({ question, answer }: { question: string; answer: string | null | undefined }) {
   return (
     <div>
       <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">{question}</p>
-      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">{answer}</p>
+      {answer ? (
+        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">{answer}</p>
+      ) : (
+        <Link 
+          href="/onboarding?resume=true"
+          className="inline-flex items-center gap-1 text-sm text-gray-300 dark:text-gray-600 hover:text-pink-500 dark:hover:text-pink-400 transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>Add your answer</span>
+        </Link>
+      )}
+    </div>
+  );
+}
+
+// Helper component for verification status rows
+function VerificationRow({ 
+  icon, 
+  label, 
+  verified, 
+  href,
+  premium = false 
+}: { 
+  icon: React.ReactNode;
+  label: string; 
+  verified: boolean;
+  href: string;
+  premium?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className={cn(
+        "w-10 h-10 rounded-full flex items-center justify-center",
+        verified 
+          ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" 
+          : "bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500"
+      )}>
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{label}</p>
+        {premium && !verified && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">Premium feature</p>
+        )}
+      </div>
+      {verified ? (
+        <CheckCircle className="w-5 h-5 text-green-500" />
+      ) : (
+        <Link href={href} className="text-sm text-pink-500 font-medium flex items-center gap-1 hover:text-pink-600">
+          <Plus className="w-4 h-4" /> Verify
+        </Link>
+      )}
     </div>
   );
 }

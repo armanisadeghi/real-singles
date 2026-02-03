@@ -9,3 +9,4 @@ export { MediaRecordingControls, type RecordingState } from "./MediaRecordingCon
 export { VoiceVideoDisplay } from "./VoiceVideoDisplay";
 export { MediaBadge, MediaPlayBadge } from "./MediaBadge";
 export { VerificationSelfieCapture } from "./VerificationSelfieCapture";
+export { ProfileCompletionBadge } from "./ProfileCompletionBadge";

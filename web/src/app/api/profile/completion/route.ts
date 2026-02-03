@@ -29,49 +29,117 @@ interface ProfileField {
   category: string;      // Grouping for UI
 }
 
-// Define all profile fields in order
+// Define ALL profile fields for completion calculation
+// This is the authoritative list - any field that can be shown on a profile should be here
 const PROFILE_FIELDS: ProfileField[] = [
-  // Step 1: Basic Info (Required)
+  // ============================================
+  // REQUIRED FIELDS (must complete to start matching)
+  // ============================================
   { key: "first_name", dbColumn: "first_name", label: "First Name", required: true, sensitive: false, step: 1, category: "basic" },
   { key: "date_of_birth", dbColumn: "date_of_birth", label: "Date of Birth", required: true, sensitive: false, step: 2, category: "basic" },
   { key: "gender", dbColumn: "gender", label: "Gender", required: true, sensitive: false, step: 3, category: "basic" },
   { key: "looking_for", dbColumn: "looking_for", label: "Looking For", required: true, sensitive: false, step: 4, category: "basic" },
-  { key: "profile_image_url", dbColumn: "profile_image_url", label: "Profile Photo", required: true, sensitive: false, step: 5, category: "media" },
+  // Note: profile_image_url is handled separately via photo count
   
-  // Step 6-10: Location & Physical
-  { key: "city", dbColumn: "city", label: "City", required: false, sensitive: false, step: 6, category: "location" },
-  { key: "state", dbColumn: "state", label: "State", required: false, sensitive: false, step: 7, category: "location" },
-  { key: "height_inches", dbColumn: "height_inches", label: "Height", required: false, sensitive: false, step: 8, category: "physical" },
-  { key: "body_type", dbColumn: "body_type", label: "Body Type", required: false, sensitive: false, step: 9, category: "physical" },
-  { key: "ethnicity", dbColumn: "ethnicity", label: "Ethnicity", required: false, sensitive: true, step: 10, category: "physical" },
+  // ============================================
+  // PHYSICAL ATTRIBUTES
+  // ============================================
+  { key: "height_inches", dbColumn: "height_inches", label: "Height", required: false, sensitive: false, step: 7, category: "physical" },
+  { key: "body_type", dbColumn: "body_type", label: "Body Type", required: false, sensitive: false, step: 7, category: "physical" },
+  { key: "ethnicity", dbColumn: "ethnicity", label: "Ethnicity", required: false, sensitive: true, step: 8, category: "physical" },
   
-  // Step 11-15: Background
-  { key: "religion", dbColumn: "religion", label: "Religion", required: false, sensitive: true, step: 11, category: "background" },
-  { key: "political_views", dbColumn: "political_views", label: "Political Views", required: false, sensitive: true, step: 12, category: "background" },
-  { key: "education", dbColumn: "education", label: "Education", required: false, sensitive: false, step: 13, category: "background" },
-  { key: "occupation", dbColumn: "occupation", label: "Occupation", required: false, sensitive: false, step: 14, category: "background" },
-  { key: "marital_status", dbColumn: "marital_status", label: "Marital Status", required: false, sensitive: true, step: 15, category: "background" },
+  // ============================================
+  // RELATIONSHIP PREFERENCES
+  // ============================================
+  { key: "dating_intentions", dbColumn: "dating_intentions", label: "Dating Intentions", required: false, sensitive: false, step: 9, category: "relationship" },
+  { key: "marital_status", dbColumn: "marital_status", label: "Marital Status", required: false, sensitive: true, step: 9, category: "relationship" },
   
-  // Step 16-20: Family & Lifestyle
-  { key: "has_kids", dbColumn: "has_kids", label: "Have Children", required: false, sensitive: true, step: 16, category: "family" },
+  // ============================================
+  // LOCATION
+  // ============================================
+  { key: "country", dbColumn: "country", label: "Country", required: false, sensitive: false, step: 10, category: "location" },
+  { key: "city", dbColumn: "city", label: "City", required: false, sensitive: false, step: 10, category: "location" },
+  { key: "state", dbColumn: "state", label: "State", required: false, sensitive: false, step: 10, category: "location" },
+  { key: "hometown", dbColumn: "hometown", label: "Hometown", required: false, sensitive: false, step: 10, category: "location" },
+  
+  // ============================================
+  // EDUCATION & CAREER
+  // ============================================
+  { key: "occupation", dbColumn: "occupation", label: "Occupation", required: false, sensitive: false, step: 11, category: "career" },
+  { key: "company", dbColumn: "company", label: "Company", required: false, sensitive: false, step: 11, category: "career" },
+  { key: "education", dbColumn: "education", label: "Education Level", required: false, sensitive: false, step: 12, category: "education" },
+  { key: "schools", dbColumn: "schools", label: "Schools", required: false, sensitive: false, step: 12, category: "education" },
+  
+  // ============================================
+  // BELIEFS & VALUES
+  // ============================================
+  { key: "religion", dbColumn: "religion", label: "Religion", required: false, sensitive: true, step: 13, category: "beliefs" },
+  { key: "political_views", dbColumn: "political_views", label: "Political Views", required: false, sensitive: true, step: 13, category: "beliefs" },
+  
+  // ============================================
+  // LIFESTYLE
+  // ============================================
+  { key: "exercise", dbColumn: "exercise", label: "Exercise", required: false, sensitive: false, step: 14, category: "lifestyle" },
+  { key: "languages", dbColumn: "languages", label: "Languages", required: false, sensitive: false, step: 15, category: "lifestyle" },
+  
+  // ============================================
+  // HABITS
+  // ============================================
+  { key: "smoking", dbColumn: "smoking", label: "Smoking", required: false, sensitive: false, step: 16, category: "habits" },
+  { key: "drinking", dbColumn: "drinking", label: "Drinking", required: false, sensitive: false, step: 16, category: "habits" },
+  { key: "marijuana", dbColumn: "marijuana", label: "Marijuana", required: false, sensitive: true, step: 16, category: "habits" },
+  
+  // ============================================
+  // FAMILY
+  // ============================================
+  { key: "has_kids", dbColumn: "has_kids", label: "Have Children", required: false, sensitive: true, step: 17, category: "family" },
   { key: "wants_kids", dbColumn: "wants_kids", label: "Want Children", required: false, sensitive: true, step: 17, category: "family" },
-  { key: "smoking", dbColumn: "smoking", label: "Smoking", required: false, sensitive: false, step: 18, category: "lifestyle" },
-  { key: "drinking", dbColumn: "drinking", label: "Drinking", required: false, sensitive: false, step: 19, category: "lifestyle" },
-  { key: "marijuana", dbColumn: "marijuana", label: "Marijuana", required: false, sensitive: true, step: 20, category: "lifestyle" },
+  { key: "pets", dbColumn: "pets", label: "Pets", required: false, sensitive: false, step: 18, category: "family" },
   
-  // Step 21-25: Interests & Prompts
-  { key: "interests", dbColumn: "interests", label: "Interests", required: false, sensitive: false, step: 21, category: "interests" },
-  { key: "bio", dbColumn: "bio", label: "About Me", required: false, sensitive: false, step: 22, category: "prompts" },
+  // ============================================
+  // INTERESTS & PERSONALITY
+  // ============================================
+  { key: "interests", dbColumn: "interests", label: "Interests", required: false, sensitive: false, step: 19, category: "personality" },
+  { key: "life_goals", dbColumn: "life_goals", label: "Life Goals", required: false, sensitive: false, step: 20, category: "personality" },
+  { key: "zodiac_sign", dbColumn: "zodiac_sign", label: "Zodiac Sign", required: false, sensitive: false, step: 2, category: "personality" }, // Auto-calculated from DOB
+  
+  // ============================================
+  // BIO & DESCRIPTIONS
+  // ============================================
+  { key: "bio", dbColumn: "bio", label: "About Me", required: false, sensitive: false, step: 21, category: "about" },
+  { key: "looking_for_description", dbColumn: "looking_for_description", label: "What I'm Looking For", required: false, sensitive: false, step: 22, category: "about" },
+  
+  // ============================================
+  // PROFILE PROMPTS (11 total)
+  // ============================================
   { key: "ideal_first_date", dbColumn: "ideal_first_date", label: "Ideal First Date", required: false, sensitive: false, step: 23, category: "prompts" },
-  { key: "way_to_heart", dbColumn: "way_to_heart", label: "Way to My Heart", required: false, sensitive: false, step: 24, category: "prompts" },
-  { key: "craziest_travel_story", dbColumn: "craziest_travel_story", label: "Craziest Thing", required: false, sensitive: false, step: 25, category: "prompts" },
+  { key: "non_negotiables", dbColumn: "non_negotiables", label: "Non-Negotiables", required: false, sensitive: false, step: 24, category: "prompts" },
+  { key: "way_to_heart", dbColumn: "way_to_heart", label: "Way to My Heart", required: false, sensitive: false, step: 25, category: "prompts" },
+  { key: "after_work", dbColumn: "after_work", label: "After Work", required: false, sensitive: false, step: 26, category: "prompts" },
+  { key: "nightclub_or_home", dbColumn: "nightclub_or_home", label: "Nightclub or Home", required: false, sensitive: false, step: 27, category: "prompts" },
+  { key: "pet_peeves", dbColumn: "pet_peeves", label: "Pet Peeves", required: false, sensitive: false, step: 28, category: "prompts" },
+  { key: "craziest_travel_story", dbColumn: "craziest_travel_story", label: "Craziest Travel Story", required: false, sensitive: false, step: 29, category: "prompts" },
+  { key: "weirdest_gift", dbColumn: "weirdest_gift", label: "Weirdest Gift", required: false, sensitive: false, step: 30, category: "prompts" },
+  { key: "worst_job", dbColumn: "worst_job", label: "Worst Job", required: false, sensitive: false, step: 31, category: "prompts" },
+  { key: "dream_job", dbColumn: "dream_job", label: "Dream Job", required: false, sensitive: false, step: 32, category: "prompts" },
+  { key: "past_event", dbColumn: "past_event", label: "Past Event", required: false, sensitive: false, step: 32, category: "prompts" },
   
-  // Step 26-30: Additional (Optional)
-  { key: "languages", dbColumn: "languages", label: "Languages", required: false, sensitive: false, step: 26, category: "additional" },
-  { key: "pets", dbColumn: "pets", label: "Pets", required: false, sensitive: false, step: 27, category: "additional" },
-  { key: "exercise", dbColumn: "exercise", label: "Exercise", required: false, sensitive: false, step: 28, category: "additional" },
-  { key: "zodiac_sign", dbColumn: "zodiac_sign", label: "Zodiac Sign", required: false, sensitive: false, step: 29, category: "additional" },
-  { key: "schools", dbColumn: "schools", label: "Schools", required: false, sensitive: false, step: 30, category: "additional" },
+  // ============================================
+  // SOCIAL LINKS
+  // ============================================
+  { key: "social_link_1", dbColumn: "social_link_1", label: "Social Link 1", required: false, sensitive: false, step: 33, category: "social" },
+  { key: "social_link_2", dbColumn: "social_link_2", label: "Social Link 2", required: false, sensitive: false, step: 33, category: "social" },
+  
+  // ============================================
+  // MEDIA (Voice & Video)
+  // ============================================
+  { key: "voice_prompt_url", dbColumn: "voice_prompt_url", label: "Voice Prompt", required: false, sensitive: false, step: 34, category: "media" },
+  { key: "video_intro_url", dbColumn: "video_intro_url", label: "Video Intro", required: false, sensitive: false, step: 34, category: "media" },
+  
+  // ============================================
+  // VERIFICATION
+  // ============================================
+  { key: "verification_selfie_url", dbColumn: "verification_selfie_url", label: "Verification Selfie", required: false, sensitive: false, step: 6, category: "verification" },
 ];
 
 // Required fields that must be completed before matching
@@ -135,18 +203,22 @@ function calculateCompletion(
     }
   }
   
-  // Calculate percentage (prefer_not counts as complete for percentage)
-  const percentage = Math.round((completedFields.length / TOTAL_FIELDS) * 100);
+  // Check photo requirement
+  const hasMinimumPhotos = MIN_PHOTOS_REQUIRED <= 0 || photoCount >= MIN_PHOTOS_REQUIRED;
+  const photoShortfall = MIN_PHOTOS_REQUIRED > 0 ? Math.max(0, MIN_PHOTOS_REQUIRED - photoCount) : 0;
+  
+  // Photos count as +1 in total for percentage calculation
+  const photoComplete = hasMinimumPhotos ? 1 : 0;
+  const totalWithPhotos = TOTAL_FIELDS + 1;
+  
+  // Calculate percentage (prefer_not counts as complete, photos count as +1)
+  const percentage = Math.round(((completedFields.length + photoComplete) / totalWithPhotos) * 100);
   
   // Find next field to complete (first incomplete that's not "prefer not to say")
   // Skip fields that user has skipped for now, but still show them
   const nextField = incompleteFields.length > 0 
     ? PROFILE_FIELDS.find(f => incompleteFields.includes(f.key))
     : null;
-  
-  // Check photo requirement
-  const hasMinimumPhotos = MIN_PHOTOS_REQUIRED <= 0 || photoCount >= MIN_PHOTOS_REQUIRED;
-  const photoShortfall = MIN_PHOTOS_REQUIRED > 0 ? Math.max(0, MIN_PHOTOS_REQUIRED - photoCount) : 0;
   
   // Check if all required fields are complete AND photo requirement is met
   const canStartMatching = requiredIncomplete.length === 0 && hasMinimumPhotos;
@@ -156,8 +228,8 @@ function calculateCompletion(
   
   return {
     percentage,
-    completedCount: completedFields.length,
-    totalCount: TOTAL_FIELDS,
+    completedCount: completedFields.length + photoComplete,
+    totalCount: totalWithPhotos,
     completedFields,
     incompleteFields,
     requiredIncomplete,

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { VoiceRecorder, VideoRecorder, VerificationSelfieCapture } from "@/components/profile";
+import { VoiceRecorder, VideoRecorder, VerificationSelfieCapture, ProfileCompletionBadge } from "@/components/profile";
 import { getExtensionFromMimeType } from "@/hooks/useMediaPermissions";
 import {
   GENDER_OPTIONS,
@@ -1002,7 +1002,7 @@ export default function EditProfilePage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-6">
       {/* Compact Header Bar */}
       <div className="flex items-center justify-between gap-3 mb-4">
-        {/* Left: Back + Title */}
+        {/* Left: Back + Title + Completion */}
         <div className="flex items-center gap-2 min-w-0">
           <Link
             href="/profile"
@@ -1012,6 +1012,7 @@ export default function EditProfilePage() {
             <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           </Link>
           <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit</h1>
+          <ProfileCompletionBadge variant="compact" className="hidden sm:inline-flex" />
         </div>
 
         {/* Right: Action Buttons + Status */}

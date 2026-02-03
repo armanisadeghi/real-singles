@@ -377,6 +377,7 @@ export async function PUT(request: Request) {
       FirstName: "first_name",
       LastName: "last_name",
       DOB: "date_of_birth",
+      DateOfBirth: "date_of_birth", // Web onboarding alias
       Gender: "gender",
       ZodiacSign: "zodiac_sign",
       HSign: "zodiac_sign", // Mobile alias

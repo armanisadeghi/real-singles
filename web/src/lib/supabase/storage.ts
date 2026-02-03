@@ -127,20 +127,26 @@ export function getEventImagePath(eventId: string, filename: string): string {
 
 /**
  * Generate the storage path for a voice prompt
- * Format: voice/{userId}/{timestamp}.{ext}
+ * Format: {userId}/voice_{timestamp}.{ext}
+ * 
+ * Note: The userId must be first to satisfy the RLS policy which checks
+ * that the first folder matches the authenticated user's ID.
  */
 export function getVoicePromptPath(userId: string, fileExtension: string): string {
   const timestamp = Date.now();
-  return `voice/${userId}/${timestamp}.${fileExtension}`;
+  return `${userId}/voice_${timestamp}.${fileExtension}`;
 }
 
 /**
  * Generate the storage path for a video intro
- * Format: video_intro/{userId}/{timestamp}.{ext}
+ * Format: {userId}/video_intro_{timestamp}.{ext}
+ * 
+ * Note: The userId must be first to satisfy the RLS policy which checks
+ * that the first folder matches the authenticated user's ID.
  */
 export function getVideoIntroPath(userId: string, fileExtension: string): string {
   const timestamp = Date.now();
-  return `video_intro/${userId}/${timestamp}.${fileExtension}`;
+  return `${userId}/video_intro_${timestamp}.${fileExtension}`;
 }
 
 /**
