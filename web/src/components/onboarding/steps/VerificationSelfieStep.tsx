@@ -28,6 +28,7 @@ export function VerificationSelfieStep({
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [existingSelfieUrl, setExistingSelfieUrl] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -36,6 +37,7 @@ export function VerificationSelfieStep({
   // Fetch existing selfie
   useEffect(() => {
     if (hasVerificationSelfie) {
+      setImageLoaded(false); // Reset loading state
       fetch("/api/users/me/verification-selfie")
         .then((res) => res.json())
         .then((data) => {

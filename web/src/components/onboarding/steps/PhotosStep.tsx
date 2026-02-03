@@ -140,50 +140,52 @@ export function PhotosStep({ photoCount, onPhotosChange }: PhotosStepProps) {
       title="Add your photos"
       subtitle="Show your best self — at least 1 photo required"
     >
-      {/* Photo grid */}
-      <div className="grid grid-cols-3 gap-2">
+      {/* Photo grid - gap-3 to allow room for ring */}
+      <div className="grid grid-cols-3 gap-3">
         {/* Existing photos */}
         {photos.map((photo) => (
           <div
             key={photo.id}
             className={cn(
-              "relative aspect-square rounded-xl overflow-hidden",
-              "bg-gray-100 dark:bg-neutral-800",
-              photo.isPrimary && "ring-2 ring-pink-500"
+              "relative aspect-square rounded-xl",
+              photo.isPrimary && "ring-2 ring-offset-2 ring-pink-500"
             )}
           >
-            <img
-              src={photo.url}
-              alt="Profile photo"
-              className="w-full h-full object-cover"
-            />
-            {/* Overlay actions */}
-            <div className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-colors group">
-              <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                {!photo.isPrimary && (
+            {/* Inner container for image with overflow hidden */}
+            <div className="absolute inset-0 rounded-xl overflow-hidden bg-gray-100 dark:bg-neutral-800">
+              <img
+                src={photo.url}
+                alt="Profile photo"
+                className="w-full h-full object-cover"
+              />
+              {/* Overlay actions */}
+              <div className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-colors group">
+                <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {!photo.isPrimary && (
+                    <button
+                      onClick={() => handleSetPrimary(photo.id)}
+                      className="p-2 rounded-full bg-white/90 text-gray-900 hover:bg-white"
+                      title="Set as primary"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </button>
+                  )}
                   <button
-                    onClick={() => handleSetPrimary(photo.id)}
-                    className="p-2 rounded-full bg-white/90 text-gray-900 hover:bg-white"
-                    title="Set as primary"
+                    onClick={() => handleDelete(photo.id)}
+                    className="p-2 rounded-full bg-white/90 text-red-500 hover:bg-white"
+                    title="Delete"
                   >
-                    <Camera className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
-                )}
-                <button
-                  onClick={() => handleDelete(photo.id)}
-                  className="p-2 rounded-full bg-white/90 text-red-500 hover:bg-white"
-                  title="Delete"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                </div>
               </div>
+              {/* Primary badge */}
+              {photo.isPrimary && (
+                <div className="absolute top-1 left-1 px-2 py-0.5 rounded-full bg-pink-500 text-white text-xs font-medium">
+                  Main
+                </div>
+              )}
             </div>
-            {/* Primary badge */}
-            {photo.isPrimary && (
-              <div className="absolute top-1 left-1 px-2 py-0.5 rounded-full bg-pink-500 text-white text-xs font-medium">
-                Main
-              </div>
-            )}
           </div>
         ))}
 
