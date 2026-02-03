@@ -127,7 +127,7 @@ export function UserActions({
             className={cn(
               "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium transition-colors",
               isBlocked
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                ? "bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
                 : "bg-pink-500 text-white hover:bg-pink-600"
             )}
           >
@@ -143,8 +143,8 @@ export function UserActions({
             className={cn(
               "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium transition-colors",
               isBlocked
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "border border-pink-500 text-pink-500 hover:bg-pink-50"
+                ? "bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                : "border border-pink-500 text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-950/30"
             )}
           >
             <Heart className="w-4 h-4" />
@@ -155,7 +155,7 @@ export function UserActions({
         {/* More menu */}
         <button
           onClick={() => setShowMenu(true)}
-          className="p-2.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50"
+          className="p-2.5 rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-800"
         >
           <MoreHorizontal className="w-5 h-5" />
         </button>
@@ -174,10 +174,10 @@ export function UserActions({
                 setShowMenu(false);
                 handleUnblock();
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
             >
               <Ban className="w-5 h-5 text-green-500" />
-              <span className="font-medium text-gray-900">Unblock {userName}</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">Unblock {userName}</span>
             </button>
           ) : (
             <>
@@ -186,10 +186,10 @@ export function UserActions({
                   setShowMenu(false);
                   setShowReportSheet(true);
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
               >
                 <Flag className="w-5 h-5 text-orange-500" />
-                <span className="font-medium text-gray-900">Report {userName}</span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">Report {userName}</span>
               </button>
 
               <button
@@ -197,10 +197,10 @@ export function UserActions({
                   setShowMenu(false);
                   setShowBlockConfirm(true);
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
               >
                 <Ban className="w-5 h-5 text-red-500" />
-                <span className="font-medium text-red-600">Block {userName}</span>
+                <span className="font-medium text-red-600 dark:text-red-400">Block {userName}</span>
               </button>
             </>
           )}
@@ -215,7 +215,7 @@ export function UserActions({
         fullHeight
       >
         <div className="p-4 space-y-4">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Why are you reporting {userName}? Your report is confidential.
           </p>
 
@@ -228,8 +228,8 @@ export function UserActions({
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 rounded-lg border transition-colors text-left",
                   reportReason === reason.value
-                    ? "border-pink-500 bg-pink-50"
-                    : "border-gray-200 hover:bg-gray-50"
+                    ? "border-pink-500 bg-pink-50 dark:bg-pink-950/30"
+                    : "border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800"
                 )}
               >
                 <div
@@ -237,7 +237,7 @@ export function UserActions({
                     "w-5 h-5 rounded-full border-2 flex items-center justify-center",
                     reportReason === reason.value
                       ? "border-pink-500 bg-pink-500"
-                      : "border-gray-300"
+                      : "border-gray-300 dark:border-neutral-600"
                   )}
                 >
                   {reportReason === reason.value && (
@@ -248,8 +248,8 @@ export function UserActions({
                   className={cn(
                     "font-medium",
                     reportReason === reason.value
-                      ? "text-pink-700"
-                      : "text-gray-700"
+                      ? "text-pink-700 dark:text-pink-400"
+                      : "text-gray-700 dark:text-gray-300"
                   )}
                 >
                   {reason.label}
@@ -260,7 +260,7 @@ export function UserActions({
 
           {/* Additional details */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Additional details (optional)
             </label>
             <textarea
@@ -268,7 +268,7 @@ export function UserActions({
               onChange={(e) => setReportDescription(e.target.value)}
               placeholder="Provide more context about your report..."
               rows={3}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-200 dark:border-neutral-700 rounded-lg resize-none focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
             />
           </div>
         </div>
@@ -276,7 +276,7 @@ export function UserActions({
         <BottomSheetActions>
           <button
             onClick={() => setShowReportSheet(false)}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
+            className="flex-1 px-4 py-3 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-neutral-800"
           >
             Cancel
           </button>
@@ -287,7 +287,7 @@ export function UserActions({
               "flex-1 px-4 py-3 rounded-lg font-medium transition-colors",
               reportReason && !loading
                 ? "bg-red-500 text-white hover:bg-red-600"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-200 dark:bg-neutral-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
             )}
           >
             {loading ? "Submitting..." : "Submit Report"}
@@ -333,15 +333,15 @@ export function BlockedUsersList({
 
   if (blockedUsers.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        <Ban className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <Ban className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
         <p>You haven't blocked anyone</p>
       </div>
     );
   }
 
   return (
-    <div className="divide-y">
+    <div className="divide-y divide-gray-200 dark:divide-neutral-700">
       {blockedUsers.map((block) => {
         const name =
           block.profile?.first_name ||
@@ -354,7 +354,7 @@ export function BlockedUsersList({
             key={block.id}
             className="flex items-center gap-3 py-3"
           >
-            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center shrink-0">
               {image ? (
                 <img
                   src={image}
@@ -362,14 +362,14 @@ export function BlockedUsersList({
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
-                <span className="text-gray-400 font-medium">
+                <span className="text-gray-400 dark:text-gray-500 font-medium">
                   {name.charAt(0).toUpperCase()}
                 </span>
               )}
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-900 truncate">{name}</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{name}</p>
             </div>
 
             <button
@@ -379,7 +379,7 @@ export function BlockedUsersList({
                 setUnblocking(null);
               }}
               disabled={unblocking === block.blocked_user_id}
-              className="px-4 py-2 text-sm font-medium text-pink-600 hover:bg-pink-50 rounded-lg transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-pink-600 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-950/30 rounded-lg transition-colors disabled:opacity-50"
             >
               {unblocking === block.blocked_user_id ? "..." : "Unblock"}
             </button>

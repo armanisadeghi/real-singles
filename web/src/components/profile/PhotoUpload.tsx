@@ -169,43 +169,43 @@ export function PhotoUpload({
           disabled={isUploading || (!canUploadPhotos && !canUploadVideos)}
           className={cn(
             "w-full border-2 border-dashed rounded-xl p-8 transition-all",
-            "hover:border-pink-400 hover:bg-pink-50/50",
+            "hover:border-pink-400 hover:bg-pink-50/50 dark:hover:bg-pink-950/20",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             isUploading
-              ? "border-pink-500 bg-pink-50"
-              : "border-gray-300 bg-gray-50"
+              ? "border-pink-500 bg-pink-50 dark:bg-pink-950/30"
+              : "border-gray-300 dark:border-neutral-600 bg-gray-50 dark:bg-neutral-950"
           )}
         >
           <div className="flex flex-col items-center gap-3">
             {isUploading ? (
               <>
                 <Loader2 className="w-12 h-12 text-pink-500 animate-spin" />
-                <p className="text-sm font-medium text-gray-700">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Uploading... {uploadProgress}%
                 </p>
               </>
             ) : (
               <>
                 <div className="flex gap-2">
-                  <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center">
-                    <ImageIcon className="w-6 h-6 text-pink-600" />
+                  <div className="w-12 h-12 rounded-full bg-pink-100 dark:bg-pink-950/50 flex items-center justify-center">
+                    <ImageIcon className="w-6 h-6 text-pink-600 dark:text-pink-400" />
                   </div>
                   {acceptVideo && (
-                    <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-                      <Video className="w-6 h-6 text-purple-600" />
+                    <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-950/50 flex items-center justify-center">
+                      <Video className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
                   )}
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-gray-700">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Click to upload or drag and drop
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {canUploadPhotos && `Photos (${currentPhotoCount}/${maxPhotos})`}
                     {canUploadPhotos && acceptVideo && canUploadVideos && " • "}
                     {acceptVideo && canUploadVideos && `Videos (${currentVideoCount}/${maxVideos})`}
                   </p>
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                     Max 5MB for images, 50MB for videos
                   </p>
                 </div>
@@ -226,13 +226,13 @@ export function PhotoUpload({
 
         {/* Error message */}
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
             {error}
           </div>
         )}
 
         {/* Upload limits info */}
-        <div className="text-xs text-gray-500 space-y-1">
+        <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
           <p>• Maximum {maxPhotos} photos and {maxVideos} video(s)</p>
           <p>• Photos will be cropped to square</p>
           <p>• Drag photos to reorder after upload</p>

@@ -89,8 +89,8 @@ export function ProfileListItem({
 
   const content = (
     <div className={cn(
-      "flex items-center gap-4 p-3 bg-white rounded-xl shadow-sm",
-      "transition-all duration-200 hover:shadow-md hover:bg-gray-50",
+      "flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20",
+      "transition-all duration-200 hover:shadow-md hover:bg-gray-50 dark:hover:bg-neutral-800",
       "cursor-pointer",
       className
     )}>
@@ -115,13 +115,13 @@ export function ProfileListItem({
       {/* Info */}
       <div className="flex-1 min-w-0">
         {/* Name */}
-        <h3 className="text-base font-semibold text-gray-900 truncate">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
           {name}
         </h3>
 
         {/* Location */}
         {location && (
-          <p className="text-sm text-gray-500 truncate mt-0.5">
+          <p className="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
             {location}
           </p>
         )}
@@ -130,7 +130,7 @@ export function ProfileListItem({
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           {/* Verified Badge */}
           {profile.is_verified && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-xs font-medium">
               <CheckCircle className="w-3 h-3" />
               Verified
             </span>
@@ -145,7 +145,7 @@ export function ProfileListItem({
 
           {/* Distance Badge */}
           {distanceString && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 rounded-full text-xs">
               <MapPin className="w-3 h-3" />
               {distanceString}
             </span>
@@ -154,7 +154,7 @@ export function ProfileListItem({
       </div>
 
       {/* Chevron */}
-      <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+      <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
     </div>
   );
 

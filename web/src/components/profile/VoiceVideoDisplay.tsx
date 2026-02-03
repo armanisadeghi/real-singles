@@ -102,8 +102,8 @@ export function VoiceVideoDisplay({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
                 transition-all duration-200 active:scale-95
                 ${isAudioPlaying 
-                  ? "bg-pink-100 text-pink-700" 
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-pink-100 dark:bg-pink-950/50 text-pink-700 dark:text-pink-400" 
+                  : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 }`}
               title={`Listen to ${userName}'s voice prompt`}
             >
@@ -121,7 +121,7 @@ export function VoiceVideoDisplay({
           <button
             onClick={() => setShowVideoModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
-              bg-gray-100 text-gray-700 hover:bg-gray-200
+              bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700
               transition-all duration-200 active:scale-95"
             title={`Watch ${userName}'s video intro`}
           >
@@ -148,7 +148,7 @@ export function VoiceVideoDisplay({
     <div className="space-y-4">
       {/* Voice Prompt */}
       {voicePromptUrl && (
-        <div className="bg-gradient-to-r from-pink-50 to-indigo-50 rounded-xl p-4">
+        <div className="bg-gradient-to-r from-pink-50 to-indigo-50 dark:from-pink-950/30 dark:to-indigo-950/30 rounded-xl p-4">
           <audio
             ref={audioRef}
             src={voicePromptUrl}
@@ -162,7 +162,7 @@ export function VoiceVideoDisplay({
                 transition-all duration-200 active:scale-95
                 ${isAudioPlaying 
                   ? "bg-pink-500 text-white" 
-                  : "bg-white text-pink-500 shadow-md hover:shadow-lg"
+                  : "bg-white dark:bg-neutral-800 text-pink-500 shadow-md dark:shadow-black/20 hover:shadow-lg dark:hover:shadow-black/30"
                 }`}
               aria-label={isAudioPlaying ? "Pause voice prompt" : "Play voice prompt"}
             >
@@ -175,12 +175,12 @@ export function VoiceVideoDisplay({
             <div>
               <div className="flex items-center gap-2">
                 <Mic className="w-4 h-4 text-pink-500" />
-                <span className="font-medium text-gray-900">Voice Prompt</span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">Voice Prompt</span>
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Listen to {userName}&apos;s voice introduction
                 {voicePromptDuration && (
-                  <span className="ml-2 text-gray-400">
+                  <span className="ml-2 text-gray-400 dark:text-gray-500">
                     ({formatDuration(voicePromptDuration)})
                   </span>
                 )}
@@ -190,7 +190,7 @@ export function VoiceVideoDisplay({
           
           {/* Waveform visualization placeholder */}
           {isAudioPlaying && (
-            <div className="mt-3 h-8 bg-white/50 rounded-lg flex items-center justify-center gap-1 px-4">
+            <div className="mt-3 h-8 bg-white/50 dark:bg-neutral-800/50 rounded-lg flex items-center justify-center gap-1 px-4">
               {Array.from({ length: 20 }).map((_, i) => (
                 <div
                   key={i}
@@ -208,7 +208,7 @@ export function VoiceVideoDisplay({
 
       {/* Video Intro */}
       {videoIntroUrl && (
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4">
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-xl p-4">
           <video
             ref={videoRef}
             src={videoIntroUrl}
@@ -219,8 +219,8 @@ export function VoiceVideoDisplay({
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowVideoModal(true)}
-              className="flex-shrink-0 w-12 h-12 rounded-full bg-white text-indigo-500 shadow-md
-                flex items-center justify-center hover:shadow-lg
+              className="flex-shrink-0 w-12 h-12 rounded-full bg-white dark:bg-neutral-800 text-indigo-500 shadow-md dark:shadow-black/20
+                flex items-center justify-center hover:shadow-lg dark:hover:shadow-black/30
                 transition-all duration-200 active:scale-95"
               aria-label="Watch video introduction"
             >
@@ -229,12 +229,12 @@ export function VoiceVideoDisplay({
             <div>
               <div className="flex items-center gap-2">
                 <Video className="w-4 h-4 text-indigo-500" />
-                <span className="font-medium text-gray-900">Video Introduction</span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">Video Introduction</span>
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Watch {userName}&apos;s video intro
                 {videoIntroDuration && (
-                  <span className="ml-2 text-gray-400">
+                  <span className="ml-2 text-gray-400 dark:text-gray-500">
                     ({formatDuration(videoIntroDuration)})
                   </span>
                 )}

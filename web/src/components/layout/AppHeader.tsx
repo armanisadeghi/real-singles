@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { usePathname } from "next/navigation";
+import { useState, useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, User, Edit, Heart, Settings, LogOut } from "lucide-react";
 import { NotificationBell, MessagesIndicator } from "@/components/notifications";
 import { PointsBadge } from "@/components/rewards";
 import { Avatar } from "@/components/ui";
+import { ActionMenu, type ActionMenuItem } from "@/components/ui/ActionMenu";
 import { useCurrentUser } from "@/components/providers/AppProviders";
-import { GlassContainer } from "@/components/glass";
 import { FilterPanel, FilterValues } from "@/components/search/FilterPanel";
 import { cn } from "@/lib/utils";
 
@@ -41,12 +41,12 @@ interface AppHeaderProps {
  */
 export function AppHeader({ user, signOutAction }: AppHeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const currentUser = useCurrentUser();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [menuAnchorPosition, setMenuAnchorPosition] = useState<{ top: number; right: number } | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filtersApplied, setFiltersApplied] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
   
   // Hide header on discover page - it has its own hero with avatar/notifications
   const isDiscoverPage = pathname === "/discover" || pathname === "/";
@@ -96,85 +96,58 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
     }
   }, []);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    };
+  // Profile menu items
+  const profileMenuItems: ActionMenuItem[] = [
+    {
+      id: "profile",
+      label: "My Profile",
+      icon: User,
+    },
+    {
+      id: "edit-profile",
+      label: "Edit Profile",
+      icon: Edit,
+    },
+    {
+      id: "favorites",
+      label: "Saved Profiles",
+      icon: Heart,
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+    },
+    {
+      id: "sign-out",
+      label: "Sign Out",
+      icon: LogOut,
+      variant: "destructive",
+    },
+  ];
 
-    if (isDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isDropdownOpen]);
-
-  // Handle keyboard navigation in dropdown
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (!isDropdownOpen) {
-      if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
-        event.preventDefault();
-        setIsDropdownOpen(true);
-      }
-      return;
-    }
-
-    const menuItems = dropdownRef.current?.querySelectorAll<HTMLElement>(
-      'a[role="menuitem"], button[role="menuitem"]'
-    );
+  // Handle profile menu selection
+  const handleProfileMenuSelect = useCallback((itemId: string) => {
+    setShowProfileMenu(false);
     
-    if (!menuItems?.length) return;
-    
-    const currentIndex = Array.from(menuItems).findIndex(
-      (item) => item === document.activeElement
-    );
-
-    switch (event.key) {
-      case "Escape":
-        event.preventDefault();
-        setIsDropdownOpen(false);
-        buttonRef.current?.focus();
+    switch (itemId) {
+      case "profile":
+        router.push("/profile");
         break;
-      case "ArrowDown":
-        event.preventDefault();
-        if (currentIndex < menuItems.length - 1) {
-          menuItems[currentIndex + 1].focus();
-        } else {
-          menuItems[0].focus();
-        }
+      case "edit-profile":
+        router.push("/profile/edit");
         break;
-      case "ArrowUp":
-        event.preventDefault();
-        if (currentIndex > 0) {
-          menuItems[currentIndex - 1].focus();
-        } else {
-          menuItems[menuItems.length - 1].focus();
-        }
+      case "favorites":
+        router.push("/favorites");
         break;
-      case "Tab":
-        setIsDropdownOpen(false);
+      case "settings":
+        router.push("/settings");
         break;
-      case "Home":
-        event.preventDefault();
-        menuItems[0].focus();
-        break;
-      case "End":
-        event.preventDefault();
-        menuItems[menuItems.length - 1].focus();
+      case "sign-out":
+        signOutAction();
         break;
     }
-  };
-
-  // Focus first menu item when dropdown opens
-  useEffect(() => {
-    if (isDropdownOpen) {
-      const firstItem = dropdownRef.current?.querySelector<HTMLElement>(
-        'a[role="menuitem"], button[role="menuitem"]'
-      );
-      firstItem?.focus();
-    }
-  }, [isDropdownOpen]);
+  }, [router, signOutAction]);
   
   if (isDiscoverPage || isFullScreenProfile || isChatPage) {
     return null;
@@ -260,96 +233,29 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
             {/* Notifications */}
             <NotificationBell />
 
-            {/* Profile Avatar Dropdown */}
-            <div className="relative" ref={dropdownRef} onKeyDown={handleKeyDown}>
-              <button
-                ref={buttonRef}
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                aria-expanded={isDropdownOpen}
-                aria-haspopup="menu"
-                aria-label={`Profile menu for ${user.displayName}`}
-                className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-neutral-800 active:bg-gray-200 dark:active:bg-neutral-700 rounded-full p-1 sm:pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
-              >
-                <Avatar
-                  src={user.profileImage}
-                  name={user.displayName || "User"}
-                  size="sm"
-                />
-                {/* Display name - hidden on mobile for cleaner look */}
-                <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[120px] truncate">
-                  {user.displayName}
-                </span>
-              </button>
-
-              {/* Dropdown Menu - Glass Effect */}
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <GlassContainer
-                    variant="menu"
-                    className="w-52 py-1.5 shadow-xl shadow-black/10"
-                  >
-                    <div
-                      role="menu"
-                      aria-orientation="vertical"
-                      aria-labelledby="user-menu"
-                    >
-                      {/* User info header - shows name on mobile */}
-                      <div className="sm:hidden px-4 py-2 border-b border-white/20 dark:border-white/10 mb-1">
-                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{user.displayName}</p>
-                      </div>
-
-                      <Link
-                        href="/profile"
-                        role="menuitem"
-                        tabIndex={-1}
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white/40 dark:hover:bg-white/10 focus:bg-white/40 dark:focus:bg-white/10 focus:outline-none transition-colors"
-                      >
-                        My Profile
-                      </Link>
-                      <Link
-                        href="/profile/edit"
-                        role="menuitem"
-                        tabIndex={-1}
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white/40 dark:hover:bg-white/10 focus:bg-white/40 dark:focus:bg-white/10 focus:outline-none transition-colors"
-                      >
-                        Edit Profile
-                      </Link>
-                      <Link
-                        href="/favorites"
-                        role="menuitem"
-                        tabIndex={-1}
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white/40 dark:hover:bg-white/10 focus:bg-white/40 dark:focus:bg-white/10 focus:outline-none transition-colors"
-                      >
-                        Saved Profiles
-                      </Link>
-                      <Link
-                        href="/settings"
-                        role="menuitem"
-                        tabIndex={-1}
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white/40 dark:hover:bg-white/10 focus:bg-white/40 dark:focus:bg-white/10 focus:outline-none transition-colors"
-                      >
-                        Settings
-                      </Link>
-                      <hr className="my-1.5 border-white/20 dark:border-white/10" aria-hidden="true" />
-                      <form action={signOutAction}>
-                        <button
-                          type="submit"
-                          role="menuitem"
-                          tabIndex={-1}
-                          className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/30 focus:bg-red-50/50 dark:focus:bg-red-900/30 focus:outline-none transition-colors"
-                        >
-                          Sign Out
-                        </button>
-                      </form>
-                    </div>
-                  </GlassContainer>
-                </div>
-              )}
-            </div>
+            {/* Profile Avatar Button */}
+            <button
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                setMenuAnchorPosition({
+                  top: rect.bottom + 8,
+                  right: window.innerWidth - rect.right,
+                });
+                setShowProfileMenu(true);
+              }}
+              aria-label={`Profile menu for ${user.displayName}`}
+              className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-neutral-800 active:bg-gray-200 dark:active:bg-neutral-700 rounded-full p-1 sm:pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            >
+              <Avatar
+                src={user.profileImage}
+                name={user.displayName || "User"}
+                size="sm"
+              />
+              {/* Display name - hidden on mobile for cleaner look */}
+              <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[120px] truncate">
+                {user.displayName}
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -361,6 +267,16 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilters}
+      />
+
+      {/* Profile Menu */}
+      <ActionMenu
+        isOpen={showProfileMenu}
+        onClose={() => setShowProfileMenu(false)}
+        onSelect={handleProfileMenuSelect}
+        items={profileMenuItems}
+        title={user.displayName}
+        anchorPosition={menuAnchorPosition}
       />
     </>
   );

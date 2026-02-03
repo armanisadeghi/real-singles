@@ -272,12 +272,12 @@ export function ProfileFocusView({
 
   const content = (
     <div className={cn(
-      "flex flex-col bg-white",
+      "flex flex-col bg-white dark:bg-neutral-900",
       isModal ? "rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden" : "min-h-dvh"
     )}>
       {/* Photo Section */}
       <div
-        className="relative aspect-[3/4] max-h-[60vh] bg-gradient-to-br from-pink-100 to-purple-100 touch-pan-y select-none"
+        className="relative aspect-[3/4] max-h-[60vh] bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-950 dark:to-purple-950 touch-pan-y select-none"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -322,15 +322,15 @@ export function ProfileFocusView({
             {/* Arrow buttons */}
             <button
               onClick={prevPhoto}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center hover:bg-white transition-colors"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 dark:bg-neutral-900/80 flex items-center justify-center hover:bg-white dark:hover:bg-neutral-900 transition-colors"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-6 h-6 text-gray-900 dark:text-gray-100" />
             </button>
             <button
               onClick={nextPhoto}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center hover:bg-white transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 dark:bg-neutral-900/80 flex items-center justify-center hover:bg-white dark:hover:bg-neutral-900 transition-colors"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-6 h-6 text-gray-900 dark:text-gray-100" />
             </button>
           </>
         )}
@@ -382,8 +382,8 @@ export function ProfileFocusView({
         {/* Bio */}
         {profile.bio && (
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-amber-700 mb-2">About</h3>
-            <p className="text-gray-600 leading-relaxed">{profile.bio}</p>
+            <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-400 mb-2">About</h3>
+            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{profile.bio}</p>
           </div>
         )}
 
@@ -403,12 +403,12 @@ export function ProfileFocusView({
         {/* Interests */}
         {profile.interests && profile.interests.length > 0 && (
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-amber-700 mb-2">Interests</h3>
+            <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-400 mb-2">Interests</h3>
             <div className="flex flex-wrap gap-2">
               {profile.interests.slice(0, 8).map((interest) => (
                 <span
                   key={interest}
-                  className="px-3 py-1.5 bg-amber-50 text-amber-800 rounded-full text-sm font-medium"
+                  className="px-3 py-1.5 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-full text-sm font-medium"
                 >
                   {interest}
                 </span>
@@ -419,29 +419,29 @@ export function ProfileFocusView({
 
         {/* Quick Info */}
         <div className="mb-6">
-          <h3 className="text-sm font-semibold text-amber-700 mb-2">Info</h3>
+          <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-400 mb-2">Info</h3>
           <div className="grid grid-cols-2 gap-3">
             {profile.occupation && (
-              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                <Briefcase className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-700">{profile.occupation}</span>
+              <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-neutral-800 rounded-lg">
+                <Briefcase className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">{profile.occupation}</span>
               </div>
             )}
             {profile.height_inches && (
-              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                <Ruler className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-700">{formatHeight(profile.height_inches)}</span>
+              <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-neutral-800 rounded-lg">
+                <Ruler className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">{formatHeight(profile.height_inches)}</span>
               </div>
             )}
             {profile.gender && (
-              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700 capitalize">{profile.gender}</span>
+              <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-neutral-800 rounded-lg">
+                <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{profile.gender}</span>
               </div>
             )}
             {profile.zodiac_sign && (
-              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                <Sparkles className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-700 capitalize">{profile.zodiac_sign}</span>
+              <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-neutral-800 rounded-lg">
+                <Sparkles className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{profile.zodiac_sign}</span>
               </div>
             )}
           </div>
@@ -449,7 +449,7 @@ export function ProfileFocusView({
       </div>
 
       {/* Action Bar - Compact native-style */}
-      <div className="sticky bottom-0 bg-white/98 border-t border-gray-200 py-3 px-4">
+      <div className="sticky bottom-0 bg-white/98 dark:bg-neutral-900/98 border-t border-gray-200 dark:border-neutral-700 py-3 px-4">
         <div className="flex items-center justify-center gap-5">
           {/* Pass Button */}
           <button
@@ -457,11 +457,11 @@ export function ProfileFocusView({
             disabled={actionLoading !== null}
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center transition-all",
-              "bg-white border border-red-200 text-red-500",
-              "hover:border-red-400 hover:bg-red-50 hover:scale-105",
+              "bg-white dark:bg-neutral-950 border border-red-200 dark:border-red-400/50 text-red-500",
+              "hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950 hover:scale-105",
               "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-              "shadow-sm",
-              actionComplete === "pass" && "bg-red-100 border-red-400"
+              "shadow-sm dark:shadow-black/20",
+              actionComplete === "pass" && "bg-red-100 dark:bg-red-950 border-red-400"
             )}
           >
             {actionLoading === "pass" ? (
@@ -477,11 +477,11 @@ export function ProfileFocusView({
             disabled={actionLoading !== null}
             className={cn(
               "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-              "bg-white border border-blue-200 text-blue-500",
-              "hover:border-blue-400 hover:bg-blue-50 hover:scale-105",
+              "bg-white dark:bg-neutral-950 border border-blue-200 dark:border-blue-400/50 text-blue-500",
+              "hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 hover:scale-105",
               "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-              "shadow-sm",
-              actionComplete === "super_like" && "bg-blue-100 border-blue-400"
+              "shadow-sm dark:shadow-black/20",
+              actionComplete === "super_like" && "bg-blue-100 dark:bg-blue-950 border-blue-400"
             )}
           >
             {actionLoading === "super_like" ? (
@@ -497,10 +497,10 @@ export function ProfileFocusView({
             disabled={actionLoading !== null}
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center transition-all",
-              "bg-amber-500 text-white",
-              "hover:bg-amber-600 hover:scale-105",
+              "bg-amber-500 dark:bg-amber-600 text-white",
+              "hover:bg-amber-600 dark:hover:bg-amber-500 hover:scale-105",
               "active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-              "shadow-sm",
+              "shadow-sm dark:shadow-black/20",
               actionComplete === "like" && "bg-green-500"
             )}
           >
@@ -530,7 +530,7 @@ export function ProfileFocusView({
 
   if (isModal) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 p-4">
         {content}
         {matchCelebration}
       </div>

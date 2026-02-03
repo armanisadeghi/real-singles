@@ -82,7 +82,7 @@ function SortableGalleryItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative group aspect-square rounded-xl overflow-hidden bg-gray-100 border-2",
+        "relative group aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-neutral-800 border-2",
         isDragging ? "border-pink-500 shadow-xl opacity-50" : "border-transparent",
         item.is_primary && "ring-4 ring-pink-500 ring-offset-2"
       )}
@@ -281,12 +281,12 @@ export function GalleryManager({
 
   if (galleryItems.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-200 flex items-center justify-center">
-          <ImageIcon className="w-8 h-8 text-gray-400" />
+      <div className="text-center py-12 bg-gray-50 dark:bg-neutral-950 rounded-xl border-2 border-dashed border-gray-300 dark:border-neutral-600">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center">
+          <ImageIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
         </div>
-        <p className="text-gray-600 font-medium">No photos or videos yet</p>
-        <p className="text-sm text-gray-500 mt-1">Upload your first photo to get started</p>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">No photos or videos yet</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Upload your first photo to get started</p>
       </div>
     );
   }
@@ -294,9 +294,9 @@ export function GalleryManager({
   return (
     <div className="space-y-4">
       {/* Instructions - different for desktop vs mobile */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800 font-medium mb-2">Gallery Tips:</p>
-        <ul className="text-xs text-blue-700 space-y-1">
+      <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-300 font-medium mb-2">Gallery Tips:</p>
+        <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
           <li>• Drag and drop to reorder photos</li>
           <li>• Your first photo will be your main profile picture</li>
           {/* Desktop tip */}
@@ -332,7 +332,7 @@ export function GalleryManager({
       {isLoading && (
         <div className="text-center py-4">
           <Loader2 className="w-6 h-6 text-pink-500 animate-spin mx-auto" />
-          <p className="text-sm text-gray-600 mt-2">Updating gallery...</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Updating gallery...</p>
         </div>
       )}
 
@@ -346,8 +346,8 @@ export function GalleryManager({
         <div className="px-4 py-2">
           {/* Preview thumbnail */}
           {selectedItem && (
-            <div className="flex items-center gap-4 pb-4 mb-4 border-b">
-              <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+            <div className="flex items-center gap-4 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
+              <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-neutral-800 flex-shrink-0">
                 {selectedItem.media_type === "video" ? (
                   <video
                     src={selectedItem.media_url}
@@ -364,7 +364,7 @@ export function GalleryManager({
                 )}
               </div>
               <div>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-gray-900 dark:text-gray-100">
                   {selectedItem.media_type === "video" ? "Video" : "Photo"}
                 </p>
                 {selectedItem.is_primary && (
@@ -383,7 +383,7 @@ export function GalleryManager({
             {selectedItem && !selectedItem.is_primary && selectedItem.media_type === "image" && (
               <button
                 onClick={() => handleSetPrimary(selectedItem.id)}
-                className="w-full flex items-center gap-3 px-4 py-3.5 bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-800 rounded-xl font-medium transition-colors min-h-[52px]"
+                className="w-full flex items-center gap-3 px-4 py-3.5 bg-yellow-50 dark:bg-yellow-950/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 active:bg-yellow-200 dark:active:bg-yellow-900/50 text-yellow-800 dark:text-yellow-400 rounded-xl font-medium transition-colors min-h-[52px]"
               >
                 <Star className="w-5 h-5" />
                 Set as Primary Photo
@@ -395,7 +395,7 @@ export function GalleryManager({
               <button
                 onClick={() => handleDelete(selectedItem.id)}
                 disabled={deletingId === selectedItem.id}
-                className="w-full flex items-center gap-3 px-4 py-3.5 bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 rounded-xl font-medium transition-colors disabled:opacity-50 min-h-[52px]"
+                className="w-full flex items-center gap-3 px-4 py-3.5 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/40 active:bg-red-200 dark:active:bg-red-900/50 text-red-700 dark:text-red-400 rounded-xl font-medium transition-colors disabled:opacity-50 min-h-[52px]"
               >
                 <Trash2 className="w-5 h-5" />
                 Delete {selectedItem.media_type === "video" ? "Video" : "Photo"}
@@ -405,7 +405,7 @@ export function GalleryManager({
             {/* Cancel button */}
             <button
               onClick={closeActionSheet}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-xl font-medium transition-colors min-h-[52px]"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 active:bg-gray-300 dark:active:bg-neutral-600 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors min-h-[52px]"
             >
               Cancel
             </button>

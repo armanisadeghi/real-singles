@@ -214,29 +214,29 @@ export default function GalleryPage() {
   const videoCount = gallery.filter((item) => item.media_type === "video").length;
 
   return (
-    <div className="min-h-dvh bg-gray-50">
+    <div className="min-h-dvh bg-gray-50 dark:bg-neutral-950">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-6">
         {/* Compact Header */}
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2 min-w-0">
             <Link
               href="/profile/edit"
-              className="flex items-center justify-center w-8 h-8 -ml-1 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              className="flex items-center justify-center w-8 h-8 -ml-1 rounded-full text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
               aria-label="Back to edit profile"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-lg font-semibold text-gray-900">Gallery</h1>
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Gallery</h1>
           </div>
 
           {/* Stats */}
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-gray-600">
-              <span className="font-semibold text-pink-600">{photoCount}</span>/10 photos
+            <span className="text-gray-600 dark:text-gray-400">
+              <span className="font-semibold text-pink-600 dark:text-pink-400">{photoCount}</span>/10 photos
             </span>
-            <span className="text-gray-300">|</span>
-            <span className="text-gray-600">
-              <span className="font-semibold text-purple-600">{videoCount}</span>/1 video
+            <span className="text-gray-300 dark:text-gray-600">|</span>
+            <span className="text-gray-600 dark:text-gray-400">
+              <span className="font-semibold text-purple-600 dark:text-purple-400">{videoCount}</span>/1 video
             </span>
           </div>
         </div>
@@ -247,8 +247,8 @@ export default function GalleryPage() {
             className={cn(
               "mb-4 p-3 rounded-lg border flex items-start gap-2 text-sm",
               message.type === "success"
-                ? "bg-green-50 border-green-200 text-green-800"
-                : "bg-red-50 border-red-200 text-red-800"
+                ? "bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-800 dark:text-green-400"
+                : "bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-400"
             )}
           >
             {message.type === "success" && <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />}
@@ -257,8 +257,8 @@ export default function GalleryPage() {
         )}
 
         {/* Upload Section */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-3">Upload New Media</h2>
+        <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm p-6 mb-6">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">Upload New Media</h2>
           <PhotoUpload
             onUploadComplete={handleUploadComplete}
             maxPhotos={10}
@@ -270,11 +270,11 @@ export default function GalleryPage() {
         </div>
 
         {/* Gallery Section */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-gray-900">Your Gallery</h2>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Your Gallery</h2>
             {gallery.length > 0 && (
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 {gallery.length} item{gallery.length !== 1 ? "s" : ""}
               </p>
             )}

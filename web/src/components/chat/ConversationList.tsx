@@ -82,7 +82,7 @@ export function ConversationList({
 
   if (loading) {
     return (
-      <div className="divide-y">
+      <div className="divide-y divide-gray-200 dark:divide-neutral-700">
         {Array.from({ length: 5 }).map((_, i) => (
           <ConversationSkeleton key={i} />
         ))}
@@ -106,21 +106,21 @@ export function ConversationList({
     <div>
       {/* Search */}
       {onSearch && (
-        <div className="p-4 border-b">
+        <div className="p-4 border-b border-gray-200 dark:border-neutral-700">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               placeholder="Search conversations..."
               onChange={(e) => onSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             />
           </div>
         </div>
       )}
 
       {/* Conversations */}
-      <div className="divide-y">
+      <div className="divide-y divide-gray-200 dark:divide-neutral-700">
         {conversations.map((conversation) => {
           const display = getConversationDisplay(conversation);
           const isActive = conversation.id === activeConversationId;
@@ -130,8 +130,8 @@ export function ConversationList({
               key={conversation.id}
               href={`/chats/${conversation.id}`}
               className={cn(
-                "flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors",
-                isActive && "bg-pink-50 hover:bg-pink-50"
+                "flex items-center gap-3 p-4 hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors",
+                isActive && "bg-pink-50 dark:bg-pink-950/30 hover:bg-pink-50 dark:hover:bg-pink-950/30"
               )}
             >
               {/* Avatar */}
@@ -155,14 +155,14 @@ export function ConversationList({
                     className={cn(
                       "font-semibold truncate",
                       conversation.unread_count > 0
-                        ? "text-gray-900"
-                        : "text-gray-700"
+                        ? "text-gray-900 dark:text-gray-100"
+                        : "text-gray-700 dark:text-gray-300"
                     )}
                   >
                     {display.name}
                   </h3>
                   {conversation.last_message_at && (
-                    <span className="text-xs text-gray-400 shrink-0">
+                    <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
                       {formatRelativeTime(conversation.last_message_at)}
                     </span>
                   )}
@@ -172,8 +172,8 @@ export function ConversationList({
                     className={cn(
                       "text-sm truncate",
                       conversation.unread_count > 0
-                        ? "text-gray-900 font-medium"
-                        : "text-gray-500"
+                        ? "text-gray-900 dark:text-gray-100 font-medium"
+                        : "text-gray-500 dark:text-gray-400"
                     )}
                   >
                     {conversation.last_message || "Start the conversation!"}

@@ -44,12 +44,12 @@ export function MessageBubble({
     switch (message.status) {
       case "sending":
         return (
-          <div className="w-3 h-3 border border-gray-300 border-t-transparent rounded-full animate-spin" />
+          <div className="w-3 h-3 border border-gray-300 dark:border-neutral-600 border-t-transparent rounded-full animate-spin" />
         );
       case "sent":
-        return <Check className="w-3 h-3 text-gray-400" />;
+        return <Check className="w-3 h-3 text-gray-400 dark:text-gray-500" />;
       case "delivered":
-        return <CheckCheck className="w-3 h-3 text-gray-400" />;
+        return <CheckCheck className="w-3 h-3 text-gray-400 dark:text-gray-500" />;
       case "read":
         return <CheckCheck className="w-3 h-3 text-blue-500" />;
       case "failed":

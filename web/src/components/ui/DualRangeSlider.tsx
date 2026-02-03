@@ -156,7 +156,7 @@ export function DualRangeSlider({
         {/* Min thumb */}
         <button
           type="button"
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-[1.5px] border-pink-500 shadow-sm focus:outline-none focus-visible:ring-1 focus-visible:ring-pink-500 focus-visible:ring-offset-1 touch-none cursor-grab active:cursor-grabbing"
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white dark:bg-neutral-900 border-[1.5px] border-pink-500 shadow-sm dark:shadow-black/20 focus:outline-none focus-visible:ring-1 focus-visible:ring-pink-500 focus-visible:ring-offset-1 touch-none cursor-grab active:cursor-grabbing"
           style={{ left: `${minPercent}%` }}
           onMouseDown={(e) => {
             e.stopPropagation();
@@ -175,7 +175,7 @@ export function DualRangeSlider({
         {/* Max thumb */}
         <button
           type="button"
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-[1.5px] border-pink-500 shadow-sm focus:outline-none focus-visible:ring-1 focus-visible:ring-pink-500 focus-visible:ring-offset-1 touch-none cursor-grab active:cursor-grabbing"
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white dark:bg-neutral-900 border-[1.5px] border-pink-500 shadow-sm dark:shadow-black/20 focus:outline-none focus-visible:ring-1 focus-visible:ring-pink-500 focus-visible:ring-offset-1 touch-none cursor-grab active:cursor-grabbing"
           style={{ left: `${maxPercent}%` }}
           onMouseDown={(e) => {
             e.stopPropagation();

@@ -178,7 +178,7 @@ export function Avatar({
       {showOnlineIndicator && isOnline && (
         <span
           className={cn(
-            "absolute bottom-0 right-0 block rounded-full bg-green-500 ring-2 ring-white",
+            "absolute bottom-0 right-0 block rounded-full bg-green-500 ring-2 ring-white dark:ring-neutral-900",
             onlineIndicatorSizes[size]
           )}
         />

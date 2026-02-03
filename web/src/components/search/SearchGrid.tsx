@@ -218,15 +218,15 @@ export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchG
       {/* Header - View Controls */}
       <div className="flex items-center justify-between gap-3 mb-8">
         {/* View mode tabs */}
-        <div className="flex items-center gap-0.5 bg-gray-100/80 backdrop-blur-sm rounded-full p-1 shadow-sm">
+        <div className="flex items-center gap-0.5 bg-gray-100/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-full p-1 shadow-sm dark:shadow-black/20">
           <button
             onClick={() => setViewMode("all")}
             className={cn(
               "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap",
               "transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
               viewMode === "all"
-                ? "bg-white text-gray-900 shadow-md"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 shadow-md dark:shadow-black/20"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
             )}
           >
             <Sparkles className="w-4 h-4" />
@@ -238,8 +238,8 @@ export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchG
               "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap",
               "transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
               viewMode === "top-matches"
-                ? "bg-white text-gray-900 shadow-md"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 shadow-md dark:shadow-black/20"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
             )}
           >
             <Heart className="w-4 h-4" />
@@ -251,8 +251,8 @@ export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchG
               "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap",
               "transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
               viewMode === "nearby"
-                ? "bg-white text-gray-900 shadow-md"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 shadow-md dark:shadow-black/20"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
             )}
           >
             <MapPin className="w-4 h-4" />
@@ -271,7 +271,7 @@ export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchG
               "active:scale-[0.97]",
               filtersApplied
                 ? "bg-pink-500 text-white shadow-md shadow-pink-500/25 hover:bg-pink-600"
-                : "bg-white text-gray-600 shadow-sm border border-gray-200/80 hover:border-gray-300 hover:text-gray-900",
+                : "bg-white dark:bg-neutral-900 text-gray-600 dark:text-gray-400 shadow-sm dark:shadow-black/20 border border-gray-200/80 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600 hover:text-gray-900 dark:hover:text-gray-100",
               isFiltering && "opacity-50 cursor-not-allowed"
             )}
           >
@@ -291,7 +291,7 @@ export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchG
               disabled={isFiltering}
               className={cn(
                 "flex items-center justify-center w-10 h-10 rounded-full",
-                "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700",
+                "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-neutral-700 hover:text-gray-700 dark:hover:text-gray-300",
                 "transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
                 "active:scale-[0.95]"
               )}
@@ -339,21 +339,21 @@ export function SearchGridSkeleton() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Header skeleton */}
       <div className="flex items-center justify-between gap-3 mb-8">
-        <div className="h-11 w-[200px] bg-gray-100 rounded-full animate-pulse" />
-        <div className="h-10 w-24 bg-gray-100 rounded-full animate-pulse" />
+        <div className="h-11 w-[200px] bg-gray-100 dark:bg-neutral-800 rounded-full animate-pulse" />
+        <div className="h-10 w-24 bg-gray-100 dark:bg-neutral-800 rounded-full animate-pulse" />
       </div>
       
       {/* Profile list skeleton */}
       <div className="max-w-2xl mx-auto space-y-3">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 p-3 bg-white rounded-xl shadow-sm">
-            <div className="w-[72px] h-[72px] bg-gray-100 rounded-lg animate-pulse" />
+          <div key={i} className="flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20">
+            <div className="w-[72px] h-[72px] bg-gray-100 dark:bg-neutral-800 rounded-lg animate-pulse" />
             <div className="flex-1 space-y-2">
-              <div className="h-5 w-32 bg-gray-100 rounded animate-pulse" />
-              <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
+              <div className="h-5 w-32 bg-gray-100 dark:bg-neutral-800 rounded animate-pulse" />
+              <div className="h-4 w-24 bg-gray-100 dark:bg-neutral-800 rounded animate-pulse" />
               <div className="flex gap-2">
-                <div className="h-5 w-16 bg-gray-100 rounded-full animate-pulse" />
-                <div className="h-5 w-12 bg-gray-100 rounded-full animate-pulse" />
+                <div className="h-5 w-16 bg-gray-100 dark:bg-neutral-800 rounded-full animate-pulse" />
+                <div className="h-5 w-12 bg-gray-100 dark:bg-neutral-800 rounded-full animate-pulse" />
               </div>
             </div>
           </div>

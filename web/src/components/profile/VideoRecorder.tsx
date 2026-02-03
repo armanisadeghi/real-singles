@@ -316,7 +316,7 @@ export function VideoRecorder({
       />
 
       {/* Video preview area */}
-      <div className="relative w-full max-w-[280px] aspect-[9/16] bg-gray-100 rounded-2xl overflow-hidden">
+      <div className="relative w-full max-w-[280px] aspect-[9/16] bg-gray-100 dark:bg-neutral-800 rounded-2xl overflow-hidden">
         {/* Live camera preview during ready/recording */}
         {(state === "ready" || state === "recording") && videoStream && (
           <>
@@ -368,10 +368,10 @@ export function VideoRecorder({
         {/* Placeholder when idle and no existing */}
         {state === "idle" && !existingUrl && (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-indigo-100 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-indigo-100 dark:from-pink-950/50 dark:to-indigo-950/50 flex items-center justify-center">
               <Video className="w-8 h-8 text-indigo-400" />
             </div>
-            <p className="mt-3 text-sm text-gray-500">No video intro</p>
+            <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">No video intro</p>
           </div>
         )}
 
@@ -427,7 +427,7 @@ export function VideoRecorder({
       {/* Preview controls */}
       {state === "preview" && (
         <div className="flex flex-col items-center gap-2 w-full">
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             Duration: {recordingTime}s
           </div>
           
@@ -437,7 +437,7 @@ export function VideoRecorder({
               onClick={handleDiscard}
               disabled={isSaving}
               className="px-3 py-1.5 rounded-lg text-sm font-medium
-                text-gray-600 hover:bg-gray-100
+                text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-800
                 disabled:opacity-50 disabled:cursor-not-allowed
                 transition-all duration-200 active:scale-[0.98]"
             >
@@ -467,12 +467,12 @@ export function VideoRecorder({
 
       {/* Error display */}
       {error && state !== "preview" && (
-        <div className="text-sm text-red-500 text-center">{error}</div>
+        <div className="text-sm text-red-500 dark:text-red-400 text-center">{error}</div>
       )}
 
       {/* Existing video info */}
       {state === "idle" && existingUrl && existingDuration && (
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500 dark:text-gray-400">
           Current intro ({existingDuration}s)
         </div>
       )}

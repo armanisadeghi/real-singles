@@ -65,17 +65,17 @@ export function StarRating({
                 "transition-colors",
                 star <= displayValue
                   ? "fill-yellow-400 text-yellow-400"
-                  : "fill-gray-200 text-gray-200"
+                  : "fill-gray-200 text-gray-200 dark:fill-neutral-700 dark:text-neutral-700"
               )}
             />
           </button>
         ))}
       </div>
       {showValue && (
-        <span className="ml-1 text-sm text-gray-600">
+        <span className="ml-1 text-sm text-gray-600 dark:text-gray-400">
           {value.toFixed(1)}
           {typeof reviewCount === "number" && (
-            <span className="text-gray-400"> ({reviewCount})</span>
+            <span className="text-gray-400 dark:text-gray-500"> ({reviewCount})</span>
           )}
         </span>
       )}
@@ -100,11 +100,11 @@ export function RatingSummary({
     <div className={cn("flex flex-col sm:flex-row gap-6", className)}>
       {/* Average */}
       <div className="flex flex-col items-center">
-        <span className="text-4xl font-bold text-gray-900">
+        <span className="text-4xl font-bold text-gray-900 dark:text-gray-100">
           {averageRating.toFixed(1)}
         </span>
         <StarRating value={averageRating} readonly size="md" />
-        <span className="text-sm text-gray-500 mt-1">
+        <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           {totalReviews} review{totalReviews !== 1 ? "s" : ""}
         </span>
       </div>
@@ -118,15 +118,15 @@ export function RatingSummary({
               totalReviews > 0 ? (count / totalReviews) * 100 : 0;
             return (
               <div key={star} className="flex items-center gap-2 text-sm">
-                <span className="w-3 text-gray-600">{star}</span>
+                <span className="w-3 text-gray-600 dark:text-gray-400">{star}</span>
                 <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-yellow-400 rounded-full transition-all"
                     style={{ width: `${percentage}%` }}
                   />
                 </div>
-                <span className="w-8 text-right text-gray-500">{count}</span>
+                <span className="w-8 text-right text-gray-500 dark:text-gray-400">{count}</span>
               </div>
             );
           })}

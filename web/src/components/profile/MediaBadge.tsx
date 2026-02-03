@@ -35,7 +35,7 @@ export function MediaBadge({
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-full bg-gray-100 text-gray-600",
+        "inline-flex items-center rounded-full bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400",
         containerSize,
         className
       )}
@@ -91,9 +91,9 @@ export function MediaPlayBadge({
       }}
       className={cn(
         "inline-flex items-center gap-1.5 px-2 py-1 rounded-full",
-        "bg-white/90 backdrop-blur-sm shadow-sm",
-        "text-xs font-medium text-gray-700",
-        "hover:bg-white hover:shadow-md",
+        "bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm shadow-sm dark:shadow-black/20",
+        "text-xs font-medium text-gray-700 dark:text-gray-300",
+        "hover:bg-white dark:hover:bg-neutral-700 hover:shadow-md dark:hover:shadow-black/30",
         "transition-all duration-200 active:scale-95",
         className
       )}

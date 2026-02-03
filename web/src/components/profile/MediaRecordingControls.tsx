@@ -66,10 +66,10 @@ export function MediaRecordingControls({
   if (!isSupported) {
     return (
       <div className="flex flex-col items-center gap-3 py-4">
-        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-          <AlertCircle className="w-6 h-6 text-gray-400" />
+        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center">
+          <AlertCircle className="w-6 h-6 text-gray-400 dark:text-gray-500" />
         </div>
-        <p className="text-sm text-gray-500 text-center">
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
           {isAudio ? "Audio" : "Video"} recording is not supported in your browser.
           <br />
           Please try using Chrome, Safari, or Firefox.
@@ -82,10 +82,10 @@ export function MediaRecordingControls({
   if (permissionDenied) {
     return (
       <div className="flex flex-col items-center gap-3 py-4">
-        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
           <OffIcon className="w-6 h-6 text-red-400" />
         </div>
-        <p className="text-sm text-gray-500 text-center">
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
           {isAudio ? "Microphone" : "Camera"} access was denied.
           <br />
           Please allow access in your browser settings.
@@ -106,10 +106,10 @@ export function MediaRecordingControls({
   if (error && state !== "recording") {
     return (
       <div className="flex flex-col items-center gap-3 py-4">
-        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
           <AlertCircle className="w-6 h-6 text-red-400" />
         </div>
-        <p className="text-sm text-red-500 text-center">{error}</p>
+        <p className="text-sm text-red-500 dark:text-red-400 text-center">{error}</p>
         {onRetry && (
           <button
             onClick={onRetry}
@@ -128,14 +128,14 @@ export function MediaRecordingControls({
       {(state === "recording" || state === "preview") && (
         <div className="flex flex-col items-center gap-1.5">
           {/* Time display */}
-          <div className="text-lg font-mono font-semibold text-gray-900">
+          <div className="text-lg font-mono font-semibold text-gray-900 dark:text-gray-100">
             {formatTime(recordingTime)}
-            <span className="text-gray-400 text-sm"> / {formatTime(maxDuration)}</span>
+            <span className="text-gray-400 dark:text-gray-500 text-sm"> / {formatTime(maxDuration)}</span>
           </div>
 
           {/* Progress bar (only during recording) */}
           {state === "recording" && (
-            <div className="w-full max-w-[160px] h-1 bg-gray-200 rounded-full overflow-hidden">
+            <div className="w-full max-w-[160px] h-1 bg-gray-200 dark:bg-neutral-700 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-pink-500 to-indigo-500 transition-all duration-1000 ease-linear"
                 style={{ width: `${progress}%` }}
@@ -187,7 +187,7 @@ export function MediaRecordingControls({
           <button
             disabled
             className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
-              bg-gray-100 text-gray-500 cursor-not-allowed"
+              bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
           >
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>{state === "processing" ? "Processing..." : "Uploading..."}</span>
@@ -199,7 +199,7 @@ export function MediaRecordingControls({
           <button
             onClick={onUploadFile}
             className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
-              bg-gray-100 text-gray-700 hover:bg-gray-200
+              bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700
               transition-all duration-200
               active:scale-[0.98]"
           >
@@ -213,7 +213,7 @@ export function MediaRecordingControls({
           <button
             onClick={onDelete}
             className="flex items-center justify-center p-2 rounded-lg
-              text-red-500 hover:bg-red-50
+              text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30
               transition-all duration-200
               active:scale-[0.98]"
             title={`Delete ${isAudio ? "voice prompt" : "video intro"}`}
@@ -225,7 +225,7 @@ export function MediaRecordingControls({
 
       {/* Helper text */}
       {state === "idle" && !hasExisting && (
-        <p className="text-xs text-gray-400 text-center">
+        <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
           {isAudio
             ? `Record up to ${maxDuration} seconds of audio`
             : `Record up to ${maxDuration} seconds of video`}

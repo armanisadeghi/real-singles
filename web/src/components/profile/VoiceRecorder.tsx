@@ -253,7 +253,7 @@ export function VoiceRecorder({
             color="#ec4899"
           />
         ) : (
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-indigo-100 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-indigo-100 dark:from-pink-950/50 dark:to-indigo-950/50 flex items-center justify-center">
             <Mic className="w-8 h-8 text-indigo-400" />
           </div>
         )}
@@ -288,7 +288,7 @@ export function VoiceRecorder({
           />
 
           {/* Duration display */}
-          <div className="text-sm font-medium text-gray-900">
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
             Recording: {recordingTime}s
           </div>
 
@@ -297,7 +297,7 @@ export function VoiceRecorder({
             <button
               onClick={togglePlayback}
               className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm
-                bg-gray-100 text-gray-700 hover:bg-gray-200
+                bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700
                 transition-all duration-200 active:scale-[0.98]"
             >
               {isPlaying ? (
@@ -320,7 +320,7 @@ export function VoiceRecorder({
               onClick={handleDiscard}
               disabled={isSaving}
               className="px-3 py-1.5 rounded-lg text-sm font-medium
-                text-gray-600 hover:bg-gray-100
+                text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-800
                 disabled:opacity-50 disabled:cursor-not-allowed
                 transition-all duration-200 active:scale-[0.98]"
             >
@@ -357,10 +357,10 @@ export function VoiceRecorder({
             preload="metadata"
           />
           
-          <div className="flex items-center gap-2 text-xs text-gray-500">
+          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
             <span>Current prompt</span>
             {existingDuration && (
-              <span className="px-1.5 py-0.5 bg-gray-100 rounded-full">
+              <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-neutral-800 rounded-full">
                 {existingDuration}s
               </span>
             )}
@@ -369,7 +369,7 @@ export function VoiceRecorder({
           <button
             onClick={togglePlayback}
             className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm
-              bg-gray-100 text-gray-700 hover:bg-gray-200
+              bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700
               transition-all duration-200 active:scale-[0.98]"
           >
             {isPlaying ? (

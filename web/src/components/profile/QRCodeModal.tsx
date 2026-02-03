@@ -164,7 +164,7 @@ export function QRCodeModal({ isOpen, onClose, referralCode }: QRCodeModalProps)
           {/* QR Code */}
           <div className="
             flex items-center justify-center p-6 mb-4
-            bg-white rounded-xl border border-gray-100
+            bg-white dark:bg-white rounded-xl border border-gray-100 dark:border-gray-200
             shadow-inner
           ">
             <QRCodeSVG
