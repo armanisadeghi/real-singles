@@ -80,13 +80,13 @@ export function MessageBubble({
           <span className="text-xs text-gray-500 mb-1 px-1">{senderName}</span>
         )}
 
-        {/* Message content */}
+        {/* Message content - iOS iMessage style */}
         <div
           className={cn(
-            "rounded-2xl px-4 py-2.5 shadow-sm",
+            "rounded-[20px] px-3.5 py-2",
             isOwn
-              ? "bg-gradient-to-br from-pink-500 to-purple-600 text-white rounded-br-md"
-              : "bg-white text-gray-900 rounded-bl-md"
+              ? "bg-[#007AFF] text-white rounded-br-[6px]"
+              : "bg-[#E9E9EB] text-gray-900 rounded-bl-[6px]"
           )}
         >
           {/* Media content */}
@@ -112,7 +112,7 @@ export function MessageBubble({
 
           {/* Text content */}
           {message.content && (
-            <p className="text-sm whitespace-pre-wrap break-words">
+            <p className="text-[15px] leading-[1.35] whitespace-pre-wrap break-words">
               {message.content}
             </p>
           )}

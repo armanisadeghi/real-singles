@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Phone, Video, Info } from "lucide-react";
+import { ChevronLeft, Phone, Video } from "lucide-react";
 import { MessageGroup, Message } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
+import { ComingSoonModal } from "./ComingSoonModal";
 import { Avatar } from "@/components/ui/Avatar";
 import { MessageSkeleton } from "@/components/ui/LoadingSkeleton";
 import { useChat } from "@/hooks/useSupabaseMessaging";
@@ -31,6 +32,16 @@ interface ChatThreadProps {
   initialMessages?: Message[];
 }
 
+/**
+ * ChatThread - iOS-inspired full-screen chat interface
+ * 
+ * Features:
+ * - Full viewport height with safe area handling
+ * - Condensed translucent header
+ * - Clickable avatar (navigates to profile)
+ * - Floating message input
+ * - Clean, borderless design
+ */
 export function ChatThread({
   conversationId,
   conversationType,
@@ -40,6 +51,12 @@ export function ChatThread({
 }: ChatThreadProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Modal state for call/video coming soon
+  const [comingSoonModal, setComingSoonModal] = useState<{
+    isOpen: boolean;
+    feature: "call" | "video";
+  }>({ isOpen: false, feature: "call" });
 
   // Get the other participant for direct chats
   const otherParticipant =
@@ -51,7 +68,7 @@ export function ChatThread({
   const { isUserOnline } = useOnlinePresence({
     conversationId,
     currentUserId,
-    enabled: conversationType === "direct", // Only for direct chats
+    enabled: conversationType === "direct",
   });
 
   // Check if the other participant is online
@@ -101,8 +118,7 @@ export function ChatThread({
     participants.map((p) => [
       p.user_id,
       {
-        name:
-          p.profile?.first_name || p.user?.display_name || "Unknown",
+        name: p.profile?.first_name || p.user?.display_name || "Unknown",
         image: p.profile?.profile_image_url || null,
       },
     ])
@@ -126,10 +142,7 @@ export function ChatThread({
     if (!content && !mediaUrl) return;
 
     try {
-      // Stop typing indicator when sending
       setTyping(false);
-
-      // Send via Supabase - the hook handles optimistic updates
       await sendMessage(content);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -141,129 +154,176 @@ export function ChatThread({
     setTyping(isTyping);
   }, [setTyping]);
 
+  // Handle call/video button clicks
+  const handleCallClick = () => {
+    setComingSoonModal({ isOpen: true, feature: "call" });
+  };
+
+  const handleVideoClick = () => {
+    setComingSoonModal({ isOpen: true, feature: "video" });
+  };
+
+  const closeModal = () => {
+    setComingSoonModal(prev => ({ ...prev, isOpen: false }));
+  };
+
   return (
-    <div className="flex flex-col h-[calc(100dvh-var(--header-height,72px)-var(--bottom-nav-height,0px))] md:h-[calc(100dvh-var(--header-height,72px))] bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b px-4 py-3 flex items-center gap-3 shrink-0">
-        {/* Back button */}
-        <Link
-          href="/chats"
-          className="p-2 -ml-2 rounded-full hover:bg-gray-100 md:hidden"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-
-        {/* Avatar */}
-        <Avatar
-          src={displayImage}
-          name={displayName}
-          size="md"
-          showOnlineIndicator={conversationType === "direct"}
-          isOnline={isOnline}
-        />
-
-        {/* Name and Status */}
-        <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-gray-900 truncate">{displayName}</h2>
-          {conversationType === "group" ? (
-            <p className="text-xs text-gray-500">
-              {participants.length} members
-            </p>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              {isOnline && (
-                <>
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  <p className="text-xs text-green-600 font-medium">Online</p>
-                </>
-              )}
-              {!isOnline && (
-                <p className="text-xs text-gray-500">Offline</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-1">
-          <button className="p-2 rounded-full hover:bg-gray-100 text-gray-600">
-            <Phone className="w-5 h-5" />
-          </button>
-          <button className="p-2 rounded-full hover:bg-gray-100 text-gray-600">
-            <Video className="w-5 h-5" />
-          </button>
-          {conversationType === "direct" && otherParticipant && (
+    <>
+      {/* Full-screen chat container - overflow hidden to prevent parent scroll */}
+      <div className="fixed inset-0 flex flex-col bg-white overflow-hidden">
+        {/* iOS-style Header - Translucent with blur */}
+        <header className="shrink-0 bg-white/90 backdrop-blur-xl pt-[env(safe-area-inset-top)] z-40 border-b border-gray-100">
+          <div className="flex items-center gap-3 px-2 py-2 h-[52px]">
+            {/* Back button - iOS chevron style */}
             <Link
-              href={`/profile/${otherParticipant.user_id}`}
-              className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
+              href="/chats"
+              className="flex items-center justify-center w-10 h-10 -ml-1 rounded-full active:bg-gray-100/80 transition-colors text-blue-500"
             >
-              <Info className="w-5 h-5" />
+              <ChevronLeft className="w-7 h-7" strokeWidth={2.5} />
             </Link>
-          )}
-        </div>
-      </header>
 
-      {/* Messages */}
-      <div
-        ref={containerRef}
-        className="flex-1 overflow-y-auto px-4 py-4"
-      >
-        {loading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <MessageSkeleton key={i} isOwn={i % 2 === 0} />
-            ))}
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center px-4">
-            <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mb-4">
-              <span className="text-3xl">👋</span>
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-1">
-              Start the conversation
-            </h3>
-            <p className="text-sm text-gray-500 max-w-xs">
-              Send a message to {displayName} to get things started!
-            </p>
-          </div>
-        ) : (
-          <>
-            <MessageGroup
-              messages={messages}
-              currentUserId={currentUserId}
-              showAvatars={conversationType === "group"}
-              participants={participantMap}
-            />
-            
-            {/* Typing Indicator */}
-            {isAnyoneTyping && (
-              <div className="flex gap-2 max-w-[85%] animate-fade-in">
+            {/* Clickable Avatar - navigates to profile */}
+            {conversationType === "direct" && otherParticipant ? (
+              <Link
+                href={`/profile/${otherParticipant.user_id}`}
+                className="shrink-0 flex items-center active:opacity-80 transition-opacity"
+              >
                 <Avatar
-                  src={otherParticipant?.profile?.profile_image_url}
+                  src={displayImage}
+                  name={displayName}
+                  size="sm"
+                  showOnlineIndicator={true}
+                  isOnline={isOnline}
+                />
+              </Link>
+            ) : (
+              <div className="shrink-0 flex items-center">
+                <Avatar
+                  src={displayImage}
                   name={displayName}
                   size="sm"
                 />
-                <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
-                  <div className="flex gap-1 items-center">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                    <span className="text-xs text-gray-500 ml-2">{typingText}</span>
-                  </div>
-                </div>
               </div>
             )}
-          </>
-        )}
-        <div ref={messagesEndRef} />
+
+            {/* Name - also clickable for direct chats */}
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
+              {conversationType === "direct" && otherParticipant ? (
+                <Link
+                  href={`/profile/${otherParticipant.user_id}`}
+                  className="block active:opacity-70 transition-opacity"
+                >
+                  <h2 className="font-semibold text-gray-900 truncate text-[16px] leading-tight">
+                    {displayName}
+                  </h2>
+                  {/* Online status - only show when online */}
+                  {isOnline && (
+                    <p className="text-[12px] text-gray-500">Active now</p>
+                  )}
+                </Link>
+              ) : (
+                <>
+                  <h2 className="font-semibold text-gray-900 truncate text-[16px] leading-tight">
+                    {displayName}
+                  </h2>
+                  {conversationType === "group" && (
+                    <p className="text-[12px] text-gray-500">{participants.length} members</p>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Action buttons - Call & Video */}
+            <div className="flex items-center shrink-0">
+              <button 
+                onClick={handleCallClick}
+                className="flex items-center justify-center w-10 h-10 rounded-full active:bg-gray-100/80 transition-colors text-blue-500"
+                aria-label="Voice call"
+              >
+                <Phone className="w-6 h-6" />
+              </button>
+              <button 
+                onClick={handleVideoClick}
+                className="flex items-center justify-center w-10 h-10 rounded-full active:bg-gray-100/80 transition-colors text-blue-500"
+                aria-label="Video call"
+              >
+                <Video className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Messages Area - Clean, scrollable */}
+        <div
+          ref={containerRef}
+          className="flex-1 overflow-y-auto overscroll-contain px-4 py-3 pb-24"
+        >
+          {loading ? (
+            <div className="space-y-3 py-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <MessageSkeleton key={i} isOwn={i % 2 === 0} />
+              ))}
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-center px-6">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mb-4">
+                <span className="text-3xl">👋</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">
+                Start the conversation
+              </h3>
+              <p className="text-sm text-gray-500 max-w-[240px]">
+                Send a message to {displayName} to get things started!
+              </p>
+            </div>
+          ) : (
+            <>
+              <MessageGroup
+                messages={messages}
+                currentUserId={currentUserId}
+                showAvatars={conversationType === "group"}
+                participants={participantMap}
+              />
+              
+              {/* Typing Indicator */}
+              {isAnyoneTyping && (
+                <div className="flex gap-2 max-w-[85%] animate-fade-in mt-2">
+                  <Avatar
+                    src={otherParticipant?.profile?.profile_image_url}
+                    name={displayName}
+                    size="xs"
+                  />
+                  <div className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-2.5">
+                    <div className="flex gap-1 items-center">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      {typingText && (
+                        <span className="text-xs text-gray-500 ml-1.5">{typingText}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Floating Message Input */}
+        <MessageInput 
+          onSend={handleSend} 
+          disabled={loading}
+          onTyping={handleTypingChange}
+        />
       </div>
 
-      {/* Message Input */}
-      <MessageInput 
-        onSend={handleSend} 
-        disabled={loading}
-        onTyping={handleTypingChange}
+      {/* Coming Soon Modal */}
+      <ComingSoonModal
+        isOpen={comingSoonModal.isOpen}
+        onClose={closeModal}
+        feature={comingSoonModal.feature}
       />
-    </div>
+    </>
   );
 }

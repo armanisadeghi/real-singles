@@ -94,25 +94,42 @@ async function getConversation(conversationId: string) {
 
 function ChatSkeleton() {
   return (
-    <div className="flex flex-col h-[calc(100dvh-var(--header-height,72px))]">
-      {/* Header skeleton */}
-      <div className="bg-white border-b px-4 py-3 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
-        <div className="flex-1">
-          <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+    <div className="fixed inset-0 flex flex-col bg-white overflow-hidden">
+      {/* iOS-style Header skeleton */}
+      <div className="shrink-0 bg-white/90 backdrop-blur-xl pt-[env(safe-area-inset-top)] border-b border-gray-100">
+        <div className="flex items-center gap-3 px-2 py-2 h-[52px]">
+          {/* Back chevron skeleton */}
+          <div className="w-10 h-10 rounded-full bg-gray-100 animate-pulse" />
+          {/* Avatar skeleton */}
+          <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+          {/* Name skeleton */}
+          <div className="flex-1">
+            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+          </div>
+          {/* Action buttons skeleton */}
+          <div className="flex">
+            <div className="w-10 h-10 rounded-full bg-gray-100 animate-pulse" />
+            <div className="w-10 h-10 rounded-full bg-gray-100 animate-pulse" />
+          </div>
         </div>
       </div>
 
       {/* Messages skeleton */}
-      <div className="flex-1 p-4 space-y-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto px-4 py-3 pb-24 space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
           <MessageSkeleton key={i} isOwn={i % 2 === 0} />
         ))}
       </div>
 
-      {/* Input skeleton */}
-      <div className="bg-white border-t p-3">
-        <div className="h-11 bg-gray-100 rounded-full animate-pulse" />
+      {/* Floating Input skeleton */}
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        <div className="px-3 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-full bg-blue-100 animate-pulse" />
+            <div className="flex-1 h-10 bg-gray-100 rounded-full animate-pulse" />
+            <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse" />
+          </div>
+        </div>
       </div>
     </div>
   );

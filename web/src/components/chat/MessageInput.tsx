@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Send, Image, Smile, Paperclip, X } from "lucide-react";
+import { Send, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IMAGE_AND_VIDEO_ACCEPT_STRING } from "@/lib/supabase/storage";
 
@@ -12,11 +12,20 @@ interface MessageInputProps {
   placeholder?: string;
 }
 
+/**
+ * iOS-style floating message input
+ * 
+ * Features:
+ * - Floating design without background
+ * - Clean, centered alignment
+ * - 16px min font-size (prevents iOS zoom)
+ * - Uniform icon sizes
+ */
 export function MessageInput({
   onSend,
   onTyping,
   disabled = false,
-  placeholder = "Type a message...",
+  placeholder = "Type a message",
 }: MessageInputProps) {
   const [message, setMessage] = useState("");
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
@@ -45,6 +54,11 @@ export function MessageInput({
       }
       setIsTyping(false);
       onTyping?.(false);
+
+      // Reset textarea height
+      if (inputRef.current) {
+        inputRef.current.style.height = "auto";
+      }
 
       // Focus back on input
       inputRef.current?.focus();
@@ -82,7 +96,7 @@ export function MessageInput({
     // Auto-resize textarea
     const textarea = e.target;
     textarea.style.height = "auto";
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 100)}px`;
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,97 +151,99 @@ export function MessageInput({
   const canSend = (message.trim() || attachedImage) && !disabled && !isUploading;
 
   return (
-    <div className="bg-white border-t">
-      {/* Attached image preview */}
-      {attachedImage && (
-        <div className="px-4 pt-3">
-          <div className="relative inline-block">
-            <img
-              src={attachedImage}
-              alt="Attached"
-              className="h-20 rounded-lg object-cover"
-            />
-            <button
-              onClick={removeAttachment}
-              className="absolute -top-2 -right-2 w-6 h-6 bg-gray-800 text-white rounded-full flex items-center justify-center hover:bg-gray-700"
-            >
-              <X className="w-4 h-4" />
-            </button>
+    <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
+      <div className="pointer-events-auto px-3 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2">
+        {/* Attached image preview */}
+        {attachedImage && (
+          <div className="mb-2 ml-12">
+            <div className="relative inline-block">
+              <img
+                src={attachedImage}
+                alt="Attached"
+                className="h-16 rounded-xl object-cover"
+              />
+              <button
+                onClick={removeAttachment}
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-800 text-white rounded-full flex items-center justify-center active:bg-gray-700"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Input row */}
-      <form onSubmit={handleSubmit} className="flex items-end gap-2 p-3">
-        {/* Attachment button */}
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={disabled || isUploading}
-          className={cn(
-            "p-2.5 rounded-full text-gray-500 hover:bg-gray-100 transition-colors shrink-0",
-            (disabled || isUploading) && "opacity-50 cursor-not-allowed"
-          )}
+        {/* Input row - Clean floating design */}
+        <form 
+          onSubmit={handleSubmit} 
+          className="flex items-center gap-2"
         >
-          {isUploading ? (
-            <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <Paperclip className="w-5 h-5" />
-          )}
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={IMAGE_AND_VIDEO_ACCEPT_STRING}
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-
-        {/* Text input */}
-        <div className="flex-1 relative">
-          <textarea
-            ref={inputRef}
-            value={message}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            disabled={disabled}
-            rows={1}
-            className={cn(
-              "w-full px-4 py-2.5 pr-12 border border-gray-200 rounded-2xl resize-none",
-              "focus:ring-2 focus:ring-pink-500 focus:border-transparent",
-              "disabled:bg-gray-50 disabled:opacity-50",
-              "placeholder:text-gray-400"
-            )}
-            style={{ minHeight: "44px", maxHeight: "120px" }}
-          />
-
-          {/* Emoji button (placeholder) */}
+          {/* Plus button for attachments */}
           <button
             type="button"
-            className="absolute right-3 bottom-2.5 p-1 text-gray-400 hover:text-gray-600"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={disabled || isUploading}
+            className={cn(
+              "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
+              "bg-blue-500 text-white",
+              (disabled || isUploading) && "opacity-50"
+            )}
           >
-            <Smile className="w-5 h-5" />
+            {isUploading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Plus className="w-5 h-5" strokeWidth={2.5} />
+            )}
           </button>
-        </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={IMAGE_AND_VIDEO_ACCEPT_STRING}
+            onChange={handleFileSelect}
+            className="hidden"
+          />
 
-        {/* Send button */}
-        <button
-          type="submit"
-          disabled={!canSend}
-          className={cn(
-            "p-2.5 rounded-full transition-all shrink-0",
-            canSend
-              ? "bg-gradient-to-br from-pink-500 to-purple-600 text-white shadow-md hover:shadow-lg active:scale-95"
-              : "bg-gray-100 text-gray-400 cursor-not-allowed"
-          )}
-        >
-          <Send className="w-5 h-5" />
-        </button>
-      </form>
+          {/* Text input - Rounded pill style */}
+          <div className="flex-1 relative">
+            <textarea
+              ref={inputRef}
+              value={message}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              disabled={disabled}
+              rows={1}
+              inputMode="text"
+              enterKeyHint="send"
+              className={cn(
+                "w-full px-4 py-2.5 bg-gray-100 rounded-full resize-none",
+                "text-[16px] leading-[1.3]",
+                "focus:outline-none focus:ring-2 focus:ring-blue-500/20",
+                "disabled:opacity-50",
+                "placeholder:text-gray-400"
+              )}
+              style={{ 
+                minHeight: "40px", 
+                maxHeight: "100px",
+                touchAction: "manipulation",
+              }}
+            />
+          </div>
 
-      {/* Safe area padding for mobile */}
-      <div className="pb-[env(safe-area-inset-bottom)]" />
+          {/* Send button */}
+          <button
+            type="submit"
+            disabled={!canSend}
+            className={cn(
+              "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
+              canSend
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-400"
+            )}
+          >
+            <Send className="w-5 h-5" />
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
