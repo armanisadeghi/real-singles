@@ -63,6 +63,47 @@ function getGitCommit(): string | null {
 }
 
 /**
+ * Get the last commit message
+ */
+function getCommitMessage(): string | null {
+  try {
+    return execSync("git log -1 --pretty=%B").toString().trim();
+  } catch (error) {
+    console.warn("⚠️  Could not get commit message:", error);
+    return null;
+  }
+}
+
+/**
+ * Get code change stats for the last commit
+ */
+function getCodeStats(): { linesAdded: number; linesDeleted: number; filesChanged: number } {
+  try {
+    const stats = execSync("git diff --numstat HEAD~1 HEAD").toString().trim();
+    let linesAdded = 0;
+    let linesDeleted = 0;
+    let filesChanged = 0;
+
+    if (stats) {
+      const lines = stats.split("\n");
+      for (const line of lines) {
+        const [added, deleted] = line.trim().split(/\s+/);
+        if (added !== "-" && deleted !== "-") {
+          linesAdded += parseInt(added) || 0;
+          linesDeleted += parseInt(deleted) || 0;
+          filesChanged += 1;
+        }
+      }
+    }
+
+    return { linesAdded, linesDeleted, filesChanged };
+  } catch (error) {
+    console.warn("⚠️  Could not get code stats:", error);
+    return { linesAdded: 0, linesDeleted: 0, filesChanged: 0 };
+  }
+}
+
+/**
  * Parse a semantic version string
  */
 function parseVersion(version: string): [number, number, number] {
@@ -134,12 +175,18 @@ async function updateAppVersion() {
 
     const newBuildNumber = currentBuildNumber + 1;
     const gitCommit = getGitCommit();
+    const commitMessage = getCommitMessage();
+    const codeStats = getCodeStats();
 
     // Insert new version record
     const { error: insertError } = await supabase.from("app_version").insert({
       version: newVersion,
       build_number: newBuildNumber,
       git_commit: gitCommit,
+      commit_message: commitMessage,
+      lines_added: codeStats.linesAdded,
+      lines_deleted: codeStats.linesDeleted,
+      files_changed: codeStats.filesChanged,
       deployed_at: new Date().toISOString(),
     });
 
@@ -152,6 +199,12 @@ async function updateAppVersion() {
     console.log(`   Build: #${newBuildNumber}`);
     if (gitCommit) {
       console.log(`   Commit: ${gitCommit}`);
+    }
+    if (commitMessage) {
+      console.log(`   Message: ${commitMessage}`);
+    }
+    if (codeStats.filesChanged > 0) {
+      console.log(`   Changes: ${codeStats.filesChanged} files, +${codeStats.linesAdded}/-${codeStats.linesDeleted} lines`);
     }
     console.log(`   Deployed: ${new Date().toISOString()}\n`);
 

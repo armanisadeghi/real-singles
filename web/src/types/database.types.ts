@@ -55,28 +55,40 @@ export type Database = {
       app_version: {
         Row: {
           build_number: number
+          commit_message: string | null
           created_at: string
           deployed_at: string
+          files_changed: number | null
           git_commit: string | null
           id: string
+          lines_added: number | null
+          lines_deleted: number | null
           updated_at: string
           version: string
         }
         Insert: {
           build_number?: number
+          commit_message?: string | null
           created_at?: string
           deployed_at?: string
+          files_changed?: number | null
           git_commit?: string | null
           id?: string
+          lines_added?: number | null
+          lines_deleted?: number | null
           updated_at?: string
           version: string
         }
         Update: {
           build_number?: number
+          commit_message?: string | null
           created_at?: string
           deployed_at?: string
+          files_changed?: number | null
           git_commit?: string | null
           id?: string
+          lines_added?: number | null
+          lines_deleted?: number | null
           updated_at?: string
           version?: string
         }

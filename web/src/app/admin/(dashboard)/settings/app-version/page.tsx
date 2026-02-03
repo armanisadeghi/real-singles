@@ -12,6 +12,10 @@ import {
   AlertCircle,
   Package,
   Activity,
+  MessageSquare,
+  FileText,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
 import { formatRelativeTime } from "@/lib/utils";
@@ -21,6 +25,10 @@ interface Version {
   version: string;
   build_number: number;
   git_commit: string | null;
+  commit_message: string | null;
+  lines_added: number | null;
+  lines_deleted: number | null;
+  files_changed: number | null;
   deployed_at: string;
   created_at: string;
 }
@@ -45,6 +53,25 @@ export default function AppVersionPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
+
+  const truncateMessage = (message: string | null, maxLength: number = 50): { text: string; isTruncated: boolean } => {
+    if (!message) return { text: "No commit message", isTruncated: false };
+    if (message.length <= maxLength) return { text: message, isTruncated: false };
+    return { text: message.substring(0, maxLength) + "...", isTruncated: true };
+  };
+
+  const toggleMessageExpansion = (versionId: string) => {
+    setExpandedMessages((prev) => {
+      const next = new Set(prev);
+      if (next.has(versionId)) {
+        next.delete(versionId);
+      } else {
+        next.add(versionId);
+      }
+      return next;
+    });
+  };
 
   const fetchVersionData = async (isRefresh = false) => {
     if (isRefresh) {
@@ -74,6 +101,10 @@ export default function AppVersionPage() {
         version: versionData.version,
         build_number: versionData.buildNumber,
         git_commit: versionData.gitCommit,
+        commit_message: versionData.commitMessage || null,
+        lines_added: versionData.linesAdded || null,
+        lines_deleted: versionData.linesDeleted || null,
+        files_changed: versionData.filesChanged || null,
         deployed_at: versionData.deployedAt,
         created_at: versionData.deployedAt,
       });
@@ -248,38 +279,71 @@ export default function AppVersionPage() {
         </div>
 
         {currentVersion && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/20">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-white/60" />
-              <div>
-                <p className="text-xs text-white/60">Deployed</p>
-                <p className="text-sm font-medium text-white">
-                  {formatRelativeTime(currentVersion.deployed_at)}
-                </p>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/20">
+              <div className="flex items-center gap-3">
+                <Calendar className="w-5 h-5 text-white/60" />
+                <div>
+                  <p className="text-xs text-white/60">Deployed</p>
+                  <p className="text-sm font-medium text-white">
+                    {formatRelativeTime(currentVersion.deployed_at)}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Clock className="w-5 h-5 text-white/60" />
+                <div>
+                  <p className="text-xs text-white/60">Deploy Time</p>
+                  <p className="text-sm font-medium text-white">
+                    {new Date(currentVersion.deployed_at).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <GitCommit className="w-5 h-5 text-white/60" />
+                <div>
+                  <p className="text-xs text-white/60">Git Commit</p>
+                  <p className="text-sm font-medium text-white font-mono">
+                    {currentVersion.git_commit?.substring(0, 7) || "N/A"}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Clock className="w-5 h-5 text-white/60" />
-              <div>
-                <p className="text-xs text-white/60">Deploy Time</p>
-                <p className="text-sm font-medium text-white">
-                  {new Date(currentVersion.deployed_at).toLocaleString("en-US", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </p>
+            
+            {currentVersion.commit_message && (
+              <div className="mt-4 pt-4 border-t border-white/20">
+                <div className="flex items-start gap-3">
+                  <MessageSquare className="w-5 h-5 text-white/60 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs text-white/60 mb-1">Commit Message</p>
+                    <p className="text-sm font-medium text-white">{currentVersion.commit_message}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <GitCommit className="w-5 h-5 text-white/60" />
-              <div>
-                <p className="text-xs text-white/60">Git Commit</p>
-                <p className="text-sm font-medium text-white font-mono">
-                  {currentVersion.git_commit?.substring(0, 7) || "N/A"}
-                </p>
+            )}
+
+            {currentVersion.files_changed !== null && currentVersion.lines_added !== null && currentVersion.lines_deleted !== null && (
+              <div className="mt-3 flex items-center gap-4 text-white/90">
+                <div className="flex items-center gap-1.5">
+                  <FileText className="w-4 h-4 text-white/60" />
+                  <span className="text-sm font-medium">{currentVersion.files_changed} files</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <Plus className="w-4 h-4 text-emerald-300" />
+                    <span className="text-sm font-medium">{currentVersion.lines_added}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Minus className="w-4 h-4 text-red-300" />
+                    <span className="text-sm font-medium">{currentVersion.lines_deleted}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            )}
+          </>
         )}
       </div>
 
@@ -370,10 +434,13 @@ export default function AppVersionPage() {
                   Build
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Deployed
+                  Message
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Date & Time
+                  Changes
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Deployed
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Commit
@@ -383,7 +450,7 @@ export default function AppVersionPage() {
             <tbody className="divide-y divide-slate-100">
               {history.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
+                  <td colSpan={6} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <GitBranch className="w-12 h-12 text-slate-300" />
                       <p className="text-sm text-slate-500">No version history found</p>
@@ -393,6 +460,10 @@ export default function AppVersionPage() {
               ) : (
                 history.map((version, index) => {
                   const isLatest = index === 0;
+                  const isExpanded = expandedMessages.has(version.id);
+                  const { text: messageText, isTruncated } = truncateMessage(version.commit_message);
+                  const displayMessage = isExpanded ? version.commit_message : messageText;
+                  
                   return (
                     <tr 
                       key={version.id || index}
@@ -417,20 +488,49 @@ export default function AppVersionPage() {
                           #{version.build_number}
                         </span>
                       </td>
+                      <td className="px-6 py-4 max-w-md">
+                        <div className="flex items-start gap-2">
+                          <MessageSquare className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm text-slate-700 ${isExpanded ? "" : "truncate"}`}>
+                              {displayMessage || "No commit message"}
+                            </p>
+                            {isTruncated && (
+                              <button
+                                onClick={() => toggleMessageExpansion(version.id)}
+                                className="text-xs text-violet-600 hover:text-violet-700 font-medium mt-1"
+                              >
+                                {isExpanded ? "Show less" : "Show more"}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {version.files_changed !== null && version.lines_added !== null && version.lines_deleted !== null ? (
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1 text-slate-600">
+                              <FileText className="w-4 h-4" />
+                              <span className="text-sm font-medium">{version.files_changed}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1 text-emerald-600">
+                                <Plus className="w-3.5 h-3.5" />
+                                <span className="text-sm font-medium">{version.lines_added}</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-red-600">
+                                <Minus className="w-3.5 h-3.5" />
+                                <span className="text-sm font-medium">{version.lines_deleted}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-slate-400">No data</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm text-slate-900">
                           {formatRelativeTime(version.deployed_at)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-slate-600">
-                          {new Date(version.deployed_at).toLocaleString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                            hour: "numeric",
-                            minute: "2-digit",
-                          })}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

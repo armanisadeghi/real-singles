@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     // Get paginated versions
     const { data, error } = await supabaseAdmin
       .from("app_version")
-      .select("id, version, build_number, git_commit, deployed_at, created_at")
+      .select("id, version, build_number, git_commit, commit_message, lines_added, lines_deleted, files_changed, deployed_at, created_at")
       .order("deployed_at", { ascending: false })
       .range(offset, offset + limit - 1);
 

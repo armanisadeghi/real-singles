@@ -25,7 +25,8 @@
     "version:minor": "tsx scripts/update-app-version.ts --minor",
     "ship": "tsx scripts/deploy.ts",
     "ship:minor": "tsx scripts/deploy.ts --minor",
-    "ship:major": "tsx scripts/deploy.ts --major"
+    "ship:major": "tsx scripts/deploy.ts --major",
+    "backfill:history": "tsx scripts/backfill-version-history.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
