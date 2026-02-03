@@ -35,7 +35,7 @@ export function OnboardingProgress({
   return (
     <header
       className={cn(
-        "flex-none pt-safe px-4 pb-2 sm:pb-3",
+        "flex-none pt-safe px-5 pb-3 sm:pb-4",
         "bg-white/70 dark:bg-neutral-900/70 backdrop-blur-xl",
         "border-b border-white/20 dark:border-white/10",
         "sm:rounded-t-2xl",

@@ -29,20 +29,20 @@ export function OnboardingStepWrapper({
   return (
     <main
       className={cn(
-        "flex-1 flex flex-col min-h-0 px-4 sm:px-6 py-4",
+        "flex-1 flex flex-col min-h-0 px-5 sm:px-6 py-6",
         // When keyboard needed, align content to top so it stays above keyboard
-        needsKeyboard ? "justify-start" : "justify-center",
+        needsKeyboard ? "justify-start pt-4" : "justify-center",
         className
       )}
     >
       <div className="w-full max-w-md mx-auto overflow-y-auto">
         {/* Step header */}
-        <div className="mb-4 sm:mb-6">
+        <div className="mb-5 sm:mb-6">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
             {title}
           </h1>
           {subtitle && (
-            <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
               {subtitle}
             </p>
           )}

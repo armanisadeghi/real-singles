@@ -276,30 +276,74 @@ export function calculateCompletion(
 
 /**
  * Get the step number to resume from
- * Priority: saved step > first skipped > first incomplete > complete
+ * Priority: first incomplete step > first skipped step > complete
+ * 
+ * Note: We ignore the saved profile_completion_step because it can be outdated.
+ * Instead, we always find the first step that actually needs attention.
  */
 export function getResumeStep(
   profile: ProfileData,
   completion: CompletionStatus
 ): number {
-  // If profile has a saved step, start there (if not complete)
-  const savedStep = profile.profile_completion_step;
-  if (savedStep && savedStep > 0 && savedStep <= ONBOARDING_STEPS.length) {
-    return savedStep;
-  }
-
-  // If there are skipped fields, go to first skipped
-  if (completion.firstSkippedStep) {
-    return completion.firstSkippedStep;
-  }
-
-  // If there are incomplete fields, go to first incomplete
-  if (completion.nextIncompleteStep) {
-    return completion.nextIncompleteStep;
+  // Find the first incomplete step by checking each step in order
+  for (const step of ONBOARDING_STEPS) {
+    // Skip the complete step
+    if (step.id === "complete") continue;
+    
+    // Check if this step is complete
+    const stepComplete = isStepCompleteByConfig(step, profile, completion);
+    if (!stepComplete) {
+      return step.stepNumber;
+    }
   }
 
   // All complete, go to complete step
   return ONBOARDING_STEPS.length;
+}
+
+/**
+ * Check if a step is complete based on its configuration
+ */
+function isStepCompleteByConfig(
+  step: (typeof ONBOARDING_STEPS)[number],
+  profile: ProfileData,
+  completion: CompletionStatus
+): boolean {
+  // Photos step - needs at least 1 photo
+  if (step.id === "photos") {
+    return hasValue(profile.profile_image_url) || completion.photoCount >= MIN_PHOTOS_REQUIRED;
+  }
+
+  // Verification selfie - optional, consider complete if has value OR was skipped
+  if (step.id === "verification-selfie") {
+    return hasValue(profile.verification_selfie_url) || 
+           completion.skippedFields.includes("verification_selfie_url");
+  }
+
+  // For all other steps, check each field
+  const preferNotFields = profile.profile_completion_prefer_not || [];
+  const skippedFields = profile.profile_completion_skipped || [];
+
+  for (const field of step.fields) {
+    const value = profile[field.dbColumn];
+    const isPreferNot = preferNotFields.includes(field.dbColumn);
+    const isSkipped = skippedFields.includes(field.dbColumn);
+
+    // A field is "complete" if it has a value, or user chose "prefer not to say"
+    // Skipped fields are NOT complete - we want to return to them
+    if (!hasValue(value) && !isPreferNot) {
+      // For required steps, any missing field means incomplete
+      if (step.isRequired) {
+        return false;
+      }
+      // For optional steps, only count as incomplete if not skipped
+      if (!isSkipped) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 /**

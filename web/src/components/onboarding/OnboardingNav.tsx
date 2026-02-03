@@ -42,7 +42,7 @@ export function OnboardingNav({
   return (
     <footer
       className={cn(
-        "flex-none px-4 pt-3 pb-safe sm:pb-4",
+        "flex-none px-5 pt-4 pb-6 sm:pb-5",
         "bg-white/70 dark:bg-neutral-900/70 backdrop-blur-xl",
         "border-t border-white/20 dark:border-white/10",
         "sm:rounded-b-2xl",

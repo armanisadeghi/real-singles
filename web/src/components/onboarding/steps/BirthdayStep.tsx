@@ -6,7 +6,7 @@
  * Step 2: Date of Birth with age calculation
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { OnboardingStepWrapper } from "../OnboardingStepWrapper";
 import { cn } from "@/lib/utils";
 
@@ -59,29 +59,43 @@ function calculateAge(dateString: string): number | null {
 }
 
 export function BirthdayStep({ dateOfBirth, onChange }: BirthdayStepProps) {
-  // Parse existing date
-  const [month, setMonth] = useState("");
-  const [day, setDay] = useState("");
-  const [year, setYear] = useState("");
+  // Parse existing date - initialize from prop
+  const initialParts = dateOfBirth?.split("-") || [];
+  const [month, setMonth] = useState(initialParts[1] || "");
+  const [day, setDay] = useState(initialParts[2] || "");
+  const [year, setYear] = useState(initialParts[0] || "");
+  
+  // Track the last value we sent to parent to avoid infinite loops
+  const lastSentValueRef = useRef(dateOfBirth);
 
+  // Sync from parent only if the value changed externally (not from us)
   useEffect(() => {
-    if (dateOfBirth) {
+    if (dateOfBirth && dateOfBirth !== lastSentValueRef.current) {
       const parts = dateOfBirth.split("-");
       if (parts.length === 3) {
         setYear(parts[0]);
         setMonth(parts[1]);
         setDay(parts[2]);
+        lastSentValueRef.current = dateOfBirth;
       }
     }
   }, [dateOfBirth]);
 
-  // Combine into date string when all parts are set
-  useEffect(() => {
-    if (month && day && year) {
-      const dateStr = `${year}-${month}-${day}`;
-      onChange(dateStr);
+  // Handler for when user changes a dropdown
+  const handleChange = (newMonth: string, newDay: string, newYear: string) => {
+    setMonth(newMonth);
+    setDay(newDay);
+    setYear(newYear);
+    
+    // Only call onChange if all parts are set and it's different from last sent
+    if (newMonth && newDay && newYear) {
+      const dateStr = `${newYear}-${newMonth}-${newDay}`;
+      if (dateStr !== lastSentValueRef.current) {
+        lastSentValueRef.current = dateStr;
+        onChange(dateStr);
+      }
     }
-  }, [month, day, year, onChange]);
+  };
 
   const age = useMemo(() => {
     if (month && day && year) {
@@ -109,7 +123,7 @@ export function BirthdayStep({ dateOfBirth, onChange }: BirthdayStepProps) {
         {/* Month */}
         <select
           value={month}
-          onChange={(e) => setMonth(e.target.value)}
+          onChange={(e) => handleChange(e.target.value, day, year)}
           className={selectClass}
         >
           <option value="" disabled>
@@ -125,7 +139,7 @@ export function BirthdayStep({ dateOfBirth, onChange }: BirthdayStepProps) {
         {/* Day */}
         <select
           value={day}
-          onChange={(e) => setDay(e.target.value)}
+          onChange={(e) => handleChange(month, e.target.value, year)}
           className={selectClass}
         >
           <option value="" disabled>
@@ -141,7 +155,7 @@ export function BirthdayStep({ dateOfBirth, onChange }: BirthdayStepProps) {
         {/* Year */}
         <select
           value={year}
-          onChange={(e) => setYear(e.target.value)}
+          onChange={(e) => handleChange(month, day, e.target.value)}
           className={selectClass}
         >
           <option value="" disabled>
