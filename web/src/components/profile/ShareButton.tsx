@@ -24,7 +24,7 @@ export function ShareButton({
       <button
         onClick={() => setShowQRModal(true)}
         className={cn(
-          "inline-flex items-center justify-center gap-1.5",
+          "inline-flex items-center justify-center gap-1",
           "bg-gray-100 text-gray-600 font-medium rounded-full",
           "hover:bg-gray-200 hover:text-gray-900",
           "transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
@@ -33,7 +33,7 @@ export function ShareButton({
         )}
         title="Share Profile"
       >
-        <Share2 className="w-4 h-4" />
+        <Share2 className="w-3.5 h-3.5" />
         {labelVisibility === "always" && <span>Share</span>}
         {labelVisibility === "responsive" && <span className="hidden sm:inline">Share</span>}
       </button>

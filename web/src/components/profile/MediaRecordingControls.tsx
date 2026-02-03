@@ -126,16 +126,16 @@ export function MediaRecordingControls({
     <div className="flex flex-col items-center gap-4">
       {/* Timer display (shown when recording or preview) */}
       {(state === "recording" || state === "preview") && (
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-1.5">
           {/* Time display */}
-          <div className="text-2xl font-mono font-semibold text-gray-900">
+          <div className="text-lg font-mono font-semibold text-gray-900">
             {formatTime(recordingTime)}
-            <span className="text-gray-400"> / {formatTime(maxDuration)}</span>
+            <span className="text-gray-400 text-sm"> / {formatTime(maxDuration)}</span>
           </div>
 
           {/* Progress bar (only during recording) */}
           {state === "recording" && (
-            <div className="w-full max-w-[200px] h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div className="w-full max-w-[160px] h-1 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-pink-500 to-indigo-500 transition-all duration-1000 ease-linear"
                 style={{ width: `${progress}%` }}
@@ -146,50 +146,50 @@ export function MediaRecordingControls({
       )}
 
       {/* Control buttons */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {/* Recording/Stop button */}
         {state === "idle" || state === "requesting" || state === "ready" ? (
           <button
             onClick={onStartRecording}
             disabled={state === "requesting"}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
               bg-gradient-to-r from-pink-500 to-indigo-500 text-white
               hover:from-pink-600 hover:to-indigo-600
               disabled:opacity-50 disabled:cursor-not-allowed
-              transition-all duration-200 shadow-md hover:shadow-lg
+              transition-all duration-200 shadow-sm hover:shadow
               active:scale-[0.98]"
           >
             {state === "requesting" ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <Icon className="w-5 h-5" />
+              <Icon className="w-4 h-4" />
             )}
             <span>
               {state === "requesting"
-                ? "Requesting access..."
+                ? "Access..."
                 : hasExisting
                   ? "Re-record"
-                  : `Record ${isAudio ? "Voice" : "Video"}`}
+                  : "Record"}
             </span>
           </button>
         ) : state === "recording" ? (
           <button
             onClick={onStopRecording}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
               bg-red-500 text-white hover:bg-red-600
-              transition-all duration-200 shadow-md hover:shadow-lg
+              transition-all duration-200 shadow-sm hover:shadow
               active:scale-[0.98] animate-pulse"
           >
-            <Square className="w-5 h-5 fill-current" />
-            <span>Stop Recording</span>
+            <Square className="w-4 h-4 fill-current" />
+            <span>Stop</span>
           </button>
         ) : state === "processing" || state === "uploading" ? (
           <button
             disabled
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
               bg-gray-100 text-gray-500 cursor-not-allowed"
           >
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
             <span>{state === "processing" ? "Processing..." : "Uploading..."}</span>
           </button>
         ) : null}
@@ -198,13 +198,13 @@ export function MediaRecordingControls({
         {mediaType === "video" && (state === "idle" || state === "ready") && onUploadFile && (
           <button
             onClick={onUploadFile}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
               bg-gray-100 text-gray-700 hover:bg-gray-200
               transition-all duration-200
               active:scale-[0.98]"
           >
-            <Upload className="w-5 h-5" />
-            <span>Upload File</span>
+            <Upload className="w-4 h-4" />
+            <span>Upload</span>
           </button>
         )}
 
@@ -212,13 +212,13 @@ export function MediaRecordingControls({
         {hasExisting && (state === "idle" || state === "ready" || state === "preview") && (
           <button
             onClick={onDelete}
-            className="flex items-center justify-center p-2.5 rounded-xl
+            className="flex items-center justify-center p-2 rounded-lg
               text-red-500 hover:bg-red-50
               transition-all duration-200
               active:scale-[0.98]"
             title={`Delete ${isAudio ? "voice prompt" : "video intro"}`}
           >
-            <Trash2 className="w-5 h-5" />
+            <Trash2 className="w-4 h-4" />
           </button>
         )}
       </div>

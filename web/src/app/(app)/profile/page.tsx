@@ -239,27 +239,26 @@ export default async function MyProfilePage() {
                     </p>
                   )}
 
-                  {/* Action Buttons - Icon-only on mobile for secondary actions */}
+                  {/* Action Buttons */}
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <Link
                       href="/profile/edit"
-                      className="inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 sm:px-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-medium rounded-full hover:from-pink-600 hover:to-rose-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97] shadow-md shadow-pink-500/20"
+                      className="inline-flex items-center justify-center gap-1 h-8 px-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-medium rounded-full hover:from-pink-600 hover:to-rose-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97] shadow-md shadow-pink-500/20"
                     >
-                      <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      Edit
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>Edit</span>
                     </Link>
                     <Link
                       href="/settings"
-                      className="inline-flex items-center justify-center gap-1.5 h-9 w-9 sm:h-10 sm:w-auto sm:px-4 bg-gray-100 text-gray-600 text-sm font-medium rounded-full hover:bg-gray-200 hover:text-gray-900 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97]"
-                      title="Settings"
+                      className="inline-flex items-center justify-center gap-1 h-8 px-3 bg-gray-100 text-gray-600 text-sm font-medium rounded-full hover:bg-gray-200 hover:text-gray-900 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97]"
                     >
-                      <Settings className="w-4 h-4" />
-                      <span className="hidden sm:inline">Settings</span>
+                      <Settings className="w-3.5 h-3.5" />
+                      <span>Settings</span>
                     </Link>
                     <ShareButton
                       referralCode={user.referral_code || ""}
-                      className="h-9 w-9 sm:h-10 sm:w-auto sm:px-4 text-sm"
-                      labelVisibility="responsive"
+                      className="h-8 px-3 text-sm"
+                      labelVisibility="always"
                     />
                   </div>
                 </div>

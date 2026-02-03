@@ -288,26 +288,26 @@ export function VoiceRecorder({
           />
 
           {/* Duration display */}
-          <div className="text-lg font-medium text-gray-900">
+          <div className="text-sm font-medium text-gray-900">
             Recording: {recordingTime}s
           </div>
 
           {/* Playback controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={togglePlayback}
-              className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl
+              className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm
                 bg-gray-100 text-gray-700 hover:bg-gray-200
                 transition-all duration-200 active:scale-[0.98]"
             >
               {isPlaying ? (
                 <>
-                  <Pause className="w-5 h-5" />
+                  <Pause className="w-4 h-4" />
                   <span>Pause</span>
                 </>
               ) : (
                 <>
-                  <Play className="w-5 h-5" />
+                  <Play className="w-4 h-4" />
                   <span>Preview</span>
                 </>
               )}
@@ -315,11 +315,11 @@ export function VoiceRecorder({
           </div>
 
           {/* Save/Discard buttons */}
-          <div className="flex items-center gap-3 mt-2">
+          <div className="flex items-center gap-2 mt-2">
             <button
               onClick={handleDiscard}
               disabled={isSaving}
-              className="px-4 py-2 rounded-xl font-medium
+              className="px-3 py-1.5 rounded-lg text-sm font-medium
                 text-gray-600 hover:bg-gray-100
                 disabled:opacity-50 disabled:cursor-not-allowed
                 transition-all duration-200 active:scale-[0.98]"
@@ -329,7 +329,7 @@ export function VoiceRecorder({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl font-medium
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
                 bg-gradient-to-r from-pink-500 to-indigo-500 text-white
                 hover:from-pink-600 hover:to-indigo-600
                 disabled:opacity-50 disabled:cursor-not-allowed
@@ -337,11 +337,11 @@ export function VoiceRecorder({
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>Saving...</span>
                 </>
               ) : (
-                <span>Save Voice Prompt</span>
+                <span>Save</span>
               )}
             </button>
           </div>
@@ -350,17 +350,17 @@ export function VoiceRecorder({
 
       {/* Existing recording preview */}
       {state === "idle" && existingUrl && (
-        <div className="flex flex-col items-center gap-3 w-full mt-2">
+        <div className="flex flex-col items-center gap-2 w-full mt-2">
           <audio
             ref={audioRef}
             src={existingUrl}
             preload="metadata"
           />
           
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span>Current voice prompt</span>
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <span>Current prompt</span>
             {existingDuration && (
-              <span className="px-2 py-0.5 bg-gray-100 rounded-full text-xs">
+              <span className="px-1.5 py-0.5 bg-gray-100 rounded-full">
                 {existingDuration}s
               </span>
             )}
@@ -368,18 +368,18 @@ export function VoiceRecorder({
 
           <button
             onClick={togglePlayback}
-            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm
               bg-gray-100 text-gray-700 hover:bg-gray-200
               transition-all duration-200 active:scale-[0.98]"
           >
             {isPlaying ? (
               <>
-                <Pause className="w-4 h-4" />
+                <Pause className="w-3.5 h-3.5" />
                 <span>Pause</span>
               </>
             ) : (
               <>
-                <Play className="w-4 h-4" />
+                <Play className="w-3.5 h-3.5" />
                 <span>Play</span>
               </>
             )}

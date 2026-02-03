@@ -426,17 +426,17 @@ export function VideoRecorder({
 
       {/* Preview controls */}
       {state === "preview" && (
-        <div className="flex flex-col items-center gap-3 w-full">
-          <div className="text-sm text-gray-500">
+        <div className="flex flex-col items-center gap-2 w-full">
+          <div className="text-xs text-gray-500">
             Duration: {recordingTime}s
           </div>
           
           {/* Save/Discard buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleDiscard}
               disabled={isSaving}
-              className="px-4 py-2 rounded-xl font-medium
+              className="px-3 py-1.5 rounded-lg text-sm font-medium
                 text-gray-600 hover:bg-gray-100
                 disabled:opacity-50 disabled:cursor-not-allowed
                 transition-all duration-200 active:scale-[0.98]"
@@ -446,7 +446,7 @@ export function VideoRecorder({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl font-medium
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
                 bg-gradient-to-r from-pink-500 to-indigo-500 text-white
                 hover:from-pink-600 hover:to-indigo-600
                 disabled:opacity-50 disabled:cursor-not-allowed
@@ -454,11 +454,11 @@ export function VideoRecorder({
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>Saving...</span>
                 </>
               ) : (
-                <span>Save Video Intro</span>
+                <span>Save</span>
               )}
             </button>
           </div>
@@ -472,8 +472,8 @@ export function VideoRecorder({
 
       {/* Existing video info */}
       {state === "idle" && existingUrl && existingDuration && (
-        <div className="text-sm text-gray-500">
-          Current video intro ({existingDuration}s)
+        <div className="text-xs text-gray-500">
+          Current intro ({existingDuration}s)
         </div>
       )}
     </div>
