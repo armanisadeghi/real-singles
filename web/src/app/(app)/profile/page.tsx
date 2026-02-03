@@ -5,13 +5,10 @@ import {
   Settings, 
   Edit3, 
   CheckCircle,
-  Sparkles,
   Camera,
   PauseCircle,
-  Eye,
   Plus,
   ChevronRight,
-  TrendingUp,
   Mic,
   Video,
   Image as ImageIcon,
@@ -272,10 +269,8 @@ export default async function MyProfilePage() {
 
   // Completion color based on percentage
   const getCompletionColor = (pct: number) => {
-    if (pct < 33) return "text-red-500";
-    if (pct < 66) return "text-orange-500";
-    if (pct < 100) return "text-green-500";
-    return "text-pink-500";
+    if (pct < 100) return "text-gray-700 dark:text-gray-300";
+    return "text-brand-primary";
   };
 
   // Format height helper
@@ -291,8 +286,8 @@ export default async function MyProfilePage() {
         /* Empty State - No Profile Yet */
         <div className="max-w-md mx-auto px-4 py-12 sm:py-16">
           <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-sm p-6 sm:p-8 text-center">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-5 sm:mb-6">
-              <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-pink-500 dark:text-pink-400" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-brand-primary/10 dark:bg-brand-primary/20 rounded-full flex items-center justify-center mx-auto mb-5 sm:mb-6">
+              <Edit3 className="w-8 h-8 sm:w-10 sm:h-10 text-brand-primary" />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2 sm:mb-3">Complete Your Profile</h2>
             <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base mb-6 sm:mb-8">
@@ -300,9 +295,8 @@ export default async function MyProfilePage() {
             </p>
             <Link
               href="/onboarding"
-              className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-medium hover:from-pink-600 hover:to-rose-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97] shadow-lg shadow-pink-500/25"
+              className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-brand-primary to-brand-primary-dark text-white rounded-lg font-medium hover:from-brand-primary-light hover:to-brand-primary transition-all duration-200 active:scale-[0.98] shadow-sm"
             >
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
               Get Started
             </Link>
           </div>
@@ -333,7 +327,7 @@ export default async function MyProfilePage() {
               <div className="flex items-center gap-4 sm:gap-6">
                 {/* Profile Photo */}
                 <div className="relative shrink-0">
-                  <div className="w-[72px] h-[72px] sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 shadow-lg">
+                  <div className="w-[72px] h-[72px] sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-neutral-800 shadow-lg">
                     {profile.profile_image_url ? (
                       <img
                         src={profile.profile_image_url}
@@ -393,7 +387,7 @@ export default async function MyProfilePage() {
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <Link
                       href="/profile/edit"
-                      className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full hover:from-pink-600 hover:to-rose-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97] shadow-md shadow-pink-500/20"
+                      className="inline-flex items-center justify-center w-8 h-8 bg-brand-primary text-white rounded-full hover:bg-brand-primary-dark transition-all duration-200 active:scale-[0.98] shadow-sm"
                       title="Edit Profile"
                     >
                       <Edit3 className="w-4 h-4" />
@@ -427,7 +421,7 @@ export default async function MyProfilePage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="grid grid-cols-4 divide-x divide-gray-200 dark:divide-neutral-700">
                 <div className="py-3 sm:py-4 text-center">
-                  <div className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+                  <div className="text-lg sm:text-2xl font-bold text-brand-primary">
                     {user.points_balance || 0}
                   </div>
                   <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Points</div>
@@ -476,7 +470,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">About</h3>
-                    <Link href="/profile/edit" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/profile/edit" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Edit</Link>
                   </div>
                   {profile.bio ? (
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-[15px] lg:text-base whitespace-pre-wrap">{profile.bio}</p>
@@ -489,7 +483,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Profile Prompts</h3>
-                    <Link href="/profile/edit" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/profile/edit" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-6">
                     <PromptField question="My ideal first date" answer={profile.ideal_first_date} step={23} />
@@ -510,7 +504,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Voice & Video</h3>
-                    <Link href="/profile/edit#voice-video" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/profile/edit#voice-video" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Edit</Link>
                   </div>
                   {profile.voice_prompt_url || profile.video_intro_url ? (
                     <VoiceVideoDisplayClient
@@ -524,28 +518,28 @@ export default async function MyProfilePage() {
                   <div className="space-y-3 mt-3">
                     {!profile.voice_prompt_url && (
                       <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-neutral-800 rounded-xl">
-                        <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
-                          <Mic className="w-5 h-5 text-pink-500" />
+                        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-neutral-700 flex items-center justify-center">
+                          <Mic className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Voice Prompt</p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">Record a 30-second voice intro</p>
                         </div>
-                        <Link href="/profile/edit#voice-video" className="text-sm text-pink-500 font-medium flex items-center gap-1 hover:text-pink-600">
+                        <Link href="/profile/edit#voice-video" className="text-sm text-brand-primary font-medium flex items-center gap-1 hover:text-brand-primary-dark">
                           <Plus className="w-4 h-4" /> Add
                         </Link>
                       </div>
                     )}
                     {!profile.video_intro_url && (
                       <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-neutral-800 rounded-xl">
-                        <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                          <Video className="w-5 h-5 text-purple-500" />
+                        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-neutral-700 flex items-center justify-center">
+                          <Video className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Video Intro</p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">Record a 60-second video intro</p>
                         </div>
-                        <Link href="/profile/edit#voice-video" className="text-sm text-pink-500 font-medium flex items-center gap-1 hover:text-pink-600">
+                        <Link href="/profile/edit#voice-video" className="text-sm text-brand-primary font-medium flex items-center gap-1 hover:text-brand-primary-dark">
                           <Plus className="w-4 h-4" /> Add
                         </Link>
                       </div>
@@ -557,7 +551,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Gallery ({photoCount} photos)</h3>
-                    <Link href="/profile/gallery" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Manage</Link>
+                    <Link href="/profile/gallery" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Manage</Link>
                   </div>
                   {gallery.length > 0 ? (
                     <>
@@ -576,21 +570,21 @@ export default async function MyProfilePage() {
                         })}
                       </div>
                       {gallery.length > 6 && (
-                        <Link href="/profile/gallery" className="block text-center text-sm text-gray-500 dark:text-gray-400 font-medium mt-4 hover:text-pink-500 dark:hover:text-pink-400 transition-colors">
+                        <Link href="/profile/gallery" className="block text-center text-sm text-gray-500 dark:text-gray-400 font-medium mt-4 hover:text-brand-primary transition-colors">
                           +{gallery.length - 6} more
                         </Link>
                       )}
                     </>
                   ) : (
                     <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-neutral-800 rounded-xl">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                        <ImageIcon className="w-5 h-5 text-blue-500" />
+                      <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-neutral-700 flex items-center justify-center">
+                        <ImageIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Add Photos</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">Upload photos to your gallery</p>
                       </div>
-                      <Link href="/profile/gallery" className="text-sm text-pink-500 font-medium flex items-center gap-1 hover:text-pink-600">
+                      <Link href="/profile/gallery" className="text-sm text-brand-primary font-medium flex items-center gap-1 hover:text-brand-primary-dark">
                         <Plus className="w-4 h-4" /> Add
                       </Link>
                     </div>
@@ -601,12 +595,12 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Interests</h3>
-                    <Link href="/onboarding?step=21" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=21" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Edit</Link>
                   </div>
                   {profile.interests && (profile.interests as string[]).length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {(profile.interests as string[]).map((interest) => (
-                        <span key={interest} className="px-4 py-2 bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/30 dark:to-purple-900/30 text-pink-700 dark:text-pink-300 rounded-full text-sm font-semibold border border-pink-100 dark:border-pink-800">
+                        <span key={interest} className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium border border-gray-200 dark:border-neutral-700">
                           {interest}
                         </span>
                       ))}
@@ -620,12 +614,12 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Life Goals</h3>
-                    <Link href="/onboarding?step=22" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=22" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Edit</Link>
                   </div>
                   {profile.life_goals && (profile.life_goals as string[]).length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {(profile.life_goals as string[]).map((goal) => (
-                        <span key={goal} className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold border border-blue-100 dark:border-blue-800">
+                        <span key={goal} className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium border border-gray-200 dark:border-neutral-700">
                           {goal}
                         </span>
                       ))}
@@ -673,7 +667,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">About Me</h3>
-                    <Link href="/onboarding?step=9" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=9" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
                     <DetailRowWithAdd label="Gender" value={profile.gender ? getGenderLabel(profile.gender) : null} step={3} />
@@ -691,7 +685,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Education & Career</h3>
-                    <Link href="/onboarding?step=13" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=13" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
                     <DetailRowWithAdd label="Education" value={profile.education ? getEducationLabel(profile.education) : null} step={14} />
@@ -705,7 +699,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Lifestyle</h3>
-                    <Link href="/onboarding?step=18" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=18" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
                     <DetailRowWithAdd label="Smoking" value={profile.smoking ? getSmokingLabel(profile.smoking) : null} step={18} />
@@ -719,7 +713,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Family</h3>
-                    <Link href="/onboarding?step=19" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=19" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
                     <DetailRowWithAdd label="Has Kids" value={profile.has_kids ? getHasKidsLabel(profile.has_kids) : null} step={19} />
@@ -732,7 +726,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Additional Info</h3>
-                    <Link href="/onboarding?step=15" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=15" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
                     <DetailRowWithAdd label="Religion" value={profile.religion ? getReligionLabel(profile.religion) : null} step={15} />
@@ -746,18 +740,18 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Social Links</h3>
-                    <Link href="/onboarding?step=33" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=33" className="text-sm text-brand-primary font-semibold hover:text-brand-primary-dark transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-2">
                     {profile.social_link_1 ? (
-                      <a href={profile.social_link_1} target="_blank" rel="noopener noreferrer" className="block text-sm text-pink-500 hover:text-pink-600 font-medium break-all">
+                      <a href={profile.social_link_1} target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-primary hover:text-brand-primary-dark font-medium break-all">
                         {profile.social_link_1}
                       </a>
                     ) : (
                       <DetailRowWithAdd label="Social Link 1" value={null} step={33} />
                     )}
                     {profile.social_link_2 ? (
-                      <a href={profile.social_link_2} target="_blank" rel="noopener noreferrer" className="block text-sm text-pink-500 hover:text-pink-600 font-medium break-all">
+                      <a href={profile.social_link_2} target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-primary hover:text-brand-primary-dark font-medium break-all">
                         {profile.social_link_2}
                       </a>
                     ) : (
@@ -780,7 +774,7 @@ function AddFieldPrompt({ label, href, step }: { label: string; href?: string; s
   return (
     <Link 
       href={targetHref}
-      className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 hover:text-pink-500 dark:hover:text-pink-400 transition-colors group"
+      className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 hover:text-brand-primary transition-colors group"
     >
       <Plus className="w-4 h-4" />
       <span>{label}</span>
@@ -798,7 +792,7 @@ function DetailRowWithAdd({ label, value, step }: { label: string; value: string
       {value ? (
         <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize text-right break-words">{value}</span>
       ) : (
-        <Link href={href} className="text-sm text-gray-300 dark:text-gray-600 hover:text-pink-500 dark:hover:text-pink-400 flex items-center gap-1 transition-colors">
+        <Link href={href} className="text-sm text-gray-300 dark:text-gray-600 hover:text-brand-primary flex items-center gap-1 transition-colors">
           <Plus className="w-3.5 h-3.5" />
           <span>Add</span>
         </Link>
@@ -818,7 +812,7 @@ function PromptField({ question, answer, step }: { question: string; answer: str
       ) : (
         <Link 
           href={href}
-          className="inline-flex items-center gap-1 text-sm text-gray-300 dark:text-gray-600 hover:text-pink-500 dark:hover:text-pink-400 transition-colors"
+          className="inline-flex items-center gap-1 text-sm text-gray-300 dark:text-gray-600 hover:text-brand-primary transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add your answer</span>
@@ -859,9 +853,9 @@ function VerificationRow({
         )}
       </div>
       {verified ? (
-        <CheckCircle className="w-5 h-5 text-green-500" />
+        <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-500" />
       ) : (
-        <Link href={href} className="text-sm text-pink-500 font-medium flex items-center gap-1 hover:text-pink-600">
+        <Link href={href} className="text-sm text-brand-primary font-medium flex items-center gap-1 hover:text-brand-primary-dark">
           <Plus className="w-4 h-4" /> Verify
         </Link>
       )}

@@ -172,7 +172,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
       </div>
     );
   }

@@ -14,10 +14,7 @@ import { X, FastForward } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { TOTAL_STEPS } from "@/lib/onboarding/steps-config";
-import {
-  formatCompletionPercentage,
-  getCompletionGradient,
-} from "@/lib/onboarding/completion";
+import { formatCompletionPercentage } from "@/lib/onboarding/completion";
 
 // Number of required steps before showing full UI
 const REQUIRED_STEPS = 6;
@@ -67,9 +64,9 @@ export function OnboardingProgress({
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-300",
                   i < currentStep
-                    ? "w-8 bg-gradient-to-r from-pink-500 to-purple-500"
+                    ? "w-8 bg-brand-primary"
                     : i === currentStep - 1
-                    ? "w-8 bg-gradient-to-r from-pink-500 to-purple-500"
+                    ? "w-8 bg-brand-primary"
                     : "w-1.5 bg-gray-300 dark:bg-neutral-600"
                 )}
               />
@@ -118,29 +115,17 @@ export function OnboardingProgress({
             <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               Profile
             </span>
-            <span
-              className={cn(
-                "text-xs sm:text-sm font-semibold",
-                completionPercentage < 50
-                  ? "text-orange-500 dark:text-orange-400"
-                  : completionPercentage < 100
-                  ? "text-green-500 dark:text-green-400"
-                  : "text-pink-500 dark:text-pink-400"
-              )}
-            >
+            <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
               {formatCompletionPercentage(completionPercentage)}
             </span>
           </div>
         </div>
 
         {/* Progress bar */}
-        <div className="relative h-1 sm:h-1.5 bg-gray-200 dark:bg-neutral-700 rounded-full overflow-hidden">
+        <div className="relative h-1 sm:h-1.5 bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden">
           {/* Animated progress fill */}
           <div
-            className={cn(
-              "absolute inset-y-0 left-0 rounded-full transition-all duration-500 ease-out",
-              getCompletionGradient(fullProgress)
-            )}
+            className="absolute inset-y-0 left-0 rounded-full transition-all duration-500 ease-out bg-brand-primary"
             style={{ width: `${fullProgress}%` }}
           />
         </div>
@@ -153,7 +138,7 @@ export function OnboardingProgress({
           {canSkipAhead && onSkipAhead ? (
             <button
               onClick={onSkipAhead}
-              className="flex items-center gap-1 text-pink-500 dark:text-pink-400 hover:text-pink-600 dark:hover:text-pink-300 transition-colors"
+              className="flex items-center gap-1 text-brand-primary hover:text-brand-primary-dark transition-colors"
             >
               <span>Skip ahead</span>
               <FastForward className="w-3 h-3" />
