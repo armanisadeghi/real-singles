@@ -119,8 +119,12 @@ export function FullScreenImageViewer({
 
     if (isLeftSwipe && currentIndex < images.length - 1) {
       goNext();
+      // Prevent synthetic click event from also firing
+      e.preventDefault();
     } else if (isRightSwipe && currentIndex > 0) {
       goPrevious();
+      // Prevent synthetic click event from also firing
+      e.preventDefault();
     } else if (!didSwipe) {
       // It was a tap - use tap zones
       // Left 30% = previous, Center 40% = nothing (already fullscreen), Right 30% = next
@@ -142,6 +146,8 @@ export function FullScreenImageViewer({
         }
       }
       // Center 40% does nothing - already in fullscreen
+      // Prevent synthetic click event from also firing (tap was handled here)
+      e.preventDefault();
     }
 
     setSwipeOffset(0);
@@ -151,7 +157,7 @@ export function FullScreenImageViewer({
       setTouchEnd(null);
       setIsTransitioning(false);
     }, 350);
-  }, [isTransitioning, touchStart, touchEnd, goNext, goPrevious, currentIndex, images.length]);
+  }, [isTransitioning, touchStart, touchEnd, goNext, goPrevious, currentIndex, images.length, triggerBounce]);
 
   // Handle click with tap zones (for desktop)
   const handleClick = useCallback((e: React.MouseEvent) => {

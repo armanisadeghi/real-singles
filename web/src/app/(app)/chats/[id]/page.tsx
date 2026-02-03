@@ -115,19 +115,21 @@ function ChatSkeleton() {
       </div>
 
       {/* Messages skeleton */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 pb-24 space-y-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <MessageSkeleton key={i} isOwn={i % 2 === 0} />
-        ))}
+      <div className="flex-1 overflow-y-auto pl-4 pr-0 py-3 pb-24 scrollbar-thin">
+        <div className="pr-3 space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <MessageSkeleton key={i} isOwn={i % 2 === 0} />
+          ))}
+        </div>
       </div>
 
       {/* Floating Input skeleton */}
       <div className="fixed bottom-0 left-0 right-0 z-50">
         <div className="px-3 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-blue-100 animate-pulse" />
-            <div className="flex-1 h-10 bg-gray-100 rounded-full animate-pulse" />
-            <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse" />
+          <div className="flex items-center gap-2 h-10">
+            <div className="w-10 h-10 rounded-full bg-blue-100 animate-pulse" />
+            <div className="flex-1 h-10 bg-gray-100 rounded-[20px] animate-pulse" />
+            <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
           </div>
         </div>
       </div>

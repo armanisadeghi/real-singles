@@ -159,8 +159,12 @@ export function PhotoCarousel({
 
     if (isLeftSwipe && currentIndex < images.length - 1) {
       goNext();
+      // Prevent synthetic click event from also firing
+      e.preventDefault();
     } else if (isRightSwipe && currentIndex > 0) {
       goPrevious();
+      // Prevent synthetic click event from also firing
+      e.preventDefault();
     } else if (!didSwipe) {
       // It was a tap, not a swipe - use tap zones
       // Left 30% = previous, Center 40% = fullscreen, Right 30% = next
@@ -188,6 +192,8 @@ export function PhotoCarousel({
         // Center 40% - open full screen
         openFullScreen();
       }
+      // Prevent synthetic click event from also firing (tap was handled here)
+      e.preventDefault();
     }
 
     // Reset swipe offset with animation
@@ -199,7 +205,7 @@ export function PhotoCarousel({
       setTouchEnd(null);
       setIsTransitioning(false);
     }, 350);
-  }, [isTransitioning, touchStart, touchEnd, goNext, goPrevious, currentIndex, images.length, openFullScreen]);
+  }, [isTransitioning, touchStart, touchEnd, goNext, goPrevious, currentIndex, images.length, openFullScreen, triggerBounce]);
 
   // Use CSS variable for height to allow className overrides
   const heightStyle = { "--carousel-height": height } as React.CSSProperties;

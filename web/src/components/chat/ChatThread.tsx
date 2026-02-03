@@ -253,19 +253,19 @@ export function ChatThread({
           </div>
         </header>
 
-        {/* Messages Area - Clean, scrollable */}
+        {/* Messages Area - Clean, scrollable with thin scrollbar at edge */}
         <div
           ref={containerRef}
-          className="flex-1 overflow-y-auto overscroll-contain px-4 py-3 pb-24"
+          className="flex-1 overflow-y-auto overscroll-contain py-3 pb-24 pl-4 pr-0 scrollbar-thin"
         >
           {loading ? (
-            <div className="space-y-3 py-2">
+            <div className="space-y-3 py-2 pr-3">
               {Array.from({ length: 5 }).map((_, i) => (
                 <MessageSkeleton key={i} isOwn={i % 2 === 0} />
               ))}
             </div>
           ) : messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center px-6">
+            <div className="h-full flex flex-col items-center justify-center text-center px-6 pr-9">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mb-4">
                 <span className="text-3xl">👋</span>
               </div>
@@ -277,7 +277,7 @@ export function ChatThread({
               </p>
             </div>
           ) : (
-            <>
+            <div className="pr-3">
               <MessageGroup
                 messages={messages}
                 currentUserId={currentUserId}
@@ -305,7 +305,7 @@ export function ChatThread({
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
           <div ref={messagesEndRef} />
         </div>

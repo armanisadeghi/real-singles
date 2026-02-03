@@ -172,10 +172,10 @@ export function MessageInput({
           </div>
         )}
 
-        {/* Input row - Clean floating design */}
+        {/* Input row - Clean floating design with perfect center alignment */}
         <form 
           onSubmit={handleSubmit} 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 h-10"
         >
           {/* Plus button for attachments */}
           <button
@@ -183,7 +183,7 @@ export function MessageInput({
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || isUploading}
             className={cn(
-              "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
+              "w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
               "bg-blue-500 text-white",
               (disabled || isUploading) && "opacity-50"
             )}
@@ -202,8 +202,8 @@ export function MessageInput({
             className="hidden"
           />
 
-          {/* Text input - Rounded pill style */}
-          <div className="flex-1 relative">
+          {/* Text input - More rounded pill style */}
+          <div className="flex-1 flex items-center">
             <textarea
               ref={inputRef}
               value={message}
@@ -215,8 +215,8 @@ export function MessageInput({
               inputMode="text"
               enterKeyHint="send"
               className={cn(
-                "w-full px-4 py-2.5 bg-gray-100 rounded-full resize-none",
-                "text-[16px] leading-[1.3]",
+                "w-full h-10 px-5 py-2 bg-gray-100 rounded-[20px] resize-none overflow-hidden",
+                "text-[16px] leading-[1.5]",
                 "focus:outline-none focus:ring-2 focus:ring-blue-500/20",
                 "disabled:opacity-50",
                 "placeholder:text-gray-400"
@@ -234,7 +234,7 @@ export function MessageInput({
             type="submit"
             disabled={!canSend}
             className={cn(
-              "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
+              "w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
               canSend
                 ? "bg-blue-500 text-white"
                 : "bg-gray-200 text-gray-400"
