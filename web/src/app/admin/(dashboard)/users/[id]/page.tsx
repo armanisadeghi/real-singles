@@ -33,6 +33,27 @@ import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader
 import { EmailComposeSheet } from "@/components/admin/EmailComposeSheet";
 import { cn, formatPoints, calculateAge } from "@/lib/utils";
 import {
+  GENDER_OPTIONS,
+  BODY_TYPE_OPTIONS,
+  MARITAL_STATUS_OPTIONS,
+  HAS_KIDS_OPTIONS,
+  WANTS_KIDS_OPTIONS,
+  SMOKING_OPTIONS,
+  DRINKING_OPTIONS,
+  MARIJUANA_OPTIONS,
+  EXERCISE_OPTIONS,
+  EDUCATION_OPTIONS,
+  ETHNICITY_OPTIONS,
+  RELIGION_OPTIONS,
+  POLITICAL_OPTIONS,
+  ZODIAC_OPTIONS,
+  PETS_OPTIONS,
+  LANGUAGE_OPTIONS,
+  INTEREST_OPTIONS,
+  COUNTRY_OPTIONS,
+  DATING_INTENTIONS_OPTIONS,
+} from "@/types";
+import {
   DndContext,
   closestCenter,
   KeyboardSensor,
@@ -74,27 +95,76 @@ interface UserDetail {
 }
 
 interface ProfileDetail {
+  // Basic Info
   first_name?: string | null;
   last_name?: string | null;
   date_of_birth?: string | null;
   gender?: string | null;
   looking_for?: string[] | null;
+  zodiac_sign?: string | null;
   bio?: string | null;
-  city?: string | null;
+  looking_for_description?: string | null;
+  dating_intentions?: string | null;
+  // Physical
+  height_inches?: number | null;
+  body_type?: string | null;
+  ethnicity?: string[] | null;
+  // Location
+  country?: string | null;
   state?: string | null;
+  city?: string | null;
+  zip_code?: string | null;
+  hometown?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  // Lifestyle
+  marital_status?: string | null;
+  religion?: string | null;
+  political_views?: string | null;
+  education?: string | null;
   occupation?: string | null;
+  company?: string | null;
+  schools?: string[] | null;
+  smoking?: string | null;
+  drinking?: string | null;
+  marijuana?: string | null;
+  exercise?: string | null;
+  languages?: string[] | null;
+  // Family
+  has_kids?: string | null;
+  wants_kids?: string | null;
+  pets?: string[] | null;
+  // Interests & Goals
+  interests?: string[] | null;
+  life_goals?: string[] | null;
+  // Profile Prompts
+  ideal_first_date?: string | null;
+  non_negotiables?: string | null;
+  worst_job?: string | null;
+  dream_job?: string | null;
+  nightclub_or_home?: string | null;
+  pet_peeves?: string | null;
+  after_work?: string | null;
+  way_to_heart?: string | null;
+  craziest_travel_story?: string | null;
+  weirdest_gift?: string | null;
+  past_event?: string | null;
+  // Social
+  social_link_1?: string | null;
+  social_link_2?: string | null;
+  // Media
   profile_image_url?: string | null;
-  is_verified: boolean;
-  is_photo_verified: boolean;
-  can_start_matching?: boolean | null;
-  profile_hidden?: boolean | null;
-  // Voice & Video Prompts
   voice_prompt_url?: string | null;
   voice_prompt_duration_seconds?: number | null;
   video_intro_url?: string | null;
   video_intro_duration_seconds?: number | null;
-  // Verification Selfie
   verification_selfie_url?: string | null;
+  // Verification & Status
+  is_verified: boolean;
+  is_photo_verified: boolean;
+  is_id_verified?: boolean | null;
+  can_start_matching?: boolean | null;
+  profile_hidden?: boolean | null;
 }
 
 interface GalleryImage {
@@ -308,10 +378,8 @@ export default function AdminUserDetailPage({ params }: PageProps) {
   const [pointsAmount, setPointsAmount] = useState(0);
   const [pointsReason, setPointsReason] = useState("");
   
-  // Edit profile form state
-  const [editFirstName, setEditFirstName] = useState("");
-  const [editLastName, setEditLastName] = useState("");
-  const [editGender, setEditGender] = useState("");
+  // Edit profile form state - comprehensive state for all fields
+  const [editForm, setEditForm] = useState<Partial<ProfileDetail>>({});
   const [editProfileImageUrl, setEditProfileImageUrl] = useState("");
   const [editGalleryImageUrl, setEditGalleryImageUrl] = useState("");
 
@@ -375,9 +443,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         setGallery(data.gallery || []);
         
         if (data.profile) {
-          setEditFirstName(data.profile.first_name || "");
-          setEditLastName(data.profile.last_name || "");
-          setEditGender(data.profile.gender || "");
+          setEditForm(data.profile);
           setEditProfileImageUrl(data.profile.profile_image_url || "");
         }
       }
@@ -493,25 +559,18 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          first_name: editFirstName,
-          last_name: editLastName,
-          gender: editGender,
+          ...editForm,
           profile_image_url: editProfileImageUrl,
         }),
       });
 
       if (res.ok) {
-        setProfile((prev) => prev ? {
-          ...prev,
-          first_name: editFirstName,
-          last_name: editLastName,
-          gender: editGender,
-          profile_image_url: editProfileImageUrl,
-        } : null);
+        await fetchData(); // Refresh data
         setShowEditProfileSheet(false);
         alert("Profile updated successfully");
       } else {
-        alert("Failed to update profile");
+        const errorData = await res.json();
+        alert(`Failed to update profile: ${errorData.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -949,49 +1008,383 @@ export default function AdminUserDetailPage({ params }: PageProps) {
 
               {/* Profile Details Grid */}
               <div className="grid lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                  <h3 className="font-semibold text-gray-900 mb-4">
-                    Profile Information
-                  </h3>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {profile?.date_of_birth && (
-                      <div className="bg-slate-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-500">Age</p>
-                        <p className="font-medium">
-                          {calculateAge(profile.date_of_birth)} years old
-                        </p>
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Basic Info Section */}
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-4">Basic Information</h3>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {profile?.date_of_birth && (
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <p className="text-xs text-gray-500">Age</p>
+                          <p className="font-medium">
+                            {calculateAge(profile.date_of_birth)} years old
+                          </p>
+                        </div>
+                      )}
+                      {profile?.gender && (
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <p className="text-xs text-gray-500">Gender</p>
+                          <p className="font-medium capitalize">{profile.gender}</p>
+                        </div>
+                      )}
+                      {profile?.zodiac_sign && (
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <p className="text-xs text-gray-500">Zodiac Sign</p>
+                          <p className="font-medium capitalize">{profile.zodiac_sign}</p>
+                        </div>
+                      )}
+                      {profile?.dating_intentions && (
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <p className="text-xs text-gray-500">Dating Intentions</p>
+                          <p className="font-medium capitalize">{profile.dating_intentions.replace(/_/g, " ")}</p>
+                        </div>
+                      )}
+                      {profile?.marital_status && (
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <p className="text-xs text-gray-500">Marital Status</p>
+                          <p className="font-medium capitalize">{profile.marital_status.replace(/_/g, " ")}</p>
+                        </div>
+                      )}
+                      {profile?.looking_for && profile.looking_for.length > 0 && (
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <p className="text-xs text-gray-500">Looking For</p>
+                          <p className="font-medium capitalize">{profile.looking_for.join(", ")}</p>
+                        </div>
+                      )}
+                    </div>
+                    {profile?.bio && (
+                      <div className="mt-4">
+                        <p className="text-xs text-gray-500 mb-1">Bio</p>
+                        <p className="text-sm bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{profile.bio}</p>
                       </div>
                     )}
-                    {profile?.gender && (
-                      <div className="bg-slate-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-500">Gender</p>
-                        <p className="font-medium capitalize">{profile.gender}</p>
-                      </div>
-                    )}
-                    {profile?.looking_for && profile.looking_for.length > 0 && (
-                      <div className="bg-slate-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-500">Looking For</p>
-                        <p className="font-medium capitalize">{profile.looking_for.join(", ")}</p>
-                      </div>
-                    )}
-                    {profile?.occupation && (
-                      <div className="bg-slate-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-500">Occupation</p>
-                        <p className="font-medium">{profile.occupation}</p>
-                      </div>
-                    )}
-                    {user.referral_code && (
-                      <div className="bg-slate-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-500">Referral Code</p>
-                        <p className="font-medium font-mono">{user.referral_code}</p>
+                    {profile?.looking_for_description && (
+                      <div className="mt-4">
+                        <p className="text-xs text-gray-500 mb-1">Looking For Description</p>
+                        <p className="text-sm bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{profile.looking_for_description}</p>
                       </div>
                     )}
                   </div>
 
-                  {profile?.bio && (
-                    <div className="mt-4">
-                      <p className="text-xs text-gray-500 mb-1">Bio</p>
-                      <p className="text-sm bg-slate-50 rounded-lg p-3">{profile.bio}</p>
+                  {/* Physical Attributes */}
+                  {(profile?.height_inches || profile?.body_type || (profile?.ethnicity && profile.ethnicity.length > 0)) && (
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-4">Physical Attributes</h3>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {profile?.height_inches && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Height</p>
+                            <p className="font-medium">
+                              {Math.floor(profile.height_inches / 12)}&apos;{profile.height_inches % 12}&quot;
+                            </p>
+                          </div>
+                        )}
+                        {profile?.body_type && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Body Type</p>
+                            <p className="font-medium capitalize">{profile.body_type.replace(/_/g, " ")}</p>
+                          </div>
+                        )}
+                        {profile?.ethnicity && profile.ethnicity.length > 0 && (
+                          <div className="bg-slate-50 rounded-lg p-3 sm:col-span-2">
+                            <p className="text-xs text-gray-500">Ethnicity</p>
+                            <p className="font-medium capitalize">{profile.ethnicity.join(", ")}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Location */}
+                  {(profile?.city || profile?.state || profile?.country || profile?.hometown) && (
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-4">Location</h3>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {profile?.city && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">City</p>
+                            <p className="font-medium">{profile.city}</p>
+                          </div>
+                        )}
+                        {profile?.state && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">State</p>
+                            <p className="font-medium">{profile.state}</p>
+                          </div>
+                        )}
+                        {profile?.country && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Country</p>
+                            <p className="font-medium">{profile.country}</p>
+                          </div>
+                        )}
+                        {profile?.zip_code && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">ZIP Code</p>
+                            <p className="font-medium">{profile.zip_code}</p>
+                          </div>
+                        )}
+                        {profile?.hometown && (
+                          <div className="bg-slate-50 rounded-lg p-3 sm:col-span-2">
+                            <p className="text-xs text-gray-500">Hometown</p>
+                            <p className="font-medium">{profile.hometown}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Career & Education */}
+                  {(profile?.occupation || profile?.company || profile?.education || (profile?.schools && profile.schools.length > 0)) && (
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-4">Career & Education</h3>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {profile?.occupation && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Occupation</p>
+                            <p className="font-medium">{profile.occupation}</p>
+                          </div>
+                        )}
+                        {profile?.company && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Company</p>
+                            <p className="font-medium">{profile.company}</p>
+                          </div>
+                        )}
+                        {profile?.education && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Education</p>
+                            <p className="font-medium capitalize">{profile.education.replace(/_/g, " ")}</p>
+                          </div>
+                        )}
+                        {profile?.schools && profile.schools.length > 0 && (
+                          <div className="bg-slate-50 rounded-lg p-3 sm:col-span-2">
+                            <p className="text-xs text-gray-500">Schools</p>
+                            <p className="font-medium">{profile.schools.join(", ")}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Lifestyle */}
+                  {(profile?.religion || profile?.political_views || profile?.exercise || (profile?.languages && profile.languages.length > 0)) && (
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-4">Lifestyle</h3>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {profile?.religion && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Religion</p>
+                            <p className="font-medium capitalize">{profile.religion}</p>
+                          </div>
+                        )}
+                        {profile?.political_views && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Political Views</p>
+                            <p className="font-medium capitalize">{profile.political_views.replace(/_/g, " ")}</p>
+                          </div>
+                        )}
+                        {profile?.exercise && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Exercise</p>
+                            <p className="font-medium capitalize">{profile.exercise}</p>
+                          </div>
+                        )}
+                        {profile?.languages && profile.languages.length > 0 && (
+                          <div className="bg-slate-50 rounded-lg p-3 sm:col-span-2">
+                            <p className="text-xs text-gray-500">Languages</p>
+                            <p className="font-medium">{profile.languages.join(", ")}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Habits */}
+                  {(profile?.smoking || profile?.drinking || profile?.marijuana) && (
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-4">Habits</h3>
+                      <div className="grid sm:grid-cols-3 gap-4">
+                        {profile?.smoking && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Smoking</p>
+                            <p className="font-medium capitalize">{profile.smoking}</p>
+                          </div>
+                        )}
+                        {profile?.drinking && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Drinking</p>
+                            <p className="font-medium capitalize">{profile.drinking}</p>
+                          </div>
+                        )}
+                        {profile?.marijuana && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Marijuana</p>
+                            <p className="font-medium capitalize">{profile.marijuana}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Family */}
+                  {(profile?.has_kids || profile?.wants_kids || (profile?.pets && profile.pets.length > 0)) && (
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-4">Family</h3>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {profile?.has_kids && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Has Kids</p>
+                            <p className="font-medium capitalize">{profile.has_kids.replace(/_/g, " ")}</p>
+                          </div>
+                        )}
+                        {profile?.wants_kids && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Wants Kids</p>
+                            <p className="font-medium capitalize">{profile.wants_kids.replace(/_/g, " ")}</p>
+                          </div>
+                        )}
+                        {profile?.pets && profile.pets.length > 0 && (
+                          <div className="bg-slate-50 rounded-lg p-3 sm:col-span-2">
+                            <p className="text-xs text-gray-500">Pets</p>
+                            <p className="font-medium capitalize">{profile.pets.join(", ")}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Interests & Goals */}
+                  {((profile?.interests && profile.interests.length > 0) || (profile?.life_goals && profile.life_goals.length > 0)) && (
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-4">Interests & Goals</h3>
+                      {profile?.interests && profile.interests.length > 0 && (
+                        <div className="mb-4">
+                          <p className="text-xs text-gray-500 mb-2">Interests</p>
+                          <div className="flex flex-wrap gap-2">
+                            {profile.interests.map((interest, idx) => (
+                              <span key={idx} className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">
+                                {interest}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {profile?.life_goals && profile.life_goals.length > 0 && (
+                        <div>
+                          <p className="text-xs text-gray-500 mb-2">Life Goals</p>
+                          <div className="flex flex-wrap gap-2">
+                            {profile.life_goals.map((goal, idx) => (
+                              <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                                {goal}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Profile Prompts */}
+                  {(profile?.ideal_first_date || profile?.non_negotiables || profile?.way_to_heart || 
+                    profile?.after_work || profile?.nightclub_or_home || profile?.pet_peeves ||
+                    profile?.worst_job || profile?.dream_job || profile?.craziest_travel_story ||
+                    profile?.weirdest_gift || profile?.past_event) && (
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-4">Profile Prompts</h3>
+                      <div className="space-y-3">
+                        {profile?.ideal_first_date && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Ideal First Date</p>
+                            <p className="text-sm whitespace-pre-wrap">{profile.ideal_first_date}</p>
+                          </div>
+                        )}
+                        {profile?.non_negotiables && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Non-Negotiables</p>
+                            <p className="text-sm whitespace-pre-wrap">{profile.non_negotiables}</p>
+                          </div>
+                        )}
+                        {profile?.way_to_heart && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Way to My Heart</p>
+                            <p className="text-sm whitespace-pre-wrap">{profile.way_to_heart}</p>
+                          </div>
+                        )}
+                        {profile?.after_work && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">After Work</p>
+                            <p className="text-sm whitespace-pre-wrap">{profile.after_work}</p>
+                          </div>
+                        )}
+                        {profile?.nightclub_or_home && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Nightclub or Home</p>
+                            <p className="text-sm">{profile.nightclub_or_home}</p>
+                          </div>
+                        )}
+                        {profile?.pet_peeves && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Pet Peeves</p>
+                            <p className="text-sm whitespace-pre-wrap">{profile.pet_peeves}</p>
+                          </div>
+                        )}
+                        {profile?.worst_job && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Worst Job</p>
+                            <p className="text-sm whitespace-pre-wrap">{profile.worst_job}</p>
+                          </div>
+                        )}
+                        {profile?.dream_job && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Dream Job</p>
+                            <p className="text-sm whitespace-pre-wrap">{profile.dream_job}</p>
+                          </div>
+                        )}
+                        {profile?.craziest_travel_story && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Craziest Travel Story</p>
+                            <p className="text-sm whitespace-pre-wrap">{profile.craziest_travel_story}</p>
+                          </div>
+                        )}
+                        {profile?.weirdest_gift && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Weirdest Gift</p>
+                            <p className="text-sm whitespace-pre-wrap">{profile.weirdest_gift}</p>
+                          </div>
+                        )}
+                        {profile?.past_event && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Past Event</p>
+                            <p className="text-sm whitespace-pre-wrap">{profile.past_event}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Social Links */}
+                  {(profile?.social_link_1 || profile?.social_link_2) && (
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-4">Social Links</h3>
+                      <div className="space-y-2">
+                        {profile?.social_link_1 && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Social Link 1</p>
+                            <a href={profile.social_link_1} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline break-all">
+                              {profile.social_link_1}
+                            </a>
+                          </div>
+                        )}
+                        {profile?.social_link_2 && (
+                          <div className="bg-slate-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Social Link 2</p>
+                            <a href={profile.social_link_2} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline break-all">
+                              {profile.social_link_2}
+                            </a>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -1318,76 +1711,610 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         </BottomSheetActions>
       </BottomSheet>
 
-      {/* Edit Profile Sheet */}
+      {/* Edit Profile Sheet - Comprehensive Form */}
       <BottomSheet
         isOpen={showEditProfileSheet}
         onClose={() => setShowEditProfileSheet(false)}
         title="Edit Profile"
       >
-        <div className="p-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                First Name
-              </label>
-              <input
-                type="text"
-                value={editFirstName}
-                onChange={(e) => setEditFirstName(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Last Name
-              </label>
-              <input
-                type="text"
-                value={editLastName}
-                onChange={(e) => setEditLastName(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg"
-              />
-            </div>
-          </div>
-
+        <div className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto space-y-6">
+          {/* Basic Info */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Gender
-            </label>
-            <select
-              value={editGender}
-              onChange={(e) => setEditGender(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg"
-            >
-              <option value="">Select gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Profile Image URL
-            </label>
-            <input
-              type="url"
-              value={editProfileImageUrl}
-              onChange={(e) => setEditProfileImageUrl(e.target.value)}
-              placeholder="https://images.unsplash.com/photo-..."
-              className="w-full px-4 py-2 border rounded-lg text-sm"
-            />
-            {editProfileImageUrl && (
-              <div className="mt-2">
-                <img
-                  src={editProfileImageUrl}
-                  alt="Preview"
-                  className="w-24 h-24 rounded-lg object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://via.placeholder.com/100?text=Invalid";
-                  }}
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Basic Information</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">First Name</label>
+                <input
+                  type="text"
+                  value={editForm.first_name || ""}
+                  onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
                 />
               </div>
-            )}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Last Name</label>
+                <input
+                  type="text"
+                  value={editForm.last_name || ""}
+                  onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Date of Birth</label>
+                <input
+                  type="date"
+                  value={editForm.date_of_birth || ""}
+                  onChange={(e) => setEditForm({ ...editForm, date_of_birth: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Gender</label>
+                <select
+                  value={editForm.gender || ""}
+                  onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {GENDER_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Zodiac Sign</label>
+                <select
+                  value={editForm.zodiac_sign || ""}
+                  onChange={(e) => setEditForm({ ...editForm, zodiac_sign: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {ZODIAC_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Dating Intentions</label>
+                <select
+                  value={editForm.dating_intentions || ""}
+                  onChange={(e) => setEditForm({ ...editForm, dating_intentions: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {DATING_INTENTIONS_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Marital Status</label>
+                <select
+                  value={editForm.marital_status || ""}
+                  onChange={(e) => setEditForm({ ...editForm, marital_status: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {MARITAL_STATUS_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Looking For (comma-separated)</label>
+              <input
+                type="text"
+                value={editForm.looking_for?.join(", ") || ""}
+                onChange={(e) => setEditForm({ 
+                  ...editForm, 
+                  looking_for: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
+                })}
+                placeholder="male, female"
+                className="w-full px-3 py-2 text-sm border rounded-lg"
+              />
+            </div>
+            <div className="mt-4">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Bio</label>
+              <textarea
+                value={editForm.bio || ""}
+                onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                rows={3}
+                className="w-full px-3 py-2 text-sm border rounded-lg"
+              />
+            </div>
+            <div className="mt-4">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Looking For Description</label>
+              <textarea
+                value={editForm.looking_for_description || ""}
+                onChange={(e) => setEditForm({ ...editForm, looking_for_description: e.target.value })}
+                rows={2}
+                className="w-full px-3 py-2 text-sm border rounded-lg"
+              />
+            </div>
+          </div>
+
+          {/* Physical */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Physical Attributes</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Height (inches)</label>
+                <input
+                  type="number"
+                  value={editForm.height_inches || ""}
+                  onChange={(e) => setEditForm({ ...editForm, height_inches: e.target.value ? parseInt(e.target.value) : null })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Body Type</label>
+                <select
+                  value={editForm.body_type || ""}
+                  onChange={(e) => setEditForm({ ...editForm, body_type: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {BODY_TYPE_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Ethnicity (comma-separated)</label>
+                <input
+                  type="text"
+                  value={editForm.ethnicity?.join(", ") || ""}
+                  onChange={(e) => setEditForm({ 
+                    ...editForm, 
+                    ethnicity: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
+                  })}
+                  placeholder="white, asian"
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Location</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Country</label>
+                <select
+                  value={editForm.country || ""}
+                  onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {COUNTRY_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">State</label>
+                <input
+                  type="text"
+                  value={editForm.state || ""}
+                  onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">City</label>
+                <input
+                  type="text"
+                  value={editForm.city || ""}
+                  onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">ZIP Code</label>
+                <input
+                  type="text"
+                  value={editForm.zip_code || ""}
+                  onChange={(e) => setEditForm({ ...editForm, zip_code: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Hometown</label>
+                <input
+                  type="text"
+                  value={editForm.hometown || ""}
+                  onChange={(e) => setEditForm({ ...editForm, hometown: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Career & Education */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Career & Education</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Occupation</label>
+                <input
+                  type="text"
+                  value={editForm.occupation || ""}
+                  onChange={(e) => setEditForm({ ...editForm, occupation: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Company</label>
+                <input
+                  type="text"
+                  value={editForm.company || ""}
+                  onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Education</label>
+                <select
+                  value={editForm.education || ""}
+                  onChange={(e) => setEditForm({ ...editForm, education: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {EDUCATION_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Schools (comma-separated)</label>
+                <input
+                  type="text"
+                  value={editForm.schools?.join(", ") || ""}
+                  onChange={(e) => setEditForm({ 
+                    ...editForm, 
+                    schools: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
+                  })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Lifestyle */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Lifestyle</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Religion</label>
+                <select
+                  value={editForm.religion || ""}
+                  onChange={(e) => setEditForm({ ...editForm, religion: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {RELIGION_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Political Views</label>
+                <select
+                  value={editForm.political_views || ""}
+                  onChange={(e) => setEditForm({ ...editForm, political_views: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {POLITICAL_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Exercise</label>
+                <select
+                  value={editForm.exercise || ""}
+                  onChange={(e) => setEditForm({ ...editForm, exercise: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {EXERCISE_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Languages (comma-separated)</label>
+                <input
+                  type="text"
+                  value={editForm.languages?.join(", ") || ""}
+                  onChange={(e) => setEditForm({ 
+                    ...editForm, 
+                    languages: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
+                  })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Habits */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Habits</h4>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Smoking</label>
+                <select
+                  value={editForm.smoking || ""}
+                  onChange={(e) => setEditForm({ ...editForm, smoking: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {SMOKING_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Drinking</label>
+                <select
+                  value={editForm.drinking || ""}
+                  onChange={(e) => setEditForm({ ...editForm, drinking: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {DRINKING_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Marijuana</label>
+                <select
+                  value={editForm.marijuana || ""}
+                  onChange={(e) => setEditForm({ ...editForm, marijuana: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {MARIJUANA_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Family */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Family</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Has Kids</label>
+                <select
+                  value={editForm.has_kids || ""}
+                  onChange={(e) => setEditForm({ ...editForm, has_kids: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {HAS_KIDS_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Wants Kids</label>
+                <select
+                  value={editForm.wants_kids || ""}
+                  onChange={(e) => setEditForm({ ...editForm, wants_kids: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                >
+                  <option value="">Select...</option>
+                  {WANTS_KIDS_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Pets (comma-separated)</label>
+                <input
+                  type="text"
+                  value={editForm.pets?.join(", ") || ""}
+                  onChange={(e) => setEditForm({ 
+                    ...editForm, 
+                    pets: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
+                  })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Interests & Goals */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Interests & Goals</h4>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Interests (comma-separated)</label>
+                <input
+                  type="text"
+                  value={editForm.interests?.join(", ") || ""}
+                  onChange={(e) => setEditForm({ 
+                    ...editForm, 
+                    interests: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
+                  })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Life Goals (comma-separated)</label>
+                <input
+                  type="text"
+                  value={editForm.life_goals?.join(", ") || ""}
+                  onChange={(e) => setEditForm({ 
+                    ...editForm, 
+                    life_goals: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
+                  })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Profile Prompts */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Profile Prompts</h4>
+            <div className="space-y-3">
+              {[
+                { key: "ideal_first_date", label: "Ideal First Date" },
+                { key: "non_negotiables", label: "Non-Negotiables" },
+                { key: "way_to_heart", label: "Way to My Heart" },
+                { key: "after_work", label: "After Work" },
+                { key: "nightclub_or_home", label: "Nightclub or Home" },
+                { key: "pet_peeves", label: "Pet Peeves" },
+                { key: "worst_job", label: "Worst Job" },
+                { key: "dream_job", label: "Dream Job" },
+                { key: "craziest_travel_story", label: "Craziest Travel Story" },
+                { key: "weirdest_gift", label: "Weirdest Gift" },
+                { key: "past_event", label: "Past Event" },
+              ].map(({ key, label }) => (
+                <div key={key}>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{label}</label>
+                  <textarea
+                    value={(editForm[key as keyof ProfileDetail] as string) || ""}
+                    onChange={(e) => setEditForm({ ...editForm, [key]: e.target.value })}
+                    rows={2}
+                    className="w-full px-3 py-2 text-sm border rounded-lg"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Social Links</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Social Link 1</label>
+                <input
+                  type="url"
+                  value={editForm.social_link_1 || ""}
+                  onChange={(e) => setEditForm({ ...editForm, social_link_1: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Social Link 2</label>
+                <input
+                  type="url"
+                  value={editForm.social_link_2 || ""}
+                  onChange={(e) => setEditForm({ ...editForm, social_link_2: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Media URLs */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Media URLs</h4>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Profile Image URL</label>
+                <input
+                  type="url"
+                  value={editProfileImageUrl}
+                  onChange={(e) => setEditProfileImageUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+                {editProfileImageUrl && (
+                  <div className="mt-2">
+                    <img
+                      src={editProfileImageUrl}
+                      alt="Preview"
+                      className="w-24 h-24 rounded-lg object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/100?text=Invalid";
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Voice Prompt URL</label>
+                <input
+                  type="url"
+                  value={editForm.voice_prompt_url || ""}
+                  onChange={(e) => setEditForm({ ...editForm, voice_prompt_url: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Video Intro URL</label>
+                <input
+                  type="url"
+                  value={editForm.video_intro_url || ""}
+                  onChange={(e) => setEditForm({ ...editForm, video_intro_url: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Verification Selfie URL</label>
+                <input
+                  type="url"
+                  value={editForm.verification_selfie_url || ""}
+                  onChange={(e) => setEditForm({ ...editForm, verification_selfie_url: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Status Flags */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Status Flags</h4>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={editForm.is_verified || false}
+                  onChange={(e) => setEditForm({ ...editForm, is_verified: e.target.checked })}
+                  className="rounded"
+                />
+                <span className="text-sm text-gray-700">Is Verified</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={editForm.is_photo_verified || false}
+                  onChange={(e) => setEditForm({ ...editForm, is_photo_verified: e.target.checked })}
+                  className="rounded"
+                />
+                <span className="text-sm text-gray-700">Is Photo Verified</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={editForm.can_start_matching || false}
+                  onChange={(e) => setEditForm({ ...editForm, can_start_matching: e.target.checked })}
+                  className="rounded"
+                />
+                <span className="text-sm text-gray-700">Can Start Matching</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={editForm.profile_hidden || false}
+                  onChange={(e) => setEditForm({ ...editForm, profile_hidden: e.target.checked })}
+                  className="rounded"
+                />
+                <span className="text-sm text-gray-700">Profile Hidden</span>
+              </label>
+            </div>
           </div>
         </div>
 

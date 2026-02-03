@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { resolveStorageUrl, resolveGalleryUrls, resolveVerificationSelfieUrl } from "@/lib/supabase/url-utils";
+import { 
+  resolveStorageUrl, 
+  resolveGalleryUrls, 
+  resolveVerificationSelfieUrl,
+  resolveVoicePromptUrl,
+  resolveVideoIntroUrl
+} from "@/lib/supabase/url-utils";
 
 // Verify the current user is an admin
 async function verifyAdmin(): Promise<{ isAdmin: boolean; userId?: string }> {
@@ -73,6 +79,16 @@ export async function GET(
     ? await resolveVerificationSelfieUrl(supabase, profile.verification_selfie_url)
     : null;
 
+  // Resolve storage URLs for voice prompt
+  const resolvedVoicePromptUrl = profile?.voice_prompt_url 
+    ? await resolveVoicePromptUrl(supabase, profile.voice_prompt_url)
+    : null;
+
+  // Resolve storage URLs for video intro
+  const resolvedVideoIntroUrl = profile?.video_intro_url 
+    ? await resolveVideoIntroUrl(supabase, profile.video_intro_url)
+    : null;
+
   // Resolve storage URLs for gallery images
   const resolvedGallery = gallery 
     ? await resolveGalleryUrls(supabase, gallery)
@@ -84,6 +100,8 @@ export async function GET(
       ...profile, 
       profile_image_url: resolvedProfileImageUrl,
       verification_selfie_url: resolvedVerificationSelfieUrl,
+      voice_prompt_url: resolvedVoicePromptUrl,
+      video_intro_url: resolvedVideoIntroUrl,
     } : null, 
     gallery: resolvedGallery 
   });
@@ -105,11 +123,43 @@ export async function PATCH(
   const supabase = createAdminClient();
 
   // Separate user fields from profile fields
-  const userFields = ["status", "role", "display_name"];
+  const userFields = ["status", "role", "display_name", "username", "phone"];
+  
+  // All profile fields that can be updated
+  // Arrays: looking_for, ethnicity, languages, interests, pets, life_goals, schools
+  // Strings: all other fields
   const profileFields = [
-    "first_name", "last_name", "gender", "date_of_birth", "bio",
-    "profile_image_url", "city", "state", "occupation", "company",
-    "is_verified", "is_photo_verified"
+    // Basic Info
+    "first_name", "last_name", "date_of_birth", "gender", "looking_for", 
+    "zodiac_sign", "bio", "looking_for_description", "dating_intentions",
+    // Physical
+    "height_inches", "body_type", "ethnicity",
+    // Location
+    "country", "state", "city", "zip_code", "hometown", "latitude", "longitude",
+    // Lifestyle
+    "marital_status", "religion", "political_views", "education", "occupation", 
+    "company", "schools", "smoking", "drinking", "marijuana", "exercise", "languages",
+    // Family
+    "has_kids", "wants_kids", "pets",
+    // Interests & Goals
+    "interests", "life_goals",
+    // Profile Prompts
+    "ideal_first_date", "non_negotiables", "worst_job", "dream_job", 
+    "nightclub_or_home", "pet_peeves", "after_work", "way_to_heart",
+    "craziest_travel_story", "weirdest_gift", "past_event",
+    // Social
+    "social_link_1", "social_link_2",
+    // Media
+    "profile_image_url", "voice_prompt_url", "video_intro_url",
+    "voice_prompt_duration_seconds", "video_intro_duration_seconds",
+    "verification_selfie_url",
+    // Verification & Status
+    "is_verified", "is_photo_verified", "is_id_verified",
+    "verified_at", "photo_verified_at", "id_verified_at",
+    "can_start_matching", "profile_hidden",
+    // Profile Completion
+    "profile_completion_step", "profile_completion_skipped", 
+    "profile_completion_prefer_not", "profile_completed_at"
   ];
 
   const userUpdates: Record<string, unknown> = {};
@@ -119,7 +169,34 @@ export async function PATCH(
     if (userFields.includes(key)) {
       userUpdates[key] = value;
     } else if (profileFields.includes(key)) {
-      profileUpdates[key] = value;
+      // Handle array fields - ensure they're properly formatted
+      const arrayFields = ["looking_for", "ethnicity", "languages", "interests", "pets", "life_goals", "schools", "profile_completion_skipped", "profile_completion_prefer_not"];
+      if (arrayFields.includes(key)) {
+        // Convert string to array if needed, or ensure it's an array
+        if (typeof value === "string" && value.trim() !== "") {
+          profileUpdates[key] = value.split(",").map((item: string) => item.trim()).filter(Boolean);
+        } else if (Array.isArray(value)) {
+          profileUpdates[key] = value.filter(Boolean);
+        } else if (value === null || value === "") {
+          profileUpdates[key] = null;
+        } else {
+          profileUpdates[key] = value;
+        }
+      } else {
+        // Handle numeric fields
+        if (key === "height_inches" && value !== null && value !== undefined && value !== "") {
+          profileUpdates[key] = parseInt(String(value), 10) || null;
+        } else if ((key === "latitude" || key === "longitude") && value !== null && value !== undefined && value !== "") {
+          profileUpdates[key] = parseFloat(String(value)) || null;
+        } else if (key === "voice_prompt_duration_seconds" || key === "video_intro_duration_seconds") {
+          profileUpdates[key] = value !== null && value !== undefined && value !== "" ? parseFloat(String(value)) : null;
+        } else if (key === "profile_completion_step") {
+          profileUpdates[key] = value !== null && value !== undefined && value !== "" ? parseInt(String(value), 10) : null;
+        } else {
+          // String fields - convert empty strings to null
+          profileUpdates[key] = value === "" ? null : value;
+        }
+      }
     }
   }
 
