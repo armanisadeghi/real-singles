@@ -155,7 +155,7 @@ export function MessageInput({
       <div className="pointer-events-auto px-2 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-xl">
         {/* Attached image preview */}
         {attachedImage && (
-          <div className="mb-2 ml-11">
+          <div className="mb-2 ml-[42px]">
             <div className="relative inline-block">
               <img
                 src={attachedImage}
@@ -175,15 +175,15 @@ export function MessageInput({
         {/* Input row - floating elements */}
         <form 
           onSubmit={handleSubmit} 
-          className="flex items-end gap-1.5"
+          className="flex items-center gap-2"
         >
-          {/* Plus button - floating */}
+          {/* Plus button - floating, aligned with input center */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || isUploading}
             className={cn(
-              "w-8 h-8 mb-0.5 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
+              "w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
               "bg-blue-500 text-white",
               (disabled || isUploading) && "opacity-50"
             )}
@@ -202,8 +202,8 @@ export function MessageInput({
             className="hidden"
           />
 
-          {/* Text input pill - standalone with border */}
-          <div className="flex-1 relative">
+          {/* Text input pill - fully rounded */}
+          <div className="flex-1 relative flex items-center">
             <textarea
               ref={inputRef}
               value={message}
@@ -215,11 +215,11 @@ export function MessageInput({
               inputMode="text"
               enterKeyHint="send"
               className={cn(
-                "w-full min-h-[36px] pl-3 pr-10 py-2 resize-none",
-                "bg-gray-100 dark:bg-neutral-800",
-                "rounded-[18px] border border-gray-200 dark:border-neutral-700",
+                "w-full min-h-[34px] pl-4 pr-9 py-[7px] resize-none",
+                "bg-transparent",
+                "rounded-full border border-gray-300 dark:border-neutral-600",
                 "text-[16px] leading-[20px] text-gray-900 dark:text-gray-100",
-                "focus:outline-none focus:border-gray-300 dark:focus:border-neutral-600",
+                "focus:outline-none focus:border-gray-400 dark:focus:border-neutral-500",
                 "disabled:opacity-50",
                 "placeholder:text-gray-400 dark:placeholder:text-gray-500"
               )}
@@ -229,19 +229,15 @@ export function MessageInput({
               }}
             />
             
-            {/* Send button - inside input on the right */}
-            <button
-              type="submit"
-              disabled={!canSend}
-              className={cn(
-                "absolute right-1 bottom-1 w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
-                canSend
-                  ? "bg-blue-500 text-white"
-                  : "bg-transparent text-gray-300 dark:text-gray-600"
-              )}
-            >
-              <ArrowUp className="w-4 h-4" strokeWidth={2.5} />
-            </button>
+            {/* Send button - only visible when can send */}
+            {canSend && (
+              <button
+                type="submit"
+                className="absolute right-1.5 w-6 h-6 rounded-full flex items-center justify-center bg-blue-500 text-white transition-all active:scale-95"
+              >
+                <ArrowUp className="w-3.5 h-3.5" strokeWidth={3} />
+              </button>
+            )}
           </div>
         </form>
       </div>
