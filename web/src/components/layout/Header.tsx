@@ -179,7 +179,7 @@ export function Header() {
                   Log out
                 </button>
                 <Link
-                  href="/search"
+                  href="/discover"
                   className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-brand-primary text-sm font-medium text-white shadow-sm hover:bg-brand-primary-dark transition-colors"
                 >
                   <Compass className="w-3.5 h-3.5" />
@@ -255,7 +255,7 @@ export function Header() {
                 ) : user ? (
                   <>
                     <Link
-                      href="/search"
+                      href="/discover"
                       className="flex items-center justify-center gap-1.5 h-9 rounded-full bg-brand-primary text-sm font-medium text-white shadow-sm hover:bg-brand-primary-dark transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >

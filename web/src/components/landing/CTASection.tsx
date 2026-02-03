@@ -39,7 +39,7 @@ export function CTASection() {
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/search"
+                href="/discover"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-lg font-semibold text-brand-primary shadow-lg hover:bg-gray-100 transition-all hover:scale-105"
               >
                 <Compass className="w-5 h-5" />

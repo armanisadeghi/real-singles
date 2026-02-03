@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass as CompassIcon, Search, MessageCircle, Users, User } from "lucide-react";
+import { Sparkles, Compass as CompassIcon, Heart, MessageCircle, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItemProps {
@@ -49,7 +49,7 @@ function NavItem({ href, icon: Icon, label, isActive }: NavItemProps) {
  * Mobile Bottom Navigation for Web
  *
  * Follows iOS/Android native patterns:
- * - 5 tabs: Explore, Search, Connections, Messages, Profile
+ * - 5 tabs: Discover, Explore, Likes, Messages, Profile
  * - Always visible labels
  * - Active state with filled icons
  * - Safe area padding for notched devices
@@ -59,17 +59,17 @@ export function BottomNavigation() {
   const pathname = usePathname();
 
   const navItems = [
+    { href: "/discover", icon: Sparkles, label: "Discover" },
     { href: "/explore", icon: CompassIcon, label: "Explore" },
-    { href: "/search", icon: Search, label: "Search" },
-    { href: "/likes", icon: Users, label: "Likes" },
+    { href: "/likes", icon: Heart, label: "Likes" },
     { href: "/chats", icon: MessageCircle, label: "Messages" },
     { href: "/profile", icon: User, label: "Profile" },
   ];
 
   // Determine active tab based on pathname
   const getIsActive = (href: string) => {
-    if (href === "/explore") {
-      return pathname === "/explore";
+    if (href === "/discover" || href === "/explore") {
+      return pathname === href;
     }
     return pathname.startsWith(href);
   };

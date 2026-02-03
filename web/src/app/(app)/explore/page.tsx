@@ -232,7 +232,7 @@ export default function ExplorePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo */}
-            <Link href="/explore" className="flex items-center gap-2 flex-shrink-0">
+            <Link href="/discover" className="flex items-center gap-2 flex-shrink-0">
               <img 
                 src="/images/logo.png" 
                 alt="RealSingles" 

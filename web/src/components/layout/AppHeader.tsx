@@ -34,9 +34,9 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   
-  // Hide header on explore page - it has its own hero with avatar/notifications
+  // Hide header on discover/explore pages - they have their own hero with avatar/notifications
   // This matches the mobile app behavior
-  const isExplorePage = pathname === "/explore" || pathname === "/";
+  const isDiscoverOrExplorePage = pathname === "/discover" || pathname === "/explore" || pathname === "/";
   
   // Hide header on full-screen profile views (search, focus)
   const isFullScreenProfile = pathname.startsWith("/search/profile/") || 
@@ -123,7 +123,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
     }
   }, [isDropdownOpen]);
   
-  if (isExplorePage || isFullScreenProfile) {
+  if (isDiscoverOrExplorePage || isFullScreenProfile) {
     return null;
   }
 
@@ -141,7 +141,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link 
-            href="/explore" 
+            href="/discover" 
             className="-m-1.5 p-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
             <Image
@@ -157,16 +157,16 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
           {/* Navigation - Hidden on mobile (bottom nav handles it) */}
           <nav className="hidden md:flex items-center space-x-1" aria-label="Main navigation">
             <Link 
+              href="/discover" 
+              className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            >
+              Discover
+            </Link>
+            <Link 
               href="/explore" 
               className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
               Explore
-            </Link>
-            <Link 
-              href="/search" 
-              className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
-            >
-              Search
             </Link>
             <Link 
               href="/likes" 

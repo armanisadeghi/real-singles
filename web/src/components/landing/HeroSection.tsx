@@ -120,7 +120,7 @@ export function HeroSection() {
               
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
                 <Link
-                  href="/search"
+                  href="/discover"
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-brand-primary-dark transition-all hover:scale-105"
                 >
                   <Compass className="w-5 h-5" />
