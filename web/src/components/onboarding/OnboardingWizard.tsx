@@ -44,9 +44,10 @@ import {
 
 interface OnboardingWizardProps {
   resume?: boolean;
+  targetStep?: number; // Go directly to this step (overrides resume)
 }
 
-export function OnboardingWizard({ resume = false }: OnboardingWizardProps) {
+export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizardProps) {
   const router = useRouter();
 
   const {
@@ -67,7 +68,7 @@ export function OnboardingWizard({ resume = false }: OnboardingWizardProps) {
     saveAndSkip,
     saveAsPreferNot,
     refreshProfile,
-  } = useOnboarding({ resume });
+  } = useOnboarding({ resume, targetStep });
 
   // Check if current step can continue (has required values)
   const canContinue = useMemo(() => {

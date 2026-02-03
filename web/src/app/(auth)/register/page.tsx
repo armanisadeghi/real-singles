@@ -110,7 +110,8 @@ export default function RegisterPage() {
         setSuccess("Registration successful! Please log in.");
         setTimeout(() => router.push("/login"), 2000);
       } else {
-        router.push("/profile/edit");
+        // Send new users to onboarding flow
+        router.push("/onboarding");
         router.refresh();
       }
     } catch {

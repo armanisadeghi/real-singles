@@ -10,9 +10,10 @@ import { useState, useEffect } from "react";
 import { OnboardingStepWrapper, OnboardingChips } from "../OnboardingStepWrapper";
 
 interface LifeGoal {
-  id: string;
-  name: string;
+  key: string;
+  label: string;
   category: string;
+  description?: string;
 }
 
 interface LifeGoalsStepProps {
@@ -29,8 +30,8 @@ export function LifeGoalsStep({ lifeGoals, onChange }: LifeGoalsStepProps) {
     fetch("/api/life-goals")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
-          setGoals(data);
+        if (data.success && data.data?.goals) {
+          setGoals(data.data.goals);
         }
       })
       .catch(() => {})
@@ -39,8 +40,8 @@ export function LifeGoalsStep({ lifeGoals, onChange }: LifeGoalsStepProps) {
 
   // Convert to options format
   const options = goals.map((goal) => ({
-    value: goal.id,
-    label: goal.name,
+    value: goal.key,
+    label: goal.label,
   }));
 
   if (isLoading) {

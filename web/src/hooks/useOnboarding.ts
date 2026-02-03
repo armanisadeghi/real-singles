@@ -36,6 +36,7 @@ export interface StepValues {
 export interface UseOnboardingOptions {
   initialStep?: number;
   resume?: boolean;
+  targetStep?: number; // Go directly to this step (overrides resume behavior)
 }
 
 export interface UseOnboardingReturn {
@@ -80,11 +81,12 @@ export interface UseOnboardingReturn {
 export function useOnboarding(
   options: UseOnboardingOptions = {}
 ): UseOnboardingReturn {
-  const { initialStep = 1, resume = false } = options;
+  const { initialStep = 1, resume = false, targetStep } = options;
   const router = useRouter();
 
-  // Use ref for resume to avoid dependency issues
+  // Use refs to avoid dependency issues
   const resumeRef = useRef(resume);
+  const targetStepRef = useRef(targetStep);
   const hasInitializedRef = useRef(false);
 
   // Core state
@@ -195,14 +197,24 @@ export function useOnboarding(
       setProfile(fetchedProfile);
       setPhotoCount(completionData.data?.photoCount || 0);
 
-      // Only set step on initial load when resuming
-      if (shouldSetStep && resumeRef.current) {
-        const completionStatus = calculateCompletion(
-          fetchedProfile,
-          completionData.data?.photoCount || 0
-        );
-        const resumeStep = getResumeStep(fetchedProfile, completionStatus);
-        setCurrentStep(resumeStep);
+      // Set initial step based on priority:
+      // 1. targetStep (explicit step from URL) - highest priority
+      // 2. resume (go to first incomplete step)
+      // 3. initialStep (default: 1)
+      if (shouldSetStep) {
+        if (targetStepRef.current && targetStepRef.current >= 1 && targetStepRef.current <= TOTAL_STEPS) {
+          // User explicitly requested a specific step - go there directly
+          setCurrentStep(targetStepRef.current);
+        } else if (resumeRef.current) {
+          // Resume mode - go to first incomplete step
+          const completionStatus = calculateCompletion(
+            fetchedProfile,
+            completionData.data?.photoCount || 0
+          );
+          const resumeStep = getResumeStep(fetchedProfile, completionStatus);
+          setCurrentStep(resumeStep);
+        }
+        // Otherwise, keep the initialStep (default: 1)
       }
 
       // Pre-populate step values from profile

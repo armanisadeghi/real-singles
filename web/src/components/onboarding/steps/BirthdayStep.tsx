@@ -105,12 +105,12 @@ export function BirthdayStep({ dateOfBirth, onChange }: BirthdayStepProps) {
   }, [month, day, year]);
 
   const selectClass = cn(
-    "flex-1 px-3 py-3 rounded-xl appearance-none",
+    "flex-1 px-3 py-3.5 rounded-xl appearance-none",
     "text-base text-gray-900 dark:text-gray-100",
-    "bg-white/80 dark:bg-neutral-800/80",
+    "bg-white dark:bg-neutral-800/90",
     "border border-gray-200 dark:border-neutral-700",
-    "focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500",
-    "transition-all duration-200"
+    "focus:outline-none focus:border-gray-400 dark:focus:border-neutral-500",
+    "transition-colors duration-150"
   );
 
   return (

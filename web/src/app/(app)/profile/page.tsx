@@ -480,7 +480,7 @@ export default async function MyProfilePage() {
                   {profile.bio ? (
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-[15px] lg:text-base whitespace-pre-wrap">{profile.bio}</p>
                   ) : (
-                    <AddFieldPrompt label="Tell others about yourself" href="/onboarding?resume=true" />
+                    <AddFieldPrompt label="Tell others about yourself" step={21} />
                   )}
                 </section>
 
@@ -491,17 +491,17 @@ export default async function MyProfilePage() {
                     <Link href="/profile/edit" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-6">
-                    <PromptField question="My ideal first date" answer={profile.ideal_first_date} />
-                    <PromptField question="My non-negotiables" answer={profile.non_negotiables} />
-                    <PromptField question="The way to my heart" answer={profile.way_to_heart} />
-                    <PromptField question="After work you'll find me" answer={profile.after_work} />
-                    <PromptField question="My pet peeves" answer={profile.pet_peeves} />
-                    <PromptField question="Nightclub or cozy night in?" answer={profile.nightclub_or_home} />
-                    <PromptField question="Worst job I've had" answer={profile.worst_job} />
-                    <PromptField question="My dream job" answer={profile.dream_job} />
-                    <PromptField question="Craziest travel story" answer={profile.craziest_travel_story} />
-                    <PromptField question="Weirdest gift I've received" answer={profile.weirdest_gift} />
-                    <PromptField question="Past event I'd attend" answer={profile.past_event} />
+                    <PromptField question="My ideal first date" answer={profile.ideal_first_date} step={23} />
+                    <PromptField question="My non-negotiables" answer={profile.non_negotiables} step={24} />
+                    <PromptField question="The way to my heart" answer={profile.way_to_heart} step={25} />
+                    <PromptField question="After work you'll find me" answer={profile.after_work} step={26} />
+                    <PromptField question="My pet peeves" answer={profile.pet_peeves} step={28} />
+                    <PromptField question="Nightclub or cozy night in?" answer={profile.nightclub_or_home} step={27} />
+                    <PromptField question="Worst job I've had" answer={profile.worst_job} step={31} />
+                    <PromptField question="My dream job" answer={profile.dream_job} step={32} />
+                    <PromptField question="Craziest travel story" answer={profile.craziest_travel_story} step={29} />
+                    <PromptField question="Weirdest gift I've received" answer={profile.weirdest_gift} step={30} />
+                    <PromptField question="Past event I'd attend" answer={profile.past_event} step={32} />
                   </div>
                 </section>
 
@@ -600,7 +600,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Interests</h3>
-                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=19" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   {profile.interests && (profile.interests as string[]).length > 0 ? (
                     <div className="flex flex-wrap gap-2">
@@ -611,7 +611,7 @@ export default async function MyProfilePage() {
                       ))}
                     </div>
                   ) : (
-                    <AddFieldPrompt label="Add your interests" href="/onboarding?resume=true" />
+                    <AddFieldPrompt label="Add your interests" step={19} />
                   )}
                 </section>
 
@@ -619,7 +619,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Life Goals</h3>
-                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=20" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   {profile.life_goals && (profile.life_goals as string[]).length > 0 ? (
                     <div className="flex flex-wrap gap-2">
@@ -630,7 +630,7 @@ export default async function MyProfilePage() {
                       ))}
                     </div>
                   ) : (
-                    <AddFieldPrompt label="Add your life goals" href="/onboarding?resume=true" />
+                    <AddFieldPrompt label="Add your life goals" step={20} />
                   )}
                 </section>
               </div>
@@ -650,13 +650,13 @@ export default async function MyProfilePage() {
                       icon={<ShieldCheck className="w-5 h-5" />}
                       label="Selfie Verification" 
                       verified={profile.is_verified || false}
-                      href="/onboarding?resume=true"
+                      href="/onboarding?step=6"
                     />
                     <VerificationRow 
                       icon={<BadgeCheck className="w-5 h-5" />}
                       label="Photo Verified" 
                       verified={profile.is_photo_verified || false}
-                      href="/profile/edit"
+                      href="/onboarding?step=5"
                     />
                     <VerificationRow 
                       icon={<IdCard className="w-5 h-5" />}
@@ -672,17 +672,17 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">About Me</h3>
-                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=7" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
-                    <DetailRowWithAdd label="Gender" value={profile.gender ? getGenderLabel(profile.gender) : null} />
-                    <DetailRowWithAdd label="Height" value={profile.height_inches ? formatHeight(profile.height_inches) : null} />
-                    <DetailRowWithAdd label="Body Type" value={profile.body_type ? getBodyTypeLabel(profile.body_type) : null} />
-                    <DetailRowWithAdd label="Ethnicity" value={profile.ethnicity && profile.ethnicity.length > 0 ? getEthnicityLabels(profile.ethnicity) : null} />
-                    <DetailRowWithAdd label="Marital Status" value={profile.marital_status ? getMaritalStatusLabel(profile.marital_status) : null} />
-                    <DetailRowWithAdd label="Zodiac" value={profile.zodiac_sign ? getZodiacLabel(profile.zodiac_sign) : null} />
-                    <DetailRowWithAdd label="Hometown" value={profile.hometown || null} />
-                    <DetailRowWithAdd label="Dating Intentions" value={profile.dating_intentions ? getDatingIntentionsLabel(profile.dating_intentions) : null} />
+                    <DetailRowWithAdd label="Gender" value={profile.gender ? getGenderLabel(profile.gender) : null} step={3} />
+                    <DetailRowWithAdd label="Height" value={profile.height_inches ? formatHeight(profile.height_inches) : null} step={7} />
+                    <DetailRowWithAdd label="Body Type" value={profile.body_type ? getBodyTypeLabel(profile.body_type) : null} step={7} />
+                    <DetailRowWithAdd label="Ethnicity" value={profile.ethnicity && profile.ethnicity.length > 0 ? getEthnicityLabels(profile.ethnicity) : null} step={8} />
+                    <DetailRowWithAdd label="Marital Status" value={profile.marital_status ? getMaritalStatusLabel(profile.marital_status) : null} step={9} />
+                    <DetailRowWithAdd label="Zodiac" value={profile.zodiac_sign ? getZodiacLabel(profile.zodiac_sign) : null} step={2} />
+                    <DetailRowWithAdd label="Hometown" value={profile.hometown || null} step={10} />
+                    <DetailRowWithAdd label="Dating Intentions" value={profile.dating_intentions ? getDatingIntentionsLabel(profile.dating_intentions) : null} step={9} />
                   </div>
                 </section>
 
@@ -690,13 +690,13 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Education & Career</h3>
-                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=11" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
-                    <DetailRowWithAdd label="Education" value={profile.education ? getEducationLabel(profile.education) : null} />
-                    <DetailRowWithAdd label="Schools" value={profile.schools && profile.schools.length > 0 ? (profile.schools as string[]).join(", ") : null} />
-                    <DetailRowWithAdd label="Occupation" value={profile.occupation || null} />
-                    <DetailRowWithAdd label="Company" value={profile.company || null} />
+                    <DetailRowWithAdd label="Education" value={profile.education ? getEducationLabel(profile.education) : null} step={12} />
+                    <DetailRowWithAdd label="Schools" value={profile.schools && profile.schools.length > 0 ? (profile.schools as string[]).join(", ") : null} step={12} />
+                    <DetailRowWithAdd label="Occupation" value={profile.occupation || null} step={11} />
+                    <DetailRowWithAdd label="Company" value={profile.company || null} step={11} />
                   </div>
                 </section>
 
@@ -704,13 +704,13 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Lifestyle</h3>
-                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=16" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
-                    <DetailRowWithAdd label="Smoking" value={profile.smoking ? getSmokingLabel(profile.smoking) : null} />
-                    <DetailRowWithAdd label="Drinking" value={profile.drinking ? getDrinkingLabel(profile.drinking) : null} />
-                    <DetailRowWithAdd label="Marijuana" value={profile.marijuana ? getMarijuanaLabel(profile.marijuana) : null} />
-                    <DetailRowWithAdd label="Exercise" value={profile.exercise ? getExerciseLabel(profile.exercise) : null} />
+                    <DetailRowWithAdd label="Smoking" value={profile.smoking ? getSmokingLabel(profile.smoking) : null} step={16} />
+                    <DetailRowWithAdd label="Drinking" value={profile.drinking ? getDrinkingLabel(profile.drinking) : null} step={16} />
+                    <DetailRowWithAdd label="Marijuana" value={profile.marijuana ? getMarijuanaLabel(profile.marijuana) : null} step={16} />
+                    <DetailRowWithAdd label="Exercise" value={profile.exercise ? getExerciseLabel(profile.exercise) : null} step={14} />
                   </div>
                 </section>
 
@@ -718,12 +718,12 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Family</h3>
-                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=17" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
-                    <DetailRowWithAdd label="Has Kids" value={profile.has_kids ? getHasKidsLabel(profile.has_kids) : null} />
-                    <DetailRowWithAdd label="Wants Kids" value={profile.wants_kids ? getWantsKidsLabel(profile.wants_kids) : null} />
-                    <DetailRowWithAdd label="Pets" value={profile.pets && profile.pets.length > 0 ? (profile.pets as string[]).map(p => getPetsLabel(p)).join(", ") : null} />
+                    <DetailRowWithAdd label="Has Kids" value={profile.has_kids ? getHasKidsLabel(profile.has_kids) : null} step={17} />
+                    <DetailRowWithAdd label="Wants Kids" value={profile.wants_kids ? getWantsKidsLabel(profile.wants_kids) : null} step={17} />
+                    <DetailRowWithAdd label="Pets" value={profile.pets && profile.pets.length > 0 ? (profile.pets as string[]).map(p => getPetsLabel(p)).join(", ") : null} step={18} />
                   </div>
                 </section>
 
@@ -731,13 +731,13 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Additional Info</h3>
-                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=13" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
-                    <DetailRowWithAdd label="Religion" value={profile.religion ? getReligionLabel(profile.religion) : null} />
-                    <DetailRowWithAdd label="Politics" value={profile.political_views ? getPoliticalLabel(profile.political_views) : null} />
-                    <DetailRowWithAdd label="Looking For" value={profile.looking_for && profile.looking_for.length > 0 ? (profile.looking_for as string[]).map(g => getGenderLabel(g)).join(", ") : null} />
-                    <DetailRowWithAdd label="Languages" value={profile.languages && profile.languages.length > 0 ? (profile.languages as string[]).join(", ") : null} />
+                    <DetailRowWithAdd label="Religion" value={profile.religion ? getReligionLabel(profile.religion) : null} step={13} />
+                    <DetailRowWithAdd label="Politics" value={profile.political_views ? getPoliticalLabel(profile.political_views) : null} step={13} />
+                    <DetailRowWithAdd label="Looking For" value={profile.looking_for && profile.looking_for.length > 0 ? (profile.looking_for as string[]).map(g => getGenderLabel(g)).join(", ") : null} step={4} />
+                    <DetailRowWithAdd label="Languages" value={profile.languages && profile.languages.length > 0 ? (profile.languages as string[]).join(", ") : null} step={15} />
                   </div>
                 </section>
 
@@ -745,7 +745,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Social Links</h3>
-                    <Link href="/onboarding?resume=true" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=33" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-2">
                     {profile.social_link_1 ? (
@@ -753,14 +753,14 @@ export default async function MyProfilePage() {
                         {profile.social_link_1}
                       </a>
                     ) : (
-                      <DetailRowWithAdd label="Social Link 1" value={null} />
+                      <DetailRowWithAdd label="Social Link 1" value={null} step={33} />
                     )}
                     {profile.social_link_2 ? (
                       <a href={profile.social_link_2} target="_blank" rel="noopener noreferrer" className="block text-sm text-pink-500 hover:text-pink-600 font-medium break-all">
                         {profile.social_link_2}
                       </a>
                     ) : (
-                      <DetailRowWithAdd label="Social Link 2" value={null} />
+                      <DetailRowWithAdd label="Social Link 2" value={null} step={33} />
                     )}
                   </div>
                 </section>
@@ -774,10 +774,11 @@ export default async function MyProfilePage() {
 }
 
 // Helper component for "Add" field prompts
-function AddFieldPrompt({ label, href }: { label: string; href: string }) {
+function AddFieldPrompt({ label, href, step }: { label: string; href?: string; step?: number }) {
+  const targetHref = step ? `/onboarding?step=${step}` : (href || "/onboarding?resume=true");
   return (
     <Link 
-      href={href}
+      href={targetHref}
       className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 hover:text-pink-500 dark:hover:text-pink-400 transition-colors group"
     >
       <Plus className="w-4 h-4" />
@@ -788,14 +789,15 @@ function AddFieldPrompt({ label, href }: { label: string; href: string }) {
 }
 
 // Helper component for detail rows with "Add" indicator
-function DetailRowWithAdd({ label, value }: { label: string; value: string | null }) {
+function DetailRowWithAdd({ label, value, step }: { label: string; value: string | null; step?: number }) {
+  const href = step ? `/onboarding?step=${step}` : "/onboarding?resume=true";
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-sm text-gray-500 dark:text-gray-400 font-medium shrink-0">{label}</span>
       {value ? (
         <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize text-right break-words">{value}</span>
       ) : (
-        <Link href="/onboarding?resume=true" className="text-sm text-gray-300 dark:text-gray-600 hover:text-pink-500 dark:hover:text-pink-400 flex items-center gap-1 transition-colors">
+        <Link href={href} className="text-sm text-gray-300 dark:text-gray-600 hover:text-pink-500 dark:hover:text-pink-400 flex items-center gap-1 transition-colors">
           <Plus className="w-3.5 h-3.5" />
           <span>Add</span>
         </Link>
@@ -805,7 +807,8 @@ function DetailRowWithAdd({ label, value }: { label: string; value: string | nul
 }
 
 // Helper component for prompt fields (always show, with "Add" if empty)
-function PromptField({ question, answer }: { question: string; answer: string | null | undefined }) {
+function PromptField({ question, answer, step }: { question: string; answer: string | null | undefined; step?: number }) {
+  const href = step ? `/onboarding?step=${step}` : "/onboarding?resume=true";
   return (
     <div>
       <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">{question}</p>
@@ -813,7 +816,7 @@ function PromptField({ question, answer }: { question: string; answer: string | 
         <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">{answer}</p>
       ) : (
         <Link 
-          href="/onboarding?resume=true"
+          href={href}
           className="inline-flex items-center gap-1 text-sm text-gray-300 dark:text-gray-600 hover:text-pink-500 dark:hover:text-pink-400 transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
