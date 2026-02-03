@@ -107,6 +107,12 @@ interface SearchProfileViewProps {
   undoState?: UndoState;
   /** Handler for undo action - returns the target user ID to navigate to */
   onUndo?: () => Promise<{ success: boolean; targetUserId?: string; error?: string }>;
+  /** 
+   * When true, the parent component handles navigation after actions (like/pass/super_like/undo).
+   * This is used in queue-based flows (e.g., discover) where the parent manages showing the next profile.
+   * When false (default), SearchProfileView will navigate/close after successful actions.
+   */
+  parentHandlesNavigation?: boolean;
 }
 
 const REPORT_REASONS = [
@@ -160,6 +166,7 @@ export function SearchProfileView({
   onClose,
   undoState,
   onUndo,
+  parentHandlesNavigation = false,
 }: SearchProfileViewProps) {
   const router = useRouter();
   const toast = useToast();
@@ -192,8 +199,12 @@ export function SearchProfileView({
       if (result.success && result.targetUserId) {
         toast.success(`Undid action on ${undoState.targetUserName || "previous profile"}`);
         triggerHaptic("success");
-        // Navigate back to the profile
-        router.push(`/search/profile/${result.targetUserId}`);
+        // Only navigate if parent doesn't handle navigation (e.g., not in discover queue flow)
+        if (!parentHandlesNavigation) {
+          router.push(`/search/profile/${result.targetUserId}`);
+        }
+        // If parentHandlesNavigation is true, the parent (e.g., DiscoverProfileView) 
+        // will handle showing the previous profile via goToPrevious()
       } else {
         toast.error(result.error || "Failed to undo");
         triggerHaptic("error");
@@ -205,7 +216,7 @@ export function SearchProfileView({
     } finally {
       setActionLoading(null);
     }
-  }, [onUndo, undoState, toast, router]);
+  }, [onUndo, undoState, toast, router, parentHandlesNavigation]);
 
   // Get all images - filter out primary from gallery since it's already added as profile_image_url
   const images = [
@@ -249,10 +260,13 @@ export function SearchProfileView({
             // Show match celebration!
             setMatchConversationId(result.conversation_id || null);
             setShowMatchCelebration(true);
-          } else {
-            // Regular action - close after brief delay
+          } else if (!parentHandlesNavigation) {
+            // Only auto-close if parent doesn't handle navigation (e.g., not in discover queue flow)
+            // In queue flows, the parent's action handlers (onLike, etc.) call advanceToNext() themselves
             setTimeout(handleClose, 500);
           }
+          // If parentHandlesNavigation is true, the parent (e.g., DiscoverProfileView) 
+          // already advanced to the next profile via advanceToNext()
         } else {
           // Show error toast
           const errorMsg = result?.msg || "Action failed. Please try again.";
@@ -265,7 +279,7 @@ export function SearchProfileView({
         setActionLoading(null);
       }
     },
-    [profile.user_id, onLike, onPass, onSuperLike, handleClose, toast]
+    [profile.user_id, onLike, onPass, onSuperLike, handleClose, toast, parentHandlesNavigation]
   );
 
   const handleReport = useCallback(
@@ -340,8 +354,10 @@ export function SearchProfileView({
         if (result?.success) {
           toast.success("User blocked. You won't see them again.");
           setShowBlockConfirm(false);
-          // Navigate away after blocking
-          setTimeout(handleClose, 500);
+          // Only auto-close if parent doesn't handle navigation
+          if (!parentHandlesNavigation) {
+            setTimeout(handleClose, 500);
+          }
         } else {
           toast.error(result?.msg || "Failed to block user. Please try again.");
         }
@@ -356,7 +372,10 @@ export function SearchProfileView({
         if (result?.success) {
           toast.success("User blocked. You won't see them again.");
           setShowBlockConfirm(false);
-          setTimeout(handleClose, 500);
+          // Only auto-close if parent doesn't handle navigation (fallback path likely not in queue flow)
+          if (!parentHandlesNavigation) {
+            setTimeout(handleClose, 500);
+          }
         } else {
           toast.error(result?.msg || "Failed to block user. Please try again.");
         }
@@ -367,7 +386,7 @@ export function SearchProfileView({
     } finally {
       setBlockLoading(false);
     }
-  }, [profile.user_id, onBlock, toast, handleClose]);
+  }, [profile.user_id, onBlock, toast, handleClose, parentHandlesNavigation]);
 
   // Action menu items
   const actionMenuItems: ActionMenuItem[] = [

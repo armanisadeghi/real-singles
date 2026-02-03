@@ -29,7 +29,25 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [referralFromLink, setReferralFromLink] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
+
+  // Redirect authenticated users to the app
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        router.replace("/discover");
+        return;
+      }
+      
+      setCheckingAuth(false);
+    };
+    
+    checkAuth();
+  }, [router]);
 
   // Check for referral code in cookie on mount
   useEffect(() => {
@@ -100,6 +118,17 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking authentication
+  if (checkingAuth) {
+    return (
+      <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="flex items-center justify-center py-12">
+          <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8">

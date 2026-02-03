@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { NotificationBell, MessagesIndicator } from "@/components/notifications";
+import { PointsBadge } from "@/components/rewards";
 import { Avatar } from "@/components/ui";
+import { useCurrentUser } from "@/components/providers/AppProviders";
 
 interface AppHeaderProps {
   user: {
@@ -35,12 +37,13 @@ interface AppHeaderProps {
  */
 export function AppHeader({ user, signOutAction }: AppHeaderProps) {
   const pathname = usePathname();
+  const currentUser = useCurrentUser();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   
-  // Hide header on discover/explore pages - they have their own hero with avatar/notifications
-  const isDiscoverOrExplorePage = pathname === "/discover" || pathname === "/explore" || pathname === "/";
+  // Hide header on discover page - it has its own hero with avatar/notifications
+  const isDiscoverPage = pathname === "/discover" || pathname === "/";
   
   // Hide header on full-screen profile views (search, focus)
   const isFullScreenProfile = pathname.startsWith("/search/profile/") || 
@@ -126,7 +129,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
     }
   }, [isDropdownOpen]);
   
-  if (isDiscoverOrExplorePage || isFullScreenProfile) {
+  if (isDiscoverPage || isFullScreenProfile) {
     return null;
   }
 
@@ -185,8 +188,18 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
             </Link>
           </nav>
 
-          {/* Right side: Messages, Notifications, Profile */}
+          {/* Right side: Points, Messages, Notifications, Profile */}
           <div className="flex items-center gap-1 sm:gap-2">
+            {/* Points Badge */}
+            {currentUser && (
+              <PointsBadge
+                points={currentUser.points}
+                size="sm"
+                href="/rewards"
+                showLabel={false}
+              />
+            )}
+
             {/* Messages Indicator - hidden on desktop (shown in nav) */}
             <div className="md:hidden">
               <MessagesIndicator />

@@ -8,49 +8,16 @@ import {
   Calendar,
   MapPin,
   Users,
-  RefreshCw,
-  Menu,
-  Bell,
+  Clock,
+  ArrowRight,
+  Sparkles,
   Loader2,
 } from "lucide-react";
-import { PointsBadge } from "@/components/rewards";
-import { ProfileCard } from "@/components/search";
 import { EmptyState } from "@/components/ui";
-import { SideMenu } from "@/components/navigation";
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
-
-/** Profile data as returned from the API */
-interface ApiProfile {
-  ID: string | null;
-  id: string | null;
-  DisplayName: string;
-  FirstName: string;
-  LastName: string;
-  DOB: string;
-  City: string;
-  State: string;
-  Occupation?: string;
-  About: string;
-  Image: string | null;
-  livePicture: string | null;
-  Height: string;
-  Interest: string;
-  is_verified: boolean;
-  IsFavorite: number;
-  distance_in_km?: number;
-}
-
-/** Video data as returned from the API */
-interface ApiVideo {
-  ID: string;
-  Name: string;
-  Link: string;
-  VideoURL: string;
-  CreatedDate: string | null;
-}
 
 /** Event data as returned from the API */
 interface ApiEvent {
@@ -83,91 +50,289 @@ interface ApiSpeedDating {
 
 interface ExploreData {
   success: boolean;
-  TopMatch: ApiProfile[];
-  NearBy: ApiProfile[];
-  Videos: ApiVideo[];
   event: ApiEvent[];
   Virtual: ApiSpeedDating[];
   baseImageUrl: string;
   msg: string;
 }
 
-interface UserInfo {
-  id: string;
-  displayName: string;
-  profileImage: string | null;
-  points: number;
+// ============================================================================
+// SECTION HEADER COMPONENT
+// ============================================================================
+
+function SectionHeader({
+  title,
+  subtitle,
+  href,
+  icon: Icon,
+}: {
+  title: string;
+  subtitle?: string;
+  href: string;
+  icon: React.ElementType;
+}) {
+  return (
+    <div className="flex items-start justify-between mb-6">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+          {subtitle && (
+            <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
+          )}
+        </div>
+      </div>
+      <Link
+        href={href}
+        className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors group"
+      >
+        View All
+        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+      </Link>
+    </div>
+  );
 }
 
-// Format profile data from API to component format
-function formatProfileForCard(profile: ApiProfile) {
-  const id = profile.ID || profile.id || "";
-  return {
-    id,
-    user_id: id,
-    first_name: profile.FirstName || profile.DisplayName?.split(" ")[0],
-    last_name: profile.LastName || profile.DisplayName?.split(" ").slice(1).join(" "),
-    date_of_birth: profile.DOB,
-    city: profile.City,
-    state: profile.State,
-    occupation: profile.Occupation,
-    bio: profile.About,
-    profile_image_url: profile.Image || profile.livePicture,
-    is_verified: profile.is_verified || false,
-    height_inches: profile.Height ? parseInt(profile.Height) : null,
-    interests: profile.Interest ? profile.Interest.split(", ").filter(Boolean) : [],
-    user: {
-      display_name: profile.DisplayName,
-    },
+// ============================================================================
+// EVENT CARD COMPONENT
+// ============================================================================
+
+function EventCard({ event }: { event: ApiEvent }) {
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
   };
+
+  return (
+    <Link
+      href={`/events/${event.EventID}`}
+      className="group flex-shrink-0 w-[320px] bg-card rounded-2xl border border-border/50 overflow-hidden hover:border-border hover:shadow-lg transition-all duration-300"
+    >
+      {/* Image */}
+      <div className="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50">
+        {event.EventImage ? (
+          <img
+            src={event.EventImage}
+            alt={event.EventName}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Calendar className="w-16 h-16 text-amber-200" />
+          </div>
+        )}
+        {/* Price badge */}
+        {event.EventPrice && (
+          <div className="absolute top-3 right-3 px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-full text-sm font-semibold text-foreground shadow-sm">
+            {event.EventPrice === "0" || event.EventPrice === "Free"
+              ? "Free"
+              : `$${event.EventPrice}`}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-5">
+        <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+          {event.EventName}
+        </h3>
+        <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">
+          {event.Description}
+        </p>
+
+        {/* Meta info */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Calendar className="w-4 h-4" />
+            {formatDate(event.EventDate)}
+          </span>
+          {event.City && (
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-4 h-4" />
+              {event.City}, {event.State}
+            </span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
 }
+
+// ============================================================================
+// SPEED DATING CARD COMPONENT
+// ============================================================================
+
+function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const getStatusColor = (status: string | null) => {
+    switch (status?.toLowerCase()) {
+      case "live":
+        return "bg-green-500 text-white";
+      case "upcoming":
+        return "bg-blue-500 text-white";
+      case "full":
+        return "bg-amber-500 text-white";
+      default:
+        return "bg-primary/10 text-primary";
+    }
+  };
+
+  return (
+    <Link
+      href={`/speed-dating/${session.ID}`}
+      className="group flex-shrink-0 w-[320px] bg-card rounded-2xl border border-border/50 overflow-hidden hover:border-border hover:shadow-lg transition-all duration-300"
+    >
+      {/* Image */}
+      <div className="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-violet-100 to-pink-50">
+        {session.Image ? (
+          <img
+            src={session.Image}
+            alt={session.Title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Video className="w-16 h-16 text-violet-200" />
+          </div>
+        )}
+        {/* Status badge */}
+        {session.Status && (
+          <div
+            className={`absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm ${getStatusColor(session.Status)}`}
+          >
+            {session.Status}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-5">
+        <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+          {session.Title}
+        </h3>
+        <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">
+          {session.Description}
+        </p>
+
+        {/* Meta info */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Calendar className="w-4 h-4" />
+            {formatDate(session.ScheduledDate)}
+          </span>
+          {session.ScheduledTime && (
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-4 h-4" />
+              {session.ScheduledTime}
+            </span>
+          )}
+          {session.MaxParticipants && (
+            <span className="flex items-center gap-1.5">
+              <Users className="w-4 h-4" />
+              {session.MaxParticipants} spots
+            </span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// ============================================================================
+// COMING SOON SECTION COMPONENT
+// ============================================================================
+
+function ComingSoonSection({
+  title,
+  description,
+  icon: Icon,
+}: {
+  title: string;
+  description: string;
+  icon: React.ElementType;
+}) {
+  return (
+    <div className="relative rounded-2xl border border-dashed border-border bg-gradient-to-br from-muted/30 to-muted/10 p-8 sm:p-12">
+      <div className="absolute top-4 right-4 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full flex items-center gap-1.5">
+        <Sparkles className="w-3.5 h-3.5" />
+        Coming Soon
+      </div>
+
+      <div className="flex flex-col items-center text-center max-w-md mx-auto">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-5">
+          <Icon className="w-8 h-8 text-primary/60" />
+        </div>
+        <h3 className="text-xl font-semibold text-foreground">{title}</h3>
+        <p className="text-muted-foreground mt-2">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// EMPTY STATE SECTION COMPONENT
+// ============================================================================
+
+function EmptySection({
+  title,
+  description,
+  icon: Icon,
+}: {
+  title: string;
+  description: string;
+  icon: React.ElementType;
+}) {
+  return (
+    <div className="rounded-2xl border border-border/50 bg-card p-8 text-center">
+      <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+        <Icon className="w-6 h-6 text-muted-foreground" />
+      </div>
+      <h3 className="font-medium text-foreground">{title}</h3>
+      <p className="text-sm text-muted-foreground mt-1">{description}</p>
+    </div>
+  );
+}
+
+// ============================================================================
+// MAIN PAGE COMPONENT
+// ============================================================================
 
 export default function ExplorePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [exploreData, setExploreData] = useState<ExploreData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Sign out handler
-  const handleSignOut = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/login");
-    } catch (error) {
-      console.error("Sign out error:", error);
-    }
-  };
-
-  const fetchData = useCallback(async (showRefresh = false) => {
-    if (showRefresh) {
-      setIsRefreshing(true);
-    }
-
-    try {
-      // Fetch user info
-      const userRes = await fetch("/api/users/me");
-      if (!userRes.ok) {
-        if (userRes.status === 401) {
+      const exploreRes = await fetch("/api/discover");
+      if (!exploreRes.ok) {
+        if (exploreRes.status === 401) {
           router.push("/login");
           return;
         }
-        throw new Error("Failed to fetch user info");
-      }
-      const userResponse = await userRes.json();
-      const userData = userResponse.data || userResponse;
-      setUserInfo({
-        id: userData.ID || userData.id,
-        displayName: userData.DisplayName || userData.FirstName || "User",
-        profileImage: userData.Image || userData.ProfileImageUrl || null,
-        points: userData.PointsBalance || userData.RedeemPoints || 0,
-      });
-
-      // Fetch explore data
-      const exploreRes = await fetch("/api/discover");
-      if (!exploreRes.ok) {
         throw new Error("Failed to fetch explore data");
       }
       const data = await exploreRes.json();
@@ -178,7 +343,6 @@ export default function ExplorePage() {
       setError("Unable to load explore data");
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
     }
   }, [router]);
 
@@ -186,31 +350,33 @@ export default function ExplorePage() {
     fetchData();
   }, [fetchData]);
 
-  const handleRefresh = () => {
-    fetchData(true);
-  };
-
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-dvh bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-sm text-muted-foreground">Loading experiences...</p>
+        </div>
       </div>
     );
   }
 
   // Error state
-  if (error || !userInfo) {
+  if (error) {
     return (
-      <div className="min-h-dvh bg-background flex items-center justify-center p-4">
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
         <div className="text-center">
           <EmptyState
-            title="Unable to load explore data"
+            title="Unable to load content"
             description="Please refresh the page or try again later."
           />
           <button
-            onClick={handleRefresh}
-            className="mt-4 px-6 py-2 bg-primary text-white rounded-full font-medium hover:bg-primary/90 transition-colors"
+            onClick={() => {
+              setIsLoading(true);
+              fetchData();
+            }}
+            className="mt-4 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-colors"
           >
             Try Again
           </button>
@@ -219,368 +385,96 @@ export default function ExplorePage() {
     );
   }
 
-  const topMatches = exploreData?.TopMatch || [];
-  const nearbyProfiles = exploreData?.NearBy || [];
-  const videos = exploreData?.Videos || [];
   const events = exploreData?.event || [];
   const speedDating = exploreData?.Virtual || [];
 
   return (
     <div className="min-h-dvh bg-background">
-      {/* Clean Header with Logo */}
-      <header className="bg-background border-b border-border sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16">
-            {/* Logo */}
-            <Link href="/discover" className="flex items-center gap-2 flex-shrink-0">
-              <img 
-                src="/images/logo.png" 
-                alt="RealSingles" 
-                className="h-8 sm:h-9 w-auto"
-              />
-            </Link>
-            
-            {/* Right Actions: Refresh + Points + Notifications + Menu */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              {/* Refresh - subtle, appears on hover of container */}
-              <button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary/80 transition-colors disabled:opacity-50"
-                title="Refresh content"
-              >
-                <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-              </button>
-              
-              <PointsBadge
-                points={userInfo.points}
-                size="sm"
-                href="/rewards"
-              />
-              
-              <Link
-                href="/notifications"
-                className="p-2 sm:p-2.5 rounded-full hover:bg-secondary/80 transition-colors"
-              >
-                <Bell className="w-5 h-5 text-foreground" />
-              </Link>
-              
-              <button
-                onClick={() => setIsMenuOpen(true)}
-                className="p-2 sm:p-2.5 rounded-full hover:bg-secondary/80 transition-colors"
-              >
-                <Menu className="w-5 h-5 text-foreground" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Quick Action Pills */}
-      <section className="bg-background border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div
-            className="flex gap-2 overflow-x-auto scrollbar-hide"
-          >
-            <Link
-              href="/search"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
-            >
-              Discover
-            </Link>
-            <Link
-              href="/matches"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
-            >
-              Top Matches
-            </Link>
-            <Link
-              href="/search?filter=videos"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
-            >
-              Videos
-            </Link>
-            <Link
-              href="/speed-dating"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
-            >
-              Virtual Dates
-            </Link>
-            <Link
-              href="/search?filter=nearby"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
-            >
-              Nearby
-            </Link>
-            <Link
-              href="/events"
-              className="flex-shrink-0 px-4 py-2 bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/30 rounded-full font-medium text-sm transition-colors"
-            >
-              Events
-            </Link>
+      {/* Hero Section */}
+      <section className="bg-gradient-to-b from-primary/5 via-primary/[0.02] to-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="max-w-2xl">
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              Explore
+            </h1>
+            <p className="text-muted-foreground mt-2 text-lg">
+              Discover events, virtual speed dating, and more ways to connect.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Main Content Sections */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 space-y-10">
-        {/* Top Matches Section */}
-        <section>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Top Matches</h2>
-            <Link
-              href="/matches"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
-            >
-              View All
-            </Link>
-          </div>
-
-          {topMatches.length > 0 ? (
-            <div
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-            >
-              {topMatches.slice(0, 10).map((profile) => (
-                <div key={profile.ID || profile.id} className="flex-shrink-0 w-40 sm:w-44">
-                  <ProfileCard
-                    profile={formatProfileForCard(profile)}
-                    showActions={false}
-                    size="compact"
-                    linkBasePath="/search/profile"
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-sm">No top matches available</p>
-          )}
-        </section>
-
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-12">
         {/* Events Section */}
         <section>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Events</h2>
-            <Link
-              href="/events"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
-            >
-              View All
-            </Link>
-          </div>
+          <SectionHeader
+            title="Events"
+            subtitle="Meet singles at curated in-person events"
+            href="/events"
+            icon={Calendar}
+          />
 
           {events.length > 0 ? (
-            <div
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-            >
+            <div className="flex gap-5 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
               {events.slice(0, 10).map((event) => (
-                <Link
-                  key={event.EventID}
-                  href={`/events/${event.EventID}`}
-                  className="flex-shrink-0 w-72 bg-white rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden border group"
-                >
-                  {event.EventImage ? (
-                    <div className="aspect-video bg-gradient-to-br from-orange-100 to-pink-100 relative overflow-hidden">
-                      <img
-                        src={event.EventImage}
-                        alt={event.EventName || "Event image"}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  ) : (
-                    <div className="aspect-video bg-gradient-to-br from-orange-100 to-pink-100 flex items-center justify-center">
-                      <Calendar className="w-12 h-12 text-orange-300" />
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <h3 className="font-bold text-sm mb-1 truncate">{event.EventName}</h3>
-                    <p className="text-gray-600 text-xs mb-2 line-clamp-2">
-                      {event.Description}
-                    </p>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {event.EventDate}
-                      </span>
-                      {event.City && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {event.City}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Link>
+                <EventCard key={event.EventID} event={event} />
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">No events available</p>
+            <EmptySection
+              title="No upcoming events"
+              description="Check back soon for new events in your area."
+              icon={Calendar}
+            />
           )}
         </section>
 
         {/* Virtual Speed Dating Section */}
         <section>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Virtual Speed Dating</h2>
-            <Link
-              href="/speed-dating"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
-            >
-              View All
-            </Link>
-          </div>
+          <SectionHeader
+            title="Virtual Speed Dating"
+            subtitle="Quick video dates from the comfort of home"
+            href="/speed-dating"
+            icon={Video}
+          />
 
           {speedDating.length > 0 ? (
-            <div
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-            >
+            <div className="flex gap-5 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
               {speedDating.slice(0, 10).map((session) => (
-                <Link
-                  key={session.ID}
-                  href={`/speed-dating/${session.ID}`}
-                  className="flex-shrink-0 w-72 bg-white rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden border group"
-                >
-                  {/* Image section - matches event card pattern */}
-                  {session.Image ? (
-                    <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 relative overflow-hidden">
-                      <img
-                        src={session.Image}
-                        alt={session.Title || "Speed dating session"}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      {/* Status badge overlay */}
-                      <span className="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur-sm text-purple-700 text-xs font-medium rounded-full">
-                        {session.Status}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="aspect-video bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center relative">
-                      <Video className="w-12 h-12 text-white/80" />
-                      {/* Status badge overlay */}
-                      <span className="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur-sm text-purple-700 text-xs font-medium rounded-full">
-                        {session.Status}
-                      </span>
-                    </div>
-                  )}
-                  {/* Content section */}
-                  <div className="p-4">
-                    <h3 className="font-bold text-sm mb-1 truncate">{session.Title}</h3>
-                    <p className="text-gray-600 text-xs mb-2 line-clamp-2">
-                      {session.Description}
-                    </p>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {session.ScheduledDate}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        {session.MaxParticipants} max
-                      </span>
-                    </div>
-                  </div>
-                </Link>
+                <SpeedDatingCard key={session.ID} session={session} />
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">No virtual speed dating available</p>
+            <EmptySection
+              title="No sessions scheduled"
+              description="New speed dating sessions are added regularly."
+              icon={Video}
+            />
           )}
         </section>
 
-        {/* Nearby Profiles Section */}
+        {/* Videos Section - Coming Soon */}
         <section>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Nearby Profiles</h2>
-            <Link
-              href="/search?filter=nearby"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
-            >
-              View All
-            </Link>
+          <div className="flex items-start gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center flex-shrink-0">
+              <Video className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-foreground">Videos</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Expert dating tips and relationship advice
+              </p>
+            </div>
           </div>
 
-          {nearbyProfiles.length > 0 ? (
-            <div
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-            >
-              {nearbyProfiles.slice(0, 10).map((profile) => (
-                <div key={profile.ID || profile.id} className="flex-shrink-0 w-40 sm:w-44">
-                  <ProfileCard
-                    profile={formatProfileForCard(profile)}
-                    showActions={false}
-                    size="compact"
-                    linkBasePath="/search/profile"
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-sm">No nearby profiles available</p>
-          )}
-        </section>
-
-        {/* Featured Videos Section */}
-        <section>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Featured Videos</h2>
-            <Link
-              href="/search?filter=videos"
-              className="text-sm font-medium underline text-gray-700 hover:text-primary"
-            >
-              View All
-            </Link>
-          </div>
-
-          {videos.length > 0 ? (
-            <div
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-            >
-              {videos.slice(0, 10).map((video) => (
-                <Link
-                  key={video.ID}
-                  href={`/profile/${video.ID}`}
-                  className="flex-shrink-0 w-32 group"
-                >
-                  <div className="relative aspect-[9/16] rounded-xl overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100">
-                    {video.VideoURL && (
-                      <video
-                        src={video.VideoURL}
-                        className="w-full h-full object-cover"
-                        muted
-                        playsInline
-                      />
-                    )}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-                      <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Video className="w-5 h-5 text-purple-500" />
-                      </div>
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
-                      <p className="text-white font-medium text-xs truncate">
-                        {video.Name}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-sm">No featured videos available</p>
-          )}
+          <ComingSoonSection
+            title="Video Content"
+            description="We're preparing exclusive video content from dating experts, relationship coaches, and success stories. Stay tuned for tips that will help you make meaningful connections."
+            icon={Video}
+          />
         </section>
       </div>
-
-      {/* Side Menu */}
-      {userInfo && (
-        <SideMenu
-          isOpen={isMenuOpen}
-          onClose={() => setIsMenuOpen(false)}
-          user={{
-            displayName: userInfo.displayName,
-            profileImage: userInfo.profileImage,
-          }}
-          onSignOut={handleSignOut}
-        />
-      )}
     </div>
   );
 }

@@ -257,6 +257,7 @@ export function DiscoverProfileView() {
         targetUserName: lastAction?.targetUserName,
       }}
       onUndo={handleUndo}
+      parentHandlesNavigation={true}
     />
   );
 }
