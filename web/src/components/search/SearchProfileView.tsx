@@ -442,7 +442,7 @@ export function SearchProfileView({
   const location = [profile.city, profile.state].filter(Boolean).join(", ");
 
   return (
-    <div className="fixed inset-0 z-30 bg-gray-50 dark:bg-neutral-900 overflow-y-auto overscroll-contain scrollbar-hide">
+    <div className="fixed inset-0 z-30 bg-gray-50 dark:bg-neutral-900 overflow-y-auto overscroll-contain scrollbar-hide pb-32 md:pb-0">
       {/* Scrollable content wrapper */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-center md:py-8 md:px-4 md:gap-6 max-w-6xl mx-auto w-full">
         
@@ -688,7 +688,7 @@ export function SearchProfileView({
 
         {/* Right Column - Profile Details */}
         <div className="flex-1 bg-white dark:bg-neutral-950 md:rounded-2xl md:shadow-lg dark:md:shadow-black/30 md:max-w-xl">
-          <div className="p-5 md:p-6 pb-48 md:pb-6">
+          <div className="p-5 md:p-6 pb-40 md:pb-6">
             {/* Mobile: Show full profile including basic info */}
             <div className="md:hidden">
               <ProfileSectionRenderer profile={profile} />
@@ -704,8 +704,8 @@ export function SearchProfileView({
       {/* Mobile Action Bar - fixed floating buttons at bottom (no backdrop) 
           Enhanced with haptic feedback and native-feeling touch interactions
           Positioned above the bottom navigation dock */}
-      <div className="md:hidden fixed left-0 right-0 z-40" style={{ bottom: 'calc(76px + env(safe-area-inset-bottom))' }}>
-        <div className="flex items-center justify-center gap-3 py-4 px-4">
+      <div className="md:hidden fixed left-0 right-0 bottom-20 z-40">
+        <div className="flex items-center justify-center gap-3 py-3 px-4">
           {/* Pass Button (X) - leftmost */}
           <button
             onTouchStart={() => triggerHaptic('light')}
