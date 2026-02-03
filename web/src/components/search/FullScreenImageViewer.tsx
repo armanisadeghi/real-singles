@@ -13,7 +13,7 @@
  */
 
 import { useCallback, useEffect, useState, useRef } from "react";
-import { X } from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FullScreenImageViewerProps {
@@ -31,6 +31,7 @@ export function FullScreenImageViewer({
 }: FullScreenImageViewerProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Touch/swipe state
@@ -277,6 +278,8 @@ export function FullScreenImageViewer({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         onClick={handleClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         {/* Sliding strip of all images */}
         <div
@@ -308,6 +311,49 @@ export function FullScreenImageViewer({
           ))}
         </div>
       </div>
+
+      {/* Navigation arrows - only show when relevant */}
+      {images.length > 1 && (
+        <>
+          {/* Previous arrow - only show if we can go back */}
+          {currentIndex > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                goPrevious();
+              }}
+              className={cn(
+                "absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full",
+                "bg-black/40 hover:bg-black/60 flex items-center justify-center",
+                "transition-opacity duration-200",
+                isHovered ? "opacity-100" : "opacity-0 md:opacity-0"
+              )}
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="w-7 h-7 text-white" />
+            </button>
+          )}
+
+          {/* Next arrow - only show if we can go forward */}
+          {currentIndex < images.length - 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                goNext();
+              }}
+              className={cn(
+                "absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full",
+                "bg-black/40 hover:bg-black/60 flex items-center justify-center",
+                "transition-opacity duration-200",
+                isHovered ? "opacity-100" : "opacity-0 md:opacity-0"
+              )}
+              aria-label="Next image"
+            >
+              <ChevronRight className="w-7 h-7 text-white" />
+            </button>
+          )}
+        </>
+      )}
 
       {/* Dot indicators - at bottom */}
       {images.length > 1 && (
