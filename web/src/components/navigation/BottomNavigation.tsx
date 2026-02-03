@@ -62,7 +62,7 @@ export function BottomNavigation() {
     { href: "/discover", icon: Sparkles, label: "Discover" },
     { href: "/explore", icon: CompassIcon, label: "Explore" },
     { href: "/likes", icon: Heart, label: "Likes" },
-    { href: "/chats", icon: MessageCircle, label: "Messages" },
+    { href: "/messages", icon: MessageCircle, label: "Messages" },
     { href: "/profile", icon: User, label: "Profile" },
   ];
 
@@ -71,14 +71,22 @@ export function BottomNavigation() {
     if (href === "/discover" || href === "/explore") {
       return pathname === href;
     }
+    // Messages tab should be active on both /messages and /chats routes
+    if (href === "/messages") {
+      return pathname.startsWith("/messages") || pathname.startsWith("/chats");
+    }
     return pathname.startsWith(href);
   };
 
-  // Hide bottom nav on full-screen profile views (search, focus)
-  const isFullScreenProfile = pathname.startsWith("/search/profile/") || 
-                               (pathname.startsWith("/profile/") && pathname.includes("/focus"));
+  // Hide bottom nav on full-screen views:
+  // - /discover (immersive single-profile discovery)
+  // - /search/profile/* (full-screen profile from search)
+  // - /profile/*/focus (profile focus view)
+  const isFullScreenView = pathname === "/discover" ||
+                           pathname.startsWith("/search/profile/") || 
+                           (pathname.startsWith("/profile/") && pathname.includes("/focus"));
   
-  if (isFullScreenProfile) {
+  if (isFullScreenView) {
     return null;
   }
 

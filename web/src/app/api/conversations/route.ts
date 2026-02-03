@@ -143,6 +143,56 @@ export async function GET(request: NextRequest) {
         displayImage = await resolveStorageUrl(supabase, otherProfile?.profile_image_url);
       }
 
+      // Get last message for this conversation
+      const { data: lastMessages } = await supabase
+        .from("messages")
+        .select("id, content, message_type, created_at, sender_id")
+        .eq("conversation_id", conv.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      const lastMessage = lastMessages?.[0] || null;
+      let lastMessagePreview: string | null = null;
+      
+      if (lastMessage) {
+        // Format message preview based on type
+        if (lastMessage.message_type === "text" && lastMessage.content) {
+          lastMessagePreview = lastMessage.content.length > 50 
+            ? lastMessage.content.substring(0, 50) + "..." 
+            : lastMessage.content;
+        } else if (lastMessage.message_type === "image") {
+          lastMessagePreview = "📷 Photo";
+        } else if (lastMessage.message_type === "video") {
+          lastMessagePreview = "🎥 Video";
+        } else if (lastMessage.message_type === "audio") {
+          lastMessagePreview = "🎵 Audio";
+        } else if (lastMessage.message_type === "file") {
+          lastMessagePreview = "📎 File";
+        }
+      }
+
+      // Calculate unread count
+      const lastReadAt = myParticipation?.last_read_at || null;
+      let unreadCount = 0;
+      
+      if (lastReadAt) {
+        const { count } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("conversation_id", conv.id)
+          .neq("sender_id", user.id)
+          .gt("created_at", lastReadAt);
+        unreadCount = count || 0;
+      } else {
+        // If never read, count all messages from others
+        const { count } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("conversation_id", conv.id)
+          .neq("sender_id", user.id);
+        unreadCount = count || 0;
+      }
+
       // Convert participant profile images
       const formattedParticipants = await Promise.all(
         otherParticipants
@@ -176,6 +226,10 @@ export async function GET(request: NextRequest) {
         IsMuted: myParticipation?.is_muted || false,
         LastReadAt: myParticipation?.last_read_at,
         Participants: formattedParticipants,
+        // New fields for messages page
+        LastMessage: lastMessagePreview,
+        LastMessageAt: lastMessage?.created_at || conv.updated_at,
+        UnreadCount: unreadCount,
       };
     })
   );

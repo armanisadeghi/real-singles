@@ -4,13 +4,14 @@
  * PhotoCarousel Component (Web)
  * 
  * A photo carousel with:
+ * - Smooth sliding swipe animation
  * - Click to view full-screen
- * - Arrow navigation
+ * - Arrow navigation (only when relevant)
  * - Dot indicators
  * - Hover effects
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FullScreenImageViewer } from "./FullScreenImageViewer";
@@ -38,6 +39,7 @@ export function PhotoCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Touch/swipe state
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -124,11 +126,23 @@ export function PhotoCarousel({
       setTouchStart(null);
       setTouchEnd(null);
       setIsTransitioning(false);
-    }, 300);
+    }, 350);
   }, [isTransitioning, touchStart, touchEnd, goNext, goPrevious, currentIndex, images.length, openFullScreen]);
 
   // Use CSS variable for height to allow className overrides
   const heightStyle = { "--carousel-height": height } as React.CSSProperties;
+
+  // Calculate slide position: each image is 100% width, offset by swipe gesture
+  const getSlideTransform = () => {
+    const containerWidth = containerRef.current?.offsetWidth || 0;
+    const baseOffset = -currentIndex * 100; // percentage
+    const pixelOffset = containerWidth > 0 ? (swipeOffset / containerWidth) * 100 : 0;
+    return `translateX(${baseOffset + pixelOffset}%)`;
+  };
+
+  // Check if we can navigate
+  const canGoPrevious = currentIndex > 0;
+  const canGoNext = currentIndex < images.length - 1;
 
   if (images.length === 0) {
     return (
@@ -149,6 +163,7 @@ export function PhotoCarousel({
   return (
     <>
       <div
+        ref={containerRef}
         className={cn("relative overflow-hidden h-[var(--carousel-height)] touch-pan-y select-none", className)}
         style={heightStyle}
         onMouseEnter={() => setIsHovered(true)}
@@ -157,21 +172,30 @@ export function PhotoCarousel({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        {/* Main image */}
+        {/* Sliding image strip - all images in a row */}
         <div
-          className="w-full h-full cursor-pointer"
+          className="flex h-full cursor-pointer"
+          style={{
+            width: `${images.length * 100}%`,
+            transform: getSlideTransform(),
+            transition: isTransitioning ? 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none',
+          }}
           aria-label="View full-screen"
         >
-          <img
-            src={images[currentIndex]}
-            alt=""
-            className="w-full h-full object-cover"
-            draggable={false}
-            style={{
-              transform: `translateX(${swipeOffset}px)`,
-              transition: isTransitioning ? 'transform 0.3s ease-out' : 'none',
-            }}
-          />
+          {images.map((src, index) => (
+            <div
+              key={index}
+              className="h-full flex-shrink-0"
+              style={{ width: `${100 / images.length}%` }}
+            >
+              <img
+                src={src}
+                alt=""
+                className="w-full h-full object-cover"
+                draggable={false}
+              />
+            </div>
+          ))}
         </div>
 
         {/* Gradient overlay */}
@@ -179,45 +203,46 @@ export function PhotoCarousel({
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
         )}
 
-        {/* Navigation arrows - show on hover */}
+        {/* Navigation arrows - only show when relevant direction is available */}
         {images.length > 1 && (
           <>
-            {/* Previous */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                goPrevious();
-              }}
-              disabled={currentIndex === 0}
-              className={cn(
-                "absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full",
-                "bg-white/80 hover:bg-white flex items-center justify-center transition-all",
-                "opacity-0 group-hover:opacity-100",
-                isHovered ? "opacity-100" : "opacity-0",
-                currentIndex === 0 && "opacity-30 cursor-not-allowed"
-              )}
-              aria-label="Previous image"
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-800" />
-            </button>
+            {/* Previous - only show if we can go back */}
+            {canGoPrevious && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goPrevious();
+                }}
+                className={cn(
+                  "absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full",
+                  "bg-white/80 hover:bg-white flex items-center justify-center",
+                  "transition-opacity duration-200",
+                  isHovered ? "opacity-100" : "opacity-0"
+                )}
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="w-6 h-6 text-gray-800" />
+              </button>
+            )}
 
-            {/* Next */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                goNext();
-              }}
-              disabled={currentIndex === images.length - 1}
-              className={cn(
-                "absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full",
-                "bg-white/80 hover:bg-white flex items-center justify-center transition-all",
-                isHovered ? "opacity-100" : "opacity-0",
-                currentIndex === images.length - 1 && "opacity-30 cursor-not-allowed"
-              )}
-              aria-label="Next image"
-            >
-              <ChevronRight className="w-6 h-6 text-gray-800" />
-            </button>
+            {/* Next - only show if we can go forward */}
+            {canGoNext && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goNext();
+                }}
+                className={cn(
+                  "absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full",
+                  "bg-white/80 hover:bg-white flex items-center justify-center",
+                  "transition-opacity duration-200",
+                  isHovered ? "opacity-100" : "opacity-0"
+                )}
+                aria-label="Next image"
+              >
+                <ChevronRight className="w-6 h-6 text-gray-800" />
+              </button>
+            )}
           </>
         )}
 

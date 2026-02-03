@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown } from "lucide-react";
-import { NotificationBell } from "@/components/notifications";
+import { NotificationBell, MessagesIndicator } from "@/components/notifications";
 import { Avatar } from "@/components/ui";
 
 interface AppHeaderProps {
@@ -19,14 +18,20 @@ interface AppHeaderProps {
 /**
  * App Header Component
  * 
- * Conditionally displays the header based on current route:
- * - Hidden on /home (matches mobile app behavior - home has its own hero)
- * - Visible on all other authenticated pages
+ * Mobile-first, clean header for the authenticated app.
  * 
- * Accessibility features:
+ * Features:
+ * - Messages indicator with unread count
+ * - Notifications bell with categorized notifications
+ * - Profile avatar dropdown (no chevron - cleaner design)
+ * 
+ * Hidden on:
+ * - /discover, /explore, / (these have their own hero)
+ * - Full-screen profile views
+ * 
+ * Accessibility:
  * - Skip to main content link
- * - Keyboard-accessible dropdown menu with proper ARIA
- * - Focus trap in dropdown when open
+ * - Keyboard-accessible dropdown with proper ARIA
  */
 export function AppHeader({ user, signOutAction }: AppHeaderProps) {
   const pathname = usePathname();
@@ -35,7 +40,6 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   
   // Hide header on discover/explore pages - they have their own hero with avatar/notifications
-  // This matches the mobile app behavior
   const isDiscoverOrExplorePage = pathname === "/discover" || pathname === "/explore" || pathname === "/";
   
   // Hide header on full-screen profile views (search, focus)
@@ -99,7 +103,6 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
         }
         break;
       case "Tab":
-        // Allow natural tab but close dropdown
         setIsDropdownOpen(false);
         break;
       case "Home":
@@ -128,8 +131,8 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
   }
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
-      {/* Skip to main content link - visible only on focus */}
+    <header className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+      {/* Skip to main content link */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-brand-primary focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
@@ -137,57 +140,62 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
         Skip to main content
       </a>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+        <div className="flex justify-between items-center h-14 sm:h-16">
+          {/* Logo - slightly smaller on mobile */}
           <Link 
             href="/discover" 
-            className="-m-1.5 p-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            className="-m-1 p-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
             <Image
               src="/images/logo.png"
-              alt="RealSingles - Go to homepage"
-              width={140}
-              height={45}
-              className="h-9 w-auto"
+              alt="RealSingles"
+              width={120}
+              height={40}
+              className="h-7 sm:h-8 w-auto"
               priority
             />
           </Link>
 
-          {/* Navigation - Hidden on mobile (bottom nav handles it) */}
-          <nav className="hidden md:flex items-center space-x-1" aria-label="Main navigation">
+          {/* Desktop Navigation - Hidden on mobile (bottom nav handles it) */}
+          <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
             <Link 
               href="/discover" 
-              className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
               Discover
             </Link>
             <Link 
               href="/explore" 
-              className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
               Explore
             </Link>
             <Link 
               href="/likes" 
-              className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
               Likes
             </Link>
             <Link 
-              href="/chats" 
-              className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+              href="/messages" 
+              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
               Messages
             </Link>
           </nav>
 
-          {/* User Menu */}
-          <div className="flex items-center space-x-3">
+          {/* Right side: Messages, Notifications, Profile */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Messages Indicator - hidden on desktop (shown in nav) */}
+            <div className="md:hidden">
+              <MessagesIndicator />
+            </div>
+
             {/* Notifications */}
             <NotificationBell />
 
-            {/* Profile Dropdown - Keyboard accessible */}
+            {/* Profile Avatar Dropdown */}
             <div className="relative" ref={dropdownRef} onKeyDown={handleKeyDown}>
               <button
                 ref={buttonRef}
@@ -195,20 +203,17 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                 aria-expanded={isDropdownOpen}
                 aria-haspopup="menu"
                 aria-label={`Profile menu for ${user.displayName}`}
-                className="flex items-center space-x-2 hover:bg-gray-100 rounded-full p-1 pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+                className="flex items-center gap-2 hover:bg-gray-100 active:bg-gray-200 rounded-full p-1 sm:pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               >
                 <Avatar
                   src={user.profileImage}
                   name={user.displayName || "User"}
                   size="sm"
                 />
-                <span className="hidden sm:block text-sm font-medium text-gray-700">
+                {/* Display name - hidden on mobile for cleaner look */}
+                <span className="hidden sm:block text-sm font-medium text-gray-700 max-w-[120px] truncate">
                   {user.displayName}
                 </span>
-                <ChevronDown 
-                  className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
-                  aria-hidden="true"
-                />
               </button>
 
               {/* Dropdown Menu */}
@@ -217,14 +222,19 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                   role="menu"
                   aria-orientation="vertical"
                   aria-labelledby="user-menu"
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border py-1 animate-in fade-in slide-in-from-top-2 duration-200"
+                  className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border py-1.5 animate-in fade-in slide-in-from-top-2 duration-200 z-50"
                 >
+                  {/* User info header - shows name on mobile */}
+                  <div className="sm:hidden px-4 py-2 border-b mb-1">
+                    <p className="font-medium text-gray-900 truncate">{user.displayName}</p>
+                  </div>
+
                   <Link
                     href="/profile"
                     role="menuitem"
                     tabIndex={-1}
                     onClick={() => setIsDropdownOpen(false)}
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
                   >
                     My Profile
                   </Link>
@@ -233,7 +243,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                     role="menuitem"
                     tabIndex={-1}
                     onClick={() => setIsDropdownOpen(false)}
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
                   >
                     Edit Profile
                   </Link>
@@ -242,7 +252,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                     role="menuitem"
                     tabIndex={-1}
                     onClick={() => setIsDropdownOpen(false)}
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
                   >
                     Saved Profiles
                   </Link>
@@ -251,17 +261,17 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                     role="menuitem"
                     tabIndex={-1}
                     onClick={() => setIsDropdownOpen(false)}
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
                   >
                     Settings
                   </Link>
-                  <hr className="my-1" aria-hidden="true" />
+                  <hr className="my-1.5 border-gray-100" aria-hidden="true" />
                   <form action={signOutAction}>
                     <button
                       type="submit"
                       role="menuitem"
                       tabIndex={-1}
-                      className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 focus:bg-red-50 focus:outline-none"
+                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 focus:bg-red-50 focus:outline-none"
                     >
                       Sign Out
                     </button>

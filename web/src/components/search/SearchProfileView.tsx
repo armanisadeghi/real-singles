@@ -441,15 +441,15 @@ export function SearchProfileView({
 
           {/* Header overlay */}
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-10 md:p-3">
-            {/* Back button */}
+            {/* Back button - no background, just icon with shadow for visibility */}
             <button
               onClick={handleClose}
-              className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
+              className="w-9 h-9 flex items-center justify-center transition-opacity hover:opacity-80"
             >
-              <ArrowLeft className="w-5 h-5 text-white" />
+              <ArrowLeft className="w-6 h-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
             </button>
 
-            {/* More actions button */}
+            {/* More actions button - no background, just icon with shadow for visibility */}
             <button
               onClick={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
@@ -460,10 +460,10 @@ export function SearchProfileView({
                 });
                 setShowActionMenu(true);
               }}
-              className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
+              className="w-9 h-9 flex items-center justify-center transition-opacity hover:opacity-80"
               aria-label="More actions"
             >
-              <MoreHorizontal className="w-5 h-5 text-white" />
+              <MoreHorizontal className="w-6 h-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
             </button>
           </div>
 
@@ -660,9 +660,10 @@ export function SearchProfileView({
       </div>
 
       {/* Mobile Action Bar - fixed floating buttons at bottom (no backdrop) 
-          Enhanced with haptic feedback and native-feeling touch interactions */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 pb-[env(safe-area-inset-bottom)] z-40">
-        <div className="flex items-center justify-center gap-4 py-4 px-4">
+          Enhanced with haptic feedback and native-feeling touch interactions
+          Extra bottom padding lifts buttons to show more content behind */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
+        <div className="flex items-center justify-center gap-4 pt-4 px-4 pb-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))]">
           {/* Pass Button (X) - leftmost */}
           <button
             onTouchStart={() => triggerHaptic('light')}

@@ -3,17 +3,19 @@
 /**
  * Likes Page
  * 
- * Hub for managing likes:
- * - Likes You: People who liked you (premium feature)
- * - Matches: Mutual connections (can message)
+ * Modern tabbed interface for:
+ * - Likes You: People who liked you
+ * - Likes Sent: People you've liked (waiting for response)
+ * - Matches: New matches without conversations yet
  */
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Heart, Sparkles, MessageCircle, CheckCircle, ChevronRight, Crown, ThumbsUp } from "lucide-react";
+import { Loader2, Heart, Sparkles, MessageCircle, CheckCircle, Users } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { MediaBadge } from "@/components/profile";
+import { Avatar } from "@/components/ui/Avatar";
 
 // ================== Interfaces ==================
 
@@ -34,7 +36,6 @@ interface Match {
   last_active_at?: string | null;
   matched_at?: string | null;
   conversation_id?: string | null;
-  // Voice & Video Prompts
   voice_prompt_url?: string | null;
   video_intro_url?: string | null;
 }
@@ -56,7 +57,6 @@ interface Like {
   is_verified: boolean;
   profile_image_url?: string | null;
   last_active_at?: string | null;
-  // Voice & Video Prompts
   voice_prompt_url?: string | null;
   video_intro_url?: string | null;
 }
@@ -80,23 +80,113 @@ function formatRelativeTime(dateString: string | null | undefined): string {
   return date.toLocaleDateString();
 }
 
-const BACKGROUND_COLORS = [
-  "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5",
-  "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50",
-];
+// ================== Loading Skeleton ==================
 
-function getBgColor(seed: string): string {
-  const index = Math.abs(
-    seed.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % BACKGROUND_COLORS.length
+function CardSkeleton() {
+  return (
+    <div className="flex items-center gap-4 p-3 bg-white rounded-xl">
+      <div className="w-[72px] h-[72px] rounded-lg bg-gray-100 animate-pulse" />
+      <div className="flex-1">
+        <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
+        <div className="h-3 w-32 bg-gray-100 rounded animate-pulse mt-2" />
+        <div className="h-3 w-20 bg-gray-100 rounded animate-pulse mt-2" />
+      </div>
+      <div className="w-10 h-10 rounded-full bg-gray-100 animate-pulse" />
+    </div>
   );
-  return BACKGROUND_COLORS[index];
 }
 
-function getInitials(name?: string | null): string {
-  if (!name) return "?";
-  const parts = name.split(" ");
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-  return parts[0].charAt(0).toUpperCase() + parts[parts.length - 1].charAt(0).toUpperCase();
+// ================== Empty State with Animated Signal/Radar Effect ==================
+
+interface EmptyStateBoostProps {
+  userProfileImage?: string | null;
+  title: string;
+  description: string;
+}
+
+function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoostProps) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 px-4">
+      {/* Animated radar/signal circles with profile photo */}
+      <div className="relative w-64 h-64 flex items-center justify-center mb-8">
+        {/* Ripple ring 1 - outermost */}
+        <div 
+          className="absolute inset-0 rounded-full border-[3px] border-pink-300"
+          style={{
+            animation: 'ripple 2.5s ease-out infinite',
+          }}
+        />
+        
+        {/* Ripple ring 2 */}
+        <div 
+          className="absolute inset-0 rounded-full border-[3px] border-pink-300"
+          style={{
+            animation: 'ripple 2.5s ease-out infinite 0.8s',
+          }}
+        />
+        
+        {/* Ripple ring 3 */}
+        <div 
+          className="absolute inset-0 rounded-full border-[3px] border-pink-300"
+          style={{
+            animation: 'ripple 2.5s ease-out infinite 1.6s',
+          }}
+        />
+        
+        {/* Static background circles - more visible */}
+        <div className="absolute inset-4 rounded-full bg-pink-100/80" />
+        <div className="absolute inset-12 rounded-full bg-pink-50" />
+        <div className="absolute inset-20 rounded-full bg-white" />
+        
+        {/* Profile photo container */}
+        <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl z-10">
+          {userProfileImage ? (
+            <img
+              src={userProfileImage}
+              alt="Your profile"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center">
+              <Users className="w-10 h-10 text-white" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Custom keyframes style */}
+      <style jsx>{`
+        @keyframes ripple {
+          0% {
+            transform: scale(0.35);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 0;
+          }
+        }
+      `}</style>
+
+      {/* Title */}
+      <h2 className="text-xl font-semibold text-gray-900 mb-2 text-center">
+        {title}
+      </h2>
+
+      {/* Description */}
+      <p className="text-gray-500 text-center max-w-xs mb-6">
+        {description}
+      </p>
+
+      {/* Boost CTA */}
+      <Link
+        href="/boost"
+        className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-pink-600 transition-all active:scale-95"
+      >
+        Boost me
+      </Link>
+    </div>
+  );
 }
 
 // ================== Likes You Tab ==================
@@ -107,19 +197,27 @@ function LikesYouTab() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [userProfileImage, setUserProfileImage] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchLikes() {
+    async function fetchData() {
       try {
-        const response = await fetch("/api/matches/likes-received");
-        const data = await response.json();
+        const [likesRes, profileRes] = await Promise.all([
+          fetch("/api/matches/likes-received"),
+          fetch("/api/users/me"),
+        ]);
+        
+        const likesData = await likesRes.json();
+        const profileData = await profileRes.json();
 
-        if (!response.ok) {
-          setError(data.error || "Failed to load likes");
+        if (!likesRes.ok) {
+          setError(likesData.error || "Failed to load likes");
           return;
         }
 
-        setLikes(data.likes || []);
+        setLikes(likesData.likes || []);
+        // API returns ProfileImageUrl at top level
+        setUserProfileImage(profileData.ProfileImageUrl || profileData.Image || null);
       } catch (err) {
         console.error("Error fetching likes:", err);
         setError("Failed to load likes. Please try again.");
@@ -128,7 +226,7 @@ function LikesYouTab() {
       }
     }
 
-    fetchLikes();
+    fetchData();
   }, []);
 
   const handleLikeBack = async (userId: string) => {
@@ -142,10 +240,7 @@ function LikesYouTab() {
       const data = await response.json();
 
       if (data.success) {
-        // Remove from likes list (now it's a match)
         setLikes((prev) => prev.filter((l) => l.user_id !== userId));
-        
-        // If mutual (always should be since they liked us), navigate to chat
         if (data.is_mutual && data.conversation_id) {
           router.push(`/chats/${data.conversation_id}`);
         }
@@ -168,7 +263,6 @@ function LikesYouTab() {
       const data = await response.json();
 
       if (data.success) {
-        // Remove from likes list
         setLikes((prev) => prev.filter((l) => l.user_id !== userId));
       }
     } catch (err) {
@@ -180,15 +274,15 @@ function LikesYouTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-16 bg-white rounded-xl shadow-sm">
+      <div className="text-center py-12">
         <p className="text-red-600 mb-4">{error}</p>
         <button
           onClick={() => window.location.reload()}
@@ -202,31 +296,19 @@ function LikesYouTab() {
 
   if (likes.length === 0) {
     return (
-      <div className="text-center py-16 bg-white rounded-xl shadow-sm">
-        <div className="flex items-center justify-center mb-4">
-          <ThumbsUp className="w-16 h-16 text-amber-300" />
-        </div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">No new likes</h2>
-        <p className="text-gray-600 mb-6">
-          When someone likes you, they'll appear here
-        </p>
-        <Link
-          href="/search"
-          className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
-        >
-          Search Profiles
-        </Link>
-      </div>
+      <EmptyStateBoost
+        userProfileImage={userProfileImage}
+        title="New likes will appear here"
+        description="Increase your chances with a Boost. Get seen up to 10x more times!"
+      />
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {likes.map((like) => {
         const name = like.first_name || like.display_name || "Someone";
         const location = [like.city, like.state].filter(Boolean).join(", ");
-        const bgColor = getBgColor(like.user_id || like.id);
-        const initials = getInitials(name);
         const likedTime = formatRelativeTime(like.liked_at);
         const isLoading = actionLoading === like.user_id;
 
@@ -234,33 +316,23 @@ function LikesYouTab() {
           <div
             key={like.id}
             className={cn(
-              "flex items-center gap-4 p-3 bg-white rounded-xl shadow-sm",
-              like.is_super_like && "ring-2 ring-blue-400 ring-offset-2"
+              "flex items-center gap-3 p-3 bg-white rounded-xl",
+              like.is_super_like && "ring-2 ring-blue-400"
             )}
           >
             {/* Photo */}
             <Link
               href={`/search/profile/${like.user_id}`}
-              className="relative w-[72px] h-[72px] rounded-lg overflow-hidden flex-shrink-0 hover:opacity-90 transition-opacity"
+              className="relative flex-shrink-0"
             >
-              {like.profile_image_url ? (
-                <img
-                  src={like.profile_image_url}
-                  alt={`Photo of ${name}`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div 
-                  className="w-full h-full flex items-center justify-center"
-                  style={{ backgroundColor: bgColor }}
-                >
-                  <span className="text-2xl font-bold text-white">{initials}</span>
-                </div>
-              )}
-              {/* Super Like indicator */}
+              <Avatar
+                src={like.profile_image_url}
+                name={name}
+                size="lg"
+              />
               {like.is_super_like && (
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                  <Sparkles className="w-3.5 h-3.5 text-white" />
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <Sparkles className="w-3 h-3 text-white" />
                 </div>
               )}
             </Link>
@@ -268,7 +340,7 @@ function LikesYouTab() {
             {/* Info */}
             <Link 
               href={`/search/profile/${like.user_id}`}
-              className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
+              className="flex-1 min-w-0"
             >
               <h3 className="text-base font-semibold text-gray-900 truncate">
                 {name}
@@ -276,60 +348,42 @@ function LikesYouTab() {
               </h3>
 
               {location && (
-                <p className="text-sm text-gray-500 truncate mt-0.5">
-                  {location}
-                </p>
+                <p className="text-sm text-gray-500 truncate">{location}</p>
               )}
 
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                 {like.is_verified && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
-                    <CheckCircle className="w-3 h-3" />
-                    Verified
-                  </span>
+                  <CheckCircle className="w-3.5 h-3.5 text-blue-500" />
                 )}
                 <MediaBadge
                   hasVoicePrompt={!!like.voice_prompt_url}
                   hasVideoIntro={!!like.video_intro_url}
                   size="sm"
                 />
-                {like.is_super_like && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
-                    <Sparkles className="w-3 h-3" />
-                    Super Like
-                  </span>
-                )}
                 {likedTime && (
-                  <span className="text-xs text-gray-400">
-                    Liked you {likedTime}
-                  </span>
+                  <span className="text-xs text-gray-400">{likedTime}</span>
                 )}
               </div>
             </Link>
 
-            {/* Action Buttons */}
+            {/* Actions */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Pass */}
               <button
                 onClick={() => like.user_id && handlePass(like.user_id)}
                 disabled={isLoading}
-                aria-label={`Pass on ${name}`}
-                className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50"
               >
-                <span className="text-lg" aria-hidden="true">✕</span>
+                <span className="text-lg">✕</span>
               </button>
-              
-              {/* Like Back */}
               <button
                 onClick={() => like.user_id && handleLikeBack(like.user_id)}
                 disabled={isLoading}
-                aria-label={`Like ${name} back`}
-                className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 transition-colors shadow-sm disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+                className="w-9 h-9 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 disabled:opacity-50"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <Heart className="w-5 h-5" aria-hidden="true" />
+                  <Heart className="w-4 h-4" />
                 )}
               </button>
             </div>
@@ -340,26 +394,176 @@ function LikesYouTab() {
   );
 }
 
-// ================== Matches Tab ==================
+// ================== Likes Sent Tab ==================
+
+function LikesSentTab() {
+  const [likes, setLikes] = useState<Like[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [userProfileImage, setUserProfileImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [likesRes, profileRes] = await Promise.all([
+          fetch("/api/matches/likes-sent"),
+          fetch("/api/users/me"),
+        ]);
+        
+        const likesData = await likesRes.json();
+        const profileData = await profileRes.json();
+
+        if (!likesRes.ok) {
+          setError(likesData.error || "Failed to load sent likes");
+          return;
+        }
+
+        setLikes(likesData.likes || []);
+        setUserProfileImage(profileData.ProfileImageUrl || profileData.Image || null);
+      } catch (err) {
+        console.error("Error fetching sent likes:", err);
+        setError("Failed to load sent likes. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600 mb-4">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (likes.length === 0) {
+    return (
+      <EmptyStateBoost
+        userProfileImage={userProfileImage}
+        title="No pending likes"
+        description="Profiles you like will appear here until they respond. Keep discovering!"
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {likes.map((like) => {
+        const name = like.first_name || like.display_name || "Someone";
+        const location = [like.city, like.state].filter(Boolean).join(", ");
+        const likedTime = formatRelativeTime(like.liked_at);
+
+        return (
+          <Link
+            key={like.id}
+            href={`/search/profile/${like.user_id}`}
+            className={cn(
+              "flex items-center gap-3 p-3 bg-white rounded-xl hover:bg-gray-50 transition-colors",
+              like.is_super_like && "ring-2 ring-blue-400"
+            )}
+          >
+            {/* Photo */}
+            <div className="relative flex-shrink-0">
+              <Avatar
+                src={like.profile_image_url}
+                name={name}
+                size="lg"
+              />
+              {like.is_super_like && (
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <Sparkles className="w-3 h-3 text-white" />
+                </div>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base font-semibold text-gray-900 truncate">
+                {name}
+                {like.age && <span className="font-normal text-gray-500">, {like.age}</span>}
+              </h3>
+
+              {location && (
+                <p className="text-sm text-gray-500 truncate">{location}</p>
+              )}
+
+              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                {like.is_verified && (
+                  <CheckCircle className="w-3.5 h-3.5 text-blue-500" />
+                )}
+                <MediaBadge
+                  hasVoicePrompt={!!like.voice_prompt_url}
+                  hasVideoIntro={!!like.video_intro_url}
+                  size="sm"
+                />
+                {likedTime && (
+                  <span className="text-xs text-gray-400">Sent {likedTime}</span>
+                )}
+              </div>
+            </div>
+
+            {/* Pending indicator */}
+            <div className="flex-shrink-0">
+              <span className="px-2.5 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-medium">
+                Pending
+              </span>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+// ================== Matches Tab (New matches without conversations) ==================
 
 function MatchesTab() {
   const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userProfileImage, setUserProfileImage] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchMatches() {
+    async function fetchData() {
       try {
-        const response = await fetch("/api/matches");
-        const data = await response.json();
+        const [matchesRes, profileRes] = await Promise.all([
+          fetch("/api/matches"),
+          fetch("/api/users/me"),
+        ]);
+        
+        const matchesData = await matchesRes.json();
+        const profileData = await profileRes.json();
 
-        if (!response.ok) {
-          setError(data.error || "Failed to load matches");
+        if (!matchesRes.ok) {
+          setError(matchesData.error || "Failed to load matches");
           return;
         }
 
-        setMatches(data.matches || []);
+        // Filter to only new matches (no conversation yet)
+        const newMatches = (matchesData.matches || []).filter(
+          (m: Match) => !m.conversation_id
+        );
+        
+        setMatches(newMatches);
+        setUserProfileImage(profileData.ProfileImageUrl || profileData.Image || null);
       } catch (err) {
         console.error("Error fetching matches:", err);
         setError("Failed to load matches. Please try again.");
@@ -368,20 +572,20 @@ function MatchesTab() {
       }
     }
 
-    fetchMatches();
+    fetchData();
   }, []);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-16 bg-white rounded-xl shadow-sm">
+      <div className="text-center py-12">
         <p className="text-red-600 mb-4">{error}</p>
         <button
           onClick={() => window.location.reload()}
@@ -395,80 +599,54 @@ function MatchesTab() {
 
   if (matches.length === 0) {
     return (
-      <div className="text-center py-16 bg-white rounded-xl shadow-sm">
-        <div className="flex items-center justify-center mb-4">
-          <Heart className="w-16 h-16 text-pink-300" />
-        </div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">No matches yet</h2>
-        <p className="text-gray-600 mb-6">
-          When you and someone else like each other, you'll match!
-        </p>
-        <Link
-          href="/search"
-          className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
-        >
-          Search Profiles
-        </Link>
-      </div>
+      <EmptyStateBoost
+        userProfileImage={userProfileImage}
+        title="New matches will appear here"
+        description="Increase your chances with a Boost. Get seen up to 10x more times!"
+      />
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {matches.map((match) => {
         const name = match.first_name || match.display_name || "Anonymous";
         const location = [match.city, match.state].filter(Boolean).join(", ");
-        const bgColor = getBgColor(match.user_id);
-        const initials = getInitials(name);
         const matchedTime = formatRelativeTime(match.matched_at);
 
         return (
           <div
             key={match.user_id}
-            className="flex items-center gap-4 p-3 bg-white rounded-xl shadow-sm"
+            className="flex items-center gap-3 p-3 bg-white rounded-xl"
           >
             {/* Photo */}
             <Link
               href={`/profile/${match.user_id}`}
-              className="relative w-[72px] h-[72px] rounded-lg overflow-hidden flex-shrink-0 hover:opacity-90 transition-opacity"
+              className="flex-shrink-0"
             >
-              {match.profile_image_url ? (
-                <img
-                  src={match.profile_image_url}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div 
-                  className="w-full h-full flex items-center justify-center"
-                  style={{ backgroundColor: bgColor }}
-                >
-                  <span className="text-2xl font-bold text-white">{initials}</span>
-                </div>
-              )}
+              <Avatar
+                src={match.profile_image_url}
+                name={name}
+                size="lg"
+              />
             </Link>
 
             {/* Info */}
             <Link 
               href={`/profile/${match.user_id}`}
-              className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
+              className="flex-1 min-w-0"
             >
               <h3 className="text-base font-semibold text-gray-900 truncate">
                 {name}
               </h3>
 
               {location && (
-                <p className="text-sm text-gray-500 truncate mt-0.5">
-                  {location}
-                </p>
+                <p className="text-sm text-gray-500 truncate">{location}</p>
               )}
 
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                 {match.is_verified && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
-                    <CheckCircle className="w-3 h-3" />
-                    Verified
-                  </span>
+                  <CheckCircle className="w-3.5 h-3.5 text-blue-500" />
                 )}
                 <MediaBadge
                   hasVoicePrompt={!!match.voice_prompt_url}
@@ -476,34 +654,21 @@ function MatchesTab() {
                   size="sm"
                 />
                 {matchedTime && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-pink-50 text-pink-600 rounded-full text-xs font-medium">
+                  <span className="inline-flex items-center gap-1 text-xs text-pink-600">
                     <Heart className="w-3 h-3" />
-                    Matched {matchedTime}
+                    {matchedTime}
                   </span>
                 )}
               </div>
             </Link>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {match.conversation_id ? (
-                <button
-                  onClick={() => router.push(`/chats/${match.conversation_id}`)}
-                  aria-label={`Message ${name}`}
-                  className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
-                >
-                  <MessageCircle className="w-5 h-5" aria-hidden="true" />
-                </button>
-              ) : (
-                <Link
-                  href={`/profile/${match.user_id}`}
-                  aria-label={`View ${name}'s profile`}
-                  className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-                >
-                  <ChevronRight className="w-5 h-5" aria-hidden="true" />
-                </Link>
-              )}
-            </div>
+            {/* Message button */}
+            <Link
+              href={`/profile/${match.user_id}`}
+              className="w-9 h-9 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 flex-shrink-0"
+            >
+              <MessageCircle className="w-4 h-4" />
+            </Link>
           </div>
         );
       })}
@@ -513,16 +678,16 @@ function MatchesTab() {
 
 // ================== Main Page ==================
 
-type TabType = "likes" | "matches";
+type TabType = "likes" | "sent" | "matches";
 
 export default function LikesPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  // Get tab from URL or default to "matches"
+  // Get tab from URL or default to "likes"
   const tabParam = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState<TabType>(
-    tabParam === "likes" ? "likes" : "matches"
+    tabParam === "sent" ? "sent" : tabParam === "matches" ? "matches" : "likes"
   );
 
   // Update URL when tab changes
@@ -532,33 +697,13 @@ export default function LikesPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Likes</h1>
-      <p className="text-gray-500 mb-6">Your likes and matches</p>
-
-      {/* Tab Navigation */}
+    <div className="max-w-2xl mx-auto px-4 pb-24 pt-4">
+      {/* Tab Navigation - Clean text-only pills */}
       <div 
         role="tablist" 
         aria-label="Likes tabs"
-        className="flex bg-gray-100 rounded-xl p-1 mb-6"
+        className="flex bg-gray-100 rounded-full p-1 mb-4"
       >
-        <button
-          role="tab"
-          id="tab-matches"
-          aria-selected={activeTab === "matches"}
-          aria-controls="tabpanel-matches"
-          onClick={() => handleTabChange("matches")}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
-            activeTab === "matches"
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-600 hover:text-gray-900"
-          )}
-        >
-          <Heart className="w-4 h-4" aria-hidden="true" />
-          Matches
-        </button>
         <button
           role="tab"
           id="tab-likes"
@@ -566,25 +711,56 @@ export default function LikesPage() {
           aria-controls="tabpanel-likes"
           onClick={() => handleTabChange("likes")}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
+            "flex-1 py-2.5 px-3 rounded-full text-sm font-medium transition-all",
             activeTab === "likes"
               ? "bg-white text-gray-900 shadow-sm"
               : "text-gray-600 hover:text-gray-900"
           )}
         >
-          <ThumbsUp className="w-4 h-4" aria-hidden="true" />
           Likes You
+        </button>
+        <button
+          role="tab"
+          id="tab-sent"
+          aria-selected={activeTab === "sent"}
+          aria-controls="tabpanel-sent"
+          onClick={() => handleTabChange("sent")}
+          className={cn(
+            "flex-1 py-2.5 px-3 rounded-full text-sm font-medium transition-all",
+            activeTab === "sent"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          )}
+        >
+          Likes Sent
+        </button>
+        <button
+          role="tab"
+          id="tab-matches"
+          aria-selected={activeTab === "matches"}
+          aria-controls="tabpanel-matches"
+          onClick={() => handleTabChange("matches")}
+          className={cn(
+            "flex-1 py-2.5 px-3 rounded-full text-sm font-medium transition-all",
+            activeTab === "matches"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          )}
+        >
+          Matches
         </button>
       </div>
 
       {/* Tab Content */}
       <div
         role="tabpanel"
-        id={activeTab === "likes" ? "tabpanel-likes" : "tabpanel-matches"}
-        aria-labelledby={activeTab === "likes" ? "tab-likes" : "tab-matches"}
+        id={`tabpanel-${activeTab}`}
+        aria-labelledby={`tab-${activeTab}`}
         tabIndex={0}
       >
-        {activeTab === "likes" ? <LikesYouTab /> : <MatchesTab />}
+        {activeTab === "likes" && <LikesYouTab />}
+        {activeTab === "sent" && <LikesSentTab />}
+        {activeTab === "matches" && <MatchesTab />}
       </div>
     </div>
   );
