@@ -140,11 +140,11 @@ async function updateAppVersion() {
   console.log("🔄 Updating app version...\n");
 
   try {
-    // Get current version from database
+    // Get current version from database (order by build_number to ensure we get the highest)
     const { data: currentData, error: fetchError } = await supabase
       .from("app_version")
       .select("version, build_number")
-      .order("deployed_at", { ascending: false })
+      .order("build_number", { ascending: false })
       .limit(1)
       .single();
 

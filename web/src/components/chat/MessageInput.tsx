@@ -42,10 +42,22 @@ export function MessageInput({
     const viewport = window.visualViewport;
     if (!viewport) return;
 
+    // Store initial window height for comparison
+    const initialHeight = window.innerHeight;
+
     const handleResize = () => {
       // Calculate keyboard height from viewport difference
-      const keyboardH = window.innerHeight - viewport.height;
-      setKeyboardHeight(Math.max(0, keyboardH));
+      // Use the smaller of the two heights as the base to avoid negative values
+      const baseHeight = Math.min(initialHeight, window.innerHeight);
+      const keyboardH = baseHeight - viewport.height;
+      
+      // Only set keyboard height if it's a significant change (> 100px)
+      // This prevents false positives from browser chrome changes
+      // Cap at 70vh to prevent extreme values that could push input to top
+      const maxKeyboardHeight = window.innerHeight * 0.7;
+      const validKeyboardHeight = keyboardH > 100 && keyboardH < maxKeyboardHeight ? keyboardH : 0;
+      
+      setKeyboardHeight(validKeyboardHeight);
     };
 
     viewport.addEventListener("resize", handleResize);
@@ -176,8 +188,9 @@ export function MessageInput({
   const canSend = (message.trim() || attachedImage) && !disabled && !isUploading;
 
   // Calculate bottom position - accounts for keyboard and safe area
+  // Use a more conservative approach to prevent positioning bugs on Android
   const bottomOffset = keyboardHeight > 0 
-    ? keyboardHeight + 8 // 8px padding above keyboard
+    ? Math.max(8, keyboardHeight + 8) // Ensure minimum 8px padding above keyboard
     : `calc(12px + env(safe-area-inset-bottom))`; // 12px + safe area when no keyboard
 
   return (
