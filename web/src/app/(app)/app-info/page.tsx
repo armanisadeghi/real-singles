@@ -60,7 +60,7 @@ export default function AboutPage() {
         >
           <ArrowLeft className="w-5 h-5" aria-hidden="true" />
         </Link>
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">About</h1>
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">App Info</h1>
       </div>
 
       {/* Hero Section with Logo */}

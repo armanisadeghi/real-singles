@@ -114,8 +114,8 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
       icon: Heart,
     },
     {
-      id: "about",
-      label: "About",
+      id: "app-info",
+      label: "App Info",
       icon: Info,
     },
     {
@@ -145,8 +145,8 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
       case "favorites":
         router.push("/favorites");
         break;
-      case "about":
-        router.push("/about");
+      case "app-info":
+        router.push("/app-info");
         break;
       case "settings":
         router.push("/settings");
