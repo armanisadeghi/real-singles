@@ -57,7 +57,7 @@ export function PhysicalStep({
               heightFeet ? "text-gray-900 dark:text-gray-100" : "text-gray-400",
               "bg-white/80 dark:bg-neutral-800/80",
               "border border-gray-200 dark:border-neutral-700",
-              "focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500"
+              "focus:outline-none focus:ring-0 focus:border-gray-400 dark:focus:border-neutral-500"
             )}
           >
             <option value="">Feet</option>
@@ -76,7 +76,7 @@ export function PhysicalStep({
               heightInches ? "text-gray-900 dark:text-gray-100" : "text-gray-400",
               "bg-white/80 dark:bg-neutral-800/80",
               "border border-gray-200 dark:border-neutral-700",
-              "focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500"
+              "focus:outline-none focus:ring-0 focus:border-gray-400 dark:focus:border-neutral-500"
             )}
           >
             <option value="">Inches</option>

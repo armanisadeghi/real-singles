@@ -407,14 +407,21 @@ input, select, textarea {
    Accessibility Styles
    ========================================================================== */
 
-/* Focus visible styles for keyboard navigation */
+/* Focus visible styles for keyboard navigation - subtle, modern approach */
 :focus-visible {
-  outline: 2px solid var(--brand-primary);
+  outline: 2px solid var(--brand-secondary);
   outline-offset: 2px;
 }
 
-/* Remove default focus outline (we use focus-visible instead) */
+/* Remove default focus outline for mouse/touch interactions */
 :focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Remove all focus outlines from form inputs - they have their own border styles */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
   outline: none;
 }
 
@@ -457,16 +464,16 @@ main:focus {
 
 /* High contrast mode support */
 @media (prefers-contrast: more) {
-  :focus-visible {
+  /* Keep subtle focus for inputs - they have their own border styles */
+  button:focus-visible,
+  a:focus-visible {
     outline-width: 3px;
     outline-offset: 3px;
   }
   
+  /* Increase base border visibility but keep focus subtle */
   button,
-  a,
-  input,
-  select,
-  textarea {
+  a {
     border-width: 2px;
   }
 }
@@ -496,7 +503,7 @@ select {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Elegant focus state - subtle glow with brand color */
+/* Clean focus state - subtle border change only, no thick rings */
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
@@ -507,9 +514,25 @@ input[type="number"]:focus,
 input[type="search"]:focus,
 textarea:focus,
 select:focus {
-  outline: none;
-  border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary) 15%, transparent);
+  outline: none !important;
+  border-color: var(--border-strong);
+  box-shadow: none;
+}
+
+/* Focus-visible for keyboard users - slightly more visible but still subtle */
+input[type="text"]:focus-visible,
+input[type="email"]:focus-visible,
+input[type="password"]:focus-visible,
+input[type="date"]:focus-visible,
+input[type="url"]:focus-visible,
+input[type="tel"]:focus-visible,
+input[type="number"]:focus-visible,
+input[type="search"]:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none !important;
+  border-color: var(--brand-secondary);
+  box-shadow: 0 0 0 1px var(--brand-secondary);
 }
 
 /* Placeholder text */

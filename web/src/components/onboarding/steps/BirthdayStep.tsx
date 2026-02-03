@@ -109,7 +109,7 @@ export function BirthdayStep({ dateOfBirth, onChange }: BirthdayStepProps) {
     "text-base text-gray-900 dark:text-gray-100",
     "bg-white dark:bg-neutral-800/90",
     "border border-gray-200 dark:border-neutral-700",
-    "focus:outline-none focus:border-gray-400 dark:focus:border-neutral-500",
+    "focus:outline-none focus:ring-0 focus:border-gray-400 dark:focus:border-neutral-500",
     "transition-colors duration-150"
   );
 
