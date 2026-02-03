@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles, Compass as CompassIcon, Heart, MessageCircle, User } from "lucide-react";
+import { Gem, Compass as CompassIcon, Heart, MessageCircle, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItemProps {
@@ -59,7 +59,7 @@ export function BottomNavigation() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/discover", icon: Sparkles, label: "Discover" },
+    { href: "/discover", icon: Gem, label: "Discover" },
     { href: "/explore", icon: CompassIcon, label: "Explore" },
     { href: "/likes", icon: Heart, label: "Likes" },
     { href: "/messages", icon: MessageCircle, label: "Messages" },

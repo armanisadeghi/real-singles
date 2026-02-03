@@ -21,9 +21,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Sparkles,
+  Diamond,
   Compass as CompassIcon,
-  Heart,
+  Heart,Gem,
   MessageCircle,
   User,
 } from "lucide-react";
@@ -73,7 +73,7 @@ export function GlassBottomNav() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/discover", icon: Sparkles, label: "Discover" },
+    { href: "/discover", icon: Gem, label: "Discover" },
     { href: "/explore", icon: CompassIcon, label: "Explore" },
     { href: "/likes", icon: Heart, label: "Likes" },
     { href: "/messages", icon: MessageCircle, label: "Messages" },

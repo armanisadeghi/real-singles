@@ -176,7 +176,7 @@ export function ChatThread({
           <div className="relative flex items-start justify-between px-3 py-2.5">
             {/* Left: Back button */}
             <Link
-              href="/chats"
+              href="/messages"
               className="pointer-events-auto flex items-center justify-center w-10 h-10 rounded-full bg-gray-200/70 dark:bg-neutral-700/70 backdrop-blur-xl active:bg-gray-300/80 dark:active:bg-neutral-600/80 transition-colors"
             >
               <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-gray-200" strokeWidth={2.5} />

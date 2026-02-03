@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { X, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { BottomSheet, BottomSheetActions } from "@/components/ui/BottomSheet";
+import { DualRangeSlider } from "@/components/ui/DualRangeSlider";
 import { cn } from "@/lib/utils";
 import {
   BODY_TYPE_OPTIONS,
@@ -108,7 +109,7 @@ export function FilterPanel({
   const formatHeight = (inches: number) => {
     const feet = Math.floor(inches / 12);
     const remainingInches = inches % 12;
-    return `${feet}'${remainingInches}"`;
+    return `${feet} ft ${remainingInches} in`;
   };
 
   // No longer needed since we're using option.label directly
@@ -188,37 +189,16 @@ export function FilterPanel({
 
         {/* Height Range */}
         <section>
-          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">
-            Height: {formatHeight(filters.minHeight)} - {formatHeight(filters.maxHeight)}
-          </h3>
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Min</label>
-              <input
-                type="range"
-                min={48}
-                max={84}
-                value={filters.minHeight}
-                onChange={(e) =>
-                  setFilters({ ...filters, minHeight: Number(e.target.value) })
-                }
-                className="w-full accent-pink-500"
-              />
-            </div>
-            <div className="flex-1">
-              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Max</label>
-              <input
-                type="range"
-                min={48}
-                max={84}
-                value={filters.maxHeight}
-                onChange={(e) =>
-                  setFilters({ ...filters, maxHeight: Number(e.target.value) })
-                }
-                className="w-full accent-pink-500"
-              />
-            </div>
-          </div>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Height</h3>
+          <DualRangeSlider
+            min={48}
+            max={84}
+            minValue={filters.minHeight}
+            maxValue={filters.maxHeight}
+            onMinChange={(value) => setFilters({ ...filters, minHeight: value })}
+            onMaxChange={(value) => setFilters({ ...filters, maxHeight: value })}
+            formatLabel={formatHeight}
+          />
         </section>
 
         {/* Note: Gender preference is not shown here - it's set in profile settings */}

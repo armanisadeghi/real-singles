@@ -93,9 +93,9 @@ const quickRouteLinks = [
     hoverBg: "hover:bg-pink-50/50",
   },
   {
-    title: "Chats",
+    title: "Messages",
     description: "Messaging and conversations",
-    href: "/chats",
+    href: "/messages",
     icon: MessageCircle,
     iconBg: "bg-cyan-100",
     iconColor: "text-cyan-600",
