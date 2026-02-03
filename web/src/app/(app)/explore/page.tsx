@@ -330,7 +330,8 @@ export default function ExplorePage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const exploreRes = await fetch("/api/discover");
+      // Use lightweight /api/explore endpoint (not /api/discover which fetches heavy profile data)
+      const exploreRes = await fetch("/api/explore");
       if (!exploreRes.ok) {
         if (exploreRes.status === 401) {
           router.push("/login");
