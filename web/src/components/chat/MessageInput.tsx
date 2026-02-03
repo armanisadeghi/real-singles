@@ -172,77 +172,86 @@ export function MessageInput({
           </div>
         )}
 
-        {/* Input row - Clean floating design with perfect center alignment */}
-        <form 
-          onSubmit={handleSubmit} 
-          className="flex items-center gap-2 h-10"
+        {/* Input row - CSS glass effect (compatible with position: fixed) */}
+        <div
+          className={cn(
+            "rounded-3xl overflow-hidden",
+            "bg-white/80 backdrop-blur-xl backdrop-saturate-150",
+            "border border-white/30",
+            "shadow-lg shadow-black/10"
+          )}
         >
-          {/* Plus button for attachments */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={disabled || isUploading}
-            className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
-              "bg-blue-500 text-white",
-              (disabled || isUploading) && "opacity-50"
-            )}
+          <form 
+            onSubmit={handleSubmit} 
+            className="flex items-center gap-2 h-12 px-2"
           >
-            {isUploading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Plus className="w-5 h-5" strokeWidth={2.5} />
-            )}
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={IMAGE_AND_VIDEO_ACCEPT_STRING}
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-
-          {/* Text input - More rounded pill style */}
-          <div className="flex-1 flex items-center">
-            <textarea
-              ref={inputRef}
-              value={message}
-              onChange={handleChange}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder}
-              disabled={disabled}
-              rows={1}
-              inputMode="text"
-              enterKeyHint="send"
+            {/* Plus button for attachments */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={disabled || isUploading}
               className={cn(
-                "w-full h-10 px-5 py-2 bg-gray-100 rounded-[20px] resize-none overflow-hidden",
-                "text-[16px] leading-[1.5]",
-                "focus:outline-none focus:ring-2 focus:ring-blue-500/20",
-                "disabled:opacity-50",
-                "placeholder:text-gray-400"
+                "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
+                "bg-blue-500 text-white",
+                (disabled || isUploading) && "opacity-50"
               )}
-              style={{ 
-                minHeight: "40px", 
-                maxHeight: "100px",
-                touchAction: "manipulation",
-              }}
+            >
+              {isUploading ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Plus className="w-5 h-5" strokeWidth={2.5} />
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={IMAGE_AND_VIDEO_ACCEPT_STRING}
+              onChange={handleFileSelect}
+              className="hidden"
             />
-          </div>
 
-          {/* Send button */}
-          <button
-            type="submit"
-            disabled={!canSend}
-            className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
-              canSend
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 text-gray-400"
-            )}
-          >
-            <Send className="w-5 h-5" />
-          </button>
-        </form>
+            {/* Text input - More rounded pill style */}
+            <div className="flex-1 flex items-center">
+              <textarea
+                ref={inputRef}
+                value={message}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                disabled={disabled}
+                rows={1}
+                inputMode="text"
+                enterKeyHint="send"
+                className={cn(
+                  "w-full h-9 px-4 py-2 bg-gray-100 rounded-full resize-none overflow-hidden",
+                  "text-[16px] leading-[1.4]",
+                  "focus:outline-none focus:ring-2 focus:ring-blue-500/30",
+                  "disabled:opacity-50",
+                  "placeholder:text-gray-400"
+                )}
+                style={{ 
+                  minHeight: "36px", 
+                  maxHeight: "100px",
+                  touchAction: "manipulation",
+                }}
+              />
+            </div>
+
+            {/* Send button */}
+            <button
+              type="submit"
+              disabled={!canSend}
+              className={cn(
+                "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
+                canSend
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-400"
+              )}
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

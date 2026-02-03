@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { BottomNavigation } from "@/components/navigation";
+import { GlassBottomNav } from "@/components/glass";
 import { AppHeader } from "@/components/layout";
 import { AppProviders } from "@/components/providers/AppProviders";
 import {
@@ -189,11 +189,11 @@ export default async function AppLayout({
           signOutAction={signOut}
         />
 
-        {/* Mobile Bottom Navigation */}
-        <BottomNavigation />
+        {/* Mobile Bottom Navigation - Floating Glass Dock */}
+        <GlassBottomNav />
 
-        {/* Main Content */}
-        <main id="main-content" className="pb-20 md:pb-0" tabIndex={-1}>
+        {/* Main Content - Extra padding for floating nav */}
+        <main id="main-content" className="pb-24 md:pb-0" tabIndex={-1}>
           {children}
         </main>
       </div>

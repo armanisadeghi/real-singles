@@ -16,6 +16,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { MediaBadge } from "@/components/profile";
 import { Avatar } from "@/components/ui/Avatar";
+import { GlassTabs, type Tab } from "@/components/glass";
 
 // ================== Interfaces ==================
 
@@ -696,60 +697,23 @@ export default function LikesPage() {
     router.replace(`/likes?tab=${tab}`, { scroll: false });
   };
 
+  // Tab definitions for GlassTabs
+  const tabs: Tab[] = [
+    { id: "likes", label: "Likes You" },
+    { id: "sent", label: "Likes Sent" },
+    { id: "matches", label: "Matches" },
+  ];
+
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24 pt-4">
-      {/* Tab Navigation - Clean text-only pills */}
-      <div 
-        role="tablist" 
-        aria-label="Likes tabs"
-        className="flex bg-gray-100 rounded-full p-1 mb-4"
-      >
-        <button
-          role="tab"
-          id="tab-likes"
-          aria-selected={activeTab === "likes"}
-          aria-controls="tabpanel-likes"
-          onClick={() => handleTabChange("likes")}
-          className={cn(
-            "flex-1 py-2.5 px-3 rounded-full text-sm font-medium transition-all",
-            activeTab === "likes"
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-600 hover:text-gray-900"
-          )}
-        >
-          Likes You
-        </button>
-        <button
-          role="tab"
-          id="tab-sent"
-          aria-selected={activeTab === "sent"}
-          aria-controls="tabpanel-sent"
-          onClick={() => handleTabChange("sent")}
-          className={cn(
-            "flex-1 py-2.5 px-3 rounded-full text-sm font-medium transition-all",
-            activeTab === "sent"
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-600 hover:text-gray-900"
-          )}
-        >
-          Likes Sent
-        </button>
-        <button
-          role="tab"
-          id="tab-matches"
-          aria-selected={activeTab === "matches"}
-          aria-controls="tabpanel-matches"
-          onClick={() => handleTabChange("matches")}
-          className={cn(
-            "flex-1 py-2.5 px-3 rounded-full text-sm font-medium transition-all",
-            activeTab === "matches"
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-600 hover:text-gray-900"
-          )}
-        >
-          Matches
-        </button>
-      </div>
+      {/* Tab Navigation - Glass Pills */}
+      <GlassTabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onChange={(id) => handleTabChange(id as TabType)}
+        ariaLabel="Likes tabs"
+        className="mb-4"
+      />
 
       {/* Tab Content */}
       <div

@@ -31,6 +31,7 @@
     "clsx": "^2.1.1",
     "expo-av": "^16.0.8",
     "expo-notifications": "^0.32.16",
+    "liquid-glass-react": "^1.1.1",
     "lucide-react": "^0.563.0",
     "next": "16.1.4",
     "qrcode.react": "^4.2.0",

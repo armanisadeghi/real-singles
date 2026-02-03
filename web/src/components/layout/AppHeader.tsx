@@ -8,6 +8,7 @@ import { NotificationBell, MessagesIndicator } from "@/components/notifications"
 import { PointsBadge } from "@/components/rewards";
 import { Avatar } from "@/components/ui";
 import { useCurrentUser } from "@/components/providers/AppProviders";
+import { GlassContainer } from "@/components/glass";
 
 interface AppHeaderProps {
   user: {
@@ -232,66 +233,72 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                 </span>
               </button>
 
-              {/* Dropdown Menu */}
+              {/* Dropdown Menu - Glass Effect */}
               {isDropdownOpen && (
-                <div 
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="user-menu"
-                  className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border py-1.5 animate-in fade-in slide-in-from-top-2 duration-200 z-50"
-                >
-                  {/* User info header - shows name on mobile */}
-                  <div className="sm:hidden px-4 py-2 border-b mb-1">
-                    <p className="font-medium text-gray-900 truncate">{user.displayName}</p>
-                  </div>
-
-                  <Link
-                    href="/profile"
-                    role="menuitem"
-                    tabIndex={-1}
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                <div className="absolute right-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <GlassContainer
+                    variant="menu"
+                    className="w-52 py-1.5 shadow-xl shadow-black/10"
                   >
-                    My Profile
-                  </Link>
-                  <Link
-                    href="/profile/edit"
-                    role="menuitem"
-                    tabIndex={-1}
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
-                  >
-                    Edit Profile
-                  </Link>
-                  <Link
-                    href="/favorites"
-                    role="menuitem"
-                    tabIndex={-1}
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
-                  >
-                    Saved Profiles
-                  </Link>
-                  <Link
-                    href="/settings"
-                    role="menuitem"
-                    tabIndex={-1}
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
-                  >
-                    Settings
-                  </Link>
-                  <hr className="my-1.5 border-gray-100" aria-hidden="true" />
-                  <form action={signOutAction}>
-                    <button
-                      type="submit"
-                      role="menuitem"
-                      tabIndex={-1}
-                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 focus:bg-red-50 focus:outline-none"
+                    <div
+                      role="menu"
+                      aria-orientation="vertical"
+                      aria-labelledby="user-menu"
                     >
-                      Sign Out
-                    </button>
-                  </form>
+                      {/* User info header - shows name on mobile */}
+                      <div className="sm:hidden px-4 py-2 border-b border-white/20 mb-1">
+                        <p className="font-medium text-gray-900 truncate">{user.displayName}</p>
+                      </div>
+
+                      <Link
+                        href="/profile"
+                        role="menuitem"
+                        tabIndex={-1}
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-white/40 focus:bg-white/40 focus:outline-none transition-colors"
+                      >
+                        My Profile
+                      </Link>
+                      <Link
+                        href="/profile/edit"
+                        role="menuitem"
+                        tabIndex={-1}
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-white/40 focus:bg-white/40 focus:outline-none transition-colors"
+                      >
+                        Edit Profile
+                      </Link>
+                      <Link
+                        href="/favorites"
+                        role="menuitem"
+                        tabIndex={-1}
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-white/40 focus:bg-white/40 focus:outline-none transition-colors"
+                      >
+                        Saved Profiles
+                      </Link>
+                      <Link
+                        href="/settings"
+                        role="menuitem"
+                        tabIndex={-1}
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-white/40 focus:bg-white/40 focus:outline-none transition-colors"
+                      >
+                        Settings
+                      </Link>
+                      <hr className="my-1.5 border-white/20" aria-hidden="true" />
+                      <form action={signOutAction}>
+                        <button
+                          type="submit"
+                          role="menuitem"
+                          tabIndex={-1}
+                          className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50/50 focus:bg-red-50/50 focus:outline-none transition-colors"
+                        >
+                          Sign Out
+                        </button>
+                      </form>
+                    </div>
+                  </GlassContainer>
                 </div>
               )}
             </div>

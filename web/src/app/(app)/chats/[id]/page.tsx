@@ -115,8 +115,8 @@ function ChatSkeleton() {
       </div>
 
       {/* Messages skeleton */}
-      <div className="flex-1 overflow-y-auto pl-4 pr-0 py-3 pb-24 scrollbar-thin">
-        <div className="pr-3 space-y-3">
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-4 py-3 pb-24 space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <MessageSkeleton key={i} isOwn={i % 2 === 0} />
           ))}
