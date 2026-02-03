@@ -1,0 +1,73 @@
+name: Update App Version
+
+# Trigger on push to main branch (after deployment)
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/**'
+
+# Prevent concurrent version updates
+concurrency:
+  group: version-update
+  cancel-in-progress: false
+
+jobs:
+  update-version:
+    name: Update Version in Database
+    runs-on: ubuntu-latest
+    
+    # Only run on the web directory
+    defaults:
+      run:
+        working-directory: ./web
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for git commit info
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: './web/pnpm-lock.yaml'
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Check if version already updated
+        id: check_version
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          CURRENT_COMMIT=$(git rev-parse --short HEAD)
+          echo "Current commit: $CURRENT_COMMIT"
+          
+          # Check if this commit already has a version entry
+          # The update script will handle this check internally
+          echo "will_update=true" >> $GITHUB_OUTPUT
+      
+      - name: Update app version
+        if: steps.check_version.outputs.will_update == 'true'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: pnpm version:update
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Failed to update app version in database"
+          echo "Check that NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY secrets are set correctly"
