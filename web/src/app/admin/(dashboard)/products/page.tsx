@@ -1,6 +1,10 @@
-import { createAdminClient } from "@/lib/supabase/admin";
-import { Package, Plus } from "lucide-react";
-import { AdminPageHeader, AdminLinkButton } from "@/components/admin/AdminPageHeader";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Package, Plus, Loader2 } from "lucide-react";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 interface Product {
   id: string;
@@ -13,20 +17,60 @@ interface Product {
   is_active: boolean;
 }
 
-async function getProducts(): Promise<Product[]> {
-  const supabase = createAdminClient();
+export default function AdminProductsPage() {
+  const router = useRouter();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [toggling, setToggling] = useState<string | null>(null);
 
-  const { data: products } = await supabase
-    .from("products")
-    .select("*")
-    .order("created_at", { ascending: false });
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
-  return (products || []) as Product[];
-}
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch("/api/admin/products");
+      if (res.ok) {
+        const data = await res.json();
+        setProducts(data.products || []);
+      }
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-export default async function AdminProductsPage() {
-  const products = await getProducts();
+  const handleToggle = async (productId: string) => {
+    setToggling(productId);
+    try {
+      const res = await fetch(`/api/admin/products/${productId}/toggle`, {
+        method: "PATCH",
+      });
+
+      if (res.ok) {
+        // Refresh products list
+        await fetchProducts();
+      } else {
+        alert("Failed to toggle product status");
+      }
+    } catch (err) {
+      console.error("Error toggling product:", err);
+      alert("Failed to toggle product status");
+    } finally {
+      setToggling(null);
+    }
+  };
+
   const activeCount = products.filter((p) => p.is_active).length;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -41,10 +85,12 @@ export default async function AdminProductsPage() {
           label: "Active Products",
         }}
       >
-        <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors">
-          <Plus className="w-4 h-4" />
-          Add Product
-        </button>
+        <Link href="/admin/products/create">
+          <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors">
+            <Plus className="w-4 h-4" />
+            Add Product
+          </button>
+        </Link>
       </AdminPageHeader>
 
       {products.length === 0 ? (
@@ -61,10 +107,12 @@ export default async function AdminProductsPage() {
           <p className="text-slate-500 mb-6 max-w-sm mx-auto">
             Add products that users can redeem with their earned points.
           </p>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
-            <Plus className="w-4 h-4" />
-            Add Product
-          </button>
+          <Link href="/admin/products/create">
+            <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+              <Plus className="w-4 h-4" />
+              Add Product
+            </button>
+          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -121,15 +169,25 @@ export default async function AdminProductsPage() {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <button className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors">
-                    Edit
-                  </button>
-                  <button className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    product.is_active 
-                      ? "border border-red-200 text-red-700 hover:bg-red-50" 
-                      : "border border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                  }`}>
-                    {product.is_active ? "Deactivate" : "Activate"}
+                  <Link href={`/admin/products/${product.id}/edit`} className="flex-1">
+                    <button className="w-full px-4 py-2 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors">
+                      Edit
+                    </button>
+                  </Link>
+                  <button 
+                    onClick={() => handleToggle(product.id)}
+                    disabled={toggling === product.id}
+                    className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                      product.is_active 
+                        ? "border border-red-200 text-red-700 hover:bg-red-50" 
+                        : "border border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                    }`}
+                  >
+                    {toggling === product.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                    ) : (
+                      product.is_active ? "Deactivate" : "Activate"
+                    )}
                   </button>
                 </div>
               </div>
