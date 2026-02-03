@@ -53,51 +53,54 @@ interface CompletionField {
 
 // Complete field list for profile completion calculation
 // This MUST match the API at /api/profile/completion
+// Step numbers updated after reordering: bio/looking-for moved to steps 7-8
 const COMPLETION_FIELDS: CompletionField[] = [
-  // Required fields
+  // Required fields (steps 1-6)
   { key: "first_name", step: 1, required: true },
   { key: "date_of_birth", step: 2, required: true },
   { key: "gender", step: 3, required: true },
   { key: "looking_for", step: 4, required: true },
-  // Physical
-  { key: "height_inches", step: 7, required: false },
-  { key: "body_type", step: 7, required: false },
-  { key: "ethnicity", step: 8, required: false },
-  // Relationship
-  { key: "dating_intentions", step: 9, required: false },
-  { key: "marital_status", step: 9, required: false },
-  // Location
-  { key: "country", step: 10, required: false },
-  { key: "city", step: 10, required: false },
-  { key: "state", step: 10, required: false },
-  { key: "hometown", step: 10, required: false },
-  // Career
-  { key: "occupation", step: 11, required: false },
-  { key: "company", step: 11, required: false },
-  { key: "education", step: 12, required: false },
-  { key: "schools", step: 12, required: false },
-  // Beliefs
-  { key: "religion", step: 13, required: false },
-  { key: "political_views", step: 13, required: false },
-  // Lifestyle
-  { key: "exercise", step: 14, required: false },
-  { key: "languages", step: 15, required: false },
-  // Habits
-  { key: "smoking", step: 16, required: false },
-  { key: "drinking", step: 16, required: false },
-  { key: "marijuana", step: 16, required: false },
-  // Family
-  { key: "has_kids", step: 17, required: false },
-  { key: "wants_kids", step: 17, required: false },
-  { key: "pets", step: 18, required: false },
-  // Personality
-  { key: "interests", step: 19, required: false },
-  { key: "life_goals", step: 20, required: false },
+  // Verification (step 6)
+  { key: "verification_selfie_url", step: 6, required: false },
+  // About (steps 7-8) - HIGH PRIORITY, moved up
+  { key: "bio", step: 7, required: false },
+  { key: "looking_for_description", step: 8, required: false },
+  // Physical (steps 9-10)
+  { key: "height_inches", step: 9, required: false },
+  { key: "body_type", step: 9, required: false },
+  { key: "ethnicity", step: 10, required: false },
+  // Relationship (step 11)
+  { key: "dating_intentions", step: 11, required: false },
+  { key: "marital_status", step: 11, required: false },
+  // Location (step 12)
+  { key: "country", step: 12, required: false },
+  { key: "city", step: 12, required: false },
+  { key: "state", step: 12, required: false },
+  { key: "hometown", step: 12, required: false },
+  // Career (steps 13-14)
+  { key: "occupation", step: 13, required: false },
+  { key: "company", step: 13, required: false },
+  { key: "education", step: 14, required: false },
+  { key: "schools", step: 14, required: false },
+  // Beliefs (step 15)
+  { key: "religion", step: 15, required: false },
+  { key: "political_views", step: 15, required: false },
+  // Lifestyle (steps 16-17)
+  { key: "exercise", step: 16, required: false },
+  { key: "languages", step: 17, required: false },
+  // Habits (step 18)
+  { key: "smoking", step: 18, required: false },
+  { key: "drinking", step: 18, required: false },
+  { key: "marijuana", step: 18, required: false },
+  // Family (steps 19-20)
+  { key: "has_kids", step: 19, required: false },
+  { key: "wants_kids", step: 19, required: false },
+  { key: "pets", step: 20, required: false },
+  // Personality (steps 21-22)
+  { key: "interests", step: 21, required: false },
+  { key: "life_goals", step: 22, required: false },
   { key: "zodiac_sign", step: 2, required: false },
-  // About
-  { key: "bio", step: 21, required: false },
-  { key: "looking_for_description", step: 22, required: false },
-  // Prompts (11 total)
+  // Prompts (steps 23-32)
   { key: "ideal_first_date", step: 23, required: false },
   { key: "non_negotiables", step: 24, required: false },
   { key: "way_to_heart", step: 25, required: false },
@@ -109,14 +112,12 @@ const COMPLETION_FIELDS: CompletionField[] = [
   { key: "worst_job", step: 31, required: false },
   { key: "dream_job", step: 32, required: false },
   { key: "past_event", step: 32, required: false },
-  // Social
+  // Social (step 33)
   { key: "social_link_1", step: 33, required: false },
   { key: "social_link_2", step: 33, required: false },
-  // Media (voice & video)
+  // Media (voice & video) - not in onboarding steps
   { key: "voice_prompt_url", step: 34, required: false },
   { key: "video_intro_url", step: 34, required: false },
-  // Verification
-  { key: "verification_selfie_url", step: 6, required: false },
 ];
 
 function hasValue(value: unknown): boolean {
@@ -480,7 +481,7 @@ export default async function MyProfilePage() {
                   {profile.bio ? (
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-[15px] lg:text-base whitespace-pre-wrap">{profile.bio}</p>
                   ) : (
-                    <AddFieldPrompt label="Tell others about yourself" step={21} />
+                    <AddFieldPrompt label="Tell others about yourself" step={7} />
                   )}
                 </section>
 
@@ -600,7 +601,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Interests</h3>
-                    <Link href="/onboarding?step=19" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=21" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   {profile.interests && (profile.interests as string[]).length > 0 ? (
                     <div className="flex flex-wrap gap-2">
@@ -611,7 +612,7 @@ export default async function MyProfilePage() {
                       ))}
                     </div>
                   ) : (
-                    <AddFieldPrompt label="Add your interests" step={19} />
+                    <AddFieldPrompt label="Add your interests" step={21} />
                   )}
                 </section>
 
@@ -619,7 +620,7 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Life Goals</h3>
-                    <Link href="/onboarding?step=20" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=22" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   {profile.life_goals && (profile.life_goals as string[]).length > 0 ? (
                     <div className="flex flex-wrap gap-2">
@@ -630,7 +631,7 @@ export default async function MyProfilePage() {
                       ))}
                     </div>
                   ) : (
-                    <AddFieldPrompt label="Add your life goals" step={20} />
+                    <AddFieldPrompt label="Add your life goals" step={22} />
                   )}
                 </section>
               </div>
@@ -672,17 +673,17 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">About Me</h3>
-                    <Link href="/onboarding?step=7" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=9" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
                     <DetailRowWithAdd label="Gender" value={profile.gender ? getGenderLabel(profile.gender) : null} step={3} />
-                    <DetailRowWithAdd label="Height" value={profile.height_inches ? formatHeight(profile.height_inches) : null} step={7} />
-                    <DetailRowWithAdd label="Body Type" value={profile.body_type ? getBodyTypeLabel(profile.body_type) : null} step={7} />
-                    <DetailRowWithAdd label="Ethnicity" value={profile.ethnicity && profile.ethnicity.length > 0 ? getEthnicityLabels(profile.ethnicity) : null} step={8} />
-                    <DetailRowWithAdd label="Marital Status" value={profile.marital_status ? getMaritalStatusLabel(profile.marital_status) : null} step={9} />
+                    <DetailRowWithAdd label="Height" value={profile.height_inches ? formatHeight(profile.height_inches) : null} step={9} />
+                    <DetailRowWithAdd label="Body Type" value={profile.body_type ? getBodyTypeLabel(profile.body_type) : null} step={9} />
+                    <DetailRowWithAdd label="Ethnicity" value={profile.ethnicity && profile.ethnicity.length > 0 ? getEthnicityLabels(profile.ethnicity) : null} step={10} />
+                    <DetailRowWithAdd label="Marital Status" value={profile.marital_status ? getMaritalStatusLabel(profile.marital_status) : null} step={11} />
                     <DetailRowWithAdd label="Zodiac" value={profile.zodiac_sign ? getZodiacLabel(profile.zodiac_sign) : null} step={2} />
-                    <DetailRowWithAdd label="Hometown" value={profile.hometown || null} step={10} />
-                    <DetailRowWithAdd label="Dating Intentions" value={profile.dating_intentions ? getDatingIntentionsLabel(profile.dating_intentions) : null} step={9} />
+                    <DetailRowWithAdd label="Hometown" value={profile.hometown || null} step={12} />
+                    <DetailRowWithAdd label="Dating Intentions" value={profile.dating_intentions ? getDatingIntentionsLabel(profile.dating_intentions) : null} step={11} />
                   </div>
                 </section>
 
@@ -690,13 +691,13 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Education & Career</h3>
-                    <Link href="/onboarding?step=11" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=13" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
-                    <DetailRowWithAdd label="Education" value={profile.education ? getEducationLabel(profile.education) : null} step={12} />
-                    <DetailRowWithAdd label="Schools" value={profile.schools && profile.schools.length > 0 ? (profile.schools as string[]).join(", ") : null} step={12} />
-                    <DetailRowWithAdd label="Occupation" value={profile.occupation || null} step={11} />
-                    <DetailRowWithAdd label="Company" value={profile.company || null} step={11} />
+                    <DetailRowWithAdd label="Education" value={profile.education ? getEducationLabel(profile.education) : null} step={14} />
+                    <DetailRowWithAdd label="Schools" value={profile.schools && profile.schools.length > 0 ? (profile.schools as string[]).join(", ") : null} step={14} />
+                    <DetailRowWithAdd label="Occupation" value={profile.occupation || null} step={13} />
+                    <DetailRowWithAdd label="Company" value={profile.company || null} step={13} />
                   </div>
                 </section>
 
@@ -704,13 +705,13 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Lifestyle</h3>
-                    <Link href="/onboarding?step=16" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=18" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
-                    <DetailRowWithAdd label="Smoking" value={profile.smoking ? getSmokingLabel(profile.smoking) : null} step={16} />
-                    <DetailRowWithAdd label="Drinking" value={profile.drinking ? getDrinkingLabel(profile.drinking) : null} step={16} />
-                    <DetailRowWithAdd label="Marijuana" value={profile.marijuana ? getMarijuanaLabel(profile.marijuana) : null} step={16} />
-                    <DetailRowWithAdd label="Exercise" value={profile.exercise ? getExerciseLabel(profile.exercise) : null} step={14} />
+                    <DetailRowWithAdd label="Smoking" value={profile.smoking ? getSmokingLabel(profile.smoking) : null} step={18} />
+                    <DetailRowWithAdd label="Drinking" value={profile.drinking ? getDrinkingLabel(profile.drinking) : null} step={18} />
+                    <DetailRowWithAdd label="Marijuana" value={profile.marijuana ? getMarijuanaLabel(profile.marijuana) : null} step={18} />
+                    <DetailRowWithAdd label="Exercise" value={profile.exercise ? getExerciseLabel(profile.exercise) : null} step={16} />
                   </div>
                 </section>
 
@@ -718,12 +719,12 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Family</h3>
-                    <Link href="/onboarding?step=17" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=19" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
-                    <DetailRowWithAdd label="Has Kids" value={profile.has_kids ? getHasKidsLabel(profile.has_kids) : null} step={17} />
-                    <DetailRowWithAdd label="Wants Kids" value={profile.wants_kids ? getWantsKidsLabel(profile.wants_kids) : null} step={17} />
-                    <DetailRowWithAdd label="Pets" value={profile.pets && profile.pets.length > 0 ? (profile.pets as string[]).map(p => getPetsLabel(p)).join(", ") : null} step={18} />
+                    <DetailRowWithAdd label="Has Kids" value={profile.has_kids ? getHasKidsLabel(profile.has_kids) : null} step={19} />
+                    <DetailRowWithAdd label="Wants Kids" value={profile.wants_kids ? getWantsKidsLabel(profile.wants_kids) : null} step={19} />
+                    <DetailRowWithAdd label="Pets" value={profile.pets && profile.pets.length > 0 ? (profile.pets as string[]).map(p => getPetsLabel(p)).join(", ") : null} step={20} />
                   </div>
                 </section>
 
@@ -731,13 +732,13 @@ export default async function MyProfilePage() {
                 <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Additional Info</h3>
-                    <Link href="/onboarding?step=13" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
+                    <Link href="/onboarding?step=15" className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors">Edit</Link>
                   </div>
                   <div className="space-y-3">
-                    <DetailRowWithAdd label="Religion" value={profile.religion ? getReligionLabel(profile.religion) : null} step={13} />
-                    <DetailRowWithAdd label="Politics" value={profile.political_views ? getPoliticalLabel(profile.political_views) : null} step={13} />
+                    <DetailRowWithAdd label="Religion" value={profile.religion ? getReligionLabel(profile.religion) : null} step={15} />
+                    <DetailRowWithAdd label="Politics" value={profile.political_views ? getPoliticalLabel(profile.political_views) : null} step={15} />
                     <DetailRowWithAdd label="Looking For" value={profile.looking_for && profile.looking_for.length > 0 ? (profile.looking_for as string[]).map(g => getGenderLabel(g)).join(", ") : null} step={4} />
-                    <DetailRowWithAdd label="Languages" value={profile.languages && profile.languages.length > 0 ? (profile.languages as string[]).join(", ") : null} step={15} />
+                    <DetailRowWithAdd label="Languages" value={profile.languages && profile.languages.length > 0 ? (profile.languages as string[]).join(", ") : null} step={17} />
                   </div>
                 </section>
 

@@ -212,10 +212,58 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "VerificationSelfieStep",
   },
 
-  // Phase 2: Physical (Steps 7-8)
+  // Phase 2: About You (Steps 7-8) - HIGH PRIORITY
+  {
+    id: "bio",
+    stepNumber: 7,
+    title: "Tell us about yourself",
+    subtitle: "Write a short bio",
+    phase: "about",
+    fields: [
+      {
+        key: "Bio",
+        dbColumn: "bio",
+        label: "About Me",
+        placeholder: "Share something interesting about yourself...",
+        inputType: "textarea",
+        maxLength: 1000,
+        rows: 4,
+      },
+    ],
+    isRequired: false,
+    allowSkip: true,
+    allowPreferNot: false,
+    needsKeyboard: true,
+    component: "BioStep",
+  },
+  {
+    id: "looking-for-description",
+    stepNumber: 8,
+    title: "What are you looking for?",
+    subtitle: "Describe your ideal match",
+    phase: "about",
+    fields: [
+      {
+        key: "LookingForDescription",
+        dbColumn: "looking_for_description",
+        label: "What I'm Looking For",
+        placeholder: "Describe what you're looking for in a partner...",
+        inputType: "textarea",
+        maxLength: 500,
+        rows: 3,
+      },
+    ],
+    isRequired: false,
+    allowSkip: true,
+    allowPreferNot: false,
+    needsKeyboard: true,
+    component: "LookingForStep",
+  },
+
+  // Phase 3: Physical (Steps 9-10)
   {
     id: "physical",
-    stepNumber: 7,
+    stepNumber: 9,
     title: "Physical attributes",
     phase: "physical",
     fields: [
@@ -242,7 +290,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "ethnicity",
-    stepNumber: 8,
+    stepNumber: 10,
     title: "What's your ethnicity?",
     subtitle: "Select all that apply",
     phase: "physical",
@@ -263,10 +311,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "EthnicityStep",
   },
 
-  // Phase 3: Relationship (Step 9)
+  // Phase 4: Relationship (Step 11)
   {
     id: "relationship-goals",
-    stepNumber: 9,
+    stepNumber: 11,
     title: "What are you looking for?",
     phase: "relationship",
     fields: [
@@ -293,10 +341,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "RelationshipGoalsStep",
   },
 
-  // Phase 4: Location (Step 10)
+  // Phase 5: Location (Step 12)
   {
     id: "location",
-    stepNumber: 10,
+    stepNumber: 12,
     title: "Where do you live?",
     phase: "location",
     fields: [
@@ -323,10 +371,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "LocationStep",
   },
 
-  // Phase 5: Lifestyle (Steps 11-15)
+  // Phase 6: Lifestyle (Steps 13-17)
   {
     id: "work",
-    stepNumber: 11,
+    stepNumber: 13,
     title: "What do you do?",
     phase: "lifestyle",
     fields: [
@@ -355,7 +403,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "education",
-    stepNumber: 12,
+    stepNumber: 14,
     title: "What's your education?",
     phase: "lifestyle",
     fields: [
@@ -375,7 +423,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "beliefs",
-    stepNumber: 13,
+    stepNumber: 15,
     title: "Your beliefs",
     phase: "lifestyle",
     fields: [
@@ -404,7 +452,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "exercise",
-    stepNumber: 14,
+    stepNumber: 16,
     title: "How often do you exercise?",
     phase: "lifestyle",
     fields: [
@@ -424,7 +472,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "languages",
-    stepNumber: 15,
+    stepNumber: 17,
     title: "What languages do you speak?",
     subtitle: "Select all that apply",
     phase: "lifestyle",
@@ -444,10 +492,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "LanguagesStep",
   },
 
-  // Phase 6: Habits (Step 16)
+  // Phase 7: Habits (Step 18)
   {
     id: "habits",
-    stepNumber: 16,
+    stepNumber: 18,
     title: "Your habits",
     phase: "habits",
     fields: [
@@ -481,10 +529,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "HabitsStep",
   },
 
-  // Phase 7: Family (Steps 17-18)
+  // Phase 8: Family (Steps 19-20)
   {
     id: "kids",
-    stepNumber: 17,
+    stepNumber: 19,
     title: "About children",
     phase: "family",
     fields: [
@@ -513,7 +561,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "pets",
-    stepNumber: 18,
+    stepNumber: 20,
     title: "Do you have pets?",
     subtitle: "Select all that apply",
     phase: "family",
@@ -533,10 +581,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "PetsStep",
   },
 
-  // Phase 8: Personality (Steps 19-20)
+  // Phase 9: Personality (Steps 21-22)
   {
     id: "interests",
-    stepNumber: 19,
+    stepNumber: 21,
     title: "What are your interests?",
     subtitle: "Select what you enjoy",
     phase: "personality",
@@ -557,7 +605,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "life-goals",
-    stepNumber: 20,
+    stepNumber: 22,
     title: "What are your life goals?",
     subtitle: "Select up to 10",
     phase: "personality",
@@ -575,54 +623,6 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     allowPreferNot: false,
     needsKeyboard: false,
     component: "LifeGoalsStep",
-  },
-
-  // Phase 9: About You (Steps 21-22)
-  {
-    id: "bio",
-    stepNumber: 21,
-    title: "Tell us about yourself",
-    subtitle: "Write a short bio",
-    phase: "about",
-    fields: [
-      {
-        key: "Bio",
-        dbColumn: "bio",
-        label: "About Me",
-        placeholder: "Share something interesting about yourself...",
-        inputType: "textarea",
-        maxLength: 1000,
-        rows: 4,
-      },
-    ],
-    isRequired: false,
-    allowSkip: true,
-    allowPreferNot: false,
-    needsKeyboard: true,
-    component: "BioStep",
-  },
-  {
-    id: "looking-for-description",
-    stepNumber: 22,
-    title: "What are you looking for?",
-    subtitle: "Describe your ideal match",
-    phase: "about",
-    fields: [
-      {
-        key: "LookingForDescription",
-        dbColumn: "looking_for_description",
-        label: "What I'm Looking For",
-        placeholder: "Describe what you're looking for in a partner...",
-        inputType: "textarea",
-        maxLength: 500,
-        rows: 3,
-      },
-    ],
-    isRequired: false,
-    allowSkip: true,
-    allowPreferNot: false,
-    needsKeyboard: true,
-    component: "LookingForStep",
   },
 
   // Phase 10: Prompts (Steps 23-32)
@@ -847,7 +847,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "PromptStep",
   },
 
-  // Phase 11: Social (Step 33)
+  // Phase 11: Social Links (Step 33)
   {
     id: "social-links",
     stepNumber: 33,

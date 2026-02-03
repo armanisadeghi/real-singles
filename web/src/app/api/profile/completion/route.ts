@@ -31,83 +31,85 @@ interface ProfileField {
 
 // Define ALL profile fields for completion calculation
 // This is the authoritative list - any field that can be shown on a profile should be here
+// Step numbers updated: bio/looking-for moved to steps 7-8 (high priority)
 const PROFILE_FIELDS: ProfileField[] = [
   // ============================================
-  // REQUIRED FIELDS (must complete to start matching)
+  // REQUIRED FIELDS (steps 1-6)
   // ============================================
   { key: "first_name", dbColumn: "first_name", label: "First Name", required: true, sensitive: false, step: 1, category: "basic" },
   { key: "date_of_birth", dbColumn: "date_of_birth", label: "Date of Birth", required: true, sensitive: false, step: 2, category: "basic" },
   { key: "gender", dbColumn: "gender", label: "Gender", required: true, sensitive: false, step: 3, category: "basic" },
   { key: "looking_for", dbColumn: "looking_for", label: "Looking For", required: true, sensitive: false, step: 4, category: "basic" },
-  // Note: profile_image_url is handled separately via photo count
+  // Note: profile_image_url is handled separately via photo count (step 5)
+  // Verification selfie is step 6
   
   // ============================================
-  // PHYSICAL ATTRIBUTES
+  // BIO & DESCRIPTIONS (steps 7-8) - HIGH PRIORITY
   // ============================================
-  { key: "height_inches", dbColumn: "height_inches", label: "Height", required: false, sensitive: false, step: 7, category: "physical" },
-  { key: "body_type", dbColumn: "body_type", label: "Body Type", required: false, sensitive: false, step: 7, category: "physical" },
-  { key: "ethnicity", dbColumn: "ethnicity", label: "Ethnicity", required: false, sensitive: true, step: 8, category: "physical" },
+  { key: "bio", dbColumn: "bio", label: "About Me", required: false, sensitive: false, step: 7, category: "about" },
+  { key: "looking_for_description", dbColumn: "looking_for_description", label: "What I'm Looking For", required: false, sensitive: false, step: 8, category: "about" },
   
   // ============================================
-  // RELATIONSHIP PREFERENCES
+  // PHYSICAL ATTRIBUTES (steps 9-10)
   // ============================================
-  { key: "dating_intentions", dbColumn: "dating_intentions", label: "Dating Intentions", required: false, sensitive: false, step: 9, category: "relationship" },
-  { key: "marital_status", dbColumn: "marital_status", label: "Marital Status", required: false, sensitive: true, step: 9, category: "relationship" },
+  { key: "height_inches", dbColumn: "height_inches", label: "Height", required: false, sensitive: false, step: 9, category: "physical" },
+  { key: "body_type", dbColumn: "body_type", label: "Body Type", required: false, sensitive: false, step: 9, category: "physical" },
+  { key: "ethnicity", dbColumn: "ethnicity", label: "Ethnicity", required: false, sensitive: true, step: 10, category: "physical" },
   
   // ============================================
-  // LOCATION
+  // RELATIONSHIP PREFERENCES (step 11)
   // ============================================
-  { key: "country", dbColumn: "country", label: "Country", required: false, sensitive: false, step: 10, category: "location" },
-  { key: "city", dbColumn: "city", label: "City", required: false, sensitive: false, step: 10, category: "location" },
-  { key: "state", dbColumn: "state", label: "State", required: false, sensitive: false, step: 10, category: "location" },
-  { key: "hometown", dbColumn: "hometown", label: "Hometown", required: false, sensitive: false, step: 10, category: "location" },
+  { key: "dating_intentions", dbColumn: "dating_intentions", label: "Dating Intentions", required: false, sensitive: false, step: 11, category: "relationship" },
+  { key: "marital_status", dbColumn: "marital_status", label: "Marital Status", required: false, sensitive: true, step: 11, category: "relationship" },
   
   // ============================================
-  // EDUCATION & CAREER
+  // LOCATION (step 12)
   // ============================================
-  { key: "occupation", dbColumn: "occupation", label: "Occupation", required: false, sensitive: false, step: 11, category: "career" },
-  { key: "company", dbColumn: "company", label: "Company", required: false, sensitive: false, step: 11, category: "career" },
-  { key: "education", dbColumn: "education", label: "Education Level", required: false, sensitive: false, step: 12, category: "education" },
-  { key: "schools", dbColumn: "schools", label: "Schools", required: false, sensitive: false, step: 12, category: "education" },
+  { key: "country", dbColumn: "country", label: "Country", required: false, sensitive: false, step: 12, category: "location" },
+  { key: "city", dbColumn: "city", label: "City", required: false, sensitive: false, step: 12, category: "location" },
+  { key: "state", dbColumn: "state", label: "State", required: false, sensitive: false, step: 12, category: "location" },
+  { key: "hometown", dbColumn: "hometown", label: "Hometown", required: false, sensitive: false, step: 12, category: "location" },
   
   // ============================================
-  // BELIEFS & VALUES
+  // EDUCATION & CAREER (steps 13-14)
   // ============================================
-  { key: "religion", dbColumn: "religion", label: "Religion", required: false, sensitive: true, step: 13, category: "beliefs" },
-  { key: "political_views", dbColumn: "political_views", label: "Political Views", required: false, sensitive: true, step: 13, category: "beliefs" },
+  { key: "occupation", dbColumn: "occupation", label: "Occupation", required: false, sensitive: false, step: 13, category: "career" },
+  { key: "company", dbColumn: "company", label: "Company", required: false, sensitive: false, step: 13, category: "career" },
+  { key: "education", dbColumn: "education", label: "Education Level", required: false, sensitive: false, step: 14, category: "education" },
+  { key: "schools", dbColumn: "schools", label: "Schools", required: false, sensitive: false, step: 14, category: "education" },
   
   // ============================================
-  // LIFESTYLE
+  // BELIEFS & VALUES (step 15)
   // ============================================
-  { key: "exercise", dbColumn: "exercise", label: "Exercise", required: false, sensitive: false, step: 14, category: "lifestyle" },
-  { key: "languages", dbColumn: "languages", label: "Languages", required: false, sensitive: false, step: 15, category: "lifestyle" },
+  { key: "religion", dbColumn: "religion", label: "Religion", required: false, sensitive: true, step: 15, category: "beliefs" },
+  { key: "political_views", dbColumn: "political_views", label: "Political Views", required: false, sensitive: true, step: 15, category: "beliefs" },
   
   // ============================================
-  // HABITS
+  // LIFESTYLE (steps 16-17)
   // ============================================
-  { key: "smoking", dbColumn: "smoking", label: "Smoking", required: false, sensitive: false, step: 16, category: "habits" },
-  { key: "drinking", dbColumn: "drinking", label: "Drinking", required: false, sensitive: false, step: 16, category: "habits" },
-  { key: "marijuana", dbColumn: "marijuana", label: "Marijuana", required: false, sensitive: true, step: 16, category: "habits" },
+  { key: "exercise", dbColumn: "exercise", label: "Exercise", required: false, sensitive: false, step: 16, category: "lifestyle" },
+  { key: "languages", dbColumn: "languages", label: "Languages", required: false, sensitive: false, step: 17, category: "lifestyle" },
   
   // ============================================
-  // FAMILY
+  // HABITS (step 18)
   // ============================================
-  { key: "has_kids", dbColumn: "has_kids", label: "Have Children", required: false, sensitive: true, step: 17, category: "family" },
-  { key: "wants_kids", dbColumn: "wants_kids", label: "Want Children", required: false, sensitive: true, step: 17, category: "family" },
-  { key: "pets", dbColumn: "pets", label: "Pets", required: false, sensitive: false, step: 18, category: "family" },
+  { key: "smoking", dbColumn: "smoking", label: "Smoking", required: false, sensitive: false, step: 18, category: "habits" },
+  { key: "drinking", dbColumn: "drinking", label: "Drinking", required: false, sensitive: false, step: 18, category: "habits" },
+  { key: "marijuana", dbColumn: "marijuana", label: "Marijuana", required: false, sensitive: true, step: 18, category: "habits" },
   
   // ============================================
-  // INTERESTS & PERSONALITY
+  // FAMILY (steps 19-20)
   // ============================================
-  { key: "interests", dbColumn: "interests", label: "Interests", required: false, sensitive: false, step: 19, category: "personality" },
-  { key: "life_goals", dbColumn: "life_goals", label: "Life Goals", required: false, sensitive: false, step: 20, category: "personality" },
+  { key: "has_kids", dbColumn: "has_kids", label: "Have Children", required: false, sensitive: true, step: 19, category: "family" },
+  { key: "wants_kids", dbColumn: "wants_kids", label: "Want Children", required: false, sensitive: true, step: 19, category: "family" },
+  { key: "pets", dbColumn: "pets", label: "Pets", required: false, sensitive: false, step: 20, category: "family" },
+  
+  // ============================================
+  // INTERESTS & PERSONALITY (steps 21-22)
+  // ============================================
+  { key: "interests", dbColumn: "interests", label: "Interests", required: false, sensitive: false, step: 21, category: "personality" },
+  { key: "life_goals", dbColumn: "life_goals", label: "Life Goals", required: false, sensitive: false, step: 22, category: "personality" },
   { key: "zodiac_sign", dbColumn: "zodiac_sign", label: "Zodiac Sign", required: false, sensitive: false, step: 2, category: "personality" }, // Auto-calculated from DOB
-  
-  // ============================================
-  // BIO & DESCRIPTIONS
-  // ============================================
-  { key: "bio", dbColumn: "bio", label: "About Me", required: false, sensitive: false, step: 21, category: "about" },
-  { key: "looking_for_description", dbColumn: "looking_for_description", label: "What I'm Looking For", required: false, sensitive: false, step: 22, category: "about" },
   
   // ============================================
   // PROFILE PROMPTS (11 total)
