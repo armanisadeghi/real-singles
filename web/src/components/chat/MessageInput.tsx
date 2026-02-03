@@ -264,7 +264,7 @@ export function MessageInput({
                 minHeight: "36px",
                 maxHeight: "120px",
                 // Override global CSS that conflicts with component styles
-                padding: "9px 36px 9px 16px",
+                padding: "9px 42px 9px 14px",
                 fontSize: "16px",
                 lineHeight: "18px",
                 border: "0.5px solid var(--border)",
@@ -281,7 +281,7 @@ export function MessageInput({
             {canSend && (
               <button
                 type="submit"
-                className="absolute right-1 top-1/2 -translate-y-1/2 w-[28px] h-[28px] rounded-full flex items-center justify-center bg-blue-500 text-white transition-all active:scale-95"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-[28px] h-[28px] rounded-full flex items-center justify-center bg-blue-500 text-white transition-all active:scale-95"
               >
                 <ArrowUp className="w-4 h-4" strokeWidth={3} />
               </button>
