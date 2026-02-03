@@ -114,9 +114,9 @@ export const HAS_KIDS_OPTIONS: readonly TypedOption<DbHasKids>[] = [
  * @constraint DbWantsKids - see db-constraints.ts
  */
 export const WANTS_KIDS_OPTIONS: readonly TypedOption<DbWantsKids>[] = [
+  { value: "yes", label: "Yes" },
   { value: "no", label: "No" },
   { value: "no_ok_if_partner_has", label: "No (OK if partner has)" },
-  { value: "yes", label: "Yes" },
   { value: "not_sure", label: "Not sure" },
 ] as const;
 

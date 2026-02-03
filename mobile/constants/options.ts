@@ -71,9 +71,9 @@ export const HAS_KIDS_OPTIONS = [
  * Matches database CHECK constraint
  */
 export const WANTS_KIDS_OPTIONS = [
+  { label: "Yes", value: "yes" },
   { label: "No", value: "no" },
   { label: "No (OK if partner has)", value: "no_ok_if_partner_has" },
-  { label: "Yes", value: "yes" },
   { label: "Not sure", value: "not_sure" },
 ];
 
