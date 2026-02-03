@@ -9,7 +9,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { X, MoreHorizontal, Heart, Star, MapPin, Briefcase, CheckCircle, ArrowLeft, Undo2, Share, Ban, Flag } from "lucide-react";
+import { X, MoreHorizontal, Heart, Star, MapPin, Briefcase, CheckCircle, ArrowLeft, Undo2, Send, Ban, Flag } from "lucide-react";
 import { cn, calculateAge } from "@/lib/utils";
 import { PhotoCarousel } from "./PhotoCarousel";
 import { ProfileSectionRenderer } from "./ProfileSectionRenderer";
@@ -393,7 +393,7 @@ export function SearchProfileView({
     {
       id: "share",
       label: "Share Profile",
-      icon: Share,
+      icon: Send,
       description: "Send this profile to a friend",
     },
     {
@@ -624,7 +624,7 @@ export function SearchProfileView({
               )}
               aria-label="Share this profile"
             >
-              <Share className="w-5 h-5" />
+              <Send className="w-5 h-5" />
             </button>
           </div>
 
@@ -854,7 +854,7 @@ export function SearchProfileView({
             )}
             aria-label="Share this profile"
           >
-            <Share className="w-6 h-6" />
+            <Send className="w-6 h-6" />
           </button>
         </div>
       </div>
