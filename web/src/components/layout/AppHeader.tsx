@@ -138,7 +138,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
   }
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+    <header className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
       {/* Skip to main content link */}
       <a
         href="#main-content"
@@ -168,25 +168,25 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
           <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
             <Link 
               href="/discover" 
-              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+              className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
               Discover
             </Link>
             <Link 
               href="/explore" 
-              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+              className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
               Explore
             </Link>
             <Link 
               href="/likes" 
-              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+              className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
               Likes
             </Link>
             <Link 
               href="/messages" 
-              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+              className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
               Messages
             </Link>
@@ -220,7 +220,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                 aria-expanded={isDropdownOpen}
                 aria-haspopup="menu"
                 aria-label={`Profile menu for ${user.displayName}`}
-                className="flex items-center gap-2 hover:bg-gray-100 active:bg-gray-200 rounded-full p-1 sm:pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+                className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-neutral-800 active:bg-gray-200 dark:active:bg-neutral-700 rounded-full p-1 sm:pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               >
                 <Avatar
                   src={user.profileImage}
@@ -228,7 +228,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                   size="sm"
                 />
                 {/* Display name - hidden on mobile for cleaner look */}
-                <span className="hidden sm:block text-sm font-medium text-gray-700 max-w-[120px] truncate">
+                <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[120px] truncate">
                   {user.displayName}
                 </span>
               </button>
@@ -246,8 +246,8 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                       aria-labelledby="user-menu"
                     >
                       {/* User info header - shows name on mobile */}
-                      <div className="sm:hidden px-4 py-2 border-b border-white/20 mb-1">
-                        <p className="font-medium text-gray-900 truncate">{user.displayName}</p>
+                      <div className="sm:hidden px-4 py-2 border-b border-white/20 dark:border-white/10 mb-1">
+                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{user.displayName}</p>
                       </div>
 
                       <Link
@@ -255,7 +255,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                         role="menuitem"
                         tabIndex={-1}
                         onClick={() => setIsDropdownOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-white/40 focus:bg-white/40 focus:outline-none transition-colors"
+                        className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white/40 dark:hover:bg-white/10 focus:bg-white/40 dark:focus:bg-white/10 focus:outline-none transition-colors"
                       >
                         My Profile
                       </Link>
@@ -264,7 +264,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                         role="menuitem"
                         tabIndex={-1}
                         onClick={() => setIsDropdownOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-white/40 focus:bg-white/40 focus:outline-none transition-colors"
+                        className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white/40 dark:hover:bg-white/10 focus:bg-white/40 dark:focus:bg-white/10 focus:outline-none transition-colors"
                       >
                         Edit Profile
                       </Link>
@@ -273,7 +273,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                         role="menuitem"
                         tabIndex={-1}
                         onClick={() => setIsDropdownOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-white/40 focus:bg-white/40 focus:outline-none transition-colors"
+                        className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white/40 dark:hover:bg-white/10 focus:bg-white/40 dark:focus:bg-white/10 focus:outline-none transition-colors"
                       >
                         Saved Profiles
                       </Link>
@@ -282,17 +282,17 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                         role="menuitem"
                         tabIndex={-1}
                         onClick={() => setIsDropdownOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-white/40 focus:bg-white/40 focus:outline-none transition-colors"
+                        className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white/40 dark:hover:bg-white/10 focus:bg-white/40 dark:focus:bg-white/10 focus:outline-none transition-colors"
                       >
                         Settings
                       </Link>
-                      <hr className="my-1.5 border-white/20" aria-hidden="true" />
+                      <hr className="my-1.5 border-white/20 dark:border-white/10" aria-hidden="true" />
                       <form action={signOutAction}>
                         <button
                           type="submit"
                           role="menuitem"
                           tabIndex={-1}
-                          className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50/50 focus:bg-red-50/50 focus:outline-none transition-colors"
+                          className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/30 focus:bg-red-50/50 dark:focus:bg-red-900/30 focus:outline-none transition-colors"
                         >
                           Sign Out
                         </button>

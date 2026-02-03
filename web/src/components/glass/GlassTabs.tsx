@@ -3,18 +3,17 @@
 /**
  * GlassTabs
  *
- * iOS 26 Liquid Glass pill-style tab navigation.
- * Designed for inline tab switching like Tinder's Likes page.
+ * iOS 26-inspired pill-style tab navigation.
+ * Uses CSS glassmorphism (compatible with all layouts).
  *
  * Features:
- * - Floating glass pill container
- * - Active tab indicator with subtle glass effect
+ * - Frosted glass pill container
+ * - Active tab indicator with subtle highlight
  * - Proper ARIA accessibility
  * - Smooth transitions
  */
 
 import { cn } from "@/lib/utils";
-import { GlassContainer } from "./GlassContainer";
 
 export interface Tab {
   id: string;
@@ -44,7 +43,13 @@ export function GlassTabs({
   className,
 }: GlassTabsProps) {
   return (
-    <GlassContainer variant="tabs" className={cn("p-1", className)}>
+    <div
+      className={cn(
+        "rounded-full p-1",
+        "bg-gray-100/80 backdrop-blur-sm",
+        className
+      )}
+    >
       <div role="tablist" aria-label={ariaLabel} className="flex">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -57,11 +62,11 @@ export function GlassTabs({
               aria-controls={`tabpanel-${tab.id}`}
               onClick={() => onChange(tab.id)}
               className={cn(
-                "flex-1 py-2.5 px-3 rounded-full text-sm font-medium transition-all relative",
+                "flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all relative",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-1",
                 isActive
-                  ? "bg-white/80 text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-white/30"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
               )}
             >
               {tab.label}
@@ -83,6 +88,6 @@ export function GlassTabs({
           );
         })}
       </div>
-    </GlassContainer>
+    </div>
   );
 }

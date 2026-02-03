@@ -11,6 +11,7 @@ Use this skill when:
 - Using modern CSS features (container queries, animations, etc.)
 - Setting up Tailwind in React/Next.js/Vite projects
 - Migrating from Tailwind v3 to v4
+- **Using glass/glassmorphism components** (see [glass-components-reference.md](glass-components-reference.md))
 
 ---
 
@@ -461,6 +462,149 @@ When reviewing code that might have v3 patterns:
 | Reduced motion | `motion-reduce:animate-none` |
 | Theme variable | `@theme { --color-brand: ... }` |
 | Custom dark variant | `@custom-variant dark (&:where(.dark, .dark *))` |
+
+---
+
+## RealSingles Dark Mode Patterns (Project-Specific)
+
+This project uses automatic dark mode detection via `prefers-color-scheme`. All components MUST support both modes.
+
+### Color Mapping Table (MANDATORY)
+
+When adding dark mode to any component, use these exact mappings:
+
+| Light Mode | Dark Mode | Usage |
+|------------|-----------|-------|
+| `bg-white` | `dark:bg-neutral-950` | Page backgrounds, cards |
+| `bg-gray-50` | `dark:bg-neutral-900` | Secondary backgrounds |
+| `bg-gray-100` | `dark:bg-neutral-800` | Tertiary backgrounds, inputs |
+| `bg-gray-200` | `dark:bg-neutral-700` | Borders as backgrounds, disabled |
+| `text-gray-900` | `dark:text-gray-100` | Primary text |
+| `text-gray-700` | `dark:text-gray-300` | Secondary text |
+| `text-gray-600` | `dark:text-gray-400` | Tertiary text |
+| `text-gray-500` | `dark:text-gray-400` | Muted text |
+| `text-gray-400` | `dark:text-gray-500` | Placeholder text |
+| `border-gray-100` | `dark:border-neutral-800` | Light borders |
+| `border-gray-200` | `dark:border-neutral-700` | Medium borders |
+| `border-gray-300` | `dark:border-neutral-600` | Strong borders |
+| `divide-gray-100` | `dark:divide-neutral-800` | Dividers |
+| `divide-gray-200` | `dark:divide-neutral-700` | Strong dividers |
+| `hover:bg-gray-50` | `dark:hover:bg-neutral-800` | Hover states |
+| `hover:bg-gray-100` | `dark:hover:bg-neutral-800` | Active hover states |
+| `active:bg-gray-200` | `dark:active:bg-neutral-700` | Active/pressed states |
+
+### Brand & Accent Colors
+
+| Light Mode | Dark Mode | Usage |
+|------------|-----------|-------|
+| `text-amber-700` | `dark:text-amber-400` | Brand gold text |
+| `text-amber-600` | `dark:text-amber-400` | Brand gold secondary |
+| `bg-amber-50` | `dark:bg-amber-900/30` | Brand gold background |
+| `text-red-600` | `dark:text-red-400` | Error/destructive text |
+| `bg-red-50` | `dark:bg-red-900/30` | Error background |
+| `text-pink-600` | `dark:text-pink-400` | Like/heart accent |
+| `text-blue-500` | `dark:text-blue-400` | Links, interactive |
+
+### Gradient Patterns
+
+```tsx
+// Pink/Purple gradients (common for empty states, accents)
+className="bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-950 dark:to-purple-950"
+className="from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30"
+
+// Blue/Indigo gradients
+className="from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30"
+
+// Amber/Orange gradients (events)
+className="from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30"
+
+// White fade gradients (overlays)
+className="from-white dark:from-neutral-950"
+className="to-white/0 dark:to-neutral-950/0"
+```
+
+### Glass/Glassmorphism Dark Mode
+
+```tsx
+// Glass container backgrounds
+className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl"
+className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl"
+
+// Glass borders
+className="border-white/30 dark:border-white/10"
+className="border-white/20 dark:border-white/10"
+
+// Glass shadows (increase opacity in dark mode)
+className="shadow-lg shadow-black/10 dark:shadow-black/30"
+```
+
+### CSS Variables (globals.css)
+
+The project defines semantic CSS variables that auto-switch:
+
+```css
+/* Already defined in globals.css - use in custom CSS only */
+--background, --foreground
+--surface, --surface-elevated, --surface-secondary
+--glass-bg, --glass-bg-solid, --glass-border, --glass-shadow
+--text-primary, --text-secondary, --text-muted, --text-inverted
+--chat-bubble-sent, --chat-bubble-received
+```
+
+### Dark Mode Checklist
+
+When updating any component for dark mode:
+
+1. ✅ **Backgrounds**: Every `bg-white`, `bg-gray-*` has a `dark:` variant
+2. ✅ **Text**: Every `text-gray-*` has a `dark:` variant  
+3. ✅ **Borders**: Every `border-gray-*` has a `dark:` variant
+4. ✅ **Dividers**: Every `divide-gray-*` has a `dark:` variant
+5. ✅ **Hovers**: Every `hover:bg-*` has a `dark:hover:` variant
+6. ✅ **Gradients**: Both ends of gradients have dark variants
+7. ✅ **Shadows**: Consider increasing opacity for dark mode
+8. ✅ **Brand colors**: Use lighter variants in dark mode (amber-700 → amber-400)
+
+### Files Already Updated
+
+| File | Status |
+|------|--------|
+| `globals.css` | ✅ CSS variables + scrollbar styles |
+| `AppHeader.tsx` | ✅ Full dark mode |
+| `GlassBottomNav.tsx` | ✅ Full dark mode |
+| `ChatThread.tsx` | ✅ Full dark mode |
+| `MessageBubble.tsx` | ✅ Full dark mode |
+| `MessageInput.tsx` | ✅ Full dark mode |
+| `SearchProfileView.tsx` | ✅ Full dark mode |
+| `DiscoverStates.tsx` | ✅ Full dark mode |
+| `likes/page.tsx` | ✅ Full dark mode |
+| `messages/page.tsx` | ✅ Full dark mode |
+| `profile/page.tsx` | ✅ Full dark mode |
+| `explore/page.tsx` | ✅ Full dark mode |
+| `(app)/layout.tsx` | ✅ Full dark mode |
+
+---
+
+## Glass Components (Project-Specific)
+
+This project includes iOS 26 "Liquid Glass" components for premium UI effects.
+
+**Quick usage:**
+```tsx
+import { GlassContainer, GlassTabs, GlassCard } from "@/components/glass";
+
+// Tab navigation
+<GlassTabs tabs={tabs} activeTab={active} onChange={setActive} />
+
+// Cards and CTAs
+<GlassCard withBorder>Content</GlassCard>
+
+// Custom glass elements
+<GlassContainer variant="menu">Dropdown content</GlassContainer>
+```
+
+**Key rule:** Don't use `GlassContainer` for fixed-positioned elements (use CSS glassmorphism instead).
+
+For complete documentation, see [glass-components-reference.md](glass-components-reference.md).
 
 ---
 

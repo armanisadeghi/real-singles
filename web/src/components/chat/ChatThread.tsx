@@ -170,14 +170,14 @@ export function ChatThread({
   return (
     <>
       {/* Full-screen chat container - explicit viewport dimensions to override scrollbar-gutter */}
-      <div className="fixed top-0 left-0 w-screen h-screen flex flex-col bg-white overflow-hidden">
+      <div className="fixed top-0 left-0 w-screen h-screen flex flex-col bg-white dark:bg-neutral-950 overflow-hidden">
         {/* iOS-style Header - Translucent with blur */}
-        <header className="shrink-0 bg-white/90 backdrop-blur-xl pt-[env(safe-area-inset-top)] z-40 border-b border-gray-100">
+        <header className="shrink-0 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl pt-[env(safe-area-inset-top)] z-40 border-b border-gray-100 dark:border-neutral-800">
           <div className="flex items-center gap-3 px-2 py-2 h-[52px]">
             {/* Back button - iOS chevron style */}
             <Link
               href="/chats"
-              className="flex items-center justify-center w-10 h-10 -ml-1 rounded-full active:bg-gray-100/80 transition-colors text-blue-500"
+              className="flex items-center justify-center w-10 h-10 -ml-1 rounded-full active:bg-gray-100/80 dark:active:bg-neutral-800/80 transition-colors text-blue-500 dark:text-blue-400"
             >
               <ChevronLeft className="w-7 h-7" strokeWidth={2.5} />
             </Link>
@@ -213,21 +213,21 @@ export function ChatThread({
                   href={`/profile/${otherParticipant.user_id}`}
                   className="block active:opacity-70 transition-opacity"
                 >
-                  <h2 className="font-semibold text-gray-900 truncate text-[16px] leading-tight">
+                  <h2 className="font-semibold text-gray-900 dark:text-gray-100 truncate text-[16px] leading-tight">
                     {displayName}
                   </h2>
                   {/* Online status - only show when online */}
                   {isOnline && (
-                    <p className="text-[12px] text-gray-500">Active now</p>
+                    <p className="text-[12px] text-gray-500 dark:text-gray-400">Active now</p>
                   )}
                 </Link>
               ) : (
                 <>
-                  <h2 className="font-semibold text-gray-900 truncate text-[16px] leading-tight">
+                  <h2 className="font-semibold text-gray-900 dark:text-gray-100 truncate text-[16px] leading-tight">
                     {displayName}
                   </h2>
                   {conversationType === "group" && (
-                    <p className="text-[12px] text-gray-500">{participants.length} members</p>
+                    <p className="text-[12px] text-gray-500 dark:text-gray-400">{participants.length} members</p>
                   )}
                 </>
               )}
@@ -237,14 +237,14 @@ export function ChatThread({
             <div className="flex items-center shrink-0">
               <button 
                 onClick={handleCallClick}
-                className="flex items-center justify-center w-10 h-10 rounded-full active:bg-gray-100/80 transition-colors text-blue-500"
+                className="flex items-center justify-center w-10 h-10 rounded-full active:bg-gray-100/80 dark:active:bg-neutral-800/80 transition-colors text-blue-500 dark:text-blue-400"
                 aria-label="Voice call"
               >
                 <Phone className="w-6 h-6" />
               </button>
               <button 
                 onClick={handleVideoClick}
-                className="flex items-center justify-center w-10 h-10 rounded-full active:bg-gray-100/80 transition-colors text-blue-500"
+                className="flex items-center justify-center w-10 h-10 rounded-full active:bg-gray-100/80 dark:active:bg-neutral-800/80 transition-colors text-blue-500 dark:text-blue-400"
                 aria-label="Video call"
               >
                 <Video className="w-6 h-6" />
@@ -267,13 +267,13 @@ export function ChatThread({
               </div>
             ) : messages.length === 0 ? (
               <div className="h-full min-h-[50vh] flex flex-col items-center justify-center text-center px-2">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/50 dark:to-purple-900/50 flex items-center justify-center mb-4">
                   <span className="text-3xl">👋</span>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                   Start the conversation
                 </h3>
-                <p className="text-sm text-gray-500 max-w-[240px]">
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-[240px]">
                   Send a message to {displayName} to get things started!
                 </p>
               </div>
@@ -294,13 +294,13 @@ export function ChatThread({
                       name={displayName}
                       size="xs"
                     />
-                    <div className="bg-[#E9E9EB] rounded-2xl rounded-bl-md px-4 py-2.5">
+                    <div className="bg-[#E9E9EB] dark:bg-[#3a3a3c] rounded-2xl rounded-bl-md px-4 py-2.5">
                       <div className="flex gap-1 items-center">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                        <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                         {typingText && (
-                          <span className="text-xs text-gray-500 ml-1.5">{typingText}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 ml-1.5">{typingText}</span>
                         )}
                       </div>
                     </div>

@@ -85,14 +85,14 @@ function formatRelativeTime(dateString: string | null | undefined): string {
 
 function CardSkeleton() {
   return (
-    <div className="flex items-center gap-4 p-3 bg-white rounded-xl">
-      <div className="w-[72px] h-[72px] rounded-lg bg-gray-100 animate-pulse" />
+    <div className="flex items-center gap-4 p-3 bg-white dark:bg-neutral-900 rounded-xl">
+      <div className="w-[72px] h-[72px] rounded-lg bg-gray-100 dark:bg-neutral-800 animate-pulse" />
       <div className="flex-1">
-        <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
-        <div className="h-3 w-32 bg-gray-100 rounded animate-pulse mt-2" />
-        <div className="h-3 w-20 bg-gray-100 rounded animate-pulse mt-2" />
+        <div className="h-4 w-24 bg-gray-100 dark:bg-neutral-800 rounded animate-pulse" />
+        <div className="h-3 w-32 bg-gray-100 dark:bg-neutral-800 rounded animate-pulse mt-2" />
+        <div className="h-3 w-20 bg-gray-100 dark:bg-neutral-800 rounded animate-pulse mt-2" />
       </div>
-      <div className="w-10 h-10 rounded-full bg-gray-100 animate-pulse" />
+      <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-neutral-800 animate-pulse" />
     </div>
   );
 }
@@ -135,9 +135,9 @@ function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoo
         />
         
         {/* Static background circles - more visible */}
-        <div className="absolute inset-4 rounded-full bg-pink-100/80" />
-        <div className="absolute inset-12 rounded-full bg-pink-50" />
-        <div className="absolute inset-20 rounded-full bg-white" />
+        <div className="absolute inset-4 rounded-full bg-pink-100/80 dark:bg-pink-900/30" />
+        <div className="absolute inset-12 rounded-full bg-pink-50 dark:bg-pink-950/40" />
+        <div className="absolute inset-20 rounded-full bg-white dark:bg-neutral-900" />
         
         {/* Profile photo container */}
         <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl z-10">
@@ -170,12 +170,12 @@ function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoo
       `}</style>
 
       {/* Title */}
-      <h2 className="text-xl font-semibold text-gray-900 mb-2 text-center">
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 text-center">
         {title}
       </h2>
 
       {/* Description */}
-      <p className="text-gray-500 text-center max-w-xs mb-6">
+      <p className="text-gray-500 dark:text-gray-400 text-center max-w-xs mb-6">
         {description}
       </p>
 
@@ -284,10 +284,10 @@ function LikesYouTab() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 mb-4">{error}</p>
+        <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700"
         >
           Try Again
         </button>
@@ -317,8 +317,8 @@ function LikesYouTab() {
           <div
             key={like.id}
             className={cn(
-              "flex items-center gap-3 p-3 bg-white rounded-xl",
-              like.is_super_like && "ring-2 ring-blue-400"
+              "flex items-center gap-3 p-3 bg-white dark:bg-neutral-900 rounded-xl",
+              like.is_super_like && "ring-2 ring-blue-400 dark:ring-blue-500"
             )}
           >
             {/* Photo */}
@@ -343,13 +343,13 @@ function LikesYouTab() {
               href={`/search/profile/${like.user_id}`}
               className="flex-1 min-w-0"
             >
-              <h3 className="text-base font-semibold text-gray-900 truncate">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
                 {name}
-                {like.age && <span className="font-normal text-gray-500">, {like.age}</span>}
+                {like.age && <span className="font-normal text-gray-500 dark:text-gray-400">, {like.age}</span>}
               </h3>
 
               {location && (
-                <p className="text-sm text-gray-500 truncate">{location}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{location}</p>
               )}
 
               <div className="flex items-center gap-1.5 mt-1 flex-wrap">
@@ -362,7 +362,7 @@ function LikesYouTab() {
                   size="sm"
                 />
                 {likedTime && (
-                  <span className="text-xs text-gray-400">{likedTime}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">{likedTime}</span>
                 )}
               </div>
             </Link>
@@ -372,7 +372,7 @@ function LikesYouTab() {
               <button
                 onClick={() => like.user_id && handlePass(like.user_id)}
                 disabled={isLoading}
-                className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50"
+                className="w-9 h-9 rounded-full bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-neutral-700 disabled:opacity-50"
               >
                 <span className="text-lg">✕</span>
               </button>
@@ -443,10 +443,10 @@ function LikesSentTab() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 mb-4">{error}</p>
+        <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700"
         >
           Try Again
         </button>
@@ -476,8 +476,8 @@ function LikesSentTab() {
             key={like.id}
             href={`/search/profile/${like.user_id}`}
             className={cn(
-              "flex items-center gap-3 p-3 bg-white rounded-xl hover:bg-gray-50 transition-colors",
-              like.is_super_like && "ring-2 ring-blue-400"
+              "flex items-center gap-3 p-3 bg-white dark:bg-neutral-900 rounded-xl hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors",
+              like.is_super_like && "ring-2 ring-blue-400 dark:ring-blue-500"
             )}
           >
             {/* Photo */}
@@ -496,13 +496,13 @@ function LikesSentTab() {
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-semibold text-gray-900 truncate">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
                 {name}
-                {like.age && <span className="font-normal text-gray-500">, {like.age}</span>}
+                {like.age && <span className="font-normal text-gray-500 dark:text-gray-400">, {like.age}</span>}
               </h3>
 
               {location && (
-                <p className="text-sm text-gray-500 truncate">{location}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{location}</p>
               )}
 
               <div className="flex items-center gap-1.5 mt-1 flex-wrap">
@@ -515,14 +515,14 @@ function LikesSentTab() {
                   size="sm"
                 />
                 {likedTime && (
-                  <span className="text-xs text-gray-400">Sent {likedTime}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">Sent {likedTime}</span>
                 )}
               </div>
             </div>
 
             {/* Pending indicator */}
             <div className="flex-shrink-0">
-              <span className="px-2.5 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-medium">
+              <span className="px-2.5 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-xs font-medium">
                 Pending
               </span>
             </div>
@@ -587,10 +587,10 @@ function MatchesTab() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 mb-4">{error}</p>
+        <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700"
         >
           Try Again
         </button>
@@ -618,7 +618,7 @@ function MatchesTab() {
         return (
           <div
             key={match.user_id}
-            className="flex items-center gap-3 p-3 bg-white rounded-xl"
+            className="flex items-center gap-3 p-3 bg-white dark:bg-neutral-900 rounded-xl"
           >
             {/* Photo */}
             <Link
@@ -637,12 +637,12 @@ function MatchesTab() {
               href={`/profile/${match.user_id}`}
               className="flex-1 min-w-0"
             >
-              <h3 className="text-base font-semibold text-gray-900 truncate">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
                 {name}
               </h3>
 
               {location && (
-                <p className="text-sm text-gray-500 truncate">{location}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{location}</p>
               )}
 
               <div className="flex items-center gap-1.5 mt-1 flex-wrap">
@@ -655,7 +655,7 @@ function MatchesTab() {
                   size="sm"
                 />
                 {matchedTime && (
-                  <span className="inline-flex items-center gap-1 text-xs text-pink-600">
+                  <span className="inline-flex items-center gap-1 text-xs text-pink-600 dark:text-pink-400">
                     <Heart className="w-3 h-3" />
                     {matchedTime}
                   </span>

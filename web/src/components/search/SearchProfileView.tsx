@@ -442,14 +442,14 @@ export function SearchProfileView({
   const location = [profile.city, profile.state].filter(Boolean).join(", ");
 
   return (
-    <div className="fixed inset-0 z-30 bg-gray-50 overflow-y-auto overscroll-contain scrollbar-hide">
+    <div className="fixed inset-0 z-30 bg-gray-50 dark:bg-neutral-900 overflow-y-auto overscroll-contain scrollbar-hide">
       {/* Scrollable content wrapper */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-center md:py-8 md:px-4 md:gap-6 max-w-6xl mx-auto w-full">
         
         {/* Left Column - Photo, Actions, Basic Info (desktop) */}
         <div className="relative md:sticky md:top-8 md:w-[400px] shrink-0">
           {/* Photo Section */}
-          <div className="md:rounded-2xl md:overflow-hidden md:shadow-lg">
+          <div className="md:rounded-2xl md:overflow-hidden md:shadow-lg dark:md:shadow-black/30">
             <PhotoCarousel 
               images={images} 
               height="55vh"
@@ -494,13 +494,13 @@ export function SearchProfileView({
               disabled={actionLoading !== null}
               className={cn(
                 "w-11 h-11 rounded-full flex items-center justify-center",
-                "bg-white text-red-500 border-2 border-red-300",
-                "shadow-sm",
+                "bg-white dark:bg-neutral-950 text-red-500 border-2 border-red-300 dark:border-red-400/50",
+                "shadow-sm dark:shadow-black/20",
                 // Smooth transitions for all properties
                 "transition-all duration-200 ease-out",
                 // Hover state - scale up, elevate shadow, shift colors
-                "hover:scale-110 hover:border-red-400 hover:bg-red-50",
-                "hover:shadow-lg hover:shadow-red-200/50",
+                "hover:scale-110 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950",
+                "hover:shadow-lg hover:shadow-red-200/50 dark:hover:shadow-red-900/30",
                 // Active/click state
                 "active:scale-95 active:shadow-sm",
                 // Disabled state
@@ -522,14 +522,14 @@ export function SearchProfileView({
               title={undoState?.canUndo ? `Undo (${undoState.secondsRemaining}s)` : "No action to undo"}
               className={cn(
                 "w-11 h-11 rounded-full flex items-center justify-center relative",
-                "bg-white border-2",
-                "shadow-sm",
+                "bg-white dark:bg-neutral-950 border-2",
+                "shadow-sm dark:shadow-black/20",
                 // Smooth transitions for all properties
                 "transition-all duration-200 ease-out",
                 // Conditional styling based on undo availability
                 undoState?.canUndo
-                  ? "text-amber-600 border-amber-300 hover:scale-110 hover:border-amber-400 hover:bg-amber-50 hover:shadow-lg hover:shadow-amber-200/50"
-                  : "text-gray-400 border-gray-200 cursor-not-allowed",
+                  ? "text-amber-600 border-amber-300 dark:border-amber-400/50 hover:scale-110 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950 hover:shadow-lg hover:shadow-amber-200/50 dark:hover:shadow-amber-900/30"
+                  : "text-gray-400 dark:text-gray-500 border-gray-200 dark:border-neutral-700 cursor-not-allowed",
                 // Active/click state
                 "active:scale-95 active:shadow-sm",
                 // Disabled state
@@ -556,13 +556,13 @@ export function SearchProfileView({
               disabled={actionLoading !== null}
               className={cn(
                 "w-11 h-11 rounded-full flex items-center justify-center",
-                "bg-white text-amber-500 border-2 border-amber-300",
-                "shadow-sm",
+                "bg-white dark:bg-neutral-950 text-amber-500 border-2 border-amber-300 dark:border-amber-400/50",
+                "shadow-sm dark:shadow-black/20",
                 // Smooth transitions for all properties
                 "transition-all duration-200 ease-out",
                 // Hover state - scale up, elevate shadow, glow effect
-                "hover:scale-110 hover:border-amber-400 hover:bg-amber-50",
-                "hover:shadow-lg hover:shadow-amber-200/50",
+                "hover:scale-110 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950",
+                "hover:shadow-lg hover:shadow-amber-200/50 dark:hover:shadow-amber-900/30",
                 // Active/click state
                 "active:scale-95 active:shadow-sm",
                 // Disabled state
@@ -583,13 +583,13 @@ export function SearchProfileView({
               disabled={actionLoading !== null}
               className={cn(
                 "w-11 h-11 rounded-full flex items-center justify-center",
-                "bg-amber-500 text-white",
-                "shadow-sm",
+                "bg-amber-500 dark:bg-amber-600 text-white",
+                "shadow-sm dark:shadow-black/20",
                 // Smooth transitions for all properties
                 "transition-all duration-200 ease-out",
                 // Hover state - scale up, elevate shadow, brighten
-                "hover:scale-110 hover:bg-amber-400",
-                "hover:shadow-lg hover:shadow-amber-300/50",
+                "hover:scale-110 hover:bg-amber-400 dark:hover:bg-amber-500",
+                "hover:shadow-lg hover:shadow-amber-300/50 dark:hover:shadow-amber-900/30",
                 // Active/click state
                 "active:scale-95 active:bg-amber-600 active:shadow-sm",
                 // Disabled state
@@ -606,10 +606,10 @@ export function SearchProfileView({
           </div>
 
           {/* Desktop: Basic Info & About below actions */}
-          <div className="hidden md:block bg-white rounded-2xl shadow-lg mt-4 p-5">
+          <div className="hidden md:block bg-white dark:bg-neutral-950 rounded-2xl shadow-lg dark:shadow-black/30 mt-4 p-5">
             {/* Name & Age */}
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {name}
                 {age && <span className="font-normal">, {age}</span>}
               </h1>
@@ -620,11 +620,11 @@ export function SearchProfileView({
 
             {/* Location */}
             {location && (
-              <div className="flex items-center gap-1.5 mt-2 text-gray-600">
+              <div className="flex items-center gap-1.5 mt-2 text-gray-600 dark:text-gray-400">
                 <MapPin className="w-4 h-4" />
                 <span className="text-sm">{location}</span>
                 {profile.distance_km && (
-                  <span className="text-gray-400 ml-1 text-sm">
+                  <span className="text-gray-400 dark:text-gray-500 ml-1 text-sm">
                     • {profile.distance_km.toFixed(1)} km away
                   </span>
                 )}
@@ -633,7 +633,7 @@ export function SearchProfileView({
 
             {/* Occupation */}
             {profile.occupation && (
-              <div className="flex items-center gap-1.5 mt-1 text-gray-600">
+              <div className="flex items-center gap-1.5 mt-1 text-gray-600 dark:text-gray-400">
                 <Briefcase className="w-4 h-4" />
                 <span className="text-sm">{profile.occupation}</span>
               </div>
@@ -641,15 +641,15 @@ export function SearchProfileView({
 
             {/* About Me */}
             {profile.bio && (
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <h2 className="text-sm font-semibold text-amber-700 mb-2">About Me</h2>
-                <p className="text-gray-700 text-sm leading-relaxed">{profile.bio}</p>
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-neutral-800">
+                <h2 className="text-sm font-semibold text-amber-700 dark:text-amber-500 mb-2">About Me</h2>
+                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{profile.bio}</p>
               </div>
             )}
 
             {/* Voice & Video Section */}
             {(profile.voice_prompt_url || profile.video_intro_url) && (
-              <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-neutral-800">
                 <VoiceVideoDisplay
                   voicePromptUrl={profile.voice_prompt_url}
                   voicePromptDuration={profile.voice_prompt_duration_seconds}
@@ -664,7 +664,7 @@ export function SearchProfileView({
         </div>
 
         {/* Right Column - Profile Details */}
-        <div className="flex-1 bg-white md:rounded-2xl md:shadow-lg md:max-w-xl">
+        <div className="flex-1 bg-white dark:bg-neutral-950 md:rounded-2xl md:shadow-lg dark:md:shadow-black/30 md:max-w-xl">
           <div className="p-5 md:p-6 pb-28 md:pb-6">
             {/* Mobile: Show full profile including basic info */}
             <div className="md:hidden">
@@ -693,12 +693,12 @@ export function SearchProfileView({
             disabled={actionLoading !== null}
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center",
-              "bg-white text-red-500 border-2 border-red-300",
-              "shadow-lg",
+              "bg-white dark:bg-neutral-950 text-red-500 border-2 border-red-300 dark:border-red-400/50",
+              "shadow-lg dark:shadow-black/40",
               // Touch-optimized transitions
               "transition-all duration-150 ease-out",
               // Active/pressed state - scale down and change background
-              "active:scale-90 active:bg-red-50 active:border-red-400 active:shadow-md",
+              "active:scale-90 active:bg-red-50 dark:active:bg-red-950 active:border-red-400 active:shadow-md",
               // Disabled state
               "disabled:opacity-50 disabled:active:scale-100",
               // Prevent text selection and optimize touch
@@ -720,14 +720,14 @@ export function SearchProfileView({
             disabled={actionLoading !== null || !undoState?.canUndo}
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center relative",
-              "bg-white border-2",
-              "shadow-lg",
+              "bg-white dark:bg-neutral-950 border-2",
+              "shadow-lg dark:shadow-black/40",
               // Touch-optimized transitions
               "transition-all duration-150 ease-out",
               // Conditional styling based on undo availability
               undoState?.canUndo
-                ? "text-amber-600 border-amber-300 active:scale-90 active:bg-amber-50 active:border-amber-400 active:shadow-md"
-                : "text-gray-400 border-gray-200",
+                ? "text-amber-600 border-amber-300 dark:border-amber-400/50 active:scale-90 active:bg-amber-50 dark:active:bg-amber-950 active:border-amber-400 active:shadow-md"
+                : "text-gray-400 dark:text-gray-500 border-gray-200 dark:border-neutral-700",
               // Disabled state
               "disabled:opacity-50 disabled:active:scale-100",
               // Prevent text selection and optimize touch
@@ -758,12 +758,12 @@ export function SearchProfileView({
             disabled={actionLoading !== null}
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center",
-              "bg-white text-amber-500 border-2 border-amber-300",
-              "shadow-lg",
+              "bg-white dark:bg-neutral-950 text-amber-500 border-2 border-amber-300 dark:border-amber-400/50",
+              "shadow-lg dark:shadow-black/40",
               // Touch-optimized transitions
               "transition-all duration-150 ease-out",
               // Active/pressed state
-              "active:scale-90 active:bg-amber-50 active:border-amber-400 active:shadow-md",
+              "active:scale-90 active:bg-amber-50 dark:active:bg-amber-950 active:border-amber-400 active:shadow-md",
               // Disabled state
               "disabled:opacity-50 disabled:active:scale-100",
               // Prevent text selection and optimize touch
@@ -788,8 +788,8 @@ export function SearchProfileView({
             disabled={actionLoading !== null}
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center",
-              "bg-amber-500 text-white",
-              "shadow-lg",
+              "bg-amber-500 dark:bg-amber-600 text-white",
+              "shadow-lg dark:shadow-black/40",
               // Touch-optimized transitions
               "transition-all duration-150 ease-out",
               // Active/pressed state - darker background, scale down
@@ -814,15 +814,15 @@ export function SearchProfileView({
       {showReportModal && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
           <div
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/50 dark:bg-black/70"
             onClick={() => setShowReportModal(false)}
           />
-          <div className="relative bg-white rounded-t-2xl w-full max-w-lg p-6 pb-10">
-            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-6" />
-            <h2 className="text-lg font-semibold text-gray-900 text-center mb-2">
+          <div className="relative bg-white dark:bg-neutral-950 rounded-t-2xl w-full max-w-lg p-6 pb-10">
+            <div className="w-10 h-1 bg-gray-300 dark:bg-neutral-600 rounded-full mx-auto mb-6" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-2">
               Report this profile
             </h2>
-            <p className="text-sm text-gray-500 text-center mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">
               Why are you reporting {profile.first_name || "this user"}?
             </p>
 
@@ -831,17 +831,17 @@ export function SearchProfileView({
                 <button
                   key={reason}
                   onClick={() => handleReport(reason)}
-                  className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
                 >
-                  <span className="text-gray-700">{reason}</span>
-                  <span className="text-gray-400">›</span>
+                  <span className="text-gray-700 dark:text-gray-300">{reason}</span>
+                  <span className="text-gray-400 dark:text-gray-500">›</span>
                 </button>
               ))}
             </div>
 
             <button
               onClick={() => setShowReportModal(false)}
-              className="w-full mt-4 py-3 text-gray-500 font-medium"
+              className="w-full mt-4 py-3 text-gray-500 dark:text-gray-400 font-medium"
             >
               Cancel
             </button>

@@ -141,16 +141,16 @@ export default async function MyProfilePage() {
   };
 
   return (
-    <div className="min-h-dvh bg-gray-50">
+    <div className="min-h-dvh bg-gray-50 dark:bg-neutral-900">
       {!hasProfile ? (
         /* Empty State - No Profile Yet */
         <div className="max-w-md mx-auto px-4 py-12 sm:py-16">
-          <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 text-center">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-5 sm:mb-6">
-              <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-pink-500" />
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-sm p-6 sm:p-8 text-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-5 sm:mb-6">
+              <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-pink-500 dark:text-pink-400" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">Complete Your Profile</h2>
-            <p className="text-gray-600 text-sm sm:text-base mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2 sm:mb-3">Complete Your Profile</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base mb-6 sm:mb-8">
               Add your details to start connecting with other singles.
             </p>
             <Link
@@ -183,12 +183,12 @@ export default async function MyProfilePage() {
           )}
           
           {/* Hero Header - Always Side-by-Side */}
-          <div className="bg-white border-b">
+          <div className="bg-white dark:bg-neutral-900 border-b dark:border-neutral-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
               <div className="flex items-center gap-4 sm:gap-6">
                 {/* Profile Photo */}
                 <div className="relative shrink-0">
-                  <div className="w-[72px] h-[72px] sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-100 to-purple-100 shadow-lg">
+                  <div className="w-[72px] h-[72px] sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 shadow-lg">
                     {profile.profile_image_url ? (
                       <img
                         src={profile.profile_image_url}
@@ -219,11 +219,11 @@ export default async function MyProfilePage() {
                 <div className="flex-1 min-w-0">
                   {/* Name & Age */}
                   <div className="flex items-baseline gap-1.5 sm:gap-2 mb-0.5">
-                    <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
+                    <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate">
                       {profile.first_name || user.display_name || "Your Name"}
                     </h1>
                     {profile.date_of_birth && (
-                      <span className="text-base sm:text-xl text-gray-400 font-light shrink-0">
+                      <span className="text-base sm:text-xl text-gray-400 dark:text-gray-500 font-light shrink-0">
                         {calculateAge(profile.date_of_birth)}
                       </span>
                     )}
@@ -231,12 +231,12 @@ export default async function MyProfilePage() {
 
                   {/* Location & Occupation - Single line with separator */}
                   {(profile.city || profile.occupation) && (
-                    <p className="text-xs sm:text-sm text-gray-500 mb-2.5 sm:mb-3 truncate">
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2.5 sm:mb-3 truncate">
                       {profile.city && (
                         <span>{profile.city}{profile.state ? `, ${profile.state}` : ""}</span>
                       )}
                       {profile.city && profile.occupation && (
-                        <span className="mx-1 sm:mx-1.5 text-gray-300">•</span>
+                        <span className="mx-1 sm:mx-1.5 text-gray-300 dark:text-gray-600">•</span>
                       )}
                       {profile.occupation && (
                         <span>{profile.occupation}</span>
@@ -255,7 +255,7 @@ export default async function MyProfilePage() {
                     </Link>
                     <Link
                       href="/settings"
-                      className="inline-flex items-center justify-center gap-1 h-8 px-3 bg-gray-100 text-gray-600 text-sm font-medium rounded-full hover:bg-gray-200 hover:text-gray-900 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97]"
+                      className="inline-flex items-center justify-center gap-1 h-8 px-3 bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400 text-sm font-medium rounded-full hover:bg-gray-200 dark:hover:bg-neutral-700 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97]"
                     >
                       <Settings className="w-3.5 h-3.5" />
                       <span>Settings</span>
@@ -272,28 +272,28 @@ export default async function MyProfilePage() {
           </div>
 
           {/* Stats Bar - Compact & Refined */}
-          <div className="bg-gray-50/80 backdrop-blur-sm border-b">
+          <div className="bg-gray-50/80 dark:bg-neutral-900/80 backdrop-blur-sm border-b dark:border-neutral-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-3 divide-x divide-gray-200">
+              <div className="grid grid-cols-3 divide-x divide-gray-200 dark:divide-neutral-700">
                 <div className="py-3 sm:py-4 text-center">
                   <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
                     {user.points_balance || 0}
                   </div>
-                  <div className="text-[11px] sm:text-xs text-gray-500 font-medium uppercase tracking-wide">Points</div>
+                  <div className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Points</div>
                 </div>
                 <div className="py-3 sm:py-4 text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-gray-900">{gallery.length}</div>
-                  <div className="text-[11px] sm:text-xs text-gray-500 font-medium uppercase tracking-wide">Photos</div>
+                  <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{gallery.length}</div>
+                  <div className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Photos</div>
                 </div>
                 <div className="py-3 sm:py-4 text-center">
                   <div className="flex items-center justify-center h-7 sm:h-8">
                     {profile.is_verified ? (
                       <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                     ) : (
-                      <span className="text-xl sm:text-2xl font-bold text-gray-300">—</span>
+                      <span className="text-xl sm:text-2xl font-bold text-gray-300 dark:text-gray-600">—</span>
                     )}
                   </div>
-                  <div className="text-[11px] sm:text-xs text-gray-500 font-medium uppercase tracking-wide">Verified</div>
+                  <div className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Verified</div>
                 </div>
               </div>
             </div>
@@ -306,9 +306,9 @@ export default async function MyProfilePage() {
               <div className="min-w-0 space-y-6">
                 {/* About */}
                 {profile.bio && (
-                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">About</h3>
-                    <p className="text-gray-700 leading-relaxed text-[15px] lg:text-base whitespace-pre-wrap">{profile.bio}</p>
+                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">About</h3>
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-[15px] lg:text-base whitespace-pre-wrap">{profile.bio}</p>
                   </section>
                 )}
 
@@ -317,9 +317,9 @@ export default async function MyProfilePage() {
                   profile.after_work || profile.pet_peeves || profile.nightclub_or_home ||
                   profile.worst_job || profile.dream_job || profile.craziest_travel_story ||
                   profile.weirdest_gift || profile.past_event) && (
-                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">My Profile</h3>
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">My Profile</h3>
                       <Link 
                         href="/profile/edit" 
                         className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors"
@@ -400,9 +400,9 @@ export default async function MyProfilePage() {
 
                 {/* Voice & Video Section */}
                 {(profile.voice_prompt_url || profile.video_intro_url) && (
-                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Voice & Video</h3>
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Voice & Video</h3>
                       <Link 
                         href="/profile/edit#voice-video" 
                         className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors"
@@ -422,9 +422,9 @@ export default async function MyProfilePage() {
 
                 {/* Gallery */}
                 {gallery.length > 0 && (
-                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Gallery</h3>
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Gallery</h3>
                       <Link 
                         href="/profile/gallery" 
                         className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors"
@@ -436,7 +436,7 @@ export default async function MyProfilePage() {
                       {gallery.slice(0, 6).map((item) => {
                         const isVideo = item.media_type === "video";
                         return (
-                          <div key={item.id} className="aspect-square rounded-xl lg:rounded-2xl overflow-hidden bg-gray-100 shadow-sm">
+                          <div key={item.id} className="aspect-square rounded-xl lg:rounded-2xl overflow-hidden bg-gray-100 dark:bg-neutral-800 shadow-sm">
                             {isVideo ? (
                               <video src={item.media_url} className="w-full h-full object-cover" muted playsInline />
                             ) : (
@@ -453,7 +453,7 @@ export default async function MyProfilePage() {
                     {gallery.length > 6 && (
                       <Link 
                         href="/profile/gallery" 
-                        className="block text-center text-sm text-gray-500 font-medium mt-4 hover:text-pink-500 transition-colors"
+                        className="block text-center text-sm text-gray-500 dark:text-gray-400 font-medium mt-4 hover:text-pink-500 dark:hover:text-pink-400 transition-colors"
                       >
                         +{gallery.length - 6} more
                       </Link>
@@ -463,13 +463,13 @@ export default async function MyProfilePage() {
 
                 {/* Interests */}
                 {profile.interests && (profile.interests as string[]).length > 0 && (
-                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Interests</h3>
+                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Interests</h3>
                     <div className="flex flex-wrap gap-2">
                       {(profile.interests as string[]).map((interest) => (
                         <span
                           key={interest}
-                          className="px-4 py-2 bg-gradient-to-r from-pink-50 to-purple-50 text-pink-700 rounded-full text-sm font-semibold border border-pink-100"
+                          className="px-4 py-2 bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/30 dark:to-purple-900/30 text-pink-700 dark:text-pink-300 rounded-full text-sm font-semibold border border-pink-100 dark:border-pink-800"
                         >
                           {interest}
                         </span>
@@ -480,13 +480,13 @@ export default async function MyProfilePage() {
 
                 {/* Life Goals */}
                 {profile.life_goals && (profile.life_goals as string[]).length > 0 && (
-                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Life Goals</h3>
+                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Life Goals</h3>
                     <div className="flex flex-wrap gap-2">
                       {(profile.life_goals as string[]).map((goal) => (
                         <span
                           key={goal}
-                          className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-full text-sm font-semibold border border-blue-100"
+                          className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold border border-blue-100 dark:border-blue-800"
                         >
                           {goal}
                         </span>
@@ -504,8 +504,8 @@ export default async function MyProfilePage() {
                 )}
 
                 {/* Basic Details */}
-                <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">About Me</h3>
+                <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                  <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">About Me</h3>
                   <div className="space-y-3">
                     {profile.gender && (
                       <DetailRow label="Gender" value={getGenderLabel(profile.gender)} />
@@ -533,8 +533,8 @@ export default async function MyProfilePage() {
 
                 {/* Education & Career */}
                 {(profile.education || profile.occupation || profile.company || (profile.schools && profile.schools.length > 0)) && (
-                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Education & Career</h3>
+                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Education & Career</h3>
                     <div className="space-y-3">
                       {profile.education && (
                         <DetailRow label="Education" value={getEducationLabel(profile.education)} />
@@ -555,8 +555,8 @@ export default async function MyProfilePage() {
                 {/* Lifestyle */}
                 {(profile.smoking || profile.drinking || profile.marijuana || profile.exercise || 
                   profile.has_kids || profile.wants_kids || (profile.pets && profile.pets.length > 0)) && (
-                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Lifestyle</h3>
+                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Lifestyle</h3>
                     <div className="space-y-3">
                       {profile.smoking && (
                         <DetailRow label="Smoking" value={getSmokingLabel(profile.smoking)} />
@@ -590,8 +590,8 @@ export default async function MyProfilePage() {
                 {(profile.religion || profile.political_views || profile.dating_intentions || 
                   (profile.languages && profile.languages.length > 0) || 
                   (profile.looking_for && profile.looking_for.length > 0)) && (
-                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Additional Info</h3>
+                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Additional Info</h3>
                     <div className="space-y-3">
                       {profile.religion && (
                         <DetailRow label="Religion" value={getReligionLabel(profile.religion)} />
@@ -617,8 +617,8 @@ export default async function MyProfilePage() {
 
                 {/* Social Links */}
                 {(profile.social_link_1 || profile.social_link_2) && (
-                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Social Links</h3>
+                  <section className="bg-white dark:bg-neutral-900 rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Social Links</h3>
                     <div className="space-y-2">
                       {profile.social_link_1 && (
                         <a 
@@ -656,8 +656,8 @@ export default async function MyProfilePage() {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <span className="text-sm text-gray-500 font-medium shrink-0">{label}</span>
-      <span className="text-sm font-semibold text-gray-900 capitalize text-right break-words">{value}</span>
+      <span className="text-sm text-gray-500 dark:text-gray-400 font-medium shrink-0">{label}</span>
+      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize text-right break-words">{value}</span>
     </div>
   );
 }
@@ -666,8 +666,8 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 function PromptAnswer({ question, answer }: { question: string; answer: string }) {
   return (
     <div>
-      <p className="text-sm font-semibold text-gray-900 mb-2">{question}</p>
-      <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{answer}</p>
+      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">{question}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">{answer}</p>
     </div>
   );
 }

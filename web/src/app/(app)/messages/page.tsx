@@ -78,14 +78,14 @@ function NewMatchesSkeleton() {
     <div className="flex gap-2.5 overflow-hidden">
       {/* Get Likes skeleton */}
       <div className="flex-shrink-0 w-[72px]">
-        <div className="w-[72px] h-[72px] rounded-xl bg-gray-100 animate-pulse" />
-        <div className="h-2.5 w-12 mx-auto mt-1.5 rounded bg-gray-100 animate-pulse" />
+        <div className="w-[72px] h-[72px] rounded-xl bg-gray-100 dark:bg-neutral-800 animate-pulse" />
+        <div className="h-2.5 w-12 mx-auto mt-1.5 rounded bg-gray-100 dark:bg-neutral-800 animate-pulse" />
       </div>
       {/* Match card skeletons */}
       {[1, 2, 3, 4].map((i) => (
         <div key={i} className="flex-shrink-0 w-[72px]">
-          <div className="w-[72px] h-[72px] rounded-xl bg-gray-100 animate-pulse" />
-          <div className="h-2.5 w-10 mx-auto mt-1.5 rounded bg-gray-100 animate-pulse" />
+          <div className="w-[72px] h-[72px] rounded-xl bg-gray-100 dark:bg-neutral-800 animate-pulse" />
+          <div className="h-2.5 w-10 mx-auto mt-1.5 rounded bg-gray-100 dark:bg-neutral-800 animate-pulse" />
         </div>
       ))}
     </div>
@@ -95,12 +95,12 @@ function NewMatchesSkeleton() {
 function ConversationSkeleton() {
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <div className="w-14 h-14 rounded-full bg-gray-100 animate-pulse" />
+      <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-neutral-800 animate-pulse" />
       <div className="flex-1 min-w-0">
-        <div className="h-4 w-24 rounded bg-gray-100 animate-pulse" />
-        <div className="h-3 w-40 rounded bg-gray-100 animate-pulse mt-2" />
+        <div className="h-4 w-24 rounded bg-gray-100 dark:bg-neutral-800 animate-pulse" />
+        <div className="h-3 w-40 rounded bg-gray-100 dark:bg-neutral-800 animate-pulse mt-2" />
       </div>
-      <div className="h-3 w-8 rounded bg-gray-100 animate-pulse" />
+      <div className="h-3 w-8 rounded bg-gray-100 dark:bg-neutral-800 animate-pulse" />
     </div>
   );
 }
@@ -125,7 +125,7 @@ function NewMatchCard({ match }: NewMatchCardProps) {
     >
       {/* Avatar with online indicator */}
       <div className="relative">
-        <div className="w-[72px] h-[72px] rounded-xl overflow-hidden bg-gray-100 ring-1 ring-gray-200/50 group-hover:ring-pink-300 transition-all">
+        <div className="w-[72px] h-[72px] rounded-xl overflow-hidden bg-gray-100 dark:bg-neutral-800 ring-1 ring-gray-200/50 dark:ring-neutral-700/50 group-hover:ring-pink-300 dark:group-hover:ring-pink-500 transition-all">
           {match.profile_image_url ? (
             <img
               src={match.profile_image_url}
@@ -144,7 +144,7 @@ function NewMatchCard({ match }: NewMatchCardProps) {
         {/* Online indicator - red dot for new, green for online */}
         <span
           className={cn(
-            "absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white",
+            "absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-neutral-900",
             isOnline ? "bg-green-500" : "bg-rose-500"
           )}
         />
@@ -152,7 +152,7 @@ function NewMatchCard({ match }: NewMatchCardProps) {
 
       {/* Name and badges */}
       <div className="mt-1 text-center">
-        <p className="text-xs font-medium text-gray-900 truncate">{name}</p>
+        <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{name}</p>
         
         {/* Badges row */}
         <div className="flex items-center justify-center gap-0.5">
@@ -185,10 +185,10 @@ function GetLikesCard() {
       href="/likes?tab=matches"
       className="flex-shrink-0 w-[72px] group"
     >
-      <div className="w-[72px] h-[72px] rounded-xl bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center group-hover:border-pink-300 group-hover:bg-pink-50/50 transition-all">
-        <Heart className="w-7 h-7 text-gray-300 group-hover:text-pink-400 transition-colors" />
+      <div className="w-[72px] h-[72px] rounded-xl bg-gray-50 dark:bg-neutral-900 border-2 border-dashed border-gray-200 dark:border-neutral-700 flex items-center justify-center group-hover:border-pink-300 dark:group-hover:border-pink-500 group-hover:bg-pink-50/50 dark:group-hover:bg-pink-950/30 transition-all">
+        <Heart className="w-7 h-7 text-gray-300 dark:text-gray-600 group-hover:text-pink-400 transition-colors" />
       </div>
-      <p className="mt-1 text-xs font-medium text-gray-500 text-center group-hover:text-pink-500 transition-colors">
+      <p className="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400 text-center group-hover:text-pink-500 transition-colors">
         Get Likes
       </p>
     </Link>
@@ -219,7 +219,7 @@ function ConversationRow({ conversation }: ConversationRowProps) {
   return (
     <Link
       href={`/chats/${conversation.ConversationID}`}
-      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-neutral-800 active:bg-gray-100 dark:active:bg-neutral-700 transition-colors"
     >
       {/* Avatar with online indicator */}
       <Avatar
@@ -236,7 +236,7 @@ function ConversationRow({ conversation }: ConversationRowProps) {
           <h3
             className={cn(
               "text-base truncate",
-              hasUnread ? "font-semibold text-gray-900" : "font-medium text-gray-700"
+              hasUnread ? "font-semibold text-gray-900 dark:text-gray-100" : "font-medium text-gray-700 dark:text-gray-300"
             )}
           >
             {displayName}
@@ -246,7 +246,7 @@ function ConversationRow({ conversation }: ConversationRowProps) {
         <p
           className={cn(
             "text-sm truncate mt-0.5",
-            hasUnread ? "text-gray-900 font-medium" : "text-gray-500"
+            hasUnread ? "text-gray-900 dark:text-gray-100 font-medium" : "text-gray-500 dark:text-gray-400"
           )}
         >
           {lastMessage}
@@ -256,7 +256,7 @@ function ConversationRow({ conversation }: ConversationRowProps) {
       {/* Right side: time and unread badge */}
       <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
         {lastMessageTime && (
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-gray-400 dark:text-gray-500">
             {formatRelativeTime(lastMessageTime)}
           </span>
         )}
@@ -340,7 +340,7 @@ export default function MessagesPage() {
       <div className="max-w-2xl mx-auto">
         {/* New Matches Section Skeleton - Compact */}
         <div className="px-4 pt-2 pb-3">
-          <h2 className="text-xs font-bold text-gray-400 mb-2">
+          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 mb-2">
             New Matches
           </h2>
           <NewMatchesSkeleton />
@@ -348,7 +348,7 @@ export default function MessagesPage() {
 
         {/* Messages Section Skeleton */}
         <div>
-          <h2 className="text-xs font-bold text-gray-400 px-4 py-2">
+          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 px-4 py-2">
             Messages
           </h2>
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -363,13 +363,13 @@ export default function MessagesPage() {
   if (error) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <p className="text-red-600 mb-4">{error}</p>
+        <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
         <button
           onClick={() => {
             setLoading(true);
             refreshData();
           }}
-          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
         >
           Try Again
         </button>
@@ -386,12 +386,12 @@ export default function MessagesPage() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <div className="flex items-center justify-center mb-4">
-          <Heart className="w-16 h-16 text-pink-300" />
+          <Heart className="w-16 h-16 text-pink-300 dark:text-pink-400" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
           No matches yet
         </h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
           Start exploring to find your matches!
         </p>
         <Link
@@ -409,7 +409,7 @@ export default function MessagesPage() {
       {/* New Matches Section - Compact */}
       {hasNewMatches && (
         <section className="px-4 pt-2 pb-3">
-          <h2 className="text-xs font-bold text-gray-400 mb-2">
+          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 mb-2">
             New Matches
           </h2>
           <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4">
@@ -424,7 +424,7 @@ export default function MessagesPage() {
       {/* Show Get Likes even if no new matches but have conversations */}
       {!hasNewMatches && hasConversations && (
         <section className="px-4 pt-2 pb-3">
-          <h2 className="text-xs font-bold text-gray-400 mb-2">
+          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 mb-2">
             New Matches
           </h2>
           <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4">
@@ -435,12 +435,12 @@ export default function MessagesPage() {
 
       {/* Messages Section */}
       <section>
-        <h2 className="text-xs font-bold text-gray-400 px-4 py-2">
+        <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 px-4 py-2">
           Messages
         </h2>
         
         {hasConversations ? (
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-neutral-800">
             {conversations.map((conversation) => (
               <ConversationRow
                 key={conversation.ConversationID}
@@ -450,7 +450,7 @@ export default function MessagesPage() {
           </div>
         ) : (
           <div className="px-4 py-8 text-center">
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-gray-400">
               No messages yet. Tap on a match to start chatting!
             </p>
           </div>

@@ -86,7 +86,7 @@ export function MessageBubble({
       )}>
         {/* Sender name (for group chats) */}
         {showAvatar && !isOwn && senderName && (
-          <span className="text-[11px] text-gray-500 mb-1 ml-3 font-medium">{senderName}</span>
+          <span className="text-[11px] text-gray-500 dark:text-gray-400 mb-1 ml-3 font-medium">{senderName}</span>
         )}
 
         {/* Message bubble - iOS iMessage style */}
@@ -95,8 +95,8 @@ export function MessageBubble({
             "relative px-4 py-2.5 shadow-sm",
             // iOS-style rounded corners with tail
             isOwn
-              ? "bg-[#007AFF] text-white rounded-[22px] rounded-br-[8px]"
-              : "bg-[#E9E9EB] text-gray-900 rounded-[22px] rounded-bl-[8px]"
+              ? "bg-[#007AFF] dark:bg-[#0A84FF] text-white rounded-[22px] rounded-br-[8px]"
+              : "bg-[#E9E9EB] dark:bg-[#3a3a3c] text-gray-900 dark:text-gray-100 rounded-[22px] rounded-bl-[8px]"
           )}
         >
           {/* Media content */}
@@ -136,7 +136,7 @@ export function MessageBubble({
           "flex items-center gap-1 mt-0.5",
           isOwn ? "mr-1" : "ml-1"
         )}>
-          <span className="text-[11px] text-gray-400">
+          <span className="text-[11px] text-gray-400 dark:text-gray-500">
             {formatTime(message.created_at)}
           </span>
           {isOwn && getStatusIcon()}
@@ -202,7 +202,7 @@ export function MessageGroup({
         <div key={date}>
           {/* Date header - iOS style floating pill */}
           <div className="flex items-center justify-center my-5">
-            <span className="px-3 py-1.5 bg-gray-100/80 backdrop-blur-sm text-gray-500 text-[11px] font-semibold rounded-full shadow-sm">
+            <span className="px-3 py-1.5 bg-gray-100/80 dark:bg-neutral-800/80 backdrop-blur-sm text-gray-500 dark:text-gray-400 text-[11px] font-semibold rounded-full shadow-sm">
               {formatDateHeader(date)}
             </span>
           </div>

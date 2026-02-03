@@ -176,9 +176,9 @@ export function MessageInput({
         <div
           className={cn(
             "rounded-3xl overflow-hidden",
-            "bg-white/80 backdrop-blur-xl backdrop-saturate-150",
-            "border border-white/30",
-            "shadow-lg shadow-black/10"
+            "bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl backdrop-saturate-150",
+            "border border-white/30 dark:border-white/10",
+            "shadow-lg shadow-black/10 dark:shadow-black/30"
           )}
         >
           <form 
@@ -192,7 +192,7 @@ export function MessageInput({
               disabled={disabled || isUploading}
               className={cn(
                 "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
-                "bg-blue-500 text-white",
+                "bg-blue-500 dark:bg-blue-600 text-white",
                 (disabled || isUploading) && "opacity-50"
               )}
             >
@@ -223,11 +223,11 @@ export function MessageInput({
                 inputMode="text"
                 enterKeyHint="send"
                 className={cn(
-                  "w-full h-9 px-4 py-2 bg-gray-100 rounded-full resize-none overflow-hidden",
-                  "text-[16px] leading-[1.4]",
+                  "w-full h-9 px-4 py-2 bg-gray-100 dark:bg-neutral-800 rounded-full resize-none overflow-hidden",
+                  "text-[16px] leading-[1.4] text-gray-900 dark:text-gray-100",
                   "focus:outline-none focus:ring-2 focus:ring-blue-500/30",
                   "disabled:opacity-50",
-                  "placeholder:text-gray-400"
+                  "placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 )}
                 style={{ 
                   minHeight: "36px", 
@@ -244,8 +244,8 @@ export function MessageInput({
               className={cn(
                 "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
                 canSend
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-400"
+                  ? "bg-blue-500 dark:bg-blue-600 text-white"
+                  : "bg-gray-200 dark:bg-neutral-700 text-gray-400 dark:text-gray-500"
               )}
             >
               <Send className="w-4 h-4" />

@@ -111,7 +111,7 @@ function EventCard({ event }: { event: ApiEvent }) {
       className="group flex-shrink-0 w-[280px] sm:w-[300px] bg-card rounded-2xl border border-border/40 overflow-hidden hover:border-border/80 hover:shadow-md transition-all duration-300"
     >
       {/* Image */}
-      <div className="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50">
+      <div className="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
         {event.EventImage ? (
           <img
             src={event.EventImage}
@@ -120,12 +120,12 @@ function EventCard({ event }: { event: ApiEvent }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Calendar className="w-12 h-12 text-amber-200" />
+            <Calendar className="w-12 h-12 text-amber-200 dark:text-amber-800" />
           </div>
         )}
         {/* Price badge */}
         {event.EventPrice && (
-          <div className="absolute top-2.5 right-2.5 px-2.5 py-1 bg-white/95 backdrop-blur-sm rounded-full text-xs font-semibold text-foreground shadow-sm">
+          <div className="absolute top-2.5 right-2.5 px-2.5 py-1 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-sm rounded-full text-xs font-semibold text-foreground shadow-sm">
             {event.EventPrice === "0" || event.EventPrice === "Free"
               ? "Free"
               : `$${event.EventPrice}`}
@@ -224,7 +224,7 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
       className="group flex-shrink-0 w-[280px] sm:w-[300px] bg-card rounded-2xl border border-border/40 overflow-hidden hover:border-border/80 hover:shadow-md transition-all duration-300"
     >
       {/* Image */}
-      <div className="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-violet-100 to-pink-50">
+      <div className="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-violet-100 to-pink-50 dark:from-violet-950/30 dark:to-pink-950/30">
         {session.Image ? (
           <img
             src={session.Image}
@@ -233,7 +233,7 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Video className="w-12 h-12 text-violet-200" />
+            <Video className="w-12 h-12 text-violet-200 dark:text-violet-800" />
           </div>
         )}
         {/* Status badge */}

@@ -45,7 +45,7 @@ function NavItem({ href, icon: Icon, label, isActive }: NavItemProps) {
         "flex flex-col items-center justify-center flex-1 py-2 min-h-[52px] transition-colors",
         "active:opacity-70 touch-manipulation rounded-xl",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-pink-500",
-        isActive ? "text-pink-600" : "text-gray-600"
+        isActive ? "text-pink-600 dark:text-pink-400" : "text-gray-600 dark:text-gray-400"
       )}
     >
       <Icon
@@ -122,9 +122,9 @@ export function GlassBottomNav() {
       <div
         className={cn(
           "rounded-3xl overflow-hidden",
-          "bg-white/70 backdrop-blur-xl backdrop-saturate-150",
-          "border border-white/30",
-          "shadow-lg shadow-black/10"
+          "bg-white/70 dark:bg-neutral-900/70 backdrop-blur-xl backdrop-saturate-150",
+          "border border-white/30 dark:border-white/10",
+          "shadow-lg shadow-black/10 dark:shadow-black/30"
         )}
       >
         <div className="flex items-stretch px-1" role="list">
