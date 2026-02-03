@@ -19,6 +19,8 @@ import {
   calculateCompletion,
   getResumeStep,
   isStepComplete,
+  getNextIncompleteStepAfter,
+  hasCompletedStepsAhead,
   type ProfileData,
   type CompletionStatus,
 } from "@/lib/onboarding/completion";
@@ -72,6 +74,11 @@ export interface UseOnboardingReturn {
   // Utilities
   isStepComplete: (stepNumber: number) => boolean;
   refreshProfile: () => Promise<void>;
+  
+  // Skip ahead
+  nextIncompleteStep: number | null;
+  canSkipAhead: boolean;
+  skipToNextIncomplete: () => void;
 }
 
 // ============================================
@@ -489,6 +496,30 @@ export function useOnboarding(
     await fetchProfile(false);
   }, [fetchProfile]);
 
+  // Skip ahead functionality
+  const nextIncompleteStep = useMemo(() => {
+    if (!profile) return null;
+    return getNextIncompleteStepAfter(currentStep, profile, photoCount);
+  }, [currentStep, profile, photoCount]);
+
+  const canSkipAhead = useMemo(() => {
+    if (!profile) return false;
+    // Only show skip ahead if:
+    // 1. There's an incomplete step ahead
+    // 2. There are completed steps ahead (meaning user has data further along)
+    return (
+      nextIncompleteStep !== null &&
+      hasCompletedStepsAhead(currentStep, profile, photoCount)
+    );
+  }, [currentStep, profile, photoCount, nextIncompleteStep]);
+
+  const skipToNextIncomplete = useCallback(() => {
+    if (nextIncompleteStep) {
+      setCurrentStep(nextIncompleteStep);
+      setError(null);
+    }
+  }, [nextIncompleteStep]);
+
   return {
     // Current state
     currentStep,
@@ -522,5 +553,10 @@ export function useOnboarding(
     // Utilities
     isStepComplete: checkStepComplete,
     refreshProfile,
+    
+    // Skip ahead
+    nextIncompleteStep,
+    canSkipAhead,
+    skipToNextIncomplete,
   };
 }

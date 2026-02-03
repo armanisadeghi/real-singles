@@ -68,6 +68,8 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
     saveAndSkip,
     saveAsPreferNot,
     refreshProfile,
+    canSkipAhead,
+    skipToNextIncomplete,
   } = useOnboarding({ resume, targetStep });
 
   // Check if current step can continue (has required values)
@@ -511,6 +513,8 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
         currentStep={currentStep}
         completionPercentage={completion?.percentage ?? 0}
         onClose={handleClose}
+        canSkipAhead={canSkipAhead}
+        onSkipAhead={skipToNextIncomplete}
       />
 
       {/* Error display */}

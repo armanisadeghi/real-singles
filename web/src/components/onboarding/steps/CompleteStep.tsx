@@ -26,7 +26,7 @@ export function CompleteStep({ completion, firstName }: CompleteStepProps) {
   const canMatch = completion?.canStartMatching ?? false;
 
   const handleStartMatching = () => {
-    router.push("/explore");
+    router.push("/discover");
   };
 
   const handleCompleteProfile = () => {

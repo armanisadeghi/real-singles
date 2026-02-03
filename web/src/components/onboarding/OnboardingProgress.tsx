@@ -10,7 +10,7 @@
  * - Steps 7+: Full header with close button, percentage, step count
  */
 
-import { X } from "lucide-react";
+import { X, FastForward } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { TOTAL_STEPS } from "@/lib/onboarding/steps-config";
@@ -27,6 +27,8 @@ interface OnboardingProgressProps {
   completionPercentage: number;
   onClose?: () => void;
   className?: string;
+  canSkipAhead?: boolean;
+  onSkipAhead?: () => void;
 }
 
 export function OnboardingProgress({
@@ -34,6 +36,8 @@ export function OnboardingProgress({
   completionPercentage,
   onClose,
   className,
+  canSkipAhead,
+  onSkipAhead,
 }: OnboardingProgressProps) {
   // Determine if we're in the initial required steps
   const isInitialPhase = currentStep <= REQUIRED_STEPS;
@@ -146,9 +150,19 @@ export function OnboardingProgress({
           <span>
             Step {currentStep} of {TOTAL_STEPS}
           </span>
-          <span className="text-gray-400 dark:text-gray-500">
-            Optional
-          </span>
+          {canSkipAhead && onSkipAhead ? (
+            <button
+              onClick={onSkipAhead}
+              className="flex items-center gap-1 text-pink-500 dark:text-pink-400 hover:text-pink-600 dark:hover:text-pink-300 transition-colors"
+            >
+              <span>Skip ahead</span>
+              <FastForward className="w-3 h-3" />
+            </button>
+          ) : (
+            <span className="text-gray-400 dark:text-gray-500">
+              Optional
+            </span>
+          )}
         </div>
       </div>
     </header>

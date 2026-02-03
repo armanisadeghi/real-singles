@@ -442,3 +442,54 @@ export function getCompletionGradient(percentage: number): string {
     return "bg-gradient-to-r from-yellow-500 to-green-500";
   return "bg-gradient-to-r from-green-500 to-pink-500";
 }
+
+/**
+ * Find the next incomplete step after the current step.
+ * Returns null if there are no incomplete steps ahead.
+ */
+export function getNextIncompleteStepAfter(
+  currentStep: number,
+  profile: ProfileData,
+  photoCount: number = 0
+): number | null {
+  for (const step of ONBOARDING_STEPS) {
+    // Only look at steps after the current one
+    if (step.stepNumber <= currentStep) continue;
+    
+    // Skip the complete step
+    if (step.id === "complete") continue;
+    
+    // Check if this step is incomplete
+    if (!isStepComplete(step.stepNumber, profile, photoCount)) {
+      return step.stepNumber;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Check if there are any completed steps after the current step.
+ * This indicates the user has previously filled in later steps,
+ * making "skip ahead" functionality useful.
+ */
+export function hasCompletedStepsAhead(
+  currentStep: number,
+  profile: ProfileData,
+  photoCount: number = 0
+): boolean {
+  for (const step of ONBOARDING_STEPS) {
+    // Only look at steps after the current one
+    if (step.stepNumber <= currentStep) continue;
+    
+    // Skip the complete step
+    if (step.id === "complete") continue;
+    
+    // If any step ahead is complete, return true
+    if (isStepComplete(step.stepNumber, profile, photoCount)) {
+      return true;
+    }
+  }
+  
+  return false;
+}
