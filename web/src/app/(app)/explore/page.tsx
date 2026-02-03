@@ -10,6 +10,9 @@ import {
   Sparkles,
   Gift,
   UserPlus,
+  Users,
+  Heart,
+  Wand2,
 } from "lucide-react";
 import { useEvents, useSpeedDating } from "@/hooks/queries";
 
@@ -347,6 +350,52 @@ function ReferFriendsBanner() {
 }
 
 // ============================================================================
+// MATCHMAKERS COMING SOON BANNER
+// ============================================================================
+
+function MatchmakersBanner() {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-purple-200 dark:border-purple-900/50 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:from-purple-950/30 dark:via-pink-950/30 dark:to-rose-950/30 p-6">
+      {/* Decorative background elements */}
+      <div className="absolute -right-8 -top-8 w-32 h-32 bg-purple-200 dark:bg-purple-800/20 rounded-full blur-3xl opacity-60" />
+      <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-pink-200 dark:bg-pink-800/20 rounded-full blur-3xl opacity-60" />
+      
+      <div className="relative flex items-start gap-4">
+        {/* Icon cluster */}
+        <div className="flex-shrink-0 relative">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+            <Wand2 className="w-7 h-7 text-white" />
+          </div>
+          {/* Floating mini icons */}
+          <div className="absolute -right-2 -top-2 w-7 h-7 rounded-full bg-gradient-to-br from-pink-400 to-rose-400 flex items-center justify-center shadow-md">
+            <Heart className="w-4 h-4 text-white" />
+          </div>
+          <div className="absolute -left-2 -bottom-2 w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-indigo-400 flex items-center justify-center shadow-md">
+            <Users className="w-4 h-4 text-white" />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <h3 className="text-lg font-bold text-foreground">
+              Professional Matchmakers
+            </h3>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">
+              <Sparkles className="w-3 h-3" />
+              Coming Soon
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Expert matchmakers will help curate your perfect connections. Get personalized matches from professionals who understand the art of meaningful relationships.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // SECTION LOADING SKELETON
 // ============================================================================
 
@@ -462,6 +511,9 @@ export default function ExplorePage() {
 
         {/* Refer Friends Banner */}
         <ReferFriendsBanner />
+
+        {/* Matchmakers Coming Soon Banner */}
+        <MatchmakersBanner />
 
         {/* Videos Section - Coming Soon */}
         <section>
