@@ -48,50 +48,51 @@ export function ReferralCard({ referralCode }: ReferralCardProps) {
 
   return (
     <>
-      <section className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-100">
-        <div className="flex items-center gap-2 mb-3">
+      <section className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 lg:p-6 border border-amber-100 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
           <Gift className="w-5 h-5 text-amber-600" />
           <h3 className="text-sm font-semibold text-amber-800">Referral Code</h3>
         </div>
-        <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-amber-200">
-          <code className="flex-1 font-mono text-amber-900 font-medium">{referralCode}</code>
+        <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-3 border border-amber-200 mb-4">
+          <code className="flex-1 font-mono text-base text-amber-900 font-semibold tracking-wide">{referralCode}</code>
           <button 
             onClick={handleCopy}
-            className="p-1 hover:bg-amber-50 rounded transition-colors"
+            className="p-1.5 hover:bg-amber-50 rounded-lg transition-colors"
             title="Copy code"
           >
             {copied ? (
-              <CheckCircle className="w-4 h-4 text-green-600" />
+              <CheckCircle className="w-5 h-5 text-green-600" />
             ) : (
-              <Copy className="w-4 h-4 text-amber-600" />
+              <Copy className="w-5 h-5 text-amber-600" />
             )}
           </button>
         </div>
-        <div className="flex items-center gap-2 mt-3">
+        <div className="flex items-center gap-2 mb-4">
           <button
             onClick={handleShare}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97] shadow-md shadow-amber-500/20"
           >
             <Share2 className="w-4 h-4" />
             Share Link
           </button>
           <button
             onClick={() => setShowQRModal(true)}
-            className="flex items-center justify-center w-10 h-10 bg-white text-amber-700 rounded-lg border border-amber-200 hover:bg-amber-50 transition-all"
+            className="flex items-center justify-center w-11 h-11 bg-white text-amber-700 rounded-xl border border-amber-200 hover:bg-amber-50 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97]"
             title="Show QR Code"
           >
             <QrCode className="w-5 h-5" />
           </button>
         </div>
-        <div className="flex items-center justify-between mt-3">
-          <p className="text-xs text-amber-700">
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-amber-700 leading-relaxed">
             Share to earn points when friends sign up!
           </p>
           <Link
             href="/refer"
-            className="text-xs font-medium text-amber-600 hover:text-amber-800 transition-colors"
+            className="text-sm font-medium text-amber-600 hover:text-amber-800 transition-colors inline-flex items-center gap-1"
           >
-            View Stats →
+            View Stats
+            <span aria-hidden="true">→</span>
           </Link>
         </div>
       </section>
