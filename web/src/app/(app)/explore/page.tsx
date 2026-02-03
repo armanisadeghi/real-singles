@@ -341,7 +341,7 @@ function ReferFriendsBanner() {
           </div>
           <p className="text-muted-foreground text-sm sm:text-base">
             Share RealSingles with friends and get exclusive rewards when they join. 
-            Everyone wins! 🎉
+            Everyone wins!
           </p>
         </div>
 
@@ -464,14 +464,14 @@ export default function ExplorePage() {
   return (
     <div className="min-h-dvh bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 space-y-8">
-        {/* Refer Friends Banner */}
-        <ReferFriendsBanner />
-
         {/* Events Section - Loads independently */}
         <EventsSection />
 
         {/* Speed Dating Section - Loads independently */}
         <SpeedDatingSection />
+
+        {/* Refer Friends Banner */}
+        <ReferFriendsBanner />
 
         {/* Videos Section - Coming Soon */}
         <section>
