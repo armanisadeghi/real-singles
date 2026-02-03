@@ -6,7 +6,11 @@ import {
   ChevronRight,
   ShieldCheck,
   Zap,
-  Gift
+  Gift,
+  Search,
+  Heart,
+  MessageCircle,
+  ExternalLink
 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
@@ -63,6 +67,40 @@ const toolsSections = [
     iconColor: "text-rose-600",
     hoverBorder: "hover:border-rose-200",
     hoverBg: "hover:bg-rose-50/50",
+  },
+];
+
+// Quick links to important routes that shouldn't get lost during UI restructuring
+const quickRouteLinks = [
+  {
+    title: "Search",
+    description: "Main search/explore interface",
+    href: "/search",
+    icon: Search,
+    iconBg: "bg-indigo-100",
+    iconColor: "text-indigo-600",
+    hoverBorder: "hover:border-indigo-200",
+    hoverBg: "hover:bg-indigo-50/50",
+  },
+  {
+    title: "Matches",
+    description: "User matches and connections",
+    href: "/matches",
+    icon: Heart,
+    iconBg: "bg-pink-100",
+    iconColor: "text-pink-600",
+    hoverBorder: "hover:border-pink-200",
+    hoverBg: "hover:bg-pink-50/50",
+  },
+  {
+    title: "Chats",
+    description: "Messaging and conversations",
+    href: "/chats",
+    icon: MessageCircle,
+    iconBg: "bg-cyan-100",
+    iconColor: "text-cyan-600",
+    hoverBorder: "hover:border-cyan-200",
+    hoverBg: "hover:bg-cyan-50/50",
   },
 ];
 
@@ -175,6 +213,63 @@ export default function AdminSettingsPage() {
                       {section.title}
                     </h3>
                     <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all shrink-0" />
+                  </div>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {section.description}
+                  </p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Route Links Section */}
+      <div className="space-y-4">
+        <div 
+          className="opacity-100 translate-y-0
+            [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+            [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+          style={{ transitionDelay: "200ms" }}
+        >
+          <h2 className="text-lg font-semibold text-slate-900 mb-1">Quick Route Links</h2>
+          <p className="text-sm text-slate-500">Direct access to important UI routes during restructuring</p>
+        </div>
+
+        <div 
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3
+            opacity-100 translate-y-0
+            [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
+            [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
+          style={{ transitionDelay: "250ms" }}
+        >
+          {quickRouteLinks.map((section, index) => (
+            <Link
+              key={section.href}
+              href={section.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`group bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 
+                transition-all duration-200
+                ${section.hoverBorder} ${section.hoverBg}
+                hover:shadow-md`}
+              style={{
+                animation: `fadeIn 300ms ease-out forwards`,
+                animationDelay: `${(index + 6) * 50}ms`,
+                opacity: 0,
+              }}
+            >
+              <div className="flex items-start gap-4">
+                <div className={`w-12 h-12 ${section.iconBg} rounded-xl flex items-center justify-center shrink-0
+                  group-hover:scale-110 transition-transform duration-200`}>
+                  <section.icon className={`w-6 h-6 ${section.iconColor}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                      {section.title}
+                    </h3>
+                    <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-blue-600 shrink-0" />
                   </div>
                   <p className="mt-1 text-sm text-slate-500">
                     {section.description}

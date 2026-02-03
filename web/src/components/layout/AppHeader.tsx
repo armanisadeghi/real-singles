@@ -34,12 +34,12 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   
-  // Hide header on home page - it has its own hero with avatar/notifications
+  // Hide header on explore page - it has its own hero with avatar/notifications
   // This matches the mobile app behavior
-  const isHomePage = pathname === "/home" || pathname === "/";
+  const isExplorePage = pathname === "/explore" || pathname === "/";
   
-  // Hide header on full-screen profile views (discovery, focus)
-  const isFullScreenProfile = pathname.startsWith("/discover/profile/") || 
+  // Hide header on full-screen profile views (search, focus)
+  const isFullScreenProfile = pathname.startsWith("/search/profile/") || 
                                pathname.startsWith("/profile/") && pathname.includes("/focus");
 
   // Close dropdown when clicking outside
@@ -123,7 +123,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
     }
   }, [isDropdownOpen]);
   
-  if (isHomePage || isFullScreenProfile) {
+  if (isExplorePage || isFullScreenProfile) {
     return null;
   }
 
@@ -141,7 +141,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link 
-            href="/home" 
+            href="/explore" 
             className="-m-1.5 p-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
             <Image
@@ -157,22 +157,22 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
           {/* Navigation - Hidden on mobile (bottom nav handles it) */}
           <nav className="hidden md:flex items-center space-x-1" aria-label="Main navigation">
             <Link 
-              href="/home" 
+              href="/explore" 
               className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
-              Home
+              Explore
             </Link>
             <Link 
-              href="/discover" 
+              href="/search" 
               className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
-              Discover
+              Search
             </Link>
             <Link 
-              href="/connections" 
+              href="/likes" 
               className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
-              Connections
+              Likes
             </Link>
             <Link 
               href="/chats" 

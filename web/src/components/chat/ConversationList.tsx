@@ -96,8 +96,8 @@ export function ConversationList({
         type="messages"
         title="No conversations yet"
         description="When you match with someone, you can start chatting here"
-        actionLabel="Start Discovering"
-        actionHref="/discover"
+        actionLabel="Start Searching"
+        actionHref="/search"
       />
     );
   }

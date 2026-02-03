@@ -62,8 +62,8 @@ export default function SettingsPage() {
         setProfileHidden(!profileHidden);
         setSuccess(
           !profileHidden
-            ? "Your account is now paused. You won't appear in discovery or matches."
-            : "Your account is active again. You'll appear in discovery and matches."
+            ? "Your account is now paused. You won't appear in search or matches."
+            : "Your account is active again. You'll appear in search and matches."
         );
       } else {
         setError(data.msg || "Failed to update account status");
@@ -219,8 +219,8 @@ export default function SettingsPage() {
                 <h3 className="font-semibold text-gray-900">Pause Account</h3>
                 <p className="text-sm text-gray-500">
                   {profileHidden 
-                    ? "Your profile is hidden from discovery" 
-                    : "Hide from discovery and matches"}
+                    ? "Your profile is hidden from search" 
+                    : "Hide from search and matches"}
                 </p>
               </div>
             </div>

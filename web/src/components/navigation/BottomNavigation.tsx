@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, MessageCircle, Users, User } from "lucide-react";
+import { Compass as CompassIcon, Search, MessageCircle, Users, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItemProps {
@@ -49,7 +49,7 @@ function NavItem({ href, icon: Icon, label, isActive }: NavItemProps) {
  * Mobile Bottom Navigation for Web
  *
  * Follows iOS/Android native patterns:
- * - 5 tabs: Home, Discover, Connections, Messages, Profile
+ * - 5 tabs: Explore, Search, Connections, Messages, Profile
  * - Always visible labels
  * - Active state with filled icons
  * - Safe area padding for notched devices
@@ -59,23 +59,23 @@ export function BottomNavigation() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/home", icon: Home, label: "Home" },
-    { href: "/discover", icon: Compass, label: "Discover" },
-    { href: "/connections", icon: Users, label: "Connections" },
+    { href: "/explore", icon: CompassIcon, label: "Explore" },
+    { href: "/search", icon: Search, label: "Search" },
+    { href: "/likes", icon: Users, label: "Likes" },
     { href: "/chats", icon: MessageCircle, label: "Messages" },
     { href: "/profile", icon: User, label: "Profile" },
   ];
 
   // Determine active tab based on pathname
   const getIsActive = (href: string) => {
-    if (href === "/home") {
-      return pathname === "/home";
+    if (href === "/explore") {
+      return pathname === "/explore";
     }
     return pathname.startsWith(href);
   };
 
-  // Hide bottom nav on full-screen profile views (discovery, focus)
-  const isFullScreenProfile = pathname.startsWith("/discover/profile/") || 
+  // Hide bottom nav on full-screen profile views (search, focus)
+  const isFullScreenProfile = pathname.startsWith("/search/profile/") || 
                                (pathname.startsWith("/profile/") && pathname.includes("/focus"));
   
   if (isFullScreenProfile) {

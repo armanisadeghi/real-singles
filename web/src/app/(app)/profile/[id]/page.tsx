@@ -137,9 +137,9 @@ export default function OtherProfilePage() {
 
         if (data.success) {
           // If not matched, redirect to the discover profile page
-          // The discover profile page allows liking/passing, while this page is for matched users only
+          // The search profile page allows liking/passing, while this page is for matched users only
           if (!data.data.IsMatched) {
-            router.replace(`/discover/profile/${userId}`);
+            router.replace(`/search/profile/${userId}`);
             return;
           }
           

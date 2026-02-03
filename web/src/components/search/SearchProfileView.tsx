@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * DiscoveryProfileView Component (Web)
+ * SearchProfileView Component (Web)
  * 
- * A full profile view designed for the discovery/matching flow.
+ * A full profile view designed for the search/matching flow.
  * Shows photo carousel, rich profile content, and action buttons.
  */
 
@@ -90,7 +90,7 @@ interface UndoState {
   targetUserName?: string;
 }
 
-interface DiscoveryProfileViewProps {
+interface SearchProfileViewProps {
   profile: Profile;
   gallery?: GalleryItem[];
   /** Current user's profile image for match celebration */
@@ -147,7 +147,7 @@ function triggerHaptic(type: 'light' | 'medium' | 'heavy' | 'success' | 'error' 
   }
 }
 
-export function DiscoveryProfileView({
+export function SearchProfileView({
   profile,
   gallery = [],
   currentUserImage,
@@ -160,7 +160,7 @@ export function DiscoveryProfileView({
   onClose,
   undoState,
   onUndo,
-}: DiscoveryProfileViewProps) {
+}: SearchProfileViewProps) {
   const router = useRouter();
   const toast = useToast();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -193,7 +193,7 @@ export function DiscoveryProfileView({
         toast.success(`Undid action on ${undoState.targetUserName || "previous profile"}`);
         triggerHaptic("success");
         // Navigate back to the profile
-        router.push(`/discover/profile/${result.targetUserId}`);
+        router.push(`/search/profile/${result.targetUserId}`);
       } else {
         toast.error(result.error || "Failed to undo");
         triggerHaptic("error");
@@ -292,7 +292,7 @@ export function DiscoveryProfileView({
   const handleShare = useCallback(async () => {
     const displayName = profile.first_name || profile.user?.display_name || "Someone";
     // Use the public share page URL - this shows limited profile for non-authenticated users
-    // and redirects authenticated users to /discover/profile/{id}
+    // and redirects authenticated users to /search/profile/{id}
     const shareUrl = typeof window !== "undefined" 
       ? `${window.location.origin}/p/${profile.user_id}`
       : "";
@@ -865,4 +865,4 @@ export function DiscoveryProfileView({
   );
 }
 
-export default DiscoveryProfileView;
+export default SearchProfileView;

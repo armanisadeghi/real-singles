@@ -31,7 +31,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/discover");
+      router.push("/search");
       router.refresh();
     } catch {
       setError("An error occurred. Please try again.");

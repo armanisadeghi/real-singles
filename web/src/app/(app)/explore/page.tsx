@@ -81,7 +81,7 @@ interface ApiSpeedDating {
   Status: string | null;
 }
 
-interface HomeData {
+interface ExploreData {
   success: boolean;
   TopMatch: ApiProfile[];
   NearBy: ApiProfile[];
@@ -122,12 +122,12 @@ function formatProfileForCard(profile: ApiProfile) {
   };
 }
 
-export default function HomePage() {
+export default function ExplorePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const [homeData, setHomeData] = useState<HomeData | null>(null);
+  const [exploreData, setExploreData] = useState<ExploreData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -165,17 +165,17 @@ export default function HomePage() {
         points: userData.PointsBalance || userData.RedeemPoints || 0,
       });
 
-      // Fetch home data
-      const homeRes = await fetch("/api/discover");
-      if (!homeRes.ok) {
-        throw new Error("Failed to fetch home data");
+      // Fetch explore data
+      const exploreRes = await fetch("/api/discover");
+      if (!exploreRes.ok) {
+        throw new Error("Failed to fetch explore data");
       }
-      const data = await homeRes.json();
-      setHomeData(data);
+      const data = await exploreRes.json();
+      setExploreData(data);
       setError(null);
     } catch (err) {
       console.error("Error fetching data:", err);
-      setError("Unable to load home data");
+      setError("Unable to load explore data");
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -205,7 +205,7 @@ export default function HomePage() {
       <div className="min-h-dvh bg-background flex items-center justify-center p-4">
         <div className="text-center">
           <EmptyState
-            title="Unable to load home data"
+            title="Unable to load explore data"
             description="Please refresh the page or try again later."
           />
           <button
@@ -219,11 +219,11 @@ export default function HomePage() {
     );
   }
 
-  const topMatches = homeData?.TopMatch || [];
-  const nearbyProfiles = homeData?.NearBy || [];
-  const videos = homeData?.Videos || [];
-  const events = homeData?.event || [];
-  const speedDating = homeData?.Virtual || [];
+  const topMatches = exploreData?.TopMatch || [];
+  const nearbyProfiles = exploreData?.NearBy || [];
+  const videos = exploreData?.Videos || [];
+  const events = exploreData?.event || [];
+  const speedDating = exploreData?.Virtual || [];
 
   return (
     <div className="min-h-dvh bg-background">
@@ -232,7 +232,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo */}
-            <Link href="/home" className="flex items-center gap-2 flex-shrink-0">
+            <Link href="/explore" className="flex items-center gap-2 flex-shrink-0">
               <img 
                 src="/images/logo.png" 
                 alt="RealSingles" 
@@ -508,7 +508,7 @@ export default function HomePage() {
                     profile={formatProfileForCard(profile)}
                     showActions={false}
                     size="compact"
-                    linkBasePath="/discover/profile"
+                    linkBasePath="/search/profile"
                   />
                 </div>
               ))}

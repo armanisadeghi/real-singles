@@ -156,7 +156,7 @@ export default function MatchesPage() {
             Start liking profiles to find your matches!
           </p>
           <Link
-            href="/discover"
+            href="/search"
             className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
           >
             Discover Profiles

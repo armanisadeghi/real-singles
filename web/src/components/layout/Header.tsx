@@ -166,7 +166,7 @@ export function Header() {
           </div>
 
           {/* Desktop CTA buttons */}
-          <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4 items-center">
+          <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-3 items-center">
             {loading ? (
               <div className="w-20 h-8 bg-gray-200 animate-pulse rounded" />
             ) : user ? (
@@ -174,15 +174,15 @@ export function Header() {
                 {/* Authenticated user on public page - show "Enter App" */}
                 <button
                   onClick={handleLogout}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-4 py-2"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5"
                 >
                   Log out
                 </button>
                 <Link
-                  href="/discover"
-                  className="rounded-full bg-brand-primary px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-primary-dark transition-colors flex items-center gap-2"
+                  href="/search"
+                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-brand-primary text-sm font-medium text-white shadow-sm hover:bg-brand-primary-dark transition-colors"
                 >
-                  <Compass className="w-4 h-4" />
+                  <Compass className="w-3.5 h-3.5" />
                   Enter App
                 </Link>
               </>
@@ -191,15 +191,15 @@ export function Header() {
                 {/* Guest - show login and signup */}
                 <Link
                   href="/login"
-                  className="text-sm font-medium text-foreground hover:text-brand-primary transition-colors px-4 py-2"
+                  className="text-sm font-medium text-foreground hover:text-brand-primary transition-colors px-3 py-1.5"
                 >
                   Log in
                 </Link>
                 <Link
                   href="/register"
-                  className="rounded-full bg-brand-primary px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-primary-dark transition-colors flex items-center gap-2"
+                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-brand-primary text-sm font-medium text-white shadow-sm hover:bg-brand-primary-dark transition-colors"
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-3.5 h-3.5" />
                   Get Started
                 </Link>
               </>
@@ -251,20 +251,20 @@ export function Header() {
               {/* Auth actions */}
               <div className="border-t border-border mt-3 pt-3 space-y-2">
                 {loading ? (
-                  <div className="w-full h-10 bg-gray-200 animate-pulse rounded-lg" />
+                  <div className="w-full h-9 bg-gray-200 animate-pulse rounded-lg" />
                 ) : user ? (
                   <>
                     <Link
-                      href="/discover"
-                      className="flex items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-brand-primary-dark transition-colors"
+                      href="/search"
+                      className="flex items-center justify-center gap-1.5 h-9 rounded-full bg-brand-primary text-sm font-medium text-white shadow-sm hover:bg-brand-primary-dark transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Compass className="w-5 h-5" />
+                      <Compass className="w-4 h-4" />
                       Enter App
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full rounded-lg px-3 py-2 text-center text-base font-medium text-muted-foreground hover:bg-muted transition-colors"
+                      className="block w-full rounded-lg px-3 py-2 text-center text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
                     >
                       Log out
                     </button>
@@ -273,16 +273,17 @@ export function Header() {
                   <>
                     <Link
                       href="/login"
-                      className="block rounded-lg px-3 py-2 text-base font-medium text-foreground hover:bg-muted transition-colors"
+                      className="block rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Log in
                     </Link>
                     <Link
                       href="/register"
-                      className="block rounded-full bg-brand-primary px-4 py-2 text-center text-base font-semibold text-white shadow-sm hover:bg-brand-primary-dark transition-colors"
+                      className="flex items-center justify-center gap-1.5 h-9 rounded-full bg-brand-primary text-sm font-medium text-white shadow-sm hover:bg-brand-primary-dark transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
+                      <Sparkles className="w-4 h-4" />
                       Get Started
                     </Link>
                   </>

@@ -27,14 +27,14 @@ interface Profile {
   } | null;
 }
 
-interface DiscoverGridProps {
+interface SearchGridProps {
   initialProfiles: Profile[];
   isProfilePaused?: boolean;
 }
 
 type ViewMode = "all" | "top-matches" | "nearby";
 
-export function DiscoverGrid({ initialProfiles, isProfilePaused = false }: DiscoverGridProps) {
+export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchGridProps) {
   const [profiles, setProfiles] = useState<Profile[]>(initialProfiles);
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -334,7 +334,7 @@ export function DiscoverGrid({ initialProfiles, isProfilePaused = false }: Disco
   );
 }
 
-export function DiscoverGridSkeleton() {
+export function SearchGridSkeleton() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Header skeleton */}

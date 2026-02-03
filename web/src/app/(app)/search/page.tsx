@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * Discover Page
+ * Search Page
  * 
- * Browse profiles grid for the discovery/matching flow.
+ * Browse profiles grid for the search/matching flow.
  * Uses /api/discover/profiles endpoint to maintain SSOT with mobile.
  */
 
 import { useEffect, useState } from "react";
-import { DiscoverGrid, DiscoverGridSkeleton } from "@/components/discovery";
+import { SearchGrid, SearchGridSkeleton } from "@/components/search";
 import { AlertCircle, UserX, Settings } from "lucide-react";
 import Link from "next/link";
 
@@ -72,7 +72,7 @@ interface DiscoverResponse {
   emptyReason?: EmptyReason;
 }
 
-export default function DiscoverPage() {
+export default function SearchPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [isProfilePaused, setIsProfilePaused] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -105,7 +105,7 @@ export default function DiscoverPage() {
   }, []);
 
   if (loading) {
-    return <DiscoverGridSkeleton />;
+    return <SearchGridSkeleton />;
   }
 
   // Show specific error states based on emptyReason
@@ -177,5 +177,5 @@ export default function DiscoverPage() {
     );
   }
 
-  return <DiscoverGrid initialProfiles={profiles} isProfilePaused={isProfilePaused} />;
+  return <SearchGrid initialProfiles={profiles} isProfilePaused={isProfilePaused} />;
 }

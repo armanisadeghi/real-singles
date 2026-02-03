@@ -56,7 +56,7 @@ interface ProfileCardProps {
   size?: "compact" | "normal" | "large";
   /** Custom class name */
   className?: string;
-  /** Base path for profile links (default: /profile, use /discover/profile for unmatched profiles) */
+  /** Base path for profile links (default: /profile, use /search/profile for unmatched profiles) */
   linkBasePath?: string;
 }
 

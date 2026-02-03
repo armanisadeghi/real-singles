@@ -19,11 +19,16 @@ import {
   getDatingIntentionsLabel,
   getSmokingLabel,
   getDrinkingLabel,
+  getMarijuanaLabel,
   getExerciseLabel,
   getWantsKidsLabel,
+  getHasKidsLabel,
   getBodyTypeLabel,
   getMaritalStatusLabel,
   getEthnicityLabels,
+  getGenderLabel,
+  getPoliticalLabel,
+  getPetsLabel,
 } from "@/types";
 
 async function getMyProfile() {
@@ -296,14 +301,100 @@ export default async function MyProfilePage() {
 
           {/* Main Content */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 lg:py-8">
-            <div className="grid lg:grid-cols-[1fr,360px] gap-6 lg:gap-8">
+            <div className="grid lg:grid-cols-[minmax(0,1fr),400px] gap-6 lg:gap-8">
               {/* Left Column - Main Content */}
-              <div className="space-y-4 sm:space-y-6">
+              <div className="min-w-0 space-y-6">
                 {/* About */}
                 {profile.bio && (
                   <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
                     <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">About</h3>
-                    <p className="text-gray-700 leading-relaxed text-[15px] lg:text-base">{profile.bio}</p>
+                    <p className="text-gray-700 leading-relaxed text-[15px] lg:text-base whitespace-pre-wrap">{profile.bio}</p>
+                  </section>
+                )}
+
+                {/* Profile Prompts */}
+                {(profile.ideal_first_date || profile.non_negotiables || profile.way_to_heart || 
+                  profile.after_work || profile.pet_peeves || profile.nightclub_or_home ||
+                  profile.worst_job || profile.dream_job || profile.craziest_travel_story ||
+                  profile.weirdest_gift || profile.past_event) && (
+                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">My Profile</h3>
+                      <Link 
+                        href="/profile/edit" 
+                        className="text-sm text-pink-500 font-semibold hover:text-pink-600 transition-colors"
+                      >
+                        Edit
+                      </Link>
+                    </div>
+                    <div className="space-y-6">
+                      {profile.ideal_first_date && (
+                        <PromptAnswer 
+                          question="My ideal first date" 
+                          answer={profile.ideal_first_date} 
+                        />
+                      )}
+                      {profile.non_negotiables && (
+                        <PromptAnswer 
+                          question="My non-negotiables" 
+                          answer={profile.non_negotiables} 
+                        />
+                      )}
+                      {profile.way_to_heart && (
+                        <PromptAnswer 
+                          question="The way to my heart" 
+                          answer={profile.way_to_heart} 
+                        />
+                      )}
+                      {profile.after_work && (
+                        <PromptAnswer 
+                          question="After work you'll find me" 
+                          answer={profile.after_work} 
+                        />
+                      )}
+                      {profile.pet_peeves && (
+                        <PromptAnswer 
+                          question="My pet peeves" 
+                          answer={profile.pet_peeves} 
+                        />
+                      )}
+                      {profile.nightclub_or_home && (
+                        <PromptAnswer 
+                          question="Nightclub or cozy night in?" 
+                          answer={profile.nightclub_or_home} 
+                        />
+                      )}
+                      {profile.worst_job && (
+                        <PromptAnswer 
+                          question="Worst job I've had" 
+                          answer={profile.worst_job} 
+                        />
+                      )}
+                      {profile.dream_job && (
+                        <PromptAnswer 
+                          question="My dream job" 
+                          answer={profile.dream_job} 
+                        />
+                      )}
+                      {profile.craziest_travel_story && (
+                        <PromptAnswer 
+                          question="Craziest travel story" 
+                          answer={profile.craziest_travel_story} 
+                        />
+                      )}
+                      {profile.weirdest_gift && (
+                        <PromptAnswer 
+                          question="Weirdest gift I've received" 
+                          answer={profile.weirdest_gift} 
+                        />
+                      )}
+                      {profile.past_event && (
+                        <PromptAnswer 
+                          question="Past event I'd attend" 
+                          answer={profile.past_event} 
+                        />
+                      )}
+                    </div>
                   </section>
                 )}
 
@@ -386,56 +477,168 @@ export default async function MyProfilePage() {
                     </div>
                   </section>
                 )}
+
+                {/* Life Goals */}
+                {profile.life_goals && (profile.life_goals as string[]).length > 0 && (
+                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Life Goals</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {(profile.life_goals as string[]).map((goal) => (
+                        <span
+                          key={goal}
+                          className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-full text-sm font-semibold border border-blue-100"
+                        >
+                          {goal}
+                        </span>
+                      ))}
+                    </div>
+                  </section>
+                )}
               </div>
 
               {/* Right Column - Sidebar */}
-              <div className="space-y-4 sm:space-y-6">
+              <div className="space-y-6">
                 {/* Referral Card */}
                 {user.referral_code && (
                   <ReferralCard referralCode={user.referral_code} />
                 )}
 
-                {/* Details Card */}
+                {/* Basic Details */}
                 <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Details</h3>
-                  <div className="space-y-3.5">
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">About Me</h3>
+                  <div className="space-y-3">
+                    {profile.gender && (
+                      <DetailRow label="Gender" value={getGenderLabel(profile.gender)} />
+                    )}
                     {profile.height_inches && (
                       <DetailRow label="Height" value={formatHeight(profile.height_inches)} />
                     )}
                     {profile.body_type && (
                       <DetailRow label="Body Type" value={getBodyTypeLabel(profile.body_type)} />
                     )}
-                    {profile.education && (
-                      <DetailRow label="Education" value={getEducationLabel(profile.education)} />
+                    {profile.ethnicity && profile.ethnicity.length > 0 && (
+                      <DetailRow label="Ethnicity" value={getEthnicityLabels(profile.ethnicity)} />
                     )}
-                    {profile.religion && (
-                      <DetailRow label="Religion" value={getReligionLabel(profile.religion)} />
+                    {profile.marital_status && (
+                      <DetailRow label="Marital Status" value={getMaritalStatusLabel(profile.marital_status)} />
                     )}
                     {profile.zodiac_sign && (
                       <DetailRow label="Zodiac" value={getZodiacLabel(profile.zodiac_sign)} />
                     )}
-                    {profile.dating_intentions && (
-                      <DetailRow label="Looking For" value={getDatingIntentionsLabel(profile.dating_intentions)} />
+                    {profile.hometown && (
+                      <DetailRow label="Hometown" value={profile.hometown} />
                     )}
                   </div>
                 </section>
 
-                {/* Lifestyle Card */}
-                {(profile.smoking || profile.drinking || profile.exercise || profile.wants_kids) && (
+                {/* Education & Career */}
+                {(profile.education || profile.occupation || profile.company || (profile.schools && profile.schools.length > 0)) && (
+                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Education & Career</h3>
+                    <div className="space-y-3">
+                      {profile.education && (
+                        <DetailRow label="Education" value={getEducationLabel(profile.education)} />
+                      )}
+                      {profile.schools && profile.schools.length > 0 && (
+                        <DetailRow label="Schools" value={(profile.schools as string[]).join(", ")} />
+                      )}
+                      {profile.occupation && (
+                        <DetailRow label="Occupation" value={profile.occupation} />
+                      )}
+                      {profile.company && (
+                        <DetailRow label="Company" value={profile.company} />
+                      )}
+                    </div>
+                  </section>
+                )}
+
+                {/* Lifestyle */}
+                {(profile.smoking || profile.drinking || profile.marijuana || profile.exercise || 
+                  profile.has_kids || profile.wants_kids || (profile.pets && profile.pets.length > 0)) && (
                   <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
                     <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Lifestyle</h3>
-                    <div className="space-y-3.5">
+                    <div className="space-y-3">
                       {profile.smoking && (
                         <DetailRow label="Smoking" value={getSmokingLabel(profile.smoking)} />
                       )}
                       {profile.drinking && (
                         <DetailRow label="Drinking" value={getDrinkingLabel(profile.drinking)} />
                       )}
+                      {profile.marijuana && (
+                        <DetailRow label="Marijuana" value={getMarijuanaLabel(profile.marijuana)} />
+                      )}
                       {profile.exercise && (
                         <DetailRow label="Exercise" value={getExerciseLabel(profile.exercise)} />
                       )}
+                      {profile.has_kids && (
+                        <DetailRow label="Has Kids" value={getHasKidsLabel(profile.has_kids)} />
+                      )}
                       {profile.wants_kids && (
                         <DetailRow label="Wants Kids" value={getWantsKidsLabel(profile.wants_kids)} />
+                      )}
+                      {profile.pets && profile.pets.length > 0 && (
+                        <DetailRow 
+                          label="Pets" 
+                          value={(profile.pets as string[]).map(p => getPetsLabel(p)).join(", ")} 
+                        />
+                      )}
+                    </div>
+                  </section>
+                )}
+
+                {/* Additional Info */}
+                {(profile.religion || profile.political_views || profile.dating_intentions || 
+                  (profile.languages && profile.languages.length > 0) || 
+                  (profile.looking_for && profile.looking_for.length > 0)) && (
+                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Additional Info</h3>
+                    <div className="space-y-3">
+                      {profile.religion && (
+                        <DetailRow label="Religion" value={getReligionLabel(profile.religion)} />
+                      )}
+                      {profile.political_views && (
+                        <DetailRow label="Politics" value={getPoliticalLabel(profile.political_views)} />
+                      )}
+                      {profile.dating_intentions && (
+                        <DetailRow label="Dating Intentions" value={getDatingIntentionsLabel(profile.dating_intentions)} />
+                      )}
+                      {profile.looking_for && profile.looking_for.length > 0 && (
+                        <DetailRow 
+                          label="Looking For" 
+                          value={(profile.looking_for as string[]).join(", ")} 
+                        />
+                      )}
+                      {profile.languages && profile.languages.length > 0 && (
+                        <DetailRow label="Languages" value={(profile.languages as string[]).join(", ")} />
+                      )}
+                    </div>
+                  </section>
+                )}
+
+                {/* Social Links */}
+                {(profile.social_link_1 || profile.social_link_2) && (
+                  <section className="bg-white rounded-2xl p-5 lg:p-6 shadow-sm">
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Social Links</h3>
+                    <div className="space-y-2">
+                      {profile.social_link_1 && (
+                        <a 
+                          href={profile.social_link_1} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-pink-500 hover:text-pink-600 font-medium break-all"
+                        >
+                          {profile.social_link_1}
+                        </a>
+                      )}
+                      {profile.social_link_2 && (
+                        <a 
+                          href={profile.social_link_2} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-pink-500 hover:text-pink-600 font-medium break-all"
+                        >
+                          {profile.social_link_2}
+                        </a>
                       )}
                     </div>
                   </section>
@@ -454,7 +657,17 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-sm text-gray-500 font-medium shrink-0">{label}</span>
-      <span className="text-sm font-semibold text-gray-900 capitalize text-right">{value}</span>
+      <span className="text-sm font-semibold text-gray-900 capitalize text-right break-words">{value}</span>
+    </div>
+  );
+}
+
+// Helper component for prompt answers
+function PromptAnswer({ question, answer }: { question: string; answer: string }) {
+  return (
+    <div>
+      <p className="text-sm font-semibold text-gray-900 mb-2">{question}</p>
+      <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{answer}</p>
     </div>
   );
 }

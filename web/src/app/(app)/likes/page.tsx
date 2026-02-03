@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * Connections Page
+ * Likes Page
  * 
- * Hub for managing dating connections:
+ * Hub for managing likes:
  * - Likes You: People who liked you (premium feature)
  * - Matches: Mutual connections (can message)
  */
@@ -211,7 +211,7 @@ function LikesYouTab() {
           When someone likes you, they'll appear here
         </p>
         <Link
-          href="/discover"
+          href="/search"
           className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
         >
           Discover Profiles
@@ -240,7 +240,7 @@ function LikesYouTab() {
           >
             {/* Photo */}
             <Link
-              href={`/discover/profile/${like.user_id}`}
+              href={`/search/profile/${like.user_id}`}
               className="relative w-[72px] h-[72px] rounded-lg overflow-hidden flex-shrink-0 hover:opacity-90 transition-opacity"
             >
               {like.profile_image_url ? (
@@ -267,7 +267,7 @@ function LikesYouTab() {
 
             {/* Info */}
             <Link 
-              href={`/discover/profile/${like.user_id}`}
+              href={`/search/profile/${like.user_id}`}
               className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
             >
               <h3 className="text-base font-semibold text-gray-900 truncate">
@@ -404,7 +404,7 @@ function MatchesTab() {
           When you and someone else like each other, you'll match!
         </p>
         <Link
-          href="/discover"
+          href="/search"
           className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
         >
           Discover Profiles
@@ -515,7 +515,7 @@ function MatchesTab() {
 
 type TabType = "likes" | "matches";
 
-export default function ConnectionsPage() {
+export default function LikesPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -528,19 +528,19 @@ export default function ConnectionsPage() {
   // Update URL when tab changes
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
-    router.replace(`/connections?tab=${tab}`, { scroll: false });
+    router.replace(`/likes?tab=${tab}`, { scroll: false });
   };
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Connections</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Likes</h1>
       <p className="text-gray-500 mb-6">Your likes and matches</p>
 
       {/* Tab Navigation */}
       <div 
         role="tablist" 
-        aria-label="Connections tabs"
+        aria-label="Likes tabs"
         className="flex bg-gray-100 rounded-xl p-1 mb-6"
       >
         <button

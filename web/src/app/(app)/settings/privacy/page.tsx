@@ -153,7 +153,7 @@ export default function PrivacySettingsPage() {
 
         {/* Privacy Settings */}
         <div className="space-y-4">
-          {/* Show Profile in Discovery */}
+          {/* Show Profile in Search */}
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-4">
@@ -161,7 +161,7 @@ export default function PrivacySettingsPage() {
                   {settings.showProfile ? <Eye className="w-5 h-5 text-pink-600" /> : <EyeOff className="w-5 h-5 text-gray-500" />}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Show Profile in Discovery</h3>
+                  <h3 className="font-semibold text-gray-900">Show Profile in Search</h3>
                   <p className="text-sm text-gray-600 mt-1">
                     Your profile will appear in search results and recommendations
                   </p>

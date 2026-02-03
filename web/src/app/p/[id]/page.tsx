@@ -4,7 +4,7 @@
  * Public Profile Share Page
  * 
  * Allows sharing a limited profile view with non-authenticated users.
- * - If authenticated: redirects to /discover/profile/[id]
+ * - If authenticated: redirects to /search/profile/[id]
  * - If not authenticated: shows limited profile with CTA to sign up/login
  */
 
@@ -58,7 +58,7 @@ export default function PublicProfileSharePage({ params }: { params: Promise<{ i
       
       if (user) {
         // User is authenticated - redirect to full profile
-        router.replace(`/discover/profile/${resolvedParams.id}`);
+        router.replace(`/search/profile/${resolvedParams.id}`);
         return;
       }
       
@@ -249,7 +249,7 @@ export default function PublicProfileSharePage({ params }: { params: Promise<{ i
               </p>
               
               <Link
-                href={`/login?returnUrl=/discover/profile/${profile.id}`}
+                href={`/login?returnUrl=/search/profile/${profile.id}`}
                 className="inline-flex items-center gap-2 px-8 py-3.5 bg-amber-500 text-white rounded-full font-semibold hover:bg-amber-600 transition-colors shadow-sm"
               >
                 Sign Up Free
@@ -258,7 +258,7 @@ export default function PublicProfileSharePage({ params }: { params: Promise<{ i
               <p className="text-sm text-gray-500 mt-4">
                 Already have an account?{" "}
                 <Link 
-                  href={`/login?returnUrl=/discover/profile/${profile.id}`}
+                  href={`/login?returnUrl=/search/profile/${profile.id}`}
                   className="text-amber-600 font-medium hover:underline"
                 >
                   Log in

@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * Discovery Profile Page
+ * Search Profile Page
  * 
- * Full-screen profile view for discovery/matching flow.
+ * Full-screen profile view for search/matching flow.
  */
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { DiscoveryProfileView } from "@/components/discovery/DiscoveryProfileView";
+import { SearchProfileView } from "@/components/search/SearchProfileView";
 import { useMatchUndo } from "@/hooks/useMatchUndo";
 
 interface Profile {
@@ -245,7 +245,7 @@ export default function DiscoveryProfilePage() {
   }
 
   return (
-    <DiscoveryProfileView
+    <SearchProfileView
       profile={profile}
       gallery={gallery}
       onLike={handleLike}

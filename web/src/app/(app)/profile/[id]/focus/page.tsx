@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ProfileFocusView } from "@/components/discovery/ProfileFocusView";
+import { ProfileFocusView } from "@/components/search/ProfileFocusView";
 
 interface ProfileData {
   id: string;
