@@ -39,10 +39,10 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Get transaction history
+  // Get transaction history - select only fields needed for display
   const { data: transactions, error: txError } = await supabase
     .from("point_transactions")
-    .select("*")
+    .select("id, amount, balance_after, transaction_type, description, reference_id, reference_type, created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
   // Get total count for pagination
   const { count } = await supabase
     .from("point_transactions")
-    .select("*", { count: "exact", head: true })
+    .select("id", { count: "exact", head: true })
     .eq("user_id", user.id);
 
   // Format transactions

@@ -1,9 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+
+// Cache this route for 1 hour - life goals are static reference data
+export const revalidate = 3600;
 
 /**
  * GET /api/life-goals
  * Get all active life goal definitions
+ * 
+ * Cached for 1 hour since life goals rarely change
  */
 export async function GET() {
   const supabase = await createApiClient();
@@ -22,7 +27,7 @@ export async function GET() {
 
   const { data: goals, error } = await supabase
     .from("life_goal_definitions")
-    .select("*")
+    .select("key, label, description, icon, category, display_order")
     .eq("is_active", true)
     .order("category")
     .order("display_order");

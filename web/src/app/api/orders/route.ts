@@ -37,7 +37,9 @@ export async function GET(request: NextRequest) {
   const { data: orders, error } = await supabase
     .from("orders")
     .select(`
-      *,
+      id, points_spent, status,
+      shipping_name, shipping_address, shipping_city, shipping_state, shipping_zip, shipping_country,
+      tracking_number, created_at, updated_at,
       products(name, image_url, points_cost)
     `)
     .eq("user_id", user.id)
@@ -55,7 +57,7 @@ export async function GET(request: NextRequest) {
   // Get total count
   const { count } = await supabase
     .from("orders")
-    .select("*", { count: "exact", head: true })
+    .select("id", { count: "exact", head: true })
     .eq("user_id", user.id);
 
   // Format orders
@@ -140,10 +142,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get product details
+    // Get product details - only fields needed for order creation
     const { data: product, error: productError } = await supabase
       .from("products")
-      .select("*")
+      .select("id, name, points_cost, stock_quantity")
       .eq("id", productId)
       .eq("is_active", true)
       .single();

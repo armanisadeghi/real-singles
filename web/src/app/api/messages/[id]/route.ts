@@ -32,10 +32,15 @@ export async function GET(
     );
   }
 
-  // Get the message
+  // Get the message - select only fields needed for display
   const { data: message, error } = await supabase
     .from("messages")
-    .select("*")
+    .select(`
+      id, conversation_id, sender_id, content, message_type,
+      media_url, media_thumbnail_url, media_metadata,
+      reply_to_id, client_message_id, status,
+      created_at, edited_at, deleted_at, deleted_for_everyone
+    `)
     .eq("id", id)
     .single();
 
@@ -109,10 +114,10 @@ export async function PATCH(
 
     const { content, deleted, deleted_for_everyone } = validation.data;
 
-    // Get the message to verify ownership
+    // Get the message to verify ownership - only need sender_id
     const { data: existingMessage, error: fetchError } = await supabase
       .from("messages")
-      .select("*")
+      .select("sender_id")
       .eq("id", id)
       .single();
 

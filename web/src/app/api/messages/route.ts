@@ -80,10 +80,15 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Build query
+  // Build query - select only fields needed for message display
   let query = supabase
     .from("messages")
-    .select("*")
+    .select(`
+      id, conversation_id, sender_id, content, message_type,
+      media_url, media_thumbnail_url, media_metadata,
+      reply_to_id, client_message_id, status,
+      created_at, edited_at, deleted_at, deleted_for_everyone
+    `)
     .eq("conversation_id", conversationId)
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
@@ -225,7 +230,12 @@ export async function POST(request: Request) {
         // Return existing message instead of creating duplicate
         const { data: message } = await supabase
           .from("messages")
-          .select("*")
+          .select(`
+            id, conversation_id, sender_id, content, message_type,
+            media_url, media_thumbnail_url, media_metadata,
+            reply_to_id, client_message_id, status,
+            created_at, edited_at, deleted_at, deleted_for_everyone
+          `)
           .eq("id", existingMessage.id)
           .single();
 

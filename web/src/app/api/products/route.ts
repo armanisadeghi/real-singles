@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 
+// Cache for 5 minutes - products change occasionally
+export const revalidate = 300;
+
 /**
  * GET /api/products
  * Get list of available products for redemption
+ * 
+ * Cached for 5 minutes - product catalog changes infrequently
  */
 export async function GET(request: NextRequest) {
   const supabase = await createApiClient();
@@ -15,7 +20,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from("products")
-    .select("*")
+    .select("id, name, description, image_url, points_cost, retail_value, category, stock_quantity, created_at")
     .eq("is_active", true)
     .order("points_cost", { ascending: true })
     .range(offset, offset + limit - 1);
@@ -37,7 +42,7 @@ export async function GET(request: NextRequest) {
   // Get total count
   let countQuery = supabase
     .from("products")
-    .select("*", { count: "exact", head: true })
+    .select("id", { count: "exact", head: true })
     .eq("is_active", true);
   
   if (category) {
