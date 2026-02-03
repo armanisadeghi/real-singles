@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Plus, X, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IMAGE_AND_VIDEO_ACCEPT_STRING } from "@/lib/supabase/storage";
@@ -13,12 +13,12 @@ interface MessageInputProps {
 }
 
 /**
- * iOS Messages-style input
+ * iOS Messages-style floating input
  * 
  * Design:
- * - Three floating elements: plus button, input pill, send button
- * - No outer container/background wrapping the elements
- * - Input is a standalone rounded pill
+ * - Glass effect background matching header
+ * - Floating above keyboard on mobile
+ * - Plus button + input pill (rounded-full)
  * - 16px min font-size (prevents iOS zoom)
  */
 export function MessageInput({
@@ -31,9 +31,34 @@ export function MessageInput({
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Track keyboard height using visualViewport API
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const handleResize = () => {
+      // Calculate keyboard height from viewport difference
+      const keyboardH = window.innerHeight - viewport.height;
+      setKeyboardHeight(Math.max(0, keyboardH));
+    };
+
+    viewport.addEventListener("resize", handleResize);
+    viewport.addEventListener("scroll", handleResize);
+    
+    // Initial check
+    handleResize();
+
+    return () => {
+      viewport.removeEventListener("resize", handleResize);
+      viewport.removeEventListener("scroll", handleResize);
+    };
+  }, []);
 
   const handleSubmit = useCallback(
     (e?: React.FormEvent) => {
@@ -150,12 +175,24 @@ export function MessageInput({
 
   const canSend = (message.trim() || attachedImage) && !disabled && !isUploading;
 
+  // Calculate bottom position - accounts for keyboard and safe area
+  const bottomOffset = keyboardHeight > 0 
+    ? keyboardHeight + 8 // 8px padding above keyboard
+    : `calc(12px + env(safe-area-inset-bottom))`; // 12px + safe area when no keyboard
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-      <div className="pointer-events-auto px-2 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-xl">
+    <div 
+      ref={containerRef}
+      className="fixed left-0 right-0 z-50 pointer-events-none px-3"
+      style={{ 
+        bottom: typeof bottomOffset === 'number' ? `${bottomOffset}px` : bottomOffset,
+        transition: 'bottom 0.1s ease-out',
+      }}
+    >
+      <div className="pointer-events-auto">
         {/* Attached image preview */}
         {attachedImage && (
-          <div className="mb-2 ml-[42px]">
+          <div className="mb-2 ml-[48px]">
             <div className="relative inline-block">
               <img
                 src={attachedImage}
@@ -172,26 +209,27 @@ export function MessageInput({
           </div>
         )}
 
-        {/* Input row - floating elements */}
+        {/* Input row - floating glass elements */}
         <form 
           onSubmit={handleSubmit} 
           className="flex items-center gap-2"
         >
-          {/* Plus button - floating, aligned with input center */}
+          {/* Plus button - glass style matching header */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || isUploading}
             className={cn(
-              "w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
-              "bg-blue-500 text-white",
+              "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95",
+              "bg-gray-200/70 dark:bg-neutral-700/70 backdrop-blur-xl",
+              "active:bg-gray-300/80 dark:active:bg-neutral-600/80",
               (disabled || isUploading) && "opacity-50"
             )}
           >
             {isUploading ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-gray-600 dark:border-gray-300 border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Plus className="w-5 h-5" strokeWidth={2.5} />
+              <Plus className="w-5 h-5 text-gray-700 dark:text-gray-200" strokeWidth={2.5} />
             )}
           </button>
           <input
@@ -202,7 +240,7 @@ export function MessageInput({
             className="hidden"
           />
 
-          {/* Text input pill - fully rounded */}
+          {/* Text input pill - glass style, fully rounded */}
           <div className="flex-1 relative flex items-center">
             <textarea
               ref={inputRef}
@@ -215,27 +253,37 @@ export function MessageInput({
               inputMode="text"
               enterKeyHint="send"
               className={cn(
-                "w-full min-h-[34px] pl-4 pr-9 py-[7px] resize-none",
-                "bg-transparent",
-                "rounded-full border border-gray-300 dark:border-neutral-600",
-                "text-[16px] leading-[20px] text-gray-900 dark:text-gray-100",
-                "focus:outline-none focus:border-gray-400 dark:focus:border-neutral-500",
+                "w-full resize-none overflow-hidden",
+                "bg-transparent dark:bg-transparent",
+                "text-gray-900 dark:text-gray-100",
                 "disabled:opacity-50",
-                "placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                "placeholder:text-gray-500 dark:placeholder:text-gray-400"
               )}
               style={{ 
+                height: "36px",
+                minHeight: "36px",
                 maxHeight: "120px",
+                // Override global CSS that conflicts with component styles
+                padding: "9px 36px 9px 16px",
+                fontSize: "16px",
+                lineHeight: "18px",
+                border: "0.5px solid var(--border)",
+                borderRadius: "9999px",
+                outline: "none",
+                boxShadow: "none",
                 touchAction: "manipulation",
+                WebkitAppearance: "none",
+                appearance: "none",
               }}
             />
             
-            {/* Send button - only visible when can send */}
+            {/* Send button - inside input, only visible when can send */}
             {canSend && (
               <button
                 type="submit"
-                className="absolute right-1.5 w-6 h-6 rounded-full flex items-center justify-center bg-blue-500 text-white transition-all active:scale-95"
+                className="absolute right-1 top-1/2 -translate-y-1/2 w-[28px] h-[28px] rounded-full flex items-center justify-center bg-blue-500 text-white transition-all active:scale-95"
               >
-                <ArrowUp className="w-3.5 h-3.5" strokeWidth={3} />
+                <ArrowUp className="w-4 h-4" strokeWidth={3} />
               </button>
             )}
           </div>

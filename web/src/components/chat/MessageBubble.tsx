@@ -200,7 +200,7 @@ export function MessageGroup({
   const groupedMessages = groupByDate(messages);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
       {Object.entries(groupedMessages).map(([date, msgs]) => (
         <div key={date}>
           {/* Date header - iOS style floating pill */}
@@ -226,7 +226,7 @@ export function MessageGroup({
                   key={message.id}
                   className={cn(
                     // Add extra spacing between different senders
-                    isNewSender && index > 0 && "mt-3"
+                    isNewSender && index > 0 && "mt-0.5"
                   )}
                 >
                   <MessageBubble
