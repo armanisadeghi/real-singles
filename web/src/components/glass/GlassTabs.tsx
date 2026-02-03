@@ -46,7 +46,7 @@ export function GlassTabs({
     <div
       className={cn(
         "rounded-full p-1",
-        "bg-gray-100/80 backdrop-blur-sm",
+        "bg-gray-100/80 dark:bg-neutral-800/80 backdrop-blur-sm",
         className
       )}
     >
@@ -63,10 +63,10 @@ export function GlassTabs({
               onClick={() => onChange(tab.id)}
               className={cn(
                 "flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all relative",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-1",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 dark:focus-visible:ring-pink-400 focus-visible:ring-offset-1",
                 isActive
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 shadow-sm dark:shadow-black/20"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
               )}
             >
               {tab.label}
@@ -78,7 +78,7 @@ export function GlassTabs({
                     "text-[10px] font-bold rounded-full",
                     isActive
                       ? "bg-pink-500 text-white"
-                      : "bg-gray-400 text-white"
+                      : "bg-gray-400 dark:bg-neutral-600 text-white"
                   )}
                 >
                   {tab.badge > 99 ? "99+" : tab.badge}

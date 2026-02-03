@@ -41,20 +41,20 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="min-h-dvh bg-gray-50">
+    <div className="min-h-dvh bg-gray-50 dark:bg-neutral-950">
       {/* Header */}
-      <div className="bg-white border-b sticky top-14 sm:top-16 z-10">
+      <div className="bg-white dark:bg-neutral-900 border-b border-gray-200 dark:border-neutral-800 sticky top-14 sm:top-16 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
               <Link
                 href="/explore"
-                className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-full bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 flex items-center justify-center transition-colors"
                 aria-label="Back to Explore"
               >
-                <ArrowLeft className="w-5 h-5 text-gray-700" />
+                <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
               </Link>
-              <h1 className="text-xl font-bold text-gray-900">Events</h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Events</h1>
             </div>
 
             {/* Filter tabs */}
@@ -64,7 +64,7 @@ export default function EventsPage() {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   filter === "upcoming"
                     ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 }`}
               >
                 Upcoming
@@ -74,7 +74,7 @@ export default function EventsPage() {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   filter === "past"
                     ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 }`}
               >
                 Past

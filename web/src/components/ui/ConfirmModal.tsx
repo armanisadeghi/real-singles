@@ -24,27 +24,27 @@ const variantStyles: Record<
 > = {
   danger: {
     icon: XCircle,
-    iconBg: "bg-red-100",
-    iconColor: "text-red-600",
-    buttonBg: "bg-red-600 hover:bg-red-700",
+    iconBg: "bg-red-100 dark:bg-red-900/30",
+    iconColor: "text-red-600 dark:text-red-400",
+    buttonBg: "bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-500",
   },
   warning: {
     icon: AlertTriangle,
-    iconBg: "bg-yellow-100",
-    iconColor: "text-yellow-600",
-    buttonBg: "bg-yellow-600 hover:bg-yellow-700",
+    iconBg: "bg-yellow-100 dark:bg-yellow-900/30",
+    iconColor: "text-yellow-600 dark:text-yellow-400",
+    buttonBg: "bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-600 dark:hover:bg-yellow-500",
   },
   info: {
     icon: Info,
-    iconBg: "bg-blue-100",
-    iconColor: "text-blue-600",
-    buttonBg: "bg-blue-600 hover:bg-blue-700",
+    iconBg: "bg-blue-100 dark:bg-blue-900/30",
+    iconColor: "text-blue-600 dark:text-blue-400",
+    buttonBg: "bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500",
   },
   success: {
     icon: CheckCircle,
-    iconBg: "bg-green-100",
-    iconColor: "text-green-600",
-    buttonBg: "bg-green-600 hover:bg-green-700",
+    iconBg: "bg-green-100 dark:bg-green-900/30",
+    iconColor: "text-green-600 dark:text-green-400",
+    buttonBg: "bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-500",
   },
 };
 
@@ -97,7 +97,7 @@ export function ConfirmModal({
     >
       <div
         className={cn(
-          "bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden",
+          "bg-white dark:bg-neutral-900 rounded-xl shadow-xl dark:shadow-black/40 max-w-md w-full overflow-hidden",
           "animate-in zoom-in-95 fade-in duration-200"
         )}
       >
@@ -112,17 +112,17 @@ export function ConfirmModal({
               <Icon className={cn("w-6 h-6", style.iconColor)} />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-              <p className="mt-2 text-sm text-gray-600">{message}</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{message}</p>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col-reverse sm:flex-row gap-3 px-6 py-4 bg-gray-50 border-t">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 px-6 py-4 bg-gray-50 dark:bg-neutral-800 border-t border-gray-100 dark:border-neutral-700">
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-900 border border-gray-300 dark:border-neutral-600 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 transition-colors"
           >
             {cancelLabel}
           </button>

@@ -71,14 +71,14 @@ function SectionHeader({
   return (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Icon className="w-4 h-4 text-primary" />
+        <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+          <Icon className="w-4 h-4 text-amber-600 dark:text-amber-400" />
         </div>
         <h2 className="text-lg font-semibold text-foreground">{title}</h2>
       </div>
       <Link
         href={href}
-        className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors whitespace-nowrap"
+        className="flex items-center gap-1 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors whitespace-nowrap"
       >
         View All
         <ChevronRight className="w-4 h-4" />
@@ -196,12 +196,12 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
   const getStatusColor = (status: string | null) => {
     switch (status?.toLowerCase()) {
       case "live":
-        return "bg-green-500 text-white";
+        return "bg-green-500 dark:bg-green-600 text-white";
       case "upcoming":
       case "scheduled":
-        return "bg-blue-500 text-white";
+        return "bg-blue-500 dark:bg-blue-600 text-white";
       case "full":
-        return "bg-amber-500 text-white";
+        return "bg-amber-500 dark:bg-amber-600 text-white";
       default:
         return "bg-primary/10 text-primary";
     }
@@ -439,8 +439,8 @@ export default function ExplorePage() {
         {/* Videos Section - Coming Soon */}
         <section>
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Video className="w-4 h-4 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+              <Video className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             </div>
             <h2 className="text-lg font-semibold text-foreground">Videos</h2>
           </div>

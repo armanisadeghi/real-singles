@@ -112,7 +112,7 @@ function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoo
       <div className="relative w-64 h-64 flex items-center justify-center mb-8">
         {/* Ripple ring 1 - outermost */}
         <div 
-          className="absolute inset-0 rounded-full border-[3px] border-pink-300"
+          className="absolute inset-0 rounded-full border-[3px] border-pink-300 dark:border-pink-500/50"
           style={{
             animation: 'ripple 2.5s ease-out infinite',
           }}
@@ -120,7 +120,7 @@ function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoo
         
         {/* Ripple ring 2 */}
         <div 
-          className="absolute inset-0 rounded-full border-[3px] border-pink-300"
+          className="absolute inset-0 rounded-full border-[3px] border-pink-300 dark:border-pink-500/50"
           style={{
             animation: 'ripple 2.5s ease-out infinite 0.8s',
           }}
@@ -128,7 +128,7 @@ function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoo
         
         {/* Ripple ring 3 */}
         <div 
-          className="absolute inset-0 rounded-full border-[3px] border-pink-300"
+          className="absolute inset-0 rounded-full border-[3px] border-pink-300 dark:border-pink-500/50"
           style={{
             animation: 'ripple 2.5s ease-out infinite 1.6s',
           }}
@@ -140,7 +140,7 @@ function EmptyStateBoost({ userProfileImage, title, description }: EmptyStateBoo
         <div className="absolute inset-20 rounded-full bg-white dark:bg-neutral-900" />
         
         {/* Profile photo container */}
-        <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl z-10">
+        <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white dark:border-neutral-800 shadow-xl dark:shadow-black/30 z-10">
           {userProfileImage ? (
             <img
               src={userProfileImage}

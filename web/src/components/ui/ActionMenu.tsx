@@ -157,21 +157,21 @@ export function ActionMenu({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Main Action Group */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl rounded-2xl overflow-hidden shadow-xl dark:shadow-black/30">
           {/* Header (optional) */}
           {(title || message) && (
-            <div className="px-4 py-3 text-center border-b border-gray-200/50">
+            <div className="px-4 py-3 text-center border-b border-gray-200/50 dark:border-neutral-700/50">
               {title && (
-                <p className="text-sm font-semibold text-gray-500">{title}</p>
+                <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">{title}</p>
               )}
               {message && (
-                <p className="text-xs text-gray-400 mt-0.5">{message}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{message}</p>
               )}
             </div>
           )}
 
           {/* Action Items */}
-          <div className="divide-y divide-gray-200/50">
+          <div className="divide-y divide-gray-200/50 dark:divide-neutral-700/50">
             {items.map((item) => {
               const Icon = item.icon;
               return (
@@ -181,10 +181,10 @@ export function ActionMenu({
                   disabled={item.disabled || item.loading}
                   className={cn(
                     "w-full flex items-center gap-3 px-4 py-3.5 transition-colors",
-                    "hover:bg-gray-100/80 active:bg-gray-200/80",
+                    "hover:bg-gray-100/80 dark:hover:bg-neutral-800/80 active:bg-gray-200/80 dark:active:bg-neutral-700/80",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    item.variant === "destructive" && "text-red-600",
-                    item.variant !== "destructive" && "text-gray-900"
+                    item.variant === "destructive" && "text-red-600 dark:text-red-400",
+                    item.variant !== "destructive" && "text-gray-900 dark:text-gray-100"
                   )}
                 >
                   {Icon && (
@@ -192,7 +192,7 @@ export function ActionMenu({
                       {item.loading ? (
                         <div className={cn(
                           "w-4 h-4 border-2 border-t-transparent rounded-full animate-spin",
-                          item.variant === "destructive" ? "border-red-600" : "border-gray-600"
+                          item.variant === "destructive" ? "border-red-600 dark:border-red-400" : "border-gray-600 dark:border-gray-400"
                         )} />
                       ) : (
                         <Icon className="w-5 h-5" />
@@ -202,7 +202,7 @@ export function ActionMenu({
                   <div className="flex-1 text-left">
                     <span className="text-base font-medium">{item.label}</span>
                     {item.description && (
-                      <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{item.description}</p>
                     )}
                   </div>
                 </button>
@@ -216,8 +216,8 @@ export function ActionMenu({
           onClick={handleClose}
           className={cn(
             "w-full py-3.5 text-center rounded-2xl font-semibold",
-            "bg-white/95 backdrop-blur-xl shadow-xl",
-            "text-blue-600 hover:bg-gray-100/80 active:bg-gray-200/80",
+            "bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl shadow-xl dark:shadow-black/30",
+            "text-blue-600 dark:text-blue-400 hover:bg-gray-100/80 dark:hover:bg-neutral-800/80 active:bg-gray-200/80 dark:active:bg-neutral-700/80",
             "transition-colors"
           )}
         >
@@ -241,7 +241,7 @@ export function ActionMenu({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-white rounded-xl overflow-hidden shadow-2xl ring-1 ring-black/5">
+        <div className="bg-white dark:bg-neutral-900 rounded-xl overflow-hidden shadow-2xl dark:shadow-black/40 ring-1 ring-black/5 dark:ring-white/10">
           {/* Action Items - compact for desktop */}
           <div className="py-1">
             {items.map((item) => {
@@ -253,10 +253,10 @@ export function ActionMenu({
                   disabled={item.disabled || item.loading}
                   className={cn(
                     "w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors",
-                    "hover:bg-gray-100 active:bg-gray-200",
+                    "hover:bg-gray-100 dark:hover:bg-neutral-800 active:bg-gray-200 dark:active:bg-neutral-700",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    item.variant === "destructive" && "text-red-600",
-                    item.variant !== "destructive" && "text-gray-700"
+                    item.variant === "destructive" && "text-red-600 dark:text-red-400",
+                    item.variant !== "destructive" && "text-gray-700 dark:text-gray-300"
                   )}
                 >
                   {Icon && (
@@ -264,7 +264,7 @@ export function ActionMenu({
                       {item.loading ? (
                         <div className={cn(
                           "w-3 h-3 border-2 border-t-transparent rounded-full animate-spin",
-                          item.variant === "destructive" ? "border-red-600" : "border-gray-600"
+                          item.variant === "destructive" ? "border-red-600 dark:border-red-400" : "border-gray-600 dark:border-gray-400"
                         )} />
                       ) : (
                         <Icon className="w-4 h-4" />

@@ -164,7 +164,7 @@ export function MatchCelebrationModal({
           <div className="flex items-center justify-center mb-6">
             {/* Current user photo */}
             <div className="relative">
-              <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
+              <div className="w-24 h-24 rounded-full border-4 border-white dark:border-white/90 shadow-lg overflow-hidden bg-white dark:bg-neutral-800">
                 {currentUserImage ? (
                   <img
                     src={currentUserImage}
@@ -172,7 +172,7 @@ export function MatchCelebrationModal({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center text-3xl">
+                  <div className="w-full h-full bg-gradient-to-br from-pink-200 to-purple-200 dark:from-pink-900 dark:to-purple-900 flex items-center justify-center text-3xl">
                     👤
                   </div>
                 )}
@@ -181,14 +181,14 @@ export function MatchCelebrationModal({
 
             {/* Heart connector */}
             <div className="mx-[-12px] z-10 relative">
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg animate-pulse">
+              <div className="w-12 h-12 bg-white dark:bg-neutral-800 rounded-full flex items-center justify-center shadow-lg animate-pulse">
                 <span className="text-2xl">💕</span>
               </div>
             </div>
 
             {/* Matched user photo */}
             <div className="relative">
-              <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
+              <div className="w-24 h-24 rounded-full border-4 border-white dark:border-white/90 shadow-lg overflow-hidden bg-white dark:bg-neutral-800">
                 {matchedUserImage ? (
                   <img
                     src={matchedUserImage}
@@ -196,7 +196,7 @@ export function MatchCelebrationModal({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center text-3xl">
+                  <div className="w-full h-full bg-gradient-to-br from-pink-200 to-purple-200 dark:from-pink-900 dark:to-purple-900 flex items-center justify-center text-3xl">
                     👤
                   </div>
                 )}

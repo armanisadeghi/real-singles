@@ -178,13 +178,13 @@ export function ProfileCard({
       <Link
         href={profile.user_id ? `${linkBasePath}/${profile.user_id}` : "#"}
         className={cn(
-          "block relative bg-white rounded-xl shadow-sm overflow-hidden group",
-          "transition-all duration-200 hover:shadow-md",
+          "block relative bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 overflow-hidden group",
+          "transition-all duration-200 hover:shadow-md dark:hover:shadow-black/30",
           className
         )}
       >
         {/* Photo */}
-        <div className="relative aspect-[3/4] bg-gradient-to-br from-pink-100 to-purple-100">
+        <div className="relative aspect-[3/4] bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-950 dark:to-purple-950">
           {photos.length > 0 ? (
             <img
               src={photos[0]}
@@ -205,13 +205,13 @@ export function ProfileCard({
                 hasVoicePrompt={!!profile.voice_prompt_url}
                 hasVideoIntro={!!profile.video_intro_url}
                 size="sm"
-                className="bg-white/90 backdrop-blur-sm"
+                className="bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm"
               />
             )}
             
             {/* Verified Badge */}
             {profile.is_verified && (
-              <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+              <div className="w-5 h-5 bg-blue-500 dark:bg-blue-600 rounded-full flex items-center justify-center">
                 <CheckCircle className="w-3 h-3 text-white" />
               </div>
             )}
@@ -240,8 +240,8 @@ export function ProfileCard({
   return (
     <div
       className={cn(
-        "relative bg-white rounded-2xl shadow-sm overflow-hidden group",
-        "transition-all duration-300 hover:shadow-lg",
+        "relative bg-white dark:bg-neutral-900 rounded-2xl shadow-sm dark:shadow-black/20 overflow-hidden group",
+        "transition-all duration-300 hover:shadow-lg dark:hover:shadow-black/30",
         size === "large" ? "md:max-w-md" : "",
         className
       )}
@@ -250,7 +250,7 @@ export function ProfileCard({
     >
       {/* Photo Section */}
       <div
-        className="relative aspect-[3/4] bg-gradient-to-br from-pink-100 to-purple-100 touch-pan-y select-none"
+        className="relative aspect-[3/4] bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-950 dark:to-purple-950 touch-pan-y select-none"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -325,13 +325,13 @@ export function ProfileCard({
               hasVoicePrompt={!!profile.voice_prompt_url}
               hasVideoIntro={!!profile.video_intro_url}
               size="md"
-              className="bg-white/90 backdrop-blur-sm shadow-sm"
+              className="bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm shadow-sm"
             />
           )}
           
           {/* Verified Badge */}
           {profile.is_verified && (
-            <div className="bg-blue-500 text-white px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+            <div className="bg-blue-500 dark:bg-blue-600 text-white px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
               <CheckCircle className="w-3 h-3" />
               Verified
             </div>
@@ -367,43 +367,43 @@ export function ProfileCard({
       </div>
 
       {/* Quick info bar */}
-      <div className="px-4 py-3 border-t">
+      <div className="px-4 py-3 border-t border-gray-100 dark:border-neutral-800">
         {profile.bio ? (
-          <p className="text-sm text-gray-600 line-clamp-2">{profile.bio}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{profile.bio}</p>
         ) : profile.interests && profile.interests.length > 0 ? (
           <div className="flex flex-wrap gap-1">
             {profile.interests.slice(0, 3).map((interest) => (
               <span
                 key={interest}
-                className="px-2 py-1 bg-pink-50 text-pink-700 rounded-full text-xs"
+                className="px-2 py-1 bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-full text-xs"
               >
                 {interest}
               </span>
             ))}
             {profile.interests.length > 3 && (
-              <span className="px-2 py-1 text-gray-400 text-xs">
+              <span className="px-2 py-1 text-gray-400 dark:text-gray-500 text-xs">
                 +{profile.interests.length - 3}
               </span>
             )}
           </div>
         ) : (
-          <p className="text-sm text-gray-400 italic">No bio yet</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 italic">No bio yet</p>
         )}
       </div>
 
       {/* Action Buttons */}
       {showActions && (
-        <div className="flex items-center justify-center gap-4 px-4 py-3 border-t bg-gray-50">
+        <div className="flex items-center justify-center gap-4 px-4 py-3 border-t border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-800/50">
           {/* Pass Button */}
           <button
             onClick={() => profile.user_id && onPass?.(profile.user_id)}
             disabled={actionLoading || !profile.user_id}
             className={cn(
               "w-14 h-14 rounded-full flex items-center justify-center",
-              "bg-white border-2 border-gray-200 text-gray-500",
-              "hover:border-red-300 hover:text-red-500 hover:bg-red-50",
+              "bg-white dark:bg-neutral-900 border-2 border-gray-200 dark:border-neutral-700 text-gray-500 dark:text-gray-400",
+              "hover:border-red-300 dark:hover:border-red-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20",
               "transition-all active:scale-95 disabled:opacity-50",
-              "shadow-sm hover:shadow"
+              "shadow-sm hover:shadow dark:shadow-black/20"
             )}
           >
             <X className="w-7 h-7" />
@@ -415,10 +415,10 @@ export function ProfileCard({
             disabled={actionLoading || !profile.user_id}
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center",
-              "bg-white border-2 border-blue-200 text-blue-500",
-              "hover:border-blue-400 hover:bg-blue-50",
+              "bg-white dark:bg-neutral-900 border-2 border-blue-200 dark:border-blue-500/30 text-blue-500 dark:text-blue-400",
+              "hover:border-blue-400 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20",
               "transition-all active:scale-95 disabled:opacity-50",
-              "shadow-sm hover:shadow"
+              "shadow-sm hover:shadow dark:shadow-black/20"
             )}
           >
             <Star className="w-5 h-5" />
@@ -433,7 +433,7 @@ export function ProfileCard({
               "bg-gradient-to-br from-pink-500 to-rose-500 text-white",
               "hover:from-pink-600 hover:to-rose-600",
               "transition-all active:scale-95 disabled:opacity-50",
-              "shadow-md hover:shadow-lg"
+              "shadow-md hover:shadow-lg dark:shadow-black/30"
             )}
           >
             <Heart className="w-7 h-7" />
@@ -444,10 +444,10 @@ export function ProfileCard({
             href={profile.user_id ? `${linkBasePath}/${profile.user_id}` : "#"}
             className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center",
-              "bg-white border-2 border-gray-200 text-gray-500",
-              "hover:border-purple-300 hover:text-purple-500 hover:bg-purple-50",
+              "bg-white dark:bg-neutral-900 border-2 border-gray-200 dark:border-neutral-700 text-gray-500 dark:text-gray-400",
+              "hover:border-purple-300 dark:hover:border-purple-400 hover:text-purple-500 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20",
               "transition-all active:scale-95",
-              "shadow-sm hover:shadow"
+              "shadow-sm hover:shadow dark:shadow-black/20"
             )}
           >
             <Info className="w-5 h-5" />

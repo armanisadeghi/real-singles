@@ -231,12 +231,19 @@ export default function HomePage() {
       <header className="bg-background border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
-            {/* Logo */}
+            {/* Logo - theme-aware */}
             <Link href="/home" className="flex items-center gap-2 flex-shrink-0">
+              {/* Light mode logo */}
               <img 
-                src="/images/logo.png" 
+                src="/images/logo-transparent.png" 
                 alt="RealSingles" 
-                className="h-8 sm:h-9 w-auto"
+                className="h-8 sm:h-9 w-auto dark:hidden"
+              />
+              {/* Dark mode logo */}
+              <img 
+                src="/images/logo-dark-transparent.png" 
+                alt="RealSingles" 
+                className="h-8 sm:h-9 w-auto hidden dark:block"
               />
             </Link>
             

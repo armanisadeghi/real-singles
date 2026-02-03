@@ -33,16 +33,16 @@ interface Notification {
 type NotificationCategory = "matches" | "events" | "activity";
 
 const notificationIcons: Record<string, { icon: typeof Bell; color: string }> = {
-  match: { icon: Heart, color: "text-pink-500 bg-pink-100" },
-  like: { icon: Heart, color: "text-pink-500 bg-pink-100" },
-  event: { icon: Calendar, color: "text-purple-500 bg-purple-100" },
-  event_reminder: { icon: Calendar, color: "text-purple-500 bg-purple-100" },
-  review: { icon: Star, color: "text-yellow-500 bg-yellow-100" },
-  reward: { icon: Gift, color: "text-green-500 bg-green-100" },
-  referral: { icon: UserPlus, color: "text-indigo-500 bg-indigo-100" },
-  system: { icon: Shield, color: "text-gray-500 bg-gray-100" },
-  admin: { icon: Sparkles, color: "text-amber-500 bg-amber-100" },
-  default: { icon: Bell, color: "text-gray-500 bg-gray-100" },
+  match: { icon: Heart, color: "text-pink-500 bg-pink-100 dark:bg-pink-900/30" },
+  like: { icon: Heart, color: "text-pink-500 bg-pink-100 dark:bg-pink-900/30" },
+  event: { icon: Calendar, color: "text-purple-500 bg-purple-100 dark:bg-purple-900/30" },
+  event_reminder: { icon: Calendar, color: "text-purple-500 bg-purple-100 dark:bg-purple-900/30" },
+  review: { icon: Star, color: "text-yellow-500 bg-yellow-100 dark:bg-yellow-900/30" },
+  reward: { icon: Gift, color: "text-green-500 bg-green-100 dark:bg-green-900/30" },
+  referral: { icon: UserPlus, color: "text-indigo-500 bg-indigo-100 dark:bg-indigo-900/30" },
+  system: { icon: Shield, color: "text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-neutral-800" },
+  admin: { icon: Sparkles, color: "text-amber-500 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30" },
+  default: { icon: Bell, color: "text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-neutral-800" },
 };
 
 // Helper to categorize notifications
@@ -218,12 +218,12 @@ export function NotificationBell() {
     description: string; 
     icon: typeof Bell;
   }) => (
-    <div className="px-4 py-3 bg-gray-50/50">
-      <div className="flex items-center gap-2 text-gray-400">
+    <div className="px-4 py-3 bg-gray-50/50 dark:bg-neutral-800/50">
+      <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-medium uppercase tracking-wide">{title}</span>
       </div>
-      <p className="text-xs text-gray-400 mt-1 pl-6">{description}</p>
+      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 pl-6">{description}</p>
     </div>
   );
 
@@ -249,12 +249,12 @@ export function NotificationBell() {
         aria-label={unreadCount > 0 ? `Notifications - ${unreadCount} unread` : "Notifications"}
         className={cn(
           "relative p-2 rounded-full transition-colors",
-          "hover:bg-gray-100 active:bg-gray-200",
+          "hover:bg-gray-100 dark:hover:bg-neutral-800 active:bg-gray-200 dark:active:bg-neutral-700",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
-          isOpen && "bg-gray-100"
+          isOpen && "bg-gray-100 dark:bg-neutral-800"
         )}
       >
-        <Bell className="w-5 h-5 text-gray-600" />
+        <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
         {unreadCount > 0 && (
           <span 
             className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-pink-500 text-white text-[10px] font-bold rounded-full"
@@ -271,7 +271,7 @@ export function NotificationBell() {
           role="dialog"
           aria-label="Notifications"
           className={cn(
-            "absolute mt-2 bg-white rounded-xl shadow-xl border overflow-hidden z-50",
+            "absolute mt-2 bg-white dark:bg-neutral-900 rounded-xl shadow-xl dark:shadow-black/40 border border-gray-200 dark:border-neutral-700 overflow-hidden z-50",
             // Mobile: use fixed positioning for full-width appearance
             "fixed left-2 right-2 sm:left-auto sm:right-0 sm:absolute",
             // Width: auto on mobile (uses left/right), fixed on desktop
@@ -280,23 +280,23 @@ export function NotificationBell() {
           )}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b bg-white sticky top-0">
-            <h2 className="font-semibold text-gray-900">Notifications</h2>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 sticky top-0">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100">Notifications</h2>
             <div className="flex items-center gap-2">
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-xs text-pink-600 hover:text-pink-700 font-medium"
+                  className="text-xs text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 font-medium"
                 >
                   Mark all read
                 </button>
               )}
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 hover:bg-gray-100 rounded-full -mr-1"
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-full -mr-1"
                 aria-label="Close notifications"
               >
-                <X className="w-4 h-4 text-gray-500" />
+                <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
           </div>
@@ -309,9 +309,9 @@ export function NotificationBell() {
               </div>
             ) : notifications.length === 0 ? (
               <div className="p-8 text-center">
-                <Bell className="w-10 h-10 text-gray-200 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No notifications yet</p>
-                <p className="text-xs text-gray-400 mt-1">We'll notify you when something happens</p>
+                <Bell className="w-10 h-10 text-gray-200 dark:text-gray-700 mx-auto mb-2" />
+                <p className="text-sm text-gray-500 dark:text-gray-400">No notifications yet</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">We'll notify you when something happens</p>
               </div>
             ) : (
               <div>
@@ -349,9 +349,9 @@ export function NotificationBell() {
                       }}
                       className={cn(
                         "w-full flex items-start gap-3 px-4 py-3 text-left",
-                        "hover:bg-gray-50 active:bg-gray-100 transition-colors",
-                        "focus:outline-none focus:bg-gray-50",
-                        !notification.is_read && "bg-pink-50/30"
+                        "hover:bg-gray-50 dark:hover:bg-neutral-800 active:bg-gray-100 dark:active:bg-neutral-700 transition-colors",
+                        "focus:outline-none focus:bg-gray-50 dark:focus:bg-neutral-800",
+                        !notification.is_read && "bg-pink-50/30 dark:bg-pink-900/20"
                       )}
                     >
                       <div
@@ -367,16 +367,16 @@ export function NotificationBell() {
                           className={cn(
                             "text-sm leading-snug",
                             !notification.is_read
-                              ? "font-semibold text-gray-900"
-                              : "font-medium text-gray-700"
+                              ? "font-semibold text-gray-900 dark:text-gray-100"
+                              : "font-medium text-gray-700 dark:text-gray-300"
                           )}
                         >
                           {notification.title}
                         </p>
-                        <p className="text-sm text-gray-500 line-clamp-2 leading-snug mt-0.5">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-snug mt-0.5">
                           {notification.message}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                           {formatRelativeTime(notification.created_at)}
                         </p>
                       </div>
@@ -392,11 +392,11 @@ export function NotificationBell() {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="border-t p-2 bg-white">
+            <div className="border-t border-gray-200 dark:border-neutral-700 p-2 bg-white dark:bg-neutral-900">
               <Link
                 href="/notifications"
                 onClick={() => setIsOpen(false)}
-                className="block w-full py-2 text-center text-sm font-medium text-pink-600 hover:bg-pink-50 rounded-lg transition-colors"
+                className="block w-full py-2 text-center text-sm font-medium text-pink-600 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-900/20 rounded-lg transition-colors"
               >
                 View all notifications
               </Link>

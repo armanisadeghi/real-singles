@@ -9,17 +9,49 @@
   --brand-secondary-light: #2DD9CA;
   --brand-secondary-dark: #0AAD9E;
   
+  /* Brand Gold Colors - for amber/gold UI elements */
+  --brand-gold: #b45309;           /* amber-700 - text/icons */
+  --brand-gold-text: #92400e;      /* amber-800 - darker text */
+  --brand-gold-bg: #fffbeb;        /* amber-50 - backgrounds */
+  --brand-gold-bg-strong: #fef3c7; /* amber-100 - stronger bg */
+  
+  /* Status Colors */
+  --status-verified: #3b82f6;      /* blue-500 */
+  --status-success: #22c55e;       /* green-500 */
+  --status-error: #ef4444;         /* red-500 */
+  --status-warning: #f59e0b;       /* amber-500 */
+  
   /* Semantic Colors - Light Mode */
   --background: #ffffff;
   --foreground: #1a1a1a;
   --muted: #f5f5f5;
   --muted-foreground: #737373;
   --border: #e5e5e5;
+  --border-light: #f3f4f6;         /* gray-100 */
+  --border-strong: #d1d5db;        /* gray-300 */
   
   /* Surface Colors - for cards, nav, etc. */
   --surface: #ffffff;
   --surface-elevated: #ffffff;
-  --surface-secondary: #f9fafb; /* gray-50 equivalent */
+  --surface-secondary: #f9fafb;    /* gray-50 */
+  --surface-tertiary: #f3f4f6;     /* gray-100 */
+  
+  /* Card Colors */
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;          /* gray-200 */
+  --card-hover: #f9fafb;           /* gray-50 */
+  
+  /* Section Colors - for profile sections */
+  --section-bg: #f9fafb;           /* gray-50 */
+  --section-border: #e5e7eb;       /* gray-200 */
+  --prompt-bg: #fffbeb;            /* amber-50 */
+  --prompt-border: #fef3c7;        /* amber-100 */
+  
+  /* Tag/Chip Colors */
+  --tag-bg: #f3f4f6;               /* gray-100 */
+  --tag-text: #374151;             /* gray-700 */
+  --tag-accent-bg: #fef3c7;        /* amber-100 */
+  --tag-accent-text: #92400e;      /* amber-800 */
   
   /* Glass Colors - for glassmorphism */
   --glass-bg: rgba(255, 255, 255, 0.70);
@@ -27,15 +59,37 @@
   --glass-border: rgba(255, 255, 255, 0.30);
   --glass-shadow: rgba(0, 0, 0, 0.10);
   
+  /* Tab Colors */
+  --tab-bg: rgba(243, 244, 246, 0.8);   /* gray-100/80 */
+  --tab-active-bg: #ffffff;
+  --tab-text: #4b5563;                   /* gray-600 */
+  --tab-active-text: #111827;            /* gray-900 */
+  --tab-badge-bg: #ec4899;               /* pink-500 */
+  --tab-badge-inactive-bg: #9ca3af;      /* gray-400 */
+  
   /* Text Colors */
   --text-primary: #1a1a1a;
   --text-secondary: #525252;
   --text-muted: #737373;
   --text-inverted: #ffffff;
+  --text-link: #3b82f6;            /* blue-500 */
   
   /* Interactive Colors */
   --interactive-hover: rgba(0, 0, 0, 0.05);
   --interactive-active: rgba(0, 0, 0, 0.10);
+  
+  /* Action Button Colors */
+  --action-pass-border: #e5e7eb;         /* gray-200 */
+  --action-pass-text: #6b7280;           /* gray-500 */
+  --action-pass-hover-border: #fca5a5;   /* red-300 */
+  --action-pass-hover-bg: #fef2f2;       /* red-50 */
+  --action-pass-hover-text: #ef4444;     /* red-500 */
+  --action-like-border: #fbcfe8;         /* pink-200 */
+  --action-like-hover-border: #f472b6;   /* pink-400 */
+  --action-like-hover-bg: #fdf2f8;       /* pink-50 */
+  --action-superlike-border: #bfdbfe;    /* blue-200 */
+  --action-superlike-hover-border: #60a5fa; /* blue-400 */
+  --action-superlike-hover-bg: #eff6ff;  /* blue-50 */
   
   /* Chat Colors */
   --chat-bubble-sent: #007AFF;
@@ -57,34 +111,108 @@
   --color-brand-secondary: var(--brand-secondary);
   --color-brand-secondary-light: var(--brand-secondary-light);
   --color-brand-secondary-dark: var(--brand-secondary-dark);
+  /* Brand gold (amber) colors */
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-gold-text: var(--brand-gold-text);
+  --color-brand-gold-bg: var(--brand-gold-bg);
+  --color-brand-gold-bg-strong: var(--brand-gold-bg-strong);
+  /* Status colors */
+  --color-status-verified: var(--status-verified);
+  --color-status-success: var(--status-success);
+  --color-status-error: var(--status-error);
+  --color-status-warning: var(--status-warning);
+  /* Semantic colors */
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-border-strong: var(--border-strong);
   /* Surface colors */
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
   --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+  /* Card colors */
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-card-hover: var(--card-hover);
+  /* Section colors */
+  --color-section-bg: var(--section-bg);
+  --color-section-border: var(--section-border);
+  --color-prompt-bg: var(--prompt-bg);
+  --color-prompt-border: var(--prompt-border);
+  /* Tag colors */
+  --color-tag-bg: var(--tag-bg);
+  --color-tag-text: var(--tag-text);
+  --color-tag-accent-bg: var(--tag-accent-bg);
+  --color-tag-accent-text: var(--tag-accent-text);
+  /* Tab colors */
+  --color-tab-bg: var(--tab-bg);
+  --color-tab-active-bg: var(--tab-active-bg);
+  --color-tab-text: var(--tab-text);
+  --color-tab-active-text: var(--tab-active-text);
+  --color-tab-badge-bg: var(--tab-badge-bg);
+  --color-tab-badge-inactive-bg: var(--tab-badge-inactive-bg);
   /* Text colors */
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
+  --color-text-link: var(--text-link);
+  /* Glass colors */
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-bg-solid: var(--glass-bg-solid);
+  --color-glass-border: var(--glass-border);
+  --color-glass-shadow: var(--glass-shadow);
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
+    /* Brand Gold Colors - Dark Mode (lighter for visibility) */
+    --brand-gold: #fbbf24;           /* amber-400 */
+    --brand-gold-text: #fcd34d;      /* amber-300 */
+    --brand-gold-bg: rgba(180, 83, 9, 0.2);  /* amber with opacity */
+    --brand-gold-bg-strong: rgba(180, 83, 9, 0.3);
+    
+    /* Status Colors - Dark Mode (lighter variants) */
+    --status-verified: #60a5fa;      /* blue-400 */
+    --status-success: #4ade80;       /* green-400 */
+    --status-error: #f87171;         /* red-400 */
+    --status-warning: #fbbf24;       /* amber-400 */
+    
     /* Semantic Colors - Dark Mode */
     --background: #0a0a0a;
     --foreground: #fafafa;
     --muted: #262626;
     --muted-foreground: #a3a3a3;
     --border: #404040;
+    --border-light: #262626;         /* neutral-800 */
+    --border-strong: #525252;        /* neutral-600 */
     
     /* Surface Colors - Dark Mode */
     --surface: #171717;
     --surface-elevated: #262626;
     --surface-secondary: #0f0f0f;
+    --surface-tertiary: #262626;     /* neutral-800 */
+    
+    /* Card Colors - Dark Mode */
+    --card-bg: #171717;              /* neutral-900 */
+    --card-border: #404040;          /* neutral-700 */
+    --card-hover: #262626;           /* neutral-800 */
+    
+    /* Section Colors - Dark Mode */
+    --section-bg: #262626;           /* neutral-800 */
+    --section-border: #404040;       /* neutral-700 */
+    --prompt-bg: rgba(180, 83, 9, 0.2);
+    --prompt-border: rgba(180, 83, 9, 0.3);
+    
+    /* Tag/Chip Colors - Dark Mode */
+    --tag-bg: #262626;               /* neutral-800 */
+    --tag-text: #d1d5db;             /* gray-300 */
+    --tag-accent-bg: rgba(180, 83, 9, 0.3);
+    --tag-accent-text: #fcd34d;      /* amber-300 */
     
     /* Glass Colors - Dark Mode */
     --glass-bg: rgba(23, 23, 23, 0.70);
@@ -92,15 +220,37 @@
     --glass-border: rgba(255, 255, 255, 0.10);
     --glass-shadow: rgba(0, 0, 0, 0.30);
     
+    /* Tab Colors - Dark Mode */
+    --tab-bg: rgba(38, 38, 38, 0.8);       /* neutral-800/80 */
+    --tab-active-bg: #171717;              /* neutral-900 */
+    --tab-text: #a3a3a3;                   /* neutral-400 */
+    --tab-active-text: #f5f5f5;            /* neutral-100 */
+    --tab-badge-bg: #ec4899;               /* pink-500 (same) */
+    --tab-badge-inactive-bg: #525252;      /* neutral-600 */
+    
     /* Text Colors - Dark Mode */
     --text-primary: #fafafa;
     --text-secondary: #d4d4d4;
     --text-muted: #a3a3a3;
     --text-inverted: #0a0a0a;
+    --text-link: #60a5fa;            /* blue-400 */
     
     /* Interactive Colors - Dark Mode */
     --interactive-hover: rgba(255, 255, 255, 0.05);
     --interactive-active: rgba(255, 255, 255, 0.10);
+    
+    /* Action Button Colors - Dark Mode */
+    --action-pass-border: #404040;         /* neutral-700 */
+    --action-pass-text: #a3a3a3;           /* neutral-400 */
+    --action-pass-hover-border: #f87171;   /* red-400 */
+    --action-pass-hover-bg: rgba(239, 68, 68, 0.2);
+    --action-pass-hover-text: #f87171;     /* red-400 */
+    --action-like-border: rgba(236, 72, 153, 0.3);
+    --action-like-hover-border: #f472b6;   /* pink-400 */
+    --action-like-hover-bg: rgba(236, 72, 153, 0.2);
+    --action-superlike-border: rgba(59, 130, 246, 0.3);
+    --action-superlike-hover-border: #60a5fa; /* blue-400 */
+    --action-superlike-hover-bg: rgba(59, 130, 246, 0.2);
     
     /* Chat Colors - Dark Mode */
     --chat-bubble-sent: #0A84FF;

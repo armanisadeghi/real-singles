@@ -129,10 +129,10 @@ export function FilterPanel({
       <div className="px-4 py-4 space-y-6 pb-24">
         {/* Age Range */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Age Range</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Age Range</h3>
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <label className="text-xs text-gray-500 mb-1 block">Min</label>
+              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Min</label>
               <input
                 type="number"
                 min={18}
@@ -141,12 +141,12 @@ export function FilterPanel({
                 onChange={(e) =>
                   setFilters({ ...filters, minAge: Number(e.target.value) })
                 }
-                className="w-full px-3 py-2 border rounded-lg text-center"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 rounded-lg text-center"
               />
             </div>
-            <span className="text-gray-400 mt-5">to</span>
+            <span className="text-gray-400 dark:text-gray-500 mt-5">to</span>
             <div className="flex-1">
-              <label className="text-xs text-gray-500 mb-1 block">Max</label>
+              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Max</label>
               <input
                 type="number"
                 min={18}
@@ -155,7 +155,7 @@ export function FilterPanel({
                 onChange={(e) =>
                   setFilters({ ...filters, maxAge: Number(e.target.value) })
                 }
-                className="w-full px-3 py-2 border rounded-lg text-center"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 rounded-lg text-center"
               />
             </div>
           </div>
@@ -163,7 +163,7 @@ export function FilterPanel({
 
         {/* Distance */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">
             Maximum Distance: {filters.maxDistance >= 500 ? "Nationwide" : `${filters.maxDistance} miles`}
           </h3>
           <input
@@ -177,7 +177,7 @@ export function FilterPanel({
             }
             className="w-full accent-pink-500"
           />
-          <div className="flex justify-between text-xs text-gray-400 mt-1">
+          <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500 mt-1">
             <span>10 mi</span>
             <span>50 mi</span>
             <span>100 mi</span>
@@ -188,12 +188,12 @@ export function FilterPanel({
 
         {/* Height Range */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">
             Height: {formatHeight(filters.minHeight)} - {formatHeight(filters.maxHeight)}
           </h3>
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <label className="text-xs text-gray-500 mb-1 block">Min</label>
+              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Min</label>
               <input
                 type="range"
                 min={48}
@@ -206,7 +206,7 @@ export function FilterPanel({
               />
             </div>
             <div className="flex-1">
-              <label className="text-xs text-gray-500 mb-1 block">Max</label>
+              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Max</label>
               <input
                 type="range"
                 min={48}
@@ -225,7 +225,7 @@ export function FilterPanel({
 
         {/* Body Type */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Body Type</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Body Type</h3>
           <div className="flex flex-wrap gap-2">
             {BODY_TYPE_OPTIONS.map((option) => (
               <button
@@ -235,7 +235,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.bodyType.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -246,7 +246,7 @@ export function FilterPanel({
 
         {/* Ethnicity */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Ethnicity</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Ethnicity</h3>
           <div className="flex flex-wrap gap-2">
             {ETHNICITY_OPTIONS.map((option) => (
               <button
@@ -256,7 +256,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.ethnicity.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -267,7 +267,7 @@ export function FilterPanel({
 
         {/* Education */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Education</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Education</h3>
           <div className="flex flex-wrap gap-2">
             {EDUCATION_OPTIONS.map((option) => (
               <button
@@ -277,7 +277,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.education.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -288,7 +288,7 @@ export function FilterPanel({
 
         {/* Religion */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Religion</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Religion</h3>
           <div className="flex flex-wrap gap-2">
             {RELIGION_OPTIONS.map((option) => (
               <button
@@ -298,7 +298,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.religion.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -309,7 +309,7 @@ export function FilterPanel({
 
         {/* Political Views */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Political Views</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Political Views</h3>
           <div className="flex flex-wrap gap-2">
             {POLITICAL_OPTIONS.map((option) => (
               <button
@@ -319,7 +319,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.politicalViews.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -330,7 +330,7 @@ export function FilterPanel({
 
         {/* Marital Status */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Marital Status</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Marital Status</h3>
           <div className="flex flex-wrap gap-2">
             {MARITAL_STATUS_OPTIONS.map((option) => (
               <button
@@ -340,7 +340,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.maritalStatus.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -351,7 +351,7 @@ export function FilterPanel({
 
         {/* Has Kids */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Has Kids</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Has Kids</h3>
           <div className="flex flex-wrap gap-2">
             {HAS_KIDS_OPTIONS.map((option) => (
               <button
@@ -361,7 +361,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.hasKids.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -372,7 +372,7 @@ export function FilterPanel({
 
         {/* Wants Kids */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Wants Kids</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Wants Kids</h3>
           <div className="flex flex-wrap gap-2">
             {WANTS_KIDS_OPTIONS.map((option) => (
               <button
@@ -382,7 +382,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.wantsKids.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -393,7 +393,7 @@ export function FilterPanel({
 
         {/* Pets */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Pets</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Pets</h3>
           <div className="flex flex-wrap gap-2">
             {PETS_OPTIONS.map((option) => (
               <button
@@ -403,7 +403,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.pets.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -414,7 +414,7 @@ export function FilterPanel({
 
         {/* Smoking */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Smoking</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Smoking</h3>
           <div className="flex flex-wrap gap-2">
             {SMOKING_OPTIONS.map((option) => (
               <button
@@ -424,7 +424,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.smoking.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -435,7 +435,7 @@ export function FilterPanel({
 
         {/* Drinking */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Drinking</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Drinking</h3>
           <div className="flex flex-wrap gap-2">
             {DRINKING_OPTIONS.map((option) => (
               <button
@@ -445,7 +445,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.drinking.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -456,7 +456,7 @@ export function FilterPanel({
 
         {/* Marijuana */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Marijuana</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Marijuana</h3>
           <div className="flex flex-wrap gap-2">
             {MARIJUANA_OPTIONS.map((option) => (
               <button
@@ -466,7 +466,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.marijuana.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -477,7 +477,7 @@ export function FilterPanel({
 
         {/* Exercise */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Exercise</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Exercise</h3>
           <div className="flex flex-wrap gap-2">
             {EXERCISE_OPTIONS.map((option) => (
               <button
@@ -487,7 +487,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.exercise.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -498,7 +498,7 @@ export function FilterPanel({
 
         {/* Zodiac */}
         <section>
-          <h3 className="font-medium text-gray-900 mb-3">Zodiac Sign</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Zodiac Sign</h3>
           <div className="flex flex-wrap gap-2">
             {ZODIAC_OPTIONS.map((option) => (
               <button
@@ -508,7 +508,7 @@ export function FilterPanel({
                   "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                   filters.zodiac.includes(option.value)
                     ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
                 )}
               >
                 {option.label}
@@ -522,7 +522,7 @@ export function FilterPanel({
       <BottomSheetActions>
         <button
           onClick={handleReset}
-          className="flex items-center justify-center gap-2 flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+          className="flex items-center justify-center gap-2 flex-1 px-4 py-3 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
         >
           <RotateCcw className="w-4 h-4" />
           Reset

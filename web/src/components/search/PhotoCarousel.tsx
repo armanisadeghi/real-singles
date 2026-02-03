@@ -246,13 +246,13 @@ export function PhotoCarousel({
     return (
       <div
         className={cn(
-          "bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center h-[var(--carousel-height)]",
+          "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-neutral-800 dark:to-neutral-900 flex items-center justify-center h-[var(--carousel-height)]",
           className
         )}
         style={heightStyle}
       >
-        <div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center">
-          <span className="text-4xl text-gray-400">👤</span>
+        <div className="w-24 h-24 rounded-full bg-gray-300 dark:bg-neutral-700 flex items-center justify-center">
+          <span className="text-4xl text-gray-400 dark:text-gray-500">👤</span>
         </div>
       </div>
     );
@@ -319,13 +319,13 @@ export function PhotoCarousel({
                 }}
                 className={cn(
                   "absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full",
-                  "bg-white/80 hover:bg-white flex items-center justify-center",
+                  "bg-white/80 dark:bg-neutral-800/80 hover:bg-white dark:hover:bg-neutral-700 flex items-center justify-center",
                   "transition-opacity duration-200",
                   isHovered ? "opacity-100" : "opacity-0"
                 )}
                 aria-label="Previous image"
               >
-                <ChevronLeft className="w-6 h-6 text-gray-800" />
+                <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-gray-200" />
               </button>
             )}
 
@@ -338,13 +338,13 @@ export function PhotoCarousel({
                 }}
                 className={cn(
                   "absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full",
-                  "bg-white/80 hover:bg-white flex items-center justify-center",
+                  "bg-white/80 dark:bg-neutral-800/80 hover:bg-white dark:hover:bg-neutral-700 flex items-center justify-center",
                   "transition-opacity duration-200",
                   isHovered ? "opacity-100" : "opacity-0"
                 )}
                 aria-label="Next image"
               >
-                <ChevronRight className="w-6 h-6 text-gray-800" />
+                <ChevronRight className="w-6 h-6 text-gray-800 dark:text-gray-200" />
               </button>
             )}
           </>

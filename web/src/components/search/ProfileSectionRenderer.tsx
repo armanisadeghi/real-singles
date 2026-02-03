@@ -210,21 +210,21 @@ export function ProfileSectionRenderer({
       {!excludeBasicsAndAbout && (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {name}
               {age && <span className="font-normal">, {age}</span>}
             </h1>
             {profile.is_verified && (
-              <CheckCircle className="w-5 h-5 text-blue-500" />
+              <CheckCircle className="w-5 h-5 text-blue-500 dark:text-blue-400" />
             )}
           </div>
 
           {location && (
-            <div className="flex items-center gap-1.5 text-gray-600">
+            <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
               <MapPin className="w-4 h-4" />
               <span>{location}</span>
               {profile.distance_km && (
-                <span className="text-gray-400 ml-2">
+                <span className="text-gray-400 dark:text-gray-500 ml-2">
                   • {profile.distance_km.toFixed(1)} km away
                 </span>
               )}
@@ -232,7 +232,7 @@ export function ProfileSectionRenderer({
           )}
 
           {shouldDisplay(profile.occupation) && (
-            <div className="flex items-center gap-1.5 text-gray-600">
+            <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
               <Briefcase className="w-4 h-4" />
               <span>{profile.occupation}</span>
             </div>
@@ -243,23 +243,23 @@ export function ProfileSectionRenderer({
       {/* About - hidden when excludeBasicsAndAbout is true */}
       {!excludeBasicsAndAbout && shouldDisplay(profile.bio) && (
         <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-amber-700">About Me</h2>
-          <p className="text-gray-700 leading-relaxed">{profile.bio}</p>
+          <h2 className="text-sm font-semibold text-amber-700 dark:text-amber-400">About Me</h2>
+          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{profile.bio}</p>
         </div>
       )}
 
       {/* Prompts */}
       {prompts.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-amber-700">Get to Know Me</h2>
+          <h2 className="text-sm font-semibold text-amber-700 dark:text-amber-400">Get to Know Me</h2>
           <div className="space-y-3">
             {prompts.map((prompt, index) => (
               <div
                 key={index}
-                className="bg-amber-50 rounded-xl p-4 space-y-1"
+                className="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4 space-y-1"
               >
-                <p className="text-xs text-amber-700 italic">{prompt.label}</p>
-                <p className="text-amber-900">{prompt.value}</p>
+                <p className="text-xs text-amber-700 dark:text-amber-400 italic">{prompt.label}</p>
+                <p className="text-amber-900 dark:text-amber-100">{prompt.value}</p>
               </div>
             ))}
           </div>
@@ -269,12 +269,12 @@ export function ProfileSectionRenderer({
       {/* Interests */}
       {shouldDisplay(profile.interests) && (
         <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-amber-700">Interests</h2>
+          <h2 className="text-sm font-semibold text-amber-700 dark:text-amber-400">Interests</h2>
           <div className="flex flex-wrap gap-2">
             {profile.interests!.map((interest, index) => (
               <span
                 key={index}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium"
+                className="px-3 py-1.5 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium"
               >
                 {capitalize(interest)}
               </span>
@@ -286,17 +286,17 @@ export function ProfileSectionRenderer({
       {/* Lifestyle */}
       {lifestyleItems.length > 0 && (
         <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-amber-700">Lifestyle</h2>
+          <h2 className="text-sm font-semibold text-amber-700 dark:text-amber-400">Lifestyle</h2>
           <div className="grid grid-cols-2 gap-2">
             {lifestyleItems.map((item, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-neutral-800 rounded-lg"
               >
-                <div className="text-amber-600">{item.icon}</div>
+                <div className="text-amber-600 dark:text-amber-400">{item.icon}</div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500">{item.label}</p>
-                  <p className="text-sm text-gray-900 font-medium truncate">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{item.label}</p>
+                  <p className="text-sm text-gray-900 dark:text-gray-100 font-medium truncate">
                     {item.value}
                   </p>
                 </div>
@@ -309,17 +309,17 @@ export function ProfileSectionRenderer({
       {/* Background */}
       {backgroundItems.length > 0 && (
         <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-amber-700">Background</h2>
+          <h2 className="text-sm font-semibold text-amber-700 dark:text-amber-400">Background</h2>
           <div className="grid grid-cols-2 gap-2">
             {backgroundItems.map((item, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-neutral-800 rounded-lg"
               >
-                <div className="text-amber-600">{item.icon}</div>
+                <div className="text-amber-600 dark:text-amber-400">{item.icon}</div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500">{item.label}</p>
-                  <p className="text-sm text-gray-900 font-medium truncate">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{item.label}</p>
+                  <p className="text-sm text-gray-900 dark:text-gray-100 font-medium truncate">
                     {item.value}
                   </p>
                 </div>
@@ -332,17 +332,17 @@ export function ProfileSectionRenderer({
       {/* Family */}
       {familyItems.length > 0 && (
         <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-amber-700">Family</h2>
+          <h2 className="text-sm font-semibold text-amber-700 dark:text-amber-400">Family</h2>
           <div className="grid grid-cols-2 gap-2">
             {familyItems.map((item, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-neutral-800 rounded-lg"
               >
-                <div className="text-amber-600">{item.icon}</div>
+                <div className="text-amber-600 dark:text-amber-400">{item.icon}</div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500">{item.label}</p>
-                  <p className="text-sm text-gray-900 font-medium truncate">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{item.label}</p>
+                  <p className="text-sm text-gray-900 dark:text-gray-100 font-medium truncate">
                     {item.value}
                   </p>
                 </div>
@@ -355,17 +355,17 @@ export function ProfileSectionRenderer({
       {/* Habits */}
       {habitsItems.length > 0 && (
         <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-amber-700">Habits</h2>
+          <h2 className="text-sm font-semibold text-amber-700 dark:text-amber-400">Habits</h2>
           <div className="grid grid-cols-2 gap-2">
             {habitsItems.map((item, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-neutral-800 rounded-lg"
               >
-                <div className="text-amber-600">{item.icon}</div>
+                <div className="text-amber-600 dark:text-amber-400">{item.icon}</div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500">{item.label}</p>
-                  <p className="text-sm text-gray-900 font-medium truncate">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{item.label}</p>
+                  <p className="text-sm text-gray-900 dark:text-gray-100 font-medium truncate">
                     {item.value}
                   </p>
                 </div>

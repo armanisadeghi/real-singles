@@ -48,48 +48,48 @@ export function ReferralCard({ referralCode }: ReferralCardProps) {
 
   return (
     <>
-      <section className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 lg:p-6 border border-amber-100 shadow-sm">
+      <section className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 rounded-2xl p-5 lg:p-6 border border-amber-100 dark:border-amber-900/50 shadow-sm dark:shadow-black/20">
         <div className="flex items-center gap-2 mb-4">
-          <Gift className="w-5 h-5 text-amber-600" />
-          <h3 className="text-sm font-semibold text-amber-800">Referral Code</h3>
+          <Gift className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+          <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300">Referral Code</h3>
         </div>
-        <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-3 border border-amber-200 mb-4">
-          <code className="flex-1 font-mono text-base text-amber-900 font-semibold tracking-wide">{referralCode}</code>
+        <div className="flex items-center gap-2 bg-white dark:bg-neutral-900 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-800/50 mb-4">
+          <code className="flex-1 font-mono text-base text-amber-900 dark:text-amber-200 font-semibold tracking-wide">{referralCode}</code>
           <button 
             onClick={handleCopy}
-            className="p-1.5 hover:bg-amber-50 rounded-lg transition-colors"
+            className="p-1.5 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors"
             title="Copy code"
           >
             {copied ? (
-              <CheckCircle className="w-5 h-5 text-green-600" />
+              <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
             ) : (
-              <Copy className="w-5 h-5 text-amber-600" />
+              <Copy className="w-5 h-5 text-amber-600 dark:text-amber-400" />
             )}
           </button>
         </div>
         <div className="flex items-center gap-2 mb-4">
           <button
             onClick={handleShare}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97] shadow-md shadow-amber-500/20"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97] shadow-md shadow-amber-500/20 dark:shadow-amber-900/30"
           >
             <Share2 className="w-4 h-4" />
             Share Link
           </button>
           <button
             onClick={() => setShowQRModal(true)}
-            className="flex items-center justify-center w-11 h-11 bg-white text-amber-700 rounded-xl border border-amber-200 hover:bg-amber-50 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97]"
+            className="flex items-center justify-center w-11 h-11 bg-white dark:bg-neutral-900 text-amber-700 dark:text-amber-400 rounded-xl border border-amber-200 dark:border-amber-800/50 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97]"
             title="Show QR Code"
           >
             <QrCode className="w-5 h-5" />
           </button>
         </div>
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-amber-700 leading-relaxed">
+          <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
             Share to earn points when friends sign up!
           </p>
           <Link
             href="/refer"
-            className="text-sm font-medium text-amber-600 hover:text-amber-800 transition-colors inline-flex items-center gap-1"
+            className="text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 transition-colors inline-flex items-center gap-1"
           >
             View Stats
             <span aria-hidden="true">→</span>

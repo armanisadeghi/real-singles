@@ -112,27 +112,27 @@ export function EmptyState({
         className
       )}
     >
-      <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-        <Icon className="w-8 h-8 text-gray-400" />
+      <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center mb-4">
+        <Icon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-1">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
         {title || config.title}
       </h3>
-      <p className="text-sm text-gray-500 mb-6 max-w-xs">
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-xs">
         {description || config.description}
       </p>
       {(actionLabel && actionHref) || (actionLabel && onAction) ? (
         actionHref ? (
           <Link
             href={actionHref}
-            className="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-medium text-sm hover:from-pink-600 hover:to-purple-700 transition-all shadow-sm"
+            className="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-medium text-sm hover:from-pink-600 hover:to-purple-700 transition-all shadow-sm dark:shadow-black/20"
           >
             {actionLabel}
           </Link>
         ) : (
           <button
             onClick={onAction}
-            className="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-medium text-sm hover:from-pink-600 hover:to-purple-700 transition-all shadow-sm"
+            className="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-medium text-sm hover:from-pink-600 hover:to-purple-700 transition-all shadow-sm dark:shadow-black/20"
           >
             {actionLabel}
           </button>

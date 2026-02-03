@@ -72,7 +72,7 @@ export function BottomSheet({
       <div
         ref={sheetRef}
         className={cn(
-          "fixed bg-white overflow-hidden",
+          "fixed bg-white dark:bg-neutral-900 overflow-hidden",
           // Mobile: bottom sheet
           "bottom-0 left-0 right-0 rounded-t-2xl",
           "animate-in slide-in-from-bottom duration-300",
@@ -86,19 +86,19 @@ export function BottomSheet({
       >
         {/* Handle bar (mobile only) */}
         <div className="flex justify-center pt-3 pb-1 md:hidden">
-          <div className="w-10 h-1 rounded-full bg-gray-300" />
+          <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-neutral-600" />
         </div>
 
         {/* Header */}
         {(title || showClose) && (
-          <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-neutral-700 shrink-0">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {title || ""}
             </h2>
             {showClose && (
               <button
                 onClick={onClose}
-                className="p-2 -m-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 -m-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -127,7 +127,7 @@ export function BottomSheetActions({ children, className }: BottomSheetActionPro
   return (
     <div
       className={cn(
-        "sticky bottom-0 bg-white border-t px-4 py-3 flex gap-3",
+        "sticky bottom-0 bg-white dark:bg-neutral-900 border-t border-gray-200 dark:border-neutral-700 px-4 py-3 flex gap-3",
         "pb-[calc(env(safe-area-inset-bottom)+12px)] md:pb-3",
         className
       )}

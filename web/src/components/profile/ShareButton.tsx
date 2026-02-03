@@ -25,8 +25,8 @@ export function ShareButton({
         onClick={() => setShowQRModal(true)}
         className={cn(
           "inline-flex items-center justify-center gap-1",
-          "bg-gray-100 text-gray-600 font-medium rounded-full",
-          "hover:bg-gray-200 hover:text-gray-900",
+          "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-300 font-medium rounded-full",
+          "hover:bg-gray-200 dark:hover:bg-neutral-700 hover:text-gray-900 dark:hover:text-gray-100",
           "transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]",
           "active:scale-[0.97]",
           className
