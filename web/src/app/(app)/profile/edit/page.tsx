@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { VoiceRecorder, VideoRecorder } from "@/components/profile";
+import { VoiceRecorder, VideoRecorder, VerificationSelfieCapture } from "@/components/profile";
 import { getExtensionFromMimeType } from "@/hooks/useMediaPermissions";
 import {
   GENDER_OPTIONS,
@@ -32,6 +32,109 @@ import {
 
 const AUTOSAVE_MIN_INTERVAL = 30000; // 30 seconds minimum between autosaves
 const IDLE_SAVE_DELAY = 10000; // 10 seconds of inactivity before considering a save
+
+/**
+ * Verification Selfie Section
+ * Handles its own state and API calls separately from the main profile form
+ */
+function VerificationSelfieSection() {
+  const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load existing verification selfie
+  useEffect(() => {
+    const loadSelfie = async () => {
+      try {
+        const res = await fetch("/api/users/me/verification-selfie");
+        const data = await res.json();
+
+        if (data.success && data.data) {
+          setSelfieUrl(data.data.verificationSelfieUrl || null);
+        }
+      } catch (err) {
+        console.error("Failed to load verification selfie:", err);
+        setError("Failed to load verification selfie");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSelfie();
+  }, []);
+
+  // Handle selfie save
+  const handleSave = async (blob: Blob) => {
+    const formData = new FormData();
+    formData.append("file", blob, "verification-selfie.jpg");
+
+    const response = await fetch("/api/users/me/verification-selfie", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.msg || "Failed to save verification selfie");
+    }
+
+    setSelfieUrl(data.data.verificationSelfieUrl);
+  };
+
+  // Handle selfie delete
+  const handleDelete = async () => {
+    const response = await fetch("/api/users/me/verification-selfie", {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.msg || "Failed to delete verification selfie");
+    }
+
+    setSelfieUrl(null);
+  };
+
+  if (loading) {
+    return (
+      <section className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Verification Selfie</h2>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm p-6">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Verification Selfie</h2>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        Take a selfie to verify your identity. This helps build trust with other members.
+      </p>
+      
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm rounded-lg">
+          {error}
+        </div>
+      )}
+
+      <div className="max-w-sm mx-auto">
+        <VerificationSelfieCapture
+          existingUrl={selfieUrl}
+          onSave={handleSave}
+          onDelete={handleDelete}
+        />
+      </div>
+
+      <p className="text-xs text-gray-400 dark:text-gray-500 mt-4 text-center">
+        Your selfie is stored securely and only used for verification purposes.
+      </p>
+    </section>
+  );
+}
 
 /**
  * Voice & Video Prompts Section
@@ -1337,6 +1440,9 @@ export default function EditProfilePage() {
             <p className="text-sm text-gray-400 dark:text-gray-500">Loading life goals...</p>
           )}
         </section>
+
+        {/* Verification Selfie */}
+        <VerificationSelfieSection />
 
         {/* Voice & Video Prompts */}
         <VoiceVideoSection />

@@ -8,3 +8,4 @@ export { AudioWaveform } from "./AudioWaveform";
 export { MediaRecordingControls, type RecordingState } from "./MediaRecordingControls";
 export { VoiceVideoDisplay } from "./VoiceVideoDisplay";
 export { MediaBadge, MediaPlayBadge } from "./MediaBadge";
+export { VerificationSelfieCapture } from "./VerificationSelfieCapture";

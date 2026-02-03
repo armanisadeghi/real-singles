@@ -111,6 +111,32 @@ export async function GET() {
     }
   }
 
+  // Convert verification selfie URL to signed URL
+  let verificationSelfieUrl = "";
+  if (profile?.verification_selfie_url) {
+    const selfiePath = profile.verification_selfie_url;
+    
+    if (selfiePath.startsWith("http")) {
+      // Check if it's a gallery URL that needs signed URL conversion
+      const galleryMatch = selfiePath.match(/\/storage\/v1\/object\/(?:public|sign)\/gallery\/(.+?)(?:\?|$)/);
+      if (galleryMatch) {
+        const extractedPath = decodeURIComponent(galleryMatch[1]);
+        const { data: selfieData } = await supabase.storage
+          .from("gallery")
+          .createSignedUrl(extractedPath, 3600);
+        verificationSelfieUrl = selfieData?.signedUrl || "";
+      } else {
+        verificationSelfieUrl = selfiePath;
+      }
+    } else {
+      // It's a storage path
+      const { data: selfieData } = await supabase.storage
+        .from("gallery")
+        .createSignedUrl(selfiePath, 3600);
+      verificationSelfieUrl = selfieData?.signedUrl || "";
+    }
+  }
+
   if (userError && userError.code !== "PGRST116") {
     return NextResponse.json(
       { success: false, msg: "Error fetching user data" },
@@ -238,7 +264,7 @@ export async function GET() {
     is_verified: profile?.is_verified || false,
     IsVerified: profile?.is_verified || false,
     VerifiedAt: profile?.verified_at || "",
-    VerificationSelfieUrl: profile?.verification_selfie_url || "",
+    VerificationSelfieUrl: verificationSelfieUrl,
     
     // Verification - Photo (Required for matching)
     IsPhotoVerified: profile?.is_photo_verified || false,

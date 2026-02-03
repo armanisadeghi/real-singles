@@ -144,6 +144,18 @@ export function getVideoIntroPath(userId: string, fileExtension: string): string
 }
 
 /**
+ * Generate the storage path for a verification selfie
+ * Format: {userId}/verification_{timestamp}.{ext}
+ * 
+ * Note: The userId must be first to satisfy the RLS policy which checks
+ * that the first folder matches the authenticated user's ID.
+ */
+export function getVerificationSelfiePath(userId: string, fileExtension: string): string {
+  const timestamp = Date.now();
+  return `${userId}/verification_${timestamp}.${fileExtension}`;
+}
+
+/**
  * Validate file before upload
  */
 export function validateFile(

@@ -138,3 +138,20 @@ export async function resolveVideoIntroUrl(
     bucket: "gallery" 
   });
 }
+
+/**
+ * Resolve a verification selfie URL.
+ * Verification selfies are stored in the gallery bucket under verification/{userId}/ prefix.
+ */
+export async function resolveVerificationSelfieUrl(
+  supabase: SupabaseClient,
+  path: string | null | undefined,
+  options?: { expiresIn?: number }
+): Promise<string> {
+  if (!path) return "";
+  // Verification selfies are stored in gallery bucket (private), need signed URL
+  return resolveStorageUrl(supabase, path, { 
+    ...options, 
+    bucket: "gallery" 
+  });
+}

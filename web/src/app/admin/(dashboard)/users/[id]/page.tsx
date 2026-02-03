@@ -93,6 +93,8 @@ interface ProfileDetail {
   voice_prompt_duration_seconds?: number | null;
   video_intro_url?: string | null;
   video_intro_duration_seconds?: number | null;
+  // Verification Selfie
+  verification_selfie_url?: string | null;
 }
 
 interface GalleryImage {
@@ -1024,6 +1026,29 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                             </span>
                           </div>
                         )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Verification Selfie Section */}
+                  {profile?.verification_selfie_url && (
+                    <div className="mt-4">
+                      <p className="text-xs text-gray-500 mb-2">Verification Selfie</p>
+                      <div className="flex items-start gap-4">
+                        <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                          <img
+                            src={profile.verification_selfie_url}
+                            alt="Verification selfie"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "https://via.placeholder.com/96?text=Error";
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium h-fit">
+                          <Shield className="w-3 h-3" />
+                          Selfie Uploaded
+                        </div>
                       </div>
                     </div>
                   )}
