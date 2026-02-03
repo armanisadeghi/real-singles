@@ -2,7 +2,6 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   Calendar,
   MapPin,
@@ -14,7 +13,7 @@ import {
   Loader2,
   ExternalLink,
 } from "lucide-react";
-import { Avatar } from "@/components/ui";
+import Link from "next/link";
 
 interface EventDetail {
   EventID: string;
@@ -42,6 +41,10 @@ interface EventDetail {
     status: string;
   }>;
   HostedBy?: string;
+  // TODO: Add to database and API
+  AgeMin?: number;
+  AgeMax?: number;
+  Price?: string;
 }
 
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -231,7 +234,6 @@ END:VCALENDAR`;
   const isRegistered = event.isMarkInterested === 1;
   const location = [event.City, event.State].filter(Boolean).join(", ");
   const fullAddress = [event.VenueName, event.Street, location].filter(Boolean).join(", ");
-  const registeredUsers = event.interestedUsers?.filter(u => u.status === "registered") || [];
 
   return (
     <div className="min-h-dvh bg-gray-50 dark:bg-neutral-950 pb-24">
@@ -361,6 +363,38 @@ END:VCALENDAR`;
                 )}
               </div>
             </div>
+
+            {(event.AgeMin || event.AgeMax) && (
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+                  <Users className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">Age Range</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {event.AgeMin && event.AgeMax
+                      ? `${event.AgeMin}-${event.AgeMax} years`
+                      : event.AgeMin
+                      ? `${event.AgeMin}+ years`
+                      : `Up to ${event.AgeMax} years`}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {event.Price && parseFloat(event.Price) > 0 && (
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">Cost</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    ${parseFloat(event.Price).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Description */}
@@ -374,37 +408,7 @@ END:VCALENDAR`;
           )}
         </div>
 
-        {/* Attendees */}
-        {registeredUsers.length > 0 && (
-          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 p-6">
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              Who's going ({registeredUsers.length})
-            </h2>
-            <div className="flex flex-wrap gap-3">
-              {registeredUsers.slice(0, 12).map((user) => (
-                <Link
-                  key={user.user_id}
-                  href={`/profile/${user.user_id}`}
-                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
-                >
-                  <Avatar
-                    src={user.profile_image_url}
-                    name={user.display_name}
-                    size="sm"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {user.display_name}
-                  </span>
-                </Link>
-              ))}
-              {registeredUsers.length > 12 && (
-                <div className="flex items-center px-3 text-sm text-gray-500 dark:text-gray-400">
-                  +{registeredUsers.length - 12} more
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Removed "Who's going" section per requirement */}
       </div>
     </div>
   );

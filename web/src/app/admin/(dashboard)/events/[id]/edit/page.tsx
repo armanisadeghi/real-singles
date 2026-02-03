@@ -18,6 +18,9 @@ interface EventFormData {
   start_datetime: string;
   end_datetime: string;
   max_attendees: string;
+  age_min: string;
+  age_max: string;
+  price: string;
   is_public: boolean;
   status: string;
 }
@@ -47,6 +50,9 @@ export default function AdminEditEventPage({
     start_datetime: "",
     end_datetime: "",
     max_attendees: "",
+    age_min: "",
+    age_max: "",
+    price: "",
     is_public: true,
     status: "upcoming",
   });
@@ -78,6 +84,9 @@ export default function AdminEditEventPage({
               ? event.end_datetime.slice(0, 16)
               : "",
             max_attendees: event.max_attendees?.toString() || "",
+            age_min: event.age_min?.toString() || "",
+            age_max: event.age_max?.toString() || "",
+            price: event.price?.toString() || "",
             is_public: event.is_public ?? true,
             status: event.status || "upcoming",
           });
@@ -202,6 +211,9 @@ export default function AdminEditEventPage({
         start_datetime: formData.start_datetime,
         end_datetime: formData.end_datetime || null,
         max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
+        age_min: formData.age_min ? parseInt(formData.age_min) : null,
+        age_max: formData.age_max ? parseInt(formData.age_max) : null,
+        price: formData.price ? parseFloat(formData.price) : null,
         is_public: formData.is_public,
         status: formData.status,
       };
@@ -481,6 +493,60 @@ export default function AdminEditEventPage({
             min="1"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Leave empty for unlimited"
+          />
+        </div>
+
+        {/* Age Range */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="age_min" className="block text-sm font-medium text-slate-700 mb-1">
+              Minimum Age
+            </label>
+            <input
+              type="number"
+              id="age_min"
+              name="age_min"
+              value={formData.age_min}
+              onChange={handleChange}
+              min="18"
+              max="99"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="e.g., 21"
+            />
+          </div>
+          <div>
+            <label htmlFor="age_max" className="block text-sm font-medium text-slate-700 mb-1">
+              Maximum Age
+            </label>
+            <input
+              type="number"
+              id="age_max"
+              name="age_max"
+              value={formData.age_max}
+              onChange={handleChange}
+              min="18"
+              max="99"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="e.g., 35"
+            />
+          </div>
+        </div>
+
+        {/* Price */}
+        <div>
+          <label htmlFor="price" className="block text-sm font-medium text-slate-700 mb-1">
+            Price (USD)
+          </label>
+          <input
+            type="number"
+            id="price"
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
+            min="0"
+            step="0.01"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="0.00 for free events"
           />
         </div>
 

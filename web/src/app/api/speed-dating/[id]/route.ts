@@ -164,6 +164,7 @@ export async function GET(
       min_age: session.age_min,
       max_age: session.age_max,
       gender_preference: session.gender_preference,
+      price: session.price,
     },
     registration_count: registrations.length,
     is_registered: isUserRegistered,

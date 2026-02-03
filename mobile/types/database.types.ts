@@ -263,6 +263,8 @@ export type Database = {
       events: {
         Row: {
           address: string | null
+          age_max: number | null
+          age_min: number | null
           city: string | null
           created_at: string | null
           created_by: string | null
@@ -277,6 +279,7 @@ export type Database = {
           location: unknown
           longitude: number | null
           max_attendees: number | null
+          price: number | null
           requires_approval: boolean | null
           start_datetime: string
           state: string | null
@@ -288,6 +291,8 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          age_max?: number | null
+          age_min?: number | null
           city?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -302,6 +307,7 @@ export type Database = {
           location?: unknown
           longitude?: number | null
           max_attendees?: number | null
+          price?: number | null
           requires_approval?: boolean | null
           start_datetime: string
           state?: string | null
@@ -313,6 +319,8 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          age_max?: number | null
+          age_min?: number | null
           city?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -327,6 +335,7 @@ export type Database = {
           location?: unknown
           longitude?: number | null
           max_attendees?: number | null
+          price?: number | null
           requires_approval?: boolean | null
           start_datetime?: string
           state?: string | null
@@ -1654,6 +1663,7 @@ export type Database = {
           image_url: string | null
           max_participants: number | null
           min_participants: number | null
+          price: number | null
           round_duration_seconds: number | null
           scheduled_datetime: string
           status: string | null
@@ -1671,6 +1681,7 @@ export type Database = {
           image_url?: string | null
           max_participants?: number | null
           min_participants?: number | null
+          price?: number | null
           round_duration_seconds?: number | null
           scheduled_datetime: string
           status?: string | null
@@ -1688,6 +1699,7 @@ export type Database = {
           image_url?: string | null
           max_participants?: number | null
           min_participants?: number | null
+          price?: number | null
           round_duration_seconds?: number | null
           scheduled_datetime?: string
           status?: string | null

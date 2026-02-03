@@ -17,6 +17,7 @@ interface SessionFormData {
   gender_preference: string;
   age_min: string;
   age_max: string;
+  price: string;
 }
 
 export default function AdminCreateSpeedDatingPage() {
@@ -35,6 +36,7 @@ export default function AdminCreateSpeedDatingPage() {
     gender_preference: "mixed",
     age_min: "",
     age_max: "",
+    price: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -113,6 +115,7 @@ export default function AdminCreateSpeedDatingPage() {
         gender_preference: formData.gender_preference || "mixed",
         age_min: formData.age_min ? parseInt(formData.age_min) : null,
         age_max: formData.age_max ? parseInt(formData.age_max) : null,
+        price: formData.price ? parseFloat(formData.price) : null,
       };
 
       const res = await fetch("/api/admin/speed-dating", {
@@ -401,6 +404,24 @@ export default function AdminCreateSpeedDatingPage() {
               placeholder="e.g., 40"
             />
           </div>
+        </div>
+
+        {/* Price */}
+        <div>
+          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+            Price (USD)
+          </label>
+          <input
+            type="number"
+            id="price"
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
+            min="0"
+            step="0.01"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="0.00 for free sessions"
+          />
         </div>
 
         {/* Submit */}

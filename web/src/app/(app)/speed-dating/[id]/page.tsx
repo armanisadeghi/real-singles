@@ -37,6 +37,8 @@ interface SpeedDatingSession {
   min_age?: number | null;
   max_age?: number | null;
   gender_preference?: string | null;
+  // TODO: Add to database and API
+  price?: number | null;
 }
 
 interface PageProps {
@@ -268,6 +270,18 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
             </p>
           </div>
         </div>
+
+        {session.price !== null && session.price !== undefined && (
+          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+            <Clock className="w-5 h-5 text-pink-500" />
+            <div>
+              <p className="text-sm text-gray-500">Cost</p>
+              <p className="font-medium text-gray-900">
+                {session.price === 0 ? 'Free' : `$${session.price.toFixed(2)}`}
+              </p>
+            </div>
+          </div>
+        )}
 
         {session.city && (
           <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl sm:col-span-2">

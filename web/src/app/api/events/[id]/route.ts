@@ -138,7 +138,7 @@ export async function GET(
     EventID: event.id,
     EventName: event.title,
     EventDate: event.start_datetime?.split("T")[0] || "",
-    EventPrice: "0",
+    EventPrice: event.price?.toString() || "0",
     StartTime: event.start_datetime
       ? new Date(event.start_datetime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
       : "",
@@ -166,6 +166,9 @@ export async function GET(
     CurrentAttendees: event.current_attendees || interestedUsers.length,
     EventType: event.event_type,
     Status: event.status,
+    AgeMin: event.age_min,
+    AgeMax: event.age_max,
+    Price: event.price?.toString() || "0",
   };
 
   return NextResponse.json({
@@ -255,6 +258,16 @@ export async function PUT(
     }
     if (body.Longitude) {
       updates.longitude = parseFloat(body.Longitude as string);
+    }
+    if (body.AgeMin !== undefined || body.age_min !== undefined) {
+      updates.age_min = (body.AgeMin ?? body.age_min) as number | null;
+    }
+    if (body.AgeMax !== undefined || body.age_max !== undefined) {
+      updates.age_max = (body.AgeMax ?? body.age_max) as number | null;
+    }
+    if (body.Price !== undefined || body.price !== undefined) {
+      const priceValue = body.Price ?? body.price;
+      updates.price = typeof priceValue === 'string' ? parseFloat(priceValue) : priceValue as number | null;
     }
 
     updates.updated_at = new Date().toISOString();
