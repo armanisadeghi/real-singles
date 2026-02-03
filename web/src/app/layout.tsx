@@ -23,6 +23,14 @@ export const metadata: Metadata = {
   title: "Real Singles - Find Your Real Connection",
   description: "Join the dating community that prioritizes authenticity. With verified profiles, video introductions, and curated events, find someone who's genuinely looking for what you are.",
   keywords: ["dating", "singles", "matchmaking", "events", "verified profiles", "video dating"],
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    // Ensure proper keyboard handling on Android
+    interactiveWidget: "resizes-content",
+  },
   openGraph: {
     title: "Real Singles - Find Your Real Connection",
     description: "Join the dating community that prioritizes authenticity.",

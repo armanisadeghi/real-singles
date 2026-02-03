@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Plus, X, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IMAGE_AND_VIDEO_ACCEPT_STRING } from "@/lib/supabase/storage";
@@ -31,46 +31,10 @@ export function MessageInput({
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Track keyboard height using visualViewport API
-  useEffect(() => {
-    const viewport = window.visualViewport;
-    if (!viewport) return;
-
-    // Store initial window height for comparison
-    const initialHeight = window.innerHeight;
-
-    const handleResize = () => {
-      // Calculate keyboard height from viewport difference
-      // Use the smaller of the two heights as the base to avoid negative values
-      const baseHeight = Math.min(initialHeight, window.innerHeight);
-      const keyboardH = baseHeight - viewport.height;
-      
-      // Only set keyboard height if it's a significant change (> 100px)
-      // This prevents false positives from browser chrome changes
-      // Cap at 70vh to prevent extreme values that could push input to top
-      const maxKeyboardHeight = window.innerHeight * 0.7;
-      const validKeyboardHeight = keyboardH > 100 && keyboardH < maxKeyboardHeight ? keyboardH : 0;
-      
-      setKeyboardHeight(validKeyboardHeight);
-    };
-
-    viewport.addEventListener("resize", handleResize);
-    viewport.addEventListener("scroll", handleResize);
-    
-    // Initial check
-    handleResize();
-
-    return () => {
-      viewport.removeEventListener("resize", handleResize);
-      viewport.removeEventListener("scroll", handleResize);
-    };
-  }, []);
 
   const handleSubmit = useCallback(
     (e?: React.FormEvent) => {
@@ -187,20 +151,10 @@ export function MessageInput({
 
   const canSend = (message.trim() || attachedImage) && !disabled && !isUploading;
 
-  // Calculate bottom position - accounts for keyboard and safe area
-  // Use a more conservative approach to prevent positioning bugs on Android
-  const bottomOffset = keyboardHeight > 0 
-    ? Math.max(8, keyboardHeight + 8) // Ensure minimum 8px padding above keyboard
-    : `calc(12px + env(safe-area-inset-bottom))`; // 12px + safe area when no keyboard
-
   return (
     <div 
       ref={containerRef}
-      className="fixed left-0 right-0 z-50 pointer-events-none px-3"
-      style={{ 
-        bottom: typeof bottomOffset === 'number' ? `${bottomOffset}px` : bottomOffset,
-        transition: 'bottom 0.1s ease-out',
-      }}
+      className="fixed left-0 right-0 bottom-3 pb-safe z-50 pointer-events-none px-3"
     >
       <div className="pointer-events-auto">
         {/* Attached image preview */}
