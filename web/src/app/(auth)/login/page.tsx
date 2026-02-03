@@ -60,8 +60,8 @@ export default function LoginPage() {
   // Show loading state while checking authentication
   if (checkingAuth) {
     return (
-      <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl dark:shadow-black/30 p-8">
-        <div className="flex items-center justify-center py-12">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl dark:shadow-black/30 p-6">
+        <div className="flex items-center justify-center py-8">
           <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
@@ -69,14 +69,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl dark:shadow-black/30 p-8">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center mb-6">
+    <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl dark:shadow-black/30 p-6">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 text-center mb-4">
         Welcome Back
       </h2>
 
-      <form onSubmit={handleLogin} className="space-y-5" aria-label="Login form">
+      <form onSubmit={handleLogin} className="space-y-3" aria-label="Login form">
         {error && (
-          <div role="alert" className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+          <div role="alert" className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-3 py-2 rounded-lg text-sm">
             {error}
           </div>
         )}
@@ -94,7 +94,7 @@ export default function LoginPage() {
             autoComplete="email"
             placeholder="your@email.com"
             aria-required="true"
-            className="w-full px-4 py-3 border border-gray-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900"
+            className="w-full px-3 py-2.5 border border-gray-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 text-base"
           />
         </div>
 
@@ -111,11 +111,11 @@ export default function LoginPage() {
             autoComplete="current-password"
             placeholder="Your password"
             aria-required="true"
-            className="w-full px-4 py-3 border border-gray-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900"
+            className="w-full px-3 py-2.5 border border-gray-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 text-base"
           />
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-1">
           <label htmlFor="remember-me" className="flex items-center cursor-pointer">
             <input
               id="remember-me"
@@ -135,13 +135,13 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-brand-primary to-brand-primary-dark text-white font-medium rounded-lg hover:from-brand-primary-light hover:to-brand-primary transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+          className="w-full py-2.5 px-4 bg-gradient-to-r from-brand-primary to-brand-primary-dark text-white font-medium rounded-lg hover:from-brand-primary-light hover:to-brand-primary transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300 dark:border-neutral-700" />
@@ -151,13 +151,13 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-2 gap-3">
           <button
             type="button"
             aria-label="Sign in with Google"
-            className="w-full py-2 px-4 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-800 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            className="w-full py-2 px-3 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-800 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 text-sm"
           >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" aria-hidden="true">
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -180,9 +180,9 @@ export default function LoginPage() {
           <button
             type="button"
             aria-label="Sign in with Apple"
-            className="w-full py-2 px-4 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-800 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            className="w-full py-2 px-3 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-800 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 text-sm"
           >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
             </svg>
             Apple
@@ -190,8 +190,8 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="mt-6 text-center">
-        <p className="text-gray-600 dark:text-gray-400">
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           Don&apos;t have an account?{" "}
           <Link 
             href="/register" 

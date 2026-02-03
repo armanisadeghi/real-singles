@@ -6,7 +6,7 @@
  * Main wizard component that orchestrates the onboarding flow.
  */
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { OnboardingProgress } from "./OnboardingProgress";
@@ -139,6 +139,32 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
     },
     [stepValues.HeightInches, setFieldValue]
   );
+
+  // Handle Enter key to continue on non-keyboard steps
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only trigger on Enter key
+      if (e.key !== "Enter") return;
+      
+      // Don't trigger if step needs keyboard (text input/textarea)
+      if (currentStepConfig?.needsKeyboard) return;
+      
+      // Don't trigger if we can't continue or are saving
+      if (!canContinue || isSaving) return;
+      
+      // Don't trigger if focus is on an interactive element that uses Enter
+      const target = e.target as HTMLElement;
+      const tagName = target.tagName.toLowerCase();
+      if (tagName === "input" || tagName === "textarea" || tagName === "select") return;
+      
+      // Prevent default and continue
+      e.preventDefault();
+      saveAndContinue();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentStepConfig?.needsKeyboard, canContinue, isSaving, saveAndContinue]);
 
   // Render loading state
   if (isLoading) {

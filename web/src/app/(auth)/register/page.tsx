@@ -123,8 +123,8 @@ export default function RegisterPage() {
   // Show loading state while checking authentication
   if (checkingAuth) {
     return (
-      <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl dark:shadow-black/30 p-8">
-        <div className="flex items-center justify-center py-12">
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl dark:shadow-black/30 p-6">
+        <div className="flex items-center justify-center py-8">
           <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
@@ -132,20 +132,20 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl dark:shadow-black/30 p-8">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center mb-6">
+    <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl dark:shadow-black/30 p-6">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 text-center mb-4">
         Create Your Account
       </h2>
 
-      <form onSubmit={handleRegister} className="space-y-5">
+      <form onSubmit={handleRegister} className="space-y-3">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-3 py-2 rounded-lg text-sm">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg text-sm">
+          <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-3 py-2 rounded-lg text-sm">
             {success}
           </div>
         )}
@@ -160,7 +160,7 @@ export default function RegisterPage() {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="How should we call you?"
-            className="w-full px-4 py-3 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+            className="w-full px-3 py-2.5 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent text-base"
           />
         </div>
 
@@ -175,51 +175,53 @@ export default function RegisterPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="your@email.com"
-            className="w-full px-4 py-3 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+            className="w-full px-3 py-2.5 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent text-base"
           />
         </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            placeholder="At least 8 characters"
-            className="w-full px-4 py-3 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-          />
-        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              placeholder="8+ characters"
+              className="w-full px-3 py-2.5 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent text-base"
+            />
+          </div>
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Confirm Password
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            minLength={8}
-            placeholder="Enter password again"
-            className="w-full px-4 py-3 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-          />
-          {password && confirmPassword && password !== confirmPassword && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">Passwords do not match</p>
-          )}
-          {password && confirmPassword && password === confirmPassword && (
-            <p className="mt-1 text-sm text-green-600 dark:text-green-400">Passwords match ✓</p>
-          )}
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Confirm
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={8}
+              placeholder="Re-enter"
+              className="w-full px-3 py-2.5 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent text-base"
+            />
+          </div>
         </div>
+        {password && confirmPassword && password !== confirmPassword && (
+          <p className="text-xs text-red-600 dark:text-red-400 -mt-1">Passwords do not match</p>
+        )}
+        {password && confirmPassword && password === confirmPassword && (
+          <p className="text-xs text-green-600 dark:text-green-400 -mt-1">Passwords match</p>
+        )}
 
         <div>
           <label htmlFor="referralCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Referral Code <span className="text-gray-400 dark:text-gray-500">(optional)</span>
+            Referral Code <span className="text-gray-400 dark:text-gray-500 text-xs">(optional)</span>
           </label>
           <input
             id="referralCode"
@@ -230,12 +232,12 @@ export default function RegisterPage() {
               setReferralFromLink(false);
             }}
             placeholder="Enter code if you have one"
-            className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent ${
+            className={`w-full px-3 py-2.5 border rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent text-base ${
               referralFromLink ? "border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20" : "border-gray-300 dark:border-neutral-600"
             }`}
           />
           {referralFromLink && (
-            <p className="mt-1 text-sm text-green-600 dark:text-green-400">
+            <p className="mt-1 text-xs text-green-600 dark:text-green-400">
               Referral code applied from your invite link!
             </p>
           )}
@@ -244,14 +246,14 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-brand-primary to-brand-primary-dark text-white font-medium rounded-lg hover:from-brand-primary-light hover:to-brand-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-50 transition-all"
+          className="w-full py-2.5 px-4 bg-gradient-to-r from-brand-primary to-brand-primary-dark text-white font-medium rounded-lg hover:from-brand-primary-light hover:to-brand-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-50 transition-all"
         >
           {loading ? "Creating account..." : "Create Account"}
         </button>
       </form>
 
-      <div className="mt-6 text-center">
-        <p className="text-gray-600 dark:text-gray-400">
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           Already have an account?{" "}
           <Link href="/login" className="text-brand-primary hover:text-brand-primary-dark font-medium">
             Sign in
