@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import Link from "next/link";
-import { Calendar, Clock, Users, Video, MapPin } from "lucide-react";
+import { Calendar, Clock, Users, Video, MapPin, ArrowLeft } from "lucide-react";
 
 interface SpeedDatingSession {
   id: string;
@@ -107,10 +107,16 @@ export default async function SpeedDatingPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Virtual Speed Dating</h1>
-        <p className="text-gray-500 mt-1">
-          Meet multiple matches in one fun session
-        </p>
+        <div className="flex items-center gap-3 mb-1">
+          <Link
+            href="/explore"
+            className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+            aria-label="Back to Explore"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-700" />
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">Virtual Speed Dating</h1>
+        </div>
       </div>
 
       {/* How it works */}

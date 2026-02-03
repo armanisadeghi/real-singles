@@ -7,9 +7,8 @@ import {
   Video,
   Calendar,
   MapPin,
-  Users,
   Clock,
-  ArrowRight,
+  ChevronRight,
   Sparkles,
   Loader2,
 } from "lucide-react";
@@ -62,34 +61,27 @@ interface ExploreData {
 
 function SectionHeader({
   title,
-  subtitle,
   href,
   icon: Icon,
 }: {
   title: string;
-  subtitle?: string;
   href: string;
   icon: React.ElementType;
 }) {
   return (
-    <div className="flex items-start justify-between mb-6">
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 text-primary" />
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-2.5">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Icon className="w-4 h-4 text-primary" />
         </div>
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">{title}</h2>
-          {subtitle && (
-            <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
-          )}
-        </div>
+        <h2 className="text-lg font-semibold text-foreground">{title}</h2>
       </div>
       <Link
         href={href}
-        className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors group"
+        className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors whitespace-nowrap"
       >
         View All
-        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+        <ChevronRight className="w-4 h-4" />
       </Link>
     </div>
   );
@@ -116,7 +108,7 @@ function EventCard({ event }: { event: ApiEvent }) {
   return (
     <Link
       href={`/events/${event.EventID}`}
-      className="group flex-shrink-0 w-[320px] bg-card rounded-2xl border border-border/50 overflow-hidden hover:border-border hover:shadow-lg transition-all duration-300"
+      className="group flex-shrink-0 w-[280px] sm:w-[300px] bg-card rounded-2xl border border-border/40 overflow-hidden hover:border-border/80 hover:shadow-md transition-all duration-300"
     >
       {/* Image */}
       <div className="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50">
@@ -128,12 +120,12 @@ function EventCard({ event }: { event: ApiEvent }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Calendar className="w-16 h-16 text-amber-200" />
+            <Calendar className="w-12 h-12 text-amber-200" />
           </div>
         )}
         {/* Price badge */}
         {event.EventPrice && (
-          <div className="absolute top-3 right-3 px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-full text-sm font-semibold text-foreground shadow-sm">
+          <div className="absolute top-2.5 right-2.5 px-2.5 py-1 bg-white/95 backdrop-blur-sm rounded-full text-xs font-semibold text-foreground shadow-sm">
             {event.EventPrice === "0" || event.EventPrice === "Free"
               ? "Free"
               : `$${event.EventPrice}`}
@@ -142,23 +134,23 @@ function EventCard({ event }: { event: ApiEvent }) {
       </div>
 
       {/* Content */}
-      <div className="p-5">
+      <div className="p-4">
         <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
           {event.EventName}
         </h3>
-        <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">
+        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
           {event.Description}
         </p>
 
         {/* Meta info */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <Calendar className="w-4 h-4" />
+        <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Calendar className="w-3.5 h-3.5" />
             {formatDate(event.EventDate)}
           </span>
           {event.City && (
-            <span className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4" />
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5" />
               {event.City}, {event.State}
             </span>
           )}
@@ -186,11 +178,27 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
     }
   };
 
+  // Format time to remove seconds (e.g., "4:47:00 PM" -> "4:47 PM")
+  const formatTime = (timeStr: string) => {
+    if (!timeStr) return "";
+    // Handle HH:MM:SS format
+    const parts = timeStr.split(":");
+    if (parts.length >= 2) {
+      const hours = parseInt(parts[0]);
+      const minutes = parts[1];
+      const ampm = hours >= 12 ? "PM" : "AM";
+      const displayHours = hours % 12 || 12;
+      return `${displayHours}:${minutes} ${ampm}`;
+    }
+    return timeStr;
+  };
+
   const getStatusColor = (status: string | null) => {
     switch (status?.toLowerCase()) {
       case "live":
         return "bg-green-500 text-white";
       case "upcoming":
+      case "scheduled":
         return "bg-blue-500 text-white";
       case "full":
         return "bg-amber-500 text-white";
@@ -199,10 +207,21 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
     }
   };
 
+  const getStatusLabel = (status: string | null) => {
+    switch (status?.toLowerCase()) {
+      case "scheduled":
+        return "Upcoming";
+      case "in_progress":
+        return "Live";
+      default:
+        return status;
+    }
+  };
+
   return (
     <Link
       href={`/speed-dating/${session.ID}`}
-      className="group flex-shrink-0 w-[320px] bg-card rounded-2xl border border-border/50 overflow-hidden hover:border-border hover:shadow-lg transition-all duration-300"
+      className="group flex-shrink-0 w-[280px] sm:w-[300px] bg-card rounded-2xl border border-border/40 overflow-hidden hover:border-border/80 hover:shadow-md transition-all duration-300"
     >
       {/* Image */}
       <div className="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-violet-100 to-pink-50">
@@ -214,44 +233,38 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Video className="w-16 h-16 text-violet-200" />
+            <Video className="w-12 h-12 text-violet-200" />
           </div>
         )}
         {/* Status badge */}
         {session.Status && (
           <div
-            className={`absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm ${getStatusColor(session.Status)}`}
+            className={`absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm ${getStatusColor(session.Status)}`}
           >
-            {session.Status}
+            {getStatusLabel(session.Status)}
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-5">
+      <div className="p-4">
         <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
           {session.Title}
         </h3>
-        <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">
+        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
           {session.Description}
         </p>
 
-        {/* Meta info */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <Calendar className="w-4 h-4" />
+        {/* Meta info - simplified to just date and time */}
+        <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Calendar className="w-3.5 h-3.5" />
             {formatDate(session.ScheduledDate)}
           </span>
           {session.ScheduledTime && (
-            <span className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4" />
-              {session.ScheduledTime}
-            </span>
-          )}
-          {session.MaxParticipants && (
-            <span className="flex items-center gap-1.5">
-              <Users className="w-4 h-4" />
-              {session.MaxParticipants} spots
+            <span className="flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5" />
+              {formatTime(session.ScheduledTime)}
             </span>
           )}
         </div>
@@ -264,28 +277,21 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
 // COMING SOON SECTION COMPONENT
 // ============================================================================
 
-function ComingSoonSection({
-  title,
-  description,
-  icon: Icon,
-}: {
-  title: string;
-  description: string;
-  icon: React.ElementType;
-}) {
+function ComingSoonSection() {
   return (
-    <div className="relative rounded-2xl border border-dashed border-border bg-gradient-to-br from-muted/30 to-muted/10 p-8 sm:p-12">
-      <div className="absolute top-4 right-4 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full flex items-center gap-1.5">
-        <Sparkles className="w-3.5 h-3.5" />
+    <div className="relative rounded-2xl border border-dashed border-border/60 bg-muted/20 p-6 sm:p-8">
+      <div className="absolute top-3 right-3 px-2.5 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full flex items-center gap-1">
+        <Sparkles className="w-3 h-3" />
         Coming Soon
       </div>
 
-      <div className="flex flex-col items-center text-center max-w-md mx-auto">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-5">
-          <Icon className="w-8 h-8 text-primary/60" />
+      <div className="flex flex-col items-center text-center max-w-sm mx-auto pt-2">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-4">
+          <Video className="w-7 h-7 text-primary/50" />
         </div>
-        <h3 className="text-xl font-semibold text-foreground">{title}</h3>
-        <p className="text-muted-foreground mt-2">{description}</p>
+        <p className="text-muted-foreground text-sm">
+          Expert dating tips and relationship advice videos coming soon.
+        </p>
       </div>
     </div>
   );
@@ -297,20 +303,17 @@ function ComingSoonSection({
 
 function EmptySection({
   title,
-  description,
   icon: Icon,
 }: {
   title: string;
-  description: string;
   icon: React.ElementType;
 }) {
   return (
-    <div className="rounded-2xl border border-border/50 bg-card p-8 text-center">
-      <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-        <Icon className="w-6 h-6 text-muted-foreground" />
+    <div className="rounded-2xl border border-border/40 bg-card p-6 text-center">
+      <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+        <Icon className="w-5 h-5 text-muted-foreground" />
       </div>
-      <h3 className="font-medium text-foreground">{title}</h3>
-      <p className="text-sm text-muted-foreground mt-1">{description}</p>
+      <p className="text-sm text-muted-foreground">{title}</p>
     </div>
   );
 }
@@ -354,10 +357,7 @@ export default function ExplorePage() {
   if (isLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-sm text-muted-foreground">Loading experiences...</p>
-        </div>
+        <Loader2 className="w-7 h-7 text-primary animate-spin" />
       </div>
     );
   }
@@ -369,14 +369,14 @@ export default function ExplorePage() {
         <div className="text-center">
           <EmptyState
             title="Unable to load content"
-            description="Please refresh the page or try again later."
+            description="Please try again."
           />
           <button
             onClick={() => {
               setIsLoading(true);
               fetchData();
             }}
-            className="mt-4 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-colors"
+            className="mt-4 px-5 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             Try Again
           </button>
@@ -390,33 +390,18 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-dvh bg-background">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary/5 via-primary/[0.02] to-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          <div className="max-w-2xl">
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              Explore
-            </h1>
-            <p className="text-muted-foreground mt-2 text-lg">
-              Discover events, virtual speed dating, and more ways to connect.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 space-y-8">
         {/* Events Section */}
         <section>
           <SectionHeader
             title="Events"
-            subtitle="Meet singles at curated in-person events"
             href="/events"
             icon={Calendar}
           />
 
           {events.length > 0 ? (
-            <div className="flex gap-5 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
               {events.slice(0, 10).map((event) => (
                 <EventCard key={event.EventID} event={event} />
               ))}
@@ -424,7 +409,6 @@ export default function ExplorePage() {
           ) : (
             <EmptySection
               title="No upcoming events"
-              description="Check back soon for new events in your area."
               icon={Calendar}
             />
           )}
@@ -434,13 +418,12 @@ export default function ExplorePage() {
         <section>
           <SectionHeader
             title="Virtual Speed Dating"
-            subtitle="Quick video dates from the comfort of home"
             href="/speed-dating"
             icon={Video}
           />
 
           {speedDating.length > 0 ? (
-            <div className="flex gap-5 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
               {speedDating.slice(0, 10).map((session) => (
                 <SpeedDatingCard key={session.ID} session={session} />
               ))}
@@ -448,7 +431,6 @@ export default function ExplorePage() {
           ) : (
             <EmptySection
               title="No sessions scheduled"
-              description="New speed dating sessions are added regularly."
               icon={Video}
             />
           )}
@@ -456,23 +438,14 @@ export default function ExplorePage() {
 
         {/* Videos Section - Coming Soon */}
         <section>
-          <div className="flex items-start gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center flex-shrink-0">
-              <Video className="w-5 h-5 text-primary" />
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Video className="w-4 h-4 text-primary" />
             </div>
-            <div>
-              <h2 className="text-xl font-semibold text-foreground">Videos</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Expert dating tips and relationship advice
-              </p>
-            </div>
+            <h2 className="text-lg font-semibold text-foreground">Videos</h2>
           </div>
 
-          <ComingSoonSection
-            title="Video Content"
-            description="We're preparing exclusive video content from dating experts, relationship coaches, and success stories. Stay tuned for tips that will help you make meaningful connections."
-            icon={Video}
-          />
+          <ComingSoonSection />
         </section>
       </div>
     </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Calendar } from "lucide-react";
+import Link from "next/link";
+import { Loader2, Calendar, ArrowLeft } from "lucide-react";
 import { EventCard, EventCardSkeleton, type EventCardData } from "@/components/events";
 import { EmptyState } from "@/components/ui";
 
@@ -42,23 +43,22 @@ export default function EventsPage() {
   return (
     <div className="min-h-dvh bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
+      <div className="bg-white border-b sticky top-14 sm:top-16 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Events</h1>
-                <p className="text-sm text-gray-500">
-                  Discover and RSVP to upcoming events
-                </p>
-              </div>
+              <Link
+                href="/explore"
+                className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                aria-label="Back to Explore"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-700" />
+              </Link>
+              <h1 className="text-xl font-bold text-gray-900">Events</h1>
             </div>
 
             {/* Filter tabs */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 ml-12 sm:ml-0">
               <button
                 onClick={() => setFilter("upcoming")}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${

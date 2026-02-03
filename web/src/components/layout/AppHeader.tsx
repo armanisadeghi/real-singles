@@ -48,6 +48,9 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
   // Hide header on full-screen profile views (search, focus)
   const isFullScreenProfile = pathname.startsWith("/search/profile/") || 
                                pathname.startsWith("/profile/") && pathname.includes("/focus");
+  
+  // Hide header on individual chat pages (immersive messaging experience)
+  const isChatPage = pathname.startsWith("/chats/") && pathname !== "/chats";
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -129,7 +132,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
     }
   }, [isDropdownOpen]);
   
-  if (isDiscoverPage || isFullScreenProfile) {
+  if (isDiscoverPage || isFullScreenProfile || isChatPage) {
     return null;
   }
 
@@ -188,9 +191,17 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
             </Link>
           </nav>
 
-          {/* Right side: Points, Messages, Notifications, Profile */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            {/* Points Badge */}
+          {/* Right side: Messages, Notifications, Points, Profile */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Messages Indicator - hidden on desktop (shown in nav) */}
+            <div className="md:hidden">
+              <MessagesIndicator />
+            </div>
+
+            {/* Notifications */}
+            <NotificationBell />
+
+            {/* Points Badge - positioned between notifications and avatar for visual balance */}
             {currentUser && (
               <PointsBadge
                 points={currentUser.points}
@@ -199,14 +210,6 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                 showLabel={false}
               />
             )}
-
-            {/* Messages Indicator - hidden on desktop (shown in nav) */}
-            <div className="md:hidden">
-              <MessagesIndicator />
-            </div>
-
-            {/* Notifications */}
-            <NotificationBell />
 
             {/* Profile Avatar Dropdown */}
             <div className="relative" ref={dropdownRef} onKeyDown={handleKeyDown}>
