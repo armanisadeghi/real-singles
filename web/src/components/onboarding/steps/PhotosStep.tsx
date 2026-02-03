@@ -6,7 +6,7 @@
  * Step 5: Upload photos (minimum 1 required)
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Camera, Plus, Trash2, Image as ImageIcon } from "lucide-react";
 import { OnboardingStepWrapper } from "../OnboardingStepWrapper";
 import { cn } from "@/lib/utils";
@@ -36,11 +36,12 @@ export function PhotosStep({ photoCount, onPhotosChange }: PhotosStepProps) {
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.data)) {
+          // API returns PascalCase field names: GalleryID, MediaURL, IsPrimary
           setPhotos(
-            data.data.map((item: { id: string; mediaUrl: string; isPrimary: boolean }) => ({
-              id: item.id,
-              url: item.mediaUrl,
-              isPrimary: item.isPrimary,
+            data.data.map((item: { GalleryID: string; MediaURL: string; IsPrimary: boolean }) => ({
+              id: item.GalleryID,
+              url: item.MediaURL,
+              isPrimary: item.IsPrimary,
             }))
           );
         }
@@ -53,9 +54,9 @@ export function PhotosStep({ photoCount, onPhotosChange }: PhotosStepProps) {
   }, []);
 
   // Initial fetch
-  useState(() => {
+  useEffect(() => {
     fetchPhotos();
-  });
+  }, [fetchPhotos]);
 
   // Handle file upload
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
