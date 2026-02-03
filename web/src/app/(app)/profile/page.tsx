@@ -298,10 +298,10 @@ export default async function MyProfilePage() {
               Add your details to start connecting with other singles.
             </p>
             <Link
-              href="/profile/edit"
+              href="/onboarding"
               className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-medium hover:from-pink-600 hover:to-rose-600 transition-all duration-200 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.97] shadow-lg shadow-pink-500/25"
             >
-              <Edit3 className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
               Get Started
             </Link>
           </div>

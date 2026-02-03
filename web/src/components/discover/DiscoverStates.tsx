@@ -160,23 +160,23 @@ export function NoMoreProfiles() {
 
 export function IncompleteProfile() {
   return (
-    <div className="min-h-dvh bg-gray-50 dark:bg-neutral-900 flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-pink-950 dark:via-neutral-950 dark:to-purple-950 flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
-        <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Settings className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+        <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Sparkles className="w-10 h-10 text-white" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-          Complete Your Profile
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+          Let&apos;s Get You Set Up
         </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          To start discovering matches, please set your gender and who you&apos;re looking for in your profile settings.
+          Complete a few quick steps to start discovering amazing people near you.
         </p>
         <Link
-          href="/profile/edit"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-pink-500 text-white rounded-full font-medium hover:bg-pink-600 dark:hover:bg-pink-400 transition-colors"
+          href="/onboarding"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full font-medium hover:from-pink-600 hover:to-purple-600 transition-colors shadow-lg"
         >
-          <Settings className="w-4 h-4" />
-          Edit Profile
+          <Sparkles className="w-4 h-4" />
+          Get Started
         </Link>
       </div>
     </div>
@@ -189,23 +189,23 @@ export function IncompleteProfile() {
 
 export function ProfileNotFound() {
   return (
-    <div className="min-h-dvh bg-gray-50 dark:bg-neutral-900 flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-pink-950 dark:via-neutral-950 dark:to-purple-950 flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
-        <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Settings className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+        <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Heart className="w-10 h-10 text-white" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-          Profile Setup Required
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+          Create Your Profile
         </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          We couldn&apos;t find your profile. Please complete your profile setup to start discovering matches.
+          Set up your profile in just a few steps and start meeting real people.
         </p>
         <Link
-          href="/profile/edit"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-pink-500 text-white rounded-full font-medium hover:bg-pink-600 dark:hover:bg-pink-400 transition-colors"
+          href="/onboarding"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full font-medium hover:from-pink-600 hover:to-purple-600 transition-colors shadow-lg"
         >
-          <Settings className="w-4 h-4" />
-          Set Up Profile
+          <Sparkles className="w-4 h-4" />
+          Get Started
         </Link>
       </div>
     </div>

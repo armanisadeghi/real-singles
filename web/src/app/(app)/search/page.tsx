@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from "react";
 import { SearchGrid, SearchGridSkeleton } from "@/components/search";
-import { AlertCircle, UserX, Settings } from "lucide-react";
+import { AlertCircle, UserX, Settings, Sparkles, Heart } from "lucide-react";
 import Link from "next/link";
 
 interface Profile {
@@ -112,21 +112,21 @@ export default function SearchPage() {
   if (emptyReason === "incomplete_profile") {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Settings className="w-8 h-8 text-amber-600" />
+        <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Sparkles className="w-10 h-10 text-white" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Complete Your Profile
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+          Let&apos;s Get You Set Up
         </h2>
-        <p className="text-gray-600 mb-6">
-          To start discovering matches, please set your gender and who you&apos;re looking for in your profile settings.
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          Complete a few quick steps to start discovering amazing people near you.
         </p>
         <Link
-          href="/profile/edit"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-pink-500 text-white rounded-full font-medium hover:bg-pink-600 transition-colors"
+          href="/onboarding"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full font-medium hover:from-pink-600 hover:to-purple-600 transition-colors shadow-lg"
         >
-          <Settings className="w-4 h-4" />
-          Edit Profile
+          <Sparkles className="w-4 h-4" />
+          Get Started
         </Link>
       </div>
     );
@@ -157,21 +157,21 @@ export default function SearchPage() {
   if (emptyReason === "profile_not_found") {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <AlertCircle className="w-8 h-8 text-amber-600" />
+        <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Heart className="w-10 h-10 text-white" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Profile Setup Required
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+          Create Your Profile
         </h2>
-        <p className="text-gray-600 mb-6">
-          We couldn&apos;t find your profile. Please complete your profile setup to start discovering matches.
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          Set up your profile in just a few steps and start meeting real people.
         </p>
         <Link
-          href="/profile/edit"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-pink-500 text-white rounded-full font-medium hover:bg-pink-600 transition-colors"
+          href="/onboarding"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full font-medium hover:from-pink-600 hover:to-purple-600 transition-colors shadow-lg"
         >
-          <Settings className="w-4 h-4" />
-          Set Up Profile
+          <Sparkles className="w-4 h-4" />
+          Get Started
         </Link>
       </div>
     );

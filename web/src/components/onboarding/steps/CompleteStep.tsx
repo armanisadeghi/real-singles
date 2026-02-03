@@ -29,6 +29,11 @@ export function CompleteStep({ completion, firstName }: CompleteStepProps) {
     router.push("/explore");
   };
 
+  const handleCompleteProfile = () => {
+    // Go back to onboarding to complete required fields
+    router.push("/onboarding?resume=true");
+  };
+
   const handleEditProfile = () => {
     router.push("/profile/edit");
   };
@@ -142,7 +147,7 @@ export function CompleteStep({ completion, firstName }: CompleteStepProps) {
             </button>
           ) : (
             <button
-              onClick={handleEditProfile}
+              onClick={handleCompleteProfile}
               className={cn(
                 "w-full flex items-center justify-center gap-2",
                 "h-14 px-6 rounded-full",
