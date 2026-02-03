@@ -210,18 +210,26 @@ export function PhotoCarousel({
   // Use CSS variable for height to allow className overrides
   const heightStyle = { "--carousel-height": height } as React.CSSProperties;
 
-  // Calculate slide position: each image is 100% width, offset by swipe gesture
+  // Calculate slide position: container is images.length * 100% wide,
+  // so each image takes up (100 / images.length)% of the container.
+  // translateX percentage is relative to the element's own width.
   const getSlideTransform = () => {
     const containerWidth = containerRef.current?.offsetWidth || 0;
-    const baseOffset = -currentIndex * 100; // percentage
-    const pixelOffset = containerWidth > 0 ? (swipeOffset / containerWidth) * 100 : 0;
+    // Each image is (100 / images.length)% of the container width
+    // To show image N, we need to offset by N * (100 / images.length)%
+    const imageWidthPercent = images.length > 0 ? 100 / images.length : 100;
+    const baseOffset = -currentIndex * imageWidthPercent;
     
-    // Add bounce offset when at edge
+    // Swipe offset in percentage of container width
+    const containerTotalWidth = containerWidth * images.length;
+    const pixelOffset = containerTotalWidth > 0 ? (swipeOffset / containerTotalWidth) * 100 : 0;
+    
+    // Add bounce offset when at edge (scale down for multi-image containers)
     let bounceOffset = 0;
     if (bounceDirection === 'left') {
-      bounceOffset = 3; // Slight shift right (trying to go left)
+      bounceOffset = imageWidthPercent * 0.03; // 3% of one image width
     } else if (bounceDirection === 'right') {
-      bounceOffset = -3; // Slight shift left (trying to go right)
+      bounceOffset = -imageWidthPercent * 0.03;
     }
     
     return `translateX(${baseOffset + pixelOffset + bounceOffset}%)`;

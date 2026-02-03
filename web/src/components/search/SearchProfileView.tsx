@@ -442,12 +442,12 @@ export function SearchProfileView({
   const location = [profile.city, profile.state].filter(Boolean).join(", ");
 
   return (
-    <div className="min-h-dvh bg-gray-50 flex flex-col">
+    <div className="h-dvh bg-gray-50 flex flex-col overflow-hidden">
       {/* Centered container for desktop */}
-      <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-center md:py-8 md:px-4 md:gap-6 max-w-6xl mx-auto w-full">
+      <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-center md:py-8 md:px-4 md:gap-6 max-w-6xl mx-auto w-full min-h-0 overflow-hidden">
         
         {/* Left Column - Photo, Actions, Basic Info (desktop) */}
-        <div className="relative md:sticky md:top-8 md:w-[400px] md:flex-shrink-0">
+        <div className="relative md:sticky md:top-8 md:w-[400px] shrink-0">
           {/* Photo Section */}
           <div className="md:rounded-2xl md:overflow-hidden md:shadow-lg">
             <PhotoCarousel 
@@ -663,9 +663,9 @@ export function SearchProfileView({
           </div>
         </div>
 
-        {/* Right Column - Profile Details */}
-        <div className="flex-1 bg-white md:rounded-2xl md:shadow-lg md:max-w-xl">
-          <div className="p-5 md:p-6">
+        {/* Right Column - Profile Details - scrollable content area */}
+        <div className="flex-1 min-h-0 bg-white md:rounded-2xl md:shadow-lg md:max-w-xl overflow-y-auto overscroll-contain scrollbar-hide">
+          <div className="p-5 md:p-6 pb-28 md:pb-6">
             {/* Mobile: Show full profile including basic info */}
             <div className="md:hidden">
               <ProfileSectionRenderer profile={profile} />

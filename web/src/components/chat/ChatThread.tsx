@@ -169,8 +169,8 @@ export function ChatThread({
 
   return (
     <>
-      {/* Full-screen chat container - overflow hidden to prevent parent scroll */}
-      <div className="fixed inset-0 flex flex-col bg-white overflow-hidden">
+      {/* Full-screen chat container - explicit viewport dimensions to override scrollbar-gutter */}
+      <div className="fixed top-0 left-0 w-screen h-screen flex flex-col bg-white overflow-hidden">
         {/* iOS-style Header - Translucent with blur */}
         <header className="shrink-0 bg-white/90 backdrop-blur-xl pt-[env(safe-area-inset-top)] z-40 border-b border-gray-100">
           <div className="flex items-center gap-3 px-2 py-2 h-[52px]">
@@ -253,16 +253,12 @@ export function ChatThread({
           </div>
         </header>
 
-        {/* Messages Area - Full width, scrollbar at edge */}
+        {/* Messages Area - Scrollbar at right edge */}
         <div
           ref={containerRef}
-          className="flex-1 overflow-y-auto overscroll-contain"
-          style={{ 
-            scrollbarWidth: 'thin',
-            scrollbarGutter: 'stable',
-          }}
+          className="flex-1 w-full overflow-y-auto overscroll-contain scrollbar-thin"
         >
-          <div className="px-4 py-3 pb-24">
+          <div className="pl-4 pr-1 py-3 pb-24">
             {loading ? (
               <div className="space-y-3 py-2">
                 {Array.from({ length: 5 }).map((_, i) => (

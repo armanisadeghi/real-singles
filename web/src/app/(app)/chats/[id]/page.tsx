@@ -94,7 +94,7 @@ async function getConversation(conversationId: string) {
 
 function ChatSkeleton() {
   return (
-    <div className="fixed inset-0 flex flex-col bg-white overflow-hidden">
+    <div className="fixed top-0 left-0 w-screen h-screen flex flex-col bg-white overflow-hidden">
       {/* iOS-style Header skeleton */}
       <div className="shrink-0 bg-white/90 backdrop-blur-xl pt-[env(safe-area-inset-top)] border-b border-gray-100">
         <div className="flex items-center gap-3 px-2 py-2 h-[52px]">
@@ -115,8 +115,8 @@ function ChatSkeleton() {
       </div>
 
       {/* Messages skeleton */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-4 py-3 pb-24 space-y-3">
+      <div className="flex-1 w-full overflow-y-auto scrollbar-thin">
+        <div className="pl-4 pr-1 py-3 pb-24 space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <MessageSkeleton key={i} isOwn={i % 2 === 0} />
           ))}

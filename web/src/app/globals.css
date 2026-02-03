@@ -82,11 +82,8 @@ input, select, textarea {
   font-size: 16px;
 }
 
-/* Custom scrollbar - thin, overlay style to prevent layout shifts */
-html {
-  /* Reserve space for scrollbar to prevent layout shifts when modals open */
-  scrollbar-gutter: stable;
-}
+/* Custom scrollbar - thin, overlay style */
+/* Note: scrollbar-gutter removed from html as it breaks fixed positioning on chat pages */
 
 ::-webkit-scrollbar {
   width: 6px;
@@ -137,23 +134,23 @@ html {
   display: none;
 }
 
-/* Ultra-thin scrollbar for chat - sits at edge */
+/* Ultra-thin scrollbar for chat - sits at edge, iOS-like */
 .scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 1.5px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.2);
 }
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
 }
 
 /* Respect reduced motion preference for accessibility */
