@@ -4,14 +4,16 @@
  * FullScreenImageViewer Component (Web)
  * 
  * A full-screen image viewer with:
+ * - Full-width images on mobile
+ * - Tap zones: left 30% = prev, center 40% = nothing, right 30% = next
+ * - Swipe gesture navigation
  * - Keyboard navigation (arrows, escape)
- * - Click outside to close
  * - Photo counter
- * - Smooth transitions
+ * - Smooth sliding transitions
  */
 
-import { useCallback, useEffect, useState } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useState, useRef } from "react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FullScreenImageViewerProps {
@@ -28,13 +30,20 @@ export function FullScreenImageViewer({
   onClose,
 }: FullScreenImageViewerProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Touch/swipe state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [bounceDirection, setBounceDirection] = useState<'left' | 'right' | null>(null);
 
   // Reset index when opening
   useEffect(() => {
     if (visible) {
       setCurrentIndex(initialIndex);
-      setIsLoading(true);
+      setSwipeOffset(0);
     }
   }, [visible, initialIndex]);
 
@@ -42,23 +51,147 @@ export function FullScreenImageViewer({
   const goNext = useCallback(() => {
     if (currentIndex < images.length - 1) {
       setCurrentIndex((prev) => prev + 1);
-      setIsLoading(true);
     }
   }, [currentIndex, images.length]);
 
   const goPrevious = useCallback(() => {
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
-      setIsLoading(true);
     }
   }, [currentIndex]);
 
   const goToIndex = useCallback((index: number) => {
     if (index >= 0 && index < images.length) {
       setCurrentIndex(index);
-      setIsLoading(true);
     }
   }, [images.length]);
+
+  // Trigger haptic feedback on mobile
+  const triggerHaptic = useCallback((type: 'light' | 'error' = 'light') => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(type === 'error' ? [10, 30, 10] : 10);
+      } catch {
+        // Silently fail
+      }
+    }
+  }, []);
+
+  // Trigger bounce animation when at edge
+  const triggerBounce = useCallback((direction: 'left' | 'right') => {
+    setBounceDirection(direction);
+    triggerHaptic('error');
+    setTimeout(() => setBounceDirection(null), 300);
+  }, [triggerHaptic]);
+
+  // Minimum swipe distance threshold
+  const minSwipeDistance = 50;
+
+  // Touch handlers for swipe navigation
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (isTransitioning) return;
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setSwipeOffset(0);
+  }, [isTransitioning]);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (isTransitioning || touchStart === null) return;
+    const currentX = e.targetTouches[0].clientX;
+    setTouchEnd(currentX);
+    // Calculate swipe offset with resistance at edges
+    const rawOffset = currentX - touchStart;
+    const isAtStart = currentIndex === 0 && rawOffset > 0;
+    const isAtEnd = currentIndex === images.length - 1 && rawOffset < 0;
+    const resistance = isAtStart || isAtEnd ? 0.3 : 1;
+    setSwipeOffset(rawOffset * resistance);
+  }, [isTransitioning, touchStart, currentIndex, images.length]);
+
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (isTransitioning || touchStart === null) return;
+
+    const distance = touchStart - (touchEnd ?? touchStart);
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    const didSwipe = Math.abs(distance) > 10;
+
+    setIsTransitioning(true);
+
+    if (isLeftSwipe && currentIndex < images.length - 1) {
+      goNext();
+    } else if (isRightSwipe && currentIndex > 0) {
+      goPrevious();
+    } else if (!didSwipe) {
+      // It was a tap - use tap zones
+      // Left 30% = previous, Center 40% = nothing (already fullscreen), Right 30% = next
+      const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
+      const tapX = e.changedTouches[0]?.clientX ?? touchStart;
+      const tapPosition = tapX / containerWidth;
+
+      if (tapPosition < 0.3) {
+        if (currentIndex > 0) {
+          goPrevious();
+        } else {
+          triggerBounce('left');
+        }
+      } else if (tapPosition > 0.7) {
+        if (currentIndex < images.length - 1) {
+          goNext();
+        } else {
+          triggerBounce('right');
+        }
+      }
+      // Center 40% does nothing - already in fullscreen
+    }
+
+    setSwipeOffset(0);
+
+    setTimeout(() => {
+      setTouchStart(null);
+      setTouchEnd(null);
+      setIsTransitioning(false);
+    }, 350);
+  }, [isTransitioning, touchStart, touchEnd, goNext, goPrevious, currentIndex, images.length]);
+
+  // Handle click with tap zones (for desktop)
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
+    const clickPosition = e.clientX / containerWidth;
+
+    if (clickPosition < 0.3) {
+      if (currentIndex > 0) {
+        goPrevious();
+      } else {
+        triggerBounce('left');
+      }
+    } else if (clickPosition > 0.7) {
+      if (currentIndex < images.length - 1) {
+        goNext();
+      } else {
+        triggerBounce('right');
+      }
+    }
+    // Center 40% does nothing - already in fullscreen
+  }, [currentIndex, images.length, goPrevious, goNext, triggerBounce]);
+
+  // Calculate slide position
+  const getSlideTransform = () => {
+    const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
+    const baseOffset = -currentIndex * 100;
+    const pixelOffset = containerWidth > 0 ? (swipeOffset / containerWidth) * 100 : 0;
+    
+    // Add bounce offset when at edge
+    let bounceOffset = 0;
+    if (bounceDirection === 'left') {
+      bounceOffset = 3; // Slight shift right (trying to go left)
+    } else if (bounceDirection === 'right') {
+      bounceOffset = -3; // Slight shift left (trying to go right)
+    }
+    
+    return `translateX(${baseOffset + pixelOffset + bounceOffset}%)`;
+  };
+  
+  const isBouncing = bounceDirection !== null;
 
   // Keyboard navigation
   useEffect(() => {
@@ -96,30 +229,22 @@ export function FullScreenImageViewer({
 
   if (!visible || images.length === 0) return null;
 
-  const currentImage = images[currentIndex];
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/95 transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4">
-        {/* Close button */}
+    <div className="fixed inset-0 z-50 bg-black">
+      {/* Header - floating over images */}
+      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))]">
+        {/* Close button - no background, just shadow for visibility */}
         <button
           onClick={onClose}
-          className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+          className="w-10 h-10 flex items-center justify-center transition-opacity hover:opacity-80"
           aria-label="Close"
         >
-          <X className="w-6 h-6 text-white" />
+          <X className="w-7 h-7 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
         </button>
 
         {/* Counter */}
         {images.length > 1 && (
-          <div className="bg-black/50 px-4 py-2 rounded-full">
+          <div className="bg-black/40 px-3 py-1.5 rounded-full">
             <span className="text-white text-sm font-medium">
               {currentIndex + 1} / {images.length}
             </span>
@@ -130,65 +255,56 @@ export function FullScreenImageViewer({
         <div className="w-10 h-10" />
       </div>
 
-      {/* Main image */}
-      <div className="relative w-full h-full flex items-center justify-center p-16">
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          </div>
-        )}
-        <img
-          src={currentImage}
-          alt=""
-          className={cn(
-            "max-w-full max-h-full object-contain transition-opacity duration-200",
-            isLoading ? "opacity-0" : "opacity-100"
-          )}
-          onLoad={() => setIsLoading(false)}
-          onClick={(e) => e.stopPropagation()}
-        />
+      {/* Full-screen sliding image container */}
+      <div
+        ref={containerRef}
+        className="absolute inset-0 touch-pan-y select-none overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onClick={handleClick}
+      >
+        {/* Sliding strip of all images */}
+        <div
+          className="flex h-full"
+          style={{
+            width: `${images.length * 100}%`,
+            transform: getSlideTransform(),
+            // Use spring-like bounce for edge feedback, smooth ease for navigation
+            transition: isBouncing 
+              ? 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' 
+              : isTransitioning 
+                ? 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
+                : 'none',
+          }}
+        >
+          {images.map((src, index) => (
+            <div
+              key={index}
+              className="h-full flex-shrink-0 flex items-center justify-center"
+              style={{ width: `${100 / images.length}%` }}
+            >
+              <img
+                src={src}
+                alt=""
+                className="w-full h-full object-contain"
+                draggable={false}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Navigation buttons */}
+      {/* Dot indicators - at bottom */}
       {images.length > 1 && (
-        <>
-          {/* Previous */}
-          <button
-            onClick={goPrevious}
-            disabled={currentIndex === 0}
-            className={cn(
-              "absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full",
-              "bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all",
-              currentIndex === 0 && "opacity-30 cursor-not-allowed"
-            )}
-            aria-label="Previous image"
-          >
-            <ChevronLeft className="w-8 h-8 text-white" />
-          </button>
-
-          {/* Next */}
-          <button
-            onClick={goNext}
-            disabled={currentIndex === images.length - 1}
-            className={cn(
-              "absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full",
-              "bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all",
-              currentIndex === images.length - 1 && "opacity-30 cursor-not-allowed"
-            )}
-            aria-label="Next image"
-          >
-            <ChevronRight className="w-8 h-8 text-white" />
-          </button>
-        </>
-      )}
-
-      {/* Dot indicators */}
-      {images.length > 1 && (
-        <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2">
+        <div className="absolute bottom-8 pb-[env(safe-area-inset-bottom)] left-0 right-0 z-20 flex justify-center gap-2">
           {images.map((_, index) => (
             <button
               key={index}
-              onClick={() => goToIndex(index)}
+              onClick={(e) => {
+                e.stopPropagation();
+                goToIndex(index);
+              }}
               className={cn(
                 "transition-all rounded-full",
                 index === currentIndex

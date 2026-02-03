@@ -46,6 +46,7 @@ export function PhotoCarousel({
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [bounceDirection, setBounceDirection] = useState<'left' | 'right' | null>(null);
 
   const goNext = useCallback(() => {
     if (currentIndex < images.length - 1) {
@@ -74,6 +75,53 @@ export function PhotoCarousel({
     setIsViewerOpen(true);
   }, []);
 
+  // Trigger haptic feedback on mobile
+  const triggerHaptic = useCallback((type: 'light' | 'error' = 'light') => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(type === 'error' ? [10, 30, 10] : 10);
+      } catch {
+        // Silently fail
+      }
+    }
+  }, []);
+
+  // Trigger bounce animation when at edge
+  const triggerBounce = useCallback((direction: 'left' | 'right') => {
+    setBounceDirection(direction);
+    triggerHaptic('error');
+    // Reset after animation completes
+    setTimeout(() => setBounceDirection(null), 300);
+  }, [triggerHaptic]);
+
+  // Handle click/tap with zones (for desktop clicks)
+  // Left 30% = previous, Center 40% = fullscreen, Right 30% = next
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    const containerWidth = containerRef.current?.offsetWidth || 0;
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    const relativeX = containerRect ? e.clientX - containerRect.left : e.clientX;
+    const clickPosition = relativeX / containerWidth;
+
+    if (clickPosition < 0.3) {
+      // Left 30% - go to previous or bounce
+      if (currentIndex > 0) {
+        goPrevious();
+      } else {
+        triggerBounce('left');
+      }
+    } else if (clickPosition > 0.7) {
+      // Right 30% - go to next or bounce
+      if (currentIndex < images.length - 1) {
+        goNext();
+      } else {
+        triggerBounce('right');
+      }
+    } else {
+      // Center 40% - open full screen
+      openFullScreen();
+    }
+  }, [currentIndex, images.length, goPrevious, goNext, openFullScreen, triggerBounce]);
+
   // Minimum swipe distance threshold (in pixels)
   const minSwipeDistance = 50;
 
@@ -97,7 +145,7 @@ export function PhotoCarousel({
     setSwipeOffset(rawOffset * resistance);
   }, [isTransitioning, touchStart, currentIndex, images.length]);
 
-  const onTouchEnd = useCallback(() => {
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
     if (isTransitioning || touchStart === null) return;
 
     const distance = touchStart - (touchEnd ?? touchStart);
@@ -114,8 +162,32 @@ export function PhotoCarousel({
     } else if (isRightSwipe && currentIndex > 0) {
       goPrevious();
     } else if (!didSwipe) {
-      // If it was a tap (not a swipe), open full screen
-      openFullScreen();
+      // It was a tap, not a swipe - use tap zones
+      // Left 30% = previous, Center 40% = fullscreen, Right 30% = next
+      const containerWidth = containerRef.current?.offsetWidth || 0;
+      const tapX = e.changedTouches[0]?.clientX ?? touchStart;
+      const containerRect = containerRef.current?.getBoundingClientRect();
+      const relativeX = containerRect ? tapX - containerRect.left : tapX;
+      const tapPosition = relativeX / containerWidth;
+
+      if (tapPosition < 0.3) {
+        // Left 30% - go to previous or bounce
+        if (currentIndex > 0) {
+          goPrevious();
+        } else {
+          triggerBounce('left');
+        }
+      } else if (tapPosition > 0.7) {
+        // Right 30% - go to next or bounce
+        if (currentIndex < images.length - 1) {
+          goNext();
+        } else {
+          triggerBounce('right');
+        }
+      } else {
+        // Center 40% - open full screen
+        openFullScreen();
+      }
     }
 
     // Reset swipe offset with animation
@@ -137,8 +209,20 @@ export function PhotoCarousel({
     const containerWidth = containerRef.current?.offsetWidth || 0;
     const baseOffset = -currentIndex * 100; // percentage
     const pixelOffset = containerWidth > 0 ? (swipeOffset / containerWidth) * 100 : 0;
-    return `translateX(${baseOffset + pixelOffset}%)`;
+    
+    // Add bounce offset when at edge
+    let bounceOffset = 0;
+    if (bounceDirection === 'left') {
+      bounceOffset = 3; // Slight shift right (trying to go left)
+    } else if (bounceDirection === 'right') {
+      bounceOffset = -3; // Slight shift left (trying to go right)
+    }
+    
+    return `translateX(${baseOffset + pixelOffset + bounceOffset}%)`;
   };
+  
+  // Determine if we should use bounce transition
+  const isBouncing = bounceDirection !== null;
 
   // Check if we can navigate
   const canGoPrevious = currentIndex > 0;
@@ -178,9 +262,15 @@ export function PhotoCarousel({
           style={{
             width: `${images.length * 100}%`,
             transform: getSlideTransform(),
-            transition: isTransitioning ? 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none',
+            // Use spring-like bounce for edge feedback, smooth ease for navigation
+            transition: isBouncing 
+              ? 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' 
+              : isTransitioning 
+                ? 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
+                : 'none',
           }}
-          aria-label="View full-screen"
+          onClick={handleClick}
+          aria-label="Tap left/right to navigate, center to view full-screen"
         >
           {images.map((src, index) => (
             <div
