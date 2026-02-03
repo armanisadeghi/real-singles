@@ -4,45 +4,14 @@
  * Matches Page
  * 
  * Displays mutual matches - users who have both liked each other.
- * Calls the /api/matches endpoint to maintain SSOT with mobile.
+ * Uses TanStack Query for caching - same data is shared with /likes and /messages pages.
  */
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Heart, MessageCircle, CheckCircle, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { MediaBadge } from "@/components/profile";
-
-interface Match {
-  user_id: string;
-  display_name?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  age?: number | null;
-  gender?: string | null;
-  city?: string | null;
-  state?: string | null;
-  occupation?: string | null;
-  bio?: string | null;
-  is_verified: boolean;
-  profile_image_url?: string | null;
-  gallery?: { media_url: string }[];
-  last_active_at?: string | null;
-  matched_at?: string | null;
-  conversation_id?: string | null;
-  // Voice & Video Prompts
-  voice_prompt_url?: string | null;
-  video_intro_url?: string | null;
-}
-
-interface MatchesResponse {
-  matches: Match[];
-  total: number;
-  limit: number;
-  offset: number;
-  error?: string;
-}
+import { useMatches } from "@/hooks/queries";
 
 // Helper to format relative time
 function formatMatchedTime(dateString: string | null | undefined): string {
@@ -84,38 +53,14 @@ function getInitials(name?: string | null): string {
 
 export default function MatchesPage() {
   const router = useRouter();
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error, refetch } = useMatches();
+  const matches = data?.matches || [];
 
-  useEffect(() => {
-    async function fetchMatches() {
-      try {
-        const response = await fetch("/api/matches");
-        const data: MatchesResponse = await response.json();
-
-        if (!response.ok) {
-          setError(data.error || "Failed to load matches");
-          return;
-        }
-
-        setMatches(data.matches || []);
-      } catch (err) {
-        console.error("Error fetching matches:", err);
-        setError("Failed to load matches. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchMatches();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Your Matches</h1>
-        <p className="text-gray-500 mb-6">People you've matched with</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Your Matches</h1>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">People you've matched with</p>
         <div className="flex items-center justify-center py-16">
           <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
         </div>
@@ -126,13 +71,13 @@ export default function MatchesPage() {
   if (error) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Your Matches</h1>
-        <p className="text-gray-500 mb-6">People you've matched with</p>
-        <div className="text-center py-16 bg-white rounded-xl shadow-sm">
-          <p className="text-red-600 mb-4">{error}</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Your Matches</h1>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">People you've matched with</p>
+        <div className="text-center py-16 bg-white dark:bg-neutral-900 rounded-xl shadow-sm">
+          <p className="text-red-600 mb-4">{error instanceof Error ? error.message : "Failed to load matches"}</p>
           <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+            onClick={() => refetch()}
+            className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700"
           >
             Try Again
           </button>
@@ -142,9 +87,9 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Your Matches</h1>
-      <p className="text-gray-500 mb-6">People you've matched with</p>
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Your Matches</h1>
+      <p className="text-gray-500 dark:text-gray-400 mb-6">People you've matched with</p>
 
       {matches.length === 0 ? (
         <div className="text-center py-8 sm:py-12 bg-white dark:bg-neutral-900 rounded-xl shadow-sm">

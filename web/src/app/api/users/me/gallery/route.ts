@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
   const { data: gallery, error } = await supabase
     .from("user_gallery")
-    .select("*")
+    .select("id, media_url, media_type, thumbnail_url, is_live_photo, is_primary, display_order, created_at")
     .eq("user_id", user.id)
     .order("display_order", { ascending: true })
     .order("created_at", { ascending: false });
@@ -214,7 +214,7 @@ export async function DELETE(request: NextRequest) {
   // Get the item first to check ownership and get URL
   const { data: item } = await supabase
     .from("user_gallery")
-    .select("*")
+    .select("id, media_url, is_primary")
     .eq("id", galleryId)
     .eq("user_id", user.id)
     .single();

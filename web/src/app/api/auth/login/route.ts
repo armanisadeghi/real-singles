@@ -37,10 +37,10 @@ export async function POST(request: NextRequest) {
       .update({ last_active_at: new Date().toISOString() })
       .eq("id", data.user.id);
 
-    // Get user profile
+    // Get user profile - minimal fields for login response
     const { data: profile } = await supabase
       .from("profiles")
-      .select("*")
+      .select("first_name, last_name, profile_image_url, gender, date_of_birth, can_start_matching")
       .eq("user_id", data.user.id)
       .single();
 

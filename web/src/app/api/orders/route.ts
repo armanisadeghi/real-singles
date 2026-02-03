@@ -202,31 +202,36 @@ export async function POST(request: Request) {
       );
     }
 
-    // Deduct points
+    // Deduct points (must happen first)
     const newBalance = currentPoints - product.points_cost;
     await supabase
       .from("users")
       .update({ points_balance: newBalance })
       .eq("id", user.id);
 
-    // Create point transaction record
-    await supabase.from("point_transactions").insert({
-      user_id: user.id,
-      amount: -product.points_cost,
-      balance_after: newBalance,
-      transaction_type: "redemption",
-      description: `Redeemed: ${product.name}`,
-      reference_id: order.id,
-      reference_type: "orders",
-    });
+    // Create point transaction record and update stock in parallel
+    const parallelUpdates: PromiseLike<unknown>[] = [
+      supabase.from("point_transactions").insert({
+        user_id: user.id,
+        amount: -product.points_cost,
+        balance_after: newBalance,
+        transaction_type: "redemption",
+        description: `Redeemed: ${product.name}`,
+        reference_id: order.id,
+        reference_type: "orders",
+      }),
+    ];
 
-    // Update stock
     if (product.stock_quantity !== null) {
-      await supabase
-        .from("products")
-        .update({ stock_quantity: product.stock_quantity - 1 })
-        .eq("id", productId);
+      parallelUpdates.push(
+        supabase
+          .from("products")
+          .update({ stock_quantity: product.stock_quantity - 1 })
+          .eq("id", productId)
+      );
     }
+
+    await Promise.all(parallelUpdates);
 
     return NextResponse.json({
       success: true,

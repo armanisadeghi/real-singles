@@ -24,6 +24,10 @@ export const queryKeys = {
   likesReceived: ["likes", "received"] as const,
   likesSent: ["likes", "sent"] as const,
   unreadCount: ["conversations", "unread"] as const,
+  notifications: ["notifications"] as const,
+  events: ["events"] as const,
+  speedDating: ["speedDating"] as const,
+  favorites: ["favorites"] as const,
 } as const;
 
 // =============================================================================
@@ -301,6 +305,189 @@ export function useMatchAction() {
       queryClient.invalidateQueries({ queryKey: queryKeys.matches });
       queryClient.invalidateQueries({ queryKey: queryKeys.likesReceived });
       queryClient.invalidateQueries({ queryKey: queryKeys.likesSent });
+    },
+  });
+}
+
+// =============================================================================
+// NOTIFICATIONS QUERY
+// =============================================================================
+
+interface Notification {
+  ID: string;
+  Type: string;
+  Title: string;
+  Body: string;
+  Data: Record<string, unknown> | null;
+  IsRead: boolean;
+  ReadAt: string | null;
+  CreatedAt: string;
+}
+
+/**
+ * Fetch notifications for the current user
+ * 
+ * Stale time: 30 seconds (notifications change frequently)
+ */
+export function useNotifications(options?: { unreadOnly?: boolean }) {
+  return useQuery({
+    queryKey: [...queryKeys.notifications, options?.unreadOnly ? "unread" : "all"] as const,
+    queryFn: async (): Promise<{ data: Notification[]; unread_count: number }> => {
+      const params = new URLSearchParams();
+      if (options?.unreadOnly) params.append("unread", "true");
+      const res = await fetch(`/api/notifications?${params.toString()}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch notifications");
+      }
+      return res.json();
+    },
+    staleTime: 30 * 1000, // 30 seconds
+  });
+}
+
+// =============================================================================
+// EVENTS QUERY
+// =============================================================================
+
+interface ApiEvent {
+  EventID: string;
+  EventName: string;
+  EventDate: string;
+  EventPrice: string;
+  StartTime: string;
+  EndTime: string;
+  Description: string;
+  Street: string;
+  City: string;
+  State: string;
+  EventImage: string | null;
+  HostedBy: string;
+}
+
+/**
+ * Fetch events
+ * 
+ * Stale time: 2 minutes (events don't change often)
+ */
+export function useEvents(options?: { limit?: number; status?: string }) {
+  return useQuery({
+    queryKey: [...queryKeys.events, options?.limit, options?.status] as const,
+    queryFn: async (): Promise<{ success: boolean; data: ApiEvent[] }> => {
+      const params = new URLSearchParams();
+      if (options?.limit) params.append("limit", options.limit.toString());
+      if (options?.status) params.append("status", options.status);
+      const res = await fetch(`/api/events?${params.toString()}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch events");
+      }
+      return res.json();
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+}
+
+// =============================================================================
+// SPEED DATING QUERY
+// =============================================================================
+
+interface SpeedDatingSession {
+  ID: string;
+  SessionID: string;
+  Title: string;
+  Description: string | null;
+  Image: string | null;
+  ScheduledDateTime: string;
+  DurationMinutes: number | null;
+  MaxParticipants: number | null;
+  CurrentParticipants: number;
+  SpotsAvailable: number;
+  Status: string | null;
+  IsUserRegistered: boolean;
+}
+
+/**
+ * Fetch speed dating sessions
+ * 
+ * Stale time: 2 minutes
+ */
+export function useSpeedDating(options?: { limit?: number; status?: string }) {
+  return useQuery({
+    queryKey: [...queryKeys.speedDating, options?.limit, options?.status] as const,
+    queryFn: async (): Promise<{ success: boolean; data: SpeedDatingSession[] }> => {
+      const params = new URLSearchParams();
+      if (options?.limit) params.append("limit", options.limit.toString());
+      if (options?.status) params.append("status", options.status);
+      const res = await fetch(`/api/speed-dating?${params.toString()}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch speed dating sessions");
+      }
+      return res.json();
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+}
+
+// =============================================================================
+// FAVORITES QUERY
+// =============================================================================
+
+interface Favorite {
+  id: string;
+  user_id: string;
+  display_name?: string | null;
+  first_name?: string | null;
+  age?: number | null;
+  city?: string | null;
+  state?: string | null;
+  profile_image_url?: string | null;
+  is_verified: boolean;
+}
+
+/**
+ * Fetch user's favorites
+ * 
+ * Stale time: 1 minute
+ */
+export function useFavorites() {
+  return useQuery({
+    queryKey: queryKeys.favorites,
+    queryFn: async (): Promise<{ success: boolean; data: Favorite[] }> => {
+      const res = await fetch("/api/favorites");
+      if (!res.ok) {
+        throw new Error("Failed to fetch favorites");
+      }
+      return res.json();
+    },
+    staleTime: 60 * 1000, // 1 minute
+  });
+}
+
+/**
+ * Hook for adding/removing favorites
+ */
+export function useFavoriteAction() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      targetUserId,
+      action,
+    }: {
+      targetUserId: string;
+      action: "add" | "remove";
+    }) => {
+      const res = await fetch("/api/favorites", {
+        method: action === "add" ? "POST" : "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ favorite_user_id: targetUserId }),
+      });
+      if (!res.ok) {
+        throw new Error(`Failed to ${action} favorite`);
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.favorites });
     },
   });
 }

@@ -96,71 +96,58 @@ export async function GET() {
     })
   );
 
-  // Convert profile image URL to signed URL
+  // Convert profile image URL and verification selfie URL to signed URLs in parallel
   // Gallery bucket is private, so we need signed URLs for gallery images
-  let profileImageUrl = "";
-  if (profile?.profile_image_url) {
+  const resolveProfileImageUrl = async (): Promise<string> => {
+    if (!profile?.profile_image_url) return "";
+    
     let storagePath = profile.profile_image_url;
     let bucket: "avatars" | "gallery" = "gallery";
     
-    // If it's a full URL, check if it's a Supabase storage URL and extract the path
     if (storagePath.startsWith("http")) {
-      // Check if it's a gallery URL that needs signed URL conversion
       const galleryMatch = storagePath.match(/\/storage\/v1\/object\/(?:public|sign)\/gallery\/(.+?)(?:\?|$)/);
       const avatarMatch = storagePath.match(/\/storage\/v1\/object\/(?:public|sign)\/avatars\/(.+?)(?:\?|$)/);
       
       if (galleryMatch) {
-        // It's a gallery URL - extract path and create signed URL
         storagePath = decodeURIComponent(galleryMatch[1]);
         bucket = "gallery";
       } else if (avatarMatch) {
-        // It's an avatar URL - avatars are public, can use as-is
-        profileImageUrl = storagePath;
-        storagePath = ""; // Skip signed URL generation
+        return storagePath; // Avatars are public
       } else {
-        // External URL or already valid signed URL - use as-is
-        profileImageUrl = storagePath;
-        storagePath = ""; // Skip signed URL generation
+        return storagePath; // External URL
       }
     } else {
-      // It's a storage path, determine bucket
       bucket = storagePath.includes("/avatar") ? "avatars" : "gallery";
     }
     
-    // Generate signed URL if needed
-    if (storagePath) {
-      const { data: imgData } = await supabase.storage
-        .from(bucket)
-        .createSignedUrl(storagePath, 3600);
-      profileImageUrl = imgData?.signedUrl || "";
-    }
-  }
+    const { data: imgData } = await supabase.storage.from(bucket).createSignedUrl(storagePath, 3600);
+    return imgData?.signedUrl || "";
+  };
 
-  // Convert verification selfie URL to signed URL
-  let verificationSelfieUrl = "";
-  if (profile?.verification_selfie_url) {
+  const resolveVerificationSelfieUrl = async (): Promise<string> => {
+    if (!profile?.verification_selfie_url) return "";
+    
     const selfiePath = profile.verification_selfie_url;
     
     if (selfiePath.startsWith("http")) {
-      // Check if it's a gallery URL that needs signed URL conversion
       const galleryMatch = selfiePath.match(/\/storage\/v1\/object\/(?:public|sign)\/gallery\/(.+?)(?:\?|$)/);
       if (galleryMatch) {
         const extractedPath = decodeURIComponent(galleryMatch[1]);
-        const { data: selfieData } = await supabase.storage
-          .from("gallery")
-          .createSignedUrl(extractedPath, 3600);
-        verificationSelfieUrl = selfieData?.signedUrl || "";
-      } else {
-        verificationSelfieUrl = selfiePath;
+        const { data: selfieData } = await supabase.storage.from("gallery").createSignedUrl(extractedPath, 3600);
+        return selfieData?.signedUrl || "";
       }
-    } else {
-      // It's a storage path
-      const { data: selfieData } = await supabase.storage
-        .from("gallery")
-        .createSignedUrl(selfiePath, 3600);
-      verificationSelfieUrl = selfieData?.signedUrl || "";
+      return selfiePath;
     }
-  }
+    
+    const { data: selfieData } = await supabase.storage.from("gallery").createSignedUrl(selfiePath, 3600);
+    return selfieData?.signedUrl || "";
+  };
+
+  // Resolve both URLs in parallel
+  const [profileImageUrl, verificationSelfieUrl] = await Promise.all([
+    resolveProfileImageUrl(),
+    resolveVerificationSelfieUrl(),
+  ]);
 
   if (userError && userError.code !== "PGRST116") {
     return NextResponse.json(

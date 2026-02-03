@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     // Get stored OTP from database
     const { data: otpRecord } = await supabase
       .from("phone_verification_otps")
-      .select("*")
+      .select("id, otp_code, expires_at, attempts, verified_at")
       .eq("user_id", user.id)
       .eq("phone", targetPhone)
       .single();

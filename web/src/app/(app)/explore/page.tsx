@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Video,
   Calendar,
@@ -11,6 +9,7 @@ import {
   ChevronRight,
   Sparkles,
 } from "lucide-react";
+import { useEvents, useSpeedDating } from "@/hooks/queries";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -336,30 +335,12 @@ function SectionSkeleton() {
 }
 
 // ============================================================================
-// EVENTS SECTION WITH INDEPENDENT LOADING
+// EVENTS SECTION WITH TANSTACK QUERY CACHING
 // ============================================================================
 
 function EventsSection() {
-  const [events, setEvents] = useState<ApiEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchEvents() {
-      try {
-        const res = await fetch("/api/events?limit=10&status=upcoming");
-        if (!res.ok) throw new Error("Failed to fetch events");
-        const data = await res.json();
-        setEvents(data.data || []);
-      } catch (err) {
-        console.error("Error fetching events:", err);
-        setError("Unable to load events");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchEvents();
-  }, []);
+  const { data, isLoading, error } = useEvents({ limit: 10, status: "upcoming" });
+  const events = data?.data || [];
 
   return (
     <section>
@@ -368,7 +349,7 @@ function EventsSection() {
       {isLoading ? (
         <SectionSkeleton />
       ) : error ? (
-        <EmptySection title={error} icon={Calendar} />
+        <EmptySection title="Unable to load events" icon={Calendar} />
       ) : events.length > 0 ? (
         <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
           {events.map((event) => (
@@ -383,44 +364,26 @@ function EventsSection() {
 }
 
 // ============================================================================
-// SPEED DATING SECTION WITH INDEPENDENT LOADING
+// SPEED DATING SECTION WITH TANSTACK QUERY CACHING
 // ============================================================================
 
 function SpeedDatingSection() {
-  const [sessions, setSessions] = useState<ApiSpeedDating[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchSpeedDating() {
-      try {
-        const res = await fetch("/api/speed-dating?limit=10&status=scheduled");
-        if (!res.ok) throw new Error("Failed to fetch speed dating");
-        const json = await res.json();
-        // Map API response to expected format
-        const data = (json.data || []).map((s: Record<string, unknown>) => ({
-          ID: s.ID || s.SessionID,
-          Title: s.Title,
-          Description: s.Description || "",
-          Image: s.Image || s.ImageURL || "",
-          ScheduledDate: s.ScheduledDateTime ? String(s.ScheduledDateTime).split("T")[0] : "",
-          ScheduledTime: s.ScheduledDateTime 
-            ? new Date(String(s.ScheduledDateTime)).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-            : "",
-          Duration: s.DurationMinutes,
-          MaxParticipants: s.MaxParticipants,
-          Status: s.Status,
-        }));
-        setSessions(data);
-      } catch (err) {
-        console.error("Error fetching speed dating:", err);
-        setError("Unable to load sessions");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchSpeedDating();
-  }, []);
+  const { data, isLoading, error } = useSpeedDating({ limit: 10, status: "scheduled" });
+  
+  // Map API response to expected format
+  const sessions: ApiSpeedDating[] = (data?.data || []).map((s) => ({
+    ID: s.ID || s.SessionID,
+    Title: s.Title,
+    Description: s.Description || "",
+    Image: s.Image || "",
+    ScheduledDate: s.ScheduledDateTime ? s.ScheduledDateTime.split("T")[0] : "",
+    ScheduledTime: s.ScheduledDateTime 
+      ? new Date(s.ScheduledDateTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+      : "",
+    Duration: s.DurationMinutes,
+    MaxParticipants: s.MaxParticipants,
+    Status: s.Status,
+  }));
 
   return (
     <section>
@@ -429,7 +392,7 @@ function SpeedDatingSection() {
       {isLoading ? (
         <SectionSkeleton />
       ) : error ? (
-        <EmptySection title={error} icon={Video} />
+        <EmptySection title="Unable to load sessions" icon={Video} />
       ) : sessions.length > 0 ? (
         <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
           {sessions.map((session) => (

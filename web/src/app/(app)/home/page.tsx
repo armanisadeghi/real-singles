@@ -17,6 +17,7 @@ import { PointsBadge } from "@/components/rewards";
 import { ProfileCard } from "@/components/search";
 import { EmptyState } from "@/components/ui";
 import { SideMenu } from "@/components/navigation";
+import { useUserProfile } from "@/hooks/queries";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -124,12 +125,14 @@ function formatProfileForCard(profile: ApiProfile) {
 
 export default function HomePage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [homeData, setHomeData] = useState<HomeData | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [homeLoading, setHomeLoading] = useState(true);
+  const [homeError, setHomeError] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Use TanStack Query for user profile (shared cache with other pages)
+  const { data: userProfile, isLoading: userLoading, error: userError, refetch: refetchUser } = useUserProfile();
 
   // Sign out handler
   const handleSignOut = async () => {
@@ -141,30 +144,12 @@ export default function HomePage() {
     }
   };
 
-  const fetchData = useCallback(async (showRefresh = false) => {
+  const fetchHomeData = useCallback(async (showRefresh = false) => {
     if (showRefresh) {
       setIsRefreshing(true);
     }
 
     try {
-      // Fetch user info
-      const userRes = await fetch("/api/users/me");
-      if (!userRes.ok) {
-        if (userRes.status === 401) {
-          router.push("/login");
-          return;
-        }
-        throw new Error("Failed to fetch user info");
-      }
-      const userResponse = await userRes.json();
-      const userData = userResponse.data || userResponse;
-      setUserInfo({
-        id: userData.ID || userData.id,
-        displayName: userData.DisplayName || userData.FirstName || "User",
-        profileImage: userData.Image || userData.ProfileImageUrl || null,
-        points: userData.PointsBalance || userData.RedeemPoints || 0,
-      });
-
       // Fetch home data
       const homeRes = await fetch("/api/discover");
       if (!homeRes.ok) {
@@ -172,25 +157,35 @@ export default function HomePage() {
       }
       const data = await homeRes.json();
       setHomeData(data);
-      setError(null);
+      setHomeError(null);
     } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Unable to load home data");
+      console.error("Error fetching home data:", err);
+      setHomeError("Unable to load home data");
     } finally {
-      setIsLoading(false);
+      setHomeLoading(false);
       setIsRefreshing(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchHomeData();
+  }, [fetchHomeData]);
 
   const handleRefresh = () => {
-    fetchData(true);
+    refetchUser();
+    fetchHomeData(true);
   };
 
+  // Derived user info from TanStack Query data
+  const userInfo: UserInfo | null = userProfile ? {
+    id: userProfile.UserID || "",
+    displayName: userProfile.DisplayName || userProfile.FirstName || "User",
+    profileImage: userProfile.ProfileImageUrl || null,
+    points: userProfile.Points || 0,
+  } : null;
+
   // Loading state
+  const isLoading = userLoading || homeLoading;
   if (isLoading) {
     return (
       <div className="min-h-dvh bg-background flex items-center justify-center">
@@ -200,7 +195,8 @@ export default function HomePage() {
   }
 
   // Error state
-  if (error || !userInfo) {
+  const hasError = userError || homeError || !userInfo;
+  if (hasError) {
     return (
       <div className="min-h-dvh bg-background flex items-center justify-center p-4">
         <div className="text-center">

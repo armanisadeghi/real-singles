@@ -16,10 +16,10 @@ export async function GET() {
     );
   }
 
-  // Get user profile data
+  // Get user profile data - minimal fields for session
   const { data: profile } = await supabase
     .from("profiles")
-    .select("*")
+    .select("first_name, last_name, profile_image_url, gender, date_of_birth, can_start_matching")
     .eq("user_id", user.id)
     .single();
 

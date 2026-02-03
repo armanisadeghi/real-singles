@@ -30,7 +30,7 @@ export async function GET(
   // Note: Allow both "active" and null status (for new users), only exclude suspended/deleted
   const { data: userData, error: userError } = await supabase
     .from("users")
-    .select("*")
+    .select("id, email, display_name, status")
     .eq("id", targetUserId)
     .not("status", "in", "(suspended,deleted)")
     .single();
@@ -42,10 +42,18 @@ export async function GET(
     );
   }
 
-  // Get profile data
+  // Get profile data - select fields needed for profile display
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("*")
+    .select(`
+      first_name, last_name, date_of_birth, gender, bio, profile_image_url, profile_hidden,
+      city, state, height_inches, body_type, ethnicity, religion, education, occupation,
+      smoking, drinking, marijuana, has_kids, wants_kids, pets, zodiac_sign, interests,
+      dating_intentions, ideal_first_date, non_negotiables, worst_job, dream_job,
+      nightclub_or_home, pet_peeves, after_work, way_to_heart, craziest_travel_story,
+      weirdest_gift, past_event, is_verified, voice_prompt_url, video_intro_url,
+      voice_prompt_duration_seconds, video_intro_duration_seconds
+    `)
     .eq("user_id", targetUserId)
     .single();
 
@@ -68,7 +76,7 @@ export async function GET(
   // Get gallery images
   const { data: gallery } = await supabase
     .from("user_gallery")
-    .select("*")
+    .select("id, media_url, media_type, thumbnail_url, is_primary, display_order")
     .eq("user_id", targetUserId)
     .order("display_order", { ascending: true });
 

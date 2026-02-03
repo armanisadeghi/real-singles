@@ -279,10 +279,21 @@ export async function GET() {
     );
   }
 
-  // Get profile data
+  // Get profile data - select all fields needed for completion calculation
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("*")
+    .select(`
+      first_name, date_of_birth, gender, looking_for, bio, looking_for_description,
+      height_inches, body_type, ethnicity, dating_intentions, marital_status,
+      country, city, state, hometown, occupation, company, education, schools,
+      religion, political_views, exercise, languages, smoking, drinking, marijuana,
+      has_kids, wants_kids, pets, interests, life_goals, zodiac_sign,
+      ideal_first_date, non_negotiables, way_to_heart, after_work, nightclub_or_home,
+      pet_peeves, craziest_travel_story, weirdest_gift, worst_job, dream_job, past_event,
+      social_link_1, social_link_2, voice_prompt_url, video_intro_url, verification_selfie_url,
+      profile_completion_skipped, profile_completion_prefer_not, profile_completion_step,
+      can_start_matching
+    `)
     .eq("user_id", user.id)
     .single();
 
@@ -296,7 +307,7 @@ export async function GET() {
   // Get gallery photo count (only images, not videos)
   const { count: photoCount } = await supabase
     .from("user_gallery")
-    .select("*", { count: "exact", head: true })
+    .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
     .eq("media_type", "image");
 
@@ -489,14 +500,24 @@ export async function POST(request: NextRequest) {
   // Return updated completion status
   const { data: updatedProfile } = await supabase
     .from("profiles")
-    .select("*")
+    .select(`
+      first_name, date_of_birth, gender, looking_for, bio, looking_for_description,
+      height_inches, body_type, ethnicity, dating_intentions, marital_status,
+      country, city, state, hometown, occupation, company, education, schools,
+      religion, political_views, exercise, languages, smoking, drinking, marijuana,
+      has_kids, wants_kids, pets, interests, life_goals, zodiac_sign,
+      ideal_first_date, non_negotiables, way_to_heart, after_work, nightclub_or_home,
+      pet_peeves, craziest_travel_story, weirdest_gift, worst_job, dream_job, past_event,
+      social_link_1, social_link_2, voice_prompt_url, video_intro_url, verification_selfie_url,
+      profile_completion_skipped, profile_completion_prefer_not
+    `)
     .eq("user_id", user.id)
     .single();
 
   // Get gallery photo count
   const { count: photoCount } = await supabase
     .from("user_gallery")
-    .select("*", { count: "exact", head: true })
+    .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
     .eq("media_type", "image");
 
