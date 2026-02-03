@@ -253,7 +253,7 @@ export function ChatThread({
           ref={containerRef}
           className="flex-1 w-full overflow-y-auto overscroll-contain scrollbar-thin"
         >
-          <div className="px-2 pt-[100px] pb-20">
+          <div className="px-2 pt-[100px] pb-52">
             {loading ? (
               <div className="space-y-3 py-2">
                 {Array.from({ length: 5 }).map((_, i) => (

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GlassBottomNav } from "@/components/glass";
 import { AppHeader } from "@/components/layout";
 import { AppProviders } from "@/components/providers/AppProviders";
+import { UpdateBanner } from "@/components/UpdateBanner";
 
 async function getUser() {
   const supabase = await createClient();
@@ -83,6 +84,12 @@ export default async function AppLayout({
       lazyLoadDiscover={true}
     >
       <div className="min-h-dvh bg-gray-50 dark:bg-neutral-950">
+        {/* Update Banner - Shown when new version is available */}
+        <UpdateBanner 
+          pollingInterval={300000} 
+          checkOnRouteChange={true}
+        />
+
         {/* Header - Hidden on home page (matches mobile app behavior) */}
         <AppHeader 
           user={{

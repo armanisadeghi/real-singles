@@ -253,28 +253,33 @@ export function MessageInput({
               inputMode="text"
               enterKeyHint="send"
               className={cn(
-                "w-full resize-none overflow-hidden",
+                "w-full resize-none",
                 "bg-transparent dark:bg-transparent",
                 "text-gray-900 dark:text-gray-100",
                 "disabled:opacity-50",
-                "placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                "placeholder:text-gray-500 dark:placeholder:text-gray-400",
+                "[&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0"
               )}
               style={{ 
                 height: "36px",
                 minHeight: "36px",
                 maxHeight: "120px",
+                overflowY: "auto", // Enable vertical scrolling
                 // Override global CSS that conflicts with component styles
-                padding: "9px 42px 9px 14px",
+                padding: "13px 42px 13px 16px", // Increased vertical padding to prevent text clipping
                 fontSize: "16px",
                 lineHeight: "18px",
                 border: "0.5px solid var(--border)",
-                borderRadius: "9999px",
+                borderRadius: "20px", // Use fixed radius instead of pill to prevent text clipping
                 outline: "none",
                 boxShadow: "none",
                 touchAction: "manipulation",
                 WebkitAppearance: "none",
                 appearance: "none",
-              }}
+                // Hide scrollbar across all browsers
+                scrollbarWidth: "none", // Firefox
+                msOverflowStyle: "none", // IE/Edge
+              } as React.CSSProperties & { scrollbarWidth?: string; msOverflowStyle?: string }}
             />
             
             {/* Send button - inside input, only visible when can send */}

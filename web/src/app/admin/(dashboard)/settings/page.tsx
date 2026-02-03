@@ -10,7 +10,8 @@ import {
   Search,
   Heart,
   MessageCircle,
-  ExternalLink
+  ExternalLink,
+  GitBranch
 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
@@ -67,6 +68,16 @@ const toolsSections = [
     iconColor: "text-rose-600",
     hoverBorder: "hover:border-rose-200",
     hoverBg: "hover:bg-rose-50/50",
+  },
+  {
+    title: "App Version",
+    description: "View deployment history and current app version",
+    href: "/admin/settings/app-version",
+    icon: GitBranch,
+    iconBg: "bg-violet-100",
+    iconColor: "text-violet-600",
+    hoverBorder: "hover:border-violet-200",
+    hoverBg: "hover:bg-violet-50/50",
   },
 ];
 

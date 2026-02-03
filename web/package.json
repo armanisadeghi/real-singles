@@ -19,7 +19,13 @@
     "db:migrate:yes": "tsx scripts/db-migrate.ts --yes",
     "db:types": "tsx scripts/db-migrate.ts --types-only",
     "db:status": "npx supabase migration list",
-    "logo:dark": "tsx scripts/create-dark-mode-logo.ts"
+    "logo:dark": "tsx scripts/create-dark-mode-logo.ts",
+    "version:update": "tsx scripts/update-app-version.ts",
+    "version:major": "tsx scripts/update-app-version.ts --major",
+    "version:minor": "tsx scripts/update-app-version.ts --minor",
+    "ship": "tsx scripts/deploy.ts",
+    "ship:minor": "tsx scripts/deploy.ts --minor",
+    "ship:major": "tsx scripts/deploy.ts --major"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

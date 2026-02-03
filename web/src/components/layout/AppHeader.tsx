@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { SlidersHorizontal, User, Edit, Heart, Settings, LogOut } from "lucide-react";
+import { SlidersHorizontal, User, Edit, Heart, Settings, LogOut, Info } from "lucide-react";
 import { NotificationBell, MessagesIndicator } from "@/components/notifications";
 import { PointsBadge } from "@/components/rewards";
 import { Avatar } from "@/components/ui";
@@ -114,6 +114,11 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
       icon: Heart,
     },
     {
+      id: "about",
+      label: "About",
+      icon: Info,
+    },
+    {
       id: "settings",
       label: "Settings",
       icon: Settings,
@@ -139,6 +144,9 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
         break;
       case "favorites":
         router.push("/favorites");
+        break;
+      case "about":
+        router.push("/about");
         break;
       case "settings":
         router.push("/settings");
