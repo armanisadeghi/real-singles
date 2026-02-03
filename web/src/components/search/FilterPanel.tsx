@@ -138,10 +138,11 @@ export function FilterPanel({
                 type="number"
                 min={18}
                 max={100}
-                value={filters.minAge}
-                onChange={(e) =>
-                  setFilters({ ...filters, minAge: Number(e.target.value) })
-                }
+                value={filters.minAge || 18}
+                onChange={(e) => {
+                  const value = Math.max(18, Math.min(100, parseInt(e.target.value, 10) || 18));
+                  setFilters({ ...filters, minAge: value });
+                }}
                 className="w-full px-3 py-2 border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 rounded-lg text-center"
               />
             </div>
@@ -152,10 +153,11 @@ export function FilterPanel({
                 type="number"
                 min={18}
                 max={100}
-                value={filters.maxAge}
-                onChange={(e) =>
-                  setFilters({ ...filters, maxAge: Number(e.target.value) })
-                }
+                value={filters.maxAge || 99}
+                onChange={(e) => {
+                  const value = Math.max(18, Math.min(100, parseInt(e.target.value, 10) || 99));
+                  setFilters({ ...filters, maxAge: value });
+                }}
                 className="w-full px-3 py-2 border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 rounded-lg text-center"
               />
             </div>

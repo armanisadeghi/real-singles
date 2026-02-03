@@ -8,6 +8,8 @@ import {
   Clock,
   ChevronRight,
   Sparkles,
+  Gift,
+  UserPlus,
 } from "lucide-react";
 import { useEvents, useSpeedDating } from "@/hooks/queries";
 
@@ -253,7 +255,7 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
           {session.ScheduledTime && (
             <span className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
-              {formatTime(session.ScheduledTime)}
+              {session.ScheduledTime}
             </span>
           )}
         </div>
@@ -304,6 +306,53 @@ function EmptySection({
       </div>
       <p className="text-sm text-muted-foreground">{title}</p>
     </div>
+  );
+}
+
+// ============================================================================
+// REFER FRIENDS BANNER COMPONENT
+// ============================================================================
+
+function ReferFriendsBanner() {
+  return (
+    <Link
+      href="/refer"
+      className="group relative rounded-2xl border border-amber-200 dark:border-amber-900/50 bg-gradient-to-br from-amber-50 via-orange-50 to-pink-50 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-pink-950/20 p-6 sm:p-8 overflow-hidden hover:shadow-lg transition-all duration-300"
+    >
+      {/* Background decoration */}
+      <div className="absolute inset-0 opacity-10 dark:opacity-5">
+        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-amber-400 blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-pink-400 blur-3xl" />
+      </div>
+
+      <div className="relative flex flex-col sm:flex-row items-center gap-6">
+        {/* Icon */}
+        <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-pink-500 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+          <Gift className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 text-center sm:text-left">
+          <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
+            <h3 className="text-xl sm:text-2xl font-bold text-foreground">
+              Refer Friends, Earn Rewards
+            </h3>
+            <UserPlus className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+          </div>
+          <p className="text-muted-foreground text-sm sm:text-base">
+            Share RealSingles with friends and get exclusive rewards when they join. 
+            Everyone wins! 🎉
+          </p>
+        </div>
+
+        {/* Arrow indicator */}
+        <div className="flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center shadow-md group-hover:translate-x-1 transition-transform">
+            <ChevronRight className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }
 
@@ -377,8 +426,9 @@ function SpeedDatingSection() {
     Description: s.Description || "",
     Image: s.Image || "",
     ScheduledDate: s.ScheduledDateTime ? s.ScheduledDateTime.split("T")[0] : "",
+    // toLocaleTimeString already includes AM/PM, so no need for formatTime to add it again
     ScheduledTime: s.ScheduledDateTime 
-      ? new Date(s.ScheduledDateTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+      ? new Date(s.ScheduledDateTime).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
       : "",
     Duration: s.DurationMinutes,
     MaxParticipants: s.MaxParticipants,
@@ -414,6 +464,9 @@ export default function ExplorePage() {
   return (
     <div className="min-h-dvh bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 space-y-8">
+        {/* Refer Friends Banner */}
+        <ReferFriendsBanner />
+
         {/* Events Section - Loads independently */}
         <EventsSection />
 

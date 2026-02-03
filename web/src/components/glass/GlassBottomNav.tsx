@@ -93,12 +93,11 @@ export function GlassBottomNav() {
   };
 
   // Hide bottom nav on full-screen views:
-  // - /discover (immersive single-profile discovery)
   // - /search/profile/* (full-screen profile from search)
   // - /profile/*/focus (profile focus view)
   // - /chats/[id] (individual chat - immersive messaging)
+  // Note: /discover now shows bottom nav like other routes
   const isFullScreenView =
-    pathname === "/discover" ||
     pathname.startsWith("/search/profile/") ||
     (pathname.startsWith("/chats/") && pathname !== "/chats") ||
     (pathname.startsWith("/profile/") && pathname.includes("/focus"));

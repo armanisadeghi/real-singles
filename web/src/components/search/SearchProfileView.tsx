@@ -577,7 +577,7 @@ export function SearchProfileView({
               )}
             </button>
 
-            {/* Like Button (Heart) - rightmost */}
+            {/* Like Button (Heart) */}
             <button
               onClick={() => handleAction("like")}
               disabled={actionLoading !== null}
@@ -602,6 +602,29 @@ export function SearchProfileView({
               ) : (
                 <Heart className="w-5 h-5 transition-transform hover:scale-110" fill="currentColor" />
               )}
+            </button>
+
+            {/* Share Button - rightmost */}
+            <button
+              onClick={handleShare}
+              disabled={actionLoading !== null}
+              className={cn(
+                "w-11 h-11 rounded-full flex items-center justify-center",
+                "bg-white dark:bg-neutral-950 text-blue-500 border-2 border-blue-300 dark:border-blue-400/50",
+                "shadow-sm dark:shadow-black/20",
+                // Smooth transitions for all properties
+                "transition-all duration-200 ease-out",
+                // Hover state - scale up, elevate shadow
+                "hover:scale-110 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950",
+                "hover:shadow-lg hover:shadow-blue-200/50 dark:hover:shadow-blue-900/30",
+                // Active/click state
+                "active:scale-95 active:shadow-sm",
+                // Disabled state
+                "disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
+              )}
+              aria-label="Share this profile"
+            >
+              <Share className="w-5 h-5" />
             </button>
           </div>
 
@@ -665,7 +688,7 @@ export function SearchProfileView({
 
         {/* Right Column - Profile Details */}
         <div className="flex-1 bg-white dark:bg-neutral-950 md:rounded-2xl md:shadow-lg dark:md:shadow-black/30 md:max-w-xl">
-          <div className="p-5 md:p-6 pb-28 md:pb-6">
+          <div className="p-5 md:p-6 pb-48 md:pb-6">
             {/* Mobile: Show full profile including basic info */}
             <div className="md:hidden">
               <ProfileSectionRenderer profile={profile} />
@@ -680,9 +703,9 @@ export function SearchProfileView({
 
       {/* Mobile Action Bar - fixed floating buttons at bottom (no backdrop) 
           Enhanced with haptic feedback and native-feeling touch interactions
-          Extra bottom padding lifts buttons to show more content behind */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
-        <div className="flex items-center justify-center gap-4 pt-4 px-4 pb-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))]">
+          Positioned above the bottom navigation dock */}
+      <div className="md:hidden fixed left-0 right-0 z-40" style={{ bottom: 'calc(76px + env(safe-area-inset-bottom))' }}>
+        <div className="flex items-center justify-center gap-3 py-4 px-4">
           {/* Pass Button (X) - leftmost */}
           <button
             onTouchStart={() => triggerHaptic('light')}
@@ -778,7 +801,7 @@ export function SearchProfileView({
             )}
           </button>
 
-          {/* Like Button (Heart) - rightmost */}
+          {/* Like Button (Heart) */}
           <button
             onTouchStart={() => triggerHaptic('light')}
             onClick={() => {
@@ -806,6 +829,32 @@ export function SearchProfileView({
             ) : (
               <Heart className="w-6 h-6 transition-transform active:scale-110" fill="currentColor" />
             )}
+          </button>
+
+          {/* Share Button - rightmost */}
+          <button
+            onTouchStart={() => triggerHaptic('light')}
+            onClick={() => {
+              triggerHaptic('medium');
+              handleShare();
+            }}
+            disabled={actionLoading !== null}
+            className={cn(
+              "w-12 h-12 rounded-full flex items-center justify-center",
+              "bg-white dark:bg-neutral-950 text-blue-500 border-2 border-blue-300 dark:border-blue-400/50",
+              "shadow-lg dark:shadow-black/40",
+              // Touch-optimized transitions
+              "transition-all duration-150 ease-out",
+              // Active/pressed state
+              "active:scale-90 active:bg-blue-50 dark:active:bg-blue-950 active:border-blue-400 active:shadow-md",
+              // Disabled state
+              "disabled:opacity-50 disabled:active:scale-100",
+              // Prevent text selection and optimize touch
+              "select-none touch-manipulation"
+            )}
+            aria-label="Share this profile"
+          >
+            <Share className="w-6 h-6" />
           </button>
         </div>
       </div>
