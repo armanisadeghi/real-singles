@@ -154,7 +154,8 @@ export function MessageInput({
   return (
     <div 
       ref={containerRef}
-      className="fixed left-0 right-0 bottom-3 pb-safe z-50 pointer-events-none px-3"
+      className="fixed left-0 right-0 bottom-3 pb-safe pointer-events-none px-3"
+      style={{ zIndex: 'var(--z-fixed)' }}
     >
       <div className="pointer-events-auto">
         {/* Attached image preview */}

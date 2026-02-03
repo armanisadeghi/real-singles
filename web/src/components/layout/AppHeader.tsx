@@ -163,11 +163,12 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
 
   return (
     <>
-    <header className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+    <header className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm shadow-sm sticky top-0" style={{ zIndex: 'var(--z-sticky)' }}>
       {/* Skip to main content link */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-brand-primary focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-brand-primary focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+        style={{ zIndex: 'var(--z-skip-link)' }}
       >
         Skip to main content
       </a>

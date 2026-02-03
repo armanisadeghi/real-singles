@@ -1,6 +1,19 @@
 @import "tailwindcss";
 
 :root {
+  /* Z-Index Scale - Ensures proper layering across the app */
+  --z-base: 0;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-fixed: 30;
+  --z-modal-backdrop: 40;
+  --z-modal: 50;
+  --z-popover: 60;
+  --z-toast: 70;
+  --z-tooltip: 80;
+  --z-notification: 90;
+  --z-skip-link: 100;
+
   /* Brand Colors */
   --brand-primary: #8F5924;
   --brand-primary-light: #A86B2D;
@@ -281,10 +294,13 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
 }
 
-/* Safe area insets for iOS */
+/* Safe area insets for iOS and Android */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
   }
 }
 
@@ -448,7 +464,7 @@ main:focus {
   position: absolute;
   top: -40px;
   left: 0;
-  z-index: 100;
+  z-index: var(--z-skip-link);
   padding: 8px 16px;
   background-color: var(--brand-primary);
   color: white;

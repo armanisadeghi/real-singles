@@ -62,11 +62,12 @@ export function UpdateBanner({
   return (
     <div
       className={cn(
-        "fixed left-0 right-0 z-50 bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg",
+        "fixed left-0 right-0 bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg",
         "animate-in slide-in-from-top-2 fade-in duration-300",
-        position === "top" ? "top-0" : "bottom-0",
+        position === "top" ? "top-0 pt-safe" : "bottom-0 pb-safe",
         className
       )}
+      style={{ zIndex: 'var(--z-notification)' }}
       role="alert"
       aria-live="polite"
     >

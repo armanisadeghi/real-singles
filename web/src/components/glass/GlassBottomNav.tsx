@@ -111,12 +111,13 @@ export function GlassBottomNav() {
     <nav
       aria-label="Main navigation"
       className={cn(
-        "md:hidden fixed z-50",
+        "md:hidden fixed",
         // Floating position - detached from edges like Tinder
         "bottom-3 left-3 right-3",
         // Safe area padding
         "pb-[env(safe-area-inset-bottom)]"
       )}
+      style={{ zIndex: 'var(--z-fixed)' }}
     >
       {/* CSS-based glass effect (compatible with position: fixed) */}
       <div
