@@ -89,10 +89,14 @@ export async function GET(request: NextRequest) {
 
     const isProfilePaused = profileData?.profile_hidden || false;
 
-    // Get user's saved filters
+    // Get user's saved filters - select only fields used by userFiltersToDiscoveryFilters
     const { data: userFilters } = await supabase
       .from("user_filters")
-      .select("*")
+      .select(`
+        min_age, max_age, min_height, max_height, max_distance_miles,
+        body_types, ethnicities, religions, education_levels, zodiac_signs,
+        smoking, drinking, marijuana, has_kids, wants_kids
+      `)
       .eq("user_id", user.id)
       .single();
 

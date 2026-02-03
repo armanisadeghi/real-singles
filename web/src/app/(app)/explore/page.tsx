@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -10,9 +10,7 @@ import {
   Clock,
   ChevronRight,
   Sparkles,
-  Loader2,
 } from "lucide-react";
-import { EmptyState } from "@/components/ui";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -45,14 +43,6 @@ interface ApiSpeedDating {
   Duration: number | null;
   MaxParticipants: number | null;
   Status: string | null;
-}
-
-interface ExploreData {
-  success: boolean;
-  event: ApiEvent[];
-  Virtual: ApiSpeedDating[];
-  baseImageUrl: string;
-  msg: string;
 }
 
 // ============================================================================
@@ -319,123 +309,153 @@ function EmptySection({
 }
 
 // ============================================================================
+// SECTION LOADING SKELETON
+// ============================================================================
+
+function SectionSkeleton() {
+  return (
+    <div className="flex gap-4 overflow-hidden">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="flex-shrink-0 w-[280px] sm:w-[300px] bg-card rounded-2xl border border-border/40 overflow-hidden animate-pulse"
+        >
+          <div className="aspect-[16/10] bg-gray-100 dark:bg-neutral-800" />
+          <div className="p-4 space-y-3">
+            <div className="h-5 w-3/4 bg-gray-100 dark:bg-neutral-800 rounded" />
+            <div className="h-4 w-full bg-gray-100 dark:bg-neutral-800 rounded" />
+            <div className="flex gap-3">
+              <div className="h-3 w-20 bg-gray-100 dark:bg-neutral-800 rounded" />
+              <div className="h-3 w-16 bg-gray-100 dark:bg-neutral-800 rounded" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ============================================================================
+// EVENTS SECTION WITH INDEPENDENT LOADING
+// ============================================================================
+
+function EventsSection() {
+  const [events, setEvents] = useState<ApiEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const res = await fetch("/api/events?limit=10&status=upcoming");
+        if (!res.ok) throw new Error("Failed to fetch events");
+        const data = await res.json();
+        setEvents(data.data || []);
+      } catch (err) {
+        console.error("Error fetching events:", err);
+        setError("Unable to load events");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchEvents();
+  }, []);
+
+  return (
+    <section>
+      <SectionHeader title="Events" href="/events" icon={Calendar} />
+
+      {isLoading ? (
+        <SectionSkeleton />
+      ) : error ? (
+        <EmptySection title={error} icon={Calendar} />
+      ) : events.length > 0 ? (
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+          {events.map((event) => (
+            <EventCard key={event.EventID} event={event} />
+          ))}
+        </div>
+      ) : (
+        <EmptySection title="No upcoming events" icon={Calendar} />
+      )}
+    </section>
+  );
+}
+
+// ============================================================================
+// SPEED DATING SECTION WITH INDEPENDENT LOADING
+// ============================================================================
+
+function SpeedDatingSection() {
+  const [sessions, setSessions] = useState<ApiSpeedDating[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchSpeedDating() {
+      try {
+        const res = await fetch("/api/speed-dating?limit=10&status=scheduled");
+        if (!res.ok) throw new Error("Failed to fetch speed dating");
+        const json = await res.json();
+        // Map API response to expected format
+        const data = (json.data || []).map((s: Record<string, unknown>) => ({
+          ID: s.ID || s.SessionID,
+          Title: s.Title,
+          Description: s.Description || "",
+          Image: s.Image || s.ImageURL || "",
+          ScheduledDate: s.ScheduledDateTime ? String(s.ScheduledDateTime).split("T")[0] : "",
+          ScheduledTime: s.ScheduledDateTime 
+            ? new Date(String(s.ScheduledDateTime)).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+            : "",
+          Duration: s.DurationMinutes,
+          MaxParticipants: s.MaxParticipants,
+          Status: s.Status,
+        }));
+        setSessions(data);
+      } catch (err) {
+        console.error("Error fetching speed dating:", err);
+        setError("Unable to load sessions");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchSpeedDating();
+  }, []);
+
+  return (
+    <section>
+      <SectionHeader title="Virtual Speed Dating" href="/speed-dating" icon={Video} />
+
+      {isLoading ? (
+        <SectionSkeleton />
+      ) : error ? (
+        <EmptySection title={error} icon={Video} />
+      ) : sessions.length > 0 ? (
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+          {sessions.map((session) => (
+            <SpeedDatingCard key={session.ID} session={session} />
+          ))}
+        </div>
+      ) : (
+        <EmptySection title="No sessions scheduled" icon={Video} />
+      )}
+    </section>
+  );
+}
+
+// ============================================================================
 // MAIN PAGE COMPONENT
 // ============================================================================
 
 export default function ExplorePage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [exploreData, setExploreData] = useState<ExploreData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useCallback(async () => {
-    try {
-      // Use lightweight /api/explore endpoint (not /api/discover which fetches heavy profile data)
-      const exploreRes = await fetch("/api/explore");
-      if (!exploreRes.ok) {
-        if (exploreRes.status === 401) {
-          router.push("/login");
-          return;
-        }
-        throw new Error("Failed to fetch explore data");
-      }
-      const data = await exploreRes.json();
-      setExploreData(data);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Unable to load explore data");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-[40vh] sm:min-h-[50vh] flex items-center justify-center">
-        <Loader2 className="w-6 h-6 sm:w-7 sm:h-7 text-pink-500 animate-spin" />
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="min-h-[40vh] sm:min-h-[50vh] flex items-center justify-center p-4">
-        <div className="text-center">
-          <EmptyState
-            title="Unable to load content"
-            description="Please try again."
-          />
-          <button
-            onClick={() => {
-              setIsLoading(true);
-              fetchData();
-            }}
-            className="mt-3 px-5 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const events = exploreData?.event || [];
-  const speedDating = exploreData?.Virtual || [];
-
   return (
     <div className="min-h-dvh bg-background">
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 space-y-8">
-        {/* Events Section */}
-        <section>
-          <SectionHeader
-            title="Events"
-            href="/events"
-            icon={Calendar}
-          />
+        {/* Events Section - Loads independently */}
+        <EventsSection />
 
-          {events.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
-              {events.slice(0, 10).map((event) => (
-                <EventCard key={event.EventID} event={event} />
-              ))}
-            </div>
-          ) : (
-            <EmptySection
-              title="No upcoming events"
-              icon={Calendar}
-            />
-          )}
-        </section>
-
-        {/* Virtual Speed Dating Section */}
-        <section>
-          <SectionHeader
-            title="Virtual Speed Dating"
-            href="/speed-dating"
-            icon={Video}
-          />
-
-          {speedDating.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
-              {speedDating.slice(0, 10).map((session) => (
-                <SpeedDatingCard key={session.ID} session={session} />
-              ))}
-            </div>
-          ) : (
-            <EmptySection
-              title="No sessions scheduled"
-              icon={Video}
-            />
-          )}
-        </section>
+        {/* Speed Dating Section - Loads independently */}
+        <SpeedDatingSection />
 
         {/* Videos Section - Coming Soon */}
         <section>
@@ -445,7 +465,6 @@ export default function ExplorePage() {
             </div>
             <h2 className="text-lg font-semibold text-foreground">Videos</h2>
           </div>
-
           <ComingSoonSection />
         </section>
       </div>

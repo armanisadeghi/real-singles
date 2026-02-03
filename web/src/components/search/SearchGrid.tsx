@@ -141,32 +141,13 @@ export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchG
         console.error("Failed to save filters");
       }
 
-      // Fetch filtered profiles from the discover API
-      const discoverRes = await fetch("/api/discover");
+      // Fetch filtered profiles from the lightweight profiles API (not /api/discover which fetches events, videos, etc.)
+      const discoverRes = await fetch("/api/discover/profiles?limit=40");
       const data = await discoverRes.json();
 
-      if (data.success) {
-        // Transform the API response to match our Profile interface
-        const transformedProfiles: Profile[] = (data.TopMatch || []).map((p: any) => ({
-          id: p.ID || p.id,
-          user_id: p.ID || p.id,
-          first_name: p.FirstName || p.DisplayName?.split(' ')[0] || '',
-          last_name: p.LastName || '',
-          date_of_birth: p.DOB || null,
-          city: p.City || null,
-          state: p.State || null,
-          occupation: null,
-          bio: p.About || null,
-          profile_image_url: p.Image || p.livePicture || null,
-          is_verified: p.is_verified || false,
-          height_inches: p.Height ? parseInt(p.Height) : null,
-          interests: p.Interest ? p.Interest.split(', ') : null,
-          user: {
-            display_name: p.DisplayName || null,
-          },
-        }));
-        
-        setProfiles(transformedProfiles);
+      if (data.profiles) {
+        // The profiles API returns data in the correct format already
+        setProfiles(data.profiles);
         setFiltersApplied(true);
       }
     } catch (error) {

@@ -65,7 +65,7 @@ export async function GET() {
     // Get gallery images - select only needed fields
     supabase
       .from("user_gallery")
-      .select("id, media_url, media_type, thumbnail_url, is_primary, display_order, caption")
+      .select("id, media_url, media_type, thumbnail_url, is_primary, display_order")
       .eq("user_id", user.id)
       .order("display_order", { ascending: true }),
   ]);

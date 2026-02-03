@@ -118,10 +118,14 @@ export async function GET() {
 
   const userProfile = profileResult.profile;
 
-  // Get user's saved filters
+  // Get user's saved filters - select only fields used by userFiltersToDiscoveryFilters
   const { data: userFilters } = await supabase
     .from("user_filters")
-    .select("*")
+    .select(`
+      min_age, max_age, min_height, max_height, max_distance_miles,
+      body_types, ethnicities, religions, education_levels, zodiac_signs,
+      smoking, drinking, marijuana, has_kids, wants_kids
+    `)
     .eq("user_id", user.id)
     .single();
 
@@ -298,7 +302,7 @@ export async function GET() {
   
   const { data: events } = await supabase
     .from("events")
-    .select("*")
+    .select("id, title, description, image_url, address, city, state, latitude, longitude, start_datetime, end_datetime, created_by, created_at")
     .eq("status", "upcoming")
     .eq("is_public", true)
     .gte("start_datetime", startOfToday.toISOString())
@@ -339,7 +343,7 @@ export async function GET() {
 
   const { data: virtualDating } = await supabase
     .from("virtual_speed_dating")
-    .select("*")
+    .select("id, title, description, image_url, scheduled_datetime, duration_minutes, max_participants, status")
     .eq("status", "scheduled")
     .gte("scheduled_datetime", new Date().toISOString())
     .order("scheduled_datetime", { ascending: true })

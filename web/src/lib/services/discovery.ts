@@ -804,9 +804,32 @@ export async function getLikesReceived(
 // =============================================================================
 
 /**
- * Convert DbUserFilters to DiscoveryFilters
+ * Input type for userFiltersToDiscoveryFilters - only the fields actually used
+ * This allows API routes to select only the necessary columns
  */
-export function userFiltersToDiscoveryFilters(userFilters: DbUserFilters | null): DiscoveryFilters {
+export type UserFiltersInput = Pick<
+  DbUserFilters,
+  | "min_age"
+  | "max_age"
+  | "min_height"
+  | "max_height"
+  | "max_distance_miles"
+  | "body_types"
+  | "ethnicities"
+  | "religions"
+  | "education_levels"
+  | "zodiac_signs"
+  | "smoking"
+  | "drinking"
+  | "marijuana"
+  | "has_kids"
+  | "wants_kids"
+>;
+
+/**
+ * Convert user filter settings to DiscoveryFilters
+ */
+export function userFiltersToDiscoveryFilters(userFilters: UserFiltersInput | null): DiscoveryFilters {
   if (!userFilters) return {};
 
   return {

@@ -34,14 +34,23 @@ interface Match {
   user_id: string;
   display_name?: string | null;
   first_name?: string | null;
+  last_name?: string | null;
   age?: number | null;
+  gender?: string | null;
+  city?: string | null;
+  state?: string | null;
+  occupation?: string | null;
+  bio?: string | null;
   is_verified: boolean;
   profile_image_url?: string | null;
+  gallery?: { media_url: string }[];
   last_active_at?: string | null;
+  matched_at?: string | null;
   conversation_id?: string | null;
   voice_prompt_url?: string | null;
   video_intro_url?: string | null;
-  matched_at?: string | null;
+  voice_prompt_duration_seconds?: number | null;
+  video_intro_duration_seconds?: number | null;
 }
 
 interface Conversation {
@@ -75,10 +84,18 @@ interface Like {
   display_name?: string | null;
   first_name?: string | null;
   age?: number | null;
+  gender?: string | null;
+  city?: string | null;
+  state?: string | null;
+  occupation?: string | null;
+  bio?: string | null;
   is_verified: boolean;
   profile_image_url?: string | null;
+  last_active_at?: string | null;
   voice_prompt_url?: string | null;
   video_intro_url?: string | null;
+  voice_prompt_duration_seconds?: number | null;
+  video_intro_duration_seconds?: number | null;
 }
 
 interface UserProfile {
