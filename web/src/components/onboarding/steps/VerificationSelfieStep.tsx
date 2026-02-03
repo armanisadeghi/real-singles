@@ -144,6 +144,7 @@ export function VerificationSelfieStep({
 
       setState("done");
       setExistingSelfieUrl(previewUrl);
+      setImageLoaded(true); // Data URL loads instantly
       onSelfieChange();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save selfie");
@@ -314,23 +315,39 @@ export function VerificationSelfieStep({
       {/* State: Done - Show existing selfie */}
       {state === "done" && (
         <div className="flex flex-col items-center gap-4">
-          <div className="relative w-64 h-64 rounded-full overflow-hidden bg-gray-100 dark:bg-neutral-800">
-            {existingSelfieUrl ? (
-              <img
-                src={existingSelfieUrl}
-                alt="Verification selfie"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <ShieldCheck className="w-16 h-16 text-green-500" />
+          {/* Wrapper for image + badge (badge positioned outside overflow) */}
+          <div className="relative">
+            {/* Circular image container with overflow hidden */}
+            <div className="w-64 h-64 rounded-full overflow-hidden bg-gray-100 dark:bg-neutral-800">
+              {existingSelfieUrl ? (
+                <img
+                  src={existingSelfieUrl}
+                  alt="Verification selfie"
+                  className={cn(
+                    "w-full h-full object-cover transition-opacity duration-300",
+                    imageLoaded ? "opacity-100" : "opacity-0"
+                  )}
+                  onLoad={() => setImageLoaded(true)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <ShieldCheck className="w-16 h-16 text-green-500" />
+                </div>
+              )}
+              {/* Loading placeholder while image loads */}
+              {existingSelfieUrl && !imageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+            </div>
+            {/* Verified badge - positioned outside overflow container, only shown when loaded */}
+            {(imageLoaded || !existingSelfieUrl) && (
+              <div className="absolute bottom-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-500 text-white text-xs font-medium shadow-lg">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Verified
               </div>
             )}
-            {/* Verified badge */}
-            <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-green-500 text-white text-xs font-medium">
-              <ShieldCheck className="w-3 h-3" />
-              Verified
-            </div>
           </div>
           <p className="text-center text-green-600 dark:text-green-400 text-sm font-medium">
             Your selfie has been saved!
