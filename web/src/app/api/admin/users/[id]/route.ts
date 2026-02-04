@@ -69,6 +69,13 @@ export async function GET(
     .eq("user_id", id)
     .order("display_order");
 
+  // Check if user is a matchmaker
+  const { data: matchmaker } = await supabase
+    .from("matchmakers")
+    .select("id, status, years_experience, specialties, approved_at")
+    .eq("user_id", id)
+    .single();
+
   // Resolve storage URLs for profile image
   const resolvedProfileImageUrl = profile?.profile_image_url 
     ? await resolveStorageUrl(supabase, profile.profile_image_url)
@@ -96,6 +103,7 @@ export async function GET(
 
   return NextResponse.json({ 
     user, 
+    matchmaker: matchmaker || null,
     profile: profile ? { 
       ...profile, 
       profile_image_url: resolvedProfileImageUrl,

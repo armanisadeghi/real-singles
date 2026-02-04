@@ -26,6 +26,7 @@ import {
   Play,
   Sparkles,
   ChevronDown,
+  Wand2,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/LoadingSkeleton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -93,6 +94,14 @@ interface UserDetail {
   referral_code?: string | null;
   created_at: string;
   last_active_at?: string | null;
+}
+
+interface MatchmakerDetail {
+  id: string;
+  status: "pending" | "approved" | "rejected" | "suspended";
+  years_experience: number;
+  specialties: string[];
+  approved_at?: string | null;
 }
 
 interface ProfileDetail {
@@ -355,6 +364,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
   // Core data state
   const [user, setUser] = useState<UserDetail | null>(null);
   const [profile, setProfile] = useState<ProfileDetail | null>(null);
+  const [matchmaker, setMatchmaker] = useState<MatchmakerDetail | null>(null);
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
   const [interactions, setInteractions] = useState<InteractionsData | null>(null);
   
@@ -444,6 +454,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         const data = await res.json();
         setUser(data.user);
         setProfile(data.profile);
+        setMatchmaker(data.matchmaker);
         setGallery(data.gallery || []);
         
         if (data.profile) {
@@ -858,6 +869,64 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         />
       )}
 
+      {/* Matchmaker Info */}
+      {matchmaker && (
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-2xl border border-purple-200/50 dark:border-purple-800/50 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+                <Wand2 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Professional Matchmaker
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  {matchmaker.years_experience} years experience
+                </p>
+              </div>
+            </div>
+            <span
+              className={cn(
+                "px-3 py-1 rounded-full text-xs font-medium",
+                matchmaker.status === "approved" && "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300",
+                matchmaker.status === "pending" && "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300",
+                matchmaker.status === "suspended" && "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300",
+                matchmaker.status === "rejected" && "bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300"
+              )}
+            >
+              {matchmaker.status}
+            </span>
+          </div>
+
+          {matchmaker.specialties && matchmaker.specialties.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Specialties:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {matchmaker.specialties.map((spec) => (
+                  <span
+                    key={spec}
+                    className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full"
+                  >
+                    {spec.replace(/_/g, " ")}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <Link
+            href={`/admin/matchmakers/${matchmaker.id}`}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-semibold rounded-lg shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30 transition-all"
+          >
+            View Matchmaker Profile
+            <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
+          </Link>
+        </div>
+      )}
+
       {/* Tab Navigation */}
       <div className="bg-white dark:bg-neutral-950 rounded-2xl border border-slate-200/80 dark:border-neutral-700 shadow-sm overflow-hidden">
         <div className="border-b border-slate-200 dark:border-neutral-700 overflow-x-auto">
@@ -1001,6 +1070,23 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                         </div>
                       )}
                     </div>
+                    {matchmaker && (
+                      <Link
+                        href={`/admin/matchmakers/${matchmaker.id}`}
+                        className={cn(
+                          "flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors",
+                          matchmaker.status === "approved" && "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400",
+                          matchmaker.status === "pending" && "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400",
+                          matchmaker.status === "suspended" && "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
+                          matchmaker.status === "rejected" && "bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400",
+                          "hover:opacity-80"
+                        )}
+                        title={`Matchmaker (${matchmaker.status}) - Click to view`}
+                      >
+                        <Wand2 className="w-3 h-3" />
+                        Matchmaker
+                      </Link>
+                    )}
                   </div>
 
                   <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">

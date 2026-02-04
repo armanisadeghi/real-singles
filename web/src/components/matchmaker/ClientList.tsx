@@ -22,11 +22,49 @@ export function ClientList() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("active");
+  const [matchmakerId, setMatchmakerId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch clients - TODO: Implement with matchmaker ID
-    setLoading(false);
-  }, [statusFilter]);
+    // Get current matchmaker ID
+    fetch("/api/users/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.user) {
+          // Fetch matchmaker record
+          fetch("/api/matchmakers?status=approved")
+            .then((res) => res.json())
+            .then((matchmakersData) => {
+              if (matchmakersData.success) {
+                const myMatchmaker = matchmakersData.data.find(
+                  (m: any) => m.user_id === data.user.id
+                );
+                if (myMatchmaker) {
+                  setMatchmakerId(myMatchmaker.id);
+                }
+              }
+            });
+        }
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!matchmakerId) return;
+
+    setLoading(true);
+    fetch(`/api/matchmakers/${matchmakerId}/clients?status=${statusFilter}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setClients(data.data || []);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to fetch clients:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [matchmakerId, statusFilter]);
 
   const statusOptions = [
     { value: "active", label: "Active" },
