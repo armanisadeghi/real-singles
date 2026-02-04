@@ -130,7 +130,7 @@ export function ProductCard({
             )}
 
             {/* Dollar price */}
-            {hasDollarPrice && (
+            {hasDollarPrice && product.dollar_price && (
               <div className="flex items-center gap-0.5">
                 <DollarSign className="w-4 h-4 text-green-500" />
                 <span className="font-bold text-gray-900 dark:text-gray-100">
@@ -164,7 +164,7 @@ export function ProductCard({
             </button>
           )}
 
-          {hasDollarPrice && onBuy && (
+          {hasDollarPrice && onBuy && product.dollar_price && (
             <button
               onClick={() => onBuy(product.id)}
               disabled={loading || !isActive || !inStock}

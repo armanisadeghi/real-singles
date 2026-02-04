@@ -25,7 +25,7 @@ if (!stripeSecretKey) {
  */
 export const stripe = stripeSecretKey
   ? new Stripe(stripeSecretKey, {
-      apiVersion: "2025-01-27.acacia",
+      apiVersion: "2026-01-28.clover",
       typescript: true,
     })
   : null;

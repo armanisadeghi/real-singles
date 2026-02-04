@@ -73,19 +73,23 @@ export async function GET(request: NextRequest) {
       .eq("stripe_checkout_session_id", sessionId)
       .single();
 
-    // Get associated order
-    const { data: order } = await supabase
-      .from("orders")
-      .select(`
-        id, 
-        status,
-        product_id,
-        purchasable_item_id,
-        products:product_id (name),
-        purchasable_items:purchasable_item_id (name)
-      `)
-      .eq("payment_id", payment?.id)
-      .single();
+    // Get associated order (only if payment exists)
+    let order = null;
+    if (payment?.id) {
+      const { data: orderData } = await supabase
+        .from("orders")
+        .select(`
+          id, 
+          status,
+          product_id,
+          purchasable_item_id,
+          products:product_id (name),
+          purchasable_items:purchasable_item_id (name)
+        `)
+        .eq("payment_id", payment.id)
+        .single();
+      order = orderData;
+    }
 
     // Type assertion for the joined data
     interface OrderWithJoins {
@@ -99,10 +103,12 @@ export async function GET(request: NextRequest) {
 
     const orderData = order as OrderWithJoins | null;
 
+    const lineItemDescription = session.line_items?.data?.[0]?.description;
     const productName =
       orderData?.products?.name ||
       orderData?.purchasable_items?.name ||
-      (session.line_items?.data[0]?.description ?? "Your purchase");
+      lineItemDescription ||
+      "Your purchase";
 
     return NextResponse.json({
       success: true,

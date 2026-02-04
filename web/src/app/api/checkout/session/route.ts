@@ -451,7 +451,7 @@ async function grantPurchasableItem(
     await supabase
       .from("user_item_inventory")
       .update({
-        quantity: existing.quantity + itemQuantity,
+        quantity: (existing.quantity ?? 0) + itemQuantity,
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id);
@@ -468,16 +468,16 @@ async function grantPurchasableItem(
   // Special handling for specific item types
   if (item.item_type === "superlike_pack") {
     // Add to user's superlike balance
-    await supabase.rpc("increment_user_superlikes", {
-      p_user_id: userId,
-      p_amount: itemQuantity,
-    }).catch(() => {
-      // RPC may not exist yet, update directly
-      supabase
-        .from("users")
-        .update({ superlike_balance: supabase.rpc("coalesce", { a: "superlike_balance", b: 0 }) })
-        .eq("id", userId);
-    });
+    const { data: userData } = await supabase
+      .from("users")
+      .select("superlike_balance")
+      .eq("id", userId)
+      .single();
+
+    await supabase
+      .from("users")
+      .update({ superlike_balance: (userData?.superlike_balance ?? 0) + itemQuantity })
+      .eq("id", userId);
   } else if (item.item_type === "boost" && item.duration_hours) {
     // Set boost expiration
     const boostExpiry = new Date();
@@ -494,7 +494,7 @@ async function grantPurchasableItem(
       .eq("id", userId)
       .single();
 
-    const currentBalance = userData?.points_balance || 0;
+    const currentBalance = userData?.points_balance ?? 0;
     const newBalance = currentBalance + itemQuantity;
 
     await supabase

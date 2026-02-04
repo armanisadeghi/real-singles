@@ -12,6 +12,10 @@ import {
   Wand2,
   Heart,
   Star,
+  Flower2,
+  Candy,
+  Wine,
+  Gem,
 } from "lucide-react";
 import { useEvents, useSpeedDating } from "@/hooks/queries";
 
@@ -539,7 +543,7 @@ function RewardsHeroBanner() {
           </div>
           
           <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
-            Impress Your Match ✨
+            Impress Your Match
           </h2>
           
           <p className="text-muted-foreground mb-4 max-w-md">
@@ -551,16 +555,16 @@ function RewardsHeroBanner() {
           <div className="flex items-center gap-3 mb-4">
             <div className="flex -space-x-2">
               <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center border-2 border-white dark:border-neutral-800">
-                <span className="text-lg">🌹</span>
+                <Flower2 className="w-5 h-5 text-red-500" />
               </div>
               <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center border-2 border-white dark:border-neutral-800">
-                <span className="text-lg">🍫</span>
+                <Candy className="w-5 h-5 text-amber-600" />
               </div>
               <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center border-2 border-white dark:border-neutral-800">
-                <span className="text-lg">🥂</span>
+                <Wine className="w-5 h-5 text-pink-500" />
               </div>
               <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center border-2 border-white dark:border-neutral-800">
-                <span className="text-lg">💎</span>
+                <Gem className="w-5 h-5 text-purple-500" />
               </div>
             </div>
             <span className="text-sm text-muted-foreground">16+ romantic rewards</span>

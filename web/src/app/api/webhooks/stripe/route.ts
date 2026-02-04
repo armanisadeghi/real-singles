@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     await supabase.from("stripe_webhook_events").insert({
       stripe_event_id: event.id,
       event_type: event.type,
-      payload: event.data.object as unknown as Record<string, unknown>,
+      payload: JSON.parse(JSON.stringify(event.data.object)),
     });
 
     // Handle the event
@@ -178,7 +178,7 @@ async function handleCheckoutCompleted(
       .single();
 
     if (userData) {
-      const newBalance = Math.max(0, userData.points_balance - pointsToDeduct);
+      const newBalance = Math.max(0, (userData.points_balance ?? 0) - pointsToDeduct);
       await supabase
         .from("users")
         .update({ points_balance: newBalance })
@@ -278,19 +278,30 @@ async function handleSubscriptionChange(
     .or(`stripe_price_id_monthly.eq.${priceId},stripe_price_id_yearly.eq.${priceId}`)
     .single();
 
-  // Upsert subscription record
+  // Get subscription period timestamps
+  const subscriptionData = subscription as unknown as {
+    current_period_start: number;
+    current_period_end: number;
+  };
+
+  // Upsert subscription record - plan_id is required, skip if no plan found
+  if (!plan?.id) {
+    console.error("No plan found for price:", priceId);
+    return;
+  }
+
   await supabase
     .from("user_subscriptions")
     .upsert(
       {
         user_id: user.id,
-        plan_id: plan?.id || null,
+        plan_id: plan.id,
         stripe_subscription_id: subscription.id,
         stripe_price_id: priceId,
         status: subscription.status,
         billing_interval: subscription.items.data[0]?.price.recurring?.interval || "month",
-        current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+        current_period_start: new Date(subscriptionData.current_period_start * 1000).toISOString(),
+        current_period_end: new Date(subscriptionData.current_period_end * 1000).toISOString(),
         cancel_at_period_end: subscription.cancel_at_period_end,
         canceled_at: subscription.canceled_at
           ? new Date(subscription.canceled_at * 1000).toISOString()
@@ -313,9 +324,9 @@ async function handleSubscriptionChange(
   await supabase
     .from("users")
     .update({
-      subscription_tier: plan?.name.toLowerCase() || "free",
-      subscription_plan_id: plan?.id || null,
-      subscription_expires_at: new Date(subscription.current_period_end * 1000).toISOString(),
+      subscription_tier: plan.name.toLowerCase(),
+      subscription_plan_id: plan.id,
+      subscription_expires_at: new Date(subscriptionData.current_period_end * 1000).toISOString(),
     })
     .eq("id", user.id);
 
@@ -391,7 +402,15 @@ async function handleInvoicePaid(
 ) {
   console.log("Processing paid invoice:", invoice.id);
 
-  if (!invoice.subscription) return;
+  // Cast to access properties that may vary across API versions
+  const invoiceData = invoice as unknown as {
+    subscription?: string | null;
+    payment_intent?: string | null;
+    period_start?: number;
+    period_end?: number;
+  };
+
+  if (!invoiceData.subscription) return;
 
   // Create payment record
   const { data: user } = await supabase
@@ -404,17 +423,17 @@ async function handleInvoicePaid(
     await supabase.from("payments").insert({
       user_id: user.id,
       stripe_invoice_id: invoice.id,
-      stripe_payment_intent_id: invoice.payment_intent as string,
+      stripe_payment_intent_id: invoiceData.payment_intent || null,
       amount_cents: invoice.amount_paid,
       currency: invoice.currency,
       status: "succeeded",
       payment_type: "subscription",
       description: `Subscription payment: ${invoice.lines.data[0]?.description || ""}`,
-      metadata: {
-        subscription_id: invoice.subscription,
-        period_start: invoice.period_start,
-        period_end: invoice.period_end,
-      },
+      metadata: JSON.parse(JSON.stringify({
+        subscription_id: invoiceData.subscription,
+        period_start: invoiceData.period_start,
+        period_end: invoiceData.period_end,
+      })),
     });
   }
 }
@@ -427,6 +446,12 @@ async function handleInvoicePaymentFailed(
   invoice: Stripe.Invoice
 ) {
   console.log("Processing failed invoice:", invoice.id);
+
+  // Cast to access properties that may vary across API versions
+  const invoiceData = invoice as unknown as {
+    subscription?: string | null;
+    attempt_count?: number;
+  };
 
   const { data: user } = await supabase
     .from("users")
@@ -445,21 +470,21 @@ async function handleInvoicePaymentFailed(
       payment_type: "subscription",
       description: `Failed subscription payment: ${invoice.lines.data[0]?.description || ""}`,
       error_message: "Payment failed",
-      metadata: {
-        subscription_id: invoice.subscription,
-        attempt_count: invoice.attempt_count,
-      },
+      metadata: JSON.parse(JSON.stringify({
+        subscription_id: invoiceData.subscription,
+        attempt_count: invoiceData.attempt_count,
+      })),
     });
 
     // Update subscription status
-    if (invoice.subscription) {
+    if (invoiceData.subscription) {
       await supabase
         .from("user_subscriptions")
         .update({
           status: "past_due",
           updated_at: new Date().toISOString(),
         })
-        .eq("stripe_subscription_id", invoice.subscription as string);
+        .eq("stripe_subscription_id", invoiceData.subscription);
     }
   }
 }
@@ -497,7 +522,7 @@ async function grantPurchasableItem(
     await supabase
       .from("user_item_inventory")
       .update({
-        quantity: existing.quantity + itemQuantity,
+        quantity: (existing.quantity ?? 0) + itemQuantity,
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id);
@@ -521,7 +546,7 @@ async function grantPurchasableItem(
 
     await supabase
       .from("users")
-      .update({ superlike_balance: (userData?.superlike_balance || 0) + itemQuantity })
+      .update({ superlike_balance: (userData?.superlike_balance ?? 0) + itemQuantity })
       .eq("id", userId);
   } else if (item.item_type === "boost" && item.duration_hours) {
     const boostExpiry = new Date();
@@ -537,7 +562,7 @@ async function grantPurchasableItem(
       .eq("id", userId)
       .single();
 
-    const currentBalance = userData?.points_balance || 0;
+    const currentBalance = userData?.points_balance ?? 0;
     const newBalance = currentBalance + itemQuantity;
 
     await supabase
