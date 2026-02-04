@@ -99,6 +99,7 @@ export default function DiscoveryProfileView() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showReportSheet, setShowReportSheet] = useState(false);
+  const [existingAction, setExistingAction] = useState<'like' | 'pass' | 'super_like' | null>(null);
   
   // Animation for action buttons
   const passScale = useSharedValue(1);
@@ -125,6 +126,8 @@ export default function DiscoveryProfileView() {
         if (res?.success) {
           setProfile(res.data);
           setGallery(res.data?.gallery || []);
+          // Set existing action if user has already acted on this profile
+          setExistingAction(res.data?.current_user_action || null);
         } else {
           Toast.show({
             type: "error",
@@ -158,6 +161,17 @@ export default function DiscoveryProfileView() {
   // Handle action with haptic feedback
   const handleAction = useCallback(async (action: "like" | "pass" | "super_like") => {
     if (!profile?.ID && !profile?.id) return;
+    
+    // Prevent action if user has already taken this action
+    if (existingAction === action) {
+      const actionVerb = action === "like" ? "liked" : action === "pass" ? "passed on" : "super liked";
+      Toast.show({
+        type: "info",
+        text1: `You've already ${actionVerb} this profile`,
+        position: "top",
+      });
+      return;
+    }
     
     const userId = (profile.ID || profile.id) as string;
     setActionLoading(action);
@@ -210,6 +224,17 @@ export default function DiscoveryProfileView() {
         // Navigate back after short delay
         setTimeout(() => router.back(), 800);
       } else {
+        // Check for duplicate action error - just navigate back to refresh
+        if (res?.should_refresh) {
+          Toast.show({
+            type: "info",
+            text1: "Refreshing...",
+            position: "top",
+            visibilityTime: 1000,
+          });
+          router.back();
+          return;
+        }
         Toast.show({
           type: "error",
           text1: res?.msg || "Action failed",
@@ -225,7 +250,7 @@ export default function DiscoveryProfileView() {
     } finally {
       setActionLoading(null);
     }
-  }, [profile, router, likeScale, passScale, superLikeScale]);
+  }, [profile, existingAction, router, likeScale, passScale, superLikeScale]);
   
   // Handle report
   const handleReport = useCallback(async (reason: string) => {
@@ -352,50 +377,62 @@ export default function DiscoveryProfileView() {
           },
         ]}
       >
-        {/* Pass Button */}
-        <Animated.View style={passAnimatedStyle}>
-          <Pressable
-            onPress={() => handleAction("pass")}
-            disabled={actionLoading !== null}
-            style={[styles.actionButton, styles.passButton, { backgroundColor: viewColors.background }]}
-          >
-            {actionLoading === "pass" ? (
-              <ActivityIndicator size="small" color="#EF4444" />
-            ) : (
-              <PlatformIcon name="close" size={24} color="#EF4444" />
-            )}
-          </Pressable>
-        </Animated.View>
+        {/* Pass Button - hide if already passed */}
+        {existingAction !== "pass" && (
+          <Animated.View style={passAnimatedStyle}>
+            <Pressable
+              onPress={() => handleAction("pass")}
+              disabled={actionLoading !== null}
+              style={[styles.actionButton, styles.passButton, { backgroundColor: viewColors.background }]}
+            >
+              {actionLoading === "pass" ? (
+                <ActivityIndicator size="small" color="#EF4444" />
+              ) : (
+                <PlatformIcon name="close" size={24} color="#EF4444" />
+              )}
+            </Pressable>
+          </Animated.View>
+        )}
         
-        {/* Super Like Button */}
-        <Animated.View style={superLikeAnimatedStyle}>
-          <Pressable
-            onPress={() => handleAction("super_like")}
-            disabled={actionLoading !== null}
-            style={[styles.actionButton, styles.superLikeButton, { backgroundColor: viewColors.background }]}
-          >
-            {actionLoading === "super_like" ? (
-              <ActivityIndicator size="small" color="#3B82F6" />
-            ) : (
-              <PlatformIcon name="star" size={18} color="#3B82F6" />
-            )}
-          </Pressable>
-        </Animated.View>
+        {/* Super Like Button - hide if already super liked */}
+        {existingAction !== "super_like" && (
+          <Animated.View style={superLikeAnimatedStyle}>
+            <Pressable
+              onPress={() => handleAction("super_like")}
+              disabled={actionLoading !== null}
+              style={[styles.actionButton, styles.superLikeButton, { backgroundColor: viewColors.background }]}
+            >
+              {actionLoading === "super_like" ? (
+                <ActivityIndicator size="small" color="#3B82F6" />
+              ) : (
+                <PlatformIcon name="star" size={18} color="#3B82F6" />
+              )}
+            </Pressable>
+          </Animated.View>
+        )}
         
-        {/* Like Button */}
-        <Animated.View style={likeAnimatedStyle}>
-          <Pressable
-            onPress={() => handleAction("like")}
-            disabled={actionLoading !== null}
-            style={[styles.actionButton, styles.likeButton]}
-          >
-            {actionLoading === "like" ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <PlatformIcon name="favorite" size={24} color="white" />
-            )}
-          </Pressable>
-        </Animated.View>
+        {/* Like Button - hide if already liked, show indicator instead */}
+        {existingAction !== "like" && existingAction !== "super_like" ? (
+          <Animated.View style={likeAnimatedStyle}>
+            <Pressable
+              onPress={() => handleAction("like")}
+              disabled={actionLoading !== null}
+              style={[styles.actionButton, styles.likeButton]}
+            >
+              {actionLoading === "like" ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <PlatformIcon name="favorite" size={24} color="white" />
+              )}
+            </Pressable>
+          </Animated.View>
+        ) : (
+          /* Already Liked indicator */
+          <View style={styles.alreadyLikedIndicator}>
+            <PlatformIcon name="favorite" size={20} color="#22C55E" />
+            <Text style={styles.alreadyLikedText}>Liked</Text>
+          </View>
+        )}
       </Animated.View>
       
       {/* Report Sheet (Simple modal for now) */}
@@ -592,5 +629,19 @@ const styles = StyleSheet.create({
   reportCancelText: {
     ...TYPOGRAPHY.bodySemibold,
     // color applied inline with viewColors.secondaryText
+  },
+  alreadyLikedIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: "rgba(34, 197, 94, 0.15)", // Green tint
+  },
+  alreadyLikedText: {
+    ...TYPOGRAPHY.caption1,
+    color: "#22C55E",
+    fontWeight: "600",
   },
 });

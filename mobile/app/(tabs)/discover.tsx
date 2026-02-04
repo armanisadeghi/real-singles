@@ -11,7 +11,7 @@ import BottomSheet, {
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
 import * as Haptics from 'expo-haptics';
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -166,6 +166,17 @@ export default function Discover() {
     fetchDiscoverProfiles();
     fetchMyProfileStatus();
   }, []);
+
+  // Refresh profiles when screen comes into focus (e.g., after returning from profile view)
+  // This ensures we don't show profiles the user has already acted on
+  useFocusEffect(
+    useCallback(() => {
+      // Only refresh if we have existing profiles (not on initial load)
+      if (discoverProfiles.length > 0) {
+        fetchDiscoverProfiles();
+      }
+    }, [discoverProfiles.length])
+  );
 
   const handleFilterPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
