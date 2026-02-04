@@ -6,6 +6,7 @@ import {
   ALLOWED_MIME_TYPES,
   getAvatarPath,
   getGalleryPath,
+  getProductImagePath,
   type StorageBucket,
 } from "@/lib/supabase/storage";
 
@@ -175,6 +176,26 @@ export async function POST(request: NextRequest) {
         }
 
         filePath = `${eventId}/${timestamp}_${file.name}`;
+        break;
+
+      case STORAGE_BUCKETS.PRODUCTS:
+        // Products bucket - admin only
+        // Verify user is admin
+        const { data: adminData } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+
+        if (adminData?.role !== "admin") {
+          return NextResponse.json(
+            { error: "Only admins can upload product images" },
+            { status: 403 }
+          );
+        }
+
+        // Use product image path helper
+        filePath = getProductImagePath(file.name);
         break;
 
       default:

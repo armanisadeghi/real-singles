@@ -104,7 +104,6 @@ export default function AdminCreateProductPage() {
         const uploadFormData = new FormData();
         uploadFormData.append("file", imageFile);
         uploadFormData.append("bucket", "products");
-        uploadFormData.append("folder", "products");
 
         const uploadRes = await fetch("/api/upload", {
           method: "POST",
@@ -115,7 +114,9 @@ export default function AdminCreateProductPage() {
           const uploadData = await uploadRes.json();
           imageUrl = uploadData.path;
         } else {
-          throw new Error("Failed to upload image");
+          const errorData = await uploadRes.json();
+          console.error("Upload failed:", errorData);
+          throw new Error(errorData.error || "Failed to upload image");
         }
       }
 

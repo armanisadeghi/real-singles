@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 // Verify the current user is an admin
 async function verifyAdmin(): Promise<{ isAdmin: boolean; userId?: string }> {
@@ -150,6 +151,16 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Resolve image URLs for display
+  const productsWithUrls = await Promise.all(
+    (products || []).map(async (product) => ({
+      ...product,
+      image_url: product.image_url
+        ? await resolveStorageUrl(supabase, product.image_url, { bucket: "products" })
+        : null,
+    }))
+  );
+
   // Get total count
   let countQuery = supabase
     .from("products")
@@ -167,7 +178,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    products: products || [],
+    products: productsWithUrls,
     total: count || 0
   });
 }

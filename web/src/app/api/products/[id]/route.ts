@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/products/[id]
@@ -26,11 +27,16 @@ export async function GET(
     );
   }
 
+  // Resolve image URL
+  const resolvedImageUrl = product.image_url
+    ? await resolveStorageUrl(supabase, product.image_url, { bucket: "products" })
+    : "";
+
   const formattedProduct = {
     ProductID: product.id,
     ProductName: product.name,
     Description: product.description || "",
-    Image: product.image_url || "",
+    Image: resolvedImageUrl,
     Points: product.points_cost.toString(),
     RetailValue: product.retail_value?.toString() || "0",
     Category: product.category || "other",

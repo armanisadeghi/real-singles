@@ -14,6 +14,7 @@ export const STORAGE_BUCKETS = {
   AVATARS: "avatars",
   GALLERY: "gallery",
   EVENTS: "events",
+  PRODUCTS: "products",
 } as const;
 
 export type StorageBucket = (typeof STORAGE_BUCKETS)[keyof typeof STORAGE_BUCKETS];
@@ -23,6 +24,7 @@ export const FILE_SIZE_LIMITS = {
   [STORAGE_BUCKETS.AVATARS]: 5 * 1024 * 1024, // 5MB
   [STORAGE_BUCKETS.GALLERY]: 50 * 1024 * 1024, // 50MB (supports video)
   [STORAGE_BUCKETS.EVENTS]: 10 * 1024 * 1024, // 10MB
+  [STORAGE_BUCKETS.PRODUCTS]: 10 * 1024 * 1024, // 10MB
 } as const;
 
 // Allowed image MIME types (shared across buckets that accept images)
@@ -66,6 +68,7 @@ export const ALLOWED_MIME_TYPES = {
     ...VOICE_PROMPT_MIME_TYPES,
   ],
   [STORAGE_BUCKETS.EVENTS]: ALLOWED_IMAGE_MIME_TYPES,
+  [STORAGE_BUCKETS.PRODUCTS]: ALLOWED_IMAGE_MIME_TYPES,
 } as const;
 
 /**
@@ -159,6 +162,15 @@ export function getVideoIntroPath(userId: string, fileExtension: string): string
 export function getVerificationSelfiePath(userId: string, fileExtension: string): string {
   const timestamp = Date.now();
   return `${userId}/verification_${timestamp}.${fileExtension}`;
+}
+
+/**
+ * Generate the storage path for a product image
+ * Format: products/{timestamp}_{filename}
+ */
+export function getProductImagePath(filename: string): string {
+  const timestamp = Date.now();
+  return `products/${timestamp}_${filename}`;
 }
 
 /**

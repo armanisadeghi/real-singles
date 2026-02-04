@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 // Cache for 5 minutes - products change occasionally
 export const revalidate = 300;
@@ -51,20 +52,24 @@ export async function GET(request: NextRequest) {
 
   const { count } = await countQuery;
 
-  // Format products for mobile app
-  const formattedProducts = (products || []).map((product) => ({
-    ProductID: product.id,
-    ProductName: product.name,
-    Description: product.description || "",
-    Image: product.image_url || "",
-    Points: product.points_cost.toString(),
-    RetailValue: product.retail_value?.toString() || "0",
-    Category: product.category || "other",
-    CategoryID: product.category || "1",
-    StockQuantity: product.stock_quantity,
-    InStock: product.stock_quantity === null || product.stock_quantity > 0,
-    CreateDate: product.created_at,
-  }));
+  // Format products for mobile app with resolved image URLs
+  const formattedProducts = await Promise.all(
+    (products || []).map(async (product) => ({
+      ProductID: product.id,
+      ProductName: product.name,
+      Description: product.description || "",
+      Image: product.image_url
+        ? await resolveStorageUrl(supabase, product.image_url, { bucket: "products" })
+        : "",
+      Points: product.points_cost.toString(),
+      RetailValue: product.retail_value?.toString() || "0",
+      Category: product.category || "other",
+      CategoryID: product.category || "1",
+      StockQuantity: product.stock_quantity,
+      InStock: product.stock_quantity === null || product.stock_quantity > 0,
+      CreateDate: product.created_at,
+    }))
+  );
 
   return NextResponse.json({
     success: true,

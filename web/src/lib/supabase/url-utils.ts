@@ -53,6 +53,14 @@ export async function resolveStorageUrl(
     return data?.publicUrl || "";
   }
   
+  // Products bucket is also public
+  if (bucket === "products") {
+    const { data } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(path);
+    return data?.publicUrl || "";
+  }
+  
   // For private buckets (gallery), use signed URLs
   const { data, error } = await supabase.storage
     .from(bucket)
