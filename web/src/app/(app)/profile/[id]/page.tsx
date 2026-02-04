@@ -183,7 +183,9 @@ export default function OtherProfilePage() {
   const handleShare = async () => {
     if (!profile) return;
 
-    const shareUrl = `${window.location.origin}/profile/${profile.ID}`;
+    // Use the public share page URL (/p/[id]) - shows limited profile for non-authenticated users
+    // and redirects authenticated users to the full profile view
+    const shareUrl = `${window.location.origin}/p/${profile.ID}`;
     const shareText = `Check out ${profile.DisplayName}'s profile on RealSingles!`;
 
     if (navigator.share) {

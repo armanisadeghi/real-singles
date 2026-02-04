@@ -129,7 +129,6 @@ export async function GET(request: NextRequest) {
         AgeMin: session.age_min,
         AgeMax: session.age_max,
         Status: session.status,
-        AgoraChannelPrefix: session.agora_channel_prefix,
         IsUserRegistered: isUserRegistered,
         CreatedAt: session.created_at,
       };

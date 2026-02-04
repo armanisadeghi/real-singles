@@ -12,6 +12,8 @@ import {
   MapPin,
   Check,
   Info,
+  Loader2,
+  Play,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/LoadingSkeleton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -77,6 +79,7 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [joining, setJoining] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -148,6 +151,19 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
     }
   };
 
+  const handleJoinSession = async () => {
+    setJoining(true);
+    try {
+      // Navigate to the video call page with the speed-dating room name
+      const roomName = `speed-dating-${id}`;
+      router.push(`/call/${encodeURIComponent(roomName)}`);
+    } catch (error) {
+      console.error("Error joining session:", error);
+      toast.error("Something went wrong. Please try again.");
+      setJoining(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -180,6 +196,7 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
   const isFull = registrationCount >= session.max_participants;
   const canRegister =
     session.status === "upcoming" && !isRegistered && !isFull;
+  const canJoin = session.status === "ongoing" && isRegistered;
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -332,7 +349,9 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
             <div>
               <p className="font-medium text-green-800">You're registered!</p>
               <p className="text-sm text-green-600">
-                We'll send you a reminder before the session starts.
+                {session.status === "ongoing" 
+                  ? "The session is live! Join now to start meeting people."
+                  : "We'll send you a reminder before the session starts."}
               </p>
             </div>
           </div>
@@ -345,6 +364,32 @@ export default function SpeedDatingDetailPage({ params }: PageProps) {
             </button>
           )}
         </div>
+      )}
+
+      {/* Join Session button - shows when session is ongoing and user is registered */}
+      {canJoin && (
+        <button
+          onClick={handleJoinSession}
+          disabled={joining}
+          className={cn(
+            "w-full py-3 rounded-xl font-semibold text-lg transition-all mb-4",
+            "bg-gradient-to-r from-green-500 to-emerald-600 text-white",
+            "hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl",
+            "active:scale-[0.98] disabled:opacity-70"
+          )}
+        >
+          {joining ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Joining...
+            </span>
+          ) : (
+            <span className="flex items-center justify-center gap-2">
+              <Play className="w-5 h-5" />
+              Join Session Now
+            </span>
+          )}
+        </button>
       )}
 
       {/* Register button */}

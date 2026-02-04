@@ -71,7 +71,6 @@ export async function GET(request: NextRequest) {
       group_name,
       group_image_url,
       created_by,
-      agora_group_id,
       created_at,
       updated_at,
       conversation_participants(
@@ -260,7 +259,6 @@ export async function GET(request: NextRequest) {
         DisplayImage: displayImage,
         GroupName: conv.group_name,
         GroupImage: conv.group_image_url ? await resolveStorageUrl(supabase, conv.group_image_url) : "",
-        AgoraGroupID: conv.agora_group_id,
         CreatedAt: conv.created_at,
         UpdatedAt: conv.updated_at,
         IsMuted: myParticipation?.is_muted || false,

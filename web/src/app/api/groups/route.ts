@@ -120,7 +120,6 @@ export async function GET(request: NextRequest) {
         MemberCount: memberCount,
         Members: membersWithUrls,
         CreatedBy: group.created_by,
-        AgoraGroupID: group.agora_group_id,
         UserRole: userRole,
         CreatedAt: group.created_at,
         UpdatedAt: group.updated_at,
@@ -237,7 +236,6 @@ export async function POST(request: Request) {
       data: {
         GroupID: group.id,
         GroupName: group.group_name,
-        AgoraGroupID: group.agora_group_id,
       },
       msg: "Group created successfully",
     });

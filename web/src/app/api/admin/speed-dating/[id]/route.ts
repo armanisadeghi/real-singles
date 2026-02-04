@@ -127,7 +127,6 @@ export async function PUT(
       "age_min",
       "age_max",
       "status",
-      "agora_channel_prefix",
     ];
 
     const updates: Record<string, unknown> = {};

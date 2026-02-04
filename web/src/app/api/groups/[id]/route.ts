@@ -108,7 +108,6 @@ export async function GET(
     MemberCount: participants.length,
     Members: membersWithUrls,
     CreatedBy: typedGroup.created_by,
-    AgoraGroupID: typedGroup.agora_group_id,
     UserRole: membership.role,
     CreatedAt: typedGroup.created_at,
     UpdatedAt: typedGroup.updated_at,

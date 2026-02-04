@@ -185,7 +185,6 @@ export async function GET(
       AgeMin: session.age_min,
       AgeMax: session.age_max,
       Status: session.status,
-      AgoraChannelPrefix: session.agora_channel_prefix,
       IsUserRegistered: isUserRegistered,
       UserRegistrationStatus: userRegistration?.status || null,
       Participants: participants,

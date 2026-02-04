@@ -93,7 +93,6 @@ export async function GET(request: NextRequest) {
         age_min: session.age_min,
         age_max: session.age_max,
         status: session.status,
-        agora_channel_prefix: session.agora_channel_prefix,
         created_at: session.created_at,
         registration_count: Array.isArray(session.speed_dating_registrations)
           ? session.speed_dating_registrations.length
@@ -165,7 +164,6 @@ export async function POST(request: NextRequest) {
         age_min: body.age_min || null,
         age_max: body.age_max || null,
         status: "scheduled",
-        agora_channel_prefix: body.agora_channel_prefix || `speed-dating-${Date.now()}`,
       })
       .select()
       .single();

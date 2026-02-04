@@ -49,7 +49,6 @@ export async function GET(
       group_name,
       group_image_url,
       created_by,
-      agora_group_id,
       created_at,
       updated_at,
       conversation_participants(
@@ -142,7 +141,6 @@ export async function GET(
       DisplayImage: displayImage || "",
       GroupName: conversation.group_name,
       GroupImage: conversation.group_image_url,
-      AgoraGroupID: conversation.agora_group_id,
       CreatedBy: conversation.created_by,
       CreatedAt: conversation.created_at,
       UpdatedAt: conversation.updated_at,

@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, Phone, Video } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronLeft, Phone, Video, Loader2 } from "lucide-react";
 import { MessageGroup, Message } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
 import { ComingSoonModal } from "./ComingSoonModal";
 import { Avatar } from "@/components/ui/Avatar";
 import { MessageSkeleton } from "@/components/ui/LoadingSkeleton";
+import { useToast } from "@/components/ui/Toast";
 import { useChat } from "@/hooks/useSupabaseMessaging";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
 import { Message as SupabaseMessage } from "@/lib/supabase/messaging";
@@ -49,10 +51,16 @@ export function ChatThread({
   participants,
   currentUserId,
 }: ChatThreadProps) {
+  const router = useRouter();
+  const toast = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Modal state for call/video coming soon
+  // Call state
+  const [isStartingCall, setIsStartingCall] = useState(false);
+  const [callType, setCallType] = useState<"audio" | "video" | null>(null);
+  
+  // Modal state for call/video coming soon (kept for group chats)
   const [comingSoonModal, setComingSoonModal] = useState<{
     isOpen: boolean;
     feature: "call" | "video";
@@ -154,13 +162,35 @@ export function ChatThread({
     setTyping(isTyping);
   }, [setTyping]);
 
+  // Start a video/audio call
+  const startCall = useCallback(async (type: "audio" | "video") => {
+    // For group chats, show coming soon modal
+    if (conversationType === "group") {
+      setComingSoonModal({ isOpen: true, feature: type === "audio" ? "call" : "video" });
+      return;
+    }
+
+    setIsStartingCall(true);
+    setCallType(type);
+
+    try {
+      // Navigate to the call page with the conversation ID as the room name
+      router.push(`/call/${conversationId}`);
+    } catch (error) {
+      console.error("Error starting call:", error);
+      toast.error("Failed to start call. Please try again.");
+      setIsStartingCall(false);
+      setCallType(null);
+    }
+  }, [conversationType, conversationId, router, toast]);
+
   // Handle call/video button clicks
   const handleCallClick = () => {
-    setComingSoonModal({ isOpen: true, feature: "call" });
+    startCall("audio");
   };
 
   const handleVideoClick = () => {
-    setComingSoonModal({ isOpen: true, feature: "video" });
+    startCall("video");
   };
 
   const closeModal = () => {
@@ -232,17 +262,27 @@ export function ChatThread({
             <div className="pointer-events-auto flex items-center gap-1.5">
               <button 
                 onClick={handleCallClick}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200/70 dark:bg-neutral-700/70 backdrop-blur-xl active:bg-gray-300/80 dark:active:bg-neutral-600/80 transition-colors"
+                disabled={isStartingCall}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200/70 dark:bg-neutral-700/70 backdrop-blur-xl active:bg-gray-300/80 dark:active:bg-neutral-600/80 transition-colors disabled:opacity-50"
                 aria-label="Voice call"
               >
-                <Phone className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+                {isStartingCall && callType === "audio" ? (
+                  <Loader2 className="w-5 h-5 text-gray-700 dark:text-gray-200 animate-spin" />
+                ) : (
+                  <Phone className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+                )}
               </button>
               <button 
                 onClick={handleVideoClick}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200/70 dark:bg-neutral-700/70 backdrop-blur-xl active:bg-gray-300/80 dark:active:bg-neutral-600/80 transition-colors"
+                disabled={isStartingCall}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200/70 dark:bg-neutral-700/70 backdrop-blur-xl active:bg-gray-300/80 dark:active:bg-neutral-600/80 transition-colors disabled:opacity-50"
                 aria-label="Video call"
               >
-                <Video className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+                {isStartingCall && callType === "video" ? (
+                  <Loader2 className="w-5 h-5 text-gray-700 dark:text-gray-200 animate-spin" />
+                ) : (
+                  <Video className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+                )}
               </button>
             </div>
           </div>
