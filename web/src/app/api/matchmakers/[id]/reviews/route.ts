@@ -27,22 +27,7 @@ export async function GET(
   // Get reviews
   const { data: reviews, error, count } = await supabase
     .from("matchmaker_reviews")
-    .select(
-      `
-      id,
-      rating,
-      review_text,
-      is_verified_client,
-      created_at,
-      users!inner (
-        display_name,
-        profiles (
-          first_name,
-          profile_image_url
-        )
-      )
-    `
-    )
+    .select("id, rating, review_text, is_verified_client, created_at, reviewer_user_id")
     .eq("matchmaker_id", matchmakerId)
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
@@ -55,10 +40,28 @@ export async function GET(
     );
   }
 
+  // Get reviewer details
+  const reviewerIds = reviews?.map((r) => r.reviewer_user_id) || [];
+  const { data: reviewerUsers } = await supabase
+    .from("users")
+    .select("id, display_name")
+    .in("id", reviewerIds);
+
+  const { data: reviewerProfiles } = await supabase
+    .from("profiles")
+    .select("user_id, first_name, profile_image_url")
+    .in("user_id", reviewerIds);
+
+  const reviewerUserMap = new Map(reviewerUsers?.map((u) => [u.id, u]) || []);
+  const reviewerProfileMap = new Map(
+    reviewerProfiles?.map((p) => [p.user_id, p]) || []
+  );
+
   // Format response
   const formatted = await Promise.all(
     (reviews || []).map(async (review) => {
-      const profile = review.users?.profiles?.[0];
+      const reviewerUser = reviewerUserMap.get(review.reviewer_user_id);
+      const profile = reviewerProfileMap.get(review.reviewer_user_id);
       const profileImageUrl = profile?.profile_image_url
         ? await resolveStorageUrl(supabase, profile.profile_image_url)
         : "";
@@ -70,7 +73,7 @@ export async function GET(
         is_verified_client: review.is_verified_client,
         created_at: review.created_at,
         reviewer: {
-          display_name: review.users?.display_name || "Anonymous",
+          display_name: reviewerUser?.display_name || "Anonymous",
           first_name: profile?.first_name || "",
           profile_image_url: profileImageUrl,
         },

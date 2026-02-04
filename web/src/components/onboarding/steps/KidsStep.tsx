@@ -30,12 +30,12 @@ export function KidsStep({
   onHasKidsPreferNotChange,
   onWantsKidsPreferNotChange,
 }: KidsStepProps) {
-  // Filter out "prefer_not_to_say" from options
+  // Filter out "prefer_not_to_say" from options if it exists
   const hasKidsOptions = HAS_KIDS_OPTIONS.filter(
-    (opt) => opt.value !== "prefer_not_to_say"
+    (opt) => opt.value !== ("prefer_not_to_say" as any)
   );
   const wantsKidsOptions = WANTS_KIDS_OPTIONS.filter(
-    (opt) => opt.value !== "prefer_not_to_say"
+    (opt) => opt.value !== ("prefer_not_to_say" as any)
   );
 
   return (

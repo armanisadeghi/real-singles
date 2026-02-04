@@ -9,6 +9,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { OnboardingStepWrapper } from "../OnboardingStepWrapper";
 import { cn } from "@/lib/utils";
+import { getZodiacFromDate, getZodiacLabel } from "@/types";
 
 interface BirthdayStepProps {
   dateOfBirth: string;
@@ -104,6 +105,14 @@ export function BirthdayStep({ dateOfBirth, onChange }: BirthdayStepProps) {
     return null;
   }, [month, day, year]);
 
+  const zodiacSign = useMemo(() => {
+    if (month && day && year) {
+      const sign = getZodiacFromDate(`${year}-${month}-${day}`);
+      return sign ? getZodiacLabel(sign) : null;
+    }
+    return null;
+  }, [month, day, year]);
+
   const selectClass = cn(
     "flex-1 px-3 py-3.5 rounded-xl appearance-none",
     "text-base text-gray-900 dark:text-gray-100",
@@ -169,7 +178,7 @@ export function BirthdayStep({ dateOfBirth, onChange }: BirthdayStepProps) {
         </select>
       </div>
 
-      {/* Age preview */}
+      {/* Age and zodiac preview */}
       {age !== null && (
         <div className="mt-4 p-4 rounded-xl bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:border-pink-800/30">
           <p className="text-center text-gray-700 dark:text-gray-300">
@@ -177,6 +186,14 @@ export function BirthdayStep({ dateOfBirth, onChange }: BirthdayStepProps) {
             <span className="font-semibold text-pink-600 dark:text-pink-400">
               {age} years old
             </span>
+            {zodiacSign && (
+              <>
+                {" · "}
+                <span className="font-semibold text-pink-600 dark:text-pink-400">
+                  {zodiacSign}
+                </span>
+              </>
+            )}
           </p>
         </div>
       )}

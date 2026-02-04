@@ -357,17 +357,20 @@ export async function getMatchmakerStats(
   }
 
   // Calculate success rate percentage
+  const totalIntros = stats.total_introductions || 0;
+  const successfulIntros = stats.successful_introductions || 0;
   const success_rate =
-    stats.total_introductions > 0
-      ? Math.round(
-          (stats.successful_introductions / stats.total_introductions) * 100
-        )
-      : 0;
+    totalIntros > 0 ? Math.round((successfulIntros / totalIntros) * 100) : 0;
 
   return {
     success: true,
     stats: {
-      ...stats,
+      total_introductions: totalIntros,
+      successful_introductions: successfulIntros,
+      active_clients: stats.active_clients || 0,
+      total_clients: stats.total_clients || 0,
+      average_rating: stats.average_rating,
+      total_reviews: stats.total_reviews || 0,
       success_rate,
     },
   };

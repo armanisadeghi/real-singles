@@ -35,17 +35,7 @@ export async function GET(
       specialties,
       years_experience,
       certifications,
-      created_at,
-      users!inner (
-        display_name,
-        profiles (
-          first_name,
-          last_name,
-          profile_image_url,
-          city,
-          state
-        )
-      )
+      created_at
     `
     )
     .eq("id", id)
@@ -81,35 +71,49 @@ export async function GET(
     );
   }
 
+  // Get user and profile data separately to avoid ambiguous joins
+  const { data: userData } = await supabase
+    .from("users")
+    .select("display_name")
+    .eq("id", matchmaker.user_id)
+    .single();
+
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("first_name, last_name, profile_image_url, city, state")
+    .eq("user_id", matchmaker.user_id)
+    .single();
+
   // Get stats
   const { stats } = await getMatchmakerStats(supabase, id);
 
-  // Get reviews
+  // Get reviews with user data
   const { data: reviews } = await supabase
     .from("matchmaker_reviews")
-    .select(
-      `
-      id,
-      rating,
-      review_text,
-      is_verified_client,
-      created_at,
-      users!inner (
-        display_name,
-        profiles (
-          first_name,
-          profile_image_url
-        )
-      )
-    `
-    )
+    .select("id, rating, review_text, is_verified_client, created_at, reviewer_user_id")
     .eq("matchmaker_id", id)
     .order("created_at", { ascending: false })
     .limit(20);
 
+  // Get reviewer details
+  const reviewerIds = reviews?.map((r) => r.reviewer_user_id) || [];
+  const { data: reviewerUsers } = await supabase
+    .from("users")
+    .select("id, display_name")
+    .in("id", reviewerIds);
+
+  const { data: reviewerProfiles } = await supabase
+    .from("profiles")
+    .select("user_id, first_name, profile_image_url")
+    .in("user_id", reviewerIds);
+
+  const reviewerUserMap = new Map(reviewerUsers?.map((u) => [u.id, u]) || []);
+  const reviewerProfileMap = new Map(
+    reviewerProfiles?.map((p) => [p.user_id, p]) || []
+  );
+
   // Format response
-  const userProfile = matchmaker.users;
-  const profile = userProfile?.profiles?.[0];
+  const profile = profileData;
 
   const profileImageUrl = profile?.profile_image_url
     ? await resolveStorageUrl(supabase, profile.profile_image_url)
@@ -117,7 +121,8 @@ export async function GET(
 
   const formattedReviews = await Promise.all(
     (reviews || []).map(async (review) => {
-      const reviewerProfile = review.users?.profiles?.[0];
+      const reviewerUser = reviewerUserMap.get(review.reviewer_user_id);
+      const reviewerProfile = reviewerProfileMap.get(review.reviewer_user_id);
       const reviewerImage = reviewerProfile?.profile_image_url
         ? await resolveStorageUrl(supabase, reviewerProfile.profile_image_url)
         : "";
@@ -129,7 +134,7 @@ export async function GET(
         is_verified_client: review.is_verified_client,
         created_at: review.created_at,
         reviewer: {
-          display_name: review.users?.display_name || "Anonymous",
+          display_name: reviewerUser?.display_name || "Anonymous",
           first_name: reviewerProfile?.first_name || "",
           profile_image_url: reviewerImage,
         },
@@ -143,7 +148,7 @@ export async function GET(
       id: matchmaker.id,
       user_id: matchmaker.user_id,
       status: matchmaker.status,
-      display_name: userProfile?.display_name || "Matchmaker",
+      display_name: userData?.display_name || "Matchmaker",
       first_name: profile?.first_name || "",
       last_name: profile?.last_name || "",
       profile_image_url: profileImageUrl,

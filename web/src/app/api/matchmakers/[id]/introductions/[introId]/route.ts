@@ -47,10 +47,7 @@ export async function GET(
       `
       *,
       matchmakers!inner (
-        user_id,
-        users (
-          display_name
-        )
+        user_id
       )
     `
     )
@@ -65,7 +62,7 @@ export async function GET(
   }
 
   // Verify user is involved (matchmaker or one of the users)
-  const isMatchmaker = intro.matchmakers?.user_id === user.id;
+  const isMatchmaker = (intro.matchmakers as any)?.user_id === user.id;
   const isParticipant = intro.user_a_id === user.id || intro.user_b_id === user.id;
 
   if (!isMatchmaker && !isParticipant) {
@@ -74,6 +71,13 @@ export async function GET(
       { status: 403 }
     );
   }
+
+  // Get matchmaker name
+  const { data: matchmakerUser } = await supabase
+    .from("users")
+    .select("display_name")
+    .eq("id", (intro.matchmakers as any)?.user_id)
+    .single();
 
   // Get user details
   const { data: users } = await supabase
@@ -105,7 +109,7 @@ export async function GET(
     success: true,
     data: {
       id: intro.id,
-      matchmaker_name: intro.matchmakers?.users?.display_name || "Matchmaker",
+      matchmaker_name: matchmakerUser?.display_name || "Matchmaker",
       user_a: {
         id: intro.user_a_id,
         display_name: userA?.display_name || "User A",

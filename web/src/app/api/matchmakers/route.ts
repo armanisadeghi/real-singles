@@ -43,22 +43,7 @@ export async function GET(request: NextRequest) {
       specialties,
       years_experience,
       certifications,
-      created_at,
-      users!inner (
-        display_name,
-        profiles (
-          first_name,
-          last_name,
-          profile_image_url
-        )
-      ),
-      matchmaker_stats (
-        total_introductions,
-        successful_introductions,
-        active_clients,
-        average_rating,
-        total_reviews
-      )
+      created_at
     `
     )
     .eq("status", "approved")
@@ -81,12 +66,34 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Get all user IDs to fetch details in batch
+  const userIds = matchmakers?.map((mm) => mm.user_id) || [];
+  
+  const { data: users } = await supabase
+    .from("users")
+    .select("id, display_name")
+    .in("id", userIds);
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("user_id, first_name, last_name, profile_image_url")
+    .in("user_id", userIds);
+
+  const { data: statsData } = await supabase
+    .from("matchmaker_stats")
+    .select("*")
+    .in("matchmaker_id", matchmakers?.map((mm) => mm.id) || []);
+
+  const userMap = new Map(users?.map((u) => [u.id, u]) || []);
+  const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
+  const statsMap = new Map(statsData?.map((s) => [s.matchmaker_id, s]) || []);
+
   // Format response with resolved image URLs and stats
   const formatted = await Promise.all(
     (matchmakers || []).map(async (mm) => {
-      const user = mm.users;
-      const profile = user?.profiles?.[0];
-      const stats = mm.matchmaker_stats?.[0];
+      const user = userMap.get(mm.user_id);
+      const profile = profileMap.get(mm.user_id);
+      const stats = statsMap.get(mm.id);
 
       const profileImageUrl = profile?.profile_image_url
         ? await resolveStorageUrl(supabase, profile.profile_image_url)
@@ -94,9 +101,9 @@ export async function GET(request: NextRequest) {
 
       // Calculate success rate
       const successRate =
-        stats && stats.total_introductions > 0
+        stats && stats.total_introductions && stats.total_introductions > 0
           ? Math.round(
-              (stats.successful_introductions / stats.total_introductions) * 100
+              ((stats.successful_introductions || 0) / stats.total_introductions) * 100
             )
           : 0;
 

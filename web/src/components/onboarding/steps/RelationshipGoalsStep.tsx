@@ -28,7 +28,7 @@ export function RelationshipGoalsStep({
 }: RelationshipGoalsStepProps) {
   // Filter out "prefer_not_to_say" from options
   const maritalStatusOptions = MARITAL_STATUS_OPTIONS.filter(
-    (opt) => opt.value !== "prefer_not_to_say"
+    (opt) => opt.value !== ("prefer_not_to_say" as any)
   );
 
   return (

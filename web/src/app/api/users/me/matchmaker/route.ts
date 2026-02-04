@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import { getMatchmakerStats } from "@/lib/services/matchmakers";
 
 /**
  * GET /api/users/me/matchmaker
@@ -24,33 +25,7 @@ export async function GET(request: NextRequest) {
   // Get active matchmaker relationship
   const { data: relationship, error } = await supabase
     .from("matchmaker_clients")
-    .select(
-      `
-      id,
-      matchmaker_id,
-      status,
-      started_at,
-      matchmakers!inner (
-        id,
-        user_id,
-        bio,
-        specialties,
-        users (
-          display_name,
-          profiles (
-            first_name,
-            last_name,
-            profile_image_url
-          )
-        ),
-        matchmaker_stats (
-          total_introductions,
-          successful_introductions,
-          average_rating
-        )
-      )
-    `
-    )
+    .select("id, matchmaker_id, status, started_at")
     .eq("client_user_id", user.id)
     .eq("status", "active")
     .maybeSingle();
@@ -71,22 +46,40 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // Format response
-  const matchmaker = relationship.matchmakers;
-  const mmUser = matchmaker?.users;
-  const mmProfile = mmUser?.profiles?.[0];
-  const stats = matchmaker?.matchmaker_stats?.[0];
+  // Get matchmaker details
+  const { data: matchmaker } = await supabase
+    .from("matchmakers")
+    .select("id, user_id, bio, specialties")
+    .eq("id", relationship.matchmaker_id)
+    .single();
+
+  if (!matchmaker) {
+    return NextResponse.json({
+      success: true,
+      data: null,
+      msg: "Matchmaker not found",
+    });
+  }
+
+  // Get matchmaker user and profile
+  const { data: mmUser } = await supabase
+    .from("users")
+    .select("display_name")
+    .eq("id", matchmaker.user_id)
+    .single();
+
+  const { data: mmProfile } = await supabase
+    .from("profiles")
+    .select("first_name, last_name, profile_image_url")
+    .eq("user_id", matchmaker.user_id)
+    .single();
+
+  // Get stats
+  const { stats } = await getMatchmakerStats(supabase, matchmaker.id);
 
   const profileImageUrl = mmProfile?.profile_image_url
     ? await resolveStorageUrl(supabase, mmProfile.profile_image_url)
     : "";
-
-  const successRate =
-    stats && stats.total_introductions > 0
-      ? Math.round(
-          (stats.successful_introductions / stats.total_introductions) * 100
-        )
-      : 0;
 
   return NextResponse.json({
     success: true,
@@ -102,12 +95,7 @@ export async function GET(request: NextRequest) {
         profile_image_url: profileImageUrl,
         bio: matchmaker.bio,
         specialties: matchmaker.specialties || [],
-        stats: {
-          total_introductions: stats?.total_introductions || 0,
-          successful_introductions: stats?.successful_introductions || 0,
-          success_rate: successRate,
-          average_rating: stats?.average_rating || null,
-        },
+        stats,
       },
     },
     msg: "Matchmaker relationship fetched successfully",

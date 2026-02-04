@@ -30,12 +30,12 @@ export function BeliefsStep({
   onReligionPreferNotChange,
   onPoliticalViewsPreferNotChange,
 }: BeliefsStepProps) {
-  // Filter out "prefer_not_to_say" from options
+  // Filter out "prefer_not_to_say" from options if it exists
   const religionOptions = RELIGION_OPTIONS.filter(
-    (opt) => opt.value !== "prefer_not_to_say"
+    (opt) => opt.value !== ("prefer_not_to_say" as any)
   );
   const politicalOptions = POLITICAL_OPTIONS.filter(
-    (opt) => opt.value !== "prefer_not_to_say"
+    (opt) => opt.value !== ("prefer_not_to_say" as any)
   );
 
   return (
