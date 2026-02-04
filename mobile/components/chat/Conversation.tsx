@@ -2,12 +2,16 @@ import { useThemeColors } from '@/context/ThemeContext';
 import { IMAGE_URL, MEDIA_BASE_URL } from '@/utils/token';
 import React, { memo } from 'react';
 import { Image, Platform, PlatformColor, ScrollView, Text, useColorScheme, View } from 'react-native';
+import CallMessageBubble from './CallMessageBubble';
+import ProfileMessageBubble from './ProfileMessageBubble';
 
 interface Message {
   id: string;
   senderId: string;
   content: string;
   timestamp: number;
+  type?: 'text' | 'image' | 'video' | 'audio' | 'file' | 'system' | 'call' | 'profile';
+  metadata?: Record<string, any> | null;
 }
 
 interface ConversationProps {
@@ -69,6 +73,65 @@ const Conversation = ({ messages, currentUserId, contact }: ConversationProps) =
       {messages.map((message) => {
         const isMine = message.senderId === currentUserId;
 
+        // Handle call messages
+        if (message.type === 'call' && message.metadata) {
+          return (
+            <CallMessageBubble
+              key={message.id}
+              metadata={message.metadata as {
+                call_id: string;
+                call_type: 'audio' | 'video';
+                duration_seconds: number;
+                status: 'completed' | 'missed' | 'declined';
+                participants: string[];
+                started_at: string;
+                ended_at: string;
+              }}
+              isOwn={isMine}
+              timestamp={message.timestamp}
+            />
+          );
+        }
+
+        // Handle profile messages
+        if (message.type === 'profile' && message.metadata) {
+          return (
+            <ProfileMessageBubble
+              key={message.id}
+              content={message.content}
+              metadata={message.metadata as {
+                profile_id: string;
+                first_name: string | null;
+                age: number | null;
+                location: string | null;
+                profile_image_url: string | null;
+                bio: string | null;
+                occupation: string | null;
+                is_hidden?: boolean;
+              }}
+              isOwn={isMine}
+              timestamp={message.timestamp}
+            />
+          );
+        }
+
+        // Handle system messages
+        if (message.type === 'system') {
+          return (
+            <View key={message.id} className="flex-row justify-center my-3">
+              <View
+                className="px-3 py-1.5 rounded-full"
+                style={{ backgroundColor: themedColors.inputBackground }}
+              >
+                <Text className="text-[13px] text-center" style={{ color: themedColors.secondaryText }}>
+                  {message.content}
+                </Text>
+              </View>
+            </View>
+          );
+        }
+
+        // Default text message rendering
         return (
           <View
             key={message.id}
@@ -114,12 +177,6 @@ const Conversation = ({ messages, currentUserId, contact }: ConversationProps) =
               )
             )}
 
-            {/* {!isMine && ( 
-              <Image
-                source={contact.image ? { uri: contact.image.startsWith('uploads/') ? IMAGE_URL + contact.image : MEDIA_BASE_URL + contact.image } : icons.ic_user}
-                className="w-8 h-8 rounded-full mr-2 mt-1"
-              />
-            )} */}
             <View className="max-w-[60%]">
               <View
                 className={`px-4 py-2 ${isMine

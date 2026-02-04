@@ -65,6 +65,8 @@ export default function ChatDetail() {
     senderId: msg.sender_id,
     content: msg.content,
     timestamp: new Date(msg.created_at).getTime(),
+    type: msg.message_type,
+    metadata: msg.metadata,
   }));
 
   // Track online presence for the peer

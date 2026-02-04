@@ -1,0 +1,10 @@
+packages:
+  - 'web'
+  - 'mobile'
+
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+
+onlyBuiltDependencies:
+  - supabase

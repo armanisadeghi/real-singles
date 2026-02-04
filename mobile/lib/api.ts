@@ -677,6 +677,75 @@ export const getAgoraChatRefreshToken = async (data: FormData) => {
 };
 
 // ===========================================
+// LIVEKIT CALL ENDPOINTS
+// ===========================================
+
+/**
+ * Start a call (creates call record)
+ */
+export const startCall = async (
+  roomName: string,
+  callType: "audio" | "video",
+  conversationId?: string
+) => {
+  return apiRequest("/calls/start", {
+    method: "POST",
+    body: JSON.stringify({ roomName, callType, conversationId }),
+  });
+};
+
+/**
+ * End a call (updates call record and triggers message creation)
+ */
+export const endCall = async (roomName: string, duration?: number) => {
+  return apiRequest("/calls/end", {
+    method: "POST",
+    body: JSON.stringify({ roomName, duration }),
+  });
+};
+
+/**
+ * Send call invitation
+ */
+export const sendCallInvite = async (
+  calleeId: string,
+  roomName: string,
+  callType: "audio" | "video",
+  conversationId?: string
+) => {
+  return apiRequest("/calls/invite", {
+    method: "POST",
+    body: JSON.stringify({ calleeId, roomName, callType, conversationId }),
+  });
+};
+
+// ===========================================
+// PROFILE SHARING ENDPOINTS
+// ===========================================
+
+/**
+ * Send a profile preview message to a conversation
+ * Used by matchmakers to share profiles with clients
+ */
+export const sendProfileMessage = async (
+  conversationId: string,
+  profileUserId: string,
+  message?: string
+) => {
+  return apiRequest("/messages/profile", {
+    method: "POST",
+    body: JSON.stringify({ conversationId, profileUserId, message }),
+  });
+};
+
+/**
+ * Get profile preview data for displaying in chat
+ */
+export const getProfilePreview = async (profileUserId: string) => {
+  return apiRequest(`/profiles/${profileUserId}/preview`);
+};
+
+// ===========================================
 // UPLOAD & GALLERY ENDPOINTS
 // ===========================================
 
@@ -898,5 +967,74 @@ export const removeGroupMember = async (groupId: string, userId: string) => {
  */
 export const getGroupMembers = async (groupId: string) => {
   return apiRequest(`/groups/${groupId}/members`);
+};
+
+// ===========================================
+// SUBSCRIPTION ENDPOINTS
+// ===========================================
+
+/**
+ * Get subscription plans and current user subscription
+ */
+export const getSubscriptionPlans = async () => {
+  return apiRequest("/subscriptions");
+};
+
+/**
+ * Create a Stripe checkout session for a subscription
+ */
+export const createSubscriptionCheckout = async (
+  planId: string,
+  interval: "monthly" | "yearly"
+) => {
+  return apiRequest("/subscriptions", {
+    method: "POST",
+    body: JSON.stringify({ planId, interval }),
+  });
+};
+
+/**
+ * Create a customer portal session for managing subscription
+ */
+export const createCustomerPortalSession = async () => {
+  return apiRequest("/subscriptions/portal", {
+    method: "POST",
+  });
+};
+
+// ===========================================
+// STORE/CHECKOUT ENDPOINTS
+// ===========================================
+
+/**
+ * Get store items (products and purchasable items)
+ */
+export const getStoreItems = async (type?: "product" | "digital" | "boost" | "superlike_pack") => {
+  const params = type ? `?type=${type}` : "";
+  return apiRequest(`/store/items${params}`);
+};
+
+/**
+ * Create a checkout session
+ */
+export const createCheckoutSession = async (data: {
+  items: Array<{ type: "product" | "purchasable_item"; id: string; quantity?: number }>;
+  paymentMethod: "points" | "stripe" | "both";
+  shippingAddress?: {
+    name: string;
+    address: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
+  isGift?: boolean;
+  recipientUserId?: string;
+  giftMessage?: string;
+}) => {
+  return apiRequest("/checkout/session", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 };
 

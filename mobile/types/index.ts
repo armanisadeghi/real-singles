@@ -157,6 +157,11 @@ export interface User {
   // Account visibility
   profile_hidden?: boolean;
   ProfileHidden?: boolean;
+  // Subscription
+  subscription_tier?: string;
+  subscription_expires_at?: string;
+  superlike_balance?: number;
+  points_balance?: number;
 }
 
 export interface EditProfileFormData {

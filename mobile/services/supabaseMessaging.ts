@@ -26,10 +26,11 @@ export interface Message {
   conversation_id: string;
   sender_id: string;
   content: string;
-  message_type: 'text' | 'image' | 'video' | 'audio' | 'file' | 'system';
+  message_type: 'text' | 'image' | 'video' | 'audio' | 'file' | 'system' | 'call' | 'profile';
   media_url?: string | null;
   media_thumbnail_url?: string | null;
   media_metadata?: Record<string, any> | null;
+  metadata?: Record<string, any> | null; // For call/profile message data
   status: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
   reply_to_id?: string | null;
   deleted_at?: string | null;
@@ -43,10 +44,11 @@ export interface MessageInsert {
   conversation_id: string;
   sender_id: string;
   content: string;
-  message_type?: 'text' | 'image' | 'video' | 'audio' | 'file' | 'system';
+  message_type?: 'text' | 'image' | 'video' | 'audio' | 'file' | 'system' | 'call' | 'profile';
   media_url?: string;
   media_thumbnail_url?: string;
   media_metadata?: Record<string, any>;
+  metadata?: Record<string, any>; // For call/profile message structured data
   reply_to_id?: string;
   client_message_id?: string;
 }

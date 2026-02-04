@@ -435,6 +435,34 @@ export default function Settings() {
               </View>
 
               <TouchableOpacity
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  // @ts-expect-error - Route exists but types need regeneration
+                  router.push("/subscription");
+                }}
+                style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: themedColors.rowBackground, marginBottom: 16, paddingHorizontal: 16, paddingVertical: 16, borderWidth: 1, borderColor: themedColors.border, borderRadius: 9999 }}
+              >
+                <PlatformIcon
+                  name="star-outline"
+                  size={22}
+                  color="#F59E0B"
+                />
+                <View style={{ marginLeft: 12, flex: 1 }}>
+                  <Text style={{ color: themedColors.text }}>Subscription</Text>
+                  <Text style={{ fontSize: 12, color: themedColors.secondaryText }}>
+                    {profile?.subscription_tier && profile.subscription_tier !== 'free' 
+                      ? `${profile.subscription_tier} member` 
+                      : "Upgrade to Premium"}
+                  </Text>
+                </View>
+                <PlatformIcon
+                  name="keyboard-arrow-right"
+                  size={22}
+                  color={themedColors.tertiaryText}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
                 // onPress={gotoPrivacy}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

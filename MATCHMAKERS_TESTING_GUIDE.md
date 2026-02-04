@@ -4,16 +4,29 @@
 
 **Password for all:** `MyCustomPass123!`
 
-**Matchmakers:**
-- sophia.matchmaker@testuser.realsingles.com (Professional, 5 years)
-- marcus.matchmaker@testuser.realsingles.com (LGBTQ+ specialist, 8 years)
-- elena.matchmaker@testuser.realsingles.com (Faith-based, 3 years)
+**Matchmakers:** (All have professional photos and are hidden from normal discovery)
+- **Sophia Chen** - sophia.matchmaker@testuser.realsingles.com
+  - Professional matchmaker, 5 years experience
+  - San Francisco, CA
+  - Specializes in career-focused professionals
+  
+- **Marcus Rivera** - marcus.matchmaker@testuser.realsingles.com
+  - LGBTQ+ specialist, 8 years experience
+  - Los Angeles, CA
+  - Inclusive matchmaking for the queer community
+  
+- **Elena Rodriguez** - elena.matchmaker@testuser.realsingles.com
+  - Faith-based matchmaker, 3 years experience
+  - Austin, TX
+  - Values-driven connections
 
 **Regular Users:**
 - Use any existing test user account
 
 **Admin:**
 - Use your admin account
+
+**Note:** Matchmaker profiles are hidden from normal discovery (`profile_hidden = true`) so they won't show up when browsing regular user profiles.
 
 ---
 
