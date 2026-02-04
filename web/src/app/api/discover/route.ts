@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-import { resolveStorageUrl, resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
+import { resolveStorageUrl, resolveOptimizedImageUrl, resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
 import {
   getDiscoverableCandidates,
   getUserProfileContextWithError,
@@ -142,8 +142,10 @@ export async function GET() {
   );
 
   // Format profile for mobile API response
+  // Uses "card" size (400x400) for profile images to reduce bandwidth
   const formatProfile = async (profile: DiscoverableProfile): Promise<FormattedProfile> => {
-    const imageUrl = await resolveStorageUrl(supabase, profile.profile_image_url);
+    // Use "card" size for discover cards - smaller than full resolution, good for card views
+    const imageUrl = await resolveOptimizedImageUrl(supabase, profile.profile_image_url, "card");
     return {
       ID: profile.user_id,
       id: profile.user_id,

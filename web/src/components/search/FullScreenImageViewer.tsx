@@ -17,7 +17,10 @@ import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FullScreenImageViewerProps {
+  /** Array of full-resolution image URLs */
   images: string[];
+  /** Optional array of thumbnail URLs for faster initial display */
+  thumbnailUrls?: string[];
   initialIndex?: number;
   visible: boolean;
   onClose: () => void;
@@ -25,6 +28,7 @@ interface FullScreenImageViewerProps {
 
 export function FullScreenImageViewer({
   images,
+  thumbnailUrls,
   initialIndex = 0,
   visible,
   onClose,
@@ -33,18 +37,27 @@ export function FullScreenImageViewer({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Track which images have been loaded (for progressive loading)
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
 
   // Touch/swipe state
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [bounceDirection, setBounceDirection] = useState<'left' | 'right' | null>(null);
+  
+  // Mark image as loaded
+  const handleImageLoad = useCallback((index: number) => {
+    setLoadedImages(prev => new Set(prev).add(index));
+  }, []);
 
-  // Reset index when opening
+  // Reset state when opening
   useEffect(() => {
     if (visible) {
       setCurrentIndex(initialIndex);
       setSwipeOffset(0);
+      setLoadedImages(new Set()); // Reset loaded state for fresh progressive loading
     }
   }, [visible, initialIndex]);
 
@@ -281,7 +294,7 @@ export function FullScreenImageViewer({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Sliding strip of all images */}
+        {/* Sliding strip of all images - progressive loading */}
         <div
           className="flex h-full"
           style={{
@@ -295,20 +308,55 @@ export function FullScreenImageViewer({
                 : 'none',
           }}
         >
-          {images.map((src, index) => (
-            <div
-              key={index}
-              className="h-full flex-shrink-0 flex items-center justify-center"
-              style={{ width: `${100 / images.length}%` }}
-            >
-              <img
-                src={src}
-                alt=""
-                className="w-full h-full object-contain"
-                draggable={false}
-              />
-            </div>
-          ))}
+          {images.map((src, index) => {
+            // Progressive loading: only load current and adjacent images eagerly
+            // This reduces initial bandwidth from loading ALL full-res images
+            const isNearCurrent = Math.abs(index - currentIndex) <= 1;
+            const isLoaded = loadedImages.has(index);
+            const thumbnailSrc = thumbnailUrls?.[index];
+            
+            // Show thumbnail as placeholder while full image loads
+            const showThumbnail = thumbnailSrc && !isLoaded && isNearCurrent;
+            
+            return (
+              <div
+                key={index}
+                className="h-full flex-shrink-0 flex items-center justify-center bg-black"
+                style={{ width: `${100 / images.length}%` }}
+              >
+                {/* Thumbnail placeholder (blurred) */}
+                {showThumbnail && (
+                  <img
+                    src={thumbnailSrc}
+                    alt=""
+                    className="absolute w-full h-full object-contain filter blur-sm scale-105"
+                    draggable={false}
+                  />
+                )}
+                {/* Full resolution image */}
+                {(isNearCurrent || isLoaded) && (
+                  <img
+                    src={src}
+                    alt=""
+                    className={cn(
+                      "w-full h-full object-contain transition-opacity duration-300",
+                      isLoaded ? "opacity-100" : "opacity-0"
+                    )}
+                    draggable={false}
+                    loading={isNearCurrent ? "eager" : "lazy"}
+                    decoding="async"
+                    onLoad={() => handleImageLoad(index)}
+                  />
+                )}
+                {/* Loading indicator for distant images */}
+                {!isNearCurrent && !isLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

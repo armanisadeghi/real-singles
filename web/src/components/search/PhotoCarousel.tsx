@@ -17,10 +17,14 @@ import { cn } from "@/lib/utils";
 import { FullScreenImageViewer } from "./FullScreenImageViewer";
 
 interface PhotoCarouselProps {
-  /** Array of image URLs */
+  /** Array of image URLs (optimized for display) */
   images: string[];
+  /** Optional array of thumbnail URLs for preloading indicators */
+  thumbnailUrls?: string[];
   /** Height of the carousel */
   height?: string;
+  /** Aspect ratio for the carousel (prevents CLS) */
+  aspectRatio?: string;
   /** Show gradient overlay at bottom */
   showGradient?: boolean;
   /** Optional callback when photo index changes */
@@ -31,7 +35,9 @@ interface PhotoCarouselProps {
 
 export function PhotoCarousel({
   images,
+  thumbnailUrls,
   height = "60vh",
+  aspectRatio,
   showGradient = true,
   onIndexChange,
   className,
@@ -208,7 +214,11 @@ export function PhotoCarousel({
   }, [isTransitioning, touchStart, touchEnd, goNext, goPrevious, currentIndex, images.length, openFullScreen, triggerBounce]);
 
   // Use CSS variable for height to allow className overrides
-  const heightStyle = { "--carousel-height": height } as React.CSSProperties;
+  // aspectRatio helps prevent CLS by reserving space before images load
+  const heightStyle = { 
+    "--carousel-height": height,
+    ...(aspectRatio && { aspectRatio }),
+  } as React.CSSProperties;
 
   // Calculate slide position: container is images.length * 100% wide,
   // so each image takes up (100 / images.length)% of the container.
@@ -246,7 +256,8 @@ export function PhotoCarousel({
     return (
       <div
         className={cn(
-          "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-neutral-800 dark:to-neutral-900 flex items-center justify-center h-[var(--carousel-height)]",
+          "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-neutral-800 dark:to-neutral-900 flex items-center justify-center",
+          aspectRatio ? "" : "h-[var(--carousel-height)]",
           className
         )}
         style={heightStyle}
@@ -286,20 +297,34 @@ export function PhotoCarousel({
           onClick={handleClick}
           aria-label="Tap left/right to navigate, center to view full-screen"
         >
-          {images.map((src, index) => (
-            <div
-              key={index}
-              className="h-full flex-shrink-0"
-              style={{ width: `${100 / images.length}%` }}
-            >
-              <img
-                src={src}
-                alt=""
-                className="w-full h-full object-cover"
-                draggable={false}
-              />
-            </div>
-          ))}
+          {images.map((src, index) => {
+            // Use lazy loading for images that aren't current or adjacent
+            // This significantly reduces initial bandwidth
+            const isNearCurrent = Math.abs(index - currentIndex) <= 1;
+            
+            return (
+              <div
+                key={index}
+                className="h-full flex-shrink-0 bg-gray-100 dark:bg-neutral-800"
+                style={{ 
+                  width: `${100 / images.length}%`,
+                  // Aspect ratio on container prevents layout shift
+                  aspectRatio: aspectRatio || 'auto',
+                }}
+              >
+                <img
+                  src={src}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  draggable={false}
+                  // Lazy load images that aren't near current view
+                  loading={isNearCurrent ? "eager" : "lazy"}
+                  // Decode async to avoid blocking main thread
+                  decoding="async"
+                />
+              </div>
+            );
+          })}
         </div>
 
         {/* Gradient overlay */}

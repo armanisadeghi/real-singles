@@ -184,7 +184,8 @@ export function useMessages({
         .substr(2, 9)}`;
 
       const messageType = options?.messageType || "text";
-      const messageContent = content.trim() || (messageType === "image" ? "📷 Image" : "📹 Video");
+      // For media messages, use provided content or empty string (no fallback emoji)
+      const messageContent = content.trim();
 
       const optimisticMessage: Message = {
         id: clientMessageId, // Temporary ID

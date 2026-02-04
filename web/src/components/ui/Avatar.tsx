@@ -26,6 +26,15 @@ const sizeClasses = {
   xl: "w-20 h-20 text-2xl",
 };
 
+// Pixel dimensions for explicit width/height attributes (prevents CLS)
+const sizePixels: Record<keyof typeof sizeClasses, number> = {
+  xs: 24,
+  sm: 32,
+  md: 40,
+  lg: 56,
+  xl: 80,
+};
+
 const onlineIndicatorSizes = {
   xs: "w-1.5 h-1.5",
   sm: "w-2 h-2",
@@ -209,10 +218,17 @@ export function Avatar({
             key={imageSrcWithRetry} // Force new element on retry to reset browser state
             src={imageSrcWithRetry}
             alt={`${name}'s avatar`}
+            // Explicit dimensions prevent CLS (Cumulative Layout Shift)
+            width={sizePixels[size]}
+            height={sizePixels[size]}
             className={cn(
               "w-full h-full object-cover transition-opacity duration-200",
               isLoaded ? "opacity-100" : "opacity-0"
             )}
+            // Lazy load avatars that are likely off-screen
+            loading="lazy"
+            // Decode async to avoid blocking main thread
+            decoding="async"
             onLoad={handleImageLoad}
             onError={handleImageError}
           />

@@ -150,7 +150,11 @@ export function MessageBubble({
         {/* Message bubble - iOS iMessage style */}
         <div
           className={cn(
-            "relative px-4 py-2.5 shadow-sm",
+            "relative shadow-sm",
+            // Conditional padding: tight for media-only, normal for text
+            (message.type === "image" || message.type === "video") && message.media_url && !message.content
+              ? "p-1" // Minimal padding for media-only messages
+              : "px-4 py-2.5", // Standard padding for text or mixed messages
             // iOS-style rounded corners with tail
             isOwn
               ? "bg-[#007AFF] dark:bg-[#0A84FF] text-white rounded-[22px] rounded-br-[8px]"
@@ -161,21 +165,28 @@ export function MessageBubble({
           {(message.type === "image" || message.type === "video") &&
             message.media_url && (
               <div className={cn(
-                "mb-2 -mx-2 -mt-1 overflow-hidden",
-                isOwn ? "rounded-[18px] rounded-br-[4px]" : "rounded-[18px] rounded-bl-[4px]"
+                "overflow-hidden",
+                // Adjust spacing based on whether there's text content
+                message.content ? "mb-2 -mx-2 -mt-1" : "", // With text: negative margins to fill bubble
+                // Border radius to match bubble
+                isOwn 
+                  ? message.content ? "rounded-[18px] rounded-br-[4px]" : "rounded-[20px] rounded-br-[6px]"
+                  : message.content ? "rounded-[18px] rounded-bl-[4px]" : "rounded-[20px] rounded-bl-[6px]"
               )}>
                 {message.type === "image" ? (
                   <img
                     src={message.media_url}
                     alt=""
-                    className="max-w-full"
+                    className="max-w-full block"
                     loading="lazy"
+                    style={{ maxWidth: '280px' }}
                   />
                 ) : (
                   <video
                     src={message.media_url}
                     controls
-                    className="max-w-full"
+                    className="max-w-full block"
+                    style={{ maxWidth: '280px' }}
                   />
                 )}
               </div>

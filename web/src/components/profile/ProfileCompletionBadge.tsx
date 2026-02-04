@@ -55,8 +55,47 @@ export function ProfileCompletionBadge({
       .finally(() => setIsLoading(false));
   }, []);
 
+  // Show skeleton while loading to prevent layout shift
   if (isLoading) {
-    return null;
+    if (variant === "compact") {
+      return (
+        <div
+          className={cn(
+            "inline-flex items-center gap-2 px-3 py-1.5 rounded-full",
+            "bg-gray-100 dark:bg-neutral-800",
+            "animate-pulse min-w-[140px]",
+            className
+          )}
+        >
+          <div className="w-3.5 h-3.5 bg-gray-200 dark:bg-neutral-700 rounded" />
+          <div className="h-4 w-20 bg-gray-200 dark:bg-neutral-700 rounded" />
+        </div>
+      );
+    }
+    // Expanded variant skeleton
+    return (
+      <div
+        className={cn(
+          "block p-4 rounded-2xl",
+          "bg-gray-100 dark:bg-neutral-800",
+          "animate-pulse",
+          className
+        )}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-200 dark:bg-neutral-700 rounded" />
+            <div className="h-4 w-28 bg-gray-200 dark:bg-neutral-700 rounded" />
+          </div>
+          <div className="h-6 w-12 bg-gray-200 dark:bg-neutral-700 rounded" />
+        </div>
+        <div className="h-2 bg-gray-200 dark:bg-neutral-700 rounded-full mb-3" />
+        <div className="flex items-center justify-between">
+          <div className="h-4 w-32 bg-gray-200 dark:bg-neutral-700 rounded" />
+          <div className="h-4 w-20 bg-gray-200 dark:bg-neutral-700 rounded" />
+        </div>
+      </div>
+    );
   }
 
   if (!completion) {

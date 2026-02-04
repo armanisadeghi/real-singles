@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-
-// Helper to convert storage path to public URL
-function getGalleryPublicUrl(path: string): string {
-  if (path.startsWith("http")) return path;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  return `${supabaseUrl}/storage/v1/object/public/gallery/${path}`;
-}
+import { resolveStorageUrl, resolveOptimizedImageUrl, IMAGE_SIZES } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/users/me/gallery
@@ -42,27 +36,26 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Generate signed URLs for gallery items
+  // Generate optimized signed URLs for gallery items
+  // Uses Supabase image transforms to reduce bandwidth
   const formattedGallery = await Promise.all(
     (gallery || []).map(async (item) => {
-      let mediaUrl = item.media_url;
-      let thumbnailUrl = item.thumbnail_url;
+      // For images, use optimized URLs with transforms
+      // For videos, use standard signed URLs
+      const isImage = item.media_type === "image";
       
-      // Create signed URL for media
-      if (!item.media_url.startsWith("http")) {
-        const { data: signedData } = await supabase.storage
-          .from("gallery")
-          .createSignedUrl(item.media_url, 3600);
-        mediaUrl = signedData?.signedUrl || getGalleryPublicUrl(item.media_url);
-      }
+      // MediaURL: Use "medium" size (600x600) for gallery view
+      // This reduces ~13MB payload to ~2-3MB while maintaining quality
+      const mediaUrl = isImage
+        ? await resolveOptimizedImageUrl(supabase, item.media_url, "medium", { bucket: "gallery" })
+        : await resolveStorageUrl(supabase, item.media_url, { bucket: "gallery" });
       
-      // Create signed URL for thumbnail if exists
-      if (item.thumbnail_url && !item.thumbnail_url.startsWith("http")) {
-        const { data: thumbData } = await supabase.storage
-          .from("gallery")
-          .createSignedUrl(item.thumbnail_url, 3600);
-        thumbnailUrl = thumbData?.signedUrl || null;
-      }
+      // ThumbnailURL: Use "thumbnail" size (150x150) for grid previews
+      const thumbnailUrl = item.thumbnail_url
+        ? await resolveOptimizedImageUrl(supabase, item.thumbnail_url, "thumbnail", { bucket: "gallery" })
+        : isImage
+          ? await resolveOptimizedImageUrl(supabase, item.media_url, "thumbnail", { bucket: "gallery" })
+          : null;
       
       return {
         GalleryID: item.id,

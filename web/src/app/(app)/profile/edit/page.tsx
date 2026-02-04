@@ -869,11 +869,14 @@ export default function EditProfilePage() {
   };
 
   const SaveStatusIndicator = () => {
+    // min-w-[130px] prevents width changes when status text changes (prevents CLS)
+    const baseClasses = "flex items-center text-sm min-w-[130px]";
+    
     switch (saveStatus) {
       case "saving":
         return (
-          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-            <svg className="animate-spin h-4 w-4 mr-2 text-brand-primary" fill="none" viewBox="0 0 24 24">
+          <div className={`${baseClasses} text-gray-500 dark:text-gray-400`}>
+            <svg className="animate-spin h-4 w-4 mr-2 text-brand-primary shrink-0" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
@@ -882,17 +885,17 @@ export default function EditProfilePage() {
         );
       case "saved":
         return (
-          <div className="flex items-center text-sm text-green-600 dark:text-green-400">
-            <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className={`${baseClasses} text-green-600 dark:text-green-400`}>
+            <svg className="h-4 w-4 mr-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            Saved {lastSaved ? getRelativeTime(lastSaved) : ""}
+            <span className="truncate">Saved {lastSaved ? getRelativeTime(lastSaved) : ""}</span>
           </div>
         );
       case "unsaved":
         return (
-          <div className="flex items-center text-sm text-amber-600 dark:text-amber-400">
-            <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className={`${baseClasses} text-amber-600 dark:text-amber-400`}>
+            <svg className="h-4 w-4 mr-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Unsaved changes
@@ -900,8 +903,8 @@ export default function EditProfilePage() {
         );
       case "error":
         return (
-          <div className="flex items-center text-sm text-red-600 dark:text-red-400">
-            <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className={`${baseClasses} text-red-600 dark:text-red-400`}>
+            <svg className="h-4 w-4 mr-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             Save failed
@@ -1438,7 +1441,24 @@ export default function EditProfilePage() {
               </p>
             </>
           ) : (
-            <p className="text-sm text-gray-400 dark:text-gray-500">Loading life goals...</p>
+            // Skeleton that matches the final life goals grid dimensions to prevent CLS
+            <div className="animate-pulse space-y-4">
+              {["Career & Achievement", "Adventure & Travel", "Personal & Lifestyle", "Impact & Legacy"].map((category, catIndex) => (
+                <div key={category} className="mb-4">
+                  <div className="h-4 w-36 bg-gray-200 dark:bg-neutral-700 rounded mb-2" />
+                  <div className="flex flex-wrap gap-2">
+                    {Array.from({ length: 5 + catIndex }).map((_, i) => (
+                      <div 
+                        key={i}
+                        className="h-10 bg-gray-100 dark:bg-neutral-800 rounded-full"
+                        style={{ width: `${80 + (i * 7) % 40}px` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <div className="h-3 w-20 bg-gray-200 dark:bg-neutral-700 rounded" />
+            </div>
           )}
         </section>
 

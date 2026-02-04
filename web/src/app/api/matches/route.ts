@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-import { resolveStorageUrl, resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
+import { resolveStorageUrl, resolveOptimizedImageUrl, resolveVoicePromptUrl, resolveVideoIntroUrl } from "@/lib/supabase/url-utils";
 import { getMutualMatches } from "@/lib/services/discovery";
 import { z } from "zod";
 
@@ -336,17 +336,18 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        // Convert profile image URL
-        const profileImageUrl = await resolveStorageUrl(
+        // Convert profile image URL - use "card" size for match cards
+        const profileImageUrl = await resolveOptimizedImageUrl(
           supabase, 
-          match.primaryPhoto || profile?.profile_image_url
+          match.primaryPhoto || profile?.profile_image_url,
+          "card"
         );
         
-        // Convert gallery URLs
+        // Convert gallery URLs - use "card" size for gallery thumbnails in match view
         const galleryWithUrls = await Promise.all(
           userGallery.slice(0, 3).map(async (g) => ({
             ...g,
-            media_url: await resolveStorageUrl(supabase, g.media_url),
+            media_url: await resolveOptimizedImageUrl(supabase, g.media_url, "card"),
           }))
         );
 
