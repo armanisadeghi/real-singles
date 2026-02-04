@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { Gift, Star, ShoppingBag, Sparkles, History, AlertCircle, CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { Gift, Star, ShoppingBag, Sparkles, History, AlertCircle, CheckCircle, Zap, Heart, Package } from "lucide-react";
 import { ProductCard, Product } from "@/components/rewards/ProductCard";
 import { PointsBalance, PointsHistory } from "@/components/rewards/PointsBalance";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -10,6 +11,7 @@ import { ProductCardSkeleton, Skeleton } from "@/components/ui/LoadingSkeleton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { cn, formatPoints } from "@/lib/utils";
 
+type ViewMode = "shop" | "powerups" | "history";
 type Category = "all" | "gift_card" | "merchandise" | "experience" | "subscription";
 
 const categories: { value: Category; label: string; icon: typeof Gift }[] = [
@@ -28,14 +30,26 @@ interface PointsTransaction {
   created_at: string;
 }
 
+interface DigitalItem {
+  id: string;
+  item_type: string;
+  name: string;
+  description: string | null;
+  quantity: number;
+  dollar_price: number | null;
+  points_cost: number | null;
+  is_active: boolean;
+}
+
 export default function RewardsPage() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
+  const [digitalItems, setDigitalItems] = useState<DigitalItem[]>([]);
   const [transactions, setTransactions] = useState<PointsTransaction[]>([]);
   const [userPoints, setUserPoints] = useState(0);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<Category>("all");
-  const [showHistory, setShowHistory] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("shop");
   const [redeemingProduct, setRedeemingProduct] = useState<Product | null>(null);
   const [buyingProduct, setBuyingProduct] = useState<Product | null>(null);
   const [redeeming, setRedeeming] = useState(false);
@@ -52,8 +66,9 @@ export default function RewardsPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [productsRes, pointsRes, transactionsRes] = await Promise.all([
+      const [productsRes, digitalRes, pointsRes, transactionsRes] = await Promise.all([
         fetch("/api/products"),
+        fetch("/api/store/items?type=digital"),
         fetch("/api/points"),
         fetch("/api/points/transactions"),
       ]);
@@ -61,6 +76,11 @@ export default function RewardsPage() {
       if (productsRes.ok) {
         const data = await productsRes.json();
         setProducts(data.products || []);
+      }
+
+      if (digitalRes.ok) {
+        const data = await digitalRes.json();
+        setDigitalItems(data.data?.filter((item: DigitalItem) => item.is_active) || []);
       }
 
       if (pointsRes.ok) {
@@ -189,18 +209,45 @@ export default function RewardsPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => setShowHistory(!showHistory)}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors",
-            showHistory
-              ? "bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400"
-              : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
-          )}
-        >
-          <History className="w-4 h-4" />
-          {showHistory ? "View Shop" : "Points History"}
-        </button>
+        {/* View Mode Tabs */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setViewMode("shop")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors",
+              viewMode === "shop"
+                ? "bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400"
+                : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
+            )}
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Shop
+          </button>
+          <button
+            onClick={() => setViewMode("powerups")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors",
+              viewMode === "powerups"
+                ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400"
+                : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
+            )}
+          >
+            <Zap className="w-4 h-4" />
+            Power-Ups
+          </button>
+          <button
+            onClick={() => setViewMode("history")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors",
+              viewMode === "history"
+                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+                : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
+            )}
+          >
+            <History className="w-4 h-4" />
+            History
+          </button>
+        </div>
       </div>
 
       {/* Points Balance */}
@@ -210,7 +257,7 @@ export default function RewardsPage() {
         <PointsBalance balance={userPoints} className="mb-6" />
       )}
 
-      {showHistory ? (
+      {viewMode === "history" ? (
         /* Points History View */
         <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 p-4">
           <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Transaction History</h2>
@@ -230,6 +277,143 @@ export default function RewardsPage() {
           ) : (
             <PointsHistory transactions={transactions} />
           )}
+        </div>
+      ) : viewMode === "powerups" ? (
+        /* Power-Ups View */
+        <div className="space-y-6">
+          {/* Quick Links to dedicated pages */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Link
+              href="/boost"
+              className="group relative overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-6 text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                  <Zap className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-1">Profile Boost</h3>
+                <p className="text-white/80 text-sm">Get seen by 10x more people</p>
+              </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-125" />
+            </Link>
+            
+            <Link
+              href="/superlikes"
+              className="group relative overflow-hidden bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl p-6 text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                  <Heart className="w-6 h-6 fill-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-1">Super Likes</h3>
+                <p className="text-white/80 text-sm">Stand out from the crowd</p>
+              </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-125" />
+            </Link>
+          </div>
+
+          {/* All Digital Items */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+              All Power-Ups
+            </h2>
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-40 rounded-xl" />
+                ))}
+              </div>
+            ) : digitalItems.length === 0 ? (
+              <EmptyState
+                type="rewards"
+                title="No power-ups available"
+                description="Check back later for new power-ups"
+              />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {digitalItems.map((item) => {
+                  const canAffordPoints = userPoints >= (item.points_cost || Infinity);
+                  const hasPointsPrice = item.points_cost !== null && item.points_cost > 0;
+                  const hasDollarPrice = item.dollar_price !== null && item.dollar_price > 0;
+                  const itemIcon = item.item_type === "boost" ? Zap : 
+                                   item.item_type === "superlike_pack" ? Heart :
+                                   item.item_type === "points_pack" ? Star : Package;
+                  const ItemIcon = itemIcon;
+                  const gradientClass = item.item_type === "boost" ? "from-purple-500/20 to-pink-500/20" :
+                                        item.item_type === "superlike_pack" ? "from-pink-500/20 to-rose-500/20" :
+                                        "from-amber-500/20 to-orange-500/20";
+                  const iconColor = item.item_type === "boost" ? "text-purple-500" :
+                                    item.item_type === "superlike_pack" ? "text-pink-500" :
+                                    "text-amber-500";
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="border border-gray-200 dark:border-neutral-700 rounded-xl p-4 bg-white dark:bg-neutral-800"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={cn("w-10 h-10 rounded-lg bg-gradient-to-br flex items-center justify-center flex-shrink-0", gradientClass)}>
+                          <ItemIcon className={cn("w-5 h-5", iconColor, item.item_type === "superlike_pack" && "fill-pink-500")} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm">
+                            {item.name}
+                          </h3>
+                          {item.description && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
+                              {item.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Pricing */}
+                      <div className="flex items-center gap-2 mt-3">
+                        {hasPointsPrice && (
+                          <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                            {item.points_cost?.toLocaleString()} pts
+                          </span>
+                        )}
+                        {hasPointsPrice && hasDollarPrice && (
+                          <span className="text-gray-300 dark:text-gray-600 text-xs">or</span>
+                        )}
+                        {hasDollarPrice && (
+                          <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                            ${item.dollar_price?.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-2 mt-3">
+                        {hasPointsPrice && (
+                          <Link
+                            href={item.item_type === "boost" ? "/boost" : item.item_type === "superlike_pack" ? "/superlikes" : "/rewards"}
+                            className={cn(
+                              "flex-1 px-3 py-2 rounded-lg text-xs font-medium text-center transition-colors",
+                              canAffordPoints
+                                ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50"
+                                : "bg-gray-100 dark:bg-neutral-700 text-gray-400 dark:text-gray-500"
+                            )}
+                          >
+                            {canAffordPoints ? "Use Points" : "Need more pts"}
+                          </Link>
+                        )}
+                        {hasDollarPrice && (
+                          <Link
+                            href={item.item_type === "boost" ? "/boost" : item.item_type === "superlike_pack" ? "/superlikes" : "/rewards"}
+                            className="flex-1 px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-xs font-medium text-center hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+                          >
+                            Buy
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         /* Shop View */

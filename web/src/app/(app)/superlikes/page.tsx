@@ -1,32 +1,31 @@
 "use client";
 
 /**
- * Boost Page
+ * Super Likes Page
  * 
- * Allows users to purchase profile boosts using points or dollars.
- * Shows current boost status and available boost packages.
+ * Allows users to purchase super like packs using points or dollars.
+ * Shows current super like balance and available packages.
  */
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { 
-  Zap, 
+  Heart, 
   ArrowLeft, 
-  Clock, 
   Star, 
   DollarSign,
   Check,
   Loader2,
   AlertCircle,
+  Sparkles,
   TrendingUp,
-  Users,
-  Eye
+  MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
-interface BoostItem {
+interface SuperLikeItem {
   id: string;
   item_type: string;
   name: string;
@@ -34,24 +33,24 @@ interface BoostItem {
   quantity: number;
   dollar_price: number | null;
   points_cost: number | null;
-  duration_hours: number | null;
   is_active: boolean;
 }
 
-interface UserBoostStatus {
-  boost_expires_at: string | null;
+interface UserSuperLikeStatus {
+  superlike_balance: number;
+  daily_superlikes_remaining: number;
   points_balance: number;
 }
 
-export default function BoostPage() {
+export default function SuperLikesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [boostItems, setBoostItems] = useState<BoostItem[]>([]);
-  const [userStatus, setUserStatus] = useState<UserBoostStatus | null>(null);
+  const [superLikeItems, setSuperLikeItems] = useState<SuperLikeItem[]>([]);
+  const [userStatus, setUserStatus] = useState<UserSuperLikeStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<BoostItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<SuperLikeItem | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"points" | "stripe">("points");
   const [showConfirm, setShowConfirm] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -62,34 +61,35 @@ export default function BoostPage() {
     const canceled = searchParams.get("canceled");
     
     if (success === "true") {
-      setMessage({ type: "success", text: "Your boost has been activated!" });
+      setMessage({ type: "success", text: "Super Likes added to your account!" });
     } else if (canceled === "true") {
       setMessage({ type: "error", text: "Purchase was canceled." });
     }
   }, [searchParams]);
 
-  // Fetch boost items and user status
+  // Fetch superlike items and user status
   const fetchData = useCallback(async () => {
     try {
       const [itemsRes, userRes] = await Promise.all([
-        fetch("/api/store/items?type=boost"),
+        fetch("/api/store/items?type=superlike_pack"),
         fetch("/api/users/me")
       ]);
 
       if (itemsRes.ok) {
         const itemsData = await itemsRes.json();
-        setBoostItems(itemsData.data?.filter((item: BoostItem) => item.item_type === "boost" && item.is_active) || []);
+        setSuperLikeItems(itemsData.data?.filter((item: SuperLikeItem) => item.item_type === "superlike_pack" && item.is_active) || []);
       }
 
       if (userRes.ok) {
         const userData = await userRes.json();
         setUserStatus({
-          boost_expires_at: userData.data?.boost_expires_at || null,
+          superlike_balance: userData.data?.superlike_balance || 0,
+          daily_superlikes_remaining: userData.data?.daily_superlikes_remaining || 0,
           points_balance: userData.data?.points_balance || 0
         });
       }
     } catch (error) {
-      console.error("Failed to fetch boost data:", error);
+      console.error("Failed to fetch superlike data:", error);
     } finally {
       setLoading(false);
     }
@@ -99,28 +99,8 @@ export default function BoostPage() {
     fetchData();
   }, [fetchData]);
 
-  // Calculate remaining boost time
-  const getBoostTimeRemaining = () => {
-    if (!userStatus?.boost_expires_at) return null;
-    
-    const expiresAt = new Date(userStatus.boost_expires_at);
-    const now = new Date();
-    
-    if (expiresAt <= now) return null;
-    
-    const diffMs = expiresAt.getTime() - now.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const hours = Math.floor(diffMins / 60);
-    const mins = diffMins % 60;
-    
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
-    }
-    return `${mins}m`;
-  };
-
-  const boostTimeRemaining = getBoostTimeRemaining();
-  const isCurrentlyBoosted = !!boostTimeRemaining;
+  // Calculate total available superlikes
+  const totalSuperlikes = (userStatus?.superlike_balance || 0) + (userStatus?.daily_superlikes_remaining || 0);
 
   // Handle purchase
   const handlePurchase = async () => {
@@ -150,7 +130,7 @@ export default function BoostPage() {
         window.location.href = data.data.checkoutUrl;
       } else {
         // Points purchase completed
-        setMessage({ type: "success", text: "Your boost has been activated!" });
+        setMessage({ type: "success", text: `${selectedItem.quantity} Super Likes added!` });
         fetchData(); // Refresh data
       }
     } catch (error) {
@@ -165,16 +145,35 @@ export default function BoostPage() {
   };
 
   // Open purchase modal
-  const openPurchaseModal = (item: BoostItem, method: "points" | "stripe") => {
+  const openPurchaseModal = (item: SuperLikeItem, method: "points" | "stripe") => {
     setSelectedItem(item);
     setPaymentMethod(method);
     setShowConfirm(true);
   };
 
+  // Get badge for best value
+  const getBestValueIndex = () => {
+    if (superLikeItems.length <= 1) return -1;
+    let bestIndex = -1;
+    let bestValue = 0;
+    
+    superLikeItems.forEach((item, index) => {
+      const pricePerUnit = (item.dollar_price || 0) / item.quantity;
+      if (bestIndex === -1 || (pricePerUnit > 0 && pricePerUnit < bestValue)) {
+        bestValue = pricePerUnit;
+        bestIndex = index;
+      }
+    });
+    
+    return bestIndex;
+  };
+
+  const bestValueIndex = getBestValueIndex();
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
       </div>
     );
   }
@@ -217,34 +216,37 @@ export default function BoostPage() {
 
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-4">
-          <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+        <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center mb-4">
+          <Heart className="w-8 h-8 sm:w-10 sm:h-10 text-white fill-white" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          Profile Boost
+          Super Likes
         </h1>
         <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-          Get seen by more people and increase your chances of matching!
+          Stand out from the crowd and let them know you're really interested!
         </p>
       </div>
 
-      {/* Current Boost Status */}
-      {isCurrentlyBoosted && (
-        <div className="mb-8 p-4 sm:p-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl text-white">
+      {/* Current Super Like Balance */}
+      <div className="mb-8 p-4 sm:p-5 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl text-white">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-              <Zap className="w-6 h-6 animate-pulse" />
+              <Heart className="w-6 h-6 fill-white" />
             </div>
             <div>
-              <p className="font-semibold text-lg">Boost Active!</p>
-              <p className="text-white/80 text-sm">
-                <Clock className="w-4 h-4 inline mr-1" />
-                {boostTimeRemaining} remaining
-              </p>
+              <p className="text-white/80 text-sm">Your Super Likes</p>
+              <p className="font-bold text-2xl">{totalSuperlikes}</p>
             </div>
           </div>
+          {userStatus && userStatus.daily_superlikes_remaining > 0 && (
+            <div className="text-right">
+              <p className="text-white/60 text-xs">Daily free</p>
+              <p className="font-semibold">{userStatus.daily_superlikes_remaining}</p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Points Balance */}
       <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl flex items-center justify-between">
@@ -260,49 +262,67 @@ export default function BoostPage() {
       {/* Benefits */}
       <div className="mb-8 grid grid-cols-3 gap-3">
         <div className="text-center p-3 bg-gray-50 dark:bg-neutral-900 rounded-xl">
-          <TrendingUp className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-          <p className="text-xs text-gray-600 dark:text-gray-400">10x more views</p>
+          <Sparkles className="w-6 h-6 text-pink-500 mx-auto mb-2" />
+          <p className="text-xs text-gray-600 dark:text-gray-400">3x more likely to match</p>
         </div>
         <div className="text-center p-3 bg-gray-50 dark:bg-neutral-900 rounded-xl">
-          <Users className="w-6 h-6 text-pink-500 mx-auto mb-2" />
-          <p className="text-xs text-gray-600 dark:text-gray-400">3x more matches</p>
+          <TrendingUp className="w-6 h-6 text-rose-500 mx-auto mb-2" />
+          <p className="text-xs text-gray-600 dark:text-gray-400">Stand out instantly</p>
         </div>
         <div className="text-center p-3 bg-gray-50 dark:bg-neutral-900 rounded-xl">
-          <Eye className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-          <p className="text-xs text-gray-600 dark:text-gray-400">Priority placement</p>
+          <MessageCircle className="w-6 h-6 text-purple-500 mx-auto mb-2" />
+          <p className="text-xs text-gray-600 dark:text-gray-400">Get noticed first</p>
         </div>
       </div>
 
-      {/* Boost Options */}
+      {/* Super Like Packages */}
       <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-        Choose Your Boost
+        Get More Super Likes
       </h2>
 
-      {boostItems.length === 0 ? (
+      {superLikeItems.length === 0 ? (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          <Zap className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-          <p>No boost packages available right now.</p>
+          <Heart className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+          <p>No packages available right now.</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {boostItems.map((item) => {
+          {superLikeItems.map((item, index) => {
             const canAffordPoints = (userStatus?.points_balance || 0) >= (item.points_cost || Infinity);
             const hasPointsPrice = item.points_cost !== null && item.points_cost > 0;
             const hasDollarPrice = item.dollar_price !== null && item.dollar_price > 0;
+            const isBestValue = index === bestValueIndex && superLikeItems.length > 1;
 
             return (
               <div
                 key={item.id}
-                className="border border-gray-200 dark:border-neutral-700 rounded-xl p-4 sm:p-5 bg-white dark:bg-neutral-800"
+                className={cn(
+                  "relative border rounded-xl p-4 sm:p-5 bg-white dark:bg-neutral-800 transition-all",
+                  isBestValue 
+                    ? "border-pink-500 ring-2 ring-pink-500/20" 
+                    : "border-gray-200 dark:border-neutral-700"
+                )}
               >
+                {/* Best Value Badge */}
+                {isBestValue && (
+                  <div className="absolute -top-3 left-4 px-3 py-1 bg-pink-500 text-white text-xs font-semibold rounded-full">
+                    Best Value
+                  </div>
+                )}
+
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0">
-                    <Zap className="w-6 h-6 text-purple-500" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500/20 to-rose-500/20 flex items-center justify-center flex-shrink-0">
+                    <Heart className="w-6 h-6 text-pink-500 fill-pink-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                      {item.name}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                        {item.name}
+                      </h3>
+                      <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-xs font-medium rounded-full">
+                        ×{item.quantity}
+                      </span>
+                    </div>
                     {item.description && (
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                         {item.description}
@@ -330,6 +350,11 @@ export default function BoostPage() {
                             {item.dollar_price?.toFixed(2)}
                           </span>
                         </div>
+                      )}
+                      {hasDollarPrice && (
+                        <span className="text-xs text-gray-400">
+                          (${(item.dollar_price! / item.quantity).toFixed(2)}/each)
+                        </span>
                       )}
                     </div>
                   </div>
@@ -371,7 +396,7 @@ export default function BoostPage() {
       <div className="mt-8 text-center">
         <Link
           href="/rewards"
-          className="text-sm text-purple-600 dark:text-purple-400 hover:underline"
+          className="text-sm text-pink-600 dark:text-pink-400 hover:underline"
         >
           Earn more points in the Rewards Store →
         </Link>
@@ -389,11 +414,11 @@ export default function BoostPage() {
         message={
           selectedItem
             ? paymentMethod === "points"
-              ? `Use ${selectedItem.points_cost?.toLocaleString()} points to activate "${selectedItem.name}"?`
+              ? `Use ${selectedItem.points_cost?.toLocaleString()} points to get ${selectedItem.quantity} Super Likes?`
               : `You'll be redirected to complete your purchase of "${selectedItem.name}" for $${selectedItem.dollar_price?.toFixed(2)}.`
             : ""
         }
-        confirmLabel={paymentMethod === "points" ? "Activate Boost" : "Continue to Checkout"}
+        confirmLabel={paymentMethod === "points" ? "Get Super Likes" : "Continue to Checkout"}
         variant={paymentMethod === "points" ? "warning" : "info"}
         loading={purchasing}
       />

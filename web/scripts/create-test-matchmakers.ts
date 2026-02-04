@@ -45,6 +45,7 @@ const matchmakers = [
     gender: "female",
     city: "San Francisco",
     state: "CA",
+    profile_image_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop",
     bio: "Professional matchmaker with 5 years of experience helping career-focused individuals find lasting love. I specialize in understanding what makes professional relationships thrive.",
     specialties: ["professionals", "career_focused"],
     years_experience: 5,
@@ -59,6 +60,7 @@ const matchmakers = [
     gender: "male",
     city: "Los Angeles",
     state: "CA",
+    profile_image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
     bio: "LGBTQ+ matchmaking specialist with 8 years of experience creating meaningful connections in the queer community. Understanding, inclusive, and dedicated to finding your perfect match.",
     specialties: ["lgbtq", "diverse_backgrounds"],
     years_experience: 8,
@@ -73,6 +75,7 @@ const matchmakers = [
     gender: "female",
     city: "Austin",
     state: "TX",
+    profile_image_url: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop",
     bio: "Faith-based matchmaker helping individuals find partners who share their values and beliefs. 3 years of experience creating connections rooted in shared faith and life goals.",
     specialties: ["faith_based", "traditional_values"],
     years_experience: 3,
@@ -82,6 +85,37 @@ const matchmakers = [
 
 async function createMatchmaker(data: typeof matchmakers[0]) {
   console.log(`\n🔄 Creating matchmaker: ${data.email}`);
+
+  // Check if user already exists
+  const { data: existingUser } = await supabase
+    .from("users")
+    .select("id")
+    .eq("email", data.email)
+    .single();
+
+  if (existingUser) {
+    console.log(`   ℹ️  User already exists, updating...`);
+    
+    // Update password
+    await supabase.auth.admin.updateUserById(existingUser.id, { password });
+    console.log(`   ✅ Password updated`);
+    
+    // Update profile with photo and hidden flag
+    await supabase
+      .from("profiles")
+      .update({
+        profile_hidden: true,
+        profile_image_url: data.profile_image_url,
+        bio: data.bio,
+        first_name: data.first_name,
+        last_name: data.last_name,
+      })
+      .eq("user_id", existingUser.id);
+    
+    console.log(`   ✅ Profile updated (hidden from discovery, photo added)`);
+    
+    return createMatchmakerProfile(existingUser.id, data);
+  }
 
   // 1. Create auth user
   const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
@@ -94,25 +128,6 @@ async function createMatchmaker(data: typeof matchmakers[0]) {
   });
 
   if (authError) {
-    if (authError.message.includes("already registered")) {
-      console.log(`   ℹ️  User already exists, looking up...`);
-      const { data: users } = await supabase
-        .from("users")
-        .select("id")
-        .eq("email", data.email)
-        .single();
-      
-      if (!users) {
-        console.error(`   ❌ Could not find existing user`);
-        return;
-      }
-      
-      // Update password
-      await supabase.auth.admin.updateUserById(users.id, { password });
-      console.log(`   ✅ Password updated`);
-      
-      return createMatchmakerProfile(users.id, data);
-    }
     console.error(`   ❌ Auth error:`, authError.message);
     return;
   }
@@ -139,7 +154,7 @@ async function createMatchmaker(data: typeof matchmakers[0]) {
 
   console.log(`   ✅ User record created`);
 
-  // 3. Create profile
+  // 3. Create profile (hidden from discovery)
   const { error: profileError } = await supabase.from("profiles").insert({
     user_id: authUser.user.id,
     first_name: data.first_name,
@@ -149,6 +164,8 @@ async function createMatchmaker(data: typeof matchmakers[0]) {
     city: data.city,
     state: data.state,
     bio: data.bio,
+    profile_image_url: data.profile_image_url,
+    profile_hidden: true, // Hide from normal discovery
   });
 
   if (profileError && !profileError.message.includes("duplicate key")) {
@@ -162,6 +179,16 @@ async function createMatchmaker(data: typeof matchmakers[0]) {
 }
 
 async function createMatchmakerProfile(userId: string, data: typeof matchmakers[0]) {
+  // Update profile to ensure hidden and has photo
+  await supabase
+    .from("profiles")
+    .update({
+      profile_hidden: true,
+      profile_image_url: data.profile_image_url,
+      bio: data.bio,
+    })
+    .eq("user_id", userId);
+
   // 4. Create matchmaker record
   const { data: matchmaker, error: matchmakerError } = await supabase
     .from("matchmakers")
@@ -181,7 +208,7 @@ async function createMatchmakerProfile(userId: string, data: typeof matchmakers[
     if (matchmakerError.message.includes("duplicate key")) {
       console.log(`   ℹ️  Matchmaker profile already exists`);
       
-      // Update to ensure approved status
+      // Update to ensure approved status and hidden profile
       await supabase
         .from("matchmakers")
         .update({

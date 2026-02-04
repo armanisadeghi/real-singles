@@ -15,8 +15,12 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const category = searchParams.get("category");
-  const itemType = searchParams.get("type"); // "product", "digital", or null for all
+  const itemType = searchParams.get("type"); // "product", "digital", "boost", "superlike_pack", etc.
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
+  
+  // Check if filtering for a specific purchasable item type
+  const specificItemTypes = ["boost", "superlike_pack", "points_pack", "see_likes"];
+  const isSpecificItemType = itemType && specificItemTypes.includes(itemType);
 
   const results: Array<{
     id: string;
@@ -33,8 +37,10 @@ export async function GET(request: NextRequest) {
     display_order: number;
   }> = [];
 
-  // Fetch products if not filtering for digital only
+  // Fetch products if not filtering for digital only or specific item types
   if (!itemType || itemType === "product") {
+    // Skip products if filtering for specific purchasable item types
+    if (!isSpecificItemType) {
     let productQuery = supabase
       .from("products")
       .select("id, name, description, image_url, points_cost, dollar_price, category, stock_quantity, created_at")
@@ -70,16 +76,22 @@ export async function GET(request: NextRequest) {
         });
       }
     }
+    }
   }
 
   // Fetch purchasable items if not filtering for products only
-  if (!itemType || itemType === "digital") {
+  if (!itemType || itemType === "digital" || isSpecificItemType) {
     let itemQuery = supabase
       .from("purchasable_items")
       .select("*")
       .eq("is_active", true)
       .order("display_order", { ascending: true })
       .limit(limit);
+
+    // Filter by specific item type if requested
+    if (isSpecificItemType) {
+      itemQuery = itemQuery.eq("item_type", itemType);
+    }
 
     const { data: items } = await itemQuery;
 
@@ -113,6 +125,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     success: true,
     items: results,
+    data: results, // Alias for compatibility
     total: results.length,
   });
 }
