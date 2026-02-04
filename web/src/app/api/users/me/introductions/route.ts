@@ -42,8 +42,8 @@ export async function GET(request: NextRequest) {
       user_b_id,
       intro_message,
       status,
-      user_a_response,
-      user_b_response,
+      user_a_response_at,
+      user_b_response_at,
       outcome,
       conversation_id,
       created_at,
@@ -95,15 +95,21 @@ export async function GET(request: NextRequest) {
   // Fetch matchmaker info
   const { data: matchmakers } = await supabase
     .from("matchmakers")
-    .select("id, user_id, professional_name")
+    .select("id, user_id, bio")
     .in("id", Array.from(matchmakerIds));
 
-  // Also get matchmaker profiles for profile image
+  // Also get matchmaker profiles for name and image
   const matchmakerUserIds = matchmakers?.map((m) => m.user_id) || [];
   const { data: matchmakerProfiles } = await supabase
     .from("profiles")
     .select("user_id, first_name, last_name, profile_image_url")
     .in("user_id", matchmakerUserIds);
+
+  // Also get display names
+  const { data: matchmakerUsers } = await supabase
+    .from("users")
+    .select("id, display_name")
+    .in("id", matchmakerUserIds);
 
   // Create lookup maps
   const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
@@ -111,6 +117,32 @@ export async function GET(request: NextRequest) {
   const matchmakerProfileMap = new Map(
     matchmakerProfiles?.map((p) => [p.user_id, p]) || []
   );
+  const matchmakerUserMap = new Map(
+    matchmakerUsers?.map((u) => [u.id, u]) || []
+  );
+
+  // Helper to determine user's response from status
+  const getUserResponse = (
+    status: string,
+    isUserA: boolean
+  ): string | null => {
+    if (status === "pending") return null;
+    if (status === "both_accepted" || status === "active") return "accepted";
+    if (isUserA) {
+      if (status === "user_a_accepted") return "accepted";
+      if (status === "user_a_declined") return "declined";
+      // If user_b declined/accepted and user_a hasn't responded
+      if (status === "user_b_accepted" || status === "user_b_declined")
+        return null;
+    } else {
+      if (status === "user_b_accepted") return "accepted";
+      if (status === "user_b_declined") return "declined";
+      // If user_a declined/accepted and user_b hasn't responded
+      if (status === "user_a_accepted" || status === "user_a_declined")
+        return null;
+    }
+    return null;
+  };
 
   // Format response
   const formatted = await Promise.all(
@@ -118,12 +150,15 @@ export async function GET(request: NextRequest) {
       // Determine which user is the "other" user
       const isUserA = intro.user_a_id === user.id;
       const otherUserId = isUserA ? intro.user_b_id : intro.user_a_id;
-      const myResponse = isUserA ? intro.user_a_response : intro.user_b_response;
+      const myResponse = getUserResponse(intro.status, isUserA);
 
       const otherProfile = profileMap.get(otherUserId);
       const matchmaker = matchmakerMap.get(intro.matchmaker_id);
       const matchmakerProfile = matchmaker
         ? matchmakerProfileMap.get(matchmaker.user_id)
+        : null;
+      const matchmakerUser = matchmaker
+        ? matchmakerUserMap.get(matchmaker.user_id)
         : null;
 
       // Resolve image URLs
@@ -150,6 +185,12 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      // Get matchmaker display name
+      const matchmakerName =
+        matchmakerUser?.display_name ||
+        `${matchmakerProfile?.first_name || ""} ${matchmakerProfile?.last_name || ""}`.trim() ||
+        "Matchmaker";
+
       return {
         id: intro.id,
         status: intro.status,
@@ -173,10 +214,7 @@ export async function GET(request: NextRequest) {
         // The matchmaker who made the introduction
         matchmaker: {
           id: intro.matchmaker_id,
-          name:
-            matchmaker?.professional_name ||
-            `${matchmakerProfile?.first_name || ""} ${matchmakerProfile?.last_name || ""}`.trim() ||
-            "Matchmaker",
+          name: matchmakerName,
           profile_image_url: matchmakerImageUrl,
         },
       };
