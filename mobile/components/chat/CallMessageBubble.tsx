@@ -7,7 +7,7 @@ interface CallMetadata {
   call_id: string;
   call_type: 'audio' | 'video';
   duration_seconds: number;
-  status: 'completed' | 'missed' | 'declined';
+  status: 'completed' | 'missed' | 'declined' | 'no_answer';
   participants: string[];
   started_at: string;
   ended_at: string;
@@ -60,46 +60,52 @@ const CallMessageBubble = ({ metadata, isOwn, timestamp }: CallMessageBubbleProp
   };
 
   const isVideo = metadata.call_type === 'video';
-  const isMissed = metadata.status === 'missed' || metadata.status === 'declined';
+  const isUnanswered = metadata.status === 'missed' || metadata.status === 'declined' || metadata.status === 'no_answer';
   const duration = metadata.duration_seconds || 0;
 
   // Determine icon based on call type and status
   const getIconName = (): string => {
     if (isVideo) {
-      return isMissed ? 'videocam-off' : 'videocam';
+      return isUnanswered ? 'videocam-off' : 'videocam';
     }
-    return isMissed ? 'phone-missed' : 'call';
+    return isUnanswered ? 'phone-missed' : 'call';
   };
 
   // Determine text based on status
   const getCallText = () => {
-    if (metadata.status === 'missed') {
-      return isVideo ? 'Missed video call' : 'Missed call';
+    const callType = isVideo ? 'Video call' : 'Voice call';
+    
+    switch (metadata.status) {
+      case 'missed':
+        return `Missed ${callType.toLowerCase()}`;
+      case 'declined':
+        return `${callType} declined`;
+      case 'no_answer':
+        return `${callType} - No answer`;
+      case 'completed':
+      default:
+        return callType;
     }
-    if (metadata.status === 'declined') {
-      return isVideo ? 'Declined video call' : 'Declined call';
-    }
-    return isVideo ? 'Video call' : 'Voice call';
   };
 
   // Colors based on status
-  const iconBgColor = isMissed 
+  const iconBgColor = isUnanswered 
     ? (isDark ? 'rgba(239, 68, 68, 0.2)' : 'rgba(239, 68, 68, 0.1)') 
     : isOwn 
     ? (isDark ? 'rgba(34, 197, 94, 0.2)' : 'rgba(34, 197, 94, 0.1)')
     : (isDark ? 'rgba(156, 163, 175, 0.2)' : 'rgba(156, 163, 175, 0.1)');
 
-  const iconColor = isMissed 
+  const iconColor = isUnanswered 
     ? '#EF4444' 
     : isOwn 
     ? '#22C55E' 
     : (isDark ? '#9CA3AF' : '#6B7280');
 
-  const cardBgColor = isMissed
+  const cardBgColor = isUnanswered
     ? (isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(254, 226, 226, 1)')
     : (isDark ? 'rgba(55, 65, 81, 0.5)' : 'rgba(243, 244, 246, 1)');
 
-  const textColor = isMissed
+  const textColor = isUnanswered
     ? (isDark ? '#FCA5A5' : '#B91C1C')
     : themedColors.text;
 
@@ -124,7 +130,7 @@ const CallMessageBubble = ({ metadata, isOwn, timestamp }: CallMessageBubbleProp
             <Text className="text-[15px] font-medium" style={{ color: textColor }}>
               {getCallText()}
             </Text>
-            {!isMissed && duration > 0 && (
+            {metadata.status === 'completed' && duration > 0 && (
               <Text className="text-[13px]" style={{ color: themedColors.secondaryText }}>
                 {formatDuration(duration)}
               </Text>

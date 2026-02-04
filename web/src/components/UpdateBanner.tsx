@@ -80,18 +80,19 @@ export function UpdateBanner({
       role="alert"
       aria-live="polite"
     >
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Message */}
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="shrink-0 bg-white/20 rounded-full p-2">
-              <RefreshCw className="w-4 h-4" />
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            <div className="shrink-0 bg-white/20 rounded-full p-1.5 sm:p-2">
+              <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium">
-                A new version is available
+                <span className="sm:hidden">New update</span>
+                <span className="hidden sm:inline">A new version is available</span>
                 {latestVersion && (
-                  <span className="ml-2 opacity-90 text-xs">
+                  <span className="ml-2 opacity-90 text-xs hidden sm:inline">
                     (v{latestVersion.version})
                   </span>
                 )}
@@ -103,12 +104,12 @@ export function UpdateBanner({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={handleReload}
               disabled={isReloading}
               className={cn(
-                "px-4 py-2 rounded-lg font-medium text-sm",
+                "px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-sm",
                 "bg-white text-blue-600 hover:bg-blue-50",
                 "transition-colors duration-200",
                 "focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600",
@@ -116,9 +117,10 @@ export function UpdateBanner({
               )}
             >
               {isReloading ? (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 sm:gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Updating...
+                  <span className="hidden xs:inline">Updating...</span>
+                  <span className="xs:hidden">...</span>
                 </span>
               ) : (
                 "Reload"
@@ -128,7 +130,7 @@ export function UpdateBanner({
               onClick={dismissUpdate}
               disabled={isReloading}
               className={cn(
-                "p-2 rounded-lg",
+                "p-1.5 sm:p-2 rounded-lg",
                 "hover:bg-white/10",
                 "transition-colors duration-200",
                 "focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600",
@@ -136,7 +138,7 @@ export function UpdateBanner({
               )}
               aria-label="Dismiss update notification"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
