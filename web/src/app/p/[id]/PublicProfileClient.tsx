@@ -283,11 +283,11 @@ export function PublicProfileClient({ userId, initialProfile }: PublicProfileCli
             </div>
           )}
 
-          {/* Profile Preview with Vertical Fade Effect */}
+          {/* Profile Preview with Visible Fade Effect */}
           {(profile.interests && profile.interests.length > 0) && (
-            <div className="relative mb-6 overflow-hidden">
-              {/* Interests */}
-              <div className="flex gap-2 flex-wrap pb-8">
+            <div className="mb-6">
+              {/* Interests - fully visible */}
+              <div className="flex gap-2 flex-wrap mb-4">
                 {profile.interests.map((interest) => (
                   <span 
                     key={interest} 
@@ -298,9 +298,20 @@ export function PublicProfileClient({ userId, initialProfile }: PublicProfileCli
                 ))}
               </div>
               
-              {/* Vertical fade gradient at the bottom - creates "see more" effect */}
-              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none flex items-end justify-center pb-1">
-                <span className="text-xs text-gray-400 font-medium">See full profile for more</span>
+              {/* Faded preview section - simulates hidden content */}
+              <div className="relative overflow-hidden h-20 rounded-xl bg-gradient-to-b from-gray-50 to-white">
+                {/* Fake "more content" that's fading out */}
+                <div className="p-3 space-y-2 opacity-40">
+                  <div className="h-3 bg-gray-200 rounded-full w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded-full w-1/2" />
+                  <div className="h-3 bg-gray-200 rounded-full w-2/3" />
+                </div>
+                {/* Strong gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/70 to-white" />
+                {/* CTA text */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-sm text-amber-600 font-semibold">See full profile →</span>
+                </div>
               </div>
             </div>
           )}
