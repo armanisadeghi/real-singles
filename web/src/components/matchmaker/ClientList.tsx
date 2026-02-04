@@ -25,54 +25,37 @@ export function ClientList() {
   const [matchmakerId, setMatchmakerId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get current user, then find their matchmaker record
     const fetchMatchmakerId = async () => {
       try {
-        // First get current user
         const userRes = await fetch("/api/users/me");
         const userData = await userRes.json();
         
-        console.log("🔍 Current user:", userData.user?.email, "ID:", userData.user?.id);
-        
-        if (!userData.success || !userData.user) {
-          console.log("❌ Not logged in");
+        if (!userData.success || !userData.data) {
           setLoading(false);
           return;
         }
 
-        // Then get their matchmaker record
+        const userId = userData.data.id;
+
         const matchmakerRes = await fetch(`/api/matchmakers?status=approved&limit=100`);
         const matchmakersData = await matchmakerRes.json();
         
-        console.log("🔍 Matchmakers API response:", matchmakersData);
-        
         if (!matchmakersData.success || !matchmakersData.data) {
-          console.log("❌ No matchmakers data");
           setLoading(false);
           return;
         }
 
         const myMatchmaker = matchmakersData.data.find(
-          (m: any) => m.user_id === userData.user.id
+          (m: any) => m.user_id === userId
         );
 
-        console.log("🔍 Looking for matchmaker with user_id:", userData.user.id);
-        console.log("🔍 Available matchmakers:", matchmakersData.data.map((m: any) => ({
-          name: m.display_name,
-          user_id: m.user_id,
-          matchmaker_id: m.id,
-          matches: m.user_id === userData.user.id ? "✅ MATCH" : "❌"
-        })));
-
         if (myMatchmaker) {
-          console.log("✅ Found my matchmaker record:", myMatchmaker.id);
           setMatchmakerId(myMatchmaker.id);
         } else {
-          console.log("❌ No matchmaker record found for user", userData.user.id);
           setLoading(false);
         }
       } catch (error) {
-        console.error("❌ Error:", error);
+        console.error("Error fetching matchmaker:", error);
         setLoading(false);
       }
     };
@@ -81,26 +64,18 @@ export function ClientList() {
   }, []);
 
   useEffect(() => {
-    if (!matchmakerId) {
-      console.log("⏸️ No matchmaker ID yet, skipping fetch");
-      return;
-    }
+    if (!matchmakerId) return;
 
-    console.log(`🔍 Fetching clients for matchmaker ${matchmakerId} with status ${statusFilter}`);
     setLoading(true);
     fetch(`/api/matchmakers/${matchmakerId}/clients?status=${statusFilter}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("📦 Clients API response:", data);
         if (data.success) {
-          console.log(`✅ Found ${data.data?.length || 0} clients`);
           setClients(data.data || []);
-        } else {
-          console.log("❌ API returned error:", data.msg);
         }
       })
       .catch((error) => {
-        console.error("❌ Failed to fetch clients:", error);
+        console.error("Failed to fetch clients:", error);
       })
       .finally(() => {
         setLoading(false);
