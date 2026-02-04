@@ -7,7 +7,7 @@ interface CallMetadata {
   call_id: string;
   call_type: "audio" | "video";
   duration_seconds: number;
-  status: "completed" | "missed" | "declined";
+  status: "completed" | "missed" | "declined" | "no_answer";
   participants: string[];
   started_at: string;
   ended_at: string;
@@ -52,18 +52,18 @@ export function CallMessageBubble({
   };
 
   const isVideo = metadata.call_type === "video";
-  const isMissed = metadata.status === "missed" || metadata.status === "declined";
+  const isUnanswered = metadata.status === "missed" || metadata.status === "declined" || metadata.status === "no_answer";
   const duration = metadata.duration_seconds || 0;
 
   // Determine icon based on call type and status
   const getIcon = () => {
     if (isVideo) {
-      if (isMissed) {
+      if (isUnanswered) {
         return <VideoOff className="w-5 h-5" />;
       }
       return <Video className="w-5 h-5" />;
     } else {
-      if (isMissed) {
+      if (isUnanswered) {
         return <PhoneMissed className="w-5 h-5" />;
       }
       return <Phone className="w-5 h-5" />;
@@ -72,29 +72,35 @@ export function CallMessageBubble({
 
   // Determine text based on status
   const getCallText = () => {
-    if (metadata.status === "missed") {
-      return isVideo ? "Missed video call" : "Missed call";
+    const callType = isVideo ? "Video call" : "Voice call";
+    
+    switch (metadata.status) {
+      case "missed":
+        return `Missed ${callType.toLowerCase()}`;
+      case "declined":
+        return `${callType} declined`;
+      case "no_answer":
+        return `${callType} - No answer`;
+      case "completed":
+      default:
+        return callType;
     }
-    if (metadata.status === "declined") {
-      return isVideo ? "Declined video call" : "Declined call";
-    }
-    return isVideo ? "Video call" : "Voice call";
   };
 
   // Color scheme based on status
-  const bgColor = isMissed
+  const bgColor = isUnanswered
     ? "bg-red-50 dark:bg-red-950/30"
     : isOwn
     ? "bg-green-50 dark:bg-green-950/30"
     : "bg-gray-100 dark:bg-neutral-800";
 
-  const iconColor = isMissed
+  const iconColor = isUnanswered
     ? "text-red-500"
     : isOwn
     ? "text-green-600 dark:text-green-400"
     : "text-gray-600 dark:text-gray-400";
 
-  const textColor = isMissed
+  const textColor = isUnanswered
     ? "text-red-700 dark:text-red-300"
     : "text-gray-800 dark:text-gray-200";
 
@@ -117,7 +123,7 @@ export function CallMessageBubble({
           <div
             className={cn(
               "flex items-center justify-center w-10 h-10 rounded-full",
-              isMissed
+              isUnanswered
                 ? "bg-red-100 dark:bg-red-900/50"
                 : isOwn
                 ? "bg-green-100 dark:bg-green-900/50"
@@ -132,7 +138,7 @@ export function CallMessageBubble({
             <span className={cn("text-[15px] font-medium", textColor)}>
               {getCallText()}
             </span>
-            {!isMissed && duration > 0 && (
+            {metadata.status === "completed" && duration > 0 && (
               <span className="text-[13px] text-gray-500 dark:text-gray-400">
                 {formatDuration(duration)}
               </span>

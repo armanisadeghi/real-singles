@@ -61,6 +61,13 @@ export async function GET(
     );
   }
 
+  // Fetch the user record (for email)
+  const { data: userRecord } = await supabase
+    .from("users")
+    .select("id, email, display_name, status, last_active_at")
+    .eq("id", clientRecord.client_user_id)
+    .single();
+
   // Fetch the user's profile
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -73,6 +80,9 @@ export async function GET(
       city,
       state,
       country,
+      zip_code,
+      latitude,
+      longitude,
       occupation,
       bio,
       profile_image_url,
@@ -96,7 +106,13 @@ export async function GET(
       non_negotiables,
       way_to_heart,
       looking_for,
-      dating_intentions
+      dating_intentions,
+      can_start_matching,
+      profile_hidden,
+      voice_prompt_url,
+      voice_prompt_duration_seconds,
+      video_intro_url,
+      video_intro_duration_seconds
     `)
     .eq("user_id", clientRecord.client_user_id)
     .single();
@@ -123,10 +139,23 @@ export async function GET(
   // Resolve gallery URLs
   const galleryWithUrls = await Promise.all(
     (gallery || []).map(async (img) => ({
-      ...img,
-      media_url: await resolveStorageUrl(supabase, img.media_url),
+      id: img.id,
+      image_url: await resolveStorageUrl(supabase, img.media_url),
+      is_primary: img.is_primary,
+      position: img.display_order,
     }))
   );
+
+  // Fetch user's search filters (for algorithm simulation)
+  const { data: userFilters } = await supabase
+    .from("user_filters")
+    .select(`
+      min_age, max_age, min_height, max_height, max_distance_miles,
+      body_types, ethnicities, religions, education_levels, zodiac_signs,
+      smoking, drinking, marijuana, has_kids, wants_kids
+    `)
+    .eq("user_id", clientRecord.client_user_id)
+    .single();
 
   // Fetch introductions involving this client
   const { data: introductions } = await supabase
@@ -144,6 +173,14 @@ export async function GET(
     .order("created_at", { ascending: false })
     .limit(10);
 
+  // Resolve voice/video URLs if they exist
+  const voicePromptUrl = profile.voice_prompt_url
+    ? await resolveStorageUrl(supabase, profile.voice_prompt_url)
+    : null;
+  const videoIntroUrl = profile.video_intro_url
+    ? await resolveStorageUrl(supabase, profile.video_intro_url)
+    : null;
+
   return NextResponse.json({
     success: true,
     data: {
@@ -155,13 +192,25 @@ export async function GET(
         started_at: clientRecord.created_at,
         ended_at: clientRecord.ended_at,
       },
+      // User info (for email/messaging)
+      user: {
+        id: userRecord?.id,
+        email: userRecord?.email,
+        display_name: userRecord?.display_name,
+        status: userRecord?.status,
+        last_active_at: userRecord?.last_active_at,
+      },
       // Profile info (safe for matchmaker to see)
       profile: {
         ...profile,
         profile_image_url: profileImageUrl,
+        voice_prompt_url: voicePromptUrl,
+        video_intro_url: videoIntroUrl,
       },
       // Gallery images
       gallery: galleryWithUrls,
+      // User's search filters
+      filters: userFilters,
       // Recent introductions
       introductions: introductions || [],
     },

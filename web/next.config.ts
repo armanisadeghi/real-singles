@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Set Turbopack root to current working directory to avoid workspace root confusion
+  // This prevents Next.js from inferring the monorepo root when multiple lockfiles exist
+  // process.cwd() returns the absolute path of the directory where the command is executed
+  turbopack: {
+    root: process.cwd(),
+  },
   // Allow external images from these domains
   images: {
     remotePatterns: [

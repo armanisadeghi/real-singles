@@ -1,29 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { verifyMatchmakerOwnership } from "@/lib/services/matchmakers";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/matchmakers/[id]/discover
  * Profile browser for matchmakers (matchmaker only)
- * 
- * Uses the same discover algorithm as /api/discover but for matchmaker use
- * 
- * Query params: All standard discover filters
- * - gender: string[]
+ *
+ * Unlike regular discovery, this shows ALL eligible profiles without
+ * bidirectional gender matching - matchmakers need to see everyone.
+ *
+ * Query params:
+ * - gender: string (filter by gender)
  * - min_age, max_age: number
- * - min_height, max_height: number
- * - max_distance: number
- * - marital_status: string[]
- * - has_kids: string[]
- * - wants_kids: string[]
- * - smoking: string[]
- * - drinking: string[]
- * - religion: string[]
- * - education: string[]
- * - body_type: string[]
- * - ethnicity: string[]
- * - interests: string[]
- * - limit: number (default 50, max 100)
+ * - max_distance: number (in miles, requires lat/lng)
+ * - limit: number (default 30, max 100)
  * - offset: number
  */
 export async function GET(
@@ -58,25 +49,121 @@ export async function GET(
     );
   }
 
-  // Forward to discover API with all query params
-  // This reuses existing discover logic
   const { searchParams } = new URL(request.url);
-  const discoverUrl = new URL("/api/discover/profiles", request.url);
-  
-  // Copy all query params
-  searchParams.forEach((value, key) => {
-    discoverUrl.searchParams.append(key, value);
-  });
+  const limit = Math.min(parseInt(searchParams.get("limit") || "30"), 100);
+  const offset = parseInt(searchParams.get("offset") || "0");
 
-  // Make internal request to discover API
-  const discoverResponse = await fetch(discoverUrl.toString(), {
-    headers: {
-      Authorization: request.headers.get("Authorization") || "",
-      Cookie: request.headers.get("Cookie") || "",
-    },
-  });
+  // Optional filters
+  const genderFilter = searchParams.getAll("gender");
+  const minAge = searchParams.get("min_age");
+  const maxAge = searchParams.get("max_age");
 
-  const discoverData = await discoverResponse.json();
+  try {
+    // Build query for discoverable profiles
+    let query = supabase
+      .from("profiles")
+      .select(
+        `
+        user_id,
+        first_name,
+        last_name,
+        date_of_birth,
+        gender,
+        city,
+        state,
+        profile_image_url,
+        is_verified,
+        is_photo_verified,
+        can_start_matching,
+        profile_hidden,
+        bio,
+        occupation,
+        height_inches,
+        body_type,
+        looking_for,
+        users!inner (
+          id,
+          status
+        )
+      `
+      )
+      .eq("can_start_matching", true)
+      .eq("profile_hidden", false)
+      .eq("users.status", "active")
+      .neq("user_id", user.id) // Exclude matchmaker's own profile
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
 
-  return NextResponse.json(discoverData);
+    // Apply gender filter
+    if (genderFilter.length > 0) {
+      query = query.in("gender", genderFilter);
+    }
+
+    const { data: profiles, error: profilesError } = await query;
+
+    if (profilesError) {
+      console.error("Error fetching profiles:", profilesError);
+      return NextResponse.json(
+        { success: false, msg: "Error fetching profiles" },
+        { status: 500 }
+      );
+    }
+
+    // Filter by age if specified (need to calculate from date_of_birth)
+    let filteredProfiles = profiles || [];
+
+    if (minAge || maxAge) {
+      const today = new Date();
+      filteredProfiles = filteredProfiles.filter((p) => {
+        if (!p.date_of_birth) return false;
+        const birthDate = new Date(p.date_of_birth);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ) {
+          age--;
+        }
+        if (minAge && age < parseInt(minAge)) return false;
+        if (maxAge && age > parseInt(maxAge)) return false;
+        return true;
+      });
+    }
+
+    // Resolve profile image URLs
+    const transformedProfiles = await Promise.all(
+      filteredProfiles.map(async (p) => ({
+        user_id: p.user_id,
+        first_name: p.first_name,
+        last_name: p.last_name,
+        date_of_birth: p.date_of_birth,
+        gender: p.gender,
+        city: p.city,
+        state: p.state,
+        profile_image_url: await resolveStorageUrl(supabase, p.profile_image_url),
+        is_verified: p.is_verified,
+        is_photo_verified: p.is_photo_verified,
+        bio: p.bio,
+        occupation: p.occupation,
+        height_inches: p.height_inches,
+        body_type: p.body_type,
+        looking_for: p.looking_for,
+      }))
+    );
+
+    return NextResponse.json({
+      success: true,
+      profiles: transformedProfiles,
+      total: transformedProfiles.length,
+      limit,
+      offset,
+    });
+  } catch (error) {
+    console.error("Error in matchmaker discover:", error);
+    return NextResponse.json(
+      { success: false, msg: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

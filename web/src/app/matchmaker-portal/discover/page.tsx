@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Search,
   Heart,
@@ -11,6 +12,10 @@ import {
   User,
   Check,
   RefreshCw,
+  SlidersHorizontal,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
 } from "lucide-react";
 import { useMatchmaker } from "@/contexts/MatchmakerContext";
 import { IntroductionModal } from "@/components/matchmaker/IntroductionModal";
@@ -30,6 +35,12 @@ interface Profile {
   city: string | null;
   state: string | null;
   is_verified?: boolean | null;
+  is_photo_verified?: boolean | null;
+  bio?: string | null;
+  occupation?: string | null;
+  height_inches?: number | null;
+  body_type?: string | null;
+  looking_for?: string[] | null;
   distance_km?: number;
 }
 
@@ -40,7 +51,25 @@ interface Filters {
   maxHeight?: number;
   maxDistanceMiles?: number;
   gender?: string[];
+  bodyTypes?: string[];
+  ethnicities?: string[];
+  religions?: string[];
+  educationLevels?: string[];
+  smoking?: string;
+  drinking?: string;
+  hasKids?: string;
+  wantsKids?: string;
 }
+
+// Filter options
+const BODY_TYPES = ["slim", "athletic", "average", "muscular", "curvy", "plus_size"];
+const ETHNICITIES = ["white", "latino", "black", "asian", "native_american", "east_indian", "pacific_islander", "middle_eastern", "armenian", "mixed", "other"];
+const RELIGIONS = ["adventist", "agnostic", "atheist", "buddhist", "christian_catholic", "christian_lds", "christian_protestant", "christian_orthodox", "hindu", "jewish", "muslim", "spiritual", "other", "prefer_not_to_say"];
+const EDUCATION_LEVELS = ["high_school", "trade_school", "some_college", "associate", "bachelor", "graduate", "phd"];
+const SMOKING_OPTIONS = ["never", "occasionally", "daily", "trying_to_quit"];
+const DRINKING_OPTIONS = ["never", "social", "moderate", "regular"];
+const HAS_KIDS_OPTIONS = ["no", "yes_live_at_home", "yes_live_away", "yes_shared"];
+const WANTS_KIDS_OPTIONS = ["no", "no_ok_if_partner_has", "yes", "not_sure"];
 
 // =============================================================================
 // MAIN COMPONENT
@@ -48,6 +77,8 @@ interface Filters {
 
 export default function MatchmakerDiscoverPage() {
   const { matchmakerId } = useMatchmaker();
+  const searchParams = useSearchParams();
+  const simulateFor = searchParams.get("simulate_for");
 
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<Profile[]>([]);
@@ -57,8 +88,17 @@ export default function MatchmakerDiscoverPage() {
   const [filters, setFilters] = useState<Filters>({});
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const BATCH_SIZE = 30;
+
+  // If simulating for a client, load their filters
+  useEffect(() => {
+    if (simulateFor) {
+      // TODO: Load client's filters from API
+      console.log("Simulating for client:", simulateFor);
+    }
+  }, [simulateFor]);
 
   // Fetch profiles from API
   const fetchProfiles = useCallback(
@@ -77,15 +117,28 @@ export default function MatchmakerDiscoverPage() {
         // Add filters to params
         if (filters.minAge) params.set("min_age", String(filters.minAge));
         if (filters.maxAge) params.set("max_age", String(filters.maxAge));
-        if (filters.minHeight)
-          params.set("min_height", String(filters.minHeight));
-        if (filters.maxHeight)
-          params.set("max_height", String(filters.maxHeight));
-        if (filters.maxDistanceMiles)
-          params.set("max_distance", String(filters.maxDistanceMiles));
+        if (filters.minHeight) params.set("min_height", String(filters.minHeight));
+        if (filters.maxHeight) params.set("max_height", String(filters.maxHeight));
+        if (filters.maxDistanceMiles) params.set("max_distance", String(filters.maxDistanceMiles));
         if (filters.gender && filters.gender.length > 0) {
           filters.gender.forEach((g) => params.append("gender", g));
         }
+        if (filters.bodyTypes && filters.bodyTypes.length > 0) {
+          filters.bodyTypes.forEach((b) => params.append("body_type", b));
+        }
+        if (filters.ethnicities && filters.ethnicities.length > 0) {
+          filters.ethnicities.forEach((e) => params.append("ethnicity", e));
+        }
+        if (filters.religions && filters.religions.length > 0) {
+          filters.religions.forEach((r) => params.append("religion", r));
+        }
+        if (filters.educationLevels && filters.educationLevels.length > 0) {
+          filters.educationLevels.forEach((e) => params.append("education", e));
+        }
+        if (filters.smoking) params.set("smoking", filters.smoking);
+        if (filters.drinking) params.set("drinking", filters.drinking);
+        if (filters.hasKids) params.set("has_kids", filters.hasKids);
+        if (filters.wantsKids) params.set("wants_kids", filters.wantsKids);
 
         const response = await fetch(
           `/api/matchmakers/${matchmakerId}/discover?${params.toString()}`
@@ -129,16 +182,23 @@ export default function MatchmakerDiscoverPage() {
   }, [matchmakerId]);
 
   // Refetch when filters change
-  const handleFilterChange = (newFilters: Filters) => {
-    setFilters(newFilters);
-    setProfiles([]);
-    setOffset(0);
-    setHasMore(true);
+  const handleFilterChange = <K extends keyof Filters>(key: K, value: Filters[K]) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   // Apply filters (trigger refetch)
   const applyFilters = () => {
+    setProfiles([]);
+    setOffset(0);
+    setHasMore(true);
     fetchProfiles(true);
+  };
+
+  const resetFilters = () => {
+    setFilters({});
+    setProfiles([]);
+    setOffset(0);
+    setHasMore(true);
   };
 
   const handleSelectProfile = (profile: Profile) => {
@@ -172,6 +232,10 @@ export default function MatchmakerDiscoverPage() {
     }
   };
 
+  const activeFilterCount = Object.entries(filters).filter(([_, v]) =>
+    v !== undefined && (Array.isArray(v) ? v.length > 0 : true)
+  ).length;
+
   return (
     <div className="space-y-6 pb-24">
       {/* Header */}
@@ -186,6 +250,7 @@ export default function MatchmakerDiscoverPage() {
             </h1>
             <p className="text-sm text-muted-foreground">
               Browse profiles and create introductions
+              {simulateFor && " (Simulating client view)"}
             </p>
           </div>
         </div>
@@ -222,13 +287,9 @@ export default function MatchmakerDiscoverPage() {
         </div>
       )}
 
-      {/* Quick Filters */}
-      <div className="bg-card rounded-xl border border-border/40 p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <h2 className="text-sm font-semibold text-foreground">
-            Quick Filters
-          </h2>
-        </div>
+      {/* Filters */}
+      <div className="bg-card rounded-xl border border-border/40 p-6 space-y-4">
+        {/* Quick Filters - Always Visible */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {/* Age Range */}
           <div>
@@ -241,10 +302,7 @@ export default function MatchmakerDiscoverPage() {
                 placeholder="18"
                 value={filters.minAge || ""}
                 onChange={(e) =>
-                  handleFilterChange({
-                    ...filters,
-                    minAge: e.target.value ? parseInt(e.target.value) : undefined,
-                  })
+                  handleFilterChange("minAge", e.target.value ? parseInt(e.target.value) : undefined)
                 }
                 className="w-full px-3 py-2 rounded-lg text-sm bg-background border border-border/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
@@ -254,10 +312,35 @@ export default function MatchmakerDiscoverPage() {
                 placeholder="99"
                 value={filters.maxAge || ""}
                 onChange={(e) =>
-                  handleFilterChange({
-                    ...filters,
-                    maxAge: e.target.value ? parseInt(e.target.value) : undefined,
-                  })
+                  handleFilterChange("maxAge", e.target.value ? parseInt(e.target.value) : undefined)
+                }
+                className="w-full px-3 py-2 rounded-lg text-sm bg-background border border-border/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Height Range */}
+          <div>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+              Height (inches)
+            </label>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="number"
+                placeholder="48"
+                value={filters.minHeight || ""}
+                onChange={(e) =>
+                  handleFilterChange("minHeight", e.target.value ? parseInt(e.target.value) : undefined)
+                }
+                className="w-full px-3 py-2 rounded-lg text-sm bg-background border border-border/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+              <span className="text-muted-foreground text-sm">–</span>
+              <input
+                type="number"
+                placeholder="84"
+                value={filters.maxHeight || ""}
+                onChange={(e) =>
+                  handleFilterChange("maxHeight", e.target.value ? parseInt(e.target.value) : undefined)
                 }
                 className="w-full px-3 py-2 rounded-lg text-sm bg-background border border-border/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
@@ -272,10 +355,7 @@ export default function MatchmakerDiscoverPage() {
             <select
               value={filters.gender?.[0] || ""}
               onChange={(e) =>
-                handleFilterChange({
-                  ...filters,
-                  gender: e.target.value ? [e.target.value] : undefined,
-                })
+                handleFilterChange("gender", e.target.value ? [e.target.value] : undefined)
               }
               className="w-full px-3 py-2 rounded-lg text-sm bg-background border border-border/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
@@ -297,12 +377,7 @@ export default function MatchmakerDiscoverPage() {
                 placeholder="Any"
                 value={filters.maxDistanceMiles || ""}
                 onChange={(e) =>
-                  handleFilterChange({
-                    ...filters,
-                    maxDistanceMiles: e.target.value
-                      ? parseInt(e.target.value)
-                      : undefined,
-                  })
+                  handleFilterChange("maxDistanceMiles", e.target.value ? parseInt(e.target.value) : undefined)
                 }
                 className="w-full px-3 py-2 rounded-lg text-sm bg-background border border-border/40 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-8"
               />
@@ -312,7 +387,7 @@ export default function MatchmakerDiscoverPage() {
             </div>
           </div>
 
-          {/* Apply Button */}
+          {/* Search Button */}
           <div className="flex items-end">
             <button
               onClick={applyFilters}
@@ -328,6 +403,113 @@ export default function MatchmakerDiscoverPage() {
             </button>
           </div>
         </div>
+
+        {/* Advanced Filters Toggle */}
+        <div className="flex items-center justify-between pt-2 border-t border-border/40">
+          <button
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+              showAdvancedFilters
+                ? "bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            )}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            Advanced Filters
+            {activeFilterCount > 0 && !showAdvancedFilters && (
+              <span className="px-1.5 py-0.5 rounded-full bg-purple-500 text-white text-xs">
+                {activeFilterCount}
+              </span>
+            )}
+            {showAdvancedFilters ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </button>
+
+          {activeFilterCount > 0 && (
+            <button
+              onClick={resetFilters}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset All
+            </button>
+          )}
+        </div>
+
+        {/* Advanced Filters */}
+        {showAdvancedFilters && (
+          <div className="animate-in fade-in slide-in-from-top-2 duration-200 space-y-6 pt-4">
+            {/* Profile Attributes */}
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                Profile Attributes
+              </h4>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <MultiSelect
+                  label="Body Type"
+                  options={BODY_TYPES}
+                  selected={filters.bodyTypes || []}
+                  onChange={(v) => handleFilterChange("bodyTypes", v.length > 0 ? v : undefined)}
+                />
+                <MultiSelect
+                  label="Ethnicity"
+                  options={ETHNICITIES}
+                  selected={filters.ethnicities || []}
+                  onChange={(v) => handleFilterChange("ethnicities", v.length > 0 ? v : undefined)}
+                />
+                <MultiSelect
+                  label="Religion"
+                  options={RELIGIONS}
+                  selected={filters.religions || []}
+                  onChange={(v) => handleFilterChange("religions", v.length > 0 ? v : undefined)}
+                />
+                <MultiSelect
+                  label="Education"
+                  options={EDUCATION_LEVELS}
+                  selected={filters.educationLevels || []}
+                  onChange={(v) => handleFilterChange("educationLevels", v.length > 0 ? v : undefined)}
+                />
+              </div>
+            </div>
+
+            {/* Lifestyle */}
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                Lifestyle & Family
+              </h4>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <SingleSelect
+                  label="Smoking"
+                  options={SMOKING_OPTIONS}
+                  value={filters.smoking}
+                  onChange={(v) => handleFilterChange("smoking", v || undefined)}
+                />
+                <SingleSelect
+                  label="Drinking"
+                  options={DRINKING_OPTIONS}
+                  value={filters.drinking}
+                  onChange={(v) => handleFilterChange("drinking", v || undefined)}
+                />
+                <SingleSelect
+                  label="Has Children"
+                  options={HAS_KIDS_OPTIONS}
+                  value={filters.hasKids}
+                  onChange={(v) => handleFilterChange("hasKids", v || undefined)}
+                />
+                <SingleSelect
+                  label="Wants Children"
+                  options={WANTS_KIDS_OPTIONS}
+                  value={filters.wantsKids}
+                  onChange={(v) => handleFilterChange("wantsKids", v || undefined)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Error State */}
@@ -520,6 +702,153 @@ function ProfileCard({
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// FILTER COMPONENTS
+// =============================================================================
+
+function MultiSelect({
+  label,
+  options,
+  selected,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleOption = (option: string) => {
+    if (selected.includes(option)) {
+      onChange(selected.filter((s) => s !== option));
+    } else {
+      onChange([...selected, option]);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+        {label}
+      </label>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "w-full px-3 py-2 rounded-lg text-sm text-left",
+          "flex items-center justify-between",
+          "bg-background border transition-all",
+          isOpen
+            ? "border-purple-500 ring-2 ring-purple-500/10"
+            : selected.length > 0
+            ? "border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-950/30"
+            : "border-border/40 hover:border-border"
+        )}
+      >
+        <span className={selected.length > 0 ? "text-purple-700 dark:text-purple-300 font-medium" : "text-muted-foreground"}>
+          {selected.length > 0 ? `${selected.length} selected` : "Any"}
+        </span>
+        <ChevronDown
+          className={cn(
+            "w-4 h-4 transition-transform",
+            isOpen && "rotate-180",
+            selected.length > 0 ? "text-purple-500" : "text-muted-foreground"
+          )}
+        />
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+          <div className="absolute z-20 mt-1 w-full bg-card border border-border/40 rounded-xl shadow-xl max-h-56 overflow-y-auto">
+            <div className="p-1">
+              {options.map((option) => (
+                <label
+                  key={option}
+                  className={cn(
+                    "flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-colors",
+                    selected.includes(option)
+                      ? "bg-purple-50 dark:bg-purple-950/30 text-purple-900 dark:text-purple-100"
+                      : "hover:bg-muted/50"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "w-4 h-4 rounded border-2 flex items-center justify-center transition-colors",
+                      selected.includes(option)
+                        ? "bg-purple-500 border-purple-500"
+                        : "border-border"
+                    )}
+                  >
+                    {selected.includes(option) && (
+                      <Check className="w-3 h-3 text-white" />
+                    )}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(option)}
+                    onChange={() => toggleOption(option)}
+                    className="sr-only"
+                  />
+                  <span className="text-sm capitalize">
+                    {option.replace(/_/g, " ")}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function SingleSelect({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  value: string | undefined;
+  onChange: (value: string | undefined) => void;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+        {label}
+      </label>
+      <select
+        value={value || ""}
+        onChange={(e) => onChange(e.target.value || undefined)}
+        className={cn(
+          "w-full px-3 py-2 rounded-lg text-sm appearance-none cursor-pointer",
+          "bg-background border transition-all",
+          value
+            ? "border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 font-medium"
+            : "border-border/40 text-foreground hover:border-border",
+          "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        )}
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+          backgroundPosition: "right 0.5rem center",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "1.5em 1.5em",
+          paddingRight: "2.5rem",
+        }}
+      >
+        <option value="">Any</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option.charAt(0).toUpperCase() + option.slice(1).replace(/_/g, " ")}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
