@@ -44,6 +44,8 @@ export type DbReport = Tables<"reports">;
 export type DbNotification = Tables<"notifications">;
 export type DbContactSubmission = Tables<"contact_submissions">;
 export type DbAdminEmailLog = Tables<"admin_email_logs">;
+export type DbCallInvitation = Tables<"call_invitations">;
+export type DbCall = Tables<"calls">;
 
 // =============================================================================
 // TABLE INSERT TYPES (for INSERT queries - what you SEND to create)
@@ -72,6 +74,8 @@ export type DbReportInsert = TablesInsert<"reports">;
 export type DbNotificationInsert = TablesInsert<"notifications">;
 export type DbContactSubmissionInsert = TablesInsert<"contact_submissions">;
 export type DbAdminEmailLogInsert = TablesInsert<"admin_email_logs">;
+export type DbCallInvitationInsert = TablesInsert<"call_invitations">;
+export type DbCallInsert = TablesInsert<"calls">;
 
 // =============================================================================
 // TABLE UPDATE TYPES (for UPDATE queries - what you SEND to update)
@@ -100,6 +104,8 @@ export type DbReportUpdate = TablesUpdate<"reports">;
 export type DbNotificationUpdate = TablesUpdate<"notifications">;
 export type DbContactSubmissionUpdate = TablesUpdate<"contact_submissions">;
 export type DbAdminEmailLogUpdate = TablesUpdate<"admin_email_logs">;
+export type DbCallInvitationUpdate = TablesUpdate<"call_invitations">;
+export type DbCallUpdate = TablesUpdate<"calls">;
 
 // =============================================================================
 // CASE CONVERSION UTILITIES

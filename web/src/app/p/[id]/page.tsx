@@ -30,6 +30,9 @@ interface PublicProfileData {
   bio: string | null;
   profile_image_url: string | null;
   is_verified: boolean;
+  interests: string[] | null;
+  occupation: string | null;
+  dating_intentions: string | null;
 }
 
 async function getPublicProfile(userId: string): Promise<PublicProfileData | null> {
@@ -45,7 +48,7 @@ async function getPublicProfile(userId: string): Promise<PublicProfileData | nul
   if (userError || !userData) return null;
   if (userData.status === "suspended" || userData.status === "deleted") return null;
 
-  // Get profile data
+  // Get profile data - include safe fields for richer preview
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select(`
@@ -56,7 +59,10 @@ async function getPublicProfile(userId: string): Promise<PublicProfileData | nul
       bio,
       profile_image_url,
       is_verified,
-      profile_hidden
+      profile_hidden,
+      interests,
+      occupation,
+      dating_intentions
     `)
     .eq("user_id", userId)
     .single();
@@ -104,6 +110,9 @@ async function getPublicProfile(userId: string): Promise<PublicProfileData | nul
     bio: truncatedBio,
     profile_image_url: profileImageUrl,
     is_verified: profile.is_verified || false,
+    interests: profile.interests?.slice(0, 5) || null,
+    occupation: profile.occupation || null,
+    dating_intentions: profile.dating_intentions || null,
   };
 }
 

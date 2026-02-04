@@ -6,13 +6,16 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * Get limited public profile data - NO AUTH REQUIRED
  * Returns sanitized data suitable for share preview
  * 
- * Limited fields returned:
+ * Limited fields returned (safe for public):
  * - First name only (no last name)
  * - Age (calculated from DOB)
  * - City, State
  * - Primary photo only
  * - Verification status
- * - Bio (truncated to 100 chars)
+ * - Bio (truncated to 150 chars)
+ * - Interests (first 5 only)
+ * - Occupation
+ * - Dating intentions
  */
 export async function GET(
   request: Request,
@@ -45,7 +48,7 @@ export async function GET(
     );
   }
 
-  // Get profile data
+  // Get profile data - include a few more safe fields for better preview
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select(`
@@ -56,7 +59,10 @@ export async function GET(
       bio,
       profile_image_url,
       is_verified,
-      profile_hidden
+      profile_hidden,
+      interests,
+      occupation,
+      dating_intentions
     `)
     .eq("user_id", userId)
     .single();
@@ -88,10 +94,10 @@ export async function GET(
     }
   }
 
-  // Truncate bio to 100 characters
+  // Truncate bio to 150 characters for a bit more content
   const truncatedBio = profile.bio 
-    ? profile.bio.length > 100 
-      ? profile.bio.substring(0, 100) + "..."
+    ? profile.bio.length > 150 
+      ? profile.bio.substring(0, 150) + "..."
       : profile.bio
     : null;
 
@@ -113,6 +119,9 @@ export async function GET(
   // Build location string
   const location = [profile.city, profile.state].filter(Boolean).join(", ");
 
+  // Limit interests to first 5 for preview
+  const limitedInterests = profile.interests?.slice(0, 5) || null;
+
   const responseData = {
     id: userId,
     first_name: profile.first_name || "Someone",
@@ -121,6 +130,10 @@ export async function GET(
     bio: truncatedBio,
     profile_image_url: profileImageUrl,
     is_verified: profile.is_verified || false,
+    // Additional safe fields for richer preview
+    interests: limitedInterests,
+    occupation: profile.occupation || null,
+    dating_intentions: profile.dating_intentions || null,
   };
 
   return NextResponse.json({

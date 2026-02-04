@@ -21,10 +21,13 @@ import {
   Users,
   Shield,
   MessageCircle,
+  Briefcase,
+  Target,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Header, Footer } from "@/components/layout";
 import { cn } from "@/lib/utils";
+import { getDatingIntentionsLabel, getInterestLabel } from "@/types";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -37,6 +40,9 @@ interface PublicProfile {
   bio: string | null;
   profile_image_url: string | null;
   is_verified: boolean;
+  interests: string[] | null;
+  occupation: string | null;
+  dating_intentions: string | null;
 }
 
 interface PublicProfileClientProps {
@@ -252,30 +258,52 @@ export function PublicProfileClient({ userId, initialProfile }: PublicProfileCli
 
         {/* Content Section */}
         <div className="max-w-lg mx-auto px-4 py-6">
+          {/* Quick Info Row */}
+          {(profile.occupation || profile.dating_intentions) && (
+            <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-gray-600">
+              {profile.occupation && (
+                <div className="flex items-center gap-1.5">
+                  <Briefcase className="w-4 h-4 text-gray-400" />
+                  <span>{profile.occupation}</span>
+                </div>
+              )}
+              {profile.dating_intentions && (
+                <div className="flex items-center gap-1.5">
+                  <Target className="w-4 h-4 text-gray-400" />
+                  <span>{getDatingIntentionsLabel(profile.dating_intentions)}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Bio Preview */}
           {profile.bio && (
-            <div className="mb-6">
+            <div className="mb-5">
               <p className="text-gray-700 leading-relaxed">{profile.bio}</p>
             </div>
           )}
 
-          {/* Blurred Teaser Section */}
-          <div className="relative mb-6 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 p-4">
-            <div className="blur-sm opacity-60">
-              <div className="flex gap-2 flex-wrap mb-3">
-                {["Travel", "Music", "Cooking", "Hiking"].map((interest) => (
-                  <span key={interest} className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs">
-                    {interest}
+          {/* Profile Preview with Vertical Fade Effect */}
+          {(profile.interests && profile.interests.length > 0) && (
+            <div className="relative mb-6 overflow-hidden">
+              {/* Interests */}
+              <div className="flex gap-2 flex-wrap pb-8">
+                {profile.interests.map((interest) => (
+                  <span 
+                    key={interest} 
+                    className="px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-sm font-medium border border-amber-100"
+                  >
+                    {getInterestLabel(interest)}
                   </span>
                 ))}
               </div>
-              <div className="h-3 bg-gray-200 rounded w-3/4 mb-2" />
-              <div className="h-3 bg-gray-200 rounded w-1/2" />
+              
+              {/* Vertical fade gradient at the bottom - creates "see more" effect */}
+              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none flex items-end justify-center pb-1">
+                <span className="text-xs text-gray-400 font-medium">See full profile for more</span>
+              </div>
             </div>
-            <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[2px]">
-              <p className="text-sm text-gray-600 font-medium">Sign up to see more</p>
-            </div>
-          </div>
+          )}
 
           {/* Main CTA Card */}
           <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 rounded-3xl p-6 text-center shadow-sm border border-amber-100/50">

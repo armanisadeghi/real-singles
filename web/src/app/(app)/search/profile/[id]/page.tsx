@@ -69,6 +69,8 @@ export default function SearchProfilePage() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [existingAction, setExistingAction] = useState<'like' | 'pass' | 'super_like' | null>(null);
+  const [isMutualMatch, setIsMutualMatch] = useState(false);
 
   // Undo hook for tracking and undoing actions
   const { canUndo, secondsRemaining, lastAction, recordAction, performUndo } = useMatchUndo();
@@ -124,6 +126,11 @@ export default function SearchProfilePage() {
             user: { display_name: profileData.DisplayName },
           });
           setGallery(profileData.gallery || []);
+          
+          // Set existing action status from API response
+          // This determines which action buttons to show/hide
+          setExistingAction(profileData.current_user_action || null);
+          setIsMutualMatch(profileData.IsMatched || false);
         } else {
           setError(data.msg || "Failed to load profile");
         }
@@ -216,6 +223,22 @@ export default function SearchProfilePage() {
     router.back();
   }, [router]);
 
+  // Handle duplicate action errors (shouldn't happen with UI protection, but just in case)
+  const handleDuplicateError = useCallback(() => {
+    // Refresh the page to get fresh data
+    router.refresh();
+  }, [router]);
+
+  // If this is a mutual match (connected), redirect to the matched profile page
+  // which has appropriate actions (message, favorite, share) instead of like/pass
+  // NOTE: This useEffect MUST be before any early returns to follow Rules of Hooks
+  useEffect(() => {
+    if (isMutualMatch && !loading) {
+      router.replace(`/profile/${userId}`);
+    }
+  }, [isMutualMatch, loading, router, userId]);
+
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-dvh flex items-center justify-center bg-white">
@@ -224,6 +247,16 @@ export default function SearchProfilePage() {
     );
   }
 
+  // Show loading while redirecting for mutual matches
+  if (isMutualMatch) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center bg-white">
+        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Error state
   if (error || !profile) {
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center p-6 bg-white">
@@ -260,6 +293,8 @@ export default function SearchProfilePage() {
         targetUserName: lastAction?.targetUserName,
       }}
       onUndo={performUndo}
+      existingAction={existingAction}
+      onDuplicateError={handleDuplicateError}
     />
   );
 }

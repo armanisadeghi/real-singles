@@ -142,6 +142,121 @@ export type Database = {
           },
         ]
       }
+      call_invitations: {
+        Row: {
+          answered_at: string | null
+          call_type: string
+          callee_id: string
+          caller_id: string
+          conversation_id: string | null
+          created_at: string | null
+          ended_at: string | null
+          id: string
+          room_name: string
+          status: string | null
+        }
+        Insert: {
+          answered_at?: string | null
+          call_type: string
+          callee_id: string
+          caller_id: string
+          conversation_id?: string | null
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          room_name: string
+          status?: string | null
+        }
+        Update: {
+          answered_at?: string | null
+          call_type?: string
+          callee_id?: string
+          caller_id?: string
+          conversation_id?: string | null
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          room_name?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_invitations_callee_id_fkey"
+            columns: ["callee_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_invitations_caller_id_fkey"
+            columns: ["caller_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_invitations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calls: {
+        Row: {
+          call_type: string
+          conversation_id: string | null
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          metadata: Json | null
+          participants: Json | null
+          room_name: string
+          speed_dating_session_id: string | null
+          started_at: string | null
+        }
+        Insert: {
+          call_type: string
+          conversation_id?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          participants?: Json | null
+          room_name: string
+          speed_dating_session_id?: string | null
+          started_at?: string | null
+        }
+        Update: {
+          call_type?: string
+          conversation_id?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          participants?: Json | null
+          room_name?: string
+          speed_dating_session_id?: string | null
+          started_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calls_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calls_speed_dating_session_id_fkey"
+            columns: ["speed_dating_session_id"]
+            isOneToOne: false
+            referencedRelation: "virtual_speed_dating"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_submissions: {
         Row: {
           created_at: string | null

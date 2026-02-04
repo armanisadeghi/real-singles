@@ -473,6 +473,9 @@ export const getZodiacLabel = (value: string | null | undefined) =>
 export const getPetsLabel = (value: string | null | undefined) => 
   getOptionLabel(value, PETS_OPTIONS);
 
+export const getInterestLabel = (value: string | null | undefined) => 
+  getOptionLabel(value, INTEREST_OPTIONS);
+
 /**
  * Format an array of values to their labels (for multi-select fields like ethnicity).
  */
