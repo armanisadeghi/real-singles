@@ -27,7 +27,9 @@
     "ship:minor": "tsx scripts/deploy.ts --minor",
     "ship:major": "tsx scripts/deploy.ts --major",
     "cleanup:duplicates": "tsx scripts/cleanup-duplicate-versions.ts",
-    "backfill:history": "tsx scripts/backfill-version-history.ts"
+    "backfill:history": "tsx scripts/backfill-version-history.ts",
+    "vercel:sync": "tsx scripts/sync-vercel-deployments.ts",
+    "vercel:sync:all": "tsx scripts/sync-vercel-deployments.ts --all"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -1,18 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/types/database.types";
-
-// Use service role to read version (bypasses RLS)
-const supabaseAdmin = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-);
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -24,11 +11,13 @@ export const revalidate = 0;
  */
 export async function GET() {
   try {
-    // Get the latest version from the database
+    const supabaseAdmin = createAdminClient();
+    
+    // Get the latest version from the database (order by build_number for correct ordering)
     const { data, error } = await supabaseAdmin
       .from("app_version")
-      .select("version, build_number, git_commit, deployed_at")
-      .order("deployed_at", { ascending: false })
+      .select("version, build_number, git_commit, commit_message, lines_added, lines_deleted, files_changed, deployed_at, deployment_status, vercel_deployment_url, deployment_error")
+      .order("build_number", { ascending: false })
       .limit(1)
       .single();
 
@@ -51,7 +40,14 @@ export async function GET() {
       version: data.version,
       buildNumber: data.build_number,
       gitCommit: data.git_commit,
+      commitMessage: data.commit_message,
+      linesAdded: data.lines_added,
+      linesDeleted: data.lines_deleted,
+      filesChanged: data.files_changed,
       deployedAt: data.deployed_at,
+      deploymentStatus: data.deployment_status,
+      vercelDeploymentUrl: data.vercel_deployment_url,
+      deploymentError: data.deployment_error,
     });
   } catch (error) {
     console.error("Error in version endpoint:", error);

@@ -7,7 +7,6 @@ import {
   Clock, 
   Calendar,
   TrendingUp,
-  RefreshCw,
   Loader2,
   AlertCircle,
   Package,
@@ -44,10 +43,19 @@ interface VersionHistoryResponse {
   offset: number;
 }
 
+interface PeriodStats {
+  deployments: number;
+  linesAdded: number;
+  linesDeleted: number;
+  filesChanged: number;
+}
+
 interface DeploymentStats {
-  deploymentsThisWeek: number;
-  deploymentsThisMonth: number;
+  today: PeriodStats;
+  week: PeriodStats;
+  month: PeriodStats;
   averageTimeBetweenDeployments: string;
+  totalDeployments: number;
 }
 
 export default function AppVersionPage() {
@@ -89,18 +97,20 @@ export default function AppVersionPage() {
     setError(null);
 
     try {
-      // Fetch current version and history in parallel
-      const [versionRes, historyRes] = await Promise.all([
+      // Fetch current version, history, and stats in parallel
+      const [versionRes, historyRes, statsRes] = await Promise.all([
         fetch("/api/version"),
         fetch("/api/version/history?limit=20&offset=0"),
+        fetch("/api/version/stats"),
       ]);
 
-      if (!versionRes.ok || !historyRes.ok) {
+      if (!versionRes.ok || !historyRes.ok || !statsRes.ok) {
         throw new Error("Failed to fetch version data");
       }
 
       const versionData = await versionRes.json();
       const historyData: VersionHistoryResponse = await historyRes.json();
+      const statsData: DeploymentStats = await statsRes.json();
 
       // Set current version
       setCurrentVersion({
@@ -124,46 +134,8 @@ export default function AppVersionPage() {
       setTotal(historyData.total);
       setHasMore(historyData.versions.length < historyData.total);
 
-      // Calculate stats
-      const now = new Date();
-      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-      const deploymentsThisWeek = historyData.versions.filter(
-        (v) => new Date(v.deployed_at) >= oneWeekAgo
-      ).length;
-
-      const deploymentsThisMonth = historyData.versions.filter(
-        (v) => new Date(v.deployed_at) >= oneMonthAgo
-      ).length;
-
-      // Calculate average time between deployments
-      let averageTimeBetweenDeployments = "N/A";
-      if (historyData.versions.length > 1) {
-        const times = historyData.versions
-          .map((v) => new Date(v.deployed_at).getTime())
-          .sort((a, b) => b - a);
-
-        let totalDiff = 0;
-        for (let i = 0; i < times.length - 1; i++) {
-          totalDiff += times[i] - times[i + 1];
-        }
-
-        const avgDiffMs = totalDiff / (times.length - 1);
-        const avgDiffHours = avgDiffMs / (1000 * 60 * 60);
-
-        if (avgDiffHours < 24) {
-          averageTimeBetweenDeployments = `${Math.round(avgDiffHours)}h`;
-        } else {
-          averageTimeBetweenDeployments = `${Math.round(avgDiffHours / 24)}d`;
-        }
-      }
-
-      setStats({
-        deploymentsThisWeek,
-        deploymentsThisMonth,
-        averageTimeBetweenDeployments,
-      });
+      // Set stats from API
+      setStats(statsData);
     } catch (err) {
       console.error("Error fetching version data:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -432,53 +404,139 @@ export default function AppVersionPage() {
       {/* Deployment Statistics */}
       {stats && (
         <div 
-          className="grid grid-cols-1 md:grid-cols-3 gap-4
+          className="space-y-4
             opacity-100 translate-y-0
             [transition:opacity_400ms_ease-out,transform_400ms_ease-out]
             [@starting-style]:opacity-0 [@starting-style]:translate-y-4"
           style={{ transitionDelay: "50ms" }}
         >
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500">This Week</p>
-                <p className="text-3xl font-bold text-slate-900 mt-1">
-                  {stats.deploymentsThisWeek}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">deployments</p>
+          {/* Main stats grid - Today and Week with full details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Today (Last 24 Hours) */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Last 24 Hours</p>
+                    <p className="text-xs text-slate-500">Today's activity</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-slate-900">{stats.today.deployments}</p>
+                  <p className="text-xs text-slate-500">pushes</p>
+                </div>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
+              <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-100">
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-emerald-600">
+                    +{stats.today.linesAdded.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-slate-500">added</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-red-600">
+                    -{stats.today.linesDeleted.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-slate-500">removed</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-slate-700">
+                    {stats.today.filesChanged.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-slate-500">files</p>
+                </div>
+              </div>
+            </div>
+
+            {/* This Week */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">This Week</p>
+                    <p className="text-xs text-slate-500">Last 7 days</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-slate-900">{stats.week.deployments}</p>
+                  <p className="text-xs text-slate-500">pushes</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-100">
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-emerald-600">
+                    +{stats.week.linesAdded.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-slate-500">added</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-red-600">
+                    -{stats.week.linesDeleted.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-slate-500">removed</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-slate-700">
+                    {stats.week.filesChanged.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-slate-500">files</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500">This Month</p>
-                <p className="text-3xl font-bold text-slate-900 mt-1">
-                  {stats.deploymentsThisMonth}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">deployments</p>
-              </div>
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-emerald-600" />
+          {/* Secondary stats - Month, Frequency, Total */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">This Month</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">
+                    {stats.month.deployments}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    +{stats.month.linesAdded.toLocaleString()} / -{stats.month.linesDeleted.toLocaleString()} lines
+                  </p>
+                </div>
+                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-emerald-600" />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500">Avg Frequency</p>
-                <p className="text-3xl font-bold text-slate-900 mt-1">
-                  {stats.averageTimeBetweenDeployments}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">between deploys</p>
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">Avg Frequency</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">
+                    {stats.averageTimeBetweenDeployments}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">between deploys</p>
+                </div>
+                <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-purple-600" />
+                </div>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <Activity className="w-6 h-6 text-purple-600" />
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">Total Deployments</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">
+                    {stats.totalDeployments}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">all time</p>
+                </div>
+                <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
+                  <GitCommit className="w-5 h-5 text-violet-600" />
+                </div>
               </div>
             </div>
           </div>
@@ -509,25 +567,22 @@ export default function AppVersionPage() {
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Version
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Build
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Message
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-3 py-2.5 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Changes
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Deployed
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Commit
                 </th>
               </tr>
@@ -535,7 +590,7 @@ export default function AppVersionPage() {
             <tbody className="divide-y divide-slate-100">
               {history.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center">
+                  <td colSpan={6} className="px-4 py-12 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <GitBranch className="w-12 h-12 text-slate-300" />
                       <p className="text-sm text-slate-500">No version history found</p>
@@ -553,91 +608,66 @@ export default function AppVersionPage() {
                     <tr 
                       key={version.id || index}
                       className={`hover:bg-slate-50 transition-colors ${
-                        isLatest ? "bg-violet-50/30" : ""
+                        isLatest ? "bg-violet-50/50 border-l-2 border-l-violet-500" : ""
                       }`}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-slate-900 font-mono">
-                            v{version.version}
-                          </span>
-                          {isLatest && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-800">
-                              Current
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-slate-600 font-mono">
-                          #{version.build_number}
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <span className={`text-sm font-semibold font-mono ${isLatest ? "text-violet-700" : "text-slate-900"}`}>
+                          v{version.version}
                         </span>
+                        <span className="text-xs text-slate-400 ml-1">#{version.build_number}</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         {getDeploymentStatusBadge(version.deployment_status)}
                         {version.deployment_status === "ready" && version.vercel_deployment_url && (
                           <a 
                             href={version.vercel_deployment_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="ml-2 text-xs text-violet-600 hover:text-violet-700 underline"
+                            className="ml-1.5 text-xs text-violet-600 hover:text-violet-700 underline"
                           >
-                            View
+                            ↗
                           </a>
                         )}
                       </td>
-                      <td className="px-6 py-4 max-w-md">
-                        <div className="flex items-start gap-2">
-                          <MessageSquare className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-                          <div className="flex-1 min-w-0">
-                            <p className={`text-sm text-slate-700 ${isExpanded ? "" : "truncate"}`}>
-                              {displayMessage || "No commit message"}
-                            </p>
-                            {isTruncated && (
-                              <button
-                                onClick={() => toggleMessageExpansion(version.id)}
-                                className="text-xs text-violet-600 hover:text-violet-700 font-medium mt-1"
-                              >
-                                {isExpanded ? "Show less" : "Show more"}
-                              </button>
-                            )}
-                          </div>
+                      <td className="px-3 py-3 max-w-xs">
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm text-slate-700 ${isExpanded ? "" : "truncate"}`}>
+                            {displayMessage || "No commit message"}
+                          </p>
+                          {isTruncated && (
+                            <button
+                              onClick={() => toggleMessageExpansion(version.id)}
+                              className="text-xs text-violet-600 hover:text-violet-700 font-medium"
+                            >
+                              {isExpanded ? "less" : "more"}
+                            </button>
+                          )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap text-right">
                         {version.files_changed !== null && version.lines_added !== null && version.lines_deleted !== null ? (
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1 text-slate-600">
-                              <FileText className="w-4 h-4" />
-                              <span className="text-sm font-medium">{version.files_changed}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="flex items-center gap-1 text-emerald-600">
-                                <Plus className="w-3.5 h-3.5" />
-                                <span className="text-sm font-medium">{version.lines_added}</span>
-                              </div>
-                              <div className="flex items-center gap-1 text-red-600">
-                                <Minus className="w-3.5 h-3.5" />
-                                <span className="text-sm font-medium">{version.lines_deleted}</span>
-                              </div>
-                            </div>
+                          <div className="flex items-center justify-end gap-2 text-xs">
+                            <span className="text-slate-500">{version.files_changed}f</span>
+                            <span className="text-emerald-600 font-medium">+{version.lines_added}</span>
+                            <span className="text-red-500 font-medium">-{version.lines_deleted}</span>
                           </div>
                         ) : (
-                          <span className="text-sm text-slate-400">No data</span>
+                          <span className="text-xs text-slate-400">—</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-slate-900">
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <span className="text-sm text-slate-700">
                           {formatRelativeTime(version.deployed_at)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         {version.git_commit ? (
-                          <code className="text-sm text-slate-600 bg-slate-100 px-2 py-1 rounded font-mono">
+                          <code className="text-xs text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded font-mono">
                             {version.git_commit.substring(0, 7)}
                           </code>
                         ) : (
-                          <span className="text-sm text-slate-400">N/A</span>
+                          <span className="text-xs text-slate-400">—</span>
                         )}
                       </td>
                     </tr>
@@ -650,24 +680,24 @@ export default function AppVersionPage() {
 
         {/* Pagination Controls */}
         {hasMore && (
-          <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
+          <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between">
             <p className="text-sm text-slate-600">
-              Showing {history.length} of {total} versions
+              Showing {history.length} of {total}
             </p>
             <button
               onClick={loadMore}
               disabled={loadingMore}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loadingMore ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Loading...
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Loading
                 </>
               ) : (
                 <>
-                  Load More
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  More
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </>
