@@ -3,13 +3,16 @@
 import { Check, CheckCheck, Image as ImageIcon, Video } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { Avatar } from "@/components/ui/Avatar";
+import { CallMessageBubble } from "./CallMessageBubble";
+import { ProfileMessageBubble } from "./ProfileMessageBubble";
 
 export interface Message {
   id: string;
   sender_id: string;
   content: string;
-  type: "text" | "image" | "video";
+  type: "text" | "image" | "video" | "call" | "profile" | "system" | "audio" | "file";
   media_url?: string | null;
+  metadata?: Record<string, unknown> | null;
   created_at: string;
   is_read?: boolean;
   status?: "sending" | "sent" | "delivered" | "read" | "failed";
@@ -60,6 +63,58 @@ export function MessageBubble({
         return null;
     }
   };
+
+  // Handle special message types
+  if (message.type === "call" && message.metadata) {
+    return (
+      <CallMessageBubble
+        metadata={message.metadata as {
+          call_id: string;
+          call_type: "audio" | "video";
+          duration_seconds: number;
+          status: "completed" | "missed" | "declined";
+          participants: string[];
+          started_at: string;
+          ended_at: string;
+        }}
+        isOwn={isOwn}
+        createdAt={message.created_at}
+      />
+    );
+  }
+
+  if (message.type === "profile" && message.metadata) {
+    return (
+      <ProfileMessageBubble
+        content={message.content}
+        metadata={message.metadata as {
+          profile_id: string;
+          first_name: string | null;
+          age: number | null;
+          location: string | null;
+          profile_image_url: string | null;
+          bio: string | null;
+          occupation: string | null;
+          is_hidden?: boolean;
+        }}
+        isOwn={isOwn}
+        createdAt={message.created_at}
+      />
+    );
+  }
+
+  // Handle system messages
+  if (message.type === "system") {
+    return (
+      <div className="flex justify-center my-3">
+        <div className="px-3 py-1.5 bg-gray-100/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-full">
+          <p className="text-[13px] text-gray-500 dark:text-gray-400 text-center">
+            {message.content}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

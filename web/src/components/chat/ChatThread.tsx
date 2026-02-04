@@ -115,8 +115,9 @@ export function ChatThread({
     id: msg.id,
     sender_id: msg.sender_id,
     content: msg.content,
-    type: msg.message_type as "text" | "image" | "video",
+    type: msg.message_type as Message["type"],
     media_url: msg.media_url || undefined,
+    metadata: msg.metadata as Record<string, unknown> | null,
     created_at: msg.created_at,
     status: msg.status as "sending" | "sent" | "delivered" | "read" | "failed",
   }));

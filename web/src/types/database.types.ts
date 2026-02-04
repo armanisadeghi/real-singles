@@ -1068,6 +1068,7 @@ export type Database = {
           media_thumbnail_url: string | null
           media_url: string | null
           message_type: string | null
+          metadata: Json | null
           reply_to_id: string | null
           sender_id: string
           status: string | null
@@ -1085,6 +1086,7 @@ export type Database = {
           media_thumbnail_url?: string | null
           media_url?: string | null
           message_type?: string | null
+          metadata?: Json | null
           reply_to_id?: string | null
           sender_id: string
           status?: string | null
@@ -1102,6 +1104,7 @@ export type Database = {
           media_thumbnail_url?: string | null
           media_url?: string | null
           message_type?: string | null
+          metadata?: Json | null
           reply_to_id?: string | null
           sender_id?: string
           status?: string | null

@@ -17,6 +17,7 @@ interface IntroductionModalProps {
   onClose: () => void;
   userA: Profile;
   userB: Profile;
+  matchmakerId: string;
   onSuccess: () => void;
 }
 
@@ -25,6 +26,7 @@ export function IntroductionModal({
   onClose,
   userA,
   userB,
+  matchmakerId,
   onSuccess,
 }: IntroductionModalProps) {
   const [introMessage, setIntroMessage] = useState("");
@@ -43,9 +45,6 @@ export function IntroductionModal({
 
     setSubmitting(true);
     setError(null);
-
-    // TODO: Get matchmaker ID from context/API
-    const matchmakerId = ""; // Will be fetched from matchmaker context
 
     try {
       const response = await fetch(

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MatchmakerNav } from "@/components/matchmaker/MatchmakerNav";
+import { MatchmakerProvider } from "@/contexts/MatchmakerContext";
 
 /**
  * Matchmaker Portal Layout
@@ -111,11 +112,13 @@ export default async function MatchmakerPortalLayout({
 
   // Approved matchmaker - show portal
   return (
-    <div className="min-h-dvh bg-background">
-      <MatchmakerNav matchmakerId={matchmaker.id} />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {children}
-      </main>
-    </div>
+    <MatchmakerProvider matchmakerId={matchmaker.id}>
+      <div className="min-h-dvh bg-background">
+        <MatchmakerNav matchmakerId={matchmaker.id} />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {children}
+        </main>
+      </div>
+    </MatchmakerProvider>
   );
 }

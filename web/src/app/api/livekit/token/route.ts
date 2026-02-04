@@ -41,9 +41,19 @@ export async function POST(request: Request) {
   const apiSecret = process.env.LIVEKIT_API_SECRET;
 
   if (!livekitUrl || !apiKey || !apiSecret) {
-    console.error("LiveKit environment variables not configured");
+    const missing: string[] = [];
+    if (!livekitUrl) missing.push("LIVEKIT_URL");
+    if (!apiKey) missing.push("LIVEKIT_API_KEY");
+    if (!apiSecret) missing.push("LIVEKIT_API_SECRET");
+    
+    console.error(`LiveKit environment variables not configured. Missing: ${missing.join(", ")}`);
     return NextResponse.json(
-      { success: false, msg: "Video call service not configured" },
+      { 
+        success: false, 
+        msg: "Video call service not configured",
+        // Only include missing vars in development for debugging
+        ...(process.env.NODE_ENV === "development" && { missing }),
+      },
       { status: 503 }
     );
   }

@@ -1,9 +1,12 @@
 "use client";
 
 import { IntroHistoryTable } from "@/components/matchmaker/IntroHistoryTable";
+import { useMatchmaker } from "@/contexts/MatchmakerContext";
 import { Heart } from "lucide-react";
 
 export default function IntroductionsPage() {
+  const { matchmakerId } = useMatchmaker();
+
   return (
     <div className="space-y-6 pb-24">
       {/* Header */}
@@ -22,7 +25,7 @@ export default function IntroductionsPage() {
       </div>
 
       {/* Introduction History Table */}
-      <IntroHistoryTable />
+      <IntroHistoryTable matchmakerId={matchmakerId} />
     </div>
   );
 }

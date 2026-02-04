@@ -1,41 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { DashboardStats } from "@/components/matchmaker/DashboardStats";
 import { RecentActivity } from "@/components/matchmaker/RecentActivity";
+import { useMatchmaker } from "@/contexts/MatchmakerContext";
 import { Wand2 } from "lucide-react";
 
 export default function MatchmakerDashboardPage() {
-  const [matchmakerId, setMatchmakerId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Get current user's matchmaker ID
-    fetch("/api/users/me")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.data) {
-          // Get matchmaker ID from users table
-          fetch("/api/matchmakers")
-            .then((res) => res.json())
-            .then((mmData) => {
-              // Find matchmaker by current user
-              // For now, we'll need to get it from the matchmakers table
-              // This is a temporary solution - ideally we'd have it in the user profile
-              setLoading(false);
-            });
-        }
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
-      </div>
-    );
-  }
+  const { matchmakerId } = useMatchmaker();
 
   return (
     <div className="space-y-6 pb-24">
@@ -55,10 +26,10 @@ export default function MatchmakerDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <DashboardStats />
+      <DashboardStats matchmakerId={matchmakerId} />
 
       {/* Recent Activity */}
-      <RecentActivity />
+      <RecentActivity matchmakerId={matchmakerId} />
     </div>
   );
 }

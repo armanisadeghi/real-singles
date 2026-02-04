@@ -6,22 +6,102 @@ import Link from "next/link";
 
 interface ActivityItem {
   id: string;
-  type: "intro_created" | "intro_accepted" | "client_joined";
+  type: "intro_created" | "intro_accepted" | "intro_declined" | "client_joined";
   title: string;
   description: string;
   time: string;
   link?: string;
 }
 
-export function RecentActivity() {
+interface RecentActivityProps {
+  matchmakerId: string;
+}
+
+export function RecentActivity({ matchmakerId }: RecentActivityProps) {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // This will be implemented to fetch recent activity
-    // For now, showing placeholder
-    setLoading(false);
-  }, []);
+    const fetchActivity = async () => {
+      setLoading(true);
+
+      try {
+        // Fetch recent introductions
+        const introsResponse = await fetch(
+          `/api/matchmakers/${matchmakerId}/introductions?limit=5`
+        );
+        const introsData = await introsResponse.json();
+
+        // Fetch recent clients
+        const clientsResponse = await fetch(
+          `/api/matchmakers/${matchmakerId}/clients?limit=5`
+        );
+        const clientsData = await clientsResponse.json();
+
+        const items: ActivityItem[] = [];
+
+        // Map introductions to activity items
+        if (introsData.success && introsData.data) {
+          introsData.data.forEach((intro: any) => {
+            const userAName = intro.user_a?.first_name || "User";
+            const userBName = intro.user_b?.first_name || "User";
+
+            let type: ActivityItem["type"] = "intro_created";
+            let title = `Introduction created`;
+            let description = `${userAName} & ${userBName}`;
+
+            if (intro.status === "active") {
+              type = "intro_accepted";
+              title = "Introduction accepted!";
+            } else if (intro.status === "declined") {
+              type = "intro_declined";
+              title = "Introduction declined";
+            }
+
+            items.push({
+              id: intro.id,
+              type,
+              title,
+              description,
+              time: formatRelativeTime(intro.created_at),
+              link: `/matchmaker-portal/introductions/${intro.id}`,
+            });
+          });
+        }
+
+        // Map clients to activity items (only recent ones)
+        if (clientsData.success && clientsData.data) {
+          clientsData.data.slice(0, 3).forEach((client: any) => {
+            const clientName = client.first_name || "New client";
+            items.push({
+              id: `client-${client.id}`,
+              type: "client_joined",
+              title: "New client joined",
+              description: clientName,
+              time: formatRelativeTime(client.started_at),
+              link: `/matchmaker-portal/clients/${client.id}`,
+            });
+          });
+        }
+
+        // Sort by time (most recent first) and take top 5
+        items.sort(
+          (a, b) =>
+            new Date(b.time).getTime() - new Date(a.time).getTime()
+        );
+
+        setActivities(items.slice(0, 5));
+      } catch (err) {
+        console.error("Error fetching activity:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (matchmakerId) {
+      fetchActivity();
+    }
+  }, [matchmakerId]);
 
   if (loading) {
     return (
@@ -79,6 +159,8 @@ export function RecentActivity() {
         return Heart;
       case "intro_accepted":
         return Heart;
+      case "intro_declined":
+        return Heart;
       case "client_joined":
         return Users;
       default:
@@ -92,6 +174,8 @@ export function RecentActivity() {
         return "from-purple-500 to-pink-500";
       case "intro_accepted":
         return "from-green-500 to-emerald-500";
+      case "intro_declined":
+        return "from-red-500 to-rose-500";
       case "client_joined":
         return "from-blue-500 to-cyan-500";
       default:
@@ -156,4 +240,23 @@ export function RecentActivity() {
       </div>
     </div>
   );
+}
+
+function formatRelativeTime(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 }

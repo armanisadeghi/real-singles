@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback, useRef, use } from "react";
 import { useRouter } from "next/navigation";
 import { VideoCallRoom } from "@/components/video-call";
 import { Skeleton } from "@/components/ui/LoadingSkeleton";
@@ -33,6 +33,10 @@ export default function VideoCallPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEnding, setIsEnding] = useState(false);
+  
+  // Track call start time for duration calculation
+  const callStartTime = useRef<number | null>(null);
+  const hasEndedCall = useRef(false);
 
   // Fetch token on mount
   const fetchToken = useCallback(async () => {
@@ -53,6 +57,23 @@ export default function VideoCallPage({ params }: PageProps) {
       }
 
       setTokenData(data.data!);
+      
+      // Start call record when we successfully get a token
+      const decodedRoomName = decodeURIComponent(roomName);
+      try {
+        await fetch("/api/calls/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            roomName: decodedRoomName,
+            callType: "video", // Default to video, could be determined by UI state
+            conversationId: decodedRoomName, // Room name is usually the conversation ID
+          }),
+        });
+        callStartTime.current = Date.now();
+      } catch (startErr) {
+        console.warn("Failed to start call record:", startErr);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to connect to call";
       setError(message);
@@ -68,11 +89,26 @@ export default function VideoCallPage({ params }: PageProps) {
 
   // Handle call end
   const handleCallEnd = useCallback(async () => {
+    if (hasEndedCall.current) return; // Prevent double-ending
+    hasEndedCall.current = true;
     setIsEnding(true);
 
     try {
-      // Log call end (optional - could record call duration, etc.)
-      // For now, just navigate back
+      // Calculate duration and end call record
+      const decodedRoomName = decodeURIComponent(roomName);
+      const duration = callStartTime.current 
+        ? Math.floor((Date.now() - callStartTime.current) / 1000)
+        : undefined;
+      
+      await fetch("/api/calls/end", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          roomName: decodedRoomName,
+          duration,
+        }),
+      });
+      
       toast.success("Call ended");
       
       // Navigate back to previous page or chats
@@ -85,7 +121,7 @@ export default function VideoCallPage({ params }: PageProps) {
       console.error("Error ending call:", err);
       router.push("/chats");
     }
-  }, [router, toast]);
+  }, [router, toast, roomName]);
 
   // Handle disconnection
   const handleDisconnected = useCallback(() => {

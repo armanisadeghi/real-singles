@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import { verifyMatchmakerOwnership } from "@/lib/services/matchmakers";
 import { z } from "zod";
 
@@ -8,6 +9,165 @@ const updateSchema = z.object({
   status: z.enum(["active", "paused", "completed", "cancelled"]).optional(),
   notes: z.string().max(5000).optional(),
 });
+
+/**
+ * GET /api/matchmakers/[id]/clients/[clientId]
+ * Get detailed client information including profile (matchmaker only)
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string; clientId: string }> }
+) {
+  const supabase = await createApiClient();
+  const { id: matchmakerId, clientId } = await params;
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json(
+      { success: false, msg: "Not authenticated" },
+      { status: 401 }
+    );
+  }
+
+  // Verify ownership
+  const ownershipCheck = await verifyMatchmakerOwnership(
+    supabase,
+    matchmakerId,
+    user.id
+  );
+  if (!ownershipCheck.success) {
+    return NextResponse.json(
+      { success: false, msg: ownershipCheck.error },
+      { status: 403 }
+    );
+  }
+
+  // Fetch the client relationship
+  const { data: clientRecord, error: clientError } = await supabase
+    .from("matchmaker_clients")
+    .select("*")
+    .eq("id", clientId)
+    .eq("matchmaker_id", matchmakerId)
+    .single();
+
+  if (clientError || !clientRecord) {
+    return NextResponse.json(
+      { success: false, msg: "Client not found" },
+      { status: 404 }
+    );
+  }
+
+  // Fetch the user's profile
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select(`
+      user_id,
+      first_name,
+      last_name,
+      date_of_birth,
+      gender,
+      city,
+      state,
+      country,
+      occupation,
+      bio,
+      profile_image_url,
+      is_verified,
+      is_photo_verified,
+      height_inches,
+      body_type,
+      zodiac_sign,
+      interests,
+      education,
+      religion,
+      ethnicity,
+      languages,
+      has_kids,
+      wants_kids,
+      pets,
+      smoking,
+      drinking,
+      marijuana,
+      ideal_first_date,
+      non_negotiables,
+      way_to_heart,
+      looking_for,
+      dating_intentions
+    `)
+    .eq("user_id", clientRecord.client_user_id)
+    .single();
+
+  if (profileError || !profile) {
+    return NextResponse.json(
+      { success: false, msg: "Profile not found" },
+      { status: 404 }
+    );
+  }
+
+  // Resolve profile image URL
+  const profileImageUrl = profile.profile_image_url
+    ? await resolveStorageUrl(supabase, profile.profile_image_url)
+    : null;
+
+  // Fetch gallery images
+  const { data: gallery } = await supabase
+    .from("user_gallery")
+    .select("id, media_url, is_primary, display_order")
+    .eq("user_id", clientRecord.client_user_id)
+    .order("display_order", { ascending: true });
+
+  // Resolve gallery URLs
+  const galleryWithUrls = await Promise.all(
+    (gallery || []).map(async (img) => ({
+      ...img,
+      media_url: await resolveStorageUrl(supabase, img.media_url),
+    }))
+  );
+
+  // Fetch introductions involving this client
+  const { data: introductions } = await supabase
+    .from("matchmaker_introductions")
+    .select(`
+      id,
+      user_a_id,
+      user_b_id,
+      status,
+      outcome,
+      created_at
+    `)
+    .eq("matchmaker_id", matchmakerId)
+    .or(`user_a_id.eq.${clientRecord.client_user_id},user_b_id.eq.${clientRecord.client_user_id}`)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  return NextResponse.json({
+    success: true,
+    data: {
+      // Client relationship info
+      client: {
+        id: clientRecord.id,
+        status: clientRecord.status,
+        notes: clientRecord.notes,
+        started_at: clientRecord.created_at,
+        ended_at: clientRecord.ended_at,
+      },
+      // Profile info (safe for matchmaker to see)
+      profile: {
+        ...profile,
+        profile_image_url: profileImageUrl,
+      },
+      // Gallery images
+      gallery: galleryWithUrls,
+      // Recent introductions
+      introductions: introductions || [],
+    },
+    msg: "Client details fetched successfully",
+  });
+}
 
 /**
  * PATCH /api/matchmakers/[id]/clients/[clientId]

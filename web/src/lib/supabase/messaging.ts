@@ -27,10 +27,11 @@ export interface Message {
   conversation_id: string;
   sender_id: string;
   content: string;
-  message_type: "text" | "image" | "video" | "audio" | "file" | "system";
+  message_type: "text" | "image" | "video" | "audio" | "file" | "system" | "call" | "profile";
   media_url?: string | null;
   media_thumbnail_url?: string | null;
   media_metadata?: Json | null;
+  metadata?: Json | null; // For call/profile message data
   status: "sending" | "sent" | "delivered" | "read" | "failed";
   reply_to_id?: string | null;
   deleted_at?: string | null;
