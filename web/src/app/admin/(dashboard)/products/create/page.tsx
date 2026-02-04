@@ -157,12 +157,9 @@ export default function AdminCreateProductPage() {
       <AdminPageHeader
         title="Create Product"
         subtitle="Add a new product to the rewards shop"
-        variant="compact"
-        iconName="package"
-        iconGradient="from-blue-500 to-indigo-500"
       >
         <Link href="/admin/products">
-          <AdminButton variant="subtle">
+          <AdminButton variant="secondary">
             Cancel
           </AdminButton>
         </Link>

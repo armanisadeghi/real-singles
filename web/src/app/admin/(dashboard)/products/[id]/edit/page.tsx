@@ -214,12 +214,9 @@ export default function AdminEditProductPage({
       <AdminPageHeader
         title="Edit Product"
         subtitle="Update product details"
-        variant="compact"
-        iconName="package"
-        iconGradient="from-blue-500 to-indigo-500"
       >
         <Link href="/admin/products">
-          <AdminButton variant="subtle">
+          <AdminButton variant="secondary">
             Cancel
           </AdminButton>
         </Link>
