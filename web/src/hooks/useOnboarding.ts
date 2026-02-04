@@ -71,6 +71,11 @@ export interface UseOnboardingReturn {
   saveAndSkip: () => Promise<void>;
   saveAsPreferNot: () => Promise<void>;
 
+  // Per-field prefer not to say
+  markFieldAsPreferNot: (fieldKey: string) => Promise<void>;
+  removeFieldFromPreferNot: (fieldKey: string) => Promise<void>;
+  isFieldPreferNot: (fieldKey: string) => boolean;
+
   // Utilities
   isStepComplete: (stepNumber: number) => boolean;
   refreshProfile: () => Promise<void>;
@@ -408,7 +413,11 @@ export function useOnboarding(
       // Refresh profile to update completion percentage
       await fetchProfile(false);
       
-      // Go to next step AFTER refresh
+      // Brief delay (500ms) to let user see the updated percentage
+      // This provides visual feedback that progress is being tracked
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Go to next step AFTER delay
       setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
@@ -505,6 +514,68 @@ export function useOnboarding(
     await fetchProfile(false);
   }, [fetchProfile]);
 
+  // Mark a specific field as "prefer not to say"
+  const markFieldAsPreferNot = useCallback(async (fieldKey: string) => {
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      const res = await fetch("/api/profile/completion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "prefer_not", field: fieldKey }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.msg || "Failed to mark field as prefer not");
+      }
+
+      // Refresh profile to update prefer_not list
+      await fetchProfile(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to mark field as prefer not");
+      throw err;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [fetchProfile]);
+
+  // Remove a field from "prefer not to say" list
+  const removeFieldFromPreferNot = useCallback(async (fieldKey: string) => {
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      const res = await fetch("/api/profile/completion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "remove_prefer_not", field: fieldKey }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.msg || "Failed to remove field from prefer not");
+      }
+
+      // Refresh profile to update prefer_not list
+      await fetchProfile(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to remove field from prefer not");
+      throw err;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [fetchProfile]);
+
+  // Check if a field is marked as "prefer not to say"
+  const isFieldPreferNot = useCallback(
+    (fieldKey: string) => {
+      return profile?.profile_completion_prefer_not?.includes(fieldKey) || false;
+    },
+    [profile]
+  );
+
   // Skip ahead functionality
   const nextIncompleteStep = useMemo(() => {
     if (!profile) return null;
@@ -558,6 +629,11 @@ export function useOnboarding(
     saveAndContinue,
     saveAndSkip,
     saveAsPreferNot,
+
+    // Per-field prefer not to say
+    markFieldAsPreferNot,
+    removeFieldFromPreferNot,
+    isFieldPreferNot,
 
     // Utilities
     isStepComplete: checkStepComplete,

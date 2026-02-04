@@ -578,6 +578,292 @@ export type Database = {
           },
         ]
       }
+      matchmaker_clients: {
+        Row: {
+          client_user_id: string
+          created_at: string | null
+          ended_at: string | null
+          id: string
+          matchmaker_id: string
+          notes: string | null
+          started_at: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          client_user_id: string
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          matchmaker_id: string
+          notes?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          client_user_id?: string
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          matchmaker_id?: string
+          notes?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matchmaker_clients_client_user_id_fkey"
+            columns: ["client_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matchmaker_clients_matchmaker_id_fkey"
+            columns: ["matchmaker_id"]
+            isOneToOne: false
+            referencedRelation: "matchmakers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matchmaker_introductions: {
+        Row: {
+          conversation_id: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          intro_message: string
+          matchmaker_id: string
+          outcome: string | null
+          outcome_updated_at: string | null
+          status: string
+          updated_at: string | null
+          user_a_id: string
+          user_a_response_at: string | null
+          user_b_id: string
+          user_b_response_at: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          intro_message: string
+          matchmaker_id: string
+          outcome?: string | null
+          outcome_updated_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_a_id: string
+          user_a_response_at?: string | null
+          user_b_id: string
+          user_b_response_at?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          intro_message?: string
+          matchmaker_id?: string
+          outcome?: string | null
+          outcome_updated_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_a_id?: string
+          user_a_response_at?: string | null
+          user_b_id?: string
+          user_b_response_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matchmaker_introductions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matchmaker_introductions_matchmaker_id_fkey"
+            columns: ["matchmaker_id"]
+            isOneToOne: false
+            referencedRelation: "matchmakers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matchmaker_introductions_user_a_id_fkey"
+            columns: ["user_a_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matchmaker_introductions_user_b_id_fkey"
+            columns: ["user_b_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matchmaker_reviews: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_verified_client: boolean | null
+          matchmaker_id: string
+          rating: number
+          review_text: string | null
+          reviewer_user_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_verified_client?: boolean | null
+          matchmaker_id: string
+          rating: number
+          review_text?: string | null
+          reviewer_user_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_verified_client?: boolean | null
+          matchmaker_id?: string
+          rating?: number
+          review_text?: string | null
+          reviewer_user_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matchmaker_reviews_matchmaker_id_fkey"
+            columns: ["matchmaker_id"]
+            isOneToOne: false
+            referencedRelation: "matchmakers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matchmaker_reviews_reviewer_user_id_fkey"
+            columns: ["reviewer_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matchmaker_stats: {
+        Row: {
+          active_clients: number | null
+          average_rating: number | null
+          last_calculated_at: string | null
+          matchmaker_id: string
+          successful_introductions: number | null
+          total_clients: number | null
+          total_introductions: number | null
+          total_reviews: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          active_clients?: number | null
+          average_rating?: number | null
+          last_calculated_at?: string | null
+          matchmaker_id: string
+          successful_introductions?: number | null
+          total_clients?: number | null
+          total_introductions?: number | null
+          total_reviews?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          active_clients?: number | null
+          average_rating?: number | null
+          last_calculated_at?: string | null
+          matchmaker_id?: string
+          successful_introductions?: number | null
+          total_clients?: number | null
+          total_introductions?: number | null
+          total_reviews?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matchmaker_stats_matchmaker_id_fkey"
+            columns: ["matchmaker_id"]
+            isOneToOne: true
+            referencedRelation: "matchmakers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matchmakers: {
+        Row: {
+          application_notes: string | null
+          approved_at: string | null
+          approved_by: string | null
+          bio: string | null
+          certifications: string[] | null
+          created_at: string | null
+          id: string
+          specialties: string[] | null
+          status: string
+          suspended_reason: string | null
+          updated_at: string | null
+          user_id: string
+          years_experience: number | null
+        }
+        Insert: {
+          application_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string | null
+          id?: string
+          specialties?: string[] | null
+          status?: string
+          suspended_reason?: string | null
+          updated_at?: string | null
+          user_id: string
+          years_experience?: number | null
+        }
+        Update: {
+          application_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string | null
+          id?: string
+          specialties?: string[] | null
+          status?: string
+          suspended_reason?: string | null
+          updated_at?: string | null
+          user_id?: string
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matchmakers_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matchmakers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_reactions: {
         Row: {
           created_at: string | null
@@ -1480,6 +1766,70 @@ export type Database = {
           },
         ]
       }
+      system_issues: {
+        Row: {
+          context: Json | null
+          created_at: string | null
+          id: string
+          issue_type: string
+          resolution_notes: string | null
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          target_user_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string | null
+          id?: string
+          issue_type: string
+          resolution_notes?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+          target_user_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string | null
+          id?: string
+          issue_type?: string
+          resolution_notes?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          target_user_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_issues_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "system_issues_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "system_issues_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_filters: {
         Row: {
           body_types: string[] | null
@@ -1940,6 +2290,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      calculate_matchmaker_stats: {
+        Args: { p_matchmaker_id: string }
+        Returns: undefined
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
@@ -1973,6 +2327,12 @@ export type Database = {
         | { Args: { table_name: string }; Returns: string }
       enablelongtransactions: { Args: never; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      find_direct_conversation: {
+        Args: { p_other_user_id: string; p_user_id: string }
+        Returns: {
+          conversation_id: string
+        }[]
+      }
       geometry: { Args: { "": string }; Returns: unknown }
       geometry_above: {
         Args: { geom1: unknown; geom2: unknown }

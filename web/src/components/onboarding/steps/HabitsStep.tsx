@@ -3,10 +3,10 @@
 /**
  * HabitsStep
  *
- * Step 16: Smoking, Drinking, Marijuana
+ * Step 18: Smoking, Drinking, Marijuana
  */
 
-import { OnboardingStepWrapper, OnboardingSelect } from "../OnboardingStepWrapper";
+import { OnboardingStepWrapper, OnboardingSelect, OnboardingSelectWithPreferNot } from "../OnboardingStepWrapper";
 import { SMOKING_OPTIONS, DRINKING_OPTIONS, MARIJUANA_OPTIONS } from "@/types";
 
 interface HabitsStepProps {
@@ -16,6 +16,8 @@ interface HabitsStepProps {
   onSmokingChange: (value: string) => void;
   onDrinkingChange: (value: string) => void;
   onMarijuanaChange: (value: string) => void;
+  isMarijuanaPreferNot: boolean;
+  onMarijuanaPreferNotChange: (isPreferNot: boolean) => void;
 }
 
 export function HabitsStep({
@@ -25,7 +27,14 @@ export function HabitsStep({
   onSmokingChange,
   onDrinkingChange,
   onMarijuanaChange,
+  isMarijuanaPreferNot,
+  onMarijuanaPreferNotChange,
 }: HabitsStepProps) {
+  // Filter out "prefer_not_to_say" from options
+  const marijuanaOptions = MARIJUANA_OPTIONS.filter(
+    (opt) => opt.value !== "prefer_not_to_say"
+  );
+
   return (
     <OnboardingStepWrapper title="Your habits">
       <OnboardingSelect
@@ -44,11 +53,14 @@ export function HabitsStep({
         placeholder="Select drinking habits"
       />
 
-      <OnboardingSelect
+      <OnboardingSelectWithPreferNot
         label="Marijuana"
-        options={MARIJUANA_OPTIONS}
+        options={marijuanaOptions}
         value={marijuana}
-        onChange={(e) => onMarijuanaChange(e.target.value)}
+        onChange={onMarijuanaChange}
+        isPreferNot={isMarijuanaPreferNot}
+        onPreferNotChange={onMarijuanaPreferNotChange}
+        fieldDbColumn="marijuana"
         placeholder="Select marijuana use"
       />
     </OnboardingStepWrapper>

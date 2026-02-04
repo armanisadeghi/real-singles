@@ -9,9 +9,6 @@ import {
   ChevronRight,
   Sparkles,
   Gift,
-  UserPlus,
-  Users,
-  Heart,
   Wand2,
 } from "lucide-react";
 import { useEvents, useSpeedDating } from "@/hooks/queries";
@@ -253,26 +250,141 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
 }
 
 // ============================================================================
-// COMING SOON SECTION COMPONENT
+// FEATURE PROMO BANNER COMPONENT (Unified for Coming Soon / Promo sections)
 // ============================================================================
 
-function ComingSoonSection() {
+interface FeaturePromoBannerProps {
+  href: string;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  badge?: string;
+  badgeIcon?: React.ElementType;
+  backgroundImage?: string;
+  accentColor: "amber" | "purple" | "rose" | "teal";
+}
+
+const accentStyles = {
+  amber: {
+    iconBg: "bg-amber-500",
+    iconBgLight: "bg-amber-100 dark:bg-amber-900/40",
+    badge: "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300",
+    hoverBorder: "hover:border-amber-300 dark:hover:border-amber-700",
+    hoverText: "group-hover:text-amber-600 dark:group-hover:text-amber-400",
+    overlay: "from-amber-900/80 via-amber-900/60 to-amber-900/40",
+  },
+  purple: {
+    iconBg: "bg-purple-500",
+    iconBgLight: "bg-purple-100 dark:bg-purple-900/40",
+    badge: "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300",
+    hoverBorder: "hover:border-purple-300 dark:hover:border-purple-700",
+    hoverText: "group-hover:text-purple-600 dark:group-hover:text-purple-400",
+    overlay: "from-purple-900/80 via-purple-900/60 to-purple-900/40",
+  },
+  rose: {
+    iconBg: "bg-rose-500",
+    iconBgLight: "bg-rose-100 dark:bg-rose-900/40",
+    badge: "bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300",
+    hoverBorder: "hover:border-rose-300 dark:hover:border-rose-700",
+    hoverText: "group-hover:text-rose-600 dark:group-hover:text-rose-400",
+    overlay: "from-rose-900/80 via-rose-900/60 to-rose-900/40",
+  },
+  teal: {
+    iconBg: "bg-teal-500",
+    iconBgLight: "bg-teal-100 dark:bg-teal-900/40",
+    badge: "bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300",
+    hoverBorder: "hover:border-teal-300 dark:hover:border-teal-700",
+    hoverText: "group-hover:text-teal-600 dark:group-hover:text-teal-400",
+    overlay: "from-teal-900/80 via-teal-900/60 to-teal-900/40",
+  },
+};
+
+function FeaturePromoBanner({
+  href,
+  title,
+  description,
+  icon: Icon,
+  badge,
+  badgeIcon: BadgeIcon,
+  backgroundImage,
+  accentColor,
+}: FeaturePromoBannerProps) {
+  const styles = accentStyles[accentColor];
+
   return (
-    <div className="relative rounded-2xl border border-dashed border-border/60 bg-muted/20 p-6 sm:p-8">
-      <div className="absolute top-3 right-3 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-semibold rounded-full flex items-center gap-1">
-        <Sparkles className="w-3 h-3" />
-        Coming Soon
+    <Link
+      href={href}
+      className={`group flex-shrink-0 w-[280px] sm:w-[300px] relative overflow-hidden rounded-2xl border border-border/40 bg-card hover:border-border/80 hover:shadow-md transition-all duration-300 ${styles.hoverBorder}`}
+    >
+      {/* Image Section - matches EventCard/SpeedDatingCard aspect ratio */}
+      <div className="aspect-[16/10] relative overflow-hidden">
+        {backgroundImage ? (
+          <>
+            <img
+              src={backgroundImage}
+              alt=""
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className={`absolute inset-0 bg-gradient-to-t ${styles.overlay}`} />
+          </>
+        ) : (
+          <div className={`w-full h-full flex items-center justify-center ${styles.iconBgLight}`}>
+            <Icon className={`w-12 h-12 ${styles.iconBg.replace("bg-", "text-")}/30`} />
+          </div>
+        )}
+
+        {/* Badge - positioned like EventCard price badge */}
+        {badge && (
+          <div
+            className={`absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm flex items-center gap-1 ${
+              backgroundImage
+                ? "bg-white/95 dark:bg-neutral-800/95 backdrop-blur-sm text-foreground"
+                : styles.badge
+            }`}
+          >
+            {BadgeIcon && <BadgeIcon className="w-3 h-3" />}
+            {badge}
+          </div>
+        )}
+
+        {/* Floating Icon - centered on image */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg ${
+              backgroundImage
+                ? "bg-white/20 backdrop-blur-md"
+                : styles.iconBgLight
+            }`}
+          >
+            <Icon
+              className={`w-8 h-8 ${
+                backgroundImage ? "text-white" : styles.iconBg.replace("bg-", "text-")
+              }`}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col items-center text-center max-w-sm mx-auto pt-2">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 dark:from-amber-900/30 to-amber-50 dark:to-amber-950/20 flex items-center justify-center mb-4">
-          <Video className="w-7 h-7 text-amber-400 dark:text-amber-500" />
-        </div>
-        <p className="text-muted-foreground text-sm">
-          Expert dating tips and relationship advice videos coming soon.
+      {/* Content Section - matches EventCard/SpeedDatingCard padding */}
+      <div className="p-4">
+        <h3 className={`font-semibold text-foreground line-clamp-1 ${styles.hoverText} transition-colors`}>
+          {title}
+        </h3>
+        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+          {description}
         </p>
+
+        {/* CTA row - matches meta info row */}
+        <div className="flex items-center justify-between mt-3 text-xs">
+          <span className={`font-medium ${styles.iconBg.replace("bg-", "text-")}`}>
+            Learn more
+          </span>
+          <ChevronRight
+            className={`w-4 h-4 text-muted-foreground ${styles.hoverText} group-hover:translate-x-0.5 transition-all`}
+          />
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -297,96 +409,6 @@ function EmptySection({
   );
 }
 
-// ============================================================================
-// REFER FRIENDS BANNER COMPONENT
-// ============================================================================
-
-function ReferFriendsBanner() {
-  return (
-    <Link
-      href="/refer"
-      className="group block rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-6 hover:shadow-md hover:border-amber-300 dark:hover:border-amber-800 transition-all duration-200"
-    >
-      <div className="flex items-start gap-4">
-        {/* Icon */}
-        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center">
-          <Gift className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-lg font-semibold text-foreground">
-              Refer Friends, Earn Rewards
-            </h3>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Share RealSingles with friends and get exclusive rewards when they join. Everyone wins!
-          </p>
-        </div>
-
-        {/* Arrow indicator */}
-        <div className="flex-shrink-0">
-          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-// ============================================================================
-// MATCHMAKERS COMING SOON BANNER
-// ============================================================================
-
-function MatchmakersBanner() {
-  return (
-    <Link
-      href="/matchmakers"
-      className="group block relative overflow-hidden rounded-2xl border border-purple-200 dark:border-purple-900/50 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:from-purple-950/30 dark:via-pink-950/30 dark:to-rose-950/30 p-6 hover:shadow-lg hover:border-purple-300 dark:hover:border-purple-800 transition-all duration-200"
-    >
-      {/* Decorative background elements */}
-      <div className="absolute -right-8 -top-8 w-32 h-32 bg-purple-200 dark:bg-purple-800/20 rounded-full blur-3xl opacity-60" />
-      <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-pink-200 dark:bg-pink-800/20 rounded-full blur-3xl opacity-60" />
-      
-      <div className="relative flex items-start gap-4">
-        {/* Icon cluster */}
-        <div className="flex-shrink-0 relative">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-            <Wand2 className="w-7 h-7 text-white" />
-          </div>
-          {/* Floating mini icons */}
-          <div className="absolute -right-2 -top-2 w-7 h-7 rounded-full bg-gradient-to-br from-pink-400 to-rose-400 flex items-center justify-center shadow-md">
-            <Heart className="w-4 h-4 text-white" />
-          </div>
-          <div className="absolute -left-2 -bottom-2 w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-indigo-400 flex items-center justify-center shadow-md">
-            <Users className="w-4 h-4 text-white" />
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <h3 className="text-lg font-bold text-foreground">
-              Professional Matchmakers
-            </h3>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">
-              <Sparkles className="w-3 h-3" />
-              Coming Soon
-            </span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Expert matchmakers will help curate your perfect connections. Get personalized matches from professionals who understand the art of meaningful relationships.
-          </p>
-        </div>
-
-        {/* Arrow indicator */}
-        <div className="flex-shrink-0">
-          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all" />
-        </div>
-      </div>
-    </Link>
-  );
-}
 
 // ============================================================================
 // SECTION LOADING SKELETON
@@ -506,21 +528,44 @@ export default function ExplorePage() {
         {/* Speed Dating Section - Loads independently */}
         <SpeedDatingSection />
 
-        {/* Refer Friends Banner */}
-        <ReferFriendsBanner />
-
-        {/* Matchmakers Coming Soon Banner */}
-        <MatchmakersBanner />
-
-        {/* Videos Section - Coming Soon */}
+        {/* Feature Promo Cards - Same sizing as Events/Speed Dating */}
         <section>
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-              <Video className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            </div>
-            <h2 className="text-lg font-semibold text-foreground">Videos</h2>
+          <SectionHeader title="More Ways to Connect" href="/features" icon={Sparkles} />
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+            {/* Refer Friends Card */}
+            <FeaturePromoBanner
+              href="/refer"
+              title="Refer Friends, Earn Rewards"
+              description="Share RealSingles with friends and get exclusive rewards when they join."
+              icon={Gift}
+              accentColor="amber"
+              backgroundImage="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80"
+            />
+
+            {/* Matchmakers Coming Soon Card */}
+            <FeaturePromoBanner
+              href="/matchmakers"
+              title="Professional Matchmakers"
+              description="Expert matchmakers will curate your perfect connections."
+              icon={Wand2}
+              badge="Coming Soon"
+              badgeIcon={Sparkles}
+              accentColor="purple"
+              backgroundImage="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&q=80"
+            />
+
+            {/* Videos Coming Soon Card */}
+            <FeaturePromoBanner
+              href="/videos"
+              title="Dating Tips & Advice"
+              description="Expert dating tips and relationship advice videos."
+              icon={Video}
+              badge="Coming Soon"
+              badgeIcon={Sparkles}
+              accentColor="rose"
+              backgroundImage="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
+            />
           </div>
-          <ComingSoonSection />
         </section>
       </div>
     </div>

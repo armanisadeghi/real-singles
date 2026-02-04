@@ -67,6 +67,9 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
     saveAndContinue,
     saveAndSkip,
     saveAsPreferNot,
+    markFieldAsPreferNot,
+    removeFieldFromPreferNot,
+    isFieldPreferNot,
     refreshProfile,
     canSkipAhead,
     skipToNextIncomplete,
@@ -244,6 +247,15 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
           <EthnicityStep
             ethnicity={(stepValues.Ethnicity as string[]) || []}
             onChange={(v) => setFieldValue("Ethnicity", v)}
+            isPreferNot={isFieldPreferNot("ethnicity")}
+            onPreferNotChange={async (isPreferNot) => {
+              if (isPreferNot) {
+                await markFieldAsPreferNot("ethnicity");
+                setFieldValue("Ethnicity", []);
+              } else {
+                await removeFieldFromPreferNot("ethnicity");
+              }
+            }}
           />
         );
 
@@ -254,6 +266,15 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
             maritalStatus={(stepValues.MaritalStatus as string) || ""}
             onDatingIntentionsChange={(v) => setFieldValue("DatingIntentions", v)}
             onMaritalStatusChange={(v) => setFieldValue("MaritalStatus", v)}
+            isMaritalStatusPreferNot={isFieldPreferNot("marital_status")}
+            onMaritalStatusPreferNotChange={async (isPreferNot) => {
+              if (isPreferNot) {
+                await markFieldAsPreferNot("marital_status");
+                setFieldValue("MaritalStatus", "");
+              } else {
+                await removeFieldFromPreferNot("marital_status");
+              }
+            }}
           />
         );
 
@@ -292,6 +313,24 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
             politicalViews={(stepValues.PoliticalViews as string) || ""}
             onReligionChange={(v) => setFieldValue("Religion", v)}
             onPoliticalViewsChange={(v) => setFieldValue("PoliticalViews", v)}
+            isReligionPreferNot={isFieldPreferNot("religion")}
+            isPoliticalViewsPreferNot={isFieldPreferNot("political_views")}
+            onReligionPreferNotChange={async (isPreferNot) => {
+              if (isPreferNot) {
+                await markFieldAsPreferNot("religion");
+                setFieldValue("Religion", "");
+              } else {
+                await removeFieldFromPreferNot("religion");
+              }
+            }}
+            onPoliticalViewsPreferNotChange={async (isPreferNot) => {
+              if (isPreferNot) {
+                await markFieldAsPreferNot("political_views");
+                setFieldValue("PoliticalViews", "");
+              } else {
+                await removeFieldFromPreferNot("political_views");
+              }
+            }}
           />
         );
 
@@ -320,6 +359,15 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
             onSmokingChange={(v) => setFieldValue("Smoking", v)}
             onDrinkingChange={(v) => setFieldValue("Drinking", v)}
             onMarijuanaChange={(v) => setFieldValue("Marijuana", v)}
+            isMarijuanaPreferNot={isFieldPreferNot("marijuana")}
+            onMarijuanaPreferNotChange={async (isPreferNot) => {
+              if (isPreferNot) {
+                await markFieldAsPreferNot("marijuana");
+                setFieldValue("Marijuana", "");
+              } else {
+                await removeFieldFromPreferNot("marijuana");
+              }
+            }}
           />
         );
 
@@ -330,6 +378,24 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
             wantsKids={(stepValues.WantsKids as string) || ""}
             onHasKidsChange={(v) => setFieldValue("HasKids", v)}
             onWantsKidsChange={(v) => setFieldValue("WantsKids", v)}
+            isHasKidsPreferNot={isFieldPreferNot("has_kids")}
+            isWantsKidsPreferNot={isFieldPreferNot("wants_kids")}
+            onHasKidsPreferNotChange={async (isPreferNot) => {
+              if (isPreferNot) {
+                await markFieldAsPreferNot("has_kids");
+                setFieldValue("HasKids", "");
+              } else {
+                await removeFieldFromPreferNot("has_kids");
+              }
+            }}
+            onWantsKidsPreferNotChange={async (isPreferNot) => {
+              if (isPreferNot) {
+                await markFieldAsPreferNot("wants_kids");
+                setFieldValue("WantsKids", "");
+              } else {
+                await removeFieldFromPreferNot("wants_kids");
+              }
+            }}
           />
         );
 
@@ -534,13 +600,9 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
         <OnboardingNav
           onBack={goBack}
           onSkip={currentStepConfig?.allowSkip ? saveAndSkip : undefined}
-          onPreferNot={
-            currentStepConfig?.allowPreferNot ? saveAsPreferNot : undefined
-          }
           onContinue={saveAndContinue}
           canGoBack={canGoBack}
           canSkip={currentStepConfig?.allowSkip ?? false}
-          canPreferNot={currentStepConfig?.allowPreferNot ?? false}
           canContinue={canContinue}
           isSaving={isSaving}
           isRequired={currentStepConfig?.isRequired ?? false}

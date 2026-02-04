@@ -380,6 +380,125 @@ export function OnboardingSelectWithPreferNot({
 }
 
 /**
+ * Multi-select chips with "Prefer not to say" option for sensitive fields
+ */
+interface OnboardingChipsWithPreferNotProps {
+  label?: string;
+  options: readonly { value: string; label: string }[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  maxSelection?: number;
+  error?: string;
+  isPreferNot: boolean;
+  onPreferNotChange: (isPreferNot: boolean) => void;
+  fieldDbColumn: string;
+}
+
+export function OnboardingChipsWithPreferNot({
+  label,
+  options,
+  selected,
+  onChange,
+  maxSelection,
+  error,
+  isPreferNot,
+  onPreferNotChange,
+  fieldDbColumn,
+}: OnboardingChipsWithPreferNotProps) {
+  const toggleOption = (value: string) => {
+    if (isPreferNot) return; // Can't select options when prefer not is checked
+    
+    if (selected.includes(value)) {
+      onChange(selected.filter((v) => v !== value));
+    } else {
+      if (maxSelection && selected.length >= maxSelection) {
+        return;
+      }
+      onChange([...selected, value]);
+    }
+  };
+
+  const handleCheckboxChange = (checked: boolean) => {
+    onPreferNotChange(checked);
+    if (checked) {
+      // Clear selections when checking "prefer not to say"
+      onChange([]);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          {label}
+          {maxSelection && !isPreferNot && (
+            <span className="ml-2 text-gray-400 dark:text-gray-500 font-normal">
+              ({selected.length}/{maxSelection})
+            </span>
+          )}
+        </label>
+      )}
+      <div className={cn("flex flex-wrap gap-2", isPreferNot && "opacity-50")}>
+        {options.map((opt) => {
+          const isSelected = selected.includes(opt.value);
+          const isDisabled =
+            isPreferNot || (!isSelected && !!maxSelection && selected.length >= maxSelection);
+
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => toggleOption(opt.value)}
+              disabled={isDisabled}
+              className={cn(
+                "px-4 py-2 rounded-full text-sm font-medium",
+                "border transition-all duration-200",
+                "active:scale-95",
+                isSelected
+                  ? cn(
+                      "bg-pink-500 dark:bg-pink-600",
+                      "border-pink-500 dark:border-pink-600",
+                      "text-white"
+                    )
+                  : cn(
+                      "bg-white/80 dark:bg-neutral-800/80",
+                      "border-gray-200 dark:border-neutral-700",
+                      "text-gray-700 dark:text-gray-300",
+                      "hover:border-pink-300 dark:hover:border-pink-700",
+                      "hover:bg-pink-50 dark:hover:bg-pink-900/20"
+                    ),
+                isDisabled && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Prefer not to say checkbox */}
+      <label className="flex items-center gap-2 cursor-pointer group">
+        <input
+          type="checkbox"
+          checked={isPreferNot}
+          onChange={(e) => handleCheckboxChange(e.target.checked)}
+          className={cn(
+            "w-4 h-4 rounded border-gray-300 dark:border-neutral-600",
+            "text-pink-500 focus:ring-pink-500 focus:ring-offset-0",
+            "cursor-pointer"
+          )}
+        />
+        <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">
+          Prefer not to say
+        </span>
+      </label>
+
+      {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
+    </div>
+  );
+}
+
+/**
  * Single-select option cards for onboarding
  */
 interface OnboardingOptionCardsProps {

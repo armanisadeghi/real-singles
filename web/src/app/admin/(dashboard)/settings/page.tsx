@@ -11,7 +11,8 @@ import {
   Heart,
   MessageCircle,
   ExternalLink,
-  GitBranch
+  GitBranch,
+  AlertTriangle
 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
@@ -48,6 +49,16 @@ const toolsSections = [
     iconColor: "text-teal-600",
     hoverBorder: "hover:border-teal-200",
     hoverBg: "hover:bg-teal-50/50",
+  },
+  {
+    title: "System Issues",
+    description: "View and resolve automated system issue tracking",
+    href: "/admin/system-issues",
+    icon: AlertTriangle,
+    iconBg: "bg-red-100",
+    iconColor: "text-red-600",
+    hoverBorder: "hover:border-red-200",
+    hoverBg: "hover:bg-red-50/50",
   },
   {
     title: "Algorithm Simulator",

@@ -13,11 +13,9 @@ import { cn } from "@/lib/utils";
 interface OnboardingNavProps {
   onBack?: () => void;
   onSkip?: () => void;
-  onPreferNot?: () => void;
   onContinue: () => void;
   canGoBack: boolean;
   canSkip: boolean;
-  canPreferNot: boolean;
   canContinue: boolean;
   isSaving: boolean;
   isRequired: boolean;
@@ -28,11 +26,9 @@ interface OnboardingNavProps {
 export function OnboardingNav({
   onBack,
   onSkip,
-  onPreferNot,
   onContinue,
   canGoBack,
   canSkip,
-  canPreferNot,
   canContinue,
   isSaving,
   isRequired,
@@ -50,9 +46,9 @@ export function OnboardingNav({
       )}
     >
       <div className="max-w-md mx-auto">
-        {/* Skip / Prefer Not Row */}
-        {(canSkip || canPreferNot) && (
-          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-3">
+        {/* Skip Row */}
+        {canSkip && (
+          <div className="flex items-center justify-center mb-2 sm:mb-3">
             {canSkip && onSkip && (
               <button
                 onClick={onSkip}
@@ -65,23 +61,6 @@ export function OnboardingNav({
                 )}
               >
                 Skip for now
-              </button>
-            )}
-            {canSkip && canPreferNot && (
-              <span className="text-gray-300 dark:text-gray-600">|</span>
-            )}
-            {canPreferNot && onPreferNot && (
-              <button
-                onClick={onPreferNot}
-                disabled={isSaving}
-                className={cn(
-                  "text-xs sm:text-sm text-gray-500 dark:text-gray-400",
-                  "hover:text-gray-700 dark:hover:text-gray-300",
-                  "transition-colors",
-                  "disabled:opacity-50 disabled:cursor-not-allowed"
-                )}
-              >
-                Prefer not to say
               </button>
             )}
           </div>

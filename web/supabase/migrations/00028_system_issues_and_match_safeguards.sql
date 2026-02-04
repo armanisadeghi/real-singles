@@ -45,13 +45,13 @@ CREATE INDEX IF NOT EXISTS idx_system_issues_created ON system_issues(created_at
 -- RLS for system_issues - only admins can access
 ALTER TABLE system_issues ENABLE ROW LEVEL SECURITY;
 
--- Admin-only access (using is_admin flag on users table)
+-- Admin-only access (using role field on users table)
 CREATE POLICY "Only admins can view system issues" ON system_issues
   FOR SELECT USING (
     EXISTS (
       SELECT 1 FROM users 
       WHERE users.id = auth.uid() 
-      AND users.is_admin = TRUE
+      AND users.role IN ('admin', 'moderator')
     )
   );
 
@@ -63,7 +63,7 @@ CREATE POLICY "Only admins can update system issues" ON system_issues
     EXISTS (
       SELECT 1 FROM users 
       WHERE users.id = auth.uid() 
-      AND users.is_admin = TRUE
+      AND users.role IN ('admin', 'moderator')
     )
   );
 

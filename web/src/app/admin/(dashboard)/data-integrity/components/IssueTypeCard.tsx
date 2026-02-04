@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Wrench, ImageOff, User, Images } from "lucide-react";
+import { ArrowRight, Wrench, ImageOff, User, Images, Heart } from "lucide-react";
 
 interface IssueItem {
   label: string;
@@ -12,7 +12,7 @@ interface IssueItem {
 interface IssueTypeCardProps {
   title: string;
   description: string;
-  iconName: "image-off" | "user" | "images";
+  iconName: "image-off" | "user" | "images" | "heart";
   iconColor: string;
   iconBg: string;
   count: number;
@@ -26,6 +26,7 @@ const iconMap = {
   "image-off": ImageOff,
   "user": User,
   "images": Images,
+  "heart": Heart,
 };
 
 export function IssueTypeCard({

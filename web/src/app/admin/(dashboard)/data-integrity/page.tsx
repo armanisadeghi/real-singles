@@ -12,14 +12,17 @@ import {
   Clock,
   Loader2,
   ShieldCheck,
+  Heart,
 } from "lucide-react";
 import { DataIntegrityActions } from "./components/DataIntegrityActions";
 import { IssueTypeCard } from "./components/IssueTypeCard";
 import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
 import type { IntegrityCheckResult } from "@/lib/services/data-integrity";
+import type { MatchIntegrityResult } from "@/app/api/admin/data-integrity/matches/route";
 
 export default function DataIntegrityPage() {
   const [data, setData] = useState<IntegrityCheckResult | null>(null);
+  const [matchData, setMatchData] = useState<MatchIntegrityResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,12 +31,22 @@ export default function DataIntegrityPage() {
     setError(null);
 
     try {
-      const res = await fetch("/api/admin/data-integrity");
-      if (!res.ok) {
-        throw new Error("Failed to run integrity check");
+      // Run both checks in parallel
+      const [profileRes, matchRes] = await Promise.all([
+        fetch("/api/admin/data-integrity"),
+        fetch("/api/admin/data-integrity/matches"),
+      ]);
+
+      if (!profileRes.ok) {
+        throw new Error("Failed to run profile integrity check");
       }
-      const result = await res.json();
-      setData(result);
+      const profileResult = await profileRes.json();
+      setData(profileResult);
+
+      if (matchRes.ok) {
+        const matchResult = await matchRes.json();
+        setMatchData(matchResult);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -97,7 +110,7 @@ export default function DataIntegrityPage() {
           <h3 className="font-semibold text-gray-900 mb-4">
             What Gets Checked
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-rose-100 rounded-lg flex items-center justify-center shrink-0">
                 <User className="w-4 h-4 text-rose-600" />
@@ -128,6 +141,17 @@ export default function DataIntegrityPage() {
                 <p className="font-medium text-gray-900">Gallery Integrity</p>
                 <p className="text-sm text-gray-500">
                   Missing primary photos, orphaned records, broken files
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center shrink-0">
+                <Heart className="w-4 h-4 text-pink-600" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Matching & Conversations</p>
+                <p className="text-sm text-gray-500">
+                  Duplicate likes, matches, and conversation issues
                 </p>
               </div>
             </div>
@@ -172,8 +196,13 @@ export default function DataIntegrityPage() {
   }
 
   // Show results
-  const totalIssues =
+  const profileTotalIssues =
     data.summary.critical + data.summary.warning + data.summary.info;
+  const matchTotalIssues =
+    (matchData?.summary.critical || 0) +
+    (matchData?.summary.warning || 0) +
+    (matchData?.summary.info || 0);
+  const totalIssues = profileTotalIssues + matchTotalIssues;
   const hasNoIssues = totalIssues === 0;
 
   // Group issues by category for display
@@ -193,6 +222,11 @@ export default function DataIntegrityPage() {
     (data.summary.byType.missing_primary_photo || 0) +
     (data.summary.byType.broken_primary_photo || 0);
 
+  const matchingIssueCount =
+    (matchData?.summary.byType.duplicate_match || 0) +
+    (matchData?.summary.byType.duplicate_conversation || 0) +
+    (matchData?.summary.byType.orphaned_conversation || 0);
+
   // Get auto-fixable counts
   const autoFixableAvatars = data.issues.filter(
     (i) =>
@@ -207,6 +241,8 @@ export default function DataIntegrityPage() {
         i.issueType === "broken_primary_photo") &&
       i.autoFixable
   ).length;
+
+  const autoFixableMatches = matchData?.issues.filter((i) => i.autoFixable).length || 0;
 
   return (
     <div className="space-y-6">
@@ -260,7 +296,7 @@ export default function DataIntegrityPage() {
             <div>
               <p className="text-sm text-gray-500">Critical Issues</p>
               <p className="text-2xl font-bold text-red-600">
-                {data.summary.critical}
+                {data.summary.critical + (matchData?.summary.critical || 0)}
               </p>
             </div>
             <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
@@ -277,7 +313,7 @@ export default function DataIntegrityPage() {
             <div>
               <p className="text-sm text-gray-500">Warnings</p>
               <p className="text-2xl font-bold text-amber-600">
-                {data.summary.warning}
+                {data.summary.warning + (matchData?.summary.warning || 0)}
               </p>
             </div>
             <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
@@ -294,7 +330,7 @@ export default function DataIntegrityPage() {
             <div>
               <p className="text-sm text-gray-500">Info</p>
               <p className="text-2xl font-bold text-blue-600">
-                {data.summary.info}
+                {data.summary.info + (matchData?.summary.info || 0)}
               </p>
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -324,9 +360,11 @@ export default function DataIntegrityPage() {
                 {totalIssues} Issues Detected
               </p>
               <p className="text-sm text-amber-600">
-                {data.summary.critical} critical, {data.summary.warning}{" "}
-                warnings, {data.summary.info} info across {data.totalUsers}{" "}
-                users.
+                {data.summary.critical + (matchData?.summary.critical || 0)} critical,{" "}
+                {data.summary.warning + (matchData?.summary.warning || 0)} warnings,{" "}
+                {data.summary.info + (matchData?.summary.info || 0)} info across{" "}
+                {data.totalUsers} users.
+                {matchingIssueCount > 0 && ` (${matchingIssueCount} matching issues)`}
               </p>
             </div>
           </div>
@@ -338,7 +376,7 @@ export default function DataIntegrityPage() {
       )}
 
       {/* Issue Categories */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
         {/* Avatar Issues */}
         <IssueTypeCard
           title="Avatar & Profile Image"
@@ -439,6 +477,40 @@ export default function DataIntegrityPage() {
             },
           ]}
           autoFixable={autoFixableGallery}
+        />
+
+        {/* Matching Issues */}
+        <IssueTypeCard
+          title="Matching & Conversations"
+          description="Duplicate matches and conversation issues"
+          iconName="heart"
+          iconColor="text-pink-600"
+          iconBg="bg-pink-100"
+          count={
+            (matchData?.summary.byType.duplicate_match || 0) +
+            (matchData?.summary.byType.duplicate_conversation || 0) +
+            (matchData?.summary.byType.orphaned_conversation || 0)
+          }
+          criticalCount={matchData?.summary.byType.duplicate_match || 0}
+          href="/admin/data-integrity/matches"
+          issues={[
+            {
+              label: "Duplicate Matches",
+              count: matchData?.summary.byType.duplicate_match || 0,
+              severity: "critical",
+            },
+            {
+              label: "Duplicate Conversations",
+              count: matchData?.summary.byType.duplicate_conversation || 0,
+              severity: "warning",
+            },
+            {
+              label: "Orphaned Conversations",
+              count: matchData?.summary.byType.orphaned_conversation || 0,
+              severity: "info",
+            },
+          ]}
+          autoFixable={matchData?.issues.filter((i) => i.autoFixable).length || 0}
         />
       </div>
 

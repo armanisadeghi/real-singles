@@ -3,10 +3,10 @@
 /**
  * BeliefsStep
  *
- * Step 13: Religion and Political Views
+ * Step 15: Religion and Political Views
  */
 
-import { OnboardingStepWrapper, OnboardingSelect } from "../OnboardingStepWrapper";
+import { OnboardingStepWrapper, OnboardingSelectWithPreferNot } from "../OnboardingStepWrapper";
 import { RELIGION_OPTIONS, POLITICAL_OPTIONS } from "@/types";
 
 interface BeliefsStepProps {
@@ -14,6 +14,10 @@ interface BeliefsStepProps {
   politicalViews: string;
   onReligionChange: (value: string) => void;
   onPoliticalViewsChange: (value: string) => void;
+  isReligionPreferNot: boolean;
+  isPoliticalViewsPreferNot: boolean;
+  onReligionPreferNotChange: (isPreferNot: boolean) => void;
+  onPoliticalViewsPreferNotChange: (isPreferNot: boolean) => void;
 }
 
 export function BeliefsStep({
@@ -21,27 +25,40 @@ export function BeliefsStep({
   politicalViews,
   onReligionChange,
   onPoliticalViewsChange,
+  isReligionPreferNot,
+  isPoliticalViewsPreferNot,
+  onReligionPreferNotChange,
+  onPoliticalViewsPreferNotChange,
 }: BeliefsStepProps) {
   // Filter out "prefer_not_to_say" from options
   const religionOptions = RELIGION_OPTIONS.filter(
     (opt) => opt.value !== "prefer_not_to_say"
   );
+  const politicalOptions = POLITICAL_OPTIONS.filter(
+    (opt) => opt.value !== "prefer_not_to_say"
+  );
 
   return (
     <OnboardingStepWrapper title="Your beliefs">
-      <OnboardingSelect
+      <OnboardingSelectWithPreferNot
         label="Religion"
         options={religionOptions}
         value={religion}
-        onChange={(e) => onReligionChange(e.target.value)}
+        onChange={onReligionChange}
+        isPreferNot={isReligionPreferNot}
+        onPreferNotChange={onReligionPreferNotChange}
+        fieldDbColumn="religion"
         placeholder="Select religion"
       />
 
-      <OnboardingSelect
+      <OnboardingSelectWithPreferNot
         label="Political Views"
-        options={POLITICAL_OPTIONS}
+        options={politicalOptions}
         value={politicalViews}
-        onChange={(e) => onPoliticalViewsChange(e.target.value)}
+        onChange={onPoliticalViewsChange}
+        isPreferNot={isPoliticalViewsPreferNot}
+        onPreferNotChange={onPoliticalViewsPreferNotChange}
+        fieldDbColumn="political_views"
         placeholder="Select political views"
       />
     </OnboardingStepWrapper>
