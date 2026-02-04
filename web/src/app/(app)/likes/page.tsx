@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Likes Page
+ * New Matches Page
  * 
  * Modern tabbed interface for:
  * - Likes You: People who liked you
@@ -267,7 +267,7 @@ function LikesYouTab() {
     return (
       <EmptyStateBoost
         userProfileImage={userProfileImage}
-        title="New likes will appear here"
+        title="New matches will appear here"
         description="Increase your chances with a Boost. Get seen up to 10x more times!"
       />
     );
@@ -614,7 +614,7 @@ export default function LikesPage() {
 
   // Tab definitions for GlassTabs
   const tabs: Tab[] = [
-    { id: "likes", label: "Likes You" },
+    { id: "likes", label: "New Matches" },
     { id: "sent", label: "Likes Sent" },
     { id: "matches", label: "Matches" },
   ];
@@ -626,7 +626,7 @@ export default function LikesPage() {
         tabs={tabs}
         activeTab={activeTab}
         onChange={(id) => handleTabChange(id as TabType)}
-        ariaLabel="Likes tabs"
+        ariaLabel="New Matches tabs"
         className="mb-4"
       />
 

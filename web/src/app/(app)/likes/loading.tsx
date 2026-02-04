@@ -1,7 +1,7 @@
 /**
- * Likes Page Loading State
+ * New Matches Page Loading State
  * 
- * Shows skeleton for the likes page with:
+ * Shows skeleton for the new matches page with:
  * - Tab navigation (already visible as static tabs)
  * - Card list skeleton
  */
@@ -9,7 +9,7 @@
 function TabsSkeleton() {
   return (
     <div className="flex gap-2 p-1 bg-gray-100/80 dark:bg-neutral-800/80 rounded-full">
-      {["Likes You", "Likes Sent", "Matches"].map((tab) => (
+      {["New Matches", "Likes Sent", "Matches"].map((tab) => (
         <div
           key={tab}
           className="flex-1 py-2 px-4 rounded-full text-center text-sm font-medium text-gray-400 dark:text-gray-500"

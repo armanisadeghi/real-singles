@@ -191,7 +191,7 @@ function GetLikesCard() {
         <Heart className="w-7 h-7 text-gray-300 dark:text-gray-600 group-hover:text-pink-400 transition-colors" />
       </div>
       <p className="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400 text-center group-hover:text-pink-500 transition-colors">
-        Get Likes
+        New Matches
       </p>
     </Link>
   );

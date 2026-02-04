@@ -301,7 +301,35 @@ export async function POST(
       );
     }
 
-    // TODO: Send notifications to both users
+    // Get matchmaker's display name for notification
+    const { data: matchmakerUser } = await supabase
+      .from("users")
+      .select("display_name")
+      .eq("id", user.id)
+      .single();
+
+    const matchmakerName = matchmakerUser?.display_name || "Your matchmaker";
+
+    // Send notifications to both users
+    const notificationPromises = [user_a_id, user_b_id].map(async (userId) => {
+      try {
+        await supabase.from("notifications").insert({
+          user_id: userId,
+          type: "matchmaker_introduction",
+          title: "New Introduction!",
+          body: `${matchmakerName} thinks they found someone special for you!`,
+          data: {
+            introduction_id: intro.id,
+            matchmaker_id: matchmakerId,
+          },
+        });
+      } catch (err) {
+        console.error(`Failed to send notification to ${userId}:`, err);
+      }
+    });
+
+    // Don't await - let notifications send in background
+    Promise.all(notificationPromises);
 
     return NextResponse.json({
       success: true,

@@ -49,7 +49,7 @@ function NavItem({ href, icon: Icon, label, isActive }: NavItemProps) {
  * Mobile Bottom Navigation for Web
  *
  * Follows iOS/Android native patterns:
- * - 5 tabs: Discover, Explore, Likes, Messages, Profile
+ * - 5 tabs: Discover, Explore, New Matches, Messages, Profile
  * - Always visible labels
  * - Active state with filled icons
  * - Safe area padding for notched devices
@@ -61,7 +61,7 @@ export function BottomNavigation() {
   const navItems = [
     { href: "/discover", icon: Gem, label: "Discover" },
     { href: "/explore", icon: CompassIcon, label: "Explore" },
-    { href: "/likes", icon: Heart, label: "Likes" },
+    { href: "/likes", icon: Heart, label: "New Matches" },
     { href: "/messages", icon: MessageCircle, label: "Messages" },
     { href: "/profile", icon: User, label: "Profile" },
   ];
