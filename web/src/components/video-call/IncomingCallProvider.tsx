@@ -6,19 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { IncomingCallModal } from "./IncomingCallModal";
 import { useToast } from "@/components/ui/Toast";
 import type { RealtimeChannel } from "@supabase/supabase-js";
-
-interface CallInvitation {
-  id: string;
-  caller_id: string;
-  callee_id: string;
-  conversation_id: string | null;
-  room_name: string;
-  call_type: "audio" | "video";
-  status: string;
-  created_at: string;
-  callerName?: string;
-  callerAvatar?: string;
-}
+import type { CallInvitation } from "./types";
 
 interface IncomingCallProviderProps {
   userId: string;

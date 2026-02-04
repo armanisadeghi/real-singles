@@ -10,6 +10,8 @@ import {
   Sparkles,
   Gift,
   Wand2,
+  Heart,
+  Star,
 } from "lucide-react";
 import { useEvents, useSpeedDating } from "@/hooks/queries";
 
@@ -515,6 +517,77 @@ function SpeedDatingSection() {
 }
 
 // ============================================================================
+// REWARDS HERO BANNER COMPONENT
+// ============================================================================
+
+function RewardsHeroBanner() {
+  return (
+    <Link
+      href="/rewards"
+      className="group block relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-rose-50 via-pink-50 to-amber-50 dark:from-rose-950/30 dark:via-pink-950/30 dark:to-amber-950/30 hover:border-rose-300 dark:hover:border-rose-700 hover:shadow-lg transition-all duration-300"
+    >
+      <div className="flex flex-col md:flex-row">
+        {/* Content */}
+        <div className="flex-1 p-6 md:p-8">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg shadow-rose-500/25">
+              <Heart className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+              Rewards Shop
+            </span>
+          </div>
+          
+          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+            Impress Your Match ✨
+          </h2>
+          
+          <p className="text-muted-foreground mb-4 max-w-md">
+            Send roses, chocolates, or plan the perfect date experience. 
+            Earn points by inviting friends and redeem them for romantic gestures.
+          </p>
+          
+          {/* Mini product preview */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex -space-x-2">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center border-2 border-white dark:border-neutral-800">
+                <span className="text-lg">🌹</span>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center border-2 border-white dark:border-neutral-800">
+                <span className="text-lg">🍫</span>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center border-2 border-white dark:border-neutral-800">
+                <span className="text-lg">🥂</span>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center border-2 border-white dark:border-neutral-800">
+                <span className="text-lg">💎</span>
+              </div>
+            </div>
+            <span className="text-sm text-muted-foreground">16+ romantic rewards</span>
+          </div>
+          
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white text-sm font-semibold rounded-full shadow-lg shadow-rose-500/25 group-hover:shadow-xl group-hover:shadow-rose-500/30 transition-all">
+            <Gift className="w-4 h-4" />
+            Browse Rewards
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </div>
+        
+        {/* Image */}
+        <div className="hidden md:block relative w-72 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-rose-50 dark:to-rose-950/30 z-10" />
+          <img
+            src="https://sotdovuprhztkrgtonyz.supabase.co/storage/v1/object/public/products/promo/rewards-gifts-hero.png"
+            alt="Romantic rewards"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// ============================================================================
 // MAIN PAGE COMPONENT
 // ============================================================================
 
@@ -522,6 +595,9 @@ export default function ExplorePage() {
   return (
     <div className="min-h-dvh bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 space-y-8">
+        {/* Rewards Hero Banner - Prominent placement */}
+        <RewardsHeroBanner />
+
         {/* Events Section - Loads independently */}
         <EventsSection />
 
@@ -532,6 +608,18 @@ export default function ExplorePage() {
         <section>
           <SectionHeader title="More Ways to Connect" href="/features" icon={Sparkles} />
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+            {/* Rewards Shop Card */}
+            <FeaturePromoBanner
+              href="/rewards"
+              title="Send Romantic Gifts"
+              description="Roses, chocolates, dinner dates & more. Show your match you care."
+              icon={Heart}
+              badge="New"
+              badgeIcon={Star}
+              accentColor="rose"
+              backgroundImage="https://sotdovuprhztkrgtonyz.supabase.co/storage/v1/object/public/products/promo/rewards-gifts-hero.png"
+            />
+
             {/* Refer Friends Card */}
             <FeaturePromoBanner
               href="/refer"
@@ -562,7 +650,7 @@ export default function ExplorePage() {
               icon={Video}
               badge="Coming Soon"
               badgeIcon={Sparkles}
-              accentColor="rose"
+              accentColor="teal"
               backgroundImage="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
             />
           </div>

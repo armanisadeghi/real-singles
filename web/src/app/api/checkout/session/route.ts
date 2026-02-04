@@ -225,14 +225,15 @@ export async function POST(request: Request) {
         );
       }
 
-      if (userData.points_balance < totalPointsCost) {
+      const currentBalance = userData.points_balance ?? 0;
+      if (currentBalance < totalPointsCost) {
         return NextResponse.json(
           {
             success: false,
             msg: "Insufficient points",
             data: {
               required: totalPointsCost,
-              available: userData.points_balance,
+              available: currentBalance,
             },
           },
           { status: 400 }
@@ -240,7 +241,7 @@ export async function POST(request: Request) {
       }
 
       // Process points-only order immediately
-      const newBalance = userData.points_balance - totalPointsCost;
+      const newBalance = currentBalance - totalPointsCost;
 
       // Create order record
       const { data: order, error: orderError } = await adminSupabase
@@ -325,14 +326,15 @@ export async function POST(request: Request) {
       }
 
       // For "both" payment method, check points balance
-      if (paymentMethod === "both" && userData.points_balance < totalPointsCost) {
+      const stripeCurrentBalance = userData.points_balance ?? 0;
+      if (paymentMethod === "both" && stripeCurrentBalance < totalPointsCost) {
         return NextResponse.json(
           {
             success: false,
             msg: "Insufficient points for combined payment",
             data: {
               requiredPoints: totalPointsCost,
-              availablePoints: userData.points_balance,
+              availablePoints: stripeCurrentBalance,
             },
           },
           { status: 400 }

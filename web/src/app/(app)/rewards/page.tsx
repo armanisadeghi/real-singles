@@ -312,11 +312,11 @@ export default function RewardsPage() {
         title="Purchase with Card"
         message={
           buyingProduct
-            ? `You will be redirected to complete your purchase of "${buyingProduct.name}" for $${buyingProduct.dollar_price?.toFixed(2)}.`
+            ? `You will be redirected to complete your purchase of "${buyingProduct.name}" for $${buyingProduct.dollar_price?.toFixed(2) || "0.00"}.`
             : ""
         }
         confirmLabel="Continue to Checkout"
-        variant="default"
+        variant="info"
         loading={redeeming}
       />
     </div>

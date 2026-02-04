@@ -67,7 +67,7 @@ export function PointsBalance({
 
 interface PointsHistoryItem {
   id: string;
-  type: "referral" | "review" | "event" | "redemption" | "admin_adjustment";
+  type: "referral" | "review" | "event" | "redemption" | "admin_adjustment" | "purchase" | "subscription_bonus" | "daily_login" | "profile_completion" | "first_match";
   amount: number;
   description?: string | null;
   created_at: string;
@@ -77,16 +77,17 @@ interface PointsHistoryProps {
   transactions: PointsHistoryItem[];
 }
 
-const transactionConfig = {
+const transactionConfig: Record<string, { icon: typeof Users; color: string; bg: string }> = {
   referral: { icon: Users, color: "text-green-500 dark:text-green-400", bg: "bg-green-100 dark:bg-green-900/30" },
   review: { icon: Star, color: "text-yellow-500 dark:text-yellow-400", bg: "bg-yellow-100 dark:bg-yellow-900/30" },
   event: { icon: Calendar, color: "text-purple-500 dark:text-purple-400", bg: "bg-purple-100 dark:bg-purple-900/30" },
   redemption: { icon: Gift, color: "text-pink-500 dark:text-pink-400", bg: "bg-pink-100 dark:bg-pink-900/30" },
-  admin_adjustment: {
-    icon: TrendingUp,
-    color: "text-blue-500 dark:text-blue-400",
-    bg: "bg-blue-100 dark:bg-blue-900/30",
-  },
+  admin_adjustment: { icon: TrendingUp, color: "text-blue-500 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-900/30" },
+  purchase: { icon: Gift, color: "text-green-500 dark:text-green-400", bg: "bg-green-100 dark:bg-green-900/30" },
+  subscription_bonus: { icon: Star, color: "text-amber-500 dark:text-amber-400", bg: "bg-amber-100 dark:bg-amber-900/30" },
+  daily_login: { icon: Calendar, color: "text-blue-500 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-900/30" },
+  profile_completion: { icon: Users, color: "text-teal-500 dark:text-teal-400", bg: "bg-teal-100 dark:bg-teal-900/30" },
+  first_match: { icon: Users, color: "text-pink-500 dark:text-pink-400", bg: "bg-pink-100 dark:bg-pink-900/30" },
 };
 
 export function PointsHistory({ transactions }: PointsHistoryProps) {

@@ -3,13 +3,13 @@ import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 /**
- * Middleware for handling special routing cases
+ * Proxy for handling special routing cases
  * 
  * Currently handles:
  * - /search/profile/[id] → /p/[id] for unauthenticated users
  *   (Shows public profile preview instead of login redirect)
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Handle /search/profile/[id] - redirect to public profile if not authenticated
@@ -63,7 +63,7 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Only run middleware on specific paths for performance
+// Only run proxy on specific paths for performance
 export const config = {
   matcher: [
     // Match /search/profile/[id] paths

@@ -3,17 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Phone, PhoneOff, Video, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface CallInvitation {
-  id: string;
-  caller_id: string;
-  callee_id: string;
-  room_name: string;
-  call_type: "audio" | "video";
-  created_at: string;
-  callerName?: string;
-  callerAvatar?: string;
-}
+import type { CallInvitation } from "./types";
 
 interface IncomingCallModalProps {
   invitation: CallInvitation | null;
@@ -133,10 +123,10 @@ export function IncomingCallModal({
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [invitation, onReject]);
+  }, [invitation, onReject, onAccept]);
 
   const handleAccept = useCallback(() => {
     if (invitation) {

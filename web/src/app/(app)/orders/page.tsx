@@ -217,14 +217,9 @@ export default function OrdersPage() {
               ? "Your order history will appear here after you make a purchase"
               : `You don't have any ${filter} orders right now`
           }
-        >
-          <Link
-            href="/rewards"
-            className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-pink-500 text-white rounded-xl font-medium hover:bg-pink-600 transition-colors"
-          >
-            Browse Rewards
-          </Link>
-        </EmptyState>
+          actionLabel="Browse Rewards"
+          actionHref="/rewards"
+        />
       ) : (
         <div className="space-y-4">
           {filteredOrders.map((order) => (

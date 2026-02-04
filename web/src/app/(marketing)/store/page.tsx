@@ -11,7 +11,7 @@ interface Product {
   points_cost: number;
   dollar_price: number | null;
   retail_value: number | null;
-  category: string;
+  category: string | null;
   stock_quantity: number | null;
 }
 
@@ -59,8 +59,9 @@ async function getPublicProducts(): Promise<Product[]> {
 }
 
 function ProductCard({ product }: { product: Product }) {
-  const Icon = categoryIcons[product.category] || Gift;
-  const colorClass = categoryColors[product.category] || "from-pink-400 to-purple-600";
+  const categoryKey = product.category || "gift_card";
+  const Icon = categoryIcons[categoryKey] || Gift;
+  const colorClass = categoryColors[categoryKey] || "from-pink-400 to-purple-600";
   const inStock = product.stock_quantity === null || product.stock_quantity > 0;
 
   return (
@@ -84,7 +85,7 @@ function ProductCard({ product }: { product: Product }) {
         {/* Category badge */}
         <div className="absolute top-3 left-3">
           <span className="px-3 py-1 rounded-full text-xs font-medium text-white bg-black/40 backdrop-blur-sm capitalize">
-            {product.category.replace("_", " ")}
+            {(product.category || "gift_card").replace("_", " ")}
           </span>
         </div>
 
