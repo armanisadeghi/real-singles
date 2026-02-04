@@ -152,7 +152,10 @@ export function ChatThread({
 
     try {
       setTyping(false);
-      await sendMessage(content);
+      await sendMessage(content, {
+        messageType: type,
+        mediaUrl,
+      });
     } catch (error) {
       console.error("Error sending message:", error);
     }

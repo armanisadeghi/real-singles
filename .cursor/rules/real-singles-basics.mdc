@@ -9,12 +9,27 @@ A modern, elegant dating app targeting discerning users who value authenticity.
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Web | Next.js 16 (App Router) on Vercel |
-| Mobile | Expo (React Native) — iOS + Android |
-| Backend | Supabase (PostgreSQL, Auth, Storage) |
-| Styling | Tailwind CSS (web), platform-native (mobile) |
+**Frontend**
+- **Web:** Next.js 16.1 (App Router) + React 19.2 + TypeScript 5.9 + Tailwind CSS 4.1
+- **Mobile:** Expo 54 (React Native 0.81) + React 19.1 + TypeScript 5.9 for iOS & Android
+  - **Target OS:** iOS 26.2.1+ | Android 16+ (latest versions)
+  - **Design Systems:** iOS 26 Liquid Glass | Android 16 Material 3 Expressive
+
+**Backend (Shared)**
+- **Supabase:** PostgreSQL database + Auth + Storage (supabase-js 2.93)
+- **API:** 76+ Next.js API routes (mobile & web both use these)
+
+**Infrastructure**
+- **Hosting:** Vercel (web) + App Store/Play Store (mobile)
+- **Package Manager:** pnpm 10.28+ (update whenever available)
+
+## MCP Tools
+
+Model Context Protocol servers provide direct integration with external services:
+
+- **Supabase MCP** — Database queries, schema inspection, migrations (**use for all database updates**)
+- **Browser MCPs** — Web testing and frontend development
+- **Other MCPs** — Vercel MCP, Stripe MCP, LiveKit Docs MCP
 
 ## Core Philosophy
 

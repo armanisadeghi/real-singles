@@ -29,7 +29,14 @@ interface UseMessagesReturn {
   messages: Message[];
   loading: boolean;
   error: Error | null;
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (
+    content: string,
+    options?: {
+      messageType?: Message["message_type"];
+      mediaUrl?: string;
+      mediaThumbnailUrl?: string;
+    }
+  ) => Promise<void>;
   loadMoreMessages: () => Promise<void>;
   hasMore: boolean;
   refresh: () => Promise<void>;
@@ -156,20 +163,37 @@ export function useMessages({
 
   // Send a message
   const sendMessage = useCallback(
-    async (content: string) => {
-      if (!content.trim() || !conversationId || !currentUserId) return;
+    async (
+      content: string,
+      options?: {
+        messageType?: Message["message_type"];
+        mediaUrl?: string;
+        mediaThumbnailUrl?: string;
+      }
+    ) => {
+      // Allow messages with either content or media
+      if (!content.trim() && !options?.mediaUrl) {
+        return;
+      }
+      
+      if (!conversationId || !currentUserId) return;
 
       // Create optimistic message with a unique client ID
       const clientMessageId = `${currentUserId}_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`;
 
+      const messageType = options?.messageType || "text";
+      const messageContent = content.trim() || (messageType === "image" ? "📷 Image" : "📹 Video");
+
       const optimisticMessage: Message = {
         id: clientMessageId, // Temporary ID
         conversation_id: conversationId,
         sender_id: currentUserId,
-        content: content.trim(),
-        message_type: "text",
+        content: messageContent,
+        message_type: messageType,
+        media_url: options?.mediaUrl,
+        media_thumbnail_url: options?.mediaThumbnailUrl,
         status: "sending",
         created_at: new Date().toISOString(),
         client_message_id: clientMessageId,
@@ -183,8 +207,13 @@ export function useMessages({
         const sentMessage = await messagingService.sendMessage(
           conversationId, 
           currentUserId, 
-          content,
-          { clientMessageId } // Pass the same ID for optimistic update matching
+          messageContent,
+          { 
+            clientMessageId,
+            messageType: options?.messageType,
+            mediaUrl: options?.mediaUrl,
+            mediaThumbnailUrl: options?.mediaThumbnailUrl,
+          }
         );
         
         // Immediately update the optimistic message with the real one

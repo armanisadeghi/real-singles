@@ -40,11 +40,16 @@ export function MessageInput({
     (e?: React.FormEvent) => {
       e?.preventDefault();
 
+      // Check if there's anything to send
+      if (!attachedImage && !message.trim()) return;
+
       if (attachedImage) {
-        onSend(message.trim(), "image", attachedImage);
+        // Send image with optional text caption
+        onSend(message.trim() || "", "image", attachedImage);
         setAttachedImage(null);
         setMessage("");
       } else if (message.trim()) {
+        // Send text only
         onSend(message.trim(), "text");
         setMessage("");
       }
@@ -110,9 +115,9 @@ export function MessageInput({
       return;
     }
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert("File size must be less than 10MB");
+    // Validate file size (max 50MB to match gallery bucket limit)
+    if (file.size > 50 * 1024 * 1024) {
+      alert("File size must be less than 50MB");
       return;
     }
 
@@ -121,7 +126,7 @@ export function MessageInput({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("type", "chat");
+      formData.append("bucket", "gallery"); // Use gallery bucket for chat images
 
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -130,9 +135,11 @@ export function MessageInput({
 
       if (res.ok) {
         const data = await res.json();
-        setAttachedImage(data.url);
+        // Use signedUrl if available (for private buckets), otherwise publicUrl
+        setAttachedImage(data.signedUrl || data.publicUrl);
       } else {
-        alert("Failed to upload file");
+        const errorData = await res.json();
+        alert(errorData.error || "Failed to upload file");
       }
     } catch (error) {
       console.error("Upload error:", error);

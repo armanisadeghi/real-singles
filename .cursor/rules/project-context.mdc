@@ -9,9 +9,9 @@ alwaysApply: true
 
 | Platform | Stack | Status |
 |----------|-------|--------|
-| Mobile | Expo (React Native) | Live on App Store + Play Store |
-| Web | Next.js 15+ on Vercel | Marketing site + authenticated app |
-| Backend | Supabase (PostgreSQL + Auth + Storage) | 76+ API endpoints |
+| Mobile | Expo 54 (React Native 0.81) + React 19.1 | Live on App Store + Play Store |
+| Web | Next.js 16.1 + React 19.2 + Tailwind 4.1 on Vercel | Marketing site + authenticated app |
+| Backend | Supabase (PostgreSQL + Auth + Storage) | 100+ API endpoints |
 
 ---
 
@@ -19,8 +19,7 @@ alwaysApply: true
 
 ```
 /mobile    → Expo app (iOS + Android)
-/web       → Next.js app (API routes + Web UI)
-/docs      → Reference documentation (data_inventory.md is source of truth)
+/web       → Next.js app (API routes + Web UI + Admin/Matchmaker portals)
 ```
 
 ---
@@ -40,10 +39,27 @@ alwaysApply: true
 
 | File | Purpose |
 |------|---------|
-| `web/src/app/api/users/me/route.ts` | API route pattern example |
-| `web/src/app/(app)/layout.tsx` | Authenticated app layout |
-| `web/src/app/(app)/profile/edit/page.tsx` | Form page pattern |
+| `web/src/app/api/users/me/route.ts` | User API route pattern |
+| `web/src/app/(app)/layout.tsx` | Main authenticated app layout |
+| `web/src/app/(app)/messages/page.tsx` | Messaging UI with real-time updates |
+| `web/src/components/chat/ChatThread.tsx` | Chat component pattern |
+| `web/src/hooks/useSupabaseMessaging.ts` | Real-time messaging hook |
 | `web/src/components/ui/` | Shared UI components (ShadCN/Radix) |
+
+---
+
+## Major Features
+
+### Core User Features
+- **Matching system** — Discovery, likes, matches with real-time notifications
+- **Messaging** — Real-time chat with typing indicators and read receipts
+- **Video/Audio calls** — LiveKit-powered voice and video chat
+- **Events** — Speed dating and community events
+- **Profiles** — Photo galleries, bios, preferences
+
+### Admin & Matchmaker Portals
+- **Matchmaker portal** (`/matchmaker-portal`) — Client management, profile creation, match suggestions
+- **Admin routes** — User management, content moderation, analytics
 
 ---
 
@@ -51,7 +67,16 @@ alwaysApply: true
 
 - All API routes live in `web/src/app/api/`
 - Mobile calls these same endpoints via `mobile/lib/api.ts`
-- Key endpoint groups: auth, users, matches, conversations, events, rewards, speed-dating
+- **Key endpoint groups:**
+  - `auth/` — Authentication and onboarding
+  - `users/` — Profile management and preferences
+  - `matches/` — Matching, likes, and compatibility
+  - `conversations/` — Messaging and chat
+  - `calls/` — Video/audio call setup and notifications
+  - `matchmakers/` — Matchmaker operations and client management
+  - `events/` — Speed dating and community events
+  - `rewards/` — Points and referral system
+  - `admin/` — Administrative operations
 
 ---
 

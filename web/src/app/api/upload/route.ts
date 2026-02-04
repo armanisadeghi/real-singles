@@ -226,11 +226,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the public URL for all buckets (gallery is public too)
+    // Get the public URL for all buckets
+    // Note: Gallery bucket is private, so we'll generate a signed URL below
     const { data: urlData } = supabase.storage
       .from(bucket)
       .getPublicUrl(uploadData.path);
     const publicUrl = urlData.publicUrl;
+
+    // For gallery bucket (private), also generate a signed URL with long expiry
+    // This is needed for chat images to be viewable by recipients
+    let signedUrl: string | null = null;
+    if (bucket === STORAGE_BUCKETS.GALLERY) {
+      const { data: signedData } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(uploadData.path, 31536000); // 1 year expiry (365 days)
+      signedUrl = signedData?.signedUrl || null;
+    }
 
     // If uploading avatar, update the profile
     if (bucket === STORAGE_BUCKETS.AVATARS && publicUrl) {
@@ -282,6 +293,7 @@ export async function POST(request: NextRequest) {
           success: true,
           path: uploadData.path,
           publicUrl,
+          signedUrl,
           bucket,
           size: file.size,
           type: file.type,
@@ -314,6 +326,7 @@ export async function POST(request: NextRequest) {
       success: true,
       path: uploadData.path,
       publicUrl,
+      signedUrl,
       bucket,
       size: file.size,
       type: file.type,
