@@ -84,6 +84,7 @@ export async function GET(
   let isFavorite = false;
   let followStatus = "not_following";
   let isMatched = false;
+  let currentUserAction: string | null = null;
 
   if (currentUser) {
     // Check favorite status
@@ -142,6 +143,16 @@ export async function GET(
       .maybeSingle();
 
     isMatched = !!(currentUserLike && targetUserLike);
+
+    // Get current user's action on this profile (for button state)
+    const { data: existingAction } = await supabase
+      .from("matches")
+      .select("action, is_unmatched")
+      .eq("user_id", currentUser.id)
+      .eq("target_user_id", targetUserId)
+      .maybeSingle();
+
+    currentUserAction = existingAction?.is_unmatched ? null : existingAction?.action || null;
   }
 
   // Get average rating
@@ -265,6 +276,7 @@ export async function GET(
     IsFavorite: isFavorite ? 1 : 0,
     FollowStatus: followStatus,
     IsMatched: isMatched,
+    current_user_action: currentUserAction, // Action user has taken on this profile (like/pass/super_like or null)
     
     // Gallery with signed URLs (generated below)
     gallery: galleryWithUrls,

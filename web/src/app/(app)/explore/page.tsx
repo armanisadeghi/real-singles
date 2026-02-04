@@ -340,7 +340,10 @@ function ReferFriendsBanner() {
 
 function MatchmakersBanner() {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-purple-200 dark:border-purple-900/50 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:from-purple-950/30 dark:via-pink-950/30 dark:to-rose-950/30 p-6">
+    <Link
+      href="/matchmakers"
+      className="group block relative overflow-hidden rounded-2xl border border-purple-200 dark:border-purple-900/50 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:from-purple-950/30 dark:via-pink-950/30 dark:to-rose-950/30 p-6 hover:shadow-lg hover:border-purple-300 dark:hover:border-purple-800 transition-all duration-200"
+    >
       {/* Decorative background elements */}
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-purple-200 dark:bg-purple-800/20 rounded-full blur-3xl opacity-60" />
       <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-pink-200 dark:bg-pink-800/20 rounded-full blur-3xl opacity-60" />
@@ -375,8 +378,13 @@ function MatchmakersBanner() {
             Expert matchmakers will help curate your perfect connections. Get personalized matches from professionals who understand the art of meaningful relationships.
           </p>
         </div>
+
+        {/* Arrow indicator */}
+        <div className="flex-shrink-0">
+          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all" />
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

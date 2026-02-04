@@ -45,11 +45,11 @@ export async function GET(request: Request) {
       );
     }
 
-    // Get paginated versions
+    // Get paginated versions (order by build_number DESC for correct ordering)
     const { data, error } = await supabaseAdmin
       .from("app_version")
-      .select("id, version, build_number, git_commit, commit_message, lines_added, lines_deleted, files_changed, deployed_at, created_at")
-      .order("deployed_at", { ascending: false })
+      .select("id, version, build_number, git_commit, commit_message, lines_added, lines_deleted, files_changed, deployed_at, created_at, deployment_status, vercel_deployment_id, vercel_deployment_url, deployment_error")
+      .order("build_number", { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) {

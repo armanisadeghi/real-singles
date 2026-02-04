@@ -178,6 +178,23 @@ async function updateAppVersion() {
     const commitMessage = getCommitMessage();
     const codeStats = getCodeStats();
 
+    // Check if this commit already has a version entry (prevent duplicates)
+    if (gitCommit) {
+      const { data: existing } = await supabase
+        .from("app_version")
+        .select("id, version, build_number")
+        .eq("git_commit", gitCommit)
+        .single();
+
+      if (existing) {
+        console.log("\n⚠️  Version already exists for this commit!");
+        console.log(`   Existing: ${existing.version} (build #${existing.build_number})`);
+        console.log(`   Commit: ${gitCommit}`);
+        console.log("\n✅ Skipping duplicate entry\n");
+        process.exit(0);
+      }
+    }
+
     // Insert new version record
     const { error: insertError } = await supabase.from("app_version").insert({
       version: newVersion,
@@ -187,6 +204,7 @@ async function updateAppVersion() {
       lines_added: codeStats.linesAdded,
       lines_deleted: codeStats.linesDeleted,
       files_changed: codeStats.filesChanged,
+      deployment_status: "pending",
       deployed_at: new Date().toISOString(),
     });
 

@@ -89,6 +89,8 @@ interface DiscoverProfilesState {
   currentIndex: number;
   /** IDs of profiles we've fetched (to avoid duplicates) */
   fetchedIds: Set<string>;
+  /** IDs of profiles user has acted on (liked/passed/super_liked) - prevents stale actions */
+  actedOnIds: Set<string>;
   /** Current offset for pagination */
   offset: number;
   /** True during initial load (before first profile is available) */
@@ -120,6 +122,10 @@ interface DiscoverProfilesContextValue extends DiscoverProfilesState {
   initializeWithProfile: (profile: DiscoverProfile | null) => void;
   /** Reset the entire state (for refresh) */
   resetState: () => void;
+  /** Mark a profile as acted on (removes from queue and tracks ID) */
+  markActedOn: (userId: string) => void;
+  /** Handle duplicate action error - forces full state refresh */
+  handleDuplicateError: () => void;
 }
 
 // =============================================================================
@@ -136,12 +142,15 @@ type DiscoverAction =
   | { type: "REMOVE_CURRENT" }
   | { type: "SET_ERROR"; error: string }
   | { type: "SET_EMPTY_REASON"; emptyReason: DiscoverProfilesState["emptyReason"] }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "MARK_ACTED_ON"; userId: string }
+  | { type: "HANDLE_DUPLICATE_ERROR" };
 
 const initialState: DiscoverProfilesState = {
   profiles: [],
   currentIndex: 0,
   fetchedIds: new Set(),
+  actedOnIds: new Set(),
   offset: 0,
   isLoading: true,
   isFetching: false,
@@ -283,6 +292,36 @@ function discoverReducer(state: DiscoverProfilesState, action: DiscoverAction): 
         ...initialState,
         isInitialized: false,
       };
+
+    case "MARK_ACTED_ON": {
+      // Track this user as acted on and remove from queue
+      const newActedOnIds = new Set(state.actedOnIds);
+      newActedOnIds.add(action.userId);
+      
+      // Remove the profile from the queue
+      const filteredProfiles = state.profiles.filter(
+        (p) => p.user_id !== action.userId
+      );
+      
+      // Adjust index if necessary
+      const newIndex = Math.min(state.currentIndex, Math.max(0, filteredProfiles.length - 1));
+      
+      return {
+        ...state,
+        actedOnIds: newActedOnIds,
+        profiles: filteredProfiles,
+        currentIndex: newIndex,
+      };
+    }
+
+    case "HANDLE_DUPLICATE_ERROR": {
+      // Full reset - clear everything and force re-initialization
+      // This handles cases where client state is severely out of sync
+      return {
+        ...initialState,
+        isInitialized: false, // Trigger re-init and fresh fetch
+      };
+    }
 
     default:
       return state;
@@ -438,6 +477,18 @@ export function DiscoverProfilesProvider({
     dispatch({ type: "RESET" });
   }, []);
 
+  // Mark a profile as acted on (removes from queue, tracks ID)
+  const markActedOn = useCallback((userId: string) => {
+    dispatch({ type: "MARK_ACTED_ON", userId });
+  }, []);
+
+  // Handle duplicate action error - forces full state refresh
+  const handleDuplicateError = useCallback(() => {
+    hasInitialized.current = false;
+    fetchInProgress.current = false;
+    dispatch({ type: "HANDLE_DUPLICATE_ERROR" });
+  }, []);
+
   // Compute current profile
   const currentProfile = useMemo(() => {
     if (state.profiles.length === 0) return null;
@@ -455,6 +506,8 @@ export function DiscoverProfilesProvider({
       fetchMoreProfiles,
       initializeWithProfile,
       resetState,
+      markActedOn,
+      handleDuplicateError,
     }),
     [
       state,
@@ -465,6 +518,8 @@ export function DiscoverProfilesProvider({
       fetchMoreProfiles,
       initializeWithProfile,
       resetState,
+      markActedOn,
+      handleDuplicateError,
     ]
   );
 

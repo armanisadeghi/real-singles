@@ -26,6 +26,7 @@
     "ship": "tsx scripts/deploy.ts",
     "ship:minor": "tsx scripts/deploy.ts --minor",
     "ship:major": "tsx scripts/deploy.ts --major",
+    "cleanup:duplicates": "tsx scripts/cleanup-duplicate-versions.ts",
     "backfill:history": "tsx scripts/backfill-version-history.ts"
   },
   "dependencies": {

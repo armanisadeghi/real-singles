@@ -31,6 +31,10 @@ interface Version {
   files_changed: number | null;
   deployed_at: string;
   created_at: string;
+  deployment_status?: string | null;
+  vercel_deployment_id?: string | null;
+  vercel_deployment_url?: string | null;
+  deployment_error?: string | null;
 }
 
 interface VersionHistoryResponse {
@@ -54,6 +58,9 @@ export default function AppVersionPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [total, setTotal] = useState(0);
 
   const truncateMessage = (message: string | null, maxLength: number = 50): { text: string; isTruncated: boolean } => {
     if (!message) return { text: "No commit message", isTruncated: false };
@@ -107,10 +114,15 @@ export default function AppVersionPage() {
         files_changed: versionData.filesChanged || null,
         deployed_at: versionData.deployedAt,
         created_at: versionData.deployedAt,
+        deployment_status: versionData.deploymentStatus || null,
+        vercel_deployment_url: versionData.vercelDeploymentUrl || null,
+        deployment_error: versionData.deploymentError || null,
       });
 
       // Set history
       setHistory(historyData.versions);
+      setTotal(historyData.total);
+      setHasMore(historyData.versions.length < historyData.total);
 
       // Calculate stats
       const now = new Date();
@@ -167,6 +179,76 @@ export default function AppVersionPage() {
 
   const handleRefresh = () => {
     fetchVersionData(true);
+  };
+
+  const loadMore = async () => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    try {
+      const offset = history.length;
+      const res = await fetch(`/api/version/history?limit=20&offset=${offset}`);
+      
+      if (!res.ok) {
+        throw new Error("Failed to load more versions");
+      }
+
+      const data: VersionHistoryResponse = await res.json();
+      setHistory(prev => [...prev, ...data.versions]);
+      setHasMore(history.length + data.versions.length < data.total);
+    } catch (err) {
+      console.error("Error loading more versions:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const getDeploymentStatusBadge = (status?: string | null) => {
+    if (!status || status === "pending") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+          <Clock className="w-3.5 h-3.5" />
+          Pending
+        </span>
+      );
+    }
+    if (status === "building") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          Building
+        </span>
+      );
+    }
+    if (status === "ready") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          Deployed
+        </span>
+      );
+    }
+    if (status === "error") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+          <AlertCircle className="w-3.5 h-3.5" />
+          Failed
+        </span>
+      );
+    }
+    if (status === "canceled") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Canceled
+        </span>
+      );
+    }
+    return null;
   };
 
   if (loading && !currentVersion) {
@@ -415,11 +497,11 @@ export default function AppVersionPage() {
           <div>
             <h2 className="text-lg font-semibold text-slate-900">Version History</h2>
             <p className="text-sm text-slate-500 mt-0.5">
-              Last 20 deployments to production
+              Deployment history and status tracking
             </p>
           </div>
           <div className="text-sm text-slate-500">
-            {history.length} {history.length === 1 ? "version" : "versions"}
+            {history.length} of {total} versions
           </div>
         </div>
 
@@ -432,6 +514,9 @@ export default function AppVersionPage() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Build
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Message
@@ -450,7 +535,7 @@ export default function AppVersionPage() {
             <tbody className="divide-y divide-slate-100">
               {history.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                  <td colSpan={7} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <GitBranch className="w-12 h-12 text-slate-300" />
                       <p className="text-sm text-slate-500">No version history found</p>
@@ -487,6 +572,19 @@ export default function AppVersionPage() {
                         <span className="text-sm text-slate-600 font-mono">
                           #{version.build_number}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {getDeploymentStatusBadge(version.deployment_status)}
+                        {version.deployment_status === "ready" && version.vercel_deployment_url && (
+                          <a 
+                            href={version.vercel_deployment_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-2 text-xs text-violet-600 hover:text-violet-700 underline"
+                          >
+                            View
+                          </a>
+                        )}
                       </td>
                       <td className="px-6 py-4 max-w-md">
                         <div className="flex items-start gap-2">
@@ -549,6 +647,34 @@ export default function AppVersionPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {hasMore && (
+          <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
+            <p className="text-sm text-slate-600">
+              Showing {history.length} of {total} versions
+            </p>
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {loadingMore ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  Load More
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Info Banner */}

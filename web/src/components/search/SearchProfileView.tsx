@@ -113,6 +113,15 @@ interface SearchProfileViewProps {
    * When false (default), SearchProfileView will navigate/close after successful actions.
    */
   parentHandlesNavigation?: boolean;
+  /** 
+   * Existing action user has taken on this profile (if any).
+   * Used to conditionally render action buttons and prevent duplicate actions.
+   */
+  existingAction?: 'like' | 'pass' | 'super_like' | null;
+  /**
+   * Callback when a duplicate action error occurs - signals parent to refresh state.
+   */
+  onDuplicateError?: () => void;
 }
 
 const REPORT_REASONS = [
@@ -167,6 +176,8 @@ export function SearchProfileView({
   undoState,
   onUndo,
   parentHandlesNavigation = false,
+  existingAction,
+  onDuplicateError,
 }: SearchProfileViewProps) {
   const router = useRouter();
   const toast = useToast();
@@ -238,10 +249,17 @@ export function SearchProfileView({
     async (action: "like" | "pass" | "super_like") => {
       if (!profile.user_id) return;
 
+      // Prevent action if user has already taken this action
+      if (existingAction === action) {
+        const actionVerb = action === "like" ? "liked" : action === "pass" ? "passed on" : "super liked";
+        toast.info(`You've already ${actionVerb} this profile`);
+        return;
+      }
+
       setActionLoading(action);
 
       try {
-        let result: MatchActionResult | { success: boolean; msg?: string } | undefined;
+        let result: MatchActionResult | { success: boolean; msg?: string; should_refresh?: boolean } | undefined;
         switch (action) {
           case "like":
             result = onLike ? await onLike(profile.user_id) : { success: true };
@@ -268,6 +286,12 @@ export function SearchProfileView({
           // If parentHandlesNavigation is true, the parent (e.g., DiscoverProfileView) 
           // already advanced to the next profile via advanceToNext()
         } else {
+          // Check for duplicate action error - signal parent to refresh state
+          if ('should_refresh' in result && result.should_refresh && onDuplicateError) {
+            toast.info("Refreshing profiles...");
+            onDuplicateError();
+            return;
+          }
           // Show error toast
           const errorMsg = result?.msg || "Action failed. Please try again.";
           toast.error(errorMsg);
@@ -279,7 +303,7 @@ export function SearchProfileView({
         setActionLoading(null);
       }
     },
-    [profile.user_id, onLike, onPass, onSuperLike, handleClose, toast, parentHandlesNavigation]
+    [profile.user_id, existingAction, onLike, onPass, onSuperLike, handleClose, toast, parentHandlesNavigation, onDuplicateError]
   );
 
   const handleReport = useCallback(
@@ -488,32 +512,34 @@ export function SearchProfileView({
 
           {/* Desktop: Action bar below photo - Enhanced hover effects */}
           <div className="hidden md:flex items-center justify-center gap-3 py-4">
-            {/* Pass Button (X) - leftmost */}
-            <button
-              onClick={() => handleAction("pass")}
-              disabled={actionLoading !== null}
-              className={cn(
-                "w-11 h-11 rounded-full flex items-center justify-center",
-                "bg-white dark:bg-neutral-950 text-red-500 border-2 border-red-300 dark:border-red-400/50",
-                "shadow-sm dark:shadow-black/20",
-                // Smooth transitions for all properties
-                "transition-all duration-200 ease-out",
-                // Hover state - scale up, elevate shadow, shift colors
-                "hover:scale-110 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950",
-                "hover:shadow-lg hover:shadow-red-200/50 dark:hover:shadow-red-900/30",
-                // Active/click state
-                "active:scale-95 active:shadow-sm",
-                // Disabled state
-                "disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
-              )}
-              aria-label="Pass on this profile"
-            >
-              {actionLoading === "pass" ? (
-                <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <X className="w-5 h-5 transition-transform group-hover:rotate-90" />
-              )}
-            </button>
+            {/* Pass Button (X) - leftmost - hide if already passed */}
+            {existingAction !== "pass" && (
+              <button
+                onClick={() => handleAction("pass")}
+                disabled={actionLoading !== null}
+                className={cn(
+                  "w-11 h-11 rounded-full flex items-center justify-center",
+                  "bg-white dark:bg-neutral-950 text-red-500 border-2 border-red-300 dark:border-red-400/50",
+                  "shadow-sm dark:shadow-black/20",
+                  // Smooth transitions for all properties
+                  "transition-all duration-200 ease-out",
+                  // Hover state - scale up, elevate shadow, shift colors
+                  "hover:scale-110 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950",
+                  "hover:shadow-lg hover:shadow-red-200/50 dark:hover:shadow-red-900/30",
+                  // Active/click state
+                  "active:scale-95 active:shadow-sm",
+                  // Disabled state
+                  "disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
+                )}
+                aria-label="Pass on this profile"
+              >
+                {actionLoading === "pass" ? (
+                  <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <X className="w-5 h-5 transition-transform group-hover:rotate-90" />
+                )}
+              </button>
+            )}
 
             {/* Undo Button (Desktop) */}
             <button
@@ -550,59 +576,69 @@ export function SearchProfileView({
               )}
             </button>
 
-            {/* Super Like Button (Star) */}
-            <button
-              onClick={() => handleAction("super_like")}
-              disabled={actionLoading !== null}
-              className={cn(
-                "w-11 h-11 rounded-full flex items-center justify-center",
-                "bg-white dark:bg-neutral-950 text-amber-500 border-2 border-amber-300 dark:border-amber-400/50",
-                "shadow-sm dark:shadow-black/20",
-                // Smooth transitions for all properties
-                "transition-all duration-200 ease-out",
-                // Hover state - scale up, elevate shadow, glow effect
-                "hover:scale-110 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950",
-                "hover:shadow-lg hover:shadow-amber-200/50 dark:hover:shadow-amber-900/30",
-                // Active/click state
-                "active:scale-95 active:shadow-sm",
-                // Disabled state
-                "disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
-              )}
-              aria-label="Super like this profile"
-            >
-              {actionLoading === "super_like" ? (
-                <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Star className="w-5 h-5 transition-transform hover:rotate-12" fill="currentColor" />
-              )}
-            </button>
+            {/* Super Like Button (Star) - hide if already super liked */}
+            {existingAction !== "super_like" && (
+              <button
+                onClick={() => handleAction("super_like")}
+                disabled={actionLoading !== null}
+                className={cn(
+                  "w-11 h-11 rounded-full flex items-center justify-center",
+                  "bg-white dark:bg-neutral-950 text-amber-500 border-2 border-amber-300 dark:border-amber-400/50",
+                  "shadow-sm dark:shadow-black/20",
+                  // Smooth transitions for all properties
+                  "transition-all duration-200 ease-out",
+                  // Hover state - scale up, elevate shadow, glow effect
+                  "hover:scale-110 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950",
+                  "hover:shadow-lg hover:shadow-amber-200/50 dark:hover:shadow-amber-900/30",
+                  // Active/click state
+                  "active:scale-95 active:shadow-sm",
+                  // Disabled state
+                  "disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
+                )}
+                aria-label="Super like this profile"
+              >
+                {actionLoading === "super_like" ? (
+                  <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Star className="w-5 h-5 transition-transform hover:rotate-12" fill="currentColor" />
+                )}
+              </button>
+            )}
 
-            {/* Like Button (Heart) */}
-            <button
-              onClick={() => handleAction("like")}
-              disabled={actionLoading !== null}
-              className={cn(
-                "w-11 h-11 rounded-full flex items-center justify-center",
-                "bg-amber-500 dark:bg-amber-600 text-white",
-                "shadow-sm dark:shadow-black/20",
-                // Smooth transitions for all properties
-                "transition-all duration-200 ease-out",
-                // Hover state - scale up, elevate shadow, brighten
-                "hover:scale-110 hover:bg-amber-400 dark:hover:bg-amber-500",
-                "hover:shadow-lg hover:shadow-amber-300/50 dark:hover:shadow-amber-900/30",
-                // Active/click state
-                "active:scale-95 active:bg-amber-600 active:shadow-sm",
-                // Disabled state
-                "disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
-              )}
-              aria-label="Like this profile"
-            >
-              {actionLoading === "like" ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Heart className="w-5 h-5 transition-transform hover:scale-110" fill="currentColor" />
-              )}
-            </button>
+            {/* Like Button (Heart) - hide if already liked */}
+            {existingAction !== "like" && existingAction !== "super_like" ? (
+              <button
+                onClick={() => handleAction("like")}
+                disabled={actionLoading !== null}
+                className={cn(
+                  "w-11 h-11 rounded-full flex items-center justify-center",
+                  "bg-amber-500 dark:bg-amber-600 text-white",
+                  "shadow-sm dark:shadow-black/20",
+                  // Smooth transitions for all properties
+                  "transition-all duration-200 ease-out",
+                  // Hover state - scale up, elevate shadow, brighten
+                  "hover:scale-110 hover:bg-amber-400 dark:hover:bg-amber-500",
+                  "hover:shadow-lg hover:shadow-amber-300/50 dark:hover:shadow-amber-900/30",
+                  // Active/click state
+                  "active:scale-95 active:bg-amber-600 active:shadow-sm",
+                  // Disabled state
+                  "disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
+                )}
+                aria-label="Like this profile"
+              >
+                {actionLoading === "like" ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Heart className="w-5 h-5 transition-transform hover:scale-110" fill="currentColor" />
+                )}
+              </button>
+            ) : (
+              /* Already Liked indicator */
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                <Heart className="w-5 h-5" fill="currentColor" />
+                <span className="text-sm font-medium">Already Liked</span>
+              </div>
+            )}
 
             {/* Share Button - rightmost */}
             <button
@@ -706,35 +742,37 @@ export function SearchProfileView({
           Positioned above the bottom navigation dock */}
       <div className="md:hidden fixed left-0 right-0 z-40" style={{ bottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
         <div className="flex items-center justify-center gap-3 py-2 px-4">
-          {/* Pass Button (X) - leftmost */}
-          <button
-            onTouchStart={() => triggerHaptic('light')}
-            onClick={() => {
-              triggerHaptic('heavy');
-              handleAction("pass");
-            }}
-            disabled={actionLoading !== null}
-            className={cn(
-              "w-12 h-12 rounded-full flex items-center justify-center",
-              "bg-white dark:bg-neutral-950 text-red-500 border-2 border-red-300 dark:border-red-400/50",
-              "shadow-lg dark:shadow-black/40",
-              // Touch-optimized transitions
-              "transition-all duration-150 ease-out",
-              // Active/pressed state - scale down and change background
-              "active:scale-90 active:bg-red-50 dark:active:bg-red-950 active:border-red-400 active:shadow-md",
-              // Disabled state
-              "disabled:opacity-50 disabled:active:scale-100",
-              // Prevent text selection and optimize touch
-              "select-none touch-manipulation"
-            )}
-            aria-label="Pass on this profile"
-          >
-            {actionLoading === "pass" ? (
-              <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <X className="w-6 h-6 transition-transform active:scale-110" />
-            )}
-          </button>
+          {/* Pass Button (X) - leftmost - hide if already passed */}
+          {existingAction !== "pass" && (
+            <button
+              onTouchStart={() => triggerHaptic('light')}
+              onClick={() => {
+                triggerHaptic('heavy');
+                handleAction("pass");
+              }}
+              disabled={actionLoading !== null}
+              className={cn(
+                "w-12 h-12 rounded-full flex items-center justify-center",
+                "bg-white dark:bg-neutral-950 text-red-500 border-2 border-red-300 dark:border-red-400/50",
+                "shadow-lg dark:shadow-black/40",
+                // Touch-optimized transitions
+                "transition-all duration-150 ease-out",
+                // Active/pressed state - scale down and change background
+                "active:scale-90 active:bg-red-50 dark:active:bg-red-950 active:border-red-400 active:shadow-md",
+                // Disabled state
+                "disabled:opacity-50 disabled:active:scale-100",
+                // Prevent text selection and optimize touch
+                "select-none touch-manipulation"
+              )}
+              aria-label="Pass on this profile"
+            >
+              {actionLoading === "pass" ? (
+                <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <X className="w-6 h-6 transition-transform active:scale-110" />
+              )}
+            </button>
+          )}
 
           {/* Undo Button (Mobile) */}
           <button
@@ -771,65 +809,75 @@ export function SearchProfileView({
             )}
           </button>
 
-          {/* Super Like Button (Star) */}
-          <button
-            onTouchStart={() => triggerHaptic('light')}
-            onClick={() => {
-              triggerHaptic('heavy');
-              handleAction("super_like");
-            }}
-            disabled={actionLoading !== null}
-            className={cn(
-              "w-12 h-12 rounded-full flex items-center justify-center",
-              "bg-white dark:bg-neutral-950 text-amber-500 border-2 border-amber-300 dark:border-amber-400/50",
-              "shadow-lg dark:shadow-black/40",
-              // Touch-optimized transitions
-              "transition-all duration-150 ease-out",
-              // Active/pressed state
-              "active:scale-90 active:bg-amber-50 dark:active:bg-amber-950 active:border-amber-400 active:shadow-md",
-              // Disabled state
-              "disabled:opacity-50 disabled:active:scale-100",
-              // Prevent text selection and optimize touch
-              "select-none touch-manipulation"
-            )}
-            aria-label="Super like this profile"
-          >
-            {actionLoading === "super_like" ? (
-              <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Star className="w-6 h-6 transition-transform active:scale-110" fill="currentColor" />
-            )}
-          </button>
+          {/* Super Like Button (Star) - hide if already super liked */}
+          {existingAction !== "super_like" && (
+            <button
+              onTouchStart={() => triggerHaptic('light')}
+              onClick={() => {
+                triggerHaptic('heavy');
+                handleAction("super_like");
+              }}
+              disabled={actionLoading !== null}
+              className={cn(
+                "w-12 h-12 rounded-full flex items-center justify-center",
+                "bg-white dark:bg-neutral-950 text-amber-500 border-2 border-amber-300 dark:border-amber-400/50",
+                "shadow-lg dark:shadow-black/40",
+                // Touch-optimized transitions
+                "transition-all duration-150 ease-out",
+                // Active/pressed state
+                "active:scale-90 active:bg-amber-50 dark:active:bg-amber-950 active:border-amber-400 active:shadow-md",
+                // Disabled state
+                "disabled:opacity-50 disabled:active:scale-100",
+                // Prevent text selection and optimize touch
+                "select-none touch-manipulation"
+              )}
+              aria-label="Super like this profile"
+            >
+              {actionLoading === "super_like" ? (
+                <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Star className="w-6 h-6 transition-transform active:scale-110" fill="currentColor" />
+              )}
+            </button>
+          )}
 
-          {/* Like Button (Heart) */}
-          <button
-            onTouchStart={() => triggerHaptic('light')}
-            onClick={() => {
-              triggerHaptic('success');
-              handleAction("like");
-            }}
-            disabled={actionLoading !== null}
-            className={cn(
-              "w-12 h-12 rounded-full flex items-center justify-center",
-              "bg-amber-500 dark:bg-amber-600 text-white",
-              "shadow-lg dark:shadow-black/40",
-              // Touch-optimized transitions
-              "transition-all duration-150 ease-out",
-              // Active/pressed state - darker background, scale down
-              "active:scale-90 active:bg-amber-600 active:shadow-md",
-              // Disabled state
-              "disabled:opacity-50 disabled:active:scale-100",
-              // Prevent text selection and optimize touch
-              "select-none touch-manipulation"
-            )}
-            aria-label="Like this profile"
-          >
-            {actionLoading === "like" ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Heart className="w-6 h-6 transition-transform active:scale-110" fill="currentColor" />
-            )}
-          </button>
+          {/* Like Button (Heart) - hide if already liked, show indicator instead */}
+          {existingAction !== "like" && existingAction !== "super_like" ? (
+            <button
+              onTouchStart={() => triggerHaptic('light')}
+              onClick={() => {
+                triggerHaptic('success');
+                handleAction("like");
+              }}
+              disabled={actionLoading !== null}
+              className={cn(
+                "w-12 h-12 rounded-full flex items-center justify-center",
+                "bg-amber-500 dark:bg-amber-600 text-white",
+                "shadow-lg dark:shadow-black/40",
+                // Touch-optimized transitions
+                "transition-all duration-150 ease-out",
+                // Active/pressed state - darker background, scale down
+                "active:scale-90 active:bg-amber-600 active:shadow-md",
+                // Disabled state
+                "disabled:opacity-50 disabled:active:scale-100",
+                // Prevent text selection and optimize touch
+                "select-none touch-manipulation"
+              )}
+              aria-label="Like this profile"
+            >
+              {actionLoading === "like" ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Heart className="w-6 h-6 transition-transform active:scale-110" fill="currentColor" />
+              )}
+            </button>
+          ) : (
+            /* Already Liked indicator (mobile) */
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 shadow-lg">
+              <Heart className="w-5 h-5" fill="currentColor" />
+              <span className="text-xs font-medium">Liked</span>
+            </div>
+          )}
 
           {/* Share Button - rightmost */}
           <button

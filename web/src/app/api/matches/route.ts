@@ -100,6 +100,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check for existing action BEFORE upsert to detect duplicate attempts
+    const { data: existingMatch } = await supabase
+      .from("matches")
+      .select("id, action, is_unmatched, created_at")
+      .eq("user_id", user.id)
+      .eq("target_user_id", target_user_id)
+      .maybeSingle();
+
+    if (existingMatch && !existingMatch.is_unmatched) {
+      if (existingMatch.action === action) {
+        // Log this as a system issue (indicates stale client state)
+        await supabase.from("system_issues").insert({
+          issue_type: "duplicate_match_attempt",
+          severity: "medium",
+          user_id: user.id,
+          target_user_id,
+          context: {
+            existing_action: existingMatch.action,
+            attempted_action: action,
+            existing_match_id: existingMatch.id,
+            existing_created_at: existingMatch.created_at,
+          },
+        });
+
+        const actionVerb = action === "like" ? "liked" : action === "pass" ? "passed on" : "super liked";
+        return NextResponse.json({
+          success: false,
+          error: "DUPLICATE_ACTION",
+          msg: `You have already ${actionVerb} this user`,
+          should_refresh: true, // Signal client to refresh state
+        }, { status: 409 });
+      }
+      // Allow changing action (pass -> like is valid)
+    }
+
     // Upsert the match action (update if exists, insert if not)
     const { data: matchData, error: matchError } = await supabase
       .from("matches")
@@ -141,25 +176,16 @@ export async function POST(request: NextRequest) {
       if (reciprocalMatch) {
         isMutual = true;
 
-        // Check if conversation already exists
+        // Find existing direct conversation between these two users using helper RPC
         const { data: existingConvo } = await supabase
-          .from("conversation_participants")
-          .select("conversation_id")
-          .eq("user_id", user.id)
+          .rpc('find_direct_conversation', {
+            p_user_id: user.id,
+            p_other_user_id: target_user_id
+          })
           .maybeSingle();
 
-        // Find conversation with target user
         if (existingConvo?.conversation_id) {
-          const { data: sharedConvo } = await supabase
-            .from("conversation_participants")
-            .select("conversation_id")
-            .eq("conversation_id", existingConvo.conversation_id)
-            .eq("user_id", target_user_id)
-            .maybeSingle();
-
-          if (sharedConvo) {
-            conversationId = sharedConvo.conversation_id;
-          }
+          conversationId = existingConvo.conversation_id;
         }
 
         // Create new conversation if none exists
