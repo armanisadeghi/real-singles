@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { success: false, msg: "Unauthorized" },
         { status: 401 }
       );
     }
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: validation.error.issues[0].message },
+        { success: false, msg: validation.error.issues[0].message },
         { status: 400 }
       );
     }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     // Prevent self-matching
     if (target_user_id === user.id) {
       return NextResponse.json(
-        { error: "Cannot match with yourself" },
+        { success: false, msg: "Cannot match with yourself" },
         { status: 400 }
       );
     }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     if (targetError || !targetUser) {
       return NextResponse.json(
-        { error: "User not found" },
+        { success: false, msg: "User not found" },
         { status: 404 }
       );
     }
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     // Only reject suspended/deleted users
     if (targetUser.status === "suspended" || targetUser.status === "deleted") {
       return NextResponse.json(
-        { error: "User is not available" },
+        { success: false, msg: "User is not available" },
         { status: 400 }
       );
     }
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     if (blockExists) {
       return NextResponse.json(
-        { error: "Cannot interact with this user" },
+        { success: false, msg: "Cannot interact with this user" },
         { status: 403 }
       );
     }
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
     if (matchError) {
       console.error("Match error:", matchError);
       return NextResponse.json(
-        { error: "Failed to record action" },
+        { success: false, msg: "Failed to record action" },
         { status: 500 }
       );
     }
@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Match error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { success: false, msg: "Internal server error" },
       { status: 500 }
     );
   }
@@ -276,7 +276,7 @@ export async function GET(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { success: false, msg: "Unauthorized" },
         { status: 401 }
       );
     }
@@ -386,7 +386,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Get matches error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { success: false, msg: "Internal server error" },
       { status: 500 }
     );
   }

@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl, resolveOptimizedImageUrl, IMAGE_SIZES } from "@/lib/supabase/url-utils";
+import { z } from "zod";
+
+// Validation schema for gallery update (PUT)
+const galleryOrderItemSchema = z.object({
+  id: z.string().uuid("Invalid gallery item ID"),
+  display_order: z.number().int().min(0, "Display order must be non-negative"),
+});
+
+const galleryUpdateSchema = z.object({
+  order: z.array(galleryOrderItemSchema).optional(),
+  primary_id: z.string().uuid("Invalid primary photo ID").optional(),
+}).refine(
+  (data) => data.order !== undefined || data.primary_id !== undefined,
+  { message: "Either 'order' or 'primary_id' must be provided" }
+);
 
 /**
  * GET /api/users/me/gallery
@@ -98,19 +113,26 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json();
-    const { order, primary_id } = body;
+    
+    // Validate request body
+    const validation = galleryUpdateSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { success: false, msg: validation.error.issues[0].message },
+        { status: 400 }
+      );
+    }
+    
+    const { order, primary_id } = validation.data;
 
     // Handle reordering
-    if (order && Array.isArray(order)) {
-      // order should be an array of { id: string, display_order: number }
+    if (order && order.length > 0) {
       for (const item of order) {
-        if (item.id && typeof item.display_order === "number") {
-          await supabase
-            .from("user_gallery")
-            .update({ display_order: item.display_order })
-            .eq("id", item.id)
-            .eq("user_id", user.id);
-        }
+        await supabase
+          .from("user_gallery")
+          .update({ display_order: item.display_order })
+          .eq("id", item.id)
+          .eq("user_id", user.id);
       }
     }
 

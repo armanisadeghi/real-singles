@@ -41,8 +41,12 @@ export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchG
   const [isFiltering, setIsFiltering] = useState(false);
   const [filtersApplied, setFiltersApplied] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [likedProfiles, setLikedProfiles] = useState<Set<string>>(new Set());
-  const [passedProfiles, setPassedProfiles] = useState<Set<string>>(new Set());
+
+  // Remove profile from list after successful action
+  // Server already excludes acted-on profiles, this is just for immediate UI feedback
+  const removeProfileFromList = useCallback((userId: string) => {
+    setProfiles((prev) => prev.filter((p) => p.user_id && p.user_id !== userId));
+  }, []);
 
   const handleLike = useCallback(async (userId: string) => {
     setActionLoading(userId);
@@ -54,16 +58,14 @@ export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchG
       });
 
       if (res.ok) {
-        setLikedProfiles((prev) => new Set([...prev, userId]));
-        // Optionally remove from list after action
-        setProfiles((prev) => prev.filter((p) => p.user_id && p.user_id !== userId));
+        removeProfileFromList(userId);
       }
     } catch (error) {
       console.error("Error liking profile:", error);
     } finally {
       setActionLoading(null);
     }
-  }, []);
+  }, [removeProfileFromList]);
 
   const handlePass = useCallback(async (userId: string) => {
     setActionLoading(userId);
@@ -75,15 +77,14 @@ export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchG
       });
 
       if (res.ok) {
-        setPassedProfiles((prev) => new Set([...prev, userId]));
-        setProfiles((prev) => prev.filter((p) => p.user_id && p.user_id !== userId));
+        removeProfileFromList(userId);
       }
     } catch (error) {
       console.error("Error passing profile:", error);
     } finally {
       setActionLoading(null);
     }
-  }, []);
+  }, [removeProfileFromList]);
 
   const handleSuperLike = useCallback(async (userId: string) => {
     setActionLoading(userId);
@@ -95,15 +96,14 @@ export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchG
       });
 
       if (res.ok) {
-        setLikedProfiles((prev) => new Set([...prev, userId]));
-        setProfiles((prev) => prev.filter((p) => p.user_id && p.user_id !== userId));
+        removeProfileFromList(userId);
       }
     } catch (error) {
       console.error("Error super liking profile:", error);
     } finally {
       setActionLoading(null);
     }
-  }, []);
+  }, [removeProfileFromList]);
 
   const handleApplyFilters = useCallback(async (filters: FilterValues) => {
     setIsFiltering(true);
@@ -174,9 +174,9 @@ export function SearchGrid({ initialProfiles, isProfilePaused = false }: SearchG
     }
   }, [initialProfiles]);
 
-  const visibleProfiles = profiles.filter(
-    (p) => p.user_id && !likedProfiles.has(p.user_id) && !passedProfiles.has(p.user_id)
-  );
+  // Server already excludes acted-on profiles; we remove from state on action success
+  // No additional client-side filtering needed
+  const visibleProfiles = profiles.filter((p) => p.user_id);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

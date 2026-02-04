@@ -2801,6 +2801,10 @@ export type Database = {
         Args: { p_matchmaker_id: string }
         Returns: undefined
       }
+      can_create_conversation: {
+        Args: { p_user_a: string; p_user_b: string }
+        Returns: boolean
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {

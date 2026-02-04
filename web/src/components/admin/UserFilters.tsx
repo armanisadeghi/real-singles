@@ -54,7 +54,7 @@ export function UserFilters({
             placeholder="Search by name, email..."
             value={filters.search}
             onChange={(e) => updateFilter("search", e.target.value)}
-            className="w-full pl-9 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 

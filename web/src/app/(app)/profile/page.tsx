@@ -40,120 +40,7 @@ import {
   getPetsLabel,
 } from "@/types";
 import { cn } from "@/lib/utils";
-
-// Server-side completion calculation (mirrors API logic)
-interface CompletionField {
-  key: string;
-  step: number;
-  required: boolean;
-}
-
-// Complete field list for profile completion calculation
-// This MUST match the API at /api/profile/completion
-// Step numbers updated after reordering: bio/looking-for moved to steps 7-8
-const COMPLETION_FIELDS: CompletionField[] = [
-  // Required fields (steps 1-6)
-  { key: "first_name", step: 1, required: true },
-  { key: "date_of_birth", step: 2, required: true },
-  { key: "gender", step: 3, required: true },
-  { key: "looking_for", step: 4, required: true },
-  // Verification (step 6)
-  { key: "verification_selfie_url", step: 6, required: false },
-  // About (steps 7-8) - HIGH PRIORITY, moved up
-  { key: "bio", step: 7, required: false },
-  { key: "looking_for_description", step: 8, required: false },
-  // Physical (steps 9-10)
-  { key: "height_inches", step: 9, required: false },
-  { key: "body_type", step: 9, required: false },
-  { key: "ethnicity", step: 10, required: false },
-  // Relationship (step 11)
-  { key: "dating_intentions", step: 11, required: false },
-  { key: "marital_status", step: 11, required: false },
-  // Location (step 12)
-  { key: "country", step: 12, required: false },
-  { key: "city", step: 12, required: false },
-  { key: "state", step: 12, required: false },
-  { key: "hometown", step: 12, required: false },
-  // Career (steps 13-14)
-  { key: "occupation", step: 13, required: false },
-  { key: "company", step: 13, required: false },
-  { key: "education", step: 14, required: false },
-  { key: "schools", step: 14, required: false },
-  // Beliefs (step 15)
-  { key: "religion", step: 15, required: false },
-  { key: "political_views", step: 15, required: false },
-  // Lifestyle (steps 16-17)
-  { key: "exercise", step: 16, required: false },
-  { key: "languages", step: 17, required: false },
-  // Habits (step 18)
-  { key: "smoking", step: 18, required: false },
-  { key: "drinking", step: 18, required: false },
-  { key: "marijuana", step: 18, required: false },
-  // Family (steps 19-20)
-  { key: "has_kids", step: 19, required: false },
-  { key: "wants_kids", step: 19, required: false },
-  { key: "pets", step: 20, required: false },
-  // Personality (steps 21-22)
-  { key: "interests", step: 21, required: false },
-  { key: "life_goals", step: 22, required: false },
-  { key: "zodiac_sign", step: 2, required: false },
-  // Prompts (steps 23-32)
-  { key: "ideal_first_date", step: 23, required: false },
-  { key: "non_negotiables", step: 24, required: false },
-  { key: "way_to_heart", step: 25, required: false },
-  { key: "after_work", step: 26, required: false },
-  { key: "nightclub_or_home", step: 27, required: false },
-  { key: "pet_peeves", step: 28, required: false },
-  { key: "craziest_travel_story", step: 29, required: false },
-  { key: "weirdest_gift", step: 30, required: false },
-  { key: "worst_job", step: 31, required: false },
-  { key: "dream_job", step: 32, required: false },
-  { key: "past_event", step: 32, required: false },
-  // Social (step 33)
-  { key: "social_link_1", step: 33, required: false },
-  { key: "social_link_2", step: 33, required: false },
-  // Media (voice & video) - not in onboarding steps
-  { key: "voice_prompt_url", step: 34, required: false },
-  { key: "video_intro_url", step: 34, required: false },
-];
-
-function hasValue(value: unknown): boolean {
-  if (value === null || value === undefined) return false;
-  if (typeof value === "string" && value.trim() === "") return false;
-  if (Array.isArray(value) && value.length === 0) return false;
-  return true;
-}
-
-function calculateProfileCompletion(
-  profile: Record<string, unknown>,
-  photoCount: number
-): { percentage: number; completedCount: number; totalCount: number; incompleteFields: string[] } {
-  const skippedFields = (profile.profile_completion_skipped as string[]) || [];
-  const preferNotFields = (profile.profile_completion_prefer_not as string[]) || [];
-  
-  let completedCount = 0;
-  const incompleteFields: string[] = [];
-  
-  for (const field of COMPLETION_FIELDS) {
-    const value = profile[field.key];
-    const isPreferNot = preferNotFields.includes(field.key);
-    
-    if (hasValue(value) || isPreferNot) {
-      completedCount++;
-    } else {
-      incompleteFields.push(field.key);
-    }
-  }
-  
-  // Photos count as 1 field
-  const hasPhotos = hasValue(profile.profile_image_url) || photoCount > 0;
-  if (hasPhotos) completedCount++;
-  
-  const totalCount = COMPLETION_FIELDS.length + 1; // +1 for photos
-  const percentage = Math.round((completedCount / totalCount) * 100);
-  
-  return { percentage, completedCount, totalCount, incompleteFields };
-}
+import { calculateCompletion, type ProfileData } from "@/lib/onboarding/completion";
 
 async function getMyProfile() {
   const supabase = await createClient();
@@ -227,10 +114,10 @@ async function getMyProfile() {
     videoIntroUrl = signedData?.signedUrl || videoIntroUrl;
   }
 
-  // Calculate completion
+  // Calculate completion using shared library (SSOT)
   const completion = profile 
-    ? calculateProfileCompletion(profile, photoCount)
-    : { percentage: 0, completedCount: 0, totalCount: COMPLETION_FIELDS.length + 1, incompleteFields: [] };
+    ? calculateCompletion(profile as ProfileData, photoCount)
+    : { percentage: 0, completedCount: 0, totalCount: 0, incompleteFields: [] as string[] };
 
   return {
     user: { ...user, ...userData },
