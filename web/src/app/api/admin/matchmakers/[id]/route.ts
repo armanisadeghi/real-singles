@@ -1,48 +1,95 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
 
 const updateSchema = z.object({
-  action: z.enum(["approve", "reject", "suspend"]),
+  action: z.enum(["approve", "reject", "suspend", "revoke", "reinstate"]),
   reason: z.string().optional(),
 });
 
-/**
- * PATCH /api/admin/matchmakers/[id]
- * Admin action to approve, reject, or suspend a matchmaker
- */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+// Verify admin access
+async function verifyAdmin() {
   const supabase = await createApiClient();
-  const { id: matchmakerId } = await params;
-
   const {
     data: { user },
     error: authError,
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    return NextResponse.json(
-      { success: false, msg: "Not authenticated" },
-      { status: 401 }
-    );
+    return { isAdmin: false, userId: null };
   }
 
-  // Verify admin role
   const { data: userData } = await supabase
     .from("users")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  if (!userData || !userData.role || !["admin", "moderator"].includes(userData.role)) {
+  return {
+    isAdmin: userData?.role === "admin" || userData?.role === "moderator",
+    userId: user.id,
+  };
+}
+
+/**
+ * DELETE /api/admin/matchmakers/[id]
+ * Permanently delete a matchmaker record (use revoke instead in most cases)
+ */
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { isAdmin, userId } = await verifyAdmin();
+  const { id: matchmakerId } = await params;
+
+  if (!isAdmin || !userId) {
     return NextResponse.json(
       { success: false, msg: "Unauthorized" },
       { status: 403 }
     );
   }
+
+  const supabase = createAdminClient();
+
+  const { error } = await supabase
+    .from("matchmakers")
+    .delete()
+    .eq("id", matchmakerId);
+
+  if (error) {
+    console.error("Error deleting matchmaker:", error);
+    return NextResponse.json(
+      { success: false, msg: "Failed to delete matchmaker" },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    success: true,
+    msg: "Matchmaker record deleted",
+  });
+}
+
+/**
+ * PATCH /api/admin/matchmakers/[id]
+ * Admin action to approve, reject, suspend, revoke, or reinstate a matchmaker
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { isAdmin, userId } = await verifyAdmin();
+  const { id: matchmakerId } = await params;
+
+  if (!isAdmin || !userId) {
+    return NextResponse.json(
+      { success: false, msg: "Unauthorized" },
+      { status: 403 }
+    );
+  }
+
+  const supabase = createAdminClient();
 
   try {
     const body = await request.json();
@@ -83,7 +130,7 @@ export async function PATCH(
         }
         updateData = {
           status: "approved",
-          approved_by: user.id,
+          approved_by: userId,
           approved_at: new Date().toISOString(),
           suspended_reason: null,
         };
@@ -118,6 +165,36 @@ export async function PATCH(
         updateData = {
           status: "suspended",
           suspended_reason: reason,
+        };
+        break;
+
+      case "revoke":
+        // Can revoke any matchmaker (removes their access completely)
+        if (matchmaker.status === "inactive") {
+          return NextResponse.json(
+            { success: false, msg: "Matchmaker access already revoked" },
+            { status: 400 }
+          );
+        }
+        updateData = {
+          status: "inactive",
+          suspended_reason: reason || "Matchmaker access revoked by admin",
+        };
+        break;
+
+      case "reinstate":
+        // Can reinstate suspended or inactive matchmakers
+        if (!["suspended", "inactive"].includes(matchmaker.status)) {
+          return NextResponse.json(
+            { success: false, msg: "Can only reinstate suspended or revoked matchmakers" },
+            { status: 400 }
+          );
+        }
+        updateData = {
+          status: "approved",
+          suspended_reason: null,
+          approved_by: userId,
+          approved_at: new Date().toISOString(),
         };
         break;
     }

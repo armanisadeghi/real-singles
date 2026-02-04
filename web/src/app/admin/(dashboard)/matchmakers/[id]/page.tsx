@@ -64,11 +64,21 @@ export default function AdminMatchmakerDetailPage({ params }: PageProps) {
     }
   };
 
-  const handleAction = async (action: "approve" | "suspend") => {
+  const handleAction = async (action: "approve" | "reject" | "suspend" | "revoke" | "reinstate") => {
     if (action === "suspend" && (!suspendReason || suspendReason.trim().length < 10)) {
       alert("Please enter a suspension reason (min 10 characters)");
       return;
     }
+
+    const confirmMessages: Record<string, string> = {
+      approve: "Are you sure you want to approve this matchmaker?",
+      reject: "Are you sure you want to reject this application?",
+      suspend: "Are you sure you want to suspend this matchmaker?",
+      revoke: "Are you sure you want to revoke this matchmaker's access? This will remove their ability to use the matchmaker portal.",
+      reinstate: "Are you sure you want to reinstate this matchmaker?",
+    };
+
+    if (!confirm(confirmMessages[action])) return;
 
     setActionLoading(true);
     
@@ -78,14 +88,21 @@ export default function AdminMatchmakerDetailPage({ params }: PageProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action,
-          reason: action === "suspend" ? suspendReason : undefined,
+          reason: ["suspend", "revoke", "reject"].includes(action) ? suspendReason || "Admin action" : undefined,
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        alert(`Matchmaker ${action === "approve" ? "approved" : "suspended"} successfully`);
+        const successMessages: Record<string, string> = {
+          approve: "Matchmaker approved successfully",
+          reject: "Application rejected",
+          suspend: "Matchmaker suspended successfully",
+          revoke: "Matchmaker access revoked",
+          reinstate: "Matchmaker reinstated successfully",
+        };
+        alert(successMessages[action]);
         router.push("/admin/matchmakers");
       } else {
         alert(data.msg || "Action failed");
@@ -119,6 +136,8 @@ export default function AdminMatchmakerDetailPage({ params }: PageProps) {
       approved: "bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-300",
       pending: "bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300",
       suspended: "bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-300",
+      inactive: "bg-gray-100 dark:bg-gray-950/30 text-gray-700 dark:text-gray-300",
+      rejected: "bg-gray-100 dark:bg-gray-950/30 text-gray-700 dark:text-gray-300",
     };
     return config[status] || config.pending;
   };
@@ -231,12 +250,12 @@ export default function AdminMatchmakerDetailPage({ params }: PageProps) {
       </div>
 
       {/* Actions Card */}
-      {matchmaker.status === "approved" && (
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-slate-200 dark:border-neutral-800 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            Admin Actions
-          </h2>
-          
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-slate-200 dark:border-neutral-800 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          Admin Actions
+        </h2>
+        
+        {matchmaker.status === "approved" && (
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -251,8 +270,73 @@ export default function AdminMatchmakerDetailPage({ params }: PageProps) {
               />
             </div>
 
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleAction("suspend")}
+                disabled={actionLoading}
+                className="flex items-center gap-2 px-6 py-2.5 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
+              >
+                {actionLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Ban className="w-5 h-5" />
+                )}
+                Suspend
+              </button>
+              <button
+                onClick={() => handleAction("revoke")}
+                disabled={actionLoading}
+                className="flex items-center gap-2 px-6 py-2.5 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {actionLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Ban className="w-5 h-5" />
+                )}
+                Revoke Access
+              </button>
+            </div>
+          </div>
+        )}
+
+        {(matchmaker.status === "suspended" || matchmaker.status === "inactive") && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              This matchmaker's access is currently{" "}
+              <span className="font-medium text-red-600 dark:text-red-400">{matchmaker.status}</span>.
+              You can reinstate their access to allow them to use the matchmaker portal again.
+            </p>
             <button
-              onClick={() => handleAction("suspend")}
+              onClick={() => handleAction("reinstate")}
+              disabled={actionLoading}
+              className="flex items-center gap-2 px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+            >
+              {actionLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <CheckCircle className="w-5 h-5" />
+              )}
+              Reinstate Matchmaker
+            </button>
+          </div>
+        )}
+
+        {matchmaker.status === "pending" && (
+          <div className="flex gap-3">
+            <button
+              onClick={() => handleAction("approve")}
+              disabled={actionLoading}
+              className="flex items-center gap-2 px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+            >
+              {actionLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <CheckCircle className="w-5 h-5" />
+              )}
+              Approve
+            </button>
+            <button
+              onClick={() => handleAction("reject")}
               disabled={actionLoading}
               className="flex items-center gap-2 px-6 py-2.5 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
             >
@@ -261,11 +345,11 @@ export default function AdminMatchmakerDetailPage({ params }: PageProps) {
               ) : (
                 <Ban className="w-5 h-5" />
               )}
-              Suspend Matchmaker
+              Reject
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -98,7 +98,7 @@ interface UserDetail {
 
 interface MatchmakerDetail {
   id: string;
-  status: "pending" | "approved" | "rejected" | "suspended";
+  status: "pending" | "approved" | "rejected" | "suspended" | "inactive";
   years_experience: number;
   specialties: string[];
   approved_at?: string | null;
@@ -391,6 +391,11 @@ export default function AdminUserDetailPage({ params }: PageProps) {
   const [showRoleChangeConfirm, setShowRoleChangeConfirm] = useState(false);
   const [newRole, setNewRole] = useState<"user" | "admin" | "moderator">("user");
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  
+  // Matchmaker management state
+  const [showMakeMatchmakerConfirm, setShowMakeMatchmakerConfirm] = useState(false);
+  const [showRevokeMatchmakerConfirm, setShowRevokeMatchmakerConfirm] = useState(false);
+  const [matchmakerYearsExp, setMatchmakerYearsExp] = useState(0);
   
   // Edit profile form state - comprehensive state for all fields
   const [editForm, setEditForm] = useState<Partial<ProfileDetail>>({});
@@ -737,6 +742,58 @@ export default function AdminUserDetailPage({ params }: PageProps) {
     router.push(`/admin/algorithm-simulator?user_id=${id}`);
   };
 
+  const handleGrantMatchmaker = async () => {
+    setActionLoading(true);
+    try {
+      const response = await fetch("/api/admin/matchmakers/grant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: id,
+          years_experience: matchmakerYearsExp,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setShowMakeMatchmakerConfirm(false);
+        setMatchmakerYearsExp(0);
+        fetchData(); // Refresh to show matchmaker status
+      } else {
+        alert(data.msg || "Failed to grant matchmaker access");
+      }
+    } catch {
+      alert("Failed to grant matchmaker access");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRevokeMatchmaker = async () => {
+    if (!matchmaker) return;
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/admin/matchmakers/${matchmaker.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "revoke",
+          reason: "Revoked by admin",
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setShowRevokeMatchmakerConfirm(false);
+        fetchData(); // Refresh to show updated status
+      } else {
+        alert(data.msg || "Failed to revoke matchmaker access");
+      }
+    } catch {
+      alert("Failed to revoke matchmaker access");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -870,7 +927,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
       )}
 
       {/* Matchmaker Info */}
-      {matchmaker && (
+      {matchmaker ? (
         <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-2xl border border-purple-200/50 dark:border-purple-800/50 p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -892,7 +949,7 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                 matchmaker.status === "approved" && "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300",
                 matchmaker.status === "pending" && "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300",
                 matchmaker.status === "suspended" && "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300",
-                matchmaker.status === "rejected" && "bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300"
+                (matchmaker.status === "rejected" || matchmaker.status === "inactive") && "bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300"
               )}
             >
               {matchmaker.status}
@@ -917,13 +974,49 @@ export default function AdminUserDetailPage({ params }: PageProps) {
             </div>
           )}
 
-          <Link
-            href={`/admin/matchmakers/${matchmaker.id}`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-semibold rounded-lg shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30 transition-all"
-          >
-            View Matchmaker Profile
-            <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/admin/matchmakers/${matchmaker.id}`}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-semibold rounded-lg shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30 transition-all"
+            >
+              View Matchmaker Profile
+              <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
+            </Link>
+            {matchmaker.status === "approved" && (
+              <button
+                onClick={() => setShowRevokeMatchmakerConfirm(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-medium rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+              >
+                <Ban className="w-4 h-4" />
+                Revoke Access
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-gradient-to-br from-gray-50 to-slate-50 dark:from-neutral-900/50 dark:to-neutral-950/50 rounded-2xl border border-slate-200/50 dark:border-neutral-800/50 p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-400 to-slate-500 flex items-center justify-center">
+                <Wand2 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Not a Matchmaker
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  This user does not have matchmaker access
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowMakeMatchmakerConfirm(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-semibold rounded-lg shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30 transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              Make Matchmaker
+            </button>
+          </div>
         </div>
       )}
 
@@ -1811,6 +1904,66 @@ export default function AdminUserDetailPage({ params }: PageProps) {
         variant="warning"
         loading={actionLoading}
       />
+
+      <ConfirmModal
+        isOpen={showRevokeMatchmakerConfirm}
+        onClose={() => setShowRevokeMatchmakerConfirm(false)}
+        onConfirm={handleRevokeMatchmaker}
+        title="Revoke Matchmaker Access"
+        message="Are you sure you want to revoke this user's matchmaker access? They will no longer be able to access the matchmaker portal or manage clients."
+        confirmLabel="Revoke Access"
+        variant="danger"
+        loading={actionLoading}
+      />
+
+      {/* Make Matchmaker Sheet */}
+      <BottomSheet
+        isOpen={showMakeMatchmakerConfirm}
+        onClose={() => {
+          setShowMakeMatchmakerConfirm(false);
+          setMatchmakerYearsExp(0);
+        }}
+        title="Grant Matchmaker Access"
+      >
+        <div className="p-4 space-y-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            This will grant matchmaker access to this user. They will be able to access the matchmaker portal, manage clients, and create introductions.
+          </p>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Years of Experience
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="50"
+              value={matchmakerYearsExp}
+              onChange={(e) => setMatchmakerYearsExp(Number(e.target.value))}
+              className="w-full px-4 py-2 border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
+            />
+          </div>
+        </div>
+
+        <BottomSheetActions>
+          <button
+            onClick={() => {
+              setShowMakeMatchmakerConfirm(false);
+              setMatchmakerYearsExp(0);
+            }}
+            className="flex-1 px-4 py-3 border border-gray-300 dark:border-neutral-700 rounded-lg text-gray-700 dark:text-gray-300 font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleGrantMatchmaker}
+            disabled={actionLoading}
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-medium disabled:opacity-50"
+          >
+            {actionLoading ? "Granting..." : "Grant Access"}
+          </button>
+        </BottomSheetActions>
+      </BottomSheet>
 
       {/* Points Adjustment Sheet */}
       <BottomSheet
