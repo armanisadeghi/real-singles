@@ -162,13 +162,17 @@ export function MatchmakerProfilePage({ matchmakerId }: MatchmakerProfilePagePro
         <div className="bg-card rounded-xl border border-border/40 overflow-hidden">
           <div className="p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row items-start gap-6">
-              {/* Profile Image */}
+              {/* Profile Image - explicit dimensions prevent CLS */}
               <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-950/30 dark:to-pink-950/30 flex items-center justify-center overflow-hidden ring-4 ring-purple-100 dark:ring-purple-950/50">
                 {profile.profile_image_url ? (
                   <img
                     src={profile.profile_image_url}
                     alt={profile.display_name}
+                    width={96}
+                    height={96}
                     className="w-full h-full object-cover"
+                    loading="eager"
+                    decoding="async"
                   />
                 ) : (
                   <span className="text-3xl font-bold text-purple-600 dark:text-purple-400">
@@ -320,12 +324,16 @@ export function MatchmakerProfilePage({ matchmakerId }: MatchmakerProfilePagePro
                   className="border-b border-border/40 last:border-0 pb-4 last:pb-0"
                 >
                   <div className="flex items-start gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-950/30 dark:to-pink-950/30 flex items-center justify-center overflow-hidden">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-950/30 dark:to-pink-950/30 flex items-center justify-center overflow-hidden shrink-0">
                       {review.reviewer.profile_image_url ? (
                         <img
                           src={review.reviewer.profile_image_url}
                           alt={review.reviewer.display_name}
+                          width={40}
+                          height={40}
                           className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
                         />
                       ) : (
                         <span className="text-sm font-bold text-purple-600 dark:text-purple-400">

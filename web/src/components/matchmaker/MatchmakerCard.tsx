@@ -39,13 +39,17 @@ export function MatchmakerCard({ matchmaker }: MatchmakerCardProps) {
     >
       {/* Profile Section */}
       <div className="p-6 text-center">
-        {/* Profile Image */}
+        {/* Profile Image - explicit dimensions prevent CLS */}
         <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-950/30 dark:to-pink-950/30 flex items-center justify-center overflow-hidden ring-4 ring-purple-100 dark:ring-purple-950/50 group-hover:ring-purple-200 dark:group-hover:ring-purple-900/50 transition-all">
           {matchmaker.profile_image_url ? (
             <img
               src={matchmaker.profile_image_url}
               alt={matchmaker.display_name}
+              width={80}
+              height={80}
               className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           ) : (
             <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
