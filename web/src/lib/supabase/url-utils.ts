@@ -14,7 +14,10 @@ export interface ImageTransformOptions {
 
 /**
  * Predefined image sizes for consistency across the app
- * All sizes use WebP format by default for ~30-50% smaller file sizes
+ * 
+ * Note: Format conversion (webp/avif) only works with PUBLIC buckets.
+ * Private buckets (gallery) use signed URLs which don't support format transforms.
+ * For private buckets, we still get resizing and quality optimization benefits.
  */
 export const IMAGE_SIZES = {
   thumbnail: { width: 150, height: 150, quality: 70, format: "webp" as const },
@@ -66,8 +69,8 @@ export async function resolveStorageUrl(
     bucket = "gallery";
   }
   
-  // Build transform options if provided
-  const transformOptions = options?.transform ? {
+  // Build transform options for PUBLIC buckets (supports format conversion)
+  const publicTransformOptions = options?.transform ? {
     transform: {
       width: options.transform.width,
       height: options.transform.height,
@@ -77,34 +80,46 @@ export async function resolveStorageUrl(
     }
   } : undefined;
   
-  // Avatars bucket is public, use public URL for better caching
+  // Build transform options for PRIVATE buckets (signed URLs don't support format conversion)
+  const privateTransformOptions = options?.transform ? {
+    transform: {
+      width: options.transform.width,
+      height: options.transform.height,
+      quality: options.transform.quality ?? 80,
+      resize: options.transform.resize ?? "cover",
+      // Note: format is intentionally omitted - signed URLs don't support it
+    }
+  } : undefined;
+  
+  // Avatars bucket is public, use public URL for better caching (supports webp/avif)
   if (bucket === "avatars") {
     const { data } = supabase.storage
       .from(bucket)
-      .getPublicUrl(path, transformOptions as any);
+      .getPublicUrl(path, publicTransformOptions as any);
     return data?.publicUrl || "";
   }
   
-  // Events bucket is also public
+  // Events bucket is also public (supports webp/avif)
   if (bucket === "events") {
     const { data } = supabase.storage
       .from(bucket)
-      .getPublicUrl(path, transformOptions as any);
+      .getPublicUrl(path, publicTransformOptions as any);
     return data?.publicUrl || "";
   }
   
-  // Products bucket is also public
+  // Products bucket is also public (supports webp/avif)
   if (bucket === "products") {
     const { data } = supabase.storage
       .from(bucket)
-      .getPublicUrl(path, transformOptions as any);
+      .getPublicUrl(path, publicTransformOptions as any);
     return data?.publicUrl || "";
   }
   
   // For private buckets (gallery), use signed URLs with transforms
+  // Note: signed URLs only support width/height/quality/resize, NOT format
   const { data, error } = await supabase.storage
     .from(bucket)
-    .createSignedUrl(path, options?.expiresIn ?? 3600, transformOptions as any);
+    .createSignedUrl(path, options?.expiresIn ?? 3600, privateTransformOptions as any);
   
   if (error) {
     console.error(`Failed to create signed URL for ${bucket}/${path}:`, error.message);
