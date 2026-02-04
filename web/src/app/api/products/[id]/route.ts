@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import { resolveStorageUrl, IMAGE_SIZES } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/products/[id]
@@ -29,9 +29,12 @@ export async function GET(
     );
   }
 
-  // Resolve image URL
+  // Resolve image URL with optimization (medium size for detail view)
   const resolvedImageUrl = product.image_url
-    ? await resolveStorageUrl(supabase, product.image_url, { bucket: "products" })
+    ? await resolveStorageUrl(supabase, product.image_url, { 
+        bucket: "products",
+        transform: IMAGE_SIZES.medium,
+      })
     : "";
 
   // Web-friendly format (camelCase)

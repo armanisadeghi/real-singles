@@ -581,7 +581,7 @@ function RewardsHeroBanner() {
         <div className="hidden md:block relative w-72 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-rose-50 dark:to-rose-950/30 z-10" />
           <img
-            src="https://sotdovuprhztkrgtonyz.supabase.co/storage/v1/object/public/products/promo/rewards-gifts-hero.png"
+            src="https://sotdovuprhztkrgtonyz.supabase.co/storage/v1/render/image/public/products/promo/rewards-gifts-hero.png?width=600&height=400&quality=75&format=webp"
             alt="Romantic rewards"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -608,56 +608,96 @@ export default function ExplorePage() {
         {/* Speed Dating Section - Loads independently */}
         <SpeedDatingSection />
 
-        {/* Feature Promo Cards - Same sizing as Events/Speed Dating */}
+        {/* Professional Matchmakers Section - Full width banner */}
         <section>
-          <SectionHeader title="More Ways to Connect" href="/features" icon={Sparkles} />
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
-            {/* Rewards Shop Card */}
-            <FeaturePromoBanner
-              href="/rewards"
-              title="Send Romantic Gifts"
-              description="Roses, chocolates, dinner dates & more. Show your match you care."
-              icon={Heart}
-              badge="New"
-              badgeIcon={Star}
-              accentColor="rose"
-              backgroundImage="https://sotdovuprhztkrgtonyz.supabase.co/storage/v1/object/public/products/promo/rewards-gifts-hero.png"
-            />
+          <Link
+            href="/matchmakers"
+            className="group block relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:from-purple-950/30 dark:via-pink-950/30 dark:to-rose-950/30 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-lg transition-all duration-300"
+          >
+            <div className="flex flex-col md:flex-row">
+              {/* Content */}
+              <div className="flex-1 p-6 md:p-8">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+                    <Wand2 className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
+                    Professional Service
+                  </span>
+                </div>
+                
+                <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  Expert Matchmakers
+                </h2>
+                
+                <p className="text-muted-foreground mb-4 max-w-md">
+                  Get personalized introductions from experienced matchmakers who understand what you're looking for in a partner.
+                </p>
+                
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-semibold rounded-full shadow-lg shadow-purple-500/25 group-hover:shadow-xl group-hover:shadow-purple-500/30 transition-all">
+                  <Wand2 className="w-4 h-4" />
+                  Browse Matchmakers
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </div>
+              
+              {/* Image */}
+              <div className="hidden md:block relative w-72 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-purple-50 dark:to-purple-950/30 z-10" />
+                <img
+                  src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&q=80"
+                  alt="Professional matchmakers"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+            </div>
+          </Link>
+        </section>
 
-            {/* Refer Friends Card */}
-            <FeaturePromoBanner
-              href="/refer"
-              title="Refer Friends, Earn Rewards"
-              description="Share RealSingles with friends and get exclusive rewards when they join."
-              icon={Gift}
-              accentColor="amber"
-              backgroundImage="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80"
-            />
-
-            {/* Matchmakers Coming Soon Card */}
-            <FeaturePromoBanner
-              href="/matchmakers"
-              title="Professional Matchmakers"
-              description="Expert matchmakers will curate your perfect connections."
-              icon={Wand2}
-              badge="Coming Soon"
-              badgeIcon={Sparkles}
-              accentColor="purple"
-              backgroundImage="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&q=80"
-            />
-
-            {/* Videos Coming Soon Card */}
-            <FeaturePromoBanner
-              href="/videos"
-              title="Dating Tips & Advice"
-              description="Expert dating tips and relationship advice videos."
-              icon={Video}
-              badge="Coming Soon"
-              badgeIcon={Sparkles}
-              accentColor="teal"
-              backgroundImage="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
-            />
-          </div>
+        {/* Refer Friends Section - Full width banner */}
+        <section>
+          <Link
+            href="/refer"
+            className="group block relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-950/30 dark:via-orange-950/30 dark:to-yellow-950/30 hover:border-amber-300 dark:hover:border-amber-700 hover:shadow-lg transition-all duration-300"
+          >
+            <div className="flex flex-col md:flex-row">
+              {/* Content */}
+              <div className="flex-1 p-6 md:p-8">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25">
+                    <Gift className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                    Earn Rewards
+                  </span>
+                </div>
+                
+                <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  Refer Friends
+                </h2>
+                
+                <p className="text-muted-foreground mb-4 max-w-md">
+                  Share RealSingles with friends and earn exclusive rewards when they join. Help others find love and get rewarded!
+                </p>
+                
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-sm font-semibold rounded-full shadow-lg shadow-amber-500/25 group-hover:shadow-xl group-hover:shadow-amber-500/30 transition-all">
+                  <Gift className="w-4 h-4" />
+                  Start Referring
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </div>
+              
+              {/* Image */}
+              <div className="hidden md:block relative w-72 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-amber-50 dark:to-amber-950/30 z-10" />
+                <img
+                  src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80"
+                  alt="Refer friends"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+            </div>
+          </Link>
         </section>
       </div>
     </div>

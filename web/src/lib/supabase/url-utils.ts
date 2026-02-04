@@ -1,6 +1,30 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
 /**
+ * Image transformation options for Supabase Storage
+ * Uses Supabase's built-in image optimization
+ */
+export interface ImageTransformOptions {
+  width?: number;
+  height?: number;
+  quality?: number; // 1-100, default 80
+  format?: "webp" | "avif" | "origin"; // webp is smaller, avif is smallest but less compatible
+  resize?: "cover" | "contain" | "fill";
+}
+
+/**
+ * Predefined image sizes for consistency across the app
+ */
+export const IMAGE_SIZES = {
+  thumbnail: { width: 150, height: 150, quality: 70 },
+  card: { width: 400, height: 400, quality: 75 },
+  cardWide: { width: 600, height: 400, quality: 75 },
+  medium: { width: 600, height: 600, quality: 80 },
+  large: { width: 1200, height: 1200, quality: 85 },
+  hero: { width: 800, height: 600, quality: 80 },
+} as const;
+
+/**
  * Resolve a storage path to a signed URL or public URL.
  * If already a full URL (http/https), returns as-is.
  * If a storage path, generates the appropriate URL based on bucket.
@@ -20,7 +44,11 @@ import { SupabaseClient } from "@supabase/supabase-js";
 export async function resolveStorageUrl(
   supabase: SupabaseClient,
   path: string | null | undefined,
-  options?: { expiresIn?: number; bucket?: string }
+  options?: { 
+    expiresIn?: number; 
+    bucket?: string;
+    transform?: ImageTransformOptions;
+  }
 ): Promise<string> {
   if (!path) return "";
   if (path.startsWith("http")) return path;
@@ -37,11 +65,22 @@ export async function resolveStorageUrl(
     bucket = "gallery";
   }
   
+  // Build transform options if provided
+  const transformOptions = options?.transform ? {
+    transform: {
+      width: options.transform.width,
+      height: options.transform.height,
+      quality: options.transform.quality ?? 80,
+      format: options.transform.format === "avif" || options.transform.format === "webp" ? options.transform.format : ("origin" as const),
+      resize: options.transform.resize ?? "cover",
+    }
+  } : undefined;
+  
   // Avatars bucket is public, use public URL for better caching
   if (bucket === "avatars") {
     const { data } = supabase.storage
       .from(bucket)
-      .getPublicUrl(path);
+      .getPublicUrl(path, transformOptions as any);
     return data?.publicUrl || "";
   }
   
@@ -49,7 +88,7 @@ export async function resolveStorageUrl(
   if (bucket === "events") {
     const { data } = supabase.storage
       .from(bucket)
-      .getPublicUrl(path);
+      .getPublicUrl(path, transformOptions as any);
     return data?.publicUrl || "";
   }
   
@@ -57,14 +96,14 @@ export async function resolveStorageUrl(
   if (bucket === "products") {
     const { data } = supabase.storage
       .from(bucket)
-      .getPublicUrl(path);
+      .getPublicUrl(path, transformOptions as any);
     return data?.publicUrl || "";
   }
   
-  // For private buckets (gallery), use signed URLs
+  // For private buckets (gallery), use signed URLs with transforms
   const { data, error } = await supabase.storage
     .from(bucket)
-    .createSignedUrl(path, options?.expiresIn ?? 3600);
+    .createSignedUrl(path, options?.expiresIn ?? 3600, transformOptions as any);
   
   if (error) {
     console.error(`Failed to create signed URL for ${bucket}/${path}:`, error.message);
@@ -72,6 +111,22 @@ export async function resolveStorageUrl(
   }
   
   return data?.signedUrl || "";
+}
+
+/**
+ * Resolve a storage URL with a predefined image size
+ * Convenience wrapper for common use cases
+ */
+export async function resolveOptimizedImageUrl(
+  supabase: SupabaseClient,
+  path: string | null | undefined,
+  size: keyof typeof IMAGE_SIZES,
+  options?: { expiresIn?: number; bucket?: string }
+): Promise<string> {
+  return resolveStorageUrl(supabase, path, {
+    ...options,
+    transform: IMAGE_SIZES[size],
+  });
 }
 
 /**

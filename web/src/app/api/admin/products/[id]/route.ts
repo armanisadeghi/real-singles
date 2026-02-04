@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import { resolveStorageUrl, IMAGE_SIZES } from "@/lib/supabase/url-utils";
 
 // Verify the current user is an admin
 async function verifyAdmin(): Promise<{ isAdmin: boolean; userId?: string }> {
@@ -54,9 +54,12 @@ export async function GET(
   // Store the raw image path
   const rawImageUrl = product.image_url;
   
-  // Resolve image URL for display if it exists
+  // Resolve image URL for display if it exists (medium size for detail view)
   const resolvedImageUrl = product.image_url
-    ? await resolveStorageUrl(supabase, product.image_url, { bucket: "products" })
+    ? await resolveStorageUrl(supabase, product.image_url, { 
+        bucket: "products",
+        transform: IMAGE_SIZES.medium,
+      })
     : null;
 
   // Get order count for this product

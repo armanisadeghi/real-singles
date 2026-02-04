@@ -24,18 +24,47 @@ export default function MatchmakerApplicationsPage() {
   const [rejectionReason, setRejectionReason] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-    // TODO: Fetch pending applications
-    setLoading(false);
+    fetchApplications();
   }, []);
+
+  const fetchApplications = async () => {
+    try {
+      const response = await fetch("/api/matchmakers?status=pending");
+      const data = await response.json();
+      
+      if (data.success) {
+        setApplications(data.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch applications:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleApprove = async (applicationId: string) => {
     setActionLoading(applicationId);
-    // TODO: Call API to approve
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch(`/api/admin/matchmakers/${applicationId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve" }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setApplications(applications.filter((a) => a.id !== applicationId));
+      } else {
+        alert(data.msg || "Failed to approve application");
+      }
+    } catch (error) {
+      console.error("Failed to approve:", error);
+      alert("Network error");
+    } finally {
       setActionLoading(null);
-      // Remove from list
-      setApplications(applications.filter((a) => a.id !== applicationId));
-    }, 1000);
+    }
   };
 
   const handleReject = async (applicationId: string) => {
@@ -46,11 +75,27 @@ export default function MatchmakerApplicationsPage() {
     }
 
     setActionLoading(applicationId);
-    // TODO: Call API to reject
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch(`/api/admin/matchmakers/${applicationId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reject", reason }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setApplications(applications.filter((a) => a.id !== applicationId));
+      } else {
+        alert(data.msg || "Failed to reject application");
+      }
+    } catch (error) {
+      console.error("Failed to reject:", error);
+      alert("Network error");
+    } finally {
       setActionLoading(null);
-      setApplications(applications.filter((a) => a.id !== applicationId));
-    }, 1000);
+    }
   };
 
   const formatSpecialty = (specialty: string) => {

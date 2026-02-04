@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-import { resolveStorageUrl } from "@/lib/supabase/url-utils";
+import { resolveStorageUrl, IMAGE_SIZES } from "@/lib/supabase/url-utils";
 
 // Cache for 5 minutes - products change occasionally
 export const revalidate = 300;
@@ -53,14 +53,18 @@ export async function GET(request: NextRequest) {
 
   const { count } = await countQuery;
 
-  // Format products with resolved image URLs
+  // Format products with resolved and optimized image URLs
   // Returns both formats for compatibility:
   // - `products` array with web-friendly format (used by web frontend)
   // - `data` array with mobile format (used by mobile app)
   const formattedProducts = await Promise.all(
     (products || []).map(async (product) => {
+      // Use optimized card-size images (400x400, 75% quality, WebP format)
       const imageUrl = product.image_url
-        ? await resolveStorageUrl(supabase, product.image_url, { bucket: "products" })
+        ? await resolveStorageUrl(supabase, product.image_url, { 
+            bucket: "products",
+            transform: IMAGE_SIZES.card,
+          })
         : "";
 
       return {

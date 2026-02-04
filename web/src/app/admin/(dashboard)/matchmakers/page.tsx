@@ -28,9 +28,28 @@ export default function AdminMatchmakersPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   useEffect(() => {
-    // TODO: Fetch all matchmakers (admin API)
-    setLoading(false);
+    fetchMatchmakers();
   }, [statusFilter]);
+
+  const fetchMatchmakers = async () => {
+    setLoading(true);
+    try {
+      const url = statusFilter === "all" 
+        ? "/api/matchmakers?limit=100"
+        : `/api/matchmakers?status=${statusFilter}&limit=100`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.success) {
+        setMatchmakers(data.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch matchmakers:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const statusOptions = [
     { value: "all", label: "All" },
