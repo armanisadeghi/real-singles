@@ -84,6 +84,10 @@ export type TypingCallback = (typingUsers: TypingUser[]) => void;
 
 // Store active channels to prevent duplicates and enable cleanup
 const activeChannels = new Map<string, RealtimeChannel>();
+// Track which channels are subscribed for broadcast
+const subscribedChannels = new Set<string>();
+// Track if message handlers were added to prevent duplicates
+const messageHandlersAdded = new Set<string>();
 
 /**
  * Get or create a channel for a conversation
@@ -117,6 +121,8 @@ export function removeChannel(conversationId: string): void {
   if (channel) {
     supabase.removeChannel(channel);
     activeChannels.delete(channelName);
+    subscribedChannels.delete(channelName);
+    messageHandlersAdded.delete(`msg:${conversationId}`);
     console.log(`[Messaging] Removed channel: ${channelName}`);
   }
 }
@@ -130,6 +136,8 @@ export function removeAllChannels(): void {
     console.log(`[Messaging] Removed channel: ${name}`);
   });
   activeChannels.clear();
+  subscribedChannels.clear();
+  messageHandlersAdded.clear();
 }
 
 // ============================================
@@ -149,10 +157,12 @@ export async function sendMessage(
     mediaThumbnailUrl?: string;
     mediaMetadata?: Record<string, any>;
     replyToId?: string;
+    clientMessageId?: string; // Allow passing from hook for optimistic update matching
   }
 ): Promise<Message> {
-  // Generate a client-side ID for optimistic updates and deduplication
-  const clientMessageId = `${senderId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // Use provided client-side ID or generate one for deduplication
+  const clientMessageId = options?.clientMessageId || 
+    `${senderId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   const messageData: MessageInsert = {
     conversation_id: conversationId,
@@ -180,6 +190,28 @@ export async function sendMessage(
   }
 
   console.log(`[Messaging] Message sent successfully:`, data.id);
+
+  // Broadcast the message to all channel subscribers for immediate delivery
+  // This ensures real-time delivery even if postgres_changes RLS filtering has delays
+  const channelName = `conversation:${conversationId}`;
+  const channel = activeChannels.get(channelName);
+  const isChannelSubscribed = subscribedChannels.has(channelName);
+  
+  if (channel && isChannelSubscribed) {
+    try {
+      const result = await channel.send({
+        type: 'broadcast',
+        event: 'new_message',
+        payload: data as Message,
+      });
+      console.log(`[Messaging] 📡 Broadcast sent to ${channelName}, result:`, result);
+    } catch (err) {
+      console.error(`[Messaging] ⚠️ Broadcast failed for ${channelName}:`, err);
+    }
+  } else {
+    console.warn(`[Messaging] ⚠️ Cannot broadcast - channel: ${!!channel}, subscribed: ${isChannelSubscribed}`);
+  }
+
   return data as Message;
 }
 
@@ -282,9 +314,35 @@ export function subscribeToMessages(
   conversationId: string,
   onMessage: MessageCallback
 ): () => void {
+  const channelName = `conversation:${conversationId}`;
   const channel = getOrCreateChannel(conversationId);
+  
+  // Check if message handlers were already added for this conversation
+  const handlersKey = `msg:${conversationId}`;
+  if (messageHandlersAdded.has(handlersKey)) {
+    console.log(`[Messaging] Message handlers already added for ${channelName}, skipping`);
+    return () => {
+      messageHandlersAdded.delete(handlersKey);
+      removeChannel(conversationId);
+    };
+  }
+  
+  console.log(`[Messaging] Setting up message subscription for ${channelName}`);
+  messageHandlersAdded.add(handlersKey);
 
-  // Subscribe to postgres_changes for messages
+  // Subscribe to broadcast events (immediate delivery from sender)
+  channel.on(
+    'broadcast',
+    { event: 'new_message' },
+    (payload) => {
+      console.log(`[Messaging] 📨 Broadcast message received:`, payload.payload?.id);
+      if (payload.payload) {
+        onMessage(payload.payload as Message);
+      }
+    }
+  );
+
+  // Subscribe to postgres_changes for INSERT (for messages from other participants)
   channel.on(
     'postgres_changes',
     {
@@ -294,7 +352,7 @@ export function subscribeToMessages(
       filter: `conversation_id=eq.${conversationId}`,
     },
     (payload) => {
-      console.log(`[Messaging] New message received:`, payload.new.id);
+      console.log(`[Messaging] 📬 postgres_changes INSERT received:`, payload.new.id);
       onMessage(payload.new as Message);
     }
   );
@@ -309,22 +367,38 @@ export function subscribeToMessages(
       filter: `conversation_id=eq.${conversationId}`,
     },
     (payload) => {
-      console.log(`[Messaging] Message updated:`, payload.new.id);
+      console.log(`[Messaging] ✏️ Message updated:`, payload.new.id);
       onMessage(payload.new as Message);
     }
   );
 
-  // Subscribe to the channel
-  channel.subscribe((status) => {
-    if (status === 'SUBSCRIBED') {
-      console.log(`[Messaging] Subscribed to conversation ${conversationId}`);
-    } else if (status === 'CHANNEL_ERROR') {
-      console.error(`[Messaging] Channel error for conversation ${conversationId}`);
-    }
-  });
+  // Subscribe if not already subscribed
+  const isAlreadySubscribed = subscribedChannels.has(channelName);
+  if (!isAlreadySubscribed) {
+    channel.subscribe((status, err) => {
+      if (status === 'SUBSCRIBED') {
+        console.log(`[Messaging] ✓ Successfully subscribed to ${channelName}`);
+        subscribedChannels.add(channelName);
+      } else if (status === 'CHANNEL_ERROR') {
+        console.error(`[Messaging] ✗ Channel error for ${channelName}:`, err);
+        subscribedChannels.delete(channelName);
+      } else if (status === 'TIMED_OUT') {
+        console.error(`[Messaging] ✗ Channel timed out for ${channelName}`);
+        subscribedChannels.delete(channelName);
+      } else if (status === 'CLOSED') {
+        console.log(`[Messaging] Channel closed for ${channelName}`);
+        subscribedChannels.delete(channelName);
+      } else {
+        console.log(`[Messaging] Channel status: ${status} for ${channelName}`);
+      }
+    });
+  } else {
+    console.log(`[Messaging] Channel ${channelName} already subscribed, adding handlers only`);
+  }
 
   // Return unsubscribe function
   return () => {
+    messageHandlersAdded.delete(handlersKey);
     removeChannel(conversationId);
   };
 }
