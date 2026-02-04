@@ -102,8 +102,8 @@ export default async function AppLayout({
         {/* Mobile Bottom Navigation - Floating Glass Dock */}
         <GlassBottomNav />
 
-        {/* Main Content - Extra padding for floating nav */}
-        <main id="main-content" className="pb-24 md:pb-0" tabIndex={-1}>
+        {/* Main Content - Extra padding for floating nav (shown on all screen sizes) */}
+        <main id="main-content" className="pb-24" tabIndex={-1}>
           {children}
         </main>
       </div>

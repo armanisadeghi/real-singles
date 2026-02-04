@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
 interface AvatarProps {
@@ -117,6 +117,7 @@ function getAvatarColor(name: string): string {
  * - Multiple size variants
  * - Optional online indicator
  * - Error handling for broken images
+ * - Auto-retry on image load failure with exponential backoff
  */
 export function Avatar({
   src,
@@ -127,12 +128,68 @@ export function Avatar({
   isOnline = false,
 }: AvatarProps) {
   const [imageError, setImageError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Max retry attempts for failed images
+  const MAX_RETRIES = 3;
 
   // Convert storage path to full URL
   const imageUrl = useMemo(() => getImageUrl(src), [src]);
+  
+  // Generate a cache-busting key for retries
+  const imageSrcWithRetry = useMemo(() => {
+    if (!imageUrl || retryCount === 0) return imageUrl;
+    // Add cache buster for retries
+    const separator = imageUrl.includes("?") ? "&" : "?";
+    return `${imageUrl}${separator}_retry=${retryCount}`;
+  }, [imageUrl, retryCount]);
 
-  const showImage = imageUrl && !imageError;
+  // Reset states when src changes
+  useEffect(() => {
+    setImageError(false);
+    setIsLoaded(false);
+    setRetryCount(0);
+    
+    // Clear any pending retry
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+  }, [src]);
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleImageLoad = useCallback(() => {
+    setIsLoaded(true);
+    setImageError(false);
+  }, []);
+
+  const handleImageError = useCallback(() => {
+    setIsLoaded(false);
+    
+    // Retry with exponential backoff
+    if (retryCount < MAX_RETRIES) {
+      const delay = Math.min(1000 * Math.pow(2, retryCount), 8000); // 1s, 2s, 4s, max 8s
+      retryTimeoutRef.current = setTimeout(() => {
+        setRetryCount((prev) => prev + 1);
+      }, delay);
+    } else {
+      // Give up after max retries
+      setImageError(true);
+    }
+  }, [retryCount]);
+
+  const hasValidUrl = Boolean(imageUrl);
+  const showFallback = !hasValidUrl || imageError;
   const initials = getInitials(name);
   const gradientColor = getAvatarColor(name);
 
@@ -142,31 +199,32 @@ export function Avatar({
         className={cn(
           "rounded-full flex items-center justify-center overflow-hidden",
           sizeClasses[size],
-          !showImage && `bg-gradient-to-br ${gradientColor}`
+          // Always show gradient as background - it serves as fallback during loading
+          `bg-gradient-to-br ${gradientColor}`
         )}
       >
-        {showImage ? (
+        {/* Image - only render if we have a URL and haven't given up */}
+        {hasValidUrl && !imageError && (
           <img
-            src={imageUrl}
+            key={imageSrcWithRetry} // Force new element on retry to reset browser state
+            src={imageSrcWithRetry}
             alt={`${name}'s avatar`}
             className={cn(
-              "w-full h-full object-cover",
-              isLoading && "opacity-0"
+              "w-full h-full object-cover transition-opacity duration-200",
+              isLoaded ? "opacity-100" : "opacity-0"
             )}
-            onLoad={() => setIsLoading(false)}
-            onError={() => {
-              setImageError(true);
-              setIsLoading(false);
-            }}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
           />
-        ) : null}
+        )}
 
-        {/* Show initials when no image or image failed to load */}
-        {(!showImage || isLoading) && (
+        {/* Initials fallback - always visible until image loads */}
+        {(!isLoaded || showFallback) && (
           <span
             className={cn(
               "font-semibold text-white select-none",
-              showImage && isLoading && "absolute"
+              // Position absolutely when image is attempting to load
+              hasValidUrl && !imageError && "absolute inset-0 flex items-center justify-center"
             )}
           >
             {initials}

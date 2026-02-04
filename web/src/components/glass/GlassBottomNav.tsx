@@ -13,6 +13,7 @@
  * - Active state with filled icons
  * - Safe area padding for notched devices
  * - Hidden on full-screen views
+ * - Responsive: full width on mobile, centered max-width (md:max-w-md) on desktop
  *
  * Note: Uses CSS-based glass effect instead of LiquidGlass
  * because SVG filters break position: fixed.
@@ -21,9 +22,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Diamond,
   Compass as CompassIcon,
-  Heart,Gem,
+  Heart,
+  Gem,
   MessageCircle,
   User,
 } from "lucide-react";
@@ -110,21 +111,44 @@ export function GlassBottomNav() {
     <nav
       aria-label="Main navigation"
       className={cn(
-        "md:hidden fixed",
+        "fixed",
         // Floating position - detached from edges like Tinder
         "bottom-3 left-3 right-3",
+        // Desktop: center with max-width so it doesn't stretch across wide screens
+        "md:left-1/2 md:-translate-x-1/2 md:right-auto md:w-full md:max-w-md",
         // Safe area padding
         "pb-[env(safe-area-inset-bottom)]"
       )}
       style={{ zIndex: 'var(--z-fixed)' }}
     >
       {/* CSS-based glass effect (compatible with position: fixed) */}
+      {/* 
+        iOS 26 Liquid Glass insight: The blur effect needs colorful content behind it.
+        When over white/plain backgrounds, we add:
+        1. Subtle warm gradient tint (from-rose-50/60 via-white/70 to-amber-50/60)
+        2. Stronger shadow for visual separation
+        3. Subtle inner highlight for depth
+        This ensures the glass looks good regardless of background content.
+      */}
       <div
         className={cn(
-          "rounded-3xl overflow-hidden",
-          "bg-white/70 dark:bg-neutral-900/70 backdrop-blur-xl backdrop-saturate-150",
-          "border border-white/30 dark:border-white/10",
-          "shadow-lg shadow-black/10 dark:shadow-black/30"
+          "rounded-3xl overflow-hidden relative",
+          // Base glass with warm gradient tint
+          // iOS 26 insight: Glass needs color to blur. Over white backgrounds,
+          // we add a subtle warm tint so it never looks like plain white.
+          "bg-gradient-to-r from-rose-100/80 via-white/85 to-amber-100/80",
+          "dark:from-neutral-800/85 dark:via-neutral-900/80 dark:to-neutral-800/85",
+          "backdrop-blur-xl backdrop-saturate-150",
+          // Border - slightly tinted for warmth
+          "border border-rose-200/30 dark:border-white/10",
+          // Stronger shadow for separation from white backgrounds
+          "shadow-[0_-2px_20px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.1)]",
+          "dark:shadow-[0_-2px_20px_rgba(0,0,0,0.3),0_4px_16px_rgba(0,0,0,0.4)]",
+          // Inner shadow for depth (simulates glass edge refraction)
+          "before:absolute before:inset-0 before:rounded-3xl",
+          "before:shadow-[inset_0_1px_2px_rgba(255,255,255,0.7)]",
+          "dark:before:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]",
+          "before:pointer-events-none"
         )}
       >
         <div className="flex items-stretch px-1" role="list">

@@ -90,7 +90,11 @@ export function DiscoverProfileView() {
     advanceToNext,
     goToPrevious,
     isLoading,
+    markActedOn,
   } = useDiscoverProfiles();
+  
+  // Track if we're waiting for match modal to close before advancing
+  const [pendingAdvanceUserId, setPendingAdvanceUserId] = useState<string | null>(null);
   
   // Undo functionality
   const {
@@ -154,14 +158,19 @@ export function DiscoverProfileView() {
       const userName = currentProfile?.first_name || "User";
       recordAction(userId, userName, "like");
       
-      // Only advance if NOT a mutual match (match celebration will handle close)
-      if (!result.is_mutual) {
+      // If mutual match, don't advance yet - wait for match modal to close
+      // Store the userId so we can advance when modal closes
+      if (result.is_mutual) {
+        setPendingAdvanceUserId(userId);
+      } else {
+        // Mark as acted on and advance to next profile
+        markActedOn(userId);
         advanceToNext();
       }
     }
     
     return result;
-  }, [currentProfile?.first_name, recordAction, advanceToNext]);
+  }, [currentProfile?.first_name, recordAction, advanceToNext, markActedOn]);
   
   // Handle Pass/Dislike action
   const handlePass = useCallback(async (userId: string): Promise<{ success: boolean; msg?: string }> => {
@@ -170,11 +179,13 @@ export function DiscoverProfileView() {
     if (result.success) {
       const userName = currentProfile?.first_name || "User";
       recordAction(userId, userName, "pass");
+      // Mark as acted on and advance
+      markActedOn(userId);
       advanceToNext();
     }
     
     return result;
-  }, [currentProfile?.first_name, recordAction, advanceToNext]);
+  }, [currentProfile?.first_name, recordAction, advanceToNext, markActedOn]);
   
   // Handle Super Like action
   const handleSuperLike = useCallback(async (userId: string): Promise<MatchActionResult> => {
@@ -184,38 +195,44 @@ export function DiscoverProfileView() {
       const userName = currentProfile?.first_name || "User";
       recordAction(userId, userName, "super_like");
       
-      // Only advance if NOT a mutual match
-      if (!result.is_mutual) {
+      // If mutual match, don't advance yet - wait for match modal to close
+      if (result.is_mutual) {
+        setPendingAdvanceUserId(userId);
+      } else {
+        // Mark as acted on and advance to next profile
+        markActedOn(userId);
         advanceToNext();
       }
     }
     
     return result;
-  }, [currentProfile?.first_name, recordAction, advanceToNext]);
+  }, [currentProfile?.first_name, recordAction, advanceToNext, markActedOn]);
   
   // Handle Block action
   const handleBlock = useCallback(async (userId: string): Promise<{ success: boolean; msg?: string }> => {
     const result = await callBlockAction(userId);
     
     if (result.success) {
-      // Advance to next profile after blocking
+      // Mark as acted on and advance to next profile after blocking
+      markActedOn(userId);
       advanceToNext();
     }
     
     return result;
-  }, [advanceToNext]);
+  }, [advanceToNext, markActedOn]);
   
   // Handle Report action
   const handleReport = useCallback(async (userId: string, reason: string): Promise<{ success: boolean; msg?: string }> => {
     const result = await callReportAction(userId, reason);
     
     if (result.success) {
-      // Advance to next profile after reporting
+      // Mark as acted on and advance to next profile after reporting
+      markActedOn(userId);
       advanceToNext();
     }
     
     return result;
-  }, [advanceToNext]);
+  }, [advanceToNext, markActedOn]);
   
   // Handle Undo action
   const handleUndo = useCallback(async (): Promise<{ success: boolean; targetUserId?: string; error?: string }> => {
@@ -229,10 +246,20 @@ export function DiscoverProfileView() {
     return result;
   }, [performUndo, goToPrevious]);
   
-  // Handle Back/Close - navigate to explore page
+  // Handle Back/Close
+  // If there's a pending advance (from match modal), complete it
+  // Otherwise navigate to explore page
   const handleClose = useCallback(() => {
-    router.push("/explore");
-  }, [router]);
+    if (pendingAdvanceUserId) {
+      // This is from the match modal closing - advance to next profile
+      markActedOn(pendingAdvanceUserId);
+      advanceToNext();
+      setPendingAdvanceUserId(null);
+    } else {
+      // This is from the X button - navigate away
+      router.push("/explore");
+    }
+  }, [pendingAdvanceUserId, markActedOn, advanceToNext, router]);
   
   // Don't render if still loading or no profile
   if (isLoading || !currentProfile) {

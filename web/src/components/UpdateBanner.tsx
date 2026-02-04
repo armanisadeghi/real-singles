@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useAppVersion } from "@/hooks/useAppVersion";
-import { RefreshCw, X } from "lucide-react";
+import { RefreshCw, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface UpdateBannerProps {
@@ -44,6 +45,8 @@ export function UpdateBanner({
   position = "top",
   className,
 }: UpdateBannerProps) {
+  const [isReloading, setIsReloading] = useState(false);
+  
   const {
     isUpdateAvailable,
     latestVersion,
@@ -54,6 +57,12 @@ export function UpdateBanner({
     checkOnRouteChange,
     debug: process.env.NODE_ENV === "development",
   });
+
+  const handleReload = async () => {
+    setIsReloading(true);
+    await reloadApp();
+    // Note: The page will navigate away, so we don't need to reset isReloading
+  };
 
   if (!isUpdateAvailable) {
     return null;
@@ -96,23 +105,34 @@ export function UpdateBanner({
           {/* Actions */}
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={reloadApp}
+              onClick={handleReload}
+              disabled={isReloading}
               className={cn(
                 "px-4 py-2 rounded-lg font-medium text-sm",
                 "bg-white text-blue-600 hover:bg-blue-50",
                 "transition-colors duration-200",
-                "focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                "focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600",
+                "disabled:opacity-70 disabled:cursor-not-allowed"
               )}
             >
-              Reload
+              {isReloading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Updating...
+                </span>
+              ) : (
+                "Reload"
+              )}
             </button>
             <button
               onClick={dismissUpdate}
+              disabled={isReloading}
               className={cn(
                 "p-2 rounded-lg",
                 "hover:bg-white/10",
                 "transition-colors duration-200",
-                "focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                "focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
               aria-label="Dismiss update notification"
             >

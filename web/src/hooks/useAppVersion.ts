@@ -210,17 +210,97 @@ export function useAppVersion(options: UseAppVersionOptions = {}) {
   }, [log]);
 
   /**
-   * Reload the page to get the latest version
+   * Perform a hard reset to get the latest version.
+   * This clears all caches and forces a completely fresh start.
    */
-  const reloadApp = useCallback(() => {
-    log("Reloading app...");
-    window.location.reload();
+  const reloadApp = useCallback(async () => {
+    log("Performing hard reset...");
+    
+    // 1. Clear localStorage items that might cache stale app state
+    // (Keep auth-related items like supabase tokens)
+    try {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && !key.startsWith("sb-") && !key.startsWith("supabase")) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => {
+        log("Clearing localStorage key:", key);
+        localStorage.removeItem(key);
+      });
+    } catch (e) {
+      log("Error clearing localStorage:", e);
+    }
+
+    // 2. Clear sessionStorage
+    try {
+      sessionStorage.clear();
+      log("Cleared sessionStorage");
+    } catch (e) {
+      log("Error clearing sessionStorage:", e);
+    }
+
+    // 3. Clear browser caches (Cache API) if available
+    if ('caches' in window) {
+      try {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => {
+            log("Deleting cache:", cacheName);
+            return caches.delete(cacheName);
+          })
+        );
+        log("Cleared browser caches");
+      } catch (e) {
+        log("Error clearing browser caches:", e);
+      }
+    }
+
+    // 4. Unregister any service workers
+    if ('serviceWorker' in navigator) {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(
+          registrations.map(registration => {
+            log("Unregistering service worker:", registration.scope);
+            return registration.unregister();
+          })
+        );
+        log("Unregistered service workers");
+      } catch (e) {
+        log("Error unregistering service workers:", e);
+      }
+    }
+
+    // 5. Force hard navigation with cache-busting query param
+    // This bypasses Next.js Router Cache and browser cache
+    const url = new URL(window.location.href);
+    url.searchParams.set('_reload', Date.now().toString());
+    
+    log("Navigating to:", url.toString());
+    
+    // Use replace to avoid polluting browser history
+    window.location.replace(url.toString());
   }, [log]);
 
   // Initial version check
   useEffect(() => {
     log("Running initial version check");
     checkForUpdateRef.current?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
+  // Clean up _reload query param from URL after hard reset
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('_reload')) {
+      url.searchParams.delete('_reload');
+      // Use replaceState to clean the URL without triggering a navigation
+      window.history.replaceState({}, '', url.toString());
+      log("Cleaned up _reload param from URL");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
