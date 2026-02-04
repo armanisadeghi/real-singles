@@ -130,38 +130,16 @@ export function FilterPanel({
       <div className="px-4 py-4 space-y-6 pb-24">
         {/* Age Range */}
         <section>
-          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Age Range</h3>
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Min</label>
-              <input
-                type="number"
-                min={18}
-                max={100}
-                value={filters.minAge || 18}
-                onChange={(e) => {
-                  const value = Math.max(18, Math.min(100, parseInt(e.target.value, 10) || 18));
-                  setFilters({ ...filters, minAge: value });
-                }}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 rounded-lg text-center"
-              />
-            </div>
-            <span className="text-gray-400 dark:text-gray-500 mt-5">to</span>
-            <div className="flex-1">
-              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Max</label>
-              <input
-                type="number"
-                min={18}
-                max={100}
-                value={filters.maxAge || 99}
-                onChange={(e) => {
-                  const value = Math.max(18, Math.min(100, parseInt(e.target.value, 10) || 99));
-                  setFilters({ ...filters, maxAge: value });
-                }}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 rounded-lg text-center"
-              />
-            </div>
-          </div>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Age</h3>
+          <DualRangeSlider
+            min={18}
+            max={99}
+            minValue={filters.minAge}
+            maxValue={filters.maxAge}
+            onMinChange={(value) => setFilters({ ...filters, minAge: value })}
+            onMaxChange={(value) => setFilters({ ...filters, maxAge: value })}
+            formatLabel={(value) => `${value}`}
+          />
         </section>
 
         {/* Distance */}

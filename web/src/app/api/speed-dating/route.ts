@@ -14,6 +14,13 @@ interface SessionWithRegistrations extends DbVirtualSpeedDating {
   speed_dating_registrations: SpeedDatingRegistration[];
 }
 
+// Get start of today in ISO format (for filtering sessions)
+function getStartOfToday(): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today.toISOString();
+}
+
 /**
  * GET /api/speed-dating
  * Get list of virtual speed dating sessions
@@ -21,7 +28,10 @@ interface SessionWithRegistrations extends DbVirtualSpeedDating {
  * Query params:
  * - limit: number of results (default 20, max 50)
  * - offset: pagination offset
- * - status: filter by status (scheduled, in_progress, completed)
+ * - status: filter by status. Can be:
+ *   - "upcoming": sessions scheduled for today or future (date-based, ignores status column)
+ *   - "past": sessions before today (date-based, ignores status column)
+ *   - "scheduled", "in_progress", "completed", "cancelled": filter by actual status column
  */
 export async function GET(request: NextRequest) {
   const supabase = await createApiClient();
@@ -40,17 +50,40 @@ export async function GET(request: NextRequest) {
     .select(`
       *,
       speed_dating_registrations(user_id, status)
-    `)
-    .order("scheduled_datetime", { ascending: true })
-    .range(offset, offset + limit - 1);
+    `);
 
   // Filter by status
-  if (status) {
-    query = query.eq("status", status);
+  // Note: We filter primarily by date for "upcoming" and "past", not the status column.
+  // The status column may not be kept up-to-date, so we use scheduled_datetime as the source of truth.
+  if (status === "upcoming") {
+    // Show sessions that haven't started yet (today or future)
+    // Exclude cancelled sessions, order by soonest first
+    query = query
+      .neq("status", "cancelled")
+      .gte("scheduled_datetime", getStartOfToday())
+      .order("scheduled_datetime", { ascending: true });
+  } else if (status === "past") {
+    // Show sessions that have already started (before today)
+    // Exclude cancelled sessions, order by most recent first
+    query = query
+      .neq("status", "cancelled")
+      .lt("scheduled_datetime", getStartOfToday())
+      .order("scheduled_datetime", { ascending: false });
+  } else if (status) {
+    // Filter by specific status column value (scheduled, in_progress, completed, cancelled)
+    query = query
+      .eq("status", status)
+      .order("scheduled_datetime", { ascending: true });
   } else {
-    // Default: show upcoming and in-progress sessions
-    query = query.in("status", ["scheduled", "in_progress"]);
+    // Default: show upcoming and in-progress sessions based on date
+    query = query
+      .neq("status", "cancelled")
+      .gte("scheduled_datetime", getStartOfToday())
+      .order("scheduled_datetime", { ascending: true });
   }
+
+  // Apply pagination
+  query = query.range(offset, offset + limit - 1);
 
   const { data: sessions, error } = await query;
 

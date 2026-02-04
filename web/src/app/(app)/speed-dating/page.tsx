@@ -60,7 +60,7 @@ export default function SpeedDatingPage() {
     setError(null);
     try {
       // Map our filter to the API's status parameter
-      const status = filter === "upcoming" ? "scheduled" : "completed";
+      const status = filter === "upcoming" ? "upcoming" : "past";
       const res = await fetch(`/api/speed-dating?status=${status}&limit=50`);
       if (!res.ok) {
         throw new Error("Failed to fetch sessions");

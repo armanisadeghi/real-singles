@@ -172,21 +172,6 @@ function SpeedDatingCard({ session }: { session: ApiSpeedDating }) {
     }
   };
 
-  // Format time to remove seconds (e.g., "4:47:00 PM" -> "4:47 PM")
-  const formatTime = (timeStr: string) => {
-    if (!timeStr) return "";
-    // Handle HH:MM:SS format
-    const parts = timeStr.split(":");
-    if (parts.length >= 2) {
-      const hours = parseInt(parts[0]);
-      const minutes = parts[1];
-      const ampm = hours >= 12 ? "PM" : "AM";
-      const displayHours = hours % 12 || 12;
-      return `${displayHours}:${minutes} ${ampm}`;
-    }
-    return timeStr;
-  };
-
   const getStatusColor = (status: string | null) => {
     switch (status?.toLowerCase()) {
       case "live":
@@ -456,7 +441,7 @@ function EventsSection() {
 // ============================================================================
 
 function SpeedDatingSection() {
-  const { data, isLoading, error } = useSpeedDating({ limit: 10, status: "scheduled" });
+  const { data, isLoading, error } = useSpeedDating({ limit: 10, status: "upcoming" });
   
   // Map API response to expected format
   const sessions: ApiSpeedDating[] = (data?.data || []).map((s) => ({
@@ -465,9 +450,13 @@ function SpeedDatingSection() {
     Description: s.Description || "",
     Image: s.Image || "",
     ScheduledDate: s.ScheduledDateTime ? s.ScheduledDateTime.split("T")[0] : "",
-    // toLocaleTimeString already includes AM/PM, so no need for formatTime to add it again
+    // Format time using toLocaleTimeString which includes AM/PM
     ScheduledTime: s.ScheduledDateTime 
-      ? new Date(s.ScheduledDateTime).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+      ? new Date(s.ScheduledDateTime).toLocaleTimeString("en-US", { 
+          hour: "numeric", 
+          minute: "2-digit",
+          hour12: true 
+        })
       : "",
     Duration: s.DurationMinutes,
     MaxParticipants: s.MaxParticipants,
