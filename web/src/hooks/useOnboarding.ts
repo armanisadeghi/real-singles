@@ -405,14 +405,17 @@ export function useOnboarding(
         }
       }
 
-      // Go to next step FIRST before any refresh
+      // Refresh profile to update completion percentage
+      await fetchProfile(false);
+      
+      // Go to next step AFTER refresh
       setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setIsSaving(false);
     }
-  }, [currentStep, currentStepConfig, stepValues, profile]);
+  }, [currentStep, currentStepConfig, stepValues, profile, fetchProfile]);
 
   // Skip current step
   const saveAndSkip = useCallback(async () => {
@@ -439,6 +442,9 @@ export function useOnboarding(
         body: JSON.stringify({ ProfileCompletionStep: currentStep + 1 }),
       });
 
+      // Refresh profile to update completion percentage
+      await fetchProfile(false);
+
       // Go to next step
       setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
     } catch (err) {
@@ -446,7 +452,7 @@ export function useOnboarding(
     } finally {
       setIsSaving(false);
     }
-  }, [currentStep, currentStepConfig]);
+  }, [currentStep, currentStepConfig, fetchProfile]);
 
   // Mark as "prefer not to say"
   const saveAsPreferNot = useCallback(async () => {
@@ -473,6 +479,9 @@ export function useOnboarding(
         body: JSON.stringify({ ProfileCompletionStep: currentStep + 1 }),
       });
 
+      // Refresh profile to update completion percentage
+      await fetchProfile(false);
+
       // Go to next step
       setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
     } catch (err) {
@@ -480,7 +489,7 @@ export function useOnboarding(
     } finally {
       setIsSaving(false);
     }
-  }, [currentStep, currentStepConfig]);
+  }, [currentStep, currentStepConfig, fetchProfile]);
 
   // Check if a step is complete
   const checkStepComplete = useCallback(

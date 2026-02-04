@@ -16,7 +16,7 @@ interface VerificationSelfieStepProps {
   onSelfieChange: () => void;
 }
 
-type CaptureState = "idle" | "capturing" | "preview" | "saving" | "done";
+type CaptureState = "idle" | "capturing" | "preview" | "saving" | "done" | "permission-denied";
 
 export function VerificationSelfieStep({
   hasVerificationSelfie,
@@ -66,8 +66,19 @@ export function VerificationSelfieStep({
         await videoRef.current.play();
       }
     } catch (err) {
-      setError("Could not access camera. Please allow camera permissions.");
-      setState("idle");
+      console.error("Camera access error:", err);
+      setState("permission-denied");
+      
+      // Determine if permanently denied or just denied
+      if (err instanceof Error) {
+        if (err.name === "NotAllowedError") {
+          setError("Camera access was denied. Please click below to allow camera access.");
+        } else if (err.name === "NotFoundError") {
+          setError("No camera found on this device.");
+        } else {
+          setError("Could not access camera. Please check your browser settings.");
+        }
+      }
     }
   }, []);
 
@@ -210,6 +221,40 @@ export function VerificationSelfieStep({
           >
             <Camera className="w-5 h-5" />
             Take Selfie
+          </button>
+        </div>
+      )}
+
+      {/* State: Permission Denied - Show clear prompt to allow access */}
+      {state === "permission-denied" && (
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-48 h-48 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+            <Camera className="w-16 h-16 text-red-400 dark:text-red-500" />
+          </div>
+          <div className="text-center space-y-2">
+            <p className="text-gray-900 dark:text-gray-100 font-medium">
+              Camera Access Required
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {error || "We need access to your camera to take a verification selfie."}
+            </p>
+          </div>
+          <button
+            onClick={startCamera}
+            className={cn(
+              "flex items-center gap-2 px-6 py-3 rounded-full",
+              "bg-pink-500 hover:bg-pink-600 text-white",
+              "font-medium transition-colors shadow-lg"
+            )}
+          >
+            <Camera className="w-5 h-5" />
+            Allow Camera Access
+          </button>
+          <button
+            onClick={() => setState(hasVerificationSelfie ? "done" : "idle")}
+            className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 underline"
+          >
+            Go back
           </button>
         </div>
       )}
@@ -380,8 +425,8 @@ export function VerificationSelfieStep({
         </div>
       )}
 
-      {/* Error message */}
-      {error && (
+      {/* Error message (for non-permission errors) */}
+      {error && state !== "permission-denied" && (
         <p className="text-sm text-red-500 dark:text-red-400 text-center">
           {error}
         </p>

@@ -140,8 +140,8 @@ export function PhotosStep({ photoCount, onPhotosChange }: PhotosStepProps) {
       title="Add your photos"
       subtitle="Show your best self — at least 1 photo required"
     >
-      {/* Photo grid - gap-3 to allow room for ring */}
-      <div className="grid grid-cols-3 gap-3">
+      {/* Photo grid - gap-3 to allow room for ring, p-1 to prevent ring cutoff */}
+      <div className="grid grid-cols-3 gap-3 p-1">
         {/* Existing photos */}
         {photos.map((photo) => (
           <div
