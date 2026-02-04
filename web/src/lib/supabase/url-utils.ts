@@ -14,14 +14,15 @@ export interface ImageTransformOptions {
 
 /**
  * Predefined image sizes for consistency across the app
+ * All sizes use WebP format by default for ~30-50% smaller file sizes
  */
 export const IMAGE_SIZES = {
-  thumbnail: { width: 150, height: 150, quality: 70 },
-  card: { width: 400, height: 400, quality: 75 },
-  cardWide: { width: 600, height: 400, quality: 75 },
-  medium: { width: 600, height: 600, quality: 80 },
-  large: { width: 1200, height: 1200, quality: 85 },
-  hero: { width: 800, height: 600, quality: 80 },
+  thumbnail: { width: 150, height: 150, quality: 70, format: "webp" as const },
+  card: { width: 400, height: 400, quality: 75, format: "webp" as const },
+  cardWide: { width: 600, height: 400, quality: 75, format: "webp" as const },
+  medium: { width: 600, height: 600, quality: 80, format: "webp" as const },
+  large: { width: 1200, height: 1200, quality: 85, format: "webp" as const },
+  hero: { width: 800, height: 600, quality: 80, format: "webp" as const },
 } as const;
 
 /**

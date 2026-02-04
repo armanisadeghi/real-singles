@@ -226,7 +226,7 @@ export function ClientDetail({ clientId }: ClientDetailProps) {
       const result = await response.json();
 
       if (result.success && result.data?.ConversationID) {
-        router.push(`/messages/${result.data.ConversationID}`);
+        router.push(`/matchmaker-portal/chats/${result.data.ConversationID}`);
       } else {
         alert(result.msg || "Failed to start chat");
       }
