@@ -7,6 +7,7 @@
  * - TanStack Query for client-side caching and request deduplication
  * - DiscoverProfilesProvider with lazy-loaded first profile
  * - User context for current user data
+ * - IncomingCallProvider for real-time call notifications
  * 
  * Separated from root Providers because it requires authenticated user context
  * that's only available in the (app) layout.
@@ -18,6 +19,7 @@ import {
   type DiscoverProfile,
 } from "@/contexts/DiscoverProfilesContext";
 import { QueryProvider } from "./QueryProvider";
+import { IncomingCallProvider } from "@/components/video-call";
 
 // =============================================================================
 // CURRENT USER CONTEXT
@@ -69,7 +71,9 @@ export function AppProviders({
           initialEmptyReason={initialDiscoverEmptyReason}
           lazyLoad={lazyLoadDiscover}
         >
-          {children}
+          <IncomingCallProvider userId={currentUser.id}>
+            {children}
+          </IncomingCallProvider>
         </DiscoverProfilesProvider>
       </CurrentUserContext.Provider>
     </QueryProvider>

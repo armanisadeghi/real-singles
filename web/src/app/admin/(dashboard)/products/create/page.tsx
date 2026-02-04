@@ -11,10 +11,13 @@ interface ProductFormData {
   name: string;
   description: string;
   points_cost: string;
+  dollar_price: string;
   retail_value: string;
   category: string;
   stock_quantity: string;
   is_active: boolean;
+  is_public: boolean;
+  requires_shipping: boolean;
 }
 
 export default function AdminCreateProductPage() {
@@ -26,10 +29,13 @@ export default function AdminCreateProductPage() {
     name: "",
     description: "",
     points_cost: "",
+    dollar_price: "",
     retail_value: "",
     category: "gift_card",
     stock_quantity: "",
     is_active: true,
+    is_public: false,
+    requires_shipping: true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -73,8 +79,18 @@ export default function AdminCreateProductPage() {
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
-    if (!formData.points_cost || isNaN(Number(formData.points_cost)) || Number(formData.points_cost) < 0) {
-      newErrors.points_cost = "Valid points cost is required";
+    // At least one price must be set
+    const hasPointsPrice = formData.points_cost && !isNaN(Number(formData.points_cost)) && Number(formData.points_cost) > 0;
+    const hasDollarPrice = formData.dollar_price && !isNaN(Number(formData.dollar_price)) && Number(formData.dollar_price) > 0;
+    
+    if (!hasPointsPrice && !hasDollarPrice) {
+      newErrors.points_cost = "At least one price (points or dollars) is required";
+    }
+    if (formData.points_cost && isNaN(Number(formData.points_cost))) {
+      newErrors.points_cost = "Points cost must be a number";
+    }
+    if (formData.dollar_price && isNaN(Number(formData.dollar_price))) {
+      newErrors.dollar_price = "Dollar price must be a number";
     }
     if (formData.retail_value && isNaN(Number(formData.retail_value))) {
       newErrors.retail_value = "Retail value must be a number";
@@ -125,11 +141,14 @@ export default function AdminCreateProductPage() {
         name: formData.name,
         description: formData.description || null,
         image_url: imageUrl,
-        points_cost: Number(formData.points_cost),
+        points_cost: formData.points_cost ? Number(formData.points_cost) : 0,
+        dollar_price: formData.dollar_price ? Number(formData.dollar_price) : null,
         retail_value: formData.retail_value ? Number(formData.retail_value) : null,
         category: formData.category || null,
         stock_quantity: formData.stock_quantity ? Number(formData.stock_quantity) : null,
         is_active: formData.is_active,
+        is_public: formData.is_public,
+        requires_shipping: formData.requires_shipping,
       };
 
       const res = await fetch("/api/admin/products", {
@@ -238,41 +257,66 @@ export default function AdminCreateProductPage() {
             />
           </div>
 
-          {/* Points Cost and Retail Value */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="points_cost" className="block text-sm font-semibold text-slate-900 mb-2">
-                Points Cost *
-              </label>
-              <input
-                type="number"
-                id="points_cost"
-                name="points_cost"
-                value={formData.points_cost}
-                onChange={handleChange}
-                min="0"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="1000"
-              />
-              {errors.points_cost && <p className="mt-1 text-sm text-red-600">{errors.points_cost}</p>}
-            </div>
+          {/* Pricing Section */}
+          <div className="border-t border-slate-200 pt-6">
+            <h3 className="text-sm font-semibold text-slate-900 mb-4">Pricing</h3>
+            <p className="text-sm text-slate-500 mb-4">
+              Set at least one price. Products can be purchased with points, dollars, or either.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label htmlFor="points_cost" className="block text-sm font-semibold text-slate-900 mb-2">
+                  Points Cost
+                </label>
+                <input
+                  type="number"
+                  id="points_cost"
+                  name="points_cost"
+                  value={formData.points_cost}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="1000"
+                />
+                {errors.points_cost && <p className="mt-1 text-sm text-red-600">{errors.points_cost}</p>}
+              </div>
 
-            <div>
-              <label htmlFor="retail_value" className="block text-sm font-semibold text-slate-900 mb-2">
-                Retail Value ($)
-              </label>
-              <input
-                type="number"
-                id="retail_value"
-                name="retail_value"
-                value={formData.retail_value}
-                onChange={handleChange}
-                min="0"
-                step="0.01"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="50.00"
-              />
-              {errors.retail_value && <p className="mt-1 text-sm text-red-600">{errors.retail_value}</p>}
+              <div>
+                <label htmlFor="dollar_price" className="block text-sm font-semibold text-slate-900 mb-2">
+                  Dollar Price ($)
+                </label>
+                <input
+                  type="number"
+                  id="dollar_price"
+                  name="dollar_price"
+                  value={formData.dollar_price}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="9.99"
+                />
+                {errors.dollar_price && <p className="mt-1 text-sm text-red-600">{errors.dollar_price}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="retail_value" className="block text-sm font-semibold text-slate-900 mb-2">
+                  Retail Value ($)
+                </label>
+                <input
+                  type="number"
+                  id="retail_value"
+                  name="retail_value"
+                  value={formData.retail_value}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="50.00"
+                />
+                <p className="mt-1 text-xs text-slate-400">Display value for reference</p>
+                {errors.retail_value && <p className="mt-1 text-sm text-red-600">{errors.retail_value}</p>}
+              </div>
             </div>
           </div>
 
@@ -314,19 +358,52 @@ export default function AdminCreateProductPage() {
             </div>
           </div>
 
-          {/* Active Status */}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="is_active"
-              name="is_active"
-              checked={formData.is_active}
-              onChange={handleChange}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="is_active" className="text-sm font-medium text-slate-700">
-              Active (visible in rewards shop)
-            </label>
+          {/* Settings */}
+          <div className="border-t border-slate-200 pt-6">
+            <h3 className="text-sm font-semibold text-slate-900 mb-4">Settings</h3>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  name="is_active"
+                  checked={formData.is_active}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="is_active" className="text-sm font-medium text-slate-700">
+                  Active (visible in rewards shop)
+                </label>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="is_public"
+                  name="is_public"
+                  checked={formData.is_public}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="is_public" className="text-sm font-medium text-slate-700">
+                  Public (visible on public store page without login)
+                </label>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="requires_shipping"
+                  name="requires_shipping"
+                  checked={formData.requires_shipping}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="requires_shipping" className="text-sm font-medium text-slate-700">
+                  Requires shipping (collect shipping address)
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 

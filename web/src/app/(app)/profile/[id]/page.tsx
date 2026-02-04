@@ -276,7 +276,13 @@ export default function OtherProfilePage() {
               Try Again
             </button>
             <button
-              onClick={() => router.back()}
+              onClick={() => {
+                if (window.history.length > 1 && document.referrer.includes(window.location.origin)) {
+                  router.back();
+                } else {
+                  router.push("/discover");
+                }
+              }}
               className="px-6 py-3 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-full font-medium hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
             >
               Go Back
@@ -293,7 +299,14 @@ export default function OtherProfilePage() {
       <div className="relative md:max-w-6xl md:mx-auto">
         {/* Back button - floats over carousel */}
         <button
-          onClick={() => router.back()}
+          onClick={() => {
+            // If there's history from our app, go back; otherwise navigate to discover
+            if (window.history.length > 1 && document.referrer.includes(window.location.origin)) {
+              router.back();
+            } else {
+              router.push("/discover");
+            }
+          }}
           className="absolute top-4 left-4 z-30 w-10 h-10 bg-white/90 dark:bg-neutral-900/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg dark:shadow-black/30 hover:bg-white dark:hover:bg-neutral-800 transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />

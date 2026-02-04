@@ -117,7 +117,12 @@ export default function ProfileFocusPage() {
   };
 
   const handleClose = () => {
-    router.back();
+    // If there's history from our app, go back; otherwise navigate to discover
+    if (window.history.length > 1 && document.referrer.includes(window.location.origin)) {
+      router.back();
+    } else {
+      router.push("/discover");
+    }
   };
 
   if (loading) {
@@ -135,7 +140,13 @@ export default function ProfileFocusPage() {
         <h1 className="text-xl font-semibold text-gray-900 mb-2">Profile not found</h1>
         <p className="text-gray-600 mb-6">{error || "The profile you're looking for doesn't exist."}</p>
         <button
-          onClick={() => router.back()}
+          onClick={() => {
+            if (window.history.length > 1 && document.referrer.includes(window.location.origin)) {
+              router.back();
+            } else {
+              router.push("/discover");
+            }
+          }}
           className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
         >
           Go Back

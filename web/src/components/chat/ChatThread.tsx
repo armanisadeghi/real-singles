@@ -170,19 +170,42 @@ export function ChatThread({
       return;
     }
 
+    // Get the other participant's ID for direct chats
+    if (!otherParticipant?.user_id) {
+      toast.error("Cannot start call - participant not found");
+      return;
+    }
+
     setIsStartingCall(true);
     setCallType(type);
 
     try {
+      // Create a call invitation to notify the other user
+      const response = await fetch("/api/calls/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          calleeId: otherParticipant.user_id,
+          roomName: conversationId,
+          callType: type,
+          conversationId: conversationId,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.msg || "Failed to send call invitation");
+      }
+
       // Navigate to the call page with the conversation ID as the room name
       router.push(`/call/${conversationId}`);
     } catch (error) {
       console.error("Error starting call:", error);
-      toast.error("Failed to start call. Please try again.");
+      toast.error(error instanceof Error ? error.message : "Failed to start call. Please try again.");
       setIsStartingCall(false);
       setCallType(null);
     }
-  }, [conversationType, conversationId, router, toast]);
+  }, [conversationType, conversationId, router, toast, otherParticipant]);
 
   // Handle call/video button clicks
   const handleCallClick = () => {

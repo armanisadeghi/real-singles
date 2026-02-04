@@ -114,16 +114,20 @@ export function IncomingCallModal({
     return () => clearInterval(interval);
   }, [invitation, onTimeout]);
 
-  // Handle escape key
+  // Handle keyboard shortcuts (Enter to accept, Escape to reject)
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && invitation) {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!invitation) return;
+      
+      if (e.key === "Escape") {
         onReject(invitation);
+      } else if (e.key === "Enter") {
+        onAccept(invitation);
       }
     };
 
     if (invitation) {
-      document.addEventListener("keydown", handleEscape);
+      document.addEventListener("keydown", handleKeyDown);
       // Prevent body scroll
       document.body.style.overflow = "hidden";
     }

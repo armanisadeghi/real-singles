@@ -9,6 +9,7 @@ export const revalidate = 300;
  * GET /api/products
  * Get list of available products for redemption
  * 
+ * Supports dual pricing (points and/or dollars)
  * Cached for 5 minutes - product catalog changes infrequently
  */
 export async function GET(request: NextRequest) {
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from("products")
-    .select("id, name, description, image_url, points_cost, retail_value, category, stock_quantity, created_at")
+    .select("id, name, description, image_url, points_cost, retail_value, dollar_price, category, stock_quantity, is_public, requires_shipping, created_at")
     .eq("is_active", true)
     .order("points_cost", { ascending: true })
     .range(offset, offset + limit - 1);
@@ -52,28 +53,57 @@ export async function GET(request: NextRequest) {
 
   const { count } = await countQuery;
 
-  // Format products for mobile app with resolved image URLs
+  // Format products with resolved image URLs
+  // Returns both formats for compatibility:
+  // - `products` array with web-friendly format (used by web frontend)
+  // - `data` array with mobile format (used by mobile app)
   const formattedProducts = await Promise.all(
-    (products || []).map(async (product) => ({
-      ProductID: product.id,
-      ProductName: product.name,
-      Description: product.description || "",
-      Image: product.image_url
+    (products || []).map(async (product) => {
+      const imageUrl = product.image_url
         ? await resolveStorageUrl(supabase, product.image_url, { bucket: "products" })
-        : "",
-      Points: product.points_cost.toString(),
-      RetailValue: product.retail_value?.toString() || "0",
-      Category: product.category || "other",
-      CategoryID: product.category || "1",
-      StockQuantity: product.stock_quantity,
-      InStock: product.stock_quantity === null || product.stock_quantity > 0,
-      CreateDate: product.created_at,
-    }))
+        : "";
+
+      return {
+        // Web-friendly format (camelCase)
+        id: product.id,
+        name: product.name,
+        description: product.description || "",
+        image_url: imageUrl,
+        points_cost: product.points_cost,
+        dollar_price: product.dollar_price ? Number(product.dollar_price) : null,
+        retail_value: product.retail_value ? Number(product.retail_value) : null,
+        category: product.category || "other",
+        stock_quantity: product.stock_quantity,
+        in_stock: product.stock_quantity === null || product.stock_quantity > 0,
+        is_public: product.is_public || false,
+        requires_shipping: product.requires_shipping ?? true,
+        created_at: product.created_at,
+      };
+    })
   );
+
+  // Mobile-friendly format (PascalCase)
+  const mobileProducts = formattedProducts.map((product) => ({
+    ProductID: product.id,
+    ProductName: product.name,
+    Description: product.description,
+    Image: product.image_url,
+    Points: product.points_cost?.toString() || "0",
+    DollarPrice: product.dollar_price?.toString() || null,
+    RetailValue: product.retail_value?.toString() || "0",
+    Category: product.category,
+    CategoryID: product.category,
+    StockQuantity: product.stock_quantity,
+    InStock: product.in_stock,
+    CreateDate: product.created_at,
+  }));
 
   return NextResponse.json({
     success: true,
-    data: formattedProducts,
+    // Web expects "products" array
+    products: formattedProducts,
+    // Mobile expects "data" array
+    data: mobileProducts,
     total: count || 0,
     msg: "Products fetched successfully",
   });

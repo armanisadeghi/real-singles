@@ -34,19 +34,16 @@ export function getStripe(): Promise<Stripe | null> {
 
 /**
  * Redirect to Stripe Checkout
+ * 
+ * Modern Stripe.js no longer has redirectToCheckout().
+ * Pass the checkout session URL from your API response.
  */
-export async function redirectToCheckout(sessionId: string): Promise<void> {
-  const stripe = await getStripe();
-  
-  if (!stripe) {
-    throw new Error("Stripe is not configured");
+export function redirectToCheckout(checkoutUrl: string): void {
+  if (!checkoutUrl) {
+    throw new Error("Checkout URL is required");
   }
   
-  const result = await stripe.redirectToCheckout({ sessionId });
-  
-  if (result.error) {
-    throw new Error(result.error.message);
-  }
+  window.location.href = checkoutUrl;
 }
 
 /**

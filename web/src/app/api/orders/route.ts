@@ -1,15 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
-import type { DbOrder } from "@/types/db";
-
-// Type for order with JOIN data
-interface OrderWithProduct extends DbOrder {
-  products: {
-    name: string;
-    image_url: string | null;
-    points_cost: number;
-  } | null;
-}
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 /**
  * GET /api/orders
@@ -37,10 +28,11 @@ export async function GET(request: NextRequest) {
   const { data: orders, error } = await supabase
     .from("orders")
     .select(`
-      id, points_spent, status,
+      id, points_spent, dollar_amount, payment_method, status,
       shipping_name, shipping_address, shipping_city, shipping_state, shipping_zip, shipping_country,
-      tracking_number, created_at, updated_at,
-      products(name, image_url, points_cost)
+      tracking_number, is_gift, gift_message, created_at, updated_at,
+      products:product_id(name, image_url),
+      purchasable_items:purchasable_item_id(name, image_url)
     `)
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -60,28 +52,79 @@ export async function GET(request: NextRequest) {
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id);
 
-  // Format orders
-  const typedOrders = (orders || []) as OrderWithProduct[];
-  const formattedOrders = typedOrders.map((order) => ({
-    OrderID: order.id,
-    ProductName: order.products?.name || "Unknown Product",
-    ProductImage: order.products?.image_url || "",
-    PointsSpent: order.points_spent,
-    Status: order.status,
-    ShippingName: order.shipping_name,
-    ShippingAddress: order.shipping_address,
-    ShippingCity: order.shipping_city,
-    ShippingState: order.shipping_state,
-    ShippingZip: order.shipping_zip,
-    ShippingCountry: order.shipping_country,
-    TrackingNumber: order.tracking_number,
-    CreatedAt: order.created_at,
-    UpdatedAt: order.updated_at,
-  }));
+  // Type for orders with joins
+  interface OrderWithJoins {
+    id: string;
+    points_spent: number;
+    dollar_amount: number | null;
+    payment_method: string | null;
+    status: string;
+    shipping_name: string | null;
+    shipping_address: string | null;
+    shipping_city: string | null;
+    shipping_state: string | null;
+    shipping_zip: string | null;
+    shipping_country: string | null;
+    tracking_number: string | null;
+    is_gift: boolean;
+    gift_message: string | null;
+    created_at: string;
+    updated_at: string;
+    products: { name: string; image_url: string | null } | null;
+    purchasable_items: { name: string; image_url: string | null } | null;
+  }
+
+  // Format orders with resolved image URLs
+  const formattedOrders = await Promise.all(
+    ((orders || []) as OrderWithJoins[]).map(async (order) => {
+      const productName = order.products?.name || null;
+      const itemName = order.purchasable_items?.name || null;
+      const rawImageUrl = order.products?.image_url || order.purchasable_items?.image_url || null;
+      const imageUrl = rawImageUrl
+        ? await resolveStorageUrl(supabase, rawImageUrl, { bucket: "products" })
+        : null;
+
+      return {
+        // Web format
+        id: order.id,
+        product_name: productName,
+        item_name: itemName,
+        image_url: imageUrl,
+        points_spent: order.points_spent,
+        dollar_amount: order.dollar_amount,
+        payment_method: order.payment_method,
+        status: order.status,
+        is_gift: order.is_gift || false,
+        gift_message: order.gift_message,
+        tracking_number: order.tracking_number,
+        shipping_name: order.shipping_name,
+        shipping_address: order.shipping_address,
+        shipping_city: order.shipping_city,
+        shipping_state: order.shipping_state,
+        shipping_zip: order.shipping_zip,
+        shipping_country: order.shipping_country,
+        created_at: order.created_at,
+        updated_at: order.updated_at,
+        // Mobile format (PascalCase)
+        OrderID: order.id,
+        ProductName: productName || itemName || "Unknown Product",
+        ProductImage: imageUrl || "",
+        PointsSpent: order.points_spent,
+        DollarAmount: order.dollar_amount,
+        PaymentMethod: order.payment_method,
+        Status: order.status,
+        IsGift: order.is_gift || false,
+        GiftMessage: order.gift_message,
+        TrackingNumber: order.tracking_number,
+        CreatedAt: order.created_at,
+      };
+    })
+  );
 
   return NextResponse.json({
     success: true,
-    data: formattedOrders,
+    orders: formattedOrders,
+    data: formattedOrders, // For mobile compatibility
     total: count || 0,
     msg: "Orders fetched successfully",
   });

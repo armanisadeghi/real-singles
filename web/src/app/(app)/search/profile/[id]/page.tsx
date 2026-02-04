@@ -220,7 +220,12 @@ export default function SearchProfilePage() {
   }, []);
 
   const handleClose = useCallback(() => {
-    router.back();
+    // If there's history from our app, go back; otherwise navigate to discover
+    if (window.history.length > 1 && document.referrer.includes(window.location.origin)) {
+      router.back();
+    } else {
+      router.push("/discover");
+    }
   }, [router]);
 
   // Handle duplicate action errors (shouldn't happen with UI protection, but just in case)
@@ -268,7 +273,13 @@ export default function SearchProfilePage() {
           {error || "The profile you're looking for doesn't exist."}
         </p>
         <button
-          onClick={() => router.back()}
+          onClick={() => {
+            if (window.history.length > 1 && document.referrer.includes(window.location.origin)) {
+              router.back();
+            } else {
+              router.push("/discover");
+            }
+          }}
           className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
         >
           Go Back

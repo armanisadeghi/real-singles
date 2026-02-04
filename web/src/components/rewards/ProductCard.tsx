@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Star, Gift, ShoppingBag, Sparkles } from "lucide-react";
+import { Star, Gift, ShoppingBag, Sparkles, DollarSign } from "lucide-react";
 import { cn, formatPoints } from "@/lib/utils";
 
 export interface Product {
@@ -10,9 +10,12 @@ export interface Product {
   description?: string | null;
   category: "gift_card" | "merchandise" | "experience" | "subscription";
   points_cost: number;
+  dollar_price?: number | null;
   retail_value?: number | null;
   image_url?: string | null;
-  is_active: boolean;
+  is_active?: boolean;
+  in_stock?: boolean;
+  stock_quantity?: number | null;
   quantity_available?: number | null;
 }
 
@@ -20,6 +23,7 @@ interface ProductCardProps {
   product: Product;
   userPoints?: number;
   onRedeem?: (productId: string) => void;
+  onBuy?: (productId: string) => void;
   loading?: boolean;
 }
 
@@ -41,10 +45,15 @@ export function ProductCard({
   product,
   userPoints = 0,
   onRedeem,
+  onBuy,
   loading = false,
 }: ProductCardProps) {
-  const canAfford = userPoints >= product.points_cost;
+  const canAffordPoints = product.points_cost && userPoints >= product.points_cost;
+  const hasDollarPrice = product.dollar_price && product.dollar_price > 0;
+  const hasPointsPrice = product.points_cost && product.points_cost > 0;
   const Icon = categoryIcons[product.category] || Gift;
+  const isActive = product.is_active !== false;
+  const inStock = product.in_stock !== false && (product.stock_quantity === null || (product.stock_quantity ?? 1) > 0);
 
   return (
     <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 overflow-hidden hover:shadow-md dark:hover:shadow-black/30 transition-shadow">
@@ -80,12 +89,11 @@ export function ProductCard({
         </div>
 
         {/* Out of stock overlay */}
-        {product.quantity_available != null &&
-          product.quantity_available <= 0 && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">Out of Stock</span>
-            </div>
-          )}
+        {!inStock && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <span className="text-white font-bold text-lg">Out of Stock</span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -103,35 +111,81 @@ export function ProductCard({
         )}
 
         {/* Price info */}
-        <div className="flex items-center justify-between mt-4">
-          <div>
-            <div className="flex items-center gap-1.5">
-              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-              <span className="font-bold text-gray-900 dark:text-gray-100">
-                {formatPoints(product.points_cost)}
-              </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">pts</span>
-            </div>
-            {product.retail_value && (
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                ${product.retail_value.toFixed(2)} value
-              </p>
+        <div className="mt-4">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Points price */}
+            {hasPointsPrice && (
+              <div className="flex items-center gap-1">
+                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                <span className="font-bold text-gray-900 dark:text-gray-100">
+                  {formatPoints(product.points_cost)}
+                </span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">pts</span>
+              </div>
+            )}
+
+            {/* Separator */}
+            {hasPointsPrice && hasDollarPrice && (
+              <span className="text-gray-300 dark:text-gray-600">or</span>
+            )}
+
+            {/* Dollar price */}
+            {hasDollarPrice && (
+              <div className="flex items-center gap-0.5">
+                <DollarSign className="w-4 h-4 text-green-500" />
+                <span className="font-bold text-gray-900 dark:text-gray-100">
+                  {product.dollar_price.toFixed(2)}
+                </span>
+              </div>
             )}
           </div>
 
-          {onRedeem && (
+          {product.retail_value && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              ${product.retail_value.toFixed(2)} value
+            </p>
+          )}
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex gap-2 mt-4">
+          {hasPointsPrice && onRedeem && (
             <button
               onClick={() => onRedeem(product.id)}
-              disabled={!canAfford || loading || !product.is_active}
+              disabled={!canAffordPoints || loading || !isActive || !inStock}
               className={cn(
-                "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                canAfford && product.is_active
+                "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                canAffordPoints && isActive && inStock
                   ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 active:scale-95"
                   : "bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
               )}
             >
-              {loading ? "..." : canAfford ? "Redeem" : "Not enough pts"}
+              {loading ? "..." : canAffordPoints ? "Use Points" : "Not enough pts"}
             </button>
+          )}
+
+          {hasDollarPrice && onBuy && (
+            <button
+              onClick={() => onBuy(product.id)}
+              disabled={loading || !isActive || !inStock}
+              className={cn(
+                "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                isActive && inStock
+                  ? "bg-green-500 text-white hover:bg-green-600 active:scale-95"
+                  : "bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+              )}
+            >
+              {loading ? "..." : `Buy $${product.dollar_price.toFixed(2)}`}
+            </button>
+          )}
+
+          {!onRedeem && !onBuy && (
+            <Link
+              href={`/rewards/${product.id}`}
+              className="flex-1 px-3 py-2 rounded-lg text-sm font-medium text-center bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 active:scale-95 transition-all"
+            >
+              View Details
+            </Link>
           )}
         </div>
       </div>
