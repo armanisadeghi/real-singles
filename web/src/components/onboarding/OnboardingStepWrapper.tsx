@@ -281,6 +281,105 @@ export function OnboardingChips({
 }
 
 /**
+ * Styled select with "Prefer not to say" option for sensitive fields
+ */
+interface OnboardingSelectWithPreferNotProps
+  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
+  label?: string;
+  error?: string;
+  options: readonly { value: string; label: string }[];
+  placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+  isPreferNot: boolean;
+  onPreferNotChange: (isPreferNot: boolean) => void;
+  fieldDbColumn: string;
+}
+
+export function OnboardingSelectWithPreferNot({
+  label,
+  error,
+  options,
+  placeholder = "Select an option",
+  className,
+  value,
+  onChange,
+  isPreferNot,
+  onPreferNotChange,
+  fieldDbColumn,
+  disabled,
+  ...props
+}: OnboardingSelectWithPreferNotProps) {
+  const handleCheckboxChange = (checked: boolean) => {
+    onPreferNotChange(checked);
+    if (checked) {
+      // Clear the select value when checking "prefer not to say"
+      onChange("");
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          {label}
+        </label>
+      )}
+      <select
+        value={isPreferNot ? "" : value || ""}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled || isPreferNot}
+        className={cn(
+          "w-full px-4 py-3.5 rounded-xl appearance-none",
+          "text-base", // 16px minimum for iOS
+          value && !isPreferNot ? "text-gray-900 dark:text-gray-100" : "text-gray-400 dark:text-gray-500",
+          "bg-white dark:bg-neutral-800/90",
+          "border border-gray-200 dark:border-neutral-700",
+          "focus:outline-none focus:border-gray-400 dark:focus:border-neutral-500",
+          "transition-colors duration-150",
+          // Custom arrow
+          "bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%239ca3af%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')]",
+          "bg-[length:20px] bg-[right_12px_center] bg-no-repeat",
+          "pr-10",
+          (disabled || isPreferNot) && "opacity-50 cursor-not-allowed",
+          error && "border-red-400 dark:border-red-500",
+          className
+        )}
+        {...props}
+      >
+        <option value="" disabled>
+          {placeholder}
+        </option>
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+
+      {/* Prefer not to say checkbox */}
+      <label className="flex items-center gap-2 cursor-pointer group">
+        <input
+          type="checkbox"
+          checked={isPreferNot}
+          onChange={(e) => handleCheckboxChange(e.target.checked)}
+          className={cn(
+            "w-4 h-4 rounded border-gray-300 dark:border-neutral-600",
+            "text-pink-500 focus:ring-pink-500 focus:ring-offset-0",
+            "cursor-pointer"
+          )}
+        />
+        <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">
+          Prefer not to say
+        </span>
+      </label>
+
+      {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
+    </div>
+  );
+}
+
+/**
  * Single-select option cards for onboarding
  */
 interface OnboardingOptionCardsProps {
