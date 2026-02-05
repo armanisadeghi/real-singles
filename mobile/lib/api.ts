@@ -1,8 +1,64 @@
 /**
  * API Client for Next.js Backend
- * 
+ *
  * This module provides all API functions that call the Next.js backend.
  * The backend uses Supabase for data storage and authentication.
+ *
+ * =============================================================================
+ * PERFORMANCE STANDARDS IMPLEMENTATION REQUIRED
+ * See /PERFORMANCE-STANDARDS.md for full requirements
+ * =============================================================================
+ *
+ * TODO [PERF-001]: Install and configure MMKV for local-first caching
+ * - Run: npm install react-native-mmkv
+ * - Replace AsyncStorage usage with MMKV
+ * - Implement cache-first data pattern for all API calls
+ *
+ * TODO [PERF-002]: Implement caching wrapper for all API functions
+ * Example implementation:
+ *
+ * ```typescript
+ * import { MMKV } from 'react-native-mmkv'
+ *
+ * const storage = new MMKV()
+ *
+ * const cacheData = (key: string, data: any) => {
+ *   storage.set(key, JSON.stringify(data))
+ *   storage.set(`${key}_timestamp`, Date.now())
+ * }
+ *
+ * const getCachedData = async <T>(
+ *   key: string,
+ *   fetchFn: () => Promise<T>,
+ *   ttl: number = 300000 // 5 minutes
+ * ): Promise<T> => {
+ *   const cached = storage.getString(key)
+ *   const timestamp = storage.getNumber(`${key}_timestamp`)
+ *
+ *   if (cached && timestamp && Date.now() - timestamp < ttl) {
+ *     // Return cached immediately, refresh in background
+ *     fetchFn().then(fresh => cacheData(key, fresh))
+ *     return JSON.parse(cached)
+ *   }
+ *
+ *   const fresh = await fetchFn()
+ *   cacheData(key, fresh)
+ *   return fresh
+ * }
+ * ```
+ *
+ * TODO [PERF-003]: Apply caching to these high-priority functions:
+ * - getHomeScreenData() - TTL: 5min
+ * - getProfile() - TTL: 5min
+ * - getAllEvents() - TTL: 5min
+ * - getProductsGiftList() - TTL: 1hr (static content)
+ * - getMatches() - TTL: 2min
+ * - getAllNotifications() - TTL: 1min
+ *
+ * TODO [PERF-004]: Implement request deduplication
+ * - Track in-flight requests to prevent duplicate API calls
+ * - Multiple components requesting same data should share one request
+ * =============================================================================
  */
 
 import { EditProfileFormData } from "@/types";
@@ -10,6 +66,18 @@ import { supabase, getSession } from "./supabase";
 
 // Get API URL from environment
 const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/api";
+
+/**
+ * TODO [PERF-005]: Cache TTL constants (in milliseconds)
+ * Uncomment and use when MMKV is implemented
+ */
+// export const CacheTTL = {
+//   realtime: 30 * 1000,      // 30 seconds - notifications, online status
+//   short: 2 * 60 * 1000,     // 2 minutes - matches, conversations
+//   user: 5 * 60 * 1000,      // 5 minutes - profile, home data, events
+//   long: 15 * 60 * 1000,     // 15 minutes - filters, preferences
+//   static: 60 * 60 * 1000,   // 1 hour - products, static content
+// } as const;
 
 /**
  * Make an authenticated API request

@@ -1,8 +1,47 @@
 /**
  * Matches Screen
- * 
+ *
  * Displays mutual matches - users who have both liked each other.
  * Calls the /api/matches endpoint to maintain SSOT with web.
+ *
+ * =============================================================================
+ * PERFORMANCE STANDARDS IMPLEMENTATION REQUIRED
+ * See /PERFORMANCE-STANDARDS.md for full requirements
+ * =============================================================================
+ *
+ * TODO [PERF-LIST-001]: Replace FlatList with FlashList for better performance
+ * - Install: npm install @shopify/flash-list
+ * - Benefits: 10x faster rendering, better memory usage
+ * - Example migration:
+ *
+ * ```typescript
+ * import { FlashList } from "@shopify/flash-list"
+ *
+ * <FlashList
+ *   data={matches}
+ *   renderItem={({ item }) => <ProfileListItem profile={item} />}
+ *   estimatedItemSize={80}      // REQUIRED: estimate item height
+ *   removeClippedSubviews={true}
+ *   maxToRenderPerBatch={10}
+ *   windowSize={5}
+ * />
+ * ```
+ *
+ * TODO [PERF-MEMO-001]: Wrap ProfileListItem with React.memo
+ * - Prevents unnecessary re-renders when parent state changes
+ * - Add custom comparison function for optimal performance:
+ *
+ * ```typescript
+ * const MemoizedProfileListItem = React.memo(ProfileListItem,
+ *   (prev, next) => prev.profile.ID === next.profile.ID
+ * );
+ * ```
+ *
+ * TODO [PERF-CACHE-001]: Add MMKV caching for matches data
+ * - Cache key: `matches-${userId}`
+ * - TTL: 2 minutes (matches change moderately)
+ * - Show cached data immediately on screen mount
+ * =============================================================================
  */
 
 import NotificationBell from "@/components/NotificationBell";

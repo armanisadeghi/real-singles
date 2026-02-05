@@ -9,6 +9,21 @@ import {
   type DiscoveryEmptyReason,
 } from "@/lib/services/discovery";
 
+/**
+ * PERFORMANCE STANDARDS IMPLEMENTATION
+ * See /PERFORMANCE-STANDARDS.md for full requirements
+ *
+ * Note: Discovery is NOT cached at the route level because:
+ * 1. Results are highly personalized per user
+ * 2. Exclusion lists (blocks, likes, passes) change frequently
+ * 3. Client-side caching via TanStack Query handles deduplication
+ *
+ * Optimization is done via:
+ * - Parallel query execution in getDiscoverableCandidates
+ * - Image optimization via resolveOptimizedImageUrl
+ * - Field-specific selects (no SELECT *)
+ */
+
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================

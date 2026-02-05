@@ -1,3 +1,36 @@
+/**
+ * Home Screen
+ *
+ * Main dashboard displaying Top Matches, Events, Nearby, Videos, etc.
+ *
+ * =============================================================================
+ * PERFORMANCE STANDARDS IMPLEMENTATION REQUIRED
+ * See /PERFORMANCE-STANDARDS.md for full requirements
+ * =============================================================================
+ *
+ * TODO [PERF-HOME-001]: Implement MMKV caching for home screen data
+ * - Cache getHomeScreenData() response with 5-minute TTL
+ * - Show cached data immediately on app open
+ * - Refresh in background after TTL expires
+ *
+ * TODO [PERF-HOME-002]: Add image preloading for visible cards
+ * - Use expo-image's Image.prefetch() for next screen images
+ * - Preload profile images that will be visible on scroll
+ *
+ * TODO [PERF-HOME-003]: Memoize card components
+ * - Wrap ProfileCard, EventCard, VideoCard with React.memo
+ * - Add custom comparison functions for optimal performance
+ *
+ * TODO [PERF-HOME-004]: Consider FlashList for horizontal carousels
+ * - For carousels with 20+ items, use FlashList with horizontal={true}
+ * - Current implementation is acceptable for small item counts (<15)
+ *
+ * TODO [PERF-HOME-005]: Add Supabase image transformations to all URLs
+ * - Append ?width=400&quality=80&format=webp for card images
+ * - Reduces bandwidth and improves load times
+ * =============================================================================
+ */
+
 import { HomeHeaderMenu } from "@/components/home";
 import SideMenu from "@/components/SidebarMenu";
 import EventCard from "@/components/ui/EventCard";

@@ -1,3 +1,46 @@
+/**
+ * =============================================================================
+ * PERFORMANCE STANDARDS IMPLEMENTATION REQUIRED
+ * See /PERFORMANCE-STANDARDS.md for full requirements
+ * =============================================================================
+ *
+ * TODO [PERF-IMG-001]: Replace ImageBackground with expo-image
+ * - expo-image provides better caching and performance
+ * - Supports blurhash placeholders for instant loading
+ * - Example migration:
+ *
+ * ```typescript
+ * import { Image } from 'expo-image';
+ *
+ * <Image
+ *   source={{ uri: imageUrl }}
+ *   placeholder={blurhash}           // Show low-res placeholder instantly
+ *   contentFit="cover"
+ *   cachePolicy="memory-disk"        // Cache to memory and disk
+ *   transition={200}                 // Smooth fade-in transition
+ *   style={{ width: cardWidth, height: cardHeight }}
+ * />
+ * ```
+ *
+ * TODO [PERF-IMG-002]: Add Supabase image transformations
+ * - NEVER serve full-resolution images
+ * - Append query params for optimization:
+ *
+ * ```typescript
+ * const optimizedUrl = `${imageUrl}?width=400&quality=80&format=webp`;
+ * ```
+ *
+ * TODO [PERF-IMG-003]: Preload images for smoother scrolling
+ * - Prefetch images when they're about to enter viewport
+ * - Use expo-image's Image.prefetch() method
+ *
+ * TODO [PERF-MEMO-002]: Wrap ProfileCard with React.memo
+ * - Prevents unnecessary re-renders when parent updates
+ * - Export: export default React.memo(ProfileCard, (prev, next) =>
+ *     prev.profile.ID === next.profile.ID)
+ * =============================================================================
+ */
+
 import { icons } from "@/constants/icons";
 import { User } from "@/types";
 import { IMAGE_URL, VIDEO_URL } from "@/utils/token";

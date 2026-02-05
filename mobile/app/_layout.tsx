@@ -1,3 +1,70 @@
+/**
+ * Root Layout - App Entry Point
+ *
+ * =============================================================================
+ * PERFORMANCE STANDARDS IMPLEMENTATION REQUIRED
+ * See /PERFORMANCE-STANDARDS.md for full requirements
+ * =============================================================================
+ *
+ * TODO [PERF-SYNC-001]: Implement background sync for critical data
+ * - Install: expo-background-fetch and expo-task-manager
+ * - Sync matches, messages, notifications in background
+ * - Example implementation:
+ *
+ * ```typescript
+ * import * as BackgroundFetch from 'expo-background-fetch';
+ * import * as TaskManager from 'expo-task-manager';
+ *
+ * const BACKGROUND_SYNC_TASK = 'BACKGROUND_SYNC';
+ *
+ * TaskManager.defineTask(BACKGROUND_SYNC_TASK, async () => {
+ *   try {
+ *     // Sync critical data to MMKV cache
+ *     await Promise.all([
+ *       syncMatches(),
+ *       syncNotifications(),
+ *       syncConversations(),
+ *     ]);
+ *     return BackgroundFetch.BackgroundFetchResult.NewData;
+ *   } catch (error) {
+ *     return BackgroundFetch.BackgroundFetchResult.Failed;
+ *   }
+ * });
+ *
+ * // Register in app initialization
+ * BackgroundFetch.registerTaskAsync(BACKGROUND_SYNC_TASK, {
+ *   minimumInterval: 15 * 60,    // 15 minutes minimum
+ *   stopOnTerminate: false,       // Keep syncing when app closes
+ *   startOnBoot: true,            // Start syncing after device boot
+ * });
+ * ```
+ *
+ * TODO [PERF-SYNC-002]: Prefetch data on app launch
+ * - Load cached data immediately from MMKV
+ * - Fetch fresh data in background after splash
+ * - Show cached content while fresh data loads
+ *
+ * TODO [PERF-SPLASH-001]: Optimize splash screen transition
+ * - Target: App opens to cached content in < 500ms
+ * - Pre-load critical images during splash
+ * - Use Image.prefetch() for profile images
+ *
+ * TODO [PERF-PERF-001]: Add performance monitoring
+ * - Install: react-native-performance
+ * - Track screen load times, API response times
+ * - Report metrics for analysis
+ *
+ * ```typescript
+ * import { performance } from 'react-native-performance';
+ *
+ * performance.mark('screen-load-start');
+ * // ... screen loads ...
+ * performance.mark('screen-load-end');
+ * performance.measure('screen-load', 'screen-load-start', 'screen-load-end');
+ * ```
+ * =============================================================================
+ */
+
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 

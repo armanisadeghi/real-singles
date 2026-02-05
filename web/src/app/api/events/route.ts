@@ -3,6 +3,15 @@ import { createApiClient } from "@/lib/supabase/server";
 import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 import type { TypedSupabaseClient, DbEventInsert } from "@/types/db";
 
+/**
+ * PERFORMANCE STANDARDS IMPLEMENTATION
+ * See /PERFORMANCE-STANDARDS.md for full requirements
+ *
+ * Cache for 5 minutes - events change occasionally but not frequently
+ * Note: POST requests bypass this cache automatically
+ */
+export const revalidate = 300;
+
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================

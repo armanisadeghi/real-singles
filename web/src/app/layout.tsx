@@ -3,6 +3,16 @@ import { Poppins, Baskervville } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
 
+/**
+ * PERFORMANCE STANDARDS IMPLEMENTATION
+ * See /PERFORMANCE-STANDARDS.md for full requirements
+ *
+ * Vercel Analytics and SpeedInsights are conditionally imported
+ * to track performance metrics in production.
+ */
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
@@ -63,6 +73,9 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        {/* PERFORMANCE MONITORING - See /PERFORMANCE-STANDARDS.md */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

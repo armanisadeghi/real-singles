@@ -1,5 +1,11 @@
 import type { NextConfig } from "next";
 
+/**
+ * Next.js Configuration
+ *
+ * PERFORMANCE STANDARDS IMPLEMENTATION
+ * See /PERFORMANCE-STANDARDS.md for full requirements
+ */
 const nextConfig: NextConfig = {
   // Set Turbopack root to current working directory to avoid workspace root confusion
   // This prevents Next.js from inferring the monorepo root when multiple lockfiles exist
@@ -7,8 +13,36 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
-  // Allow external images from these domains
+
+  // ==========================================================================
+  // PERFORMANCE: Bundle Optimization
+  // ==========================================================================
+
+  // Remove console logs in production for smaller bundles
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
+  },
+
+  // Optimize package imports to reduce bundle size
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "@supabase/supabase-js",
+      "@supabase/ssr",
+      "@livekit/components-react",
+      "livekit-client",
+      "zod",
+    ],
+  },
+
+  // ==========================================================================
+  // IMAGE OPTIMIZATION
+  // ==========================================================================
+
   images: {
+    // Serve images in modern WebP format when supported
+    formats: ["image/webp"],
+    // Allow external images from these domains
     remotePatterns: [
       {
         protocol: "https",
@@ -19,6 +53,10 @@ const nextConfig: NextConfig = {
         hostname: "*.supabase.co",
       },
     ],
+    // Configure device sizes for responsive images
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    // Configure image sizes for srcset
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   // Redirects for old routes to new routes (matching WordPress URLs)
   async redirects() {
