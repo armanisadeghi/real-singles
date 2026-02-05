@@ -2,22 +2,32 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Image transformation options for Supabase Storage
- * Uses Supabase's built-in image optimization
+ * 
+ * IMPORTANT: Supabase image transforms via getPublicUrl() generate URLs using
+ * the /render/image/ endpoint, which requires the Supabase Pro plan with image
+ * transformations enabled. For public buckets (avatars, events, products), we
+ * return plain public URLs and rely on Next.js <Image> for frontend optimization.
+ * 
+ * For private buckets (gallery), signed URL transforms (width/height/quality/resize)
+ * work on all plans — only format conversion is unsupported on signed URLs.
  */
 export interface ImageTransformOptions {
   width?: number;
   height?: number;
   quality?: number; // 1-100, default 80
-  format?: "webp" | "avif" | "origin"; // webp is smaller, avif is smallest but less compatible
+  format?: "webp" | "avif" | "origin"; // Only works with Supabase Pro image transforms
   resize?: "cover" | "contain" | "fill";
 }
 
 /**
- * Predefined image sizes for consistency across the app
+ * Predefined image sizes for consistency across the app.
  * 
- * Note: Format conversion (webp/avif) only works with PUBLIC buckets.
- * Private buckets (gallery) use signed URLs which don't support format transforms.
- * For private buckets, we still get resizing and quality optimization benefits.
+ * These are used for:
+ * - Private bucket signed URLs (gallery) — resize/quality transforms work on all plans
+ * - Next.js <Image> component sizing hints on the frontend
+ * 
+ * Note: Format conversion (webp/avif) via Supabase requires Pro plan.
+ * For public buckets, use Next.js <Image> component for format optimization.
  */
 export const IMAGE_SIZES = {
   thumbnail: { width: 150, height: 150, quality: 70, format: "webp" as const },
@@ -69,54 +79,40 @@ export async function resolveStorageUrl(
     bucket = "gallery";
   }
   
-  // Build transform options for PUBLIC buckets (supports format conversion)
-  const publicTransformOptions = options?.transform ? {
-    transform: {
-      width: options.transform.width,
-      height: options.transform.height,
-      quality: options.transform.quality ?? 80,
-      format: options.transform.format === "avif" || options.transform.format === "webp" ? options.transform.format : ("origin" as const),
-      resize: options.transform.resize ?? "cover",
-    }
-  } : undefined;
-  
-  // Build transform options for PRIVATE buckets (signed URLs don't support format conversion)
+  // Build transform options for PRIVATE buckets (signed URLs)
+  // Signed URLs support width/height/quality/resize on all Supabase plans.
+  // Format conversion (webp/avif) is NOT supported on signed URLs.
   const privateTransformOptions = options?.transform ? {
     transform: {
       width: options.transform.width,
       height: options.transform.height,
       quality: options.transform.quality ?? 80,
       resize: options.transform.resize ?? "cover",
-      // Note: format is intentionally omitted - signed URLs don't support it
     }
   } : undefined;
   
-  // Avatars bucket is public, use public URL for better caching (supports webp/avif)
+  // PUBLIC BUCKETS: Return plain public URLs (no Supabase transforms).
+  // Supabase getPublicUrl() with transforms uses the /render/image/ endpoint
+  // which requires Pro plan image transformations. Without it, URLs break.
+  // Frontend optimization is handled by Next.js <Image> component instead.
+  
   if (bucket === "avatars") {
-    const { data } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(path, publicTransformOptions as any);
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     return data?.publicUrl || "";
   }
   
-  // Events bucket is also public (supports webp/avif)
   if (bucket === "events") {
-    const { data } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(path, publicTransformOptions as any);
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     return data?.publicUrl || "";
   }
   
-  // Products bucket is also public (supports webp/avif)
   if (bucket === "products") {
-    const { data } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(path, publicTransformOptions as any);
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     return data?.publicUrl || "";
   }
   
-  // For private buckets (gallery), use signed URLs with transforms
-  // Note: signed URLs only support width/height/quality/resize, NOT format
+  // PRIVATE BUCKETS (gallery): Use signed URLs with resize transforms.
+  // Signed URL transforms (width/height/quality/resize) work on all plans.
   const { data, error } = await supabase.storage
     .from(bucket)
     .createSignedUrl(path, options?.expiresIn ?? 3600, privateTransformOptions as any);

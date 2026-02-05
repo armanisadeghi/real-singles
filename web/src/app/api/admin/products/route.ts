@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { resolveStorageUrl, IMAGE_SIZES } from "@/lib/supabase/url-utils";
+import { resolveStorageUrl } from "@/lib/supabase/url-utils";
 
 // Verify the current user is an admin
 async function verifyAdmin(): Promise<{ isAdmin: boolean; userId?: string }> {
@@ -168,7 +168,6 @@ export async function GET(request: NextRequest) {
       image_url: product.image_url
         ? await resolveStorageUrl(supabase, product.image_url, { 
             bucket: "products",
-            transform: IMAGE_SIZES.card,
           })
         : null,
     }))

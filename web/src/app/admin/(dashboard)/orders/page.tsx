@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import {
   Package,
   Clock,
@@ -253,11 +254,15 @@ export default function AdminOrdersPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {order.product_image_url ? (
-                          <img
-                            src={order.product_image_url}
-                            alt=""
-                            className="w-10 h-10 rounded-lg object-cover"
-                          />
+                          <div className="relative w-10 h-10 rounded-lg overflow-hidden">
+                            <Image
+                              src={order.product_image_url}
+                              alt=""
+                              fill
+                              sizes="40px"
+                              className="object-cover"
+                            />
+                          </div>
                         ) : (
                           <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
                             <Package className="w-5 h-5 text-slate-400" />
@@ -385,13 +390,17 @@ function OrderDetailModal({ order, onClose, onUpdate, updating }: OrderDetailMod
           {/* Product Info */}
           <div className="flex items-start gap-4">
             {order.product_image_url ? (
-              <img
-                src={order.product_image_url}
-                alt=""
-                className="w-20 h-20 rounded-lg object-cover"
-              />
+              <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0">
+                <Image
+                  src={order.product_image_url}
+                  alt=""
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                />
+              </div>
             ) : (
-              <div className="w-20 h-20 rounded-lg bg-slate-100 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
                 <Package className="w-8 h-8 text-slate-400" />
               </div>
             )}

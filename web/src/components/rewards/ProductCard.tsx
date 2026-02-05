@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Star, Gift, ShoppingBag, Sparkles, DollarSign } from "lucide-react";
 import { cn, formatPoints } from "@/lib/utils";
 
@@ -60,10 +61,12 @@ export function ProductCard({
       {/* Image */}
       <div className="aspect-square relative">
         {product.image_url ? (
-          <img
+          <Image
             src={product.image_url}
             alt={product.name}
-            className="w-full h-full object-cover"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover"
           />
         ) : (
           <div

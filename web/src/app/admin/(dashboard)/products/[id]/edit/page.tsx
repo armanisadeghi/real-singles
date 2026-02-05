@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Loader2, Upload, X, Package } from "lucide-react";
 import { AdminPageHeader, AdminButton } from "@/components/admin/AdminPageHeader";
 import { IMAGE_ACCEPT_STRING } from "@/lib/supabase/storage";
@@ -231,12 +232,24 @@ export default function AdminEditProductPage({
               Product Image
             </label>
             {displayImage ? (
-              <div className="relative inline-block">
-                <img
-                  src={displayImage}
-                  alt="Preview"
-                  className="w-48 h-48 object-cover rounded-lg"
-                />
+              <div className="relative inline-block w-48 h-48">
+                {/* Use <img> for data URLs (local preview), Next.js Image for remote URLs */}
+                {displayImage.startsWith("data:") ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={displayImage}
+                    alt="Preview"
+                    className="w-48 h-48 object-cover rounded-lg"
+                  />
+                ) : (
+                  <Image
+                    src={displayImage}
+                    alt="Preview"
+                    fill
+                    sizes="192px"
+                    className="object-cover rounded-lg"
+                  />
+                )}
                 <button
                   type="button"
                   onClick={removeImage}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Star, Gift, ShoppingBag, Sparkles, Check } from "lucide-react";
 import { PointsBalance } from "@/components/rewards/PointsBalance";
 import { Skeleton } from "@/components/ui/LoadingSkeleton";
@@ -174,12 +175,15 @@ export default function ProductDetailPage({ params }: PageProps) {
 
       <div className="grid md:grid-cols-2 gap-8">
         {/* Image */}
-        <div className="aspect-square rounded-xl overflow-hidden">
+        <div className="aspect-square rounded-xl overflow-hidden relative">
           {product.image_url ? (
-            <img
+            <Image
               src={product.image_url}
               alt={product.name}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+              priority
             />
           ) : (
             <div

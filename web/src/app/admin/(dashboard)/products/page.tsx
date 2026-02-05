@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Package, Plus, Loader2 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
@@ -127,11 +128,13 @@ export default function AdminProductsPage() {
               style={{ transitionDelay: `${index * 50}ms` }}
             >
               {product.image_url ? (
-                <div className="aspect-[4/3] bg-slate-100 overflow-hidden">
-                  <img
+                <div className="aspect-[4/3] bg-slate-100 overflow-hidden relative">
+                  <Image
                     src={product.image_url}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               ) : (
