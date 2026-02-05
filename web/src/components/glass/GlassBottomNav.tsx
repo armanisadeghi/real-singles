@@ -76,7 +76,7 @@ export function GlassBottomNav() {
   const navItems = [
     { href: "/discover", icon: Gem, label: "Discover" },
     { href: "/explore", icon: CompassIcon, label: "Explore" },
-    { href: "/likes", icon: Heart, label: "New Matches" },
+    { href: "/likes", icon: Heart, label: "Likes" },
     { href: "/messages", icon: MessageCircle, label: "Messages" },
     { href: "/profile", icon: User, label: "Profile" },
   ];

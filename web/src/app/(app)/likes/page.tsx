@@ -1,20 +1,20 @@
 "use client";
 
 /**
- * New Matches Page
+ * Likes Page
  * 
  * Modern tabbed interface for:
- * - Likes You: People who liked you
+ * - Likes You: People who liked you (unacted)
  * - Likes Sent: People you've liked (waiting for response)
- * - Matches: New matches without conversations yet
+ * - Matches: All matches with 3 collapsible sections (Favorites, New Matches, All Matches)
  * 
  * Uses TanStack Query for caching - same data is shared across tabs,
  * eliminating duplicate API calls and providing instant tab switching.
  */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Heart, Sparkles, MessageCircle, CheckCircle, Users } from "lucide-react";
+import { Loader2, Heart, Sparkles, MessageCircle, CheckCircle, Users, ChevronDown, Star } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { MediaBadge } from "@/components/profile";
@@ -24,6 +24,7 @@ import {
   useLikesReceived, 
   useLikesSent, 
   useMatches, 
+  useFavorites,
   useUserProfile,
   useMatchAction,
 } from "@/hooks/queries";
@@ -267,8 +268,8 @@ function LikesYouTab() {
     return (
       <EmptyStateBoost
         userProfileImage={userProfileImage}
-        title="New matches will appear here"
-        description="Increase your chances with a Boost. Get seen up to 10x more times!"
+        title="People who like you will appear here"
+        description="Increase your visibility with a Boost. Get seen up to 10x more times!"
       />
     );
   }
@@ -476,18 +477,158 @@ function LikesSentTab() {
   );
 }
 
-// ================== Matches Tab (New matches without conversations) ==================
+// ================== Collapsible Section ==================
+
+interface CollapsibleSectionProps {
+  title: string;
+  count: number;
+  icon: React.ReactNode;
+  defaultExpanded?: boolean;
+  children: React.ReactNode;
+}
+
+function CollapsibleSection({ title, count, icon, defaultExpanded = true, children }: CollapsibleSectionProps) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+
+  return (
+    <div className="rounded-xl overflow-hidden">
+      {/* Section header */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-2.5 px-3 py-2.5 bg-gray-50 dark:bg-neutral-800/60 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors rounded-xl"
+        aria-expanded={expanded}
+      >
+        {icon}
+        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+          {title}
+        </span>
+        <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+          {count}
+        </span>
+        <ChevronDown
+          className={cn(
+            "w-4 h-4 ml-auto text-gray-400 dark:text-gray-500 transition-transform duration-200",
+            expanded && "rotate-180"
+          )}
+        />
+      </button>
+
+      {/* Collapsible content */}
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows] duration-200 ease-out",
+          expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="pt-2 space-y-2">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ================== Match Card (shared across sections) ==================
+
+function MatchCard({ match }: { match: Match }) {
+  const name = match.first_name || match.display_name || "Anonymous";
+  const location = [match.city, match.state].filter(Boolean).join(", ");
+  const matchedTime = formatRelativeTime(match.matched_at);
+  const hasConversation = !!match.conversation_id;
+
+  return (
+    <div className="flex items-center gap-3 p-3 bg-white dark:bg-neutral-900 rounded-xl">
+      {/* Photo */}
+      <Link
+        href={`/profile/${match.user_id}`}
+        className="flex-shrink-0"
+      >
+        <Avatar
+          src={match.profile_image_url}
+          name={name}
+          size="lg"
+        />
+      </Link>
+
+      {/* Info */}
+      <Link
+        href={`/profile/${match.user_id}`}
+        className="flex-1 min-w-0"
+      >
+        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
+          {name}
+        </h3>
+
+        {location && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{location}</p>
+        )}
+
+        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+          {match.is_verified && (
+            <CheckCircle className="w-3.5 h-3.5 text-blue-500" />
+          )}
+          <MediaBadge
+            hasVoicePrompt={!!match.voice_prompt_url}
+            hasVideoIntro={!!match.video_intro_url}
+            size="sm"
+          />
+          {matchedTime && (
+            <span className="inline-flex items-center gap-1 text-xs text-pink-600 dark:text-pink-400">
+              <Heart className="w-3 h-3" />
+              {matchedTime}
+            </span>
+          )}
+        </div>
+      </Link>
+
+      {/* Message button */}
+      <Link
+        href={hasConversation ? `/chats/${match.conversation_id}` : `/profile/${match.user_id}`}
+        className="w-9 h-9 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 flex-shrink-0"
+        title={hasConversation ? "Open chat" : "View profile"}
+      >
+        <MessageCircle className="w-4 h-4" />
+      </Link>
+    </div>
+  );
+}
+
+// ================== Matches Tab (3 collapsible sections) ==================
 
 function MatchesTab() {
-  // Use TanStack Query hooks - automatically cached and deduplicated
-  const { data: matchesData, isLoading: loading, error, refetch } = useMatches();
+  // Fetch matches and favorites in parallel (TanStack Query deduplicates)
+  const { data: matchesData, isLoading: matchesLoading, error: matchesError, refetch: refetchMatches } = useMatches();
+  const { data: favoritesData, isLoading: favoritesLoading } = useFavorites();
   const { data: profileData } = useUserProfile();
 
-  // Filter to only new matches (no conversation yet)
-  const matches = (matchesData?.matches || []).filter(
-    (m: Match) => !m.conversation_id
-  );
+  const loading = matchesLoading || favoritesLoading;
   const userProfileImage = profileData?.ProfileImageUrl || null;
+
+  // Build a Set of favorited user IDs for O(1) lookup
+  const favoriteUserIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (favoritesData?.data) {
+      for (const fav of favoritesData.data) {
+        if (fav.id) ids.add(fav.id);
+      }
+    }
+    return ids;
+  }, [favoritesData]);
+
+  // Split matches into sections
+  const allMatches = matchesData?.matches || [];
+
+  const favoriteMatches = useMemo(
+    () => allMatches.filter((m: Match) => favoriteUserIds.has(m.user_id)),
+    [allMatches, favoriteUserIds]
+  );
+
+  const newMatches = useMemo(
+    () => allMatches.filter((m: Match) => !m.conversation_id),
+    [allMatches]
+  );
 
   if (loading) {
     return (
@@ -497,14 +638,14 @@ function MatchesTab() {
     );
   }
 
-  if (error) {
+  if (matchesError) {
     return (
       <div className="text-center py-12">
         <p className="text-red-600 dark:text-red-400 mb-4">
-          {error instanceof Error ? error.message : "Failed to load matches"}
+          {matchesError instanceof Error ? matchesError.message : "Failed to load matches"}
         </p>
         <button
-          onClick={() => refetch()}
+          onClick={() => refetchMatches()}
           className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-700"
         >
           Try Again
@@ -513,81 +654,57 @@ function MatchesTab() {
     );
   }
 
-  if (matches.length === 0) {
+  if (allMatches.length === 0) {
     return (
       <EmptyStateBoost
         userProfileImage={userProfileImage}
-        title="New matches will appear here"
-        description="Increase your chances with a Boost. Get seen up to 10x more times!"
+        title="Your matches will appear here"
+        description="When you and someone both like each other, you'll see them here!"
       />
     );
   }
 
   return (
-    <div className="space-y-2">
-      {matches.map((match) => {
-        const name = match.first_name || match.display_name || "Anonymous";
-        const location = [match.city, match.state].filter(Boolean).join(", ");
-        const matchedTime = formatRelativeTime(match.matched_at);
+    <div className="space-y-3">
+      {/* Favorites section - only shown if user has favorited matches */}
+      {favoriteMatches.length > 0 && (
+        <CollapsibleSection
+          title="Favorites"
+          count={favoriteMatches.length}
+          icon={<Star className="w-4 h-4 text-amber-500" fill="currentColor" />}
+          defaultExpanded
+        >
+          {favoriteMatches.map((match: Match) => (
+            <MatchCard key={`fav-${match.user_id}`} match={match} />
+          ))}
+        </CollapsibleSection>
+      )}
 
-        return (
-          <div
-            key={match.user_id}
-            className="flex items-center gap-3 p-3 bg-white dark:bg-neutral-900 rounded-xl"
-          >
-            {/* Photo */}
-            <Link
-              href={`/profile/${match.user_id}`}
-              className="flex-shrink-0"
-            >
-              <Avatar
-                src={match.profile_image_url}
-                name={name}
-                size="lg"
-              />
-            </Link>
+      {/* New Matches section - matches without conversations */}
+      {newMatches.length > 0 && (
+        <CollapsibleSection
+          title="New Matches"
+          count={newMatches.length}
+          icon={<Sparkles className="w-4 h-4 text-pink-500" />}
+          defaultExpanded
+        >
+          {newMatches.map((match: Match) => (
+            <MatchCard key={`new-${match.user_id}`} match={match} />
+          ))}
+        </CollapsibleSection>
+      )}
 
-            {/* Info */}
-            <Link 
-              href={`/profile/${match.user_id}`}
-              className="flex-1 min-w-0"
-            >
-              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
-                {name}
-              </h3>
-
-              {location && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{location}</p>
-              )}
-
-              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                {match.is_verified && (
-                  <CheckCircle className="w-3.5 h-3.5 text-blue-500" />
-                )}
-                <MediaBadge
-                  hasVoicePrompt={!!match.voice_prompt_url}
-                  hasVideoIntro={!!match.video_intro_url}
-                  size="sm"
-                />
-                {matchedTime && (
-                  <span className="inline-flex items-center gap-1 text-xs text-pink-600 dark:text-pink-400">
-                    <Heart className="w-3 h-3" />
-                    {matchedTime}
-                  </span>
-                )}
-              </div>
-            </Link>
-
-            {/* Message button */}
-            <Link
-              href={`/profile/${match.user_id}`}
-              className="w-9 h-9 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 flex-shrink-0"
-            >
-              <MessageCircle className="w-4 h-4" />
-            </Link>
-          </div>
-        );
-      })}
+      {/* All Matches section */}
+      <CollapsibleSection
+        title="All Matches"
+        count={allMatches.length}
+        icon={<Heart className="w-4 h-4 text-rose-500" />}
+        defaultExpanded={favoriteMatches.length === 0 && newMatches.length === 0}
+      >
+        {allMatches.map((match: Match) => (
+          <MatchCard key={`all-${match.user_id}`} match={match} />
+        ))}
+      </CollapsibleSection>
     </div>
   );
 }
@@ -614,7 +731,7 @@ export default function LikesPage() {
 
   // Tab definitions for GlassTabs
   const tabs: Tab[] = [
-    { id: "likes", label: "New Matches" },
+    { id: "likes", label: "Likes You" },
     { id: "sent", label: "Likes Sent" },
     { id: "matches", label: "Matches" },
   ];
@@ -626,7 +743,7 @@ export default function LikesPage() {
         tabs={tabs}
         activeTab={activeTab}
         onChange={(id) => handleTabChange(id as TabType)}
-        ariaLabel="New Matches tabs"
+        ariaLabel="Likes and Matches tabs"
         className="mb-4"
       />
 
