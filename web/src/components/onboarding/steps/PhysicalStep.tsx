@@ -3,10 +3,12 @@
 /**
  * PhysicalStep
  *
- * Step 7: Height and Body Type
+ * Step 9: Height and Body Type
+ * Height uses select dropdowns (feet + inches).
+ * Body type uses option cards (6 options fit without scroll).
  */
 
-import { OnboardingStepWrapper, OnboardingSelect } from "../OnboardingStepWrapper";
+import { OnboardingStepWrapper, OnboardingOptionCards } from "../OnboardingStepWrapper";
 import { BODY_TYPE_OPTIONS } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -89,14 +91,17 @@ export function PhysicalStep({
         </div>
       </div>
 
-      {/* Body Type */}
-      <OnboardingSelect
-        label="Body Type"
-        options={BODY_TYPE_OPTIONS}
-        value={bodyType}
-        onChange={(e) => onBodyTypeChange(e.target.value)}
-        placeholder="Select body type"
-      />
+      {/* Body Type — option cards instead of dropdown */}
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Body Type
+        </label>
+        <OnboardingOptionCards
+          options={BODY_TYPE_OPTIONS}
+          selected={bodyType || null}
+          onChange={onBodyTypeChange}
+        />
+      </div>
     </OnboardingStepWrapper>
   );
 }

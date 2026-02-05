@@ -4,11 +4,12 @@
  * InterestedInStep
  *
  * Step 4: Who are you interested in? (Multi-select)
+ * Uses OnboardingOptionCardsMulti for consistency with GenderStep's card style.
  */
 
 import {
   OnboardingStepWrapper,
-  OnboardingChips,
+  OnboardingOptionCardsMulti,
 } from "../OnboardingStepWrapper";
 import { GENDER_OPTIONS } from "@/types";
 
@@ -26,7 +27,7 @@ export function InterestedInStep({
       title="Who are you interested in?"
       subtitle="Select all that apply"
     >
-      <OnboardingChips
+      <OnboardingOptionCardsMulti
         options={GENDER_OPTIONS}
         selected={lookingFor}
         onChange={onChange}

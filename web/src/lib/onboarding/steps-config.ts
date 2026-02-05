@@ -3,6 +3,8 @@
  *
  * Defines all steps in the onboarding wizard, their fields, and metadata.
  * This is the single source of truth for the onboarding flow.
+ *
+ * TOTAL: 37 steps across 12 phases.
  */
 
 import {
@@ -68,11 +70,11 @@ export interface OnboardingStep {
 }
 
 // ============================================
-// STEP DEFINITIONS
+// STEP DEFINITIONS (37 total)
 // ============================================
 
 export const ONBOARDING_STEPS: OnboardingStep[] = [
-  // Phase 1: Required (Steps 1-6)
+  // ── Phase 1: Required (Steps 1-6) ──────────────────────────
   {
     id: "name",
     stepNumber: 1,
@@ -193,7 +195,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         dbColumn: "verification_selfie_url",
         label: "Verification Selfie",
         inputType: "camera-capture",
-        required: false, // Can skip but encouraged
+        required: false,
       },
     ],
     isRequired: false,
@@ -203,7 +205,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "VerificationSelfieStep",
   },
 
-  // Phase 2: About You (Steps 7-8) - HIGH PRIORITY
+  // ── Phase 2: About You (Steps 7-8) ─────────────────────────
   {
     id: "bio",
     stepNumber: 7,
@@ -230,8 +232,8 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: "looking-for-description",
     stepNumber: 8,
-    title: "What are you looking for?",
-    subtitle: "Describe your ideal match",
+    title: "Describe your ideal match",
+    subtitle: "What are you looking for in a partner?",
     phase: "about",
     fields: [
       {
@@ -251,7 +253,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "LookingForStep",
   },
 
-  // Phase 3: Physical (Steps 9-10)
+  // ── Phase 3: Physical (Steps 9-10) ─────────────────────────
   {
     id: "physical",
     stepNumber: 9,
@@ -263,7 +265,6 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         dbColumn: "height_inches",
         label: "Height",
         inputType: "select",
-        // Height options will be generated in component (feet + inches)
       },
       {
         key: "BodyType",
@@ -302,20 +303,13 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "EthnicityStep",
   },
 
-  // Phase 4: Relationship (Step 11)
+  // ── Phase 4: Relationship (Steps 11-12) — SPLIT ────────────
   {
-    id: "relationship-goals",
+    id: "marital-status",
     stepNumber: 11,
-    title: "What are you looking for?",
+    title: "What's your marital status?",
     phase: "relationship",
     fields: [
-      {
-        key: "DatingIntentions",
-        dbColumn: "dating_intentions",
-        label: "Dating Intentions",
-        inputType: "select",
-        options: DATING_INTENTIONS_OPTIONS,
-      },
       {
         key: "MaritalStatus",
         dbColumn: "marital_status",
@@ -329,13 +323,34 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     allowSkip: true,
     allowPreferNot: false,
     needsKeyboard: false,
-    component: "RelationshipGoalsStep",
+    component: "MaritalStatusStep",
+  },
+  {
+    id: "dating-intentions",
+    stepNumber: 12,
+    title: "What are you looking for?",
+    subtitle: "What kind of relationship interests you?",
+    phase: "relationship",
+    fields: [
+      {
+        key: "DatingIntentions",
+        dbColumn: "dating_intentions",
+        label: "Dating Intentions",
+        inputType: "select",
+        options: DATING_INTENTIONS_OPTIONS,
+      },
+    ],
+    isRequired: false,
+    allowSkip: true,
+    allowPreferNot: false,
+    needsKeyboard: false,
+    component: "DatingIntentionsStep",
   },
 
-  // Phase 5: Location (Step 12)
+  // ── Phase 5: Location (Step 13) ────────────────────────────
   {
     id: "location",
-    stepNumber: 12,
+    stepNumber: 13,
     title: "Where do you live?",
     phase: "location",
     fields: [
@@ -354,6 +369,14 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         inputType: "text",
         maxLength: 100,
       },
+      {
+        key: "ZipCode",
+        dbColumn: "zip_code",
+        label: "Zip / Postal Code",
+        placeholder: "Enter your zip code",
+        inputType: "text",
+        maxLength: 20,
+      },
     ],
     isRequired: false,
     allowSkip: true,
@@ -362,10 +385,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "LocationStep",
   },
 
-  // Phase 6: Lifestyle (Steps 13-17)
+  // ── Phase 6: Lifestyle (Steps 14-19) ───────────────────────
   {
     id: "work",
-    stepNumber: 13,
+    stepNumber: 14,
     title: "What do you do?",
     phase: "lifestyle",
     fields: [
@@ -394,7 +417,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "education",
-    stepNumber: 14,
+    stepNumber: 15,
     title: "What's your education?",
     phase: "lifestyle",
     fields: [
@@ -413,9 +436,9 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "EducationStep",
   },
   {
-    id: "beliefs",
-    stepNumber: 15,
-    title: "Your beliefs",
+    id: "religion",
+    stepNumber: 16,
+    title: "What's your religion?",
     phase: "lifestyle",
     fields: [
       {
@@ -426,6 +449,19 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         options: RELIGION_OPTIONS,
         sensitive: true,
       },
+    ],
+    isRequired: false,
+    allowSkip: true,
+    allowPreferNot: false,
+    needsKeyboard: false,
+    component: "ReligionStep",
+  },
+  {
+    id: "political-views",
+    stepNumber: 17,
+    title: "What are your political views?",
+    phase: "lifestyle",
+    fields: [
       {
         key: "PoliticalViews",
         dbColumn: "political_views",
@@ -439,11 +475,11 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     allowSkip: true,
     allowPreferNot: false,
     needsKeyboard: false,
-    component: "BeliefsStep",
+    component: "PoliticalViewsStep",
   },
   {
     id: "exercise",
-    stepNumber: 16,
+    stepNumber: 18,
     title: "How often do you exercise?",
     phase: "lifestyle",
     fields: [
@@ -463,7 +499,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "languages",
-    stepNumber: 17,
+    stepNumber: 19,
     title: "What languages do you speak?",
     subtitle: "Select all that apply",
     phase: "lifestyle",
@@ -483,10 +519,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "LanguagesStep",
   },
 
-  // Phase 7: Habits (Step 18)
+  // ── Phase 7: Habits (Step 20) ──────────────────────────────
   {
     id: "habits",
-    stepNumber: 18,
+    stepNumber: 20,
     title: "Your habits",
     phase: "habits",
     fields: [
@@ -496,6 +532,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         label: "Smoking",
         inputType: "select",
         options: SMOKING_OPTIONS,
+        sensitive: true,
       },
       {
         key: "Drinking",
@@ -503,6 +540,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         label: "Drinking",
         inputType: "select",
         options: DRINKING_OPTIONS,
+        sensitive: true,
       },
       {
         key: "Marijuana",
@@ -520,11 +558,11 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "HabitsStep",
   },
 
-  // Phase 8: Family (Steps 19-20)
+  // ── Phase 8: Family (Steps 21-23) — SPLIT ──────────────────
   {
-    id: "kids",
-    stepNumber: 19,
-    title: "About children",
+    id: "has-kids",
+    stepNumber: 21,
+    title: "Do you have children?",
     phase: "family",
     fields: [
       {
@@ -535,6 +573,19 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         options: HAS_KIDS_OPTIONS,
         sensitive: true,
       },
+    ],
+    isRequired: false,
+    allowSkip: true,
+    allowPreferNot: false,
+    needsKeyboard: false,
+    component: "HasKidsStep",
+  },
+  {
+    id: "wants-kids",
+    stepNumber: 22,
+    title: "Do you want children?",
+    phase: "family",
+    fields: [
       {
         key: "WantsKids",
         dbColumn: "wants_kids",
@@ -548,11 +599,11 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     allowSkip: true,
     allowPreferNot: false,
     needsKeyboard: false,
-    component: "KidsStep",
+    component: "WantsKidsStep",
   },
   {
     id: "pets",
-    stepNumber: 20,
+    stepNumber: 23,
     title: "Do you have pets?",
     subtitle: "Select all that apply",
     phase: "family",
@@ -572,10 +623,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "PetsStep",
   },
 
-  // Phase 9: Personality (Steps 21-22)
+  // ── Phase 9: Personality (Steps 24-25) ─────────────────────
   {
     id: "interests",
-    stepNumber: 21,
+    stepNumber: 24,
     title: "What are your interests?",
     subtitle: "Select what you enjoy",
     phase: "personality",
@@ -596,7 +647,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "life-goals",
-    stepNumber: 22,
+    stepNumber: 25,
     title: "What are your life goals?",
     subtitle: "Select up to 10",
     phase: "personality",
@@ -606,7 +657,6 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
         dbColumn: "life_goals",
         label: "Life Goals",
         inputType: "multi-select",
-        // Life goals are fetched from API
       },
     ],
     isRequired: false,
@@ -616,10 +666,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "LifeGoalsStep",
   },
 
-  // Phase 10: Prompts (Steps 23-32)
+  // ── Phase 10: Prompts (Steps 26-35) ────────────────────────
   {
     id: "prompt-ideal-date",
-    stepNumber: 23,
+    stepNumber: 26,
     title: "My ideal first date...",
     subtitle: "...starts with and ends with",
     phase: "prompts",
@@ -642,7 +692,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "prompt-non-negotiables",
-    stepNumber: 24,
+    stepNumber: 27,
     title: "My top non-negotiables",
     phase: "prompts",
     fields: [
@@ -664,7 +714,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "prompt-way-to-heart",
-    stepNumber: 25,
+    stepNumber: 28,
     title: "The way to my heart is through...",
     phase: "prompts",
     fields: [
@@ -686,7 +736,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "prompt-after-work",
-    stepNumber: 26,
+    stepNumber: 29,
     title: "After work, you can find me...",
     phase: "prompts",
     fields: [
@@ -708,7 +758,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "prompt-nightclub-or-home",
-    stepNumber: 27,
+    stepNumber: 30,
     title: "Nightclub or night at home?",
     phase: "prompts",
     fields: [
@@ -729,7 +779,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "prompt-pet-peeves",
-    stepNumber: 28,
+    stepNumber: 31,
     title: "My pet peeves",
     phase: "prompts",
     fields: [
@@ -751,7 +801,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "prompt-travel-story",
-    stepNumber: 29,
+    stepNumber: 32,
     title: "My craziest travel story",
     phase: "prompts",
     fields: [
@@ -773,7 +823,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "prompt-weirdest-gift",
-    stepNumber: 30,
+    stepNumber: 33,
     title: "The weirdest gift I've received",
     phase: "prompts",
     fields: [
@@ -795,7 +845,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "prompt-worst-job",
-    stepNumber: 31,
+    stepNumber: 34,
     title: "The worst job I ever had",
     phase: "prompts",
     fields: [
@@ -817,7 +867,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: "prompt-dream-job",
-    stepNumber: 32,
+    stepNumber: 35,
     title: "The job I'd do for free",
     phase: "prompts",
     fields: [
@@ -838,10 +888,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "PromptStep",
   },
 
-  // Phase 11: Social Links (Step 33)
+  // ── Phase 11: Social Links (Step 36) ───────────────────────
   {
     id: "social-links",
-    stepNumber: 33,
+    stepNumber: 36,
     title: "Connect your socials",
     subtitle: "Optional — helps verify you're real",
     phase: "social",
@@ -870,10 +920,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     component: "SocialLinksStep",
   },
 
-  // Phase 12: Complete (Step 34)
+  // ── Phase 12: Complete (Step 37) ───────────────────────────
   {
     id: "complete",
-    stepNumber: 34,
+    stepNumber: 37,
     title: "You're all set!",
     subtitle: "Your profile is ready",
     phase: "complete",

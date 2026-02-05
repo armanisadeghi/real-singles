@@ -5,6 +5,12 @@
  * Sets a test user's password to the admin password so you can log in as them.
  * This is useful for testing the matching algorithm, liking users, etc.
  *
+ * Admin User: admin@realsingles.com
+ * Admin Password: AdminPass123!
+ * 
+ * Test User: kayla.lee18@testuser.realsingles.com
+ * Test Password: TestPassword123!
+
  * Usage:
  *   # By user ID
  *   pnpm tsx scripts/set-test-user-password.ts d69593d2-8091-4742-ae4d-c2fcafa83714

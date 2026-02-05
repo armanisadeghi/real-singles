@@ -36,6 +36,7 @@ export interface ProfileData {
   // Location
   country?: string | null;
   city?: string | null;
+  zip_code?: string | null;
   state?: string | null;
 
   // Lifestyle
@@ -152,55 +153,56 @@ export const PROFILE_FIELDS: ProfileFieldDef[] = [
   { key: "height_inches", label: "Height", required: false, sensitive: false, step: 9, category: "physical" },
   { key: "body_type", label: "Body Type", required: false, sensitive: false, step: 9, category: "physical" },
   { key: "ethnicity", label: "Ethnicity", required: false, sensitive: true, step: 10, category: "physical" },
-  // Relationship (step 11)
-  { key: "dating_intentions", label: "Dating Intentions", required: false, sensitive: false, step: 11, category: "relationship" },
+  // Relationship (steps 11-12) — split: marital status first, then dating intentions
   { key: "marital_status", label: "Marital Status", required: false, sensitive: true, step: 11, category: "relationship" },
-  // Location (step 12)
-  { key: "country", label: "Country", required: false, sensitive: false, step: 12, category: "location" },
-  { key: "city", label: "City", required: false, sensitive: false, step: 12, category: "location" },
-  { key: "state", label: "State", required: false, sensitive: false, step: 12, category: "location" },
-  { key: "hometown", label: "Hometown", required: false, sensitive: false, step: 12, category: "location" },
-  // Education & career (steps 13-14)
-  { key: "occupation", label: "Occupation", required: false, sensitive: false, step: 13, category: "career" },
-  { key: "company", label: "Company", required: false, sensitive: false, step: 13, category: "career" },
-  { key: "education", label: "Education Level", required: false, sensitive: false, step: 14, category: "education" },
-  { key: "schools", label: "Schools", required: false, sensitive: false, step: 14, category: "education" },
-  // Beliefs & values (step 15)
-  { key: "religion", label: "Religion", required: false, sensitive: true, step: 15, category: "beliefs" },
-  { key: "political_views", label: "Political Views", required: false, sensitive: true, step: 15, category: "beliefs" },
-  // Lifestyle (steps 16-17)
-  { key: "exercise", label: "Exercise", required: false, sensitive: false, step: 16, category: "lifestyle" },
-  { key: "languages", label: "Languages", required: false, sensitive: false, step: 17, category: "lifestyle" },
-  // Habits (step 18)
-  { key: "smoking", label: "Smoking", required: false, sensitive: false, step: 18, category: "habits" },
-  { key: "drinking", label: "Drinking", required: false, sensitive: false, step: 18, category: "habits" },
-  { key: "marijuana", label: "Marijuana", required: false, sensitive: true, step: 18, category: "habits" },
-  // Family (steps 19-20)
-  { key: "has_kids", label: "Have Children", required: false, sensitive: true, step: 19, category: "family" },
-  { key: "wants_kids", label: "Want Children", required: false, sensitive: true, step: 19, category: "family" },
-  { key: "pets", label: "Pets", required: false, sensitive: false, step: 20, category: "family" },
-  // Interests & personality (steps 21-22)
-  { key: "interests", label: "Interests", required: false, sensitive: false, step: 21, category: "personality" },
-  { key: "life_goals", label: "Life Goals", required: false, sensitive: false, step: 22, category: "personality" },
+  { key: "dating_intentions", label: "Dating Intentions", required: false, sensitive: false, step: 12, category: "relationship" },
+  // Location (step 13)
+  { key: "country", label: "Country", required: false, sensitive: false, step: 13, category: "location" },
+  { key: "city", label: "City", required: false, sensitive: false, step: 13, category: "location" },
+  { key: "zip_code", label: "Zip Code", required: false, sensitive: false, step: 13, category: "location" },
+  { key: "state", label: "State", required: false, sensitive: false, step: 13, category: "location" },
+  { key: "hometown", label: "Hometown", required: false, sensitive: false, step: 13, category: "location" },
+  // Education & career (steps 14-15)
+  { key: "occupation", label: "Occupation", required: false, sensitive: false, step: 14, category: "career" },
+  { key: "company", label: "Company", required: false, sensitive: false, step: 14, category: "career" },
+  { key: "education", label: "Education Level", required: false, sensitive: false, step: 15, category: "education" },
+  { key: "schools", label: "Schools", required: false, sensitive: false, step: 15, category: "education" },
+  // Beliefs & values (steps 16-17) — split: religion, then political views
+  { key: "religion", label: "Religion", required: false, sensitive: true, step: 16, category: "beliefs" },
+  { key: "political_views", label: "Political Views", required: false, sensitive: true, step: 17, category: "beliefs" },
+  // Lifestyle (steps 18-19)
+  { key: "exercise", label: "Exercise", required: false, sensitive: false, step: 18, category: "lifestyle" },
+  { key: "languages", label: "Languages", required: false, sensitive: false, step: 19, category: "lifestyle" },
+  // Habits (step 20)
+  { key: "smoking", label: "Smoking", required: false, sensitive: true, step: 20, category: "habits" },
+  { key: "drinking", label: "Drinking", required: false, sensitive: true, step: 20, category: "habits" },
+  { key: "marijuana", label: "Marijuana", required: false, sensitive: true, step: 20, category: "habits" },
+  // Family (steps 21-23) — split: has kids, wants kids, pets
+  { key: "has_kids", label: "Have Children", required: false, sensitive: true, step: 21, category: "family" },
+  { key: "wants_kids", label: "Want Children", required: false, sensitive: true, step: 22, category: "family" },
+  { key: "pets", label: "Pets", required: false, sensitive: false, step: 23, category: "family" },
+  // Interests & personality (steps 24-25)
+  { key: "interests", label: "Interests", required: false, sensitive: false, step: 24, category: "personality" },
+  { key: "life_goals", label: "Life Goals", required: false, sensitive: false, step: 25, category: "personality" },
   { key: "zodiac_sign", label: "Zodiac Sign", required: false, sensitive: false, step: 2, category: "personality" },
-  // Profile prompts (steps 23-32)
-  { key: "ideal_first_date", label: "Ideal First Date", required: false, sensitive: false, step: 23, category: "prompts" },
-  { key: "non_negotiables", label: "Non-Negotiables", required: false, sensitive: false, step: 24, category: "prompts" },
-  { key: "way_to_heart", label: "Way to My Heart", required: false, sensitive: false, step: 25, category: "prompts" },
-  { key: "after_work", label: "After Work", required: false, sensitive: false, step: 26, category: "prompts" },
-  { key: "nightclub_or_home", label: "Nightclub or Home", required: false, sensitive: false, step: 27, category: "prompts" },
-  { key: "pet_peeves", label: "Pet Peeves", required: false, sensitive: false, step: 28, category: "prompts" },
-  { key: "craziest_travel_story", label: "Craziest Travel Story", required: false, sensitive: false, step: 29, category: "prompts" },
-  { key: "weirdest_gift", label: "Weirdest Gift", required: false, sensitive: false, step: 30, category: "prompts" },
-  { key: "worst_job", label: "Worst Job", required: false, sensitive: false, step: 31, category: "prompts" },
-  { key: "dream_job", label: "Dream Job", required: false, sensitive: false, step: 32, category: "prompts" },
-  { key: "past_event", label: "Past Event", required: false, sensitive: false, step: 32, category: "prompts" },
-  // Social links (step 33)
-  { key: "social_link_1", label: "Social Link 1", required: false, sensitive: false, step: 33, category: "social" },
-  { key: "social_link_2", label: "Social Link 2", required: false, sensitive: false, step: 33, category: "social" },
-  // Media — voice & video (step 34)
-  { key: "voice_prompt_url", label: "Voice Prompt", required: false, sensitive: false, step: 34, category: "media" },
-  { key: "video_intro_url", label: "Video Intro", required: false, sensitive: false, step: 34, category: "media" },
+  // Profile prompts (steps 26-35)
+  { key: "ideal_first_date", label: "Ideal First Date", required: false, sensitive: false, step: 26, category: "prompts" },
+  { key: "non_negotiables", label: "Non-Negotiables", required: false, sensitive: false, step: 27, category: "prompts" },
+  { key: "way_to_heart", label: "Way to My Heart", required: false, sensitive: false, step: 28, category: "prompts" },
+  { key: "after_work", label: "After Work", required: false, sensitive: false, step: 29, category: "prompts" },
+  { key: "nightclub_or_home", label: "Nightclub or Home", required: false, sensitive: false, step: 30, category: "prompts" },
+  { key: "pet_peeves", label: "Pet Peeves", required: false, sensitive: false, step: 31, category: "prompts" },
+  { key: "craziest_travel_story", label: "Craziest Travel Story", required: false, sensitive: false, step: 32, category: "prompts" },
+  { key: "weirdest_gift", label: "Weirdest Gift", required: false, sensitive: false, step: 33, category: "prompts" },
+  { key: "worst_job", label: "Worst Job", required: false, sensitive: false, step: 34, category: "prompts" },
+  { key: "dream_job", label: "Dream Job", required: false, sensitive: false, step: 35, category: "prompts" },
+  { key: "past_event", label: "Past Event", required: false, sensitive: false, step: 35, category: "prompts" },
+  // Social links (step 36)
+  { key: "social_link_1", label: "Social Link 1", required: false, sensitive: false, step: 36, category: "social" },
+  { key: "social_link_2", label: "Social Link 2", required: false, sensitive: false, step: 36, category: "social" },
+  // Media — voice & video (step 37)
+  { key: "voice_prompt_url", label: "Voice Prompt", required: false, sensitive: false, step: 37, category: "media" },
+  { key: "video_intro_url", label: "Video Intro", required: false, sensitive: false, step: 37, category: "media" },
 ];
 
 const TOTAL_FIELDS = PROFILE_FIELDS.length;

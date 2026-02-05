@@ -4,9 +4,10 @@
  * OnboardingWizard
  *
  * Main wizard component that orchestrates the onboarding flow.
+ * 37 steps across 12 phases. Smooth CSS transitions between steps.
  */
 
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { OnboardingProgress } from "./OnboardingProgress";
@@ -23,15 +24,18 @@ import {
   VerificationSelfieStep,
   PhysicalStep,
   EthnicityStep,
-  RelationshipGoalsStep,
+  MaritalStatusStep,
+  DatingIntentionsStep,
   LocationStep,
   WorkStep,
   EducationStep,
-  BeliefsStep,
+  ReligionStep,
+  PoliticalViewsStep,
   ExerciseStep,
   LanguagesStep,
   HabitsStep,
-  KidsStep,
+  HasKidsStep,
+  WantsKidsStep,
   PetsStep,
   InterestsStep,
   LifeGoalsStep,
@@ -44,11 +48,12 @@ import {
 
 interface OnboardingWizardProps {
   resume?: boolean;
-  targetStep?: number; // Go directly to this step (overrides resume)
+  targetStep?: number;
 }
 
 export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizardProps) {
   const router = useRouter();
+  const stepContentRef = useRef<HTMLDivElement>(null);
 
   const {
     currentStep,
@@ -60,6 +65,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
     profile,
     photoCount,
     completion,
+    goToStep,
     goBack,
     canGoBack,
     setFieldValue,
@@ -79,20 +85,16 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
   const canContinue = useMemo(() => {
     if (!currentStepConfig) return false;
 
-    // Complete step always can continue (no fields)
     if (currentStepConfig.id === "complete") return true;
 
-    // Photos step - check if at least 1 photo
     if (currentStepConfig.id === "photos") {
       return photoCount >= 1 || !!profile?.profile_image_url;
     }
 
-    // Verification selfie - always can continue (optional)
     if (currentStepConfig.id === "verification-selfie") {
       return true;
     }
 
-    // For required steps, check if all fields have values
     if (currentStepConfig.isRequired) {
       for (const field of currentStepConfig.fields) {
         const value = stepValues[field.key];
@@ -114,6 +116,11 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
   const handleClose = useCallback(() => {
     router.push("/profile");
   }, [router]);
+
+  // Handle go to start
+  const handleGoToStart = useCallback(() => {
+    goToStep(7); // Go to first optional step (after required steps)
+  }, [goToStep]);
 
   // Convert height to feet/inches
   const heightInches = stepValues.HeightInches as number | undefined;
@@ -145,24 +152,43 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
     [stepValues.HeightInches, setFieldValue]
   );
 
-  // Handle Enter key to continue on non-keyboard steps
+  // Handle Enter key for both keyboard and non-keyboard steps
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only trigger on Enter key
       if (e.key !== "Enter") return;
-      
-      // Don't trigger if step needs keyboard (text input/textarea)
-      if (currentStepConfig?.needsKeyboard) return;
-      
-      // Don't trigger if we can't continue or are saving
-      if (!canContinue || isSaving) return;
-      
-      // Don't trigger if focus is on an interactive element that uses Enter
+
       const target = e.target as HTMLElement;
       const tagName = target.tagName.toLowerCase();
-      if (tagName === "input" || tagName === "textarea" || tagName === "select") return;
-      
-      // Prevent default and continue
+
+      // Don't interfere with textarea Enter (newlines)
+      if (tagName === "textarea") return;
+
+      // For keyboard steps: focus next input or continue
+      if (currentStepConfig?.needsKeyboard) {
+        if (tagName === "input") {
+          e.preventDefault();
+          // Find all focusable inputs in the step content
+          const container = stepContentRef.current;
+          if (!container) return;
+          const inputs = Array.from(
+            container.querySelectorAll<HTMLElement>("input, select")
+          );
+          const currentIndex = inputs.indexOf(target as HTMLElement);
+          if (currentIndex >= 0 && currentIndex < inputs.length - 1) {
+            // Focus next input
+            inputs[currentIndex + 1].focus();
+          } else if (canContinue && !isSaving) {
+            // Last input — continue
+            saveAndContinue();
+          }
+        }
+        return;
+      }
+
+      // For non-keyboard steps, Enter triggers continue
+      if (!canContinue || isSaving) return;
+      if (tagName === "input" || tagName === "select") return;
+
       e.preventDefault();
       saveAndContinue();
     };
@@ -257,15 +283,13 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
           />
         );
 
-      case "relationship-goals":
+      case "marital-status":
         return (
-          <RelationshipGoalsStep
-            datingIntentions={(stepValues.DatingIntentions as string) || ""}
+          <MaritalStatusStep
             maritalStatus={(stepValues.MaritalStatus as string) || ""}
-            onDatingIntentionsChange={(v) => setFieldValue("DatingIntentions", v)}
             onMaritalStatusChange={(v) => setFieldValue("MaritalStatus", v)}
-            isMaritalStatusPreferNot={isFieldPreferNot("marital_status")}
-            onMaritalStatusPreferNotChange={async (isPreferNot) => {
+            isPreferNot={isFieldPreferNot("marital_status")}
+            onPreferNotChange={async (isPreferNot) => {
               if (isPreferNot) {
                 await markFieldAsPreferNot("marital_status");
                 setFieldValue("MaritalStatus", "");
@@ -276,13 +300,23 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
           />
         );
 
+      case "dating-intentions":
+        return (
+          <DatingIntentionsStep
+            datingIntentions={(stepValues.DatingIntentions as string) || ""}
+            onDatingIntentionsChange={(v) => setFieldValue("DatingIntentions", v)}
+          />
+        );
+
       case "location":
         return (
           <LocationStep
             country={(stepValues.Country as string) || ""}
             city={(stepValues.City as string) || ""}
+            zipCode={(stepValues.ZipCode as string) || ""}
             onCountryChange={(v) => setFieldValue("Country", v)}
             onCityChange={(v) => setFieldValue("City", v)}
+            onZipCodeChange={(v) => setFieldValue("ZipCode", v)}
           />
         );
 
@@ -304,16 +338,13 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
           />
         );
 
-      case "beliefs":
+      case "religion":
         return (
-          <BeliefsStep
+          <ReligionStep
             religion={(stepValues.Religion as string) || ""}
-            politicalViews={(stepValues.PoliticalViews as string) || ""}
             onReligionChange={(v) => setFieldValue("Religion", v)}
-            onPoliticalViewsChange={(v) => setFieldValue("PoliticalViews", v)}
-            isReligionPreferNot={isFieldPreferNot("religion")}
-            isPoliticalViewsPreferNot={isFieldPreferNot("political_views")}
-            onReligionPreferNotChange={async (isPreferNot) => {
+            isPreferNot={isFieldPreferNot("religion")}
+            onPreferNotChange={async (isPreferNot) => {
               if (isPreferNot) {
                 await markFieldAsPreferNot("religion");
                 setFieldValue("Religion", "");
@@ -321,7 +352,16 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
                 await removeFieldFromPreferNot("religion");
               }
             }}
-            onPoliticalViewsPreferNotChange={async (isPreferNot) => {
+          />
+        );
+
+      case "political-views":
+        return (
+          <PoliticalViewsStep
+            politicalViews={(stepValues.PoliticalViews as string) || ""}
+            onPoliticalViewsChange={(v) => setFieldValue("PoliticalViews", v)}
+            isPreferNot={isFieldPreferNot("political_views")}
+            onPreferNotChange={async (isPreferNot) => {
               if (isPreferNot) {
                 await markFieldAsPreferNot("political_views");
                 setFieldValue("PoliticalViews", "");
@@ -357,7 +397,25 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
             onSmokingChange={(v) => setFieldValue("Smoking", v)}
             onDrinkingChange={(v) => setFieldValue("Drinking", v)}
             onMarijuanaChange={(v) => setFieldValue("Marijuana", v)}
+            isSmokingPreferNot={isFieldPreferNot("smoking")}
+            isDrinkingPreferNot={isFieldPreferNot("drinking")}
             isMarijuanaPreferNot={isFieldPreferNot("marijuana")}
+            onSmokingPreferNotChange={async (isPreferNot) => {
+              if (isPreferNot) {
+                await markFieldAsPreferNot("smoking");
+                setFieldValue("Smoking", "");
+              } else {
+                await removeFieldFromPreferNot("smoking");
+              }
+            }}
+            onDrinkingPreferNotChange={async (isPreferNot) => {
+              if (isPreferNot) {
+                await markFieldAsPreferNot("drinking");
+                setFieldValue("Drinking", "");
+              } else {
+                await removeFieldFromPreferNot("drinking");
+              }
+            }}
             onMarijuanaPreferNotChange={async (isPreferNot) => {
               if (isPreferNot) {
                 await markFieldAsPreferNot("marijuana");
@@ -369,16 +427,13 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
           />
         );
 
-      case "kids":
+      case "has-kids":
         return (
-          <KidsStep
+          <HasKidsStep
             hasKids={(stepValues.HasKids as string) || ""}
-            wantsKids={(stepValues.WantsKids as string) || ""}
             onHasKidsChange={(v) => setFieldValue("HasKids", v)}
-            onWantsKidsChange={(v) => setFieldValue("WantsKids", v)}
-            isHasKidsPreferNot={isFieldPreferNot("has_kids")}
-            isWantsKidsPreferNot={isFieldPreferNot("wants_kids")}
-            onHasKidsPreferNotChange={async (isPreferNot) => {
+            isPreferNot={isFieldPreferNot("has_kids")}
+            onPreferNotChange={async (isPreferNot) => {
               if (isPreferNot) {
                 await markFieldAsPreferNot("has_kids");
                 setFieldValue("HasKids", "");
@@ -386,7 +441,16 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
                 await removeFieldFromPreferNot("has_kids");
               }
             }}
-            onWantsKidsPreferNotChange={async (isPreferNot) => {
+          />
+        );
+
+      case "wants-kids":
+        return (
+          <WantsKidsStep
+            wantsKids={(stepValues.WantsKids as string) || ""}
+            onWantsKidsChange={(v) => setFieldValue("WantsKids", v)}
+            isPreferNot={isFieldPreferNot("wants_kids")}
+            onPreferNotChange={async (isPreferNot) => {
               if (isPreferNot) {
                 await markFieldAsPreferNot("wants_kids");
                 setFieldValue("WantsKids", "");
@@ -555,6 +619,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
           <CompleteStep
             completion={completion}
             firstName={(stepValues.DisplayName as string) || ""}
+            profileImageUrl={profile?.profile_image_url || undefined}
           />
         );
 
@@ -579,6 +644,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
         onClose={handleClose}
         canSkipAhead={canSkipAhead}
         onSkipAhead={skipToNextIncomplete}
+        onGoToStart={handleGoToStart}
       />
 
       {/* Error display */}
@@ -590,8 +656,32 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
         </div>
       )}
 
-      {/* Step content */}
-      {renderStep()}
+      {/* Step content with entrance transition */}
+      <div
+        key={currentStep}
+        ref={stepContentRef}
+        className="flex-1 flex flex-col min-h-0 animate-[fadeSlideIn_300ms_ease-out]"
+        style={{
+          // CSS animation for entrance
+          animationFillMode: "both",
+        }}
+      >
+        {renderStep()}
+      </div>
+
+      {/* Inline keyframes for step transition */}
+      <style jsx>{`
+        @keyframes fadeSlideIn {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
 
       {/* Navigation footer (hidden on complete step) */}
       {!isCompleteStep && (
@@ -605,7 +695,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
           isSaving={isSaving}
           isRequired={currentStepConfig?.isRequired ?? false}
           continueLabel={
-            currentStep === 33 ? "Finish" : "Continue"
+            currentStep === 36 ? "Finish" : "Continue"
           }
         />
       )}

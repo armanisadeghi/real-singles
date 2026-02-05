@@ -170,6 +170,7 @@ export function useOnboarding(
         marital_status: profileData.MaritalStatus || "",
         country: profileData.Country || "",
         city: profileData.City || "",
+        zip_code: profileData.ZipCode || "",
         state: profileData.State || "",
         occupation: profileData.Occupation || "",
         company: profileData.Company || "",
@@ -264,6 +265,7 @@ export function useOnboarding(
       values.MaritalStatus = profileData.marital_status;
     if (profileData.country) values.Country = profileData.country;
     if (profileData.city) values.City = profileData.city;
+    if (profileData.zip_code) values.ZipCode = profileData.zip_code;
     if (profileData.occupation) values.Occupation = profileData.occupation;
     if (profileData.company) values.Company = profileData.company;
     if (profileData.education) values.Education = profileData.education;

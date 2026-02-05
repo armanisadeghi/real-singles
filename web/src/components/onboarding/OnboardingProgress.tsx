@@ -8,9 +8,11 @@
  * Two modes:
  * - Steps 1-6 (required): Minimal header - just progress dots, no percentage/close
  * - Steps 7+: Full header with close button, percentage, step count
+ * 
+ * Navigation icons: ChevronsLeft (go to start), ChevronsRight (skip ahead) — icon-only
  */
 
-import { X, FastForward } from "lucide-react";
+import { X, ChevronsLeft, ChevronsRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { TOTAL_STEPS } from "@/lib/onboarding/steps-config";
@@ -26,6 +28,7 @@ interface OnboardingProgressProps {
   className?: string;
   canSkipAhead?: boolean;
   onSkipAhead?: () => void;
+  onGoToStart?: () => void;
 }
 
 export function OnboardingProgress({
@@ -35,12 +38,10 @@ export function OnboardingProgress({
   className,
   canSkipAhead,
   onSkipAhead,
+  onGoToStart,
 }: OnboardingProgressProps) {
   // Determine if we're in the initial required steps
   const isInitialPhase = currentStep <= REQUIRED_STEPS;
-  
-  // For initial phase, show progress through required steps only
-  const initialProgress = Math.round((currentStep / REQUIRED_STEPS) * 100);
   
   // For full phase, show progress through all steps
   const fullProgress = Math.round((currentStep / TOTAL_STEPS) * 100);
@@ -130,21 +131,36 @@ export function OnboardingProgress({
           />
         </div>
 
-        {/* Step indicator text */}
+        {/* Step indicator with icon navigation */}
         <div className="mt-1.5 sm:mt-2 flex items-center justify-between text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+          {/* Go to start icon */}
+          {onGoToStart && currentStep > REQUIRED_STEPS + 1 ? (
+            <button
+              onClick={onGoToStart}
+              className="p-1 -ml-1 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors text-gray-400 dark:text-gray-500 hover:text-brand-primary dark:hover:text-brand-primary"
+              aria-label="Go back to beginning"
+            >
+              <ChevronsLeft className="w-4 h-4" />
+            </button>
+          ) : (
+            <span className="w-6" />
+          )}
+
           <span>
             Step {currentStep} of {TOTAL_STEPS}
           </span>
+
+          {/* Skip ahead icon */}
           {canSkipAhead && onSkipAhead ? (
             <button
               onClick={onSkipAhead}
-              className="flex items-center gap-1 text-brand-primary hover:text-brand-primary-dark transition-colors"
+              className="p-1 -mr-1 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors text-gray-400 dark:text-gray-500 hover:text-brand-primary dark:hover:text-brand-primary"
+              aria-label="Skip ahead to next incomplete step"
             >
-              <span>Skip ahead</span>
-              <FastForward className="w-3 h-3" />
+              <ChevronsRight className="w-4 h-4" />
             </button>
           ) : (
-            <span className="text-gray-400 dark:text-gray-500">
+            <span className="text-gray-400 dark:text-gray-500 text-[10px] sm:text-xs">
               Optional
             </span>
           )}

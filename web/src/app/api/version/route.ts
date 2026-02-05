@@ -1,16 +1,23 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { syncPendingDeployments } from "@/lib/services/vercel-sync";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 /**
  * GET /api/version
- * Returns the current deployed version of the app
- * Used by clients to check if they need to refresh
+ * Returns the current deployed version of the app.
+ * Used by clients to check if they need to refresh.
+ *
+ * Before returning, syncs any pending/building records with Vercel
+ * so the reported status is always accurate.
  */
 export async function GET() {
   try {
+    // Sync any pending/building records with Vercel before reading
+    await syncPendingDeployments();
+
     const supabaseAdmin = createAdminClient();
     
     // Get the latest version from the database (order by build_number for correct ordering)

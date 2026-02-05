@@ -4,6 +4,7 @@
  * BirthdayStep
  *
  * Step 2: Date of Birth with age calculation
+ * Shows age and zodiac sign on separate lines for clean display.
  */
 
 import { useState, useEffect, useMemo, useRef } from "react";
@@ -15,6 +16,22 @@ interface BirthdayStepProps {
   dateOfBirth: string;
   onChange: (value: string) => void;
 }
+
+// Zodiac emoji map
+const ZODIAC_EMOJI: Record<string, string> = {
+  aries: "\u2648",
+  taurus: "\u2649",
+  gemini: "\u264A",
+  cancer: "\u264B",
+  leo: "\u264C",
+  virgo: "\u264D",
+  libra: "\u264E",
+  scorpio: "\u264F",
+  sagittarius: "\u2650",
+  capricorn: "\u2651",
+  aquarius: "\u2652",
+  pisces: "\u2653",
+};
 
 // Generate options for month/day/year
 const MONTHS = [
@@ -107,11 +124,13 @@ export function BirthdayStep({ dateOfBirth, onChange }: BirthdayStepProps) {
 
   const zodiacSign = useMemo(() => {
     if (month && day && year) {
-      const sign = getZodiacFromDate(`${year}-${month}-${day}`);
-      return sign ? getZodiacLabel(sign) : null;
+      return getZodiacFromDate(`${year}-${month}-${day}`);
     }
     return null;
   }, [month, day, year]);
+
+  const zodiacLabel = zodiacSign ? getZodiacLabel(zodiacSign) : null;
+  const zodiacEmoji = zodiacSign ? ZODIAC_EMOJI[zodiacSign] || "" : "";
 
   const selectClass = cn(
     "flex-1 px-3 py-3.5 rounded-xl appearance-none",
@@ -178,23 +197,20 @@ export function BirthdayStep({ dateOfBirth, onChange }: BirthdayStepProps) {
         </select>
       </div>
 
-      {/* Age and zodiac preview */}
+      {/* Age and zodiac preview — each on its own line */}
       {age !== null && (
-        <div className="mt-4 p-4 rounded-xl bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:border-pink-800/30">
-          <p className="text-center text-gray-700 dark:text-gray-300">
-            Your profile will show:{" "}
-            <span className="font-semibold text-pink-600 dark:text-pink-400">
-              {age} years old
-            </span>
-            {zodiacSign && (
-              <>
-                {" · "}
-                <span className="font-semibold text-pink-600 dark:text-pink-400">
-                  {zodiacSign}
-                </span>
-              </>
-            )}
+        <div className="mt-4 p-4 rounded-xl bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:border-pink-800/30 space-y-1">
+          <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+            Your profile will show
           </p>
+          <p className="text-center text-lg font-semibold text-pink-600 dark:text-pink-400">
+            {age} years old
+          </p>
+          {zodiacLabel && (
+            <p className="text-center text-base font-medium text-pink-500 dark:text-pink-300">
+              {zodiacEmoji} {zodiacLabel}
+            </p>
+          )}
         </div>
       )}
     </OnboardingStepWrapper>

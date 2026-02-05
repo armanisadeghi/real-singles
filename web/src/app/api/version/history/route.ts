@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { syncPendingDeployments } from "@/lib/services/vercel-sync";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 /**
  * GET /api/version/history?limit=20&offset=0
- * Returns version history from the app_version table
- * Admin-only endpoint (no auth check for now, but should be protected in production)
+ * Returns version history from the app_version table.
+ *
+ * Before returning data, any records still in a non-terminal state
+ * ("pending" / "building") are synced with the Vercel API so the
+ * caller always receives the true deployment status.
  */
 export async function GET(request: Request) {
   try {
@@ -29,6 +33,11 @@ export async function GET(request: Request) {
         { status: 400 }
       );
     }
+
+    // Sync any pending/building records with Vercel before reading.
+    // This is a no-op when there's nothing to sync or when Vercel
+    // credentials are not configured.
+    await syncPendingDeployments();
 
     const supabaseAdmin = createAdminClient();
 

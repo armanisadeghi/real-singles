@@ -4,7 +4,7 @@
  * OnboardingStepWrapper
  *
  * Provides consistent layout for each onboarding step.
- * Handles vertical centering and ensures content doesn't overflow.
+ * Title always pinned at top. Content centered vertically for non-keyboard steps.
  */
 
 import { ReactNode, forwardRef } from "react";
@@ -29,27 +29,37 @@ export function OnboardingStepWrapper({
   return (
     <main
       className={cn(
-        "flex-1 flex flex-col min-h-0 px-5 sm:px-6 py-6",
-        // When keyboard needed, align content to top so it stays above keyboard
-        needsKeyboard ? "justify-start pt-4" : "justify-center",
+        "flex-1 flex flex-col min-h-0 px-5 sm:px-6",
         className
       )}
     >
-      <div className="w-full max-w-md mx-auto overflow-y-auto">
-        {/* Step header */}
-        <div className="mb-5 sm:mb-6">
+      <div className="w-full max-w-md mx-auto flex flex-col flex-1 min-h-0 py-4 sm:py-6">
+        {/* Step header — always pinned at top */}
+        <div className="flex-none mb-4 sm:mb-5">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
             {title}
           </h1>
           {subtitle && (
-            <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+            <p className="mt-1.5 text-sm sm:text-base text-gray-600 dark:text-gray-400">
               {subtitle}
             </p>
           )}
         </div>
 
-        {/* Step content */}
-        <div className="space-y-3 sm:space-y-4">{children}</div>
+        {/* Step content — centered vertically for non-keyboard steps */}
+        <div
+          className={cn(
+            "flex-1 min-h-0 flex flex-col",
+            needsKeyboard ? "" : "justify-center"
+          )}
+        >
+          <div className={cn(
+            "space-y-3 sm:space-y-4",
+            needsKeyboard ? "" : "overflow-y-auto"
+          )}>
+            {children}
+          </div>
+        </div>
       </div>
     </main>
   );
@@ -62,16 +72,20 @@ interface OnboardingInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  hint?: string;
 }
 
 export const OnboardingInput = forwardRef<HTMLInputElement, OnboardingInputProps>(
-  function OnboardingInput({ label, error, className, ...props }, ref) {
+  function OnboardingInput({ label, error, hint, className, ...props }, ref) {
     return (
       <div className="space-y-1.5">
         {label && (
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             {label}
           </label>
+        )}
+        {hint && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">{hint}</p>
         )}
         <input
           ref={ref}
@@ -219,7 +233,6 @@ export function OnboardingChips({
       onChange(selected.filter((v) => v !== value));
     } else {
       if (maxSelection && selected.length >= maxSelection) {
-        // At max, remove first and add new
         return;
       }
       onChange([...selected, value]);
@@ -313,7 +326,6 @@ export function OnboardingSelectWithPreferNot({
   const handleCheckboxChange = (checked: boolean) => {
     onPreferNotChange(checked);
     if (checked) {
-      // Clear the select value when checking "prefer not to say"
       onChange("");
     }
   };
@@ -331,13 +343,12 @@ export function OnboardingSelectWithPreferNot({
         disabled={disabled || isPreferNot}
         className={cn(
           "w-full px-4 py-3.5 rounded-xl appearance-none",
-          "text-base", // 16px minimum for iOS
+          "text-base",
           value && !isPreferNot ? "text-gray-900 dark:text-gray-100" : "text-gray-400 dark:text-gray-500",
           "bg-white dark:bg-neutral-800/90",
           "border border-gray-200 dark:border-neutral-700",
           "focus:outline-none focus:border-gray-400 dark:focus:border-neutral-500",
           "transition-colors duration-150",
-          // Custom arrow
           "bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%239ca3af%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')]",
           "bg-[length:20px] bg-[right_12px_center] bg-no-repeat",
           "pr-10",
@@ -357,7 +368,6 @@ export function OnboardingSelectWithPreferNot({
         ))}
       </select>
 
-      {/* Prefer not to say checkbox */}
       <label className="flex items-center gap-2 cursor-pointer group">
         <input
           type="checkbox"
@@ -406,7 +416,7 @@ export function OnboardingChipsWithPreferNot({
   fieldDbColumn,
 }: OnboardingChipsWithPreferNotProps) {
   const toggleOption = (value: string) => {
-    if (isPreferNot) return; // Can't select options when prefer not is checked
+    if (isPreferNot) return;
     
     if (selected.includes(value)) {
       onChange(selected.filter((v) => v !== value));
@@ -421,7 +431,6 @@ export function OnboardingChipsWithPreferNot({
   const handleCheckboxChange = (checked: boolean) => {
     onPreferNotChange(checked);
     if (checked) {
-      // Clear selections when checking "prefer not to say"
       onChange([]);
     }
   };
@@ -476,7 +485,6 @@ export function OnboardingChipsWithPreferNot({
         })}
       </div>
 
-      {/* Prefer not to say checkbox */}
       <label className="flex items-center gap-2 cursor-pointer group">
         <input
           type="checkbox"
@@ -548,6 +556,102 @@ export function OnboardingOptionCards({
                 <div
                   className={cn(
                     "w-5 h-5 rounded-full border-2 transition-all",
+                    isSelected
+                      ? "border-pink-500 bg-pink-500"
+                      : "border-gray-300 dark:border-neutral-600"
+                  )}
+                >
+                  {isSelected && (
+                    <svg
+                      className="w-full h-full text-white p-0.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
+    </div>
+  );
+}
+
+/**
+ * Multi-select option cards for onboarding (same visual as single-select, but allows multiple)
+ */
+interface OnboardingOptionCardsMultiProps {
+  options: readonly { value: string; label: string }[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  maxSelection?: number;
+  error?: string;
+}
+
+export function OnboardingOptionCardsMulti({
+  options,
+  selected,
+  onChange,
+  maxSelection,
+  error,
+}: OnboardingOptionCardsMultiProps) {
+  const toggleOption = (value: string) => {
+    if (selected.includes(value)) {
+      onChange(selected.filter((v) => v !== value));
+    } else {
+      if (maxSelection && selected.length >= maxSelection) {
+        return;
+      }
+      onChange([...selected, value]);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="space-y-2">
+        {options.map((opt) => {
+          const isSelected = selected.includes(opt.value);
+          const isDisabled =
+            !isSelected && !!maxSelection && selected.length >= maxSelection;
+
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => toggleOption(opt.value)}
+              disabled={isDisabled}
+              className={cn(
+                "w-full px-4 py-3 rounded-xl text-left",
+                "border transition-all duration-200",
+                "active:scale-[0.99]",
+                isSelected
+                  ? cn(
+                      "bg-pink-50 dark:bg-pink-900/30",
+                      "border-pink-500",
+                      "text-gray-900 dark:text-gray-100"
+                    )
+                  : cn(
+                      "bg-white/80 dark:bg-neutral-800/80",
+                      "border-gray-200 dark:border-neutral-700",
+                      "text-gray-700 dark:text-gray-300",
+                      "hover:border-pink-300 dark:hover:border-pink-700"
+                    ),
+                isDisabled && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-medium">{opt.label}</span>
+                <div
+                  className={cn(
+                    "w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center",
                     isSelected
                       ? "border-pink-500 bg-pink-500"
                       : "border-gray-300 dark:border-neutral-600"
