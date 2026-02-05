@@ -101,23 +101,37 @@ export async function PUT(
       description,
       image_url,
       points_cost,
+      dollar_price,
       retail_value,
       category,
       stock_quantity,
-      is_active
+      is_active,
+      is_public,
+      requires_shipping,
     } = body;
 
     // Validation
-    if (!name || points_cost === undefined) {
+    if (!name) {
       return NextResponse.json(
-        { error: "Name and points cost are required" },
+        { error: "Name is required" },
         { status: 400 }
       );
     }
 
-    if (typeof points_cost !== "number" || points_cost < 0) {
+    // At least one price (points or dollars) is required
+    const hasPointsPrice = typeof points_cost === "number" && points_cost > 0;
+    const hasDollarPrice = typeof dollar_price === "number" && dollar_price > 0;
+
+    if (!hasPointsPrice && !hasDollarPrice) {
       return NextResponse.json(
-        { error: "Points cost must be a positive number" },
+        { error: "At least one price (points or dollars) is required" },
+        { status: 400 }
+      );
+    }
+
+    if (points_cost !== undefined && points_cost !== null && (typeof points_cost !== "number" || points_cost < 0)) {
+      return NextResponse.json(
+        { error: "Points cost must be a non-negative number" },
         { status: 400 }
       );
     }
@@ -148,11 +162,14 @@ export async function PUT(
         name,
         description: description || null,
         image_url: image_url || null,
-        points_cost,
-        retail_value: retail_value ? parseFloat(retail_value) : null,
+        points_cost: points_cost ?? 0,
+        dollar_price: dollar_price !== undefined && dollar_price !== null ? parseFloat(String(dollar_price)) : null,
+        retail_value: retail_value ? parseFloat(String(retail_value)) : null,
         category: category || null,
-        stock_quantity: stock_quantity !== undefined ? parseInt(stock_quantity) : null,
-        is_active: is_active !== undefined ? is_active : true
+        stock_quantity: stock_quantity !== undefined && stock_quantity !== null ? parseInt(String(stock_quantity)) : null,
+        is_active: is_active !== undefined ? is_active : true,
+        is_public: is_public !== undefined ? is_public : false,
+        requires_shipping: requires_shipping !== undefined ? requires_shipping : true,
       })
       .eq("id", productId)
       .select()

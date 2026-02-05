@@ -18,6 +18,7 @@ interface AdminHeaderProps {
 const navItems = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/users", label: "Users" },
+  { href: "/admin/products", label: "Products" },
   { href: "/admin/email", label: "Email" },
   { href: "/admin/events", label: "Events" },
   { href: "/admin/speed-dating", label: "Speed Dating" },

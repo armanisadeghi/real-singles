@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get profiles for the users in history
-    const targetUserIds = history.map((h) => h.target_user_id);
+    const targetUserIds = history.map((h) => h.target_user_id).filter((id): id is string => id !== null);
 
     // Get profiles (exclude hidden profiles - show null for hidden users)
     const { data: profiles } = await supabase
@@ -92,9 +92,16 @@ export async function GET(request: NextRequest) {
       .in("user_id", targetUserIds)
       .eq("profile_hidden", false);
 
+    // Get display_name from users table
+    const { data: users } = await supabase
+      .from("users")
+      .select("id, display_name")
+      .in("id", targetUserIds);
+
     // Combine data
     const historyWithProfiles = history.map((record) => {
       const profile = profiles?.find((p) => p.user_id === record.target_user_id);
+      const userData = users?.find((u) => u.id === record.target_user_id);
       
       // Calculate age
       let age: number | null = null;
@@ -115,6 +122,7 @@ export async function GET(request: NextRequest) {
         created_at: record.created_at,
         profile: profile
           ? {
+              display_name: userData?.display_name || profile.first_name,
               first_name: profile.first_name,
               age,
               gender: profile.gender,

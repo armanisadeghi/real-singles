@@ -2,11 +2,9 @@ import Link from "next/link";
 import { 
   MessageSquare, 
   Target, 
-  Settings, 
   ChevronRight,
   ShieldCheck,
   Zap,
-  Gift,
   Search,
   Heart,
   MessageCircle,
@@ -69,16 +67,6 @@ const toolsSections = [
     iconColor: "text-purple-600",
     hoverBorder: "hover:border-purple-200",
     hoverBg: "hover:bg-purple-50/50",
-  },
-  {
-    title: "Reward Products",
-    description: "Manage products users can redeem with points",
-    href: "/admin/products",
-    icon: Gift,
-    iconBg: "bg-rose-100",
-    iconColor: "text-rose-600",
-    hoverBorder: "hover:border-rose-200",
-    hoverBg: "hover:bg-rose-50/50",
   },
   {
     title: "App Version",
