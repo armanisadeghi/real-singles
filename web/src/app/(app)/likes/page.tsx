@@ -710,7 +710,7 @@ function MatchesTab() {
         title="Favorites"
         count={favoriteMatches.length}
         icon={<Star className="w-4 h-4 text-amber-500" fill="currentColor" />}
-        defaultExpanded={favoriteMatches.length > 0}
+        defaultExpanded
         emptyMessage="Tap the star on any match to add them to your favorites for quick access."
         emptyAction={allMatches.length > 0 ? undefined : { label: "Discover People", href: "/discover" }}
       >
@@ -724,7 +724,7 @@ function MatchesTab() {
         title="New Matches"
         count={newMatches.length}
         icon={<Sparkles className="w-4 h-4 text-pink-500" />}
-        defaultExpanded={newMatches.length > 0}
+        defaultExpanded
         emptyMessage="No new matches yet. Boost your profile to get seen by more people!"
         emptyAction={{ label: "Boost Me", href: "/boost" }}
       >
@@ -738,7 +738,7 @@ function MatchesTab() {
         title="All Matches"
         count={allMatches.length}
         icon={<Heart className="w-4 h-4 text-rose-500" />}
-        defaultExpanded={allMatches.length > 0 && favoriteMatches.length === 0 && newMatches.length === 0}
+        defaultExpanded
         emptyMessage="When you and someone both like each other, they'll appear here."
         emptyAction={{ label: "Discover People", href: "/discover" }}
       >
