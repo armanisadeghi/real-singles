@@ -29,7 +29,6 @@ interface ApiProfile {
   id: string | null;
   DisplayName: string;
   FirstName: string;
-  LastName: string;
   DOB: string;
   City: string;
   State: string;
@@ -107,7 +106,6 @@ function formatProfileForCard(profile: ApiProfile) {
     id,
     user_id: id,
     first_name: profile.FirstName || profile.DisplayName?.split(" ")[0],
-    last_name: profile.LastName || profile.DisplayName?.split(" ").slice(1).join(" "),
     date_of_birth: profile.DOB,
     city: profile.City,
     state: profile.State,

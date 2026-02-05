@@ -115,8 +115,10 @@ export interface CompletionStatus {
 
 // Fields that count toward completion (excluding media fields handled separately)
 const COMPLETION_FIELDS = [
-  // Display name (step 1) — first_name/last_name are collected at registration
-  { key: "display_name", step: 1, required: true },
+  // first_name is collected at registration (always present for completed profiles)
+  // Note: onboarding step 1 now collects display_name, but we track first_name
+  // for completion since it's the field that existing users already have filled in
+  { key: "first_name", step: 1, required: true },
   { key: "date_of_birth", step: 2, required: true },
   { key: "gender", step: 3, required: true },
   { key: "looking_for", step: 4, required: true },

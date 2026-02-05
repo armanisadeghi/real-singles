@@ -39,7 +39,6 @@ interface ConversationParticipant {
   UserID: string;
   DisplayName: string;
   FirstName: string;
-  LastName: string;
   ProfileImage: string;
   LastActiveAt?: string | null;
 }
