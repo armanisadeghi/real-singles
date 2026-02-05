@@ -88,8 +88,8 @@ export function ProfileCard({
   ].filter(Boolean) as string[];
 
   const name =
-    profile.first_name ||
     profile.user?.display_name ||
+    profile.first_name ||
     "Anonymous";
   const age = profile.date_of_birth
     ? calculateAge(profile.date_of_birth)

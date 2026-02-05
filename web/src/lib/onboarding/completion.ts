@@ -13,6 +13,8 @@ import { ONBOARDING_STEPS, getAllFields } from "./steps-config";
 // ============================================
 
 export interface ProfileData {
+  // Display name (what the user wants to be called publicly)
+  display_name?: string | null;
   // Basic info
   first_name?: string | null;
   last_name?: string | null;
@@ -113,8 +115,8 @@ export interface CompletionStatus {
 
 // Fields that count toward completion (excluding media fields handled separately)
 const COMPLETION_FIELDS = [
-  // Basic (step 1-4, but photos handled separately)
-  { key: "first_name", step: 1, required: true },
+  // Display name (step 1) — first_name/last_name are collected at registration
+  { key: "display_name", step: 1, required: true },
   { key: "date_of_birth", step: 2, required: true },
   { key: "gender", step: 3, required: true },
   { key: "looking_for", step: 4, required: true },

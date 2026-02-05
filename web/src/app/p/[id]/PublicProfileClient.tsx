@@ -35,6 +35,7 @@ import { getDatingIntentionsLabel, getInterestLabel } from "@/types";
 
 interface PublicProfile {
   first_name: string;
+  display_name: string;
   age: number | null;
   location: string | null;
   bio: string | null;
@@ -235,7 +236,7 @@ export function PublicProfileClient({ userId, initialProfile }: PublicProfileCli
             <div className="absolute bottom-0 left-0 right-0 p-5 pb-6 text-white">
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-3xl font-bold tracking-tight">
-                  {profile.first_name}
+                  {profile.display_name || profile.first_name}
                   {profile.age && <span className="font-normal">, {profile.age}</span>}
                 </h1>
                 {profile.is_verified && (

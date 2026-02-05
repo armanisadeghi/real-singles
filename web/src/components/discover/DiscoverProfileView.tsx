@@ -155,7 +155,7 @@ export function DiscoverProfileView() {
     
     if (result.success) {
       // Record for potential undo
-      const userName = currentProfile?.first_name || "User";
+      const userName = currentProfile?.user?.display_name || currentProfile?.first_name || "User";
       recordAction(userId, userName, "like");
       
       // If mutual match, don't advance yet - wait for match modal to close
@@ -170,14 +170,14 @@ export function DiscoverProfileView() {
     }
     
     return result;
-  }, [currentProfile?.first_name, recordAction, advanceToNext, markActedOn]);
+  }, [currentProfile?.user?.display_name, currentProfile?.first_name, recordAction, advanceToNext, markActedOn]);
   
   // Handle Pass/Dislike action
   const handlePass = useCallback(async (userId: string): Promise<{ success: boolean; msg?: string }> => {
     const result = await callMatchAction(userId, "pass");
     
     if (result.success) {
-      const userName = currentProfile?.first_name || "User";
+      const userName = currentProfile?.user?.display_name || currentProfile?.first_name || "User";
       recordAction(userId, userName, "pass");
       // Mark as acted on and advance
       markActedOn(userId);
@@ -185,14 +185,14 @@ export function DiscoverProfileView() {
     }
     
     return result;
-  }, [currentProfile?.first_name, recordAction, advanceToNext, markActedOn]);
+  }, [currentProfile?.user?.display_name, currentProfile?.first_name, recordAction, advanceToNext, markActedOn]);
   
   // Handle Super Like action
   const handleSuperLike = useCallback(async (userId: string): Promise<MatchActionResult> => {
     const result = await callMatchAction(userId, "super_like");
     
     if (result.success) {
-      const userName = currentProfile?.first_name || "User";
+      const userName = currentProfile?.user?.display_name || currentProfile?.first_name || "User";
       recordAction(userId, userName, "super_like");
       
       // If mutual match, don't advance yet - wait for match modal to close
@@ -206,7 +206,7 @@ export function DiscoverProfileView() {
     }
     
     return result;
-  }, [currentProfile?.first_name, recordAction, advanceToNext, markActedOn]);
+  }, [currentProfile?.user?.display_name, currentProfile?.first_name, recordAction, advanceToNext, markActedOn]);
   
   // Handle Block action
   const handleBlock = useCallback(async (userId: string): Promise<{ success: boolean; msg?: string }> => {

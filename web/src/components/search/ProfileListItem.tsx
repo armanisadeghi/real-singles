@@ -73,7 +73,7 @@ export function ProfileListItem({
   className,
   onClick,
 }: ProfileListItemProps) {
-  const name = profile.first_name || profile.user?.display_name || "Anonymous";
+  const name = profile.user?.display_name || profile.first_name || "Anonymous";
   const location = [profile.city, profile.state].filter(Boolean).join(", ");
   const bgColor = getBgColor(profile.id || profile.user_id || name);
   const initials = getInitials(name);

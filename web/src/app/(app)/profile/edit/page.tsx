@@ -411,6 +411,10 @@ export default function EditProfilePage() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [lifeGoalOptions, setLifeGoalOptions] = useState<{key: string; label: string; category: string; description?: string}[]>([]);
+  
+  // Display name (from users table) and email (from auth) - separate from profiles
+  const [displayName, setDisplayName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   // Refs for autosave
   const lastSavedProfileRef = useRef<string>("");
@@ -570,6 +574,14 @@ export default function EditProfilePage() {
       .from("profiles")
       .upsert(profileData, { onConflict: "user_id" });
 
+    // Also save display_name to users table if it has changed
+    if (displayName) {
+      await supabase
+        .from("users")
+        .update({ display_name: displayName, updated_at: new Date().toISOString() })
+        .eq("id", user.id);
+    }
+
     isSavingRef.current = false;
 
     if (upsertError) {
@@ -664,11 +676,25 @@ export default function EditProfilePage() {
       return;
     }
 
-    const { data: existingProfile } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
+    // Set email from auth user
+    setUserEmail(user.email || "");
+
+    // Fetch profile and user data in parallel
+    const [{ data: existingProfile }, { data: userData }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single(),
+      supabase
+        .from("users")
+        .select("display_name")
+        .eq("id", user.id)
+        .single(),
+    ]);
+
+    // Set display name from users table
+    setDisplayName(userData?.display_name || "");
 
     if (existingProfile) {
       const { feet, inches } = inchesToFeetAndInches(existingProfile.height_inches);
@@ -1056,6 +1082,37 @@ export default function EditProfilePage() {
         <section className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm p-6" aria-labelledby="basic-info-heading">
           <h2 id="basic-info-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Basic Info</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label htmlFor="display-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Display Name<span className="text-red-500 ml-1" aria-hidden="true">*</span>
+                <span className="sr-only">(required)</span>
+              </label>
+              <input
+                id="display-name"
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                aria-required="true"
+                placeholder="This is how other members see you"
+                maxLength={50}
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950"
+              />
+              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">This is how other members will see you on the app</p>
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={userEmail}
+                readOnly
+                disabled
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-neutral-700 rounded-lg bg-gray-50 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+              />
+              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Your account email cannot be changed here</p>
+            </div>
             <div>
               <label htmlFor="first-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 First Name<span className="text-red-500 ml-1" aria-hidden="true">*</span>

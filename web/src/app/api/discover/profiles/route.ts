@@ -116,7 +116,6 @@ export async function GET(request: NextRequest) {
         id: p.id,
         user_id: p.user_id,
         first_name: p.first_name,
-        last_name: p.last_name,
         date_of_birth: p.date_of_birth,
         city: p.city,
         state: p.state,

@@ -328,7 +328,7 @@ export function SearchProfileView({
   // Uses the public share URL (/p/{user_id}) which shows a limited profile for non-authenticated users
   // and redirects authenticated users to the full profile
   const handleShare = useCallback(async () => {
-    const displayName = profile.first_name || profile.user?.display_name || "Someone";
+    const displayName = profile.user?.display_name || profile.first_name || "Someone";
     // Use the public share page URL - this shows limited profile for non-authenticated users
     // and redirects authenticated users to /search/profile/{id}
     const shareUrl = typeof window !== "undefined" 
@@ -461,7 +461,7 @@ export function SearchProfileView({
   }, [handleClose]);
 
   // Derived values for display
-  const name = profile.first_name || profile.user?.display_name || "Anonymous";
+  const name = profile.user?.display_name || profile.first_name || "Anonymous";
   const age = profile.date_of_birth ? calculateAge(profile.date_of_birth) : null;
   const location = [profile.city, profile.state].filter(Boolean).join(", ");
 
@@ -920,7 +920,7 @@ export function SearchProfileView({
               Report this profile
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">
-              Why are you reporting {profile.first_name || "this user"}?
+              Why are you reporting {profile.user?.display_name || profile.first_name || "this user"}?
             </p>
 
             <div className="space-y-2">
@@ -971,7 +971,7 @@ export function SearchProfileView({
         isOpen={showBlockConfirm}
         onClose={() => setShowBlockConfirm(false)}
         onConfirm={handleBlock}
-        title={`Block ${profile.first_name || "this user"}?`}
+        title={`Block ${profile.user?.display_name || profile.first_name || "this user"}?`}
         message="They won't be able to see your profile or contact you. You can unblock them later from Settings."
         confirmLabel="Block"
         cancelLabel="Cancel"

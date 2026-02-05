@@ -130,7 +130,7 @@ export function ProfileSectionRenderer({
   className,
   excludeBasicsAndAbout = false,
 }: ProfileSectionRendererProps) {
-  const name = profile.first_name || profile.user?.display_name || "Anonymous";
+  const name = profile.user?.display_name || profile.first_name || "Anonymous";
   const age = profile.date_of_birth ? calculateAge(profile.date_of_birth) : null;
   const location = [profile.city, profile.state].filter(Boolean).join(", ");
   const height = profile.height_inches ? formatHeight(profile.height_inches) : null;

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 interface ProfileMetadata {
   profile_id: string;
   first_name: string | null;
+  display_name?: string | null;
   age: number | null;
   location: string | null;
   profile_image_url: string | null;
@@ -131,7 +132,7 @@ export function ProfileMessageBubble({
                 <div className="aspect-[4/3] overflow-hidden">
                   <img
                     src={metadata.profile_image_url}
-                    alt={metadata.first_name || "Profile"}
+                    alt={metadata.display_name || metadata.first_name || "Profile"}
                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
                   />
                 </div>
@@ -139,7 +140,7 @@ export function ProfileMessageBubble({
                 <div className="aspect-[4/3] bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 flex items-center justify-center">
                   <Avatar
                     src={null}
-                    name={metadata.first_name || "?"}
+                    name={metadata.display_name || metadata.first_name || "?"}
                     size="xl"
                   />
                 </div>
@@ -152,7 +153,7 @@ export function ProfileMessageBubble({
               <div className="absolute bottom-3 left-3 right-3">
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-xl font-bold text-white drop-shadow-lg">
-                    {metadata.first_name || "Unknown"}
+                    {metadata.display_name || metadata.first_name || "Unknown"}
                   </span>
                   {metadata.age && (
                     <span className="text-lg text-white/90 drop-shadow-lg">

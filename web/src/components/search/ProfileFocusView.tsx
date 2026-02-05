@@ -133,7 +133,7 @@ export function ProfileFocusView({
     ...gallery.filter((g) => g.media_type === "image").map((g) => g.media_url),
   ].filter(Boolean) as string[];
 
-  const name = profile.first_name || profile.user?.display_name || "Anonymous";
+  const name = profile.user?.display_name || profile.first_name || "Anonymous";
   const age = profile.date_of_birth ? calculateAge(profile.date_of_birth) : null;
   const location = [profile.city, profile.state].filter(Boolean).join(", ");
   const bgColor = getBgColor(profile.id || profile.user_id || name);

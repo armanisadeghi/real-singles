@@ -246,7 +246,7 @@ export default async function MyProfilePage() {
                   {/* Name & Age */}
                   <div className="flex items-baseline gap-1.5 sm:gap-2 mb-0.5">
                     <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate">
-                      {profile.first_name || user.display_name || "Your Name"}
+                      {user.display_name || profile.first_name || "Your Name"}
                     </h1>
                     {profile.date_of_birth && (
                       <span className="text-base sm:text-xl text-gray-400 dark:text-gray-500 font-light shrink-0">

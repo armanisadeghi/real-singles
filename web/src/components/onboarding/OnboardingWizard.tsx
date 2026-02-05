@@ -186,10 +186,8 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
       case "name":
         return (
           <NameStep
-            firstName={(stepValues.FirstName as string) || ""}
-            lastName={(stepValues.LastName as string) || ""}
-            onFirstNameChange={(v) => setFieldValue("FirstName", v)}
-            onLastNameChange={(v) => setFieldValue("LastName", v)}
+            displayName={(stepValues.DisplayName as string) || ""}
+            onDisplayNameChange={(v) => setFieldValue("DisplayName", v)}
           />
         );
 
@@ -556,7 +554,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
         return (
           <CompleteStep
             completion={completion}
-            firstName={(stepValues.FirstName as string) || ""}
+            firstName={(stepValues.DisplayName as string) || ""}
           />
         );
 

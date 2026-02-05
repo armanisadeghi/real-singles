@@ -344,8 +344,8 @@ export function BlockedUsersList({
     <div className="divide-y divide-gray-200 dark:divide-neutral-700">
       {blockedUsers.map((block) => {
         const name =
-          block.profile?.first_name ||
           block.user?.display_name ||
+          block.profile?.first_name ||
           "Unknown User";
         const image = block.profile?.profile_image_url;
 

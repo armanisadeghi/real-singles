@@ -353,9 +353,8 @@ export async function GET(request: NextRequest) {
 
         return {
           user_id: match.userId,
-          display_name: match.user?.display_name,
+          display_name: match.user?.display_name || profile?.first_name,
           first_name: profile?.first_name,
-          last_name: profile?.last_name,
           age,
           gender: profile?.gender,
           city: profile?.city,

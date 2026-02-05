@@ -149,7 +149,7 @@ export default function SearchProfilePage() {
 
   // Get the display name for recording actions
   const getDisplayName = useCallback(() => {
-    return profile?.first_name || profile?.user?.display_name || "User";
+    return profile?.user?.display_name || profile?.first_name || "User";
   }, [profile]);
 
   // Action handlers - now record actions for undo

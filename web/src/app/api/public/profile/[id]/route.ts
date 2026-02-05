@@ -29,7 +29,7 @@ export async function GET(
   // Check if user exists and is active
   const { data: userData, error: userError } = await supabase
     .from("users")
-    .select("id, status")
+    .select("id, status, display_name")
     .eq("id", userId)
     .single();
 
@@ -124,6 +124,7 @@ export async function GET(
 
   const responseData = {
     id: userId,
+    display_name: userData.display_name || profile.first_name || "Someone",
     first_name: profile.first_name || "Someone",
     age,
     location: location || null,

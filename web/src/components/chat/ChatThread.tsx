@@ -85,8 +85,8 @@ export function ChatThread({
   const displayName =
     conversationType === "group"
       ? conversationName || "Group Chat"
-      : otherParticipant?.profile?.first_name ||
-        otherParticipant?.user?.display_name ||
+      : otherParticipant?.user?.display_name ||
+        otherParticipant?.profile?.first_name ||
         "Unknown";
 
   const displayImage =
@@ -127,7 +127,7 @@ export function ChatThread({
     participants.map((p) => [
       p.user_id,
       {
-        name: p.profile?.first_name || p.user?.display_name || "Unknown",
+        name: p.user?.display_name || p.profile?.first_name || "Unknown",
         image: p.profile?.profile_image_url || null,
       },
     ])

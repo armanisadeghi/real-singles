@@ -13,8 +13,6 @@ interface FormattedProfileWithDistance {
   id: string | null;
   DisplayName: string;
   FirstName: string;
-  LastName: string;
-  Email: string;
   DOB: string;
   Gender: string;
   Image: string | null;
@@ -174,8 +172,6 @@ async function handleNearbyRequest(request: Request) {
       id: profile.user_id,
       DisplayName: profile.user?.display_name || profile.first_name || "",
       FirstName: profile.first_name || "",
-      LastName: profile.last_name || "",
-      Email: profile.user?.email || "",
       DOB: profile.date_of_birth || "",
       Gender: profile.gender || "",
       Image: imageUrl,

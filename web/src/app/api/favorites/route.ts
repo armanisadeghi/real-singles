@@ -8,7 +8,7 @@ import type { DbProfile, DbUser } from "@/types/db";
 // ============================================================================
 
 interface ProfileWithUser extends DbProfile {
-  users: Pick<DbUser, "id" | "display_name" | "email" | "status"> | null;
+  users: Pick<DbUser, "id" | "display_name" | "status"> | null;
 }
 
 interface FavoriteWithProfile {
@@ -69,7 +69,7 @@ export async function GET() {
     .from("profiles")
     .select(`
       *,
-      users:user_id(id, display_name, email, status)
+      users:user_id(id, display_name, status)
     `)
     .in("user_id", favoriteUserIds)
     .eq("profile_hidden", false);
@@ -116,8 +116,6 @@ export async function GET() {
         id: profile.user_id,
         DisplayName: profile.users?.display_name || profile.first_name || "",
         FirstName: profile.first_name || "",
-        LastName: profile.last_name || "",
-        Email: profile.users?.email || "",
         DOB: profile.date_of_birth || "",
         Gender: profile.gender || "",
         Image: imageUrl,

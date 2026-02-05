@@ -116,7 +116,7 @@ interface NewMatchCardProps {
 }
 
 function NewMatchCard({ match }: NewMatchCardProps) {
-  const name = match.first_name || match.display_name || "User";
+  const name = match.display_name || match.first_name || "User";
   const isOnline = isUserOnline(match.last_active_at);
   const hasMedia = match.voice_prompt_url || match.video_intro_url;
 

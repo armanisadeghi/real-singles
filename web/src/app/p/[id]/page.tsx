@@ -25,6 +25,7 @@ import { PublicProfileClient } from "./PublicProfileClient";
 
 interface PublicProfileData {
   first_name: string;
+  display_name: string;
   age: number | null;
   location: string | null;
   bio: string | null;
@@ -38,10 +39,10 @@ interface PublicProfileData {
 async function getPublicProfile(userId: string): Promise<PublicProfileData | null> {
   const supabase = createAdminClient();
 
-  // Check if user exists and is active
+  // Check if user exists and is active, and get display_name
   const { data: userData, error: userError } = await supabase
     .from("users")
-    .select("id, status")
+    .select("id, status, display_name")
     .eq("id", userId)
     .single();
 
@@ -104,6 +105,7 @@ async function getPublicProfile(userId: string): Promise<PublicProfileData | nul
     : null;
 
   return {
+    display_name: userData.display_name || profile.first_name || "Someone",
     first_name: profile.first_name || "Someone",
     age,
     location: location || null,
@@ -131,13 +133,14 @@ export async function generateMetadata({
     };
   }
 
+  const name = profile.display_name;
   const title = profile.age
-    ? `${profile.first_name}, ${profile.age} on RealSingles`
-    : `${profile.first_name} on RealSingles`;
+    ? `${name}, ${profile.age} on RealSingles`
+    : `${name} on RealSingles`;
   
   const description = profile.location
-    ? `Check out ${profile.first_name}'s profile from ${profile.location}. Join RealSingles to connect with authentic singles.`
-    : `Check out ${profile.first_name}'s profile on RealSingles - a dating app for people who want something real.`;
+    ? `Check out ${name}'s profile from ${profile.location}. Join RealSingles to connect with authentic singles.`
+    : `Check out ${name}'s profile on RealSingles - a dating app for people who want something real.`;
 
   return {
     title,

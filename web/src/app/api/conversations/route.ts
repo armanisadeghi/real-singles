@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
   // Get profiles for all participants
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("user_id, first_name, last_name, profile_image_url")
+    .select("user_id, first_name, profile_image_url")
     .in("user_id", Array.from(allParticipantIds));
 
   const { data: users } = await supabase
@@ -221,9 +221,7 @@ export async function GET(request: NextRequest) {
       if (conv.type === "direct" && otherProfiles.length > 0) {
         const otherProfile = otherProfiles[0];
         const otherUser = otherUsers.find((u) => u.id === otherProfile?.user_id);
-        displayName = otherUser?.display_name || 
-          `${otherProfile?.first_name || ""} ${otherProfile?.last_name || ""}`.trim() || 
-          "User";
+        displayName = otherUser?.display_name || otherProfile?.first_name || "User";
         displayImage = profileImageUrls.get(otherProfile?.user_id || "") || "";
       }
 
@@ -245,7 +243,6 @@ export async function GET(request: NextRequest) {
             UserID: p.user_id!,
             DisplayName: userData?.display_name || profile?.first_name || "User",
             FirstName: profile?.first_name || "",
-            LastName: profile?.last_name || "",
             ProfileImage: profileImage,
             LastActiveAt: userData?.last_active_at,
             Role: p.role || "member",

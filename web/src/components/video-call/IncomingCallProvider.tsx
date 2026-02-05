@@ -48,16 +48,23 @@ export function IncomingCallProvider({ userId, children }: IncomingCallProviderP
             // Only show pending invitations
             if (invitation.status !== "pending") return;
 
-            // Fetch caller profile
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("first_name, profile_image_url")
-              .eq("user_id", invitation.caller_id)
-              .single();
+            // Fetch caller profile and display name
+            const [{ data: profile }, { data: callerUser }] = await Promise.all([
+              supabase
+                .from("profiles")
+                .select("first_name, profile_image_url")
+                .eq("user_id", invitation.caller_id)
+                .single(),
+              supabase
+                .from("users")
+                .select("display_name")
+                .eq("id", invitation.caller_id)
+                .single(),
+            ]);
 
             setIncomingCall({
               ...invitation,
-              callerName: profile?.first_name || "Someone",
+              callerName: callerUser?.display_name || profile?.first_name || "Someone",
               callerAvatar: profile?.profile_image_url || undefined,
             });
           }

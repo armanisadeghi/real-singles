@@ -3,7 +3,8 @@
 /**
  * NameStep
  *
- * Step 1: First Name and Last Name
+ * Step 1: Display Name — what the user wants to be called publicly
+ * (Legal first/last name is collected at registration)
  */
 
 import { useEffect, useRef } from "react";
@@ -13,50 +14,38 @@ import {
 } from "../OnboardingStepWrapper";
 
 interface NameStepProps {
-  firstName: string;
-  lastName: string;
-  onFirstNameChange: (value: string) => void;
-  onLastNameChange: (value: string) => void;
+  displayName: string;
+  onDisplayNameChange: (value: string) => void;
 }
 
 export function NameStep({
-  firstName,
-  lastName,
-  onFirstNameChange,
-  onLastNameChange,
+  displayName,
+  onDisplayNameChange,
 }: NameStepProps) {
-  const firstNameRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus first input
+  // Auto-focus input
   useEffect(() => {
     const timer = setTimeout(() => {
-      firstNameRef.current?.focus();
+      inputRef.current?.focus();
     }, 100);
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <OnboardingStepWrapper
-      title="What's your name?"
-      subtitle="This is how you'll appear to others"
+      title="What should we call you?"
+      subtitle="This is how other members will see you"
       needsKeyboard
     >
       <OnboardingInput
-        ref={firstNameRef}
-        placeholder="First name"
-        value={firstName}
-        onChange={(e) => onFirstNameChange(e.target.value)}
+        ref={inputRef}
+        placeholder="e.g. Kayla, KayLee, K..."
+        value={displayName}
+        onChange={(e) => onDisplayNameChange(e.target.value)}
         maxLength={50}
         autoCapitalize="words"
-        autoComplete="given-name"
-      />
-      <OnboardingInput
-        placeholder="Last name"
-        value={lastName}
-        onChange={(e) => onLastNameChange(e.target.value)}
-        maxLength={50}
-        autoCapitalize="words"
-        autoComplete="family-name"
+        autoComplete="nickname"
       />
     </OnboardingStepWrapper>
   );

@@ -67,8 +67,8 @@ export function ConversationList({
 
     if (otherParticipant) {
       const name =
-        otherParticipant.profile?.first_name ||
         otherParticipant.user?.display_name ||
+        otherParticipant.profile?.first_name ||
         "Unknown";
       return {
         name,

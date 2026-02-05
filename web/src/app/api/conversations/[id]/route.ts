@@ -77,7 +77,7 @@ export async function GET(
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("user_id, first_name, last_name, profile_image_url, is_verified")
+    .select("user_id, first_name, profile_image_url, is_verified")
     .in("user_id", participantIds);
 
   const { data: users } = await supabase
@@ -99,11 +99,8 @@ export async function GET(
         return {
           UserID: user_id,
           IsMe: isMe,
-          DisplayName: userData?.display_name || 
-            `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || 
-            "User",
+          DisplayName: userData?.display_name || profile?.first_name || "User",
           FirstName: profile?.first_name || "",
-          LastName: profile?.last_name || "",
           ProfileImage: profileImageUrl,
           IsVerified: profile?.is_verified || false,
           LastActiveAt: userData?.last_active_at,

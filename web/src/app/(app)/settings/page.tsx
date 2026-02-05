@@ -15,6 +15,7 @@ import {
   BadgeCheck,
   PauseCircle,
   ArrowLeft,
+  Mail,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -28,8 +29,9 @@ export default function SettingsPage() {
   const [success, setSuccess] = useState("");
   const [profileHidden, setProfileHidden] = useState(false);
   const [pauseLoading, setPauseLoading] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
-  // Fetch current profile_hidden state on mount
+  // Fetch current profile_hidden state and email on mount
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -37,6 +39,7 @@ export default function SettingsPage() {
         const data = await response.json();
         if (data.success && data.data) {
           setProfileHidden(data.data.profile_hidden || false);
+          setUserEmail(data.data.Email || "");
         }
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -140,6 +143,21 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-6">
+        {/* Account Email */}
+        {userEmail && (
+          <section className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 p-4">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center">
+                <Mail className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Account Email</h3>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{userEmail}</p>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Quick Links */}
         <nav className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 divide-y divide-gray-100 dark:divide-neutral-800" aria-label="Settings navigation">
           <Link

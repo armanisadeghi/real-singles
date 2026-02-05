@@ -93,10 +93,10 @@ export async function GET(
   // Build location string
   const location = [profile.city, profile.state].filter(Boolean).join(", ");
 
-  // Get user verification status
+  // Get user status and display_name
   const { data: userData } = await supabase
     .from("users")
-    .select("status")
+    .select("status, display_name")
     .eq("id", profileUserId)
     .not("status", "in", "(suspended,deleted)")
     .single();
@@ -135,6 +135,7 @@ export async function GET(
     data: {
       profile_id: profile.user_id,
       is_hidden: false,
+      display_name: userData?.display_name || profile.first_name,
       first_name: profile.first_name,
       age: age,
       location: location || null,

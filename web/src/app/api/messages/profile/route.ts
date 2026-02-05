@@ -85,6 +85,13 @@ export async function POST(request: Request) {
       );
     }
 
+    // Get display_name from users table
+    const { data: profileUser } = await supabase
+      .from("users")
+      .select("display_name")
+      .eq("id", profileUserId)
+      .single();
+
     // Don't share hidden profiles
     if (profile.profile_hidden) {
       return NextResponse.json(
@@ -120,6 +127,7 @@ export async function POST(request: Request) {
         message_type: "profile",
         metadata: {
           profile_id: profile.user_id,
+          display_name: profileUser?.display_name || profile.first_name,
           first_name: profile.first_name,
           age: age,
           location: location || null,

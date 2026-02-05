@@ -155,6 +155,7 @@ export function useOnboarding(
       // Convert API response to snake_case profile data
       // Note: API uses DOB not DateOfBirth
       const fetchedProfile: ProfileData = {
+        display_name: profileData.DisplayName || "",
         first_name: profileData.FirstName || "",
         last_name: profileData.LastName || "",
         date_of_birth: profileData.DOB || "", // API uses DOB
@@ -244,6 +245,7 @@ export function useOnboarding(
 
     // Map profile data to API field keys (used by the wizard)
     // Use empty string check to avoid setting undefined values
+    if (profileData.display_name) values.DisplayName = profileData.display_name;
     if (profileData.first_name) values.FirstName = profileData.first_name;
     if (profileData.last_name) values.LastName = profileData.last_name;
     // The API expects "DOB" for save, but we use "DateOfBirth" in wizard

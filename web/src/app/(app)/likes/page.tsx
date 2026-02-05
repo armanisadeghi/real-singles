@@ -278,7 +278,7 @@ function LikesYouTab() {
   return (
     <div className="space-y-2">
       {likes.map((like) => {
-        const name = like.first_name || like.display_name || "Someone";
+        const name = like.display_name || like.first_name || "Someone";
         const location = [like.city, like.state].filter(Boolean).join(", ");
         const likedTime = formatRelativeTime(like.liked_at);
         const isLoading = actionLoading === like.user_id;
@@ -412,7 +412,7 @@ function LikesSentTab() {
   return (
     <div className="space-y-2">
       {likes.map((like) => {
-        const name = like.first_name || like.display_name || "Someone";
+        const name = like.display_name || like.first_name || "Someone";
         const location = [like.city, like.state].filter(Boolean).join(", ");
         const likedTime = formatRelativeTime(like.liked_at);
 
@@ -556,7 +556,7 @@ interface MatchCardProps {
 }
 
 function MatchCard({ match, isFavorite = false, onToggleFavorite }: MatchCardProps) {
-  const name = match.first_name || match.display_name || "Anonymous";
+  const name = match.display_name || match.first_name || "Anonymous";
   const location = [match.city, match.state].filter(Boolean).join(", ");
   const matchedTime = formatRelativeTime(match.matched_at);
   const hasConversation = !!match.conversation_id;

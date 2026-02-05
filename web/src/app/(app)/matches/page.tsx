@@ -130,7 +130,7 @@ export default function MatchesPage() {
       ) : (
         <div className="space-y-3">
           {matches.map((match) => {
-            const name = match.first_name || match.display_name || "Anonymous";
+            const name = match.display_name || match.first_name || "Anonymous";
             const location = [match.city, match.state].filter(Boolean).join(", ");
             const bgColor = getBgColor(match.user_id);
             const initials = getInitials(name);
