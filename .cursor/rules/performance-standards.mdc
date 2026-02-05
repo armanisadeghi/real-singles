@@ -1,0 +1,58 @@
+---
+description: MANDATORY performance standards - data caching, image optimization, query efficiency, list rendering
+alwaysApply: true
+---
+
+# Performance Standards
+
+**Report ANY violation you notice — even while working on unrelated tasks.**
+
+---
+
+## Forbidden Patterns
+
+| Pattern | Replace With |
+|---------|-------------|
+| `select('*')` | Specify exact fields: `select('id, name, avatar_url')` |
+| Query without `.limit()` | Always add `.limit()` (default 20) |
+| `<Image>` from `react-native` | `expo-image` with `cachePolicy="memory-disk"` |
+| `ScrollView` + `.map()` for lists | `FlashList` with `estimatedItemSize` |
+| `AsyncStorage` | `react-native-mmkv` |
+| Full-resolution image URLs | Supabase transforms: `?width=800&quality=80&format=webp` |
+| Multiple sequential API calls for one screen | Single batched endpoint or Supabase RPC |
+| `next/image` without `placeholder="blur"` | Add `placeholder="blur"` + `blurDataURL` |
+
+---
+
+## Required Patterns
+
+- **Cache-first data:** Serve cached data immediately, refresh in background
+- **MMKV** for all mobile local storage (never AsyncStorage)
+- **FlashList** for all mobile lists (never ScrollView + map)
+- **expo-image** for all mobile images (with blurhash placeholders)
+- **Supabase image transforms** on all image URLs (never serve full-resolution)
+- **`.limit()`** on every database query
+- **Specific fields** in every `select()` — never `select('*')`
+- **Request deduplication** for concurrent identical requests
+- **`React.memo`** on all list item components
+- **Dynamic imports** for heavy components on web (`dynamic(() => import(...))`)
+
+---
+
+## Performance Targets
+
+| Platform | Metric | Target |
+|----------|--------|--------|
+| Mobile | App to cached content | < 500ms |
+| Mobile | Screen transitions | < 16ms (60 FPS) |
+| Mobile | First data render | < 1s |
+| Web | Lighthouse Performance | > 90 |
+| Web | First Contentful Paint | < 1.5s |
+| Web | Largest Contentful Paint | < 2.5s |
+| Web | Cumulative Layout Shift | < 0.1 |
+
+---
+
+## Detailed Guidance
+
+For code examples, audit workflows, and implementation patterns, use the **performance-expert** skill.

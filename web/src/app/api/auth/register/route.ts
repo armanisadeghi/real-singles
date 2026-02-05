@@ -6,7 +6,8 @@ import { z } from "zod";
 const registerSchema = z.object({
   email: z.email(),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  display_name: z.string().min(2).optional(),
+  first_name: z.string().min(1, "First name is required").max(50),
+  last_name: z.string().min(1, "Last name is required").max(50),
   referral_code: z.string().optional(),
 });
 
@@ -22,17 +23,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, password, display_name, referral_code } = validation.data;
+    const { email, password, first_name, last_name, referral_code } = validation.data;
     const supabase = await createApiClient();
     const adminClient = createAdminClient();
 
-    // Sign up the user
+    // Sign up the user — pass first/last name through metadata for the DB trigger
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          display_name,
+          first_name,
+          last_name,
         },
       },
     });
@@ -49,8 +51,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Note: User record is created automatically by database trigger (handle_new_user)
-    // We only need to handle referral tracking here using admin client (bypasses RLS)
-    
+    // Create the profiles record with the legal name collected at registration
+    await adminClient.from("profiles").upsert(
+      {
+        user_id: authData.user.id,
+        first_name,
+        last_name,
+      },
+      { onConflict: "user_id" }
+    );
+
+    // Handle referral tracking using admin client (bypasses RLS)
     if (referral_code) {
       const { data: referrer } = await adminClient
         .from("users")
