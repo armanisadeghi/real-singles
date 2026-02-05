@@ -15,11 +15,6 @@ import {
   getCompletionGradient,
 } from "@/lib/onboarding/completion";
 
-interface ProfileCompletionBadgeProps {
-  className?: string;
-  variant?: "compact" | "expanded";
-}
-
 interface CompletionData {
   percentage: number;
   completedCount: number;
@@ -29,14 +24,25 @@ interface CompletionData {
   skippedFields: string[];
 }
 
+interface ProfileCompletionBadgeProps {
+  className?: string;
+  variant?: "compact" | "expanded";
+  /** Pre-computed completion data. When provided, skips the API fetch (SSOT). */
+  serverData?: CompletionData;
+}
+
 export function ProfileCompletionBadge({
   className,
   variant = "compact",
+  serverData,
 }: ProfileCompletionBadgeProps) {
-  const [completion, setCompletion] = useState<CompletionData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [completion, setCompletion] = useState<CompletionData | null>(serverData ?? null);
+  const [isLoading, setIsLoading] = useState(!serverData);
 
   useEffect(() => {
+    // Skip fetch if server already provided the data
+    if (serverData) return;
+
     fetch("/api/profile/completion")
       .then((res) => res.json())
       .then((data) => {
@@ -53,7 +59,7 @@ export function ProfileCompletionBadge({
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [serverData]);
 
   // Show skeleton while loading to prevent layout shift
   if (isLoading) {

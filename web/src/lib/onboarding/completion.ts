@@ -76,10 +76,22 @@ export interface ProfileData {
   weirdest_gift?: string | null;
   worst_job?: string | null;
   dream_job?: string | null;
+  past_event?: string | null;
 
   // Social
   social_link_1?: string | null;
   social_link_2?: string | null;
+
+  // Media
+  voice_prompt_url?: string | null;
+  video_intro_url?: string | null;
+  voice_prompt_duration_seconds?: number | null;
+  video_intro_duration_seconds?: number | null;
+
+  // Additional location
+  hometown?: string | null;
+  schools?: string[] | null;
+  zodiac_sign?: string | null;
 
   // Completion tracking
   profile_completion_step?: number | null;
@@ -110,68 +122,89 @@ export interface CompletionStatus {
 }
 
 // ============================================
-// FIELD DEFINITIONS
+// FIELD DEFINITIONS (Single Source of Truth)
 // ============================================
+// This is the ONE authoritative field list for completion calculation.
+// The API route (/api/profile/completion) imports this — never define fields there.
 
-// Fields that count toward completion (excluding media fields handled separately)
-const COMPLETION_FIELDS = [
-  // first_name is collected at registration (always present for completed profiles)
-  // Note: onboarding step 1 now collects display_name, but we track first_name
-  // for completion since it's the field that existing users already have filled in
-  { key: "first_name", step: 1, required: true },
-  { key: "date_of_birth", step: 2, required: true },
-  { key: "gender", step: 3, required: true },
-  { key: "looking_for", step: 4, required: true },
-  // Physical (steps 7-8)
-  { key: "height_inches", step: 7, required: false },
-  { key: "body_type", step: 7, required: false },
-  { key: "ethnicity", step: 8, required: false },
-  // Relationship (step 9)
-  { key: "dating_intentions", step: 9, required: false },
-  { key: "marital_status", step: 9, required: false },
-  // Location (step 10)
-  { key: "country", step: 10, required: false },
-  { key: "city", step: 10, required: false },
-  // Lifestyle (steps 11-15)
-  { key: "occupation", step: 11, required: false },
-  { key: "company", step: 11, required: false },
-  { key: "education", step: 12, required: false },
-  { key: "religion", step: 13, required: false },
-  { key: "political_views", step: 13, required: false },
-  { key: "exercise", step: 14, required: false },
-  { key: "languages", step: 15, required: false },
-  // Habits (step 16)
-  { key: "smoking", step: 16, required: false },
-  { key: "drinking", step: 16, required: false },
-  { key: "marijuana", step: 16, required: false },
-  // Family (steps 17-18)
-  { key: "has_kids", step: 17, required: false },
-  { key: "wants_kids", step: 17, required: false },
-  { key: "pets", step: 18, required: false },
-  // Personality (steps 19-20)
-  { key: "interests", step: 19, required: false },
-  { key: "life_goals", step: 20, required: false },
-  // About (steps 21-22)
-  { key: "bio", step: 21, required: false },
-  { key: "looking_for_description", step: 22, required: false },
-  // Prompts (steps 23-32)
-  { key: "ideal_first_date", step: 23, required: false },
-  { key: "non_negotiables", step: 24, required: false },
-  { key: "way_to_heart", step: 25, required: false },
-  { key: "after_work", step: 26, required: false },
-  { key: "nightclub_or_home", step: 27, required: false },
-  { key: "pet_peeves", step: 28, required: false },
-  { key: "craziest_travel_story", step: 29, required: false },
-  { key: "weirdest_gift", step: 30, required: false },
-  { key: "worst_job", step: 31, required: false },
-  { key: "dream_job", step: 32, required: false },
-  // Social (step 33)
-  { key: "social_link_1", step: 33, required: false },
-  { key: "social_link_2", step: 33, required: false },
+export interface ProfileFieldDef {
+  key: string;           // Database column name (used for value lookup)
+  label: string;         // Human-readable label
+  required: boolean;     // Required to start matching
+  sensitive: boolean;    // Allows "prefer not to say" option
+  step: number;          // Onboarding step number
+  category: string;      // Grouping for UI
+}
+
+export const PROFILE_FIELDS: ProfileFieldDef[] = [
+  // Required fields (steps 1-4)
+  { key: "first_name", label: "First Name", required: true, sensitive: false, step: 1, category: "basic" },
+  { key: "date_of_birth", label: "Date of Birth", required: true, sensitive: false, step: 2, category: "basic" },
+  { key: "gender", label: "Gender", required: true, sensitive: false, step: 3, category: "basic" },
+  { key: "looking_for", label: "Looking For", required: true, sensitive: false, step: 4, category: "basic" },
+  // Note: profile_image_url is handled separately via photo count (step 5)
+  // Verification selfie is step 6
+  { key: "verification_selfie_url", label: "Verification Selfie", required: false, sensitive: false, step: 6, category: "verification" },
+  // Bio & descriptions (steps 7-8)
+  { key: "bio", label: "About Me", required: false, sensitive: false, step: 7, category: "about" },
+  { key: "looking_for_description", label: "What I'm Looking For", required: false, sensitive: false, step: 8, category: "about" },
+  // Physical (steps 9-10)
+  { key: "height_inches", label: "Height", required: false, sensitive: false, step: 9, category: "physical" },
+  { key: "body_type", label: "Body Type", required: false, sensitive: false, step: 9, category: "physical" },
+  { key: "ethnicity", label: "Ethnicity", required: false, sensitive: true, step: 10, category: "physical" },
+  // Relationship (step 11)
+  { key: "dating_intentions", label: "Dating Intentions", required: false, sensitive: false, step: 11, category: "relationship" },
+  { key: "marital_status", label: "Marital Status", required: false, sensitive: true, step: 11, category: "relationship" },
+  // Location (step 12)
+  { key: "country", label: "Country", required: false, sensitive: false, step: 12, category: "location" },
+  { key: "city", label: "City", required: false, sensitive: false, step: 12, category: "location" },
+  { key: "state", label: "State", required: false, sensitive: false, step: 12, category: "location" },
+  { key: "hometown", label: "Hometown", required: false, sensitive: false, step: 12, category: "location" },
+  // Education & career (steps 13-14)
+  { key: "occupation", label: "Occupation", required: false, sensitive: false, step: 13, category: "career" },
+  { key: "company", label: "Company", required: false, sensitive: false, step: 13, category: "career" },
+  { key: "education", label: "Education Level", required: false, sensitive: false, step: 14, category: "education" },
+  { key: "schools", label: "Schools", required: false, sensitive: false, step: 14, category: "education" },
+  // Beliefs & values (step 15)
+  { key: "religion", label: "Religion", required: false, sensitive: true, step: 15, category: "beliefs" },
+  { key: "political_views", label: "Political Views", required: false, sensitive: true, step: 15, category: "beliefs" },
+  // Lifestyle (steps 16-17)
+  { key: "exercise", label: "Exercise", required: false, sensitive: false, step: 16, category: "lifestyle" },
+  { key: "languages", label: "Languages", required: false, sensitive: false, step: 17, category: "lifestyle" },
+  // Habits (step 18)
+  { key: "smoking", label: "Smoking", required: false, sensitive: false, step: 18, category: "habits" },
+  { key: "drinking", label: "Drinking", required: false, sensitive: false, step: 18, category: "habits" },
+  { key: "marijuana", label: "Marijuana", required: false, sensitive: true, step: 18, category: "habits" },
+  // Family (steps 19-20)
+  { key: "has_kids", label: "Have Children", required: false, sensitive: true, step: 19, category: "family" },
+  { key: "wants_kids", label: "Want Children", required: false, sensitive: true, step: 19, category: "family" },
+  { key: "pets", label: "Pets", required: false, sensitive: false, step: 20, category: "family" },
+  // Interests & personality (steps 21-22)
+  { key: "interests", label: "Interests", required: false, sensitive: false, step: 21, category: "personality" },
+  { key: "life_goals", label: "Life Goals", required: false, sensitive: false, step: 22, category: "personality" },
+  { key: "zodiac_sign", label: "Zodiac Sign", required: false, sensitive: false, step: 2, category: "personality" },
+  // Profile prompts (steps 23-32)
+  { key: "ideal_first_date", label: "Ideal First Date", required: false, sensitive: false, step: 23, category: "prompts" },
+  { key: "non_negotiables", label: "Non-Negotiables", required: false, sensitive: false, step: 24, category: "prompts" },
+  { key: "way_to_heart", label: "Way to My Heart", required: false, sensitive: false, step: 25, category: "prompts" },
+  { key: "after_work", label: "After Work", required: false, sensitive: false, step: 26, category: "prompts" },
+  { key: "nightclub_or_home", label: "Nightclub or Home", required: false, sensitive: false, step: 27, category: "prompts" },
+  { key: "pet_peeves", label: "Pet Peeves", required: false, sensitive: false, step: 28, category: "prompts" },
+  { key: "craziest_travel_story", label: "Craziest Travel Story", required: false, sensitive: false, step: 29, category: "prompts" },
+  { key: "weirdest_gift", label: "Weirdest Gift", required: false, sensitive: false, step: 30, category: "prompts" },
+  { key: "worst_job", label: "Worst Job", required: false, sensitive: false, step: 31, category: "prompts" },
+  { key: "dream_job", label: "Dream Job", required: false, sensitive: false, step: 32, category: "prompts" },
+  { key: "past_event", label: "Past Event", required: false, sensitive: false, step: 32, category: "prompts" },
+  // Social links (step 33)
+  { key: "social_link_1", label: "Social Link 1", required: false, sensitive: false, step: 33, category: "social" },
+  { key: "social_link_2", label: "Social Link 2", required: false, sensitive: false, step: 33, category: "social" },
+  // Media — voice & video (step 34)
+  { key: "voice_prompt_url", label: "Voice Prompt", required: false, sensitive: false, step: 34, category: "media" },
+  { key: "video_intro_url", label: "Video Intro", required: false, sensitive: false, step: 34, category: "media" },
 ];
 
-const TOTAL_FIELDS = COMPLETION_FIELDS.length;
-const MIN_PHOTOS_REQUIRED = 1;
+const TOTAL_FIELDS = PROFILE_FIELDS.length;
+export const MIN_PHOTOS_REQUIRED = parseInt(process.env.MIN_PHOTOS_REQUIRED || "1", 10);
 
 // ============================================
 // UTILITIES
@@ -205,7 +238,7 @@ export function calculateCompletion(
   const incompleteSteps = new Set<number>();
   const skippedSteps = new Set<number>();
 
-  for (const field of COMPLETION_FIELDS) {
+  for (const field of PROFILE_FIELDS) {
     const value = profile[field.key];
     const isSkipped = skippedFields.includes(field.key);
     const isPreferNot = preferNotFields.includes(field.key);

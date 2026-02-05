@@ -117,7 +117,22 @@ async function getMyProfile() {
   // Calculate completion using shared library (SSOT)
   const completion = profile 
     ? calculateCompletion(profile as ProfileData, photoCount)
-    : { percentage: 0, completedCount: 0, totalCount: 0, incompleteFields: [] as string[] };
+    : {
+        percentage: 0,
+        completedCount: 0,
+        totalCount: 0,
+        completedFields: [] as string[],
+        incompleteFields: [] as string[],
+        skippedFields: [] as string[],
+        preferNotFields: [] as string[],
+        requiredIncomplete: [] as string[],
+        nextIncompleteStep: null,
+        firstSkippedStep: null,
+        canStartMatching: false,
+        isComplete: false,
+        photoCount: 0,
+        hasMinimumPhotos: false,
+      } satisfies import("@/lib/onboarding/completion").CompletionStatus;
 
   return {
     user: { ...user, ...userData },
@@ -343,9 +358,19 @@ export default async function MyProfilePage() {
             </div>
           </div>
 
-          {/* Profile Completion Badge */}
+          {/* Profile Completion Badge — uses same data as stats bar (SSOT) */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <ProfileCompletionBadge variant="expanded" />
+            <ProfileCompletionBadge
+              variant="expanded"
+              serverData={{
+                percentage: completion.percentage,
+                completedCount: completion.completedCount,
+                totalCount: completion.totalCount,
+                canStartMatching: completion.canStartMatching,
+                isComplete: completion.isComplete,
+                skippedFields: completion.skippedFields,
+              }}
+            />
           </div>
 
           {/* Main Content */}
