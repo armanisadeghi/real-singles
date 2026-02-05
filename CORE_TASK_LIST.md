@@ -8,7 +8,7 @@
 - [ ] Name/Last is in profile settings, and name you want to be called is in sign up - This is totally backwards and needs to be updated.
     - Confirmed: Mobile (`mobile/components/signup/PersonalDetails.tsx`) collects all three name fields in signup. Web flow is correct (legal names at registration, display name in onboarding). Fix needed on mobile side.
 
-- [ ] Sign-up process
+- [ ] Sign-up process 
     - [ ] This feature is not properly using next.js layouts and page layering... We need to have a consistent header and footer that update, as needed but we don't reload them constantly and cause the entire page to go blank after each question. 
     - [ ] We have a feature to skip ahead. Let's also add one to go back to start but we can remove words for both of them and just represent them with a nice icon that emplies forward and backwards, likely a lucid icon that's kind of like these: << >>
     - [ ] Some of the items in the sign up that are together should not be together
