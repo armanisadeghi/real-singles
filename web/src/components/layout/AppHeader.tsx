@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { SlidersHorizontal, User, Edit, Heart, Settings, LogOut, Info } from "lucide-react";
+import { SlidersHorizontal, User, Edit, Star, Settings, LogOut, Info } from "lucide-react";
 import { NotificationBell, MessagesIndicator } from "@/components/notifications";
 import { PointsBadge } from "@/components/rewards";
 import { Avatar } from "@/components/ui";
@@ -110,8 +110,8 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
     },
     {
       id: "favorites",
-      label: "Saved Profiles",
-      icon: Heart,
+      label: "Favorites",
+      icon: Star,
     },
     {
       id: "app-info",

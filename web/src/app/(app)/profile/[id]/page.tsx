@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Heart,
+  Star,
   MessageCircle,
   Share2,
   MapPin,
@@ -373,16 +374,16 @@ export default function OtherProfilePage() {
               className={cn(
                 "flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-medium transition-all text-sm",
                 isFavorite
-                  ? "bg-pink-500 text-white hover:bg-pink-600"
+                  ? "bg-amber-500 text-white hover:bg-amber-600"
                   : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
               )}
             >
               {favoriteLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <Heart className={cn("w-5 h-5", isFavorite && "fill-current")} />
+                <Star className={cn("w-5 h-5", isFavorite && "fill-current")} />
               )}
-              {isFavorite ? "Saved" : "Save"}
+              {isFavorite ? "Favorited" : "Favorite"}
             </button>
 
             {/* Message Button - Primary CTA */}

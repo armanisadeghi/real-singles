@@ -25,6 +25,7 @@ import {
   useLikesSent, 
   useMatches, 
   useFavorites,
+  useFavoriteAction,
   useUserProfile,
   useMatchAction,
 } from "@/hooks/queries";
@@ -484,10 +485,12 @@ interface CollapsibleSectionProps {
   count: number;
   icon: React.ReactNode;
   defaultExpanded?: boolean;
+  emptyMessage?: string;
+  emptyAction?: { label: string; href: string };
   children: React.ReactNode;
 }
 
-function CollapsibleSection({ title, count, icon, defaultExpanded = true, children }: CollapsibleSectionProps) {
+function CollapsibleSection({ title, count, icon, defaultExpanded = true, emptyMessage, emptyAction, children }: CollapsibleSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   return (
@@ -522,7 +525,21 @@ function CollapsibleSection({ title, count, icon, defaultExpanded = true, childr
       >
         <div className="overflow-hidden">
           <div className="pt-2 space-y-2">
-            {children}
+            {count === 0 && emptyMessage ? (
+              <div className="flex flex-col items-center py-5 px-4 bg-white dark:bg-neutral-900 rounded-xl">
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center">{emptyMessage}</p>
+                {emptyAction && (
+                  <Link
+                    href={emptyAction.href}
+                    className="mt-3 px-4 py-2 text-xs font-medium text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/30 rounded-full hover:bg-pink-100 dark:hover:bg-pink-900/50 transition-colors"
+                  >
+                    {emptyAction.label}
+                  </Link>
+                )}
+              </div>
+            ) : (
+              children
+            )}
           </div>
         </div>
       </div>
@@ -532,7 +549,13 @@ function CollapsibleSection({ title, count, icon, defaultExpanded = true, childr
 
 // ================== Match Card (shared across sections) ==================
 
-function MatchCard({ match }: { match: Match }) {
+interface MatchCardProps {
+  match: Match;
+  isFavorite?: boolean;
+  onToggleFavorite?: (userId: string) => void;
+}
+
+function MatchCard({ match, isFavorite = false, onToggleFavorite }: MatchCardProps) {
   const name = match.first_name || match.display_name || "Anonymous";
   const location = [match.city, match.state].filter(Boolean).join(", ");
   const matchedTime = formatRelativeTime(match.matched_at);
@@ -583,14 +606,33 @@ function MatchCard({ match }: { match: Match }) {
         </div>
       </Link>
 
-      {/* Message button */}
-      <Link
-        href={hasConversation ? `/chats/${match.conversation_id}` : `/profile/${match.user_id}`}
-        className="w-9 h-9 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600 flex-shrink-0"
-        title={hasConversation ? "Open chat" : "View profile"}
-      >
-        <MessageCircle className="w-4 h-4" />
-      </Link>
+      {/* Actions */}
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        {/* Favorite toggle */}
+        {onToggleFavorite && (
+          <button
+            onClick={() => onToggleFavorite(match.user_id)}
+            className={cn(
+              "w-9 h-9 rounded-full flex items-center justify-center transition-colors",
+              isFavorite
+                ? "bg-amber-50 dark:bg-amber-900/30 text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/50"
+                : "bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-neutral-700 hover:text-amber-500"
+            )}
+            title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Star className="w-4 h-4" fill={isFavorite ? "currentColor" : "none"} />
+          </button>
+        )}
+
+        {/* Message button */}
+        <Link
+          href={hasConversation ? `/chats/${match.conversation_id}` : `/profile/${match.user_id}`}
+          className="w-9 h-9 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center hover:from-pink-600 hover:to-rose-600"
+          title={hasConversation ? "Open chat" : "View profile"}
+        >
+          <MessageCircle className="w-4 h-4" />
+        </Link>
+      </div>
     </div>
   );
 }
@@ -602,6 +644,7 @@ function MatchesTab() {
   const { data: matchesData, isLoading: matchesLoading, error: matchesError, refetch: refetchMatches } = useMatches();
   const { data: favoritesData, isLoading: favoritesLoading } = useFavorites();
   const { data: profileData } = useUserProfile();
+  const favoriteAction = useFavoriteAction();
 
   const loading = matchesLoading || favoritesLoading;
   const userProfileImage = profileData?.ProfileImageUrl || null;
@@ -630,6 +673,12 @@ function MatchesTab() {
     [allMatches]
   );
 
+  // Toggle favorite for a match (uses the toggle POST endpoint)
+  const handleToggleFavorite = (userId: string) => {
+    const isFav = favoriteUserIds.has(userId);
+    favoriteAction.mutate({ targetUserId: userId, action: isFav ? "remove" : "add" });
+  };
+
   if (loading) {
     return (
       <div className="space-y-3">
@@ -654,55 +703,47 @@ function MatchesTab() {
     );
   }
 
-  if (allMatches.length === 0) {
-    return (
-      <EmptyStateBoost
-        userProfileImage={userProfileImage}
-        title="Your matches will appear here"
-        description="When you and someone both like each other, you'll see them here!"
-      />
-    );
-  }
-
   return (
     <div className="space-y-3">
-      {/* Favorites section - only shown if user has favorited matches */}
-      {favoriteMatches.length > 0 && (
-        <CollapsibleSection
-          title="Favorites"
-          count={favoriteMatches.length}
-          icon={<Star className="w-4 h-4 text-amber-500" fill="currentColor" />}
-          defaultExpanded
-        >
-          {favoriteMatches.map((match: Match) => (
-            <MatchCard key={`fav-${match.user_id}`} match={match} />
-          ))}
-        </CollapsibleSection>
-      )}
+      {/* Favorites section - always visible */}
+      <CollapsibleSection
+        title="Favorites"
+        count={favoriteMatches.length}
+        icon={<Star className="w-4 h-4 text-amber-500" fill="currentColor" />}
+        defaultExpanded={favoriteMatches.length > 0}
+        emptyMessage="Tap the star on any match to add them to your favorites for quick access."
+        emptyAction={allMatches.length > 0 ? undefined : { label: "Discover People", href: "/discover" }}
+      >
+        {favoriteMatches.map((match: Match) => (
+          <MatchCard key={`fav-${match.user_id}`} match={match} isFavorite onToggleFavorite={handleToggleFavorite} />
+        ))}
+      </CollapsibleSection>
 
-      {/* New Matches section - matches without conversations */}
-      {newMatches.length > 0 && (
-        <CollapsibleSection
-          title="New Matches"
-          count={newMatches.length}
-          icon={<Sparkles className="w-4 h-4 text-pink-500" />}
-          defaultExpanded
-        >
-          {newMatches.map((match: Match) => (
-            <MatchCard key={`new-${match.user_id}`} match={match} />
-          ))}
-        </CollapsibleSection>
-      )}
+      {/* New Matches section - always visible */}
+      <CollapsibleSection
+        title="New Matches"
+        count={newMatches.length}
+        icon={<Sparkles className="w-4 h-4 text-pink-500" />}
+        defaultExpanded={newMatches.length > 0}
+        emptyMessage="No new matches yet. Boost your profile to get seen by more people!"
+        emptyAction={{ label: "Boost Me", href: "/boost" }}
+      >
+        {newMatches.map((match: Match) => (
+          <MatchCard key={`new-${match.user_id}`} match={match} isFavorite={favoriteUserIds.has(match.user_id)} onToggleFavorite={handleToggleFavorite} />
+        ))}
+      </CollapsibleSection>
 
-      {/* All Matches section */}
+      {/* All Matches section - always visible */}
       <CollapsibleSection
         title="All Matches"
         count={allMatches.length}
         icon={<Heart className="w-4 h-4 text-rose-500" />}
-        defaultExpanded={favoriteMatches.length === 0 && newMatches.length === 0}
+        defaultExpanded={allMatches.length > 0 && favoriteMatches.length === 0 && newMatches.length === 0}
+        emptyMessage="When you and someone both like each other, they'll appear here."
+        emptyAction={{ label: "Discover People", href: "/discover" }}
       >
         {allMatches.map((match: Match) => (
-          <MatchCard key={`all-${match.user_id}`} match={match} />
+          <MatchCard key={`all-${match.user_id}`} match={match} isFavorite={favoriteUserIds.has(match.user_id)} onToggleFavorite={handleToggleFavorite} />
         ))}
       </CollapsibleSection>
     </div>

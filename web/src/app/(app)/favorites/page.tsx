@@ -42,14 +42,14 @@ export default async function FavoritesPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Your Favorites</h1>
-      <p className="text-gray-500 mb-6">Profiles you've saved</p>
+      <p className="text-gray-500 mb-6">Matches you've favorited</p>
 
       {favorites.length === 0 ? (
         <div className="text-center py-8 sm:py-12 bg-white dark:bg-neutral-900 rounded-xl shadow-sm">
           <div className="text-4xl sm:text-5xl mb-3">⭐</div>
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1.5">No favorites yet</h2>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-5 px-4">
-            Save profiles you like to your favorites!
+            Tap the star on any match to add them to your favorites!
           </p>
           <a
             href="/search"

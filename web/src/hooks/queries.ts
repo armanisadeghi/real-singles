@@ -464,6 +464,9 @@ export function useFavorites() {
 
 /**
  * Hook for adding/removing favorites
+ * 
+ * Uses POST /api/favorites/[id] to add and DELETE /api/favorites/[id] to remove.
+ * Invalidates both favorites and matches queries on success so all UI stays in sync.
  */
 export function useFavoriteAction() {
   const queryClient = useQueryClient();
@@ -476,11 +479,8 @@ export function useFavoriteAction() {
       targetUserId: string;
       action: "add" | "remove";
     }) => {
-      const res = await fetch("/api/favorites", {
-        method: action === "add" ? "POST" : "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ favorite_user_id: targetUserId }),
-      });
+      const method = action === "add" ? "POST" : "DELETE";
+      const res = await fetch(`/api/favorites/${targetUserId}`, { method });
       if (!res.ok) {
         throw new Error(`Failed to ${action} favorite`);
       }

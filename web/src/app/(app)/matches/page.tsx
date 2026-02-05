@@ -7,11 +7,13 @@
  * Uses TanStack Query for caching - same data is shared with /likes and /messages pages.
  */
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Heart, MessageCircle, CheckCircle, ChevronRight } from "lucide-react";
+import { Loader2, Heart, Star, MessageCircle, CheckCircle, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { MediaBadge } from "@/components/profile";
-import { useMatches } from "@/hooks/queries";
+import { useMatches, useFavorites, useFavoriteAction } from "@/hooks/queries";
 
 // Helper to format relative time
 function formatMatchedTime(dateString: string | null | undefined): string {
@@ -54,7 +56,25 @@ function getInitials(name?: string | null): string {
 export default function MatchesPage() {
   const router = useRouter();
   const { data, isLoading, error, refetch } = useMatches();
+  const { data: favoritesData } = useFavorites();
+  const favoriteAction = useFavoriteAction();
   const matches = data?.matches || [];
+
+  // Build a Set of favorited user IDs for O(1) lookup
+  const favoriteUserIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (favoritesData?.data) {
+      for (const fav of favoritesData.data) {
+        if (fav.id) ids.add(fav.id);
+      }
+    }
+    return ids;
+  }, [favoritesData]);
+
+  const handleToggleFavorite = (userId: string) => {
+    const isFav = favoriteUserIds.has(userId);
+    favoriteAction.mutate({ targetUserId: userId, action: isFav ? "remove" : "add" });
+  };
 
   if (isLoading) {
     return (
@@ -187,7 +207,21 @@ export default function MatchesPage() {
                 </Link>
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {/* Favorite Button */}
+                  <button
+                    onClick={() => handleToggleFavorite(match.user_id)}
+                    className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+                      favoriteUserIds.has(match.user_id)
+                        ? "bg-amber-50 dark:bg-amber-900/30 text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/50"
+                        : "bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-neutral-700 hover:text-amber-500"
+                    )}
+                    title={favoriteUserIds.has(match.user_id) ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    <Star className="w-5 h-5" fill={favoriteUserIds.has(match.user_id) ? "currentColor" : "none"} />
+                  </button>
+
                   {/* Message Button */}
                   {match.conversation_id ? (
                     <button
@@ -200,7 +234,7 @@ export default function MatchesPage() {
                   ) : (
                     <Link
                       href={`/profile/${match.user_id}`}
-                      className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                      className="w-10 h-10 rounded-full bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
                       title="View profile"
                     >
                       <ChevronRight className="w-5 h-5" />
