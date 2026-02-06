@@ -45,6 +45,12 @@ export function UserActions({
   const handleReport = async () => {
     if (!reportReason) return;
 
+    // Require description for "Other"
+    if (reportReason === "other" && !reportDescription.trim()) {
+      alert("Please describe the issue when selecting 'Other'.");
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/reports", {
@@ -261,15 +267,31 @@ export function UserActions({
           {/* Additional details */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Additional details (optional)
+              {reportReason === "other"
+                ? "Please describe the issue (required)"
+                : "Additional details (optional)"}
             </label>
             <textarea
               value={reportDescription}
               onChange={(e) => setReportDescription(e.target.value)}
-              placeholder="Provide more context about your report..."
+              placeholder={
+                reportReason === "other"
+                  ? "Describe what happened..."
+                  : "Provide more context about your report..."
+              }
               rows={3}
-              className="w-full px-4 py-2 border border-gray-200 dark:border-neutral-700 rounded-lg resize-none focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
+              className={cn(
+                "w-full px-4 py-2 border rounded-lg resize-none focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500",
+                reportReason === "other" && !reportDescription.trim()
+                  ? "border-pink-300 dark:border-pink-700"
+                  : "border-gray-200 dark:border-neutral-700"
+              )}
             />
+            {reportReason === "other" && !reportDescription.trim() && (
+              <p className="text-xs text-pink-500 mt-1">
+                A description is required when selecting &quot;Other&quot;
+              </p>
+            )}
           </div>
         </div>
 
@@ -282,10 +304,10 @@ export function UserActions({
           </button>
           <button
             onClick={handleReport}
-            disabled={!reportReason || loading}
+            disabled={!reportReason || loading || (reportReason === "other" && !reportDescription.trim())}
             className={cn(
               "flex-1 px-4 py-3 rounded-lg font-medium transition-colors",
-              reportReason && !loading
+              reportReason && !loading && !(reportReason === "other" && !reportDescription.trim())
                 ? "bg-red-500 text-white hover:bg-red-600"
                 : "bg-gray-200 dark:bg-neutral-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
             )}

@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 interface VerificationSelfieStepProps {
   hasVerificationSelfie: boolean;
   onSelfieChange: () => void;
+  onSaveAndContinue?: () => Promise<void>;
 }
 
 type CaptureState = "idle" | "capturing" | "preview" | "saving" | "done" | "permission-denied";
@@ -21,6 +22,7 @@ type CaptureState = "idle" | "capturing" | "preview" | "saving" | "done" | "perm
 export function VerificationSelfieStep({
   hasVerificationSelfie,
   onSelfieChange,
+  onSaveAndContinue,
 }: VerificationSelfieStepProps) {
   const [state, setState] = useState<CaptureState>(
     hasVerificationSelfie ? "done" : "idle"
@@ -126,8 +128,8 @@ export function VerificationSelfieStep({
     startCamera();
   }, [startCamera]);
 
-  // Save selfie
-  const saveSelfie = useCallback(async () => {
+  // Save selfie (and optionally auto-continue to next step)
+  const saveSelfie = useCallback(async (andContinue = false) => {
     if (!previewUrl) return;
 
     try {
@@ -157,11 +159,16 @@ export function VerificationSelfieStep({
       setExistingSelfieUrl(previewUrl);
       setImageLoaded(true); // Data URL loads instantly
       onSelfieChange();
+
+      // Auto-continue to next step after saving
+      if (andContinue && onSaveAndContinue) {
+        await onSaveAndContinue();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save selfie");
       setState("preview");
     }
-  }, [previewUrl, onSelfieChange]);
+  }, [previewUrl, onSelfieChange, onSaveAndContinue]);
 
   // Cancel capture
   const cancel = useCallback(() => {
@@ -304,54 +311,72 @@ export function VerificationSelfieStep({
         </div>
       )}
 
-      {/* State: Preview - Show captured photo */}
+      {/* State: Preview - Show captured photo with prominent save action */}
       {state === "preview" && previewUrl && (
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-64 h-64 rounded-full overflow-hidden bg-black">
-            <img
-              src={previewUrl}
-              alt="Selfie preview"
-              className="w-full h-full object-cover"
-            />
+        <div className="flex flex-col items-center gap-5 animate-[fadeIn_300ms_ease-out]">
+          <div className="relative">
+            <div className="w-56 h-56 rounded-full overflow-hidden ring-4 ring-pink-400/40 dark:ring-pink-500/30 shadow-xl">
+              <img
+                src={previewUrl}
+                alt="Selfie preview"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
-          <p className="text-center text-gray-500 dark:text-gray-400 text-sm">
+          <p className="text-center text-gray-600 dark:text-gray-300 text-sm font-medium">
             Happy with this photo?
           </p>
-          <div className="flex gap-3">
-            <button
-              onClick={retake}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full",
-                "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400",
-                "hover:bg-gray-200 dark:hover:bg-neutral-700",
-                "transition-colors"
-              )}
-            >
-              <RefreshCw className="w-4 h-4" />
-              Retake
-            </button>
-            <button
-              onClick={saveSelfie}
-              className={cn(
-                "flex items-center gap-2 px-6 py-2 rounded-full",
-                "bg-pink-500 hover:bg-pink-600 text-white",
-                "font-medium transition-colors"
-              )}
-            >
-              <Check className="w-4 h-4" />
-              Use This
-            </button>
-          </div>
+          {/* Primary action: save and continue in one click */}
+          <button
+            onClick={() => saveSelfie(true)}
+            className={cn(
+              "flex items-center justify-center gap-2 w-full max-w-[280px]",
+              "px-6 py-3.5 rounded-full",
+              "bg-gradient-to-r from-pink-500 to-purple-500",
+              "hover:from-pink-600 hover:to-purple-600",
+              "text-white font-semibold text-base",
+              "shadow-lg shadow-pink-500/25 dark:shadow-pink-500/15",
+              "transition-all duration-200 active:scale-[0.97]"
+            )}
+          >
+            <Check className="w-5 h-5" />
+            Use This Photo
+          </button>
+          {/* Secondary: retake */}
+          <button
+            onClick={retake}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-full",
+              "text-gray-500 dark:text-gray-400",
+              "hover:text-gray-700 dark:hover:text-gray-300",
+              "hover:bg-gray-100 dark:hover:bg-neutral-800",
+              "transition-colors text-sm"
+            )}
+          >
+            <RefreshCw className="w-4 h-4" />
+            Retake
+          </button>
         </div>
       )}
 
-      {/* State: Saving */}
+      {/* State: Saving — show preview with overlay spinner */}
       {state === "saving" && (
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-64 h-64 rounded-full overflow-hidden bg-gray-100 dark:bg-neutral-800 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-col items-center gap-5">
+          <div className="relative">
+            <div className="w-56 h-56 rounded-full overflow-hidden ring-4 ring-pink-400/40 dark:ring-pink-500/30 shadow-xl">
+              {previewUrl && (
+                <img
+                  src={previewUrl}
+                  alt="Saving selfie"
+                  className="w-full h-full object-cover opacity-60"
+                />
+              )}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full">
+                <div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            </div>
           </div>
-          <p className="text-center text-gray-500 dark:text-gray-400 text-sm">
+          <p className="text-center text-gray-500 dark:text-gray-400 text-sm font-medium">
             Saving your selfie...
           </p>
         </div>

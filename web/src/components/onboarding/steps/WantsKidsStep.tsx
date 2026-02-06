@@ -5,7 +5,9 @@
  *
  * Step 22: Do you want children? (split from old KidsStep)
  * Uses option cards for a clean, list-based selection.
- * Includes "Prefer not to say" as a selectable option card.
+ * "Prefer not to say" is a UI-only card — tracked via markFieldAsPreferNot().
+ *
+ * NOTE: "prefer_not_to_say" is NOT a valid DbWantsKids value.
  */
 
 import {
@@ -13,19 +15,19 @@ import {
   OnboardingOptionCards,
 } from "../OnboardingStepWrapper";
 import { WANTS_KIDS_OPTIONS } from "@/types";
+import type { DbWantsKids } from "@/types/db-constraints";
 
 interface WantsKidsStepProps {
-  wantsKids: string;
-  onWantsKidsChange: (value: string) => void;
+  wantsKids: DbWantsKids | "";
+  onWantsKidsChange: (value: DbWantsKids | "") => void;
   isPreferNot: boolean;
   onPreferNotChange: (isPreferNot: boolean) => void;
 }
 
-// Extend options with "Prefer not to say" as a selectable card
-const WANTS_KIDS_WITH_PREFER_NOT = [
+const DISPLAY_OPTIONS = [
   ...WANTS_KIDS_OPTIONS,
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
-] as const;
+  { value: "prefer_not_to_say" as const, label: "Prefer not to say" },
+];
 
 export function WantsKidsStep({
   wantsKids,
@@ -41,14 +43,14 @@ export function WantsKidsStep({
       if (isPreferNot) {
         onPreferNotChange(false);
       }
-      onWantsKidsChange(value);
+      onWantsKidsChange(value as DbWantsKids);
     }
   };
 
   return (
     <OnboardingStepWrapper title="Do you want children?">
       <OnboardingOptionCards
-        options={WANTS_KIDS_WITH_PREFER_NOT}
+        options={DISPLAY_OPTIONS}
         selected={isPreferNot ? "prefer_not_to_say" : wantsKids || null}
         onChange={handleChange}
       />

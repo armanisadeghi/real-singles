@@ -990,12 +990,17 @@ export const unblockUser = async (blockedUserId: string) => {
 /**
  * Report a user
  */
-export const reportUser = async (reportedUserId: string, reason: string) => {
+export const reportUser = async (
+  reportedUserId: string,
+  reason: string,
+  description?: string
+) => {
   return apiRequest("/reports", {
     method: "POST",
-    body: JSON.stringify({ 
+    body: JSON.stringify({
       reported_user_id: reportedUserId,
-      reason: reason,
+      reason,
+      description: description || null,
     }),
   });
 };

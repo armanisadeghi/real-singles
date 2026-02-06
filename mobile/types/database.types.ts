@@ -1874,6 +1874,7 @@ export type Database = {
           reason: string
           reported_user_id: string | null
           reporter_id: string | null
+          resolution_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string | null
@@ -1885,6 +1886,7 @@ export type Database = {
           reason: string
           reported_user_id?: string | null
           reporter_id?: string | null
+          resolution_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string | null
@@ -1896,6 +1898,7 @@ export type Database = {
           reason?: string
           reported_user_id?: string | null
           reporter_id?: string | null
+          resolution_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string | null

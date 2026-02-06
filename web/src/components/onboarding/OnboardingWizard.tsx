@@ -251,6 +251,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
           <VerificationSelfieStep
             hasVerificationSelfie={!!profile?.verification_selfie_url}
             onSelfieChange={refreshProfile}
+            onSaveAndContinue={saveAndContinue}
           />
         );
 
@@ -679,6 +680,14 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
           }
         }
       `}</style>

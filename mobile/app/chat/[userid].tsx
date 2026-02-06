@@ -41,6 +41,9 @@ export default function ChatDetail() {
 
   const [isBlocked, setIsBlocked] = useState(false); // track block state
   const [reportReason, setReportReason] = useState(""); // reason typed by user
+  const [reportSelectedReason, setReportSelectedReason] = useState<string | null>(null);
+  const [reportDescription, setReportDescription] = useState("");
+  const [reportLoading, setReportLoading] = useState(false);
 
   // Use Supabase messaging hooks when conversation is ready
   const {
@@ -129,13 +132,34 @@ export default function ChatDetail() {
   };
 
   const handleReportUser = async () => {
+    const reason = reportSelectedReason || reportReason;
+    if (!reason) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Alert.alert("Error", "Please select or enter a reason for reporting");
+      return;
+    }
+
+    // Require description for "Other"
+    if (reason === "Other" && !reportDescription.trim()) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Alert.alert("Error", 'Please describe the issue when selecting "Other"');
+      return;
+    }
+
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    setReportLoading(true);
     try {
-      const res = await reportUser(peerId, reportReason);
+      const res = await reportUser(
+        peerId,
+        reason,
+        reportDescription.trim() || undefined
+      );
 
       if (res.success) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setReportReason("");
+        setReportSelectedReason(null);
+        setReportDescription("");
         setVisible(false);
         Alert.alert("Success", "User reported successfully");
       } else {
@@ -146,6 +170,8 @@ export default function ChatDetail() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error(error);
       Alert.alert("Error", "Something went wrong");
+    } finally {
+      setReportLoading(false);
     }
   };
 
@@ -384,38 +410,126 @@ export default function ChatDetail() {
               )}
 
               <View style={{ width: "100%", marginTop: Platform.OS === "ios" ? 0 : 10 }}>
-                <TextInput
-                  placeholder="Enter reason for reporting"
-                  placeholderTextColor={themedColors.tertiaryText}
-                  value={reportReason}
-                  onChangeText={setReportReason}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: themedColors.border,
-                    borderRadius: 8,
-                    paddingHorizontal: 10,
-                    height: 40,
-                    marginBottom: 10,
-                    fontSize: 16, // iOS requires 16px+ to prevent zoom
-                    color: themedColors.text,
-                    backgroundColor: themedColors.background,
-                  }}
-                />
+                {/* Step 1: Reason selection */}
+                {!reportSelectedReason ? (
+                  <View style={{ marginBottom: 10 }}>
+                    <Text style={{ color: themedColors.secondaryText, fontSize: 13, marginBottom: 8 }}>
+                      Why are you reporting this user?
+                    </Text>
+                    {[
+                      { value: "Inappropriate messages", label: "Inappropriate messages" },
+                      { value: "Harassment", label: "Harassment or bullying" },
+                      { value: "Fake profile", label: "Fake or spam profile" },
+                      { value: "Scam", label: "Scammer or catfish" },
+                      { value: "Other", label: "Other" },
+                    ].map((reason) => (
+                      <TouchableOpacity
+                        key={reason.value}
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          setReportSelectedReason(reason.value);
+                        }}
+                        style={{
+                          paddingVertical: 12,
+                          paddingHorizontal: 12,
+                          borderBottomWidth: StyleSheet.hairlineWidth,
+                          borderBottomColor: themedColors.border,
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Text style={{ color: themedColors.text, fontSize: 15 }}>{reason.label}</Text>
+                        <PlatformIcon name="chevron-right" size={18} color={themedColors.secondaryText} />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                ) : (
+                  /* Step 2: Description + submit */
+                  <View style={{ marginBottom: 10 }}>
+                    {/* Selected reason badge */}
+                    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
+                      <View style={{
+                        backgroundColor: isDark ? "rgba(239,68,68,0.15)" : "#FEF2F2",
+                        paddingHorizontal: 10,
+                        paddingVertical: 5,
+                        borderRadius: 14,
+                      }}>
+                        <Text style={{ color: isDark ? "#FCA5A5" : "#DC2626", fontSize: 13, fontWeight: "600" }}>
+                          {reportSelectedReason}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setReportSelectedReason(null);
+                          setReportDescription("");
+                        }}
+                        style={{ marginLeft: 8 }}
+                      >
+                        <Text style={{ color: themedColors.secondaryText, fontSize: 13 }}>Change</Text>
+                      </TouchableOpacity>
+                    </View>
 
-                <TouchableOpacity style={styles.actionBtn}
-                  onPress={() => {
-                    if (reportReason) handleReportUser()
-                    else blankReport()
-                  }}>
-                  <LinearGradient
-                    colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.gradientBtn}
-                  >
-                    <Text style={styles.actionText}>Report User</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
+                    <Text style={{ color: themedColors.text, fontSize: 14, fontWeight: "500", marginBottom: 6 }}>
+                      {reportSelectedReason === "Other"
+                        ? "Please describe the issue (required)"
+                        : "Additional details (optional)"}
+                    </Text>
+                    <TextInput
+                      placeholder={
+                        reportSelectedReason === "Other"
+                          ? "Describe what happened..."
+                          : "Provide more context..."
+                      }
+                      placeholderTextColor={themedColors.tertiaryText}
+                      value={reportDescription}
+                      onChangeText={setReportDescription}
+                      multiline
+                      numberOfLines={3}
+                      textAlignVertical="top"
+                      style={{
+                        borderWidth: 1,
+                        borderColor: reportSelectedReason === "Other" && !reportDescription.trim()
+                          ? (isDark ? "#7F1D1D" : "#FCA5A5")
+                          : themedColors.border,
+                        borderRadius: 10,
+                        paddingHorizontal: 12,
+                        paddingTop: 10,
+                        paddingBottom: 10,
+                        minHeight: 80,
+                        marginBottom: 4,
+                        fontSize: 16,
+                        color: themedColors.text,
+                        backgroundColor: themedColors.background,
+                      }}
+                      autoFocus
+                    />
+                    {reportSelectedReason === "Other" && !reportDescription.trim() && (
+                      <Text style={{ color: "#EF4444", fontSize: 12, marginBottom: 6 }}>
+                        A description is required when selecting &quot;Other&quot;
+                      </Text>
+                    )}
+
+                    <TouchableOpacity
+                      style={[styles.actionBtn, {
+                        opacity: reportLoading || (reportSelectedReason === "Other" && !reportDescription.trim()) ? 0.5 : 1
+                      }]}
+                      disabled={reportLoading || (reportSelectedReason === "Other" && !reportDescription.trim())}
+                      onPress={handleReportUser}
+                    >
+                      <LinearGradient
+                        colors={["#B06D1E", "#F99F2D", "#B06D1E", "#F99F2D", "#B06D1E"]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.gradientBtn}
+                      >
+                        <Text style={styles.actionText}>
+                          {reportLoading ? "Submitting..." : "Submit Report"}
+                        </Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
 
             </View>

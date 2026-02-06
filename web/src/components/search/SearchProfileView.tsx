@@ -100,7 +100,7 @@ interface SearchProfileViewProps {
   onLike?: (userId: string) => Promise<MatchActionResult>;
   onPass?: (userId: string) => Promise<{ success: boolean; msg?: string }>;
   onSuperLike?: (userId: string) => Promise<MatchActionResult>;
-  onReport?: (userId: string, reason: string) => Promise<{ success: boolean; msg?: string }>;
+  onReport?: (userId: string, reason: string, description?: string) => Promise<{ success: boolean; msg?: string }>;
   onBlock?: (userId: string) => Promise<{ success: boolean; msg?: string }>;
   onClose?: () => void;
   /** Undo state - shows if undo is available for a previous action */
@@ -125,11 +125,13 @@ interface SearchProfileViewProps {
 }
 
 const REPORT_REASONS = [
-  "Inappropriate photos",
-  "Fake profile",
-  "Harassment",
-  "Spam",
-  "Other",
+  { value: "Inappropriate photos", label: "Inappropriate photos" },
+  { value: "Fake profile", label: "Fake or spam profile" },
+  { value: "Harassment", label: "Harassment or bullying" },
+  { value: "Underage", label: "User appears underage" },
+  { value: "Scam", label: "Scammer or catfish" },
+  { value: "Spam", label: "Spam" },
+  { value: "Other", label: "Other" },
 ];
 
 /**
@@ -183,6 +185,9 @@ export function SearchProfileView({
   const toast = useToast();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState<string | null>(null);
+  const [reportDescription, setReportDescription] = useState("");
+  const [reportLoading, setReportLoading] = useState(false);
   
   // Action menu state
   const [showActionMenu, setShowActionMenu] = useState(false);
@@ -306,23 +311,44 @@ export function SearchProfileView({
     [profile.user_id, existingAction, onLike, onPass, onSuperLike, handleClose, toast, parentHandlesNavigation, onDuplicateError]
   );
 
-  const handleReport = useCallback(
-    async (reason: string) => {
-      if (!profile.user_id || !onReport) return;
+  const handleReportSubmit = useCallback(
+    async () => {
+      if (!profile.user_id || !onReport || !reportReason) return;
 
+      // Require description for "Other"
+      if (reportReason === "Other" && !reportDescription.trim()) {
+        toast.error("Please describe the issue when selecting 'Other'.");
+        return;
+      }
+
+      setReportLoading(true);
       try {
-        const result = await onReport(profile.user_id, reason);
+        const result = await onReport(
+          profile.user_id,
+          reportReason,
+          reportDescription.trim() || undefined
+        );
         if (result?.success) {
           setShowReportModal(false);
+          setReportReason(null);
+          setReportDescription("");
           toast.success("Report submitted. Thank you for helping keep our community safe.");
         }
       } catch (error) {
         console.error("Report failed:", error);
         toast.error("Failed to submit report. Please try again.");
+      } finally {
+        setReportLoading(false);
       }
     },
-    [profile.user_id, onReport, toast]
+    [profile.user_id, onReport, reportReason, reportDescription, toast]
   );
+
+  const handleReportClose = useCallback(() => {
+    setShowReportModal(false);
+    setReportReason(null);
+    setReportDescription("");
+  }, []);
 
   // Handle share action
   // Uses the public share URL (/p/{user_id}) which shows a limited profile for non-authenticated users
@@ -907,37 +933,113 @@ export function SearchProfileView({
         </div>
       </div>
 
-      {/* Report Modal */}
+      {/* Report Modal — multi-step: reason → description → submit */}
       {showReportModal && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
           <div
             className="absolute inset-0 bg-black/50 dark:bg-black/70"
-            onClick={() => setShowReportModal(false)}
+            onClick={handleReportClose}
           />
-          <div className="relative bg-white dark:bg-neutral-950 rounded-t-2xl w-full max-w-lg p-6 pb-10">
+          <div className="relative bg-white dark:bg-neutral-950 rounded-t-2xl w-full max-w-lg p-6 pb-10 max-h-[85vh] overflow-y-auto">
             <div className="w-10 h-1 bg-gray-300 dark:bg-neutral-600 rounded-full mx-auto mb-6" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-2">
               Report this profile
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">
-              Why are you reporting {profile.user?.display_name || profile.first_name || "this user"}?
+              {!reportReason
+                ? `Why are you reporting ${profile.user?.display_name || profile.first_name || "this user"}?`
+                : "Add any additional details to help us review this report."}
             </p>
 
-            <div className="space-y-2">
-              {REPORT_REASONS.map((reason) => (
+            {/* Step 1: Reason selection */}
+            {!reportReason ? (
+              <div className="space-y-2">
+                {REPORT_REASONS.map((reason) => (
+                  <button
+                    key={reason.value}
+                    onClick={() => setReportReason(reason.value)}
+                    className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
+                  >
+                    <span className="text-gray-700 dark:text-gray-300">{reason.label}</span>
+                    <span className="text-gray-400 dark:text-gray-500">›</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              /* Step 2: Description + submit */
+              <div className="space-y-4">
+                {/* Selected reason badge */}
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400">
+                    {REPORT_REASONS.find((r) => r.value === reportReason)?.label || reportReason}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setReportReason(null);
+                      setReportDescription("");
+                    }}
+                    className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  >
+                    Change
+                  </button>
+                </div>
+
+                {/* Description textarea */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {reportReason === "Other"
+                      ? "Please describe the issue (required)"
+                      : "Additional details (optional)"}
+                  </label>
+                  <textarea
+                    value={reportDescription}
+                    onChange={(e) => setReportDescription(e.target.value)}
+                    placeholder={
+                      reportReason === "Other"
+                        ? "Describe what happened..."
+                        : "Provide more context to help us review this report..."
+                    }
+                    rows={4}
+                    className={cn(
+                      "w-full px-4 py-3 border rounded-xl resize-none text-sm",
+                      "focus:ring-2 focus:ring-red-500 focus:border-transparent",
+                      "bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100",
+                      "placeholder:text-gray-400 dark:placeholder:text-gray-500",
+                      reportReason === "Other" && !reportDescription.trim()
+                        ? "border-red-300 dark:border-red-700"
+                        : "border-gray-200 dark:border-neutral-700"
+                    )}
+                    autoFocus
+                  />
+                  {reportReason === "Other" && !reportDescription.trim() && (
+                    <p className="text-xs text-red-500 mt-1">
+                      A description is required when selecting &quot;Other&quot;
+                    </p>
+                  )}
+                </div>
+
+                {/* Submit button */}
                 <button
-                  key={reason}
-                  onClick={() => handleReport(reason)}
-                  className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
+                  onClick={handleReportSubmit}
+                  disabled={
+                    reportLoading ||
+                    (reportReason === "Other" && !reportDescription.trim())
+                  }
+                  className={cn(
+                    "w-full py-3 rounded-xl font-medium transition-colors text-sm",
+                    reportLoading ||
+                      (reportReason === "Other" && !reportDescription.trim())
+                      ? "bg-gray-200 dark:bg-neutral-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                      : "bg-red-500 text-white hover:bg-red-600"
+                  )}
                 >
-                  <span className="text-gray-700 dark:text-gray-300">{reason}</span>
-                  <span className="text-gray-400 dark:text-gray-500">›</span>
+                  {reportLoading ? "Submitting..." : "Submit Report"}
                 </button>
-              ))}
-            </div>
+              </div>
+            )}
 
             <button
-              onClick={() => setShowReportModal(false)}
+              onClick={handleReportClose}
               className="w-full mt-4 py-3 text-gray-500 dark:text-gray-400 font-medium"
             >
               Cancel

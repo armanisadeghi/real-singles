@@ -6,18 +6,24 @@
  * Step 20: Smoking, Drinking, Marijuana
  * All three on same page using dropdowns (lists would cause scroll).
  * Each habit has its own "Prefer not to say" as a dropdown option.
+ *
+ * "Prefer not to say" is a UI-only option — tracked via markFieldAsPreferNot().
+ * The field value stays "" (unset), which saveAndContinue strips before API calls.
+ *
+ * NOTE: "prefer_not_to_say" is NOT a valid DB value for any of these fields.
  */
 
 import { OnboardingStepWrapper, OnboardingSelect } from "../OnboardingStepWrapper";
 import { SMOKING_OPTIONS, DRINKING_OPTIONS, MARIJUANA_OPTIONS } from "@/types";
+import type { DbSmoking, DbDrinking, DbMarijuana } from "@/types/db-constraints";
 
 interface HabitsStepProps {
-  smoking: string;
-  drinking: string;
-  marijuana: string;
-  onSmokingChange: (value: string) => void;
-  onDrinkingChange: (value: string) => void;
-  onMarijuanaChange: (value: string) => void;
+  smoking: DbSmoking | "";
+  drinking: DbDrinking | "";
+  marijuana: DbMarijuana | "";
+  onSmokingChange: (value: DbSmoking | "") => void;
+  onDrinkingChange: (value: DbDrinking | "") => void;
+  onMarijuanaChange: (value: DbMarijuana | "") => void;
   // Per-field prefer not to say
   isSmokingPreferNot: boolean;
   isDrinkingPreferNot: boolean;
@@ -27,18 +33,18 @@ interface HabitsStepProps {
   onMarijuanaPreferNotChange: (isPreferNot: boolean) => void;
 }
 
-// Extend each options array with "Prefer not to say" as a selectable dropdown option
-const SMOKING_WITH_PREFER = [
+// Display options include "Prefer not to say" as a UI-only option
+const SMOKING_DISPLAY = [
   ...SMOKING_OPTIONS,
   { value: "prefer_not_to_say" as const, label: "Prefer not to say" },
 ];
 
-const DRINKING_WITH_PREFER = [
+const DRINKING_DISPLAY = [
   ...DRINKING_OPTIONS,
   { value: "prefer_not_to_say" as const, label: "Prefer not to say" },
 ];
 
-const MARIJUANA_WITH_PREFER = [
+const MARIJUANA_DISPLAY = [
   ...MARIJUANA_OPTIONS,
   { value: "prefer_not_to_say" as const, label: "Prefer not to say" },
 ];
@@ -64,7 +70,7 @@ export function HabitsStep({
       onSmokingChange("");
     } else {
       if (isSmokingPreferNot) onSmokingPreferNotChange(false);
-      onSmokingChange(value);
+      onSmokingChange(value as DbSmoking);
     }
   };
 
@@ -75,7 +81,7 @@ export function HabitsStep({
       onDrinkingChange("");
     } else {
       if (isDrinkingPreferNot) onDrinkingPreferNotChange(false);
-      onDrinkingChange(value);
+      onDrinkingChange(value as DbDrinking);
     }
   };
 
@@ -86,7 +92,7 @@ export function HabitsStep({
       onMarijuanaChange("");
     } else {
       if (isMarijuanaPreferNot) onMarijuanaPreferNotChange(false);
-      onMarijuanaChange(value);
+      onMarijuanaChange(value as DbMarijuana);
     }
   };
 
@@ -94,7 +100,7 @@ export function HabitsStep({
     <OnboardingStepWrapper title="Your habits">
       <OnboardingSelect
         label="Smoking"
-        options={SMOKING_WITH_PREFER}
+        options={SMOKING_DISPLAY}
         value={isSmokingPreferNot ? "prefer_not_to_say" : smoking}
         onChange={handleSmokingChange}
         placeholder="Select smoking habits"
@@ -102,7 +108,7 @@ export function HabitsStep({
 
       <OnboardingSelect
         label="Drinking"
-        options={DRINKING_WITH_PREFER}
+        options={DRINKING_DISPLAY}
         value={isDrinkingPreferNot ? "prefer_not_to_say" : drinking}
         onChange={handleDrinkingChange}
         placeholder="Select drinking habits"
@@ -110,7 +116,7 @@ export function HabitsStep({
 
       <OnboardingSelect
         label="Marijuana"
-        options={MARIJUANA_WITH_PREFER}
+        options={MARIJUANA_DISPLAY}
         value={isMarijuanaPreferNot ? "prefer_not_to_say" : marijuana}
         onChange={handleMarijuanaChange}
         placeholder="Select marijuana use"

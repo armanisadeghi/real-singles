@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createApiClient } from "@/lib/supabase/server";
 import { validateProfileUpdate } from "@/lib/validation/profile";
+import { capitalizeName } from "@/lib/utils";
 
 // Helper to convert storage path to public URL
 function getGalleryPublicUrl(path: string): string {
@@ -363,7 +364,7 @@ export async function PUT(request: Request) {
 
     // Update users table
     const userUpdates: Record<string, unknown> = {};
-    if (body.DisplayName !== undefined) userUpdates.display_name = body.DisplayName;
+    if (body.DisplayName !== undefined) userUpdates.display_name = capitalizeName(body.DisplayName);
     if (body.Username !== undefined) userUpdates.username = body.Username;
     if (body.Phone !== undefined) userUpdates.phone = body.Phone;
 
@@ -495,6 +496,11 @@ export async function PUT(request: Request) {
         }
         if (dbField === "profile_completion_step" && value) {
           value = parseInt(value, 10) || 0;
+        }
+
+        // Auto-capitalize name fields for proper presentation
+        if ((dbField === "first_name" || dbField === "last_name") && typeof value === "string") {
+          value = capitalizeName(value);
         }
         
         profileUpdates[dbField] = value;

@@ -130,27 +130,41 @@ export function useOnboarding(
   // DATA FETCHING
   // ============================================
 
+  /**
+   * Fetch profile data.
+   * @param shouldSetStep - Whether to set the current step based on resume/target logic (initial load only)
+   * 
+   * Only shows the full-screen loading spinner on initial load.
+   * Background refreshes update data silently without interrupting the UI.
+   */
   const fetchProfile = useCallback(async (shouldSetStep: boolean = false) => {
     try {
-      setIsLoading(true);
+      // Only show full-screen spinner on initial load, not background refreshes
+      if (shouldSetStep) {
+        setIsLoading(true);
+      }
       setError(null);
 
-      // Fetch profile data
-      const profileRes = await fetch("/api/users/me");
+      // Fetch profile and completion data in parallel
+      const [profileRes, completionRes] = await Promise.all([
+        fetch("/api/users/me"),
+        fetch("/api/profile/completion"),
+      ]);
+      
       if (!profileRes.ok) {
         throw new Error("Failed to fetch profile");
       }
-      const profileJson = await profileRes.json();
-      
-      // API returns { success, data, msg } - extract data
-      const profileData = profileJson.data || profileJson;
-
-      // Fetch completion data (includes photo count)
-      const completionRes = await fetch("/api/profile/completion");
       if (!completionRes.ok) {
         throw new Error("Failed to fetch completion status");
       }
-      const completionData = await completionRes.json();
+
+      const [profileJson, completionData] = await Promise.all([
+        profileRes.json(),
+        completionRes.json(),
+      ]);
+      
+      // API returns { success, data, msg } - extract data
+      const profileData = profileJson.data || profileJson;
 
       // Convert API response to snake_case profile data
       // Note: API uses DOB not DateOfBirth
@@ -236,7 +250,9 @@ export function useOnboarding(
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
-      setIsLoading(false);
+      if (shouldSetStep) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
@@ -359,29 +375,44 @@ export function useOnboarding(
   }, []);
 
   // Save current step values and continue
+  // Optimistic: advances step immediately, saves in background
   const saveAndContinue = useCallback(async () => {
     if (!currentStepConfig) return;
 
-    try {
-      setIsSaving(true);
-      setError(null);
+    const stepConfig = currentStepConfig;
+    const step = currentStep;
+    const currentProfile = profile;
+    const currentValues = stepValues;
 
+    // Advance step immediately (optimistic)
+    setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+    setError(null);
+
+    // Save in background — don't block the user
+    try {
       // Get field values for this step
+      // Skip empty strings and empty arrays — these represent unset/cleared fields
+      // (e.g. when user selects "prefer not to say", the value is set to "" but
+      // that's tracked separately via markFieldAsPreferNot, not as a field value)
       const fieldsToSave: Record<string, unknown> = {};
-      for (const field of currentStepConfig.fields) {
-        const value = stepValues[field.key];
-        if (value !== undefined) {
+      for (const field of stepConfig.fields) {
+        const value = currentValues[field.key];
+        if (
+          value !== undefined &&
+          value !== "" &&
+          !(Array.isArray(value) && value.length === 0)
+        ) {
           fieldsToSave[field.key] = value;
         }
       }
 
       // Add step number
-      fieldsToSave.ProfileCompletionStep = currentStep + 1;
+      fieldsToSave.ProfileCompletionStep = step + 1;
 
       // Save to API (skip for photos/selfie steps which have their own handlers)
       if (
-        currentStepConfig.id !== "photos" &&
-        currentStepConfig.id !== "verification-selfie"
+        stepConfig.id !== "photos" &&
+        stepConfig.id !== "verification-selfie"
       ) {
         const res = await fetch("/api/users/me", {
           method: "PUT",
@@ -398,109 +429,112 @@ export function useOnboarding(
         await fetch("/api/users/me", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ProfileCompletionStep: currentStep + 1 }),
+          body: JSON.stringify({ ProfileCompletionStep: step + 1 }),
         });
       }
 
-      // Remove from skipped if was there
-      const stepFieldKeys = currentStepConfig.fields.map((f) => f.dbColumn);
-      for (const fieldKey of stepFieldKeys) {
-        if (profile?.profile_completion_skipped?.includes(fieldKey)) {
-          await fetch("/api/profile/completion", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "unskip", field: fieldKey }),
-          });
-        }
+      // Remove from skipped if was there (batch all unskip calls in parallel)
+      const stepFieldKeys = stepConfig.fields.map((f) => f.dbColumn);
+      const skippedFields = stepFieldKeys.filter(
+        (key) => currentProfile?.profile_completion_skipped?.includes(key)
+      );
+      if (skippedFields.length > 0) {
+        await Promise.all(
+          skippedFields.map((fieldKey) =>
+            fetch("/api/profile/completion", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "unskip", field: fieldKey }),
+            })
+          )
+        );
       }
 
-      // Refresh profile to update completion percentage
-      await fetchProfile(false);
-      
-      // Brief delay (500ms) to let user see the updated percentage
-      // This provides visual feedback that progress is being tracked
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Go to next step AFTER delay
-      setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+      // Refresh profile in background to update completion percentage
+      // This won't show a loading spinner since shouldSetStep is false
+      fetchProfile(false);
     } catch (err) {
+      // On save failure, go back to the step and show the error
+      setCurrentStep(step);
       setError(err instanceof Error ? err.message : "Failed to save");
-    } finally {
-      setIsSaving(false);
     }
   }, [currentStep, currentStepConfig, stepValues, profile, fetchProfile]);
 
-  // Skip current step
+  // Skip current step — optimistic advance
   const saveAndSkip = useCallback(async () => {
     if (!currentStepConfig || !currentStepConfig.allowSkip) return;
 
+    const stepConfig = currentStepConfig;
+    const step = currentStep;
+
+    // Advance step immediately (optimistic)
+    setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+    setError(null);
+
+    // Save skip state in background
     try {
-      setIsSaving(true);
-      setError(null);
-
-      // Mark all fields in this step as skipped
-      const stepFieldKeys = currentStepConfig.fields.map((f) => f.dbColumn);
-      for (const fieldKey of stepFieldKeys) {
-        await fetch("/api/profile/completion", {
-          method: "POST",
+      // Mark all fields in this step as skipped + update step number in parallel
+      const stepFieldKeys = stepConfig.fields.map((f) => f.dbColumn);
+      await Promise.all([
+        // Skip field markers
+        ...stepFieldKeys.map((fieldKey) =>
+          fetch("/api/profile/completion", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "skip", field: fieldKey }),
+          })
+        ),
+        // Update step number
+        fetch("/api/users/me", {
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "skip", field: fieldKey }),
-        });
-      }
+          body: JSON.stringify({ ProfileCompletionStep: step + 1 }),
+        }),
+      ]);
 
-      // Update step number
-      await fetch("/api/users/me", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ProfileCompletionStep: currentStep + 1 }),
-      });
-
-      // Refresh profile to update completion percentage
-      await fetchProfile(false);
-
-      // Go to next step
-      setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+      // Refresh profile in background
+      fetchProfile(false);
     } catch (err) {
+      setCurrentStep(step);
       setError(err instanceof Error ? err.message : "Failed to skip");
-    } finally {
-      setIsSaving(false);
     }
   }, [currentStep, currentStepConfig, fetchProfile]);
 
-  // Mark as "prefer not to say"
+  // Mark as "prefer not to say" — optimistic advance
   const saveAsPreferNot = useCallback(async () => {
     if (!currentStepConfig || !currentStepConfig.allowPreferNot) return;
 
+    const stepConfig = currentStepConfig;
+    const step = currentStep;
+
+    // Advance step immediately (optimistic)
+    setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+    setError(null);
+
+    // Save in background
     try {
-      setIsSaving(true);
-      setError(null);
-
-      // Mark all sensitive fields in this step as prefer_not
-      const sensitivesFields = currentStepConfig.fields.filter((f) => f.sensitive);
-      for (const field of sensitivesFields) {
-        await fetch("/api/profile/completion", {
-          method: "POST",
+      // Mark all sensitive fields as prefer_not + update step number in parallel
+      const sensitiveFields = stepConfig.fields.filter((f) => f.sensitive);
+      await Promise.all([
+        ...sensitiveFields.map((field) =>
+          fetch("/api/profile/completion", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "prefer_not", field: field.dbColumn }),
+          })
+        ),
+        fetch("/api/users/me", {
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "prefer_not", field: field.dbColumn }),
-        });
-      }
+          body: JSON.stringify({ ProfileCompletionStep: step + 1 }),
+        }),
+      ]);
 
-      // Update step number
-      await fetch("/api/users/me", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ProfileCompletionStep: currentStep + 1 }),
-      });
-
-      // Refresh profile to update completion percentage
-      await fetchProfile(false);
-
-      // Go to next step
-      setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+      // Refresh profile in background
+      fetchProfile(false);
     } catch (err) {
+      setCurrentStep(step);
       setError(err instanceof Error ? err.message : "Failed to save preference");
-    } finally {
-      setIsSaving(false);
     }
   }, [currentStep, currentStepConfig, fetchProfile]);
 

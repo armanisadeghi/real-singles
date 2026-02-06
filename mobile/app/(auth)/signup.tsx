@@ -22,6 +22,7 @@ import { images } from "@/constants/images";
 import { REFERRAL_CODE_STORAGE_KEY } from "@/lib/config";
 import { signUpWithEmail, supabase, updateProfile } from "@/lib/supabase";
 import { SignupData } from "@/types";
+import { capitalizeName } from "@/utils/strings";
 import { requestPermission } from "@/utils/permissions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
@@ -432,11 +433,12 @@ const Signup = () => {
 
     try {
       // Step 1: Create auth user with Supabase
+      const rawDisplayName = signupData.DisplayName || `${signupData.FirstName} ${signupData.LastName}`.trim();
       const authData = await signUpWithEmail(
         signupData.Email,
         signupData.Password,
         {
-          display_name: signupData.DisplayName || `${signupData.FirstName} ${signupData.LastName}`.trim(),
+          display_name: capitalizeName(rawDisplayName),
         }
       );
 
@@ -456,8 +458,8 @@ const Signup = () => {
 
       // Map signup data to profile schema
       const profileData = {
-        first_name: signupData.FirstName || null,
-        last_name: signupData.LastName || null,
+        first_name: signupData.FirstName ? capitalizeName(signupData.FirstName) : null,
+        last_name: signupData.LastName ? capitalizeName(signupData.LastName) : null,
         date_of_birth: formattedDOB || null,
         gender: signupData.Gender || null,
         looking_for: signupData.LookingFor?.length > 0 ? signupData.LookingFor : null,
@@ -501,7 +503,7 @@ const Signup = () => {
         const { error: userError } = await supabase
           .from('users')
           .update({
-            display_name: signupData.DisplayName || `${signupData.FirstName} ${signupData.LastName}`.trim(),
+            display_name: capitalizeName(signupData.DisplayName || `${signupData.FirstName} ${signupData.LastName}`.trim()),
             phone: signupData.Phone || null,
           })
           .eq('id', authData.user.id);

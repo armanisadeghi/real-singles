@@ -15,6 +15,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   useColorScheme,
   View,
   useWindowDimensions,
@@ -99,6 +100,9 @@ export default function DiscoveryProfileView() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showReportSheet, setShowReportSheet] = useState(false);
+  const [reportReason, setReportReason] = useState<string | null>(null);
+  const [reportDescription, setReportDescription] = useState("");
+  const [reportLoading, setReportLoading] = useState(false);
   const [existingAction, setExistingAction] = useState<'like' | 'pass' | 'super_like' | null>(null);
   
   // Animation for action buttons
@@ -252,14 +256,31 @@ export default function DiscoveryProfileView() {
     }
   }, [profile, existingAction, router, likeScale, passScale, superLikeScale]);
   
-  // Handle report
-  const handleReport = useCallback(async (reason: string) => {
+  // Handle report submission
+  const handleReportSubmit = useCallback(async () => {
     if (!profile?.ID && !profile?.id) return;
+    if (!reportReason) return;
+    
+    // Require description for "Other"
+    if (reportReason === "Other" && !reportDescription.trim()) {
+      Toast.show({
+        type: "error",
+        text1: "Please describe the issue",
+        text2: 'A description is required when selecting "Other"',
+        position: "bottom",
+      });
+      return;
+    }
     
     const userId = (profile.ID || profile.id) as string;
+    setReportLoading(true);
     
     try {
-      const res = await reportUser(userId, reason);
+      const res = await reportUser(
+        userId,
+        reportReason,
+        reportDescription.trim() || undefined
+      );
       if (res?.success) {
         Toast.show({
           type: "success",
@@ -268,6 +289,8 @@ export default function DiscoveryProfileView() {
           position: "bottom",
         });
         setShowReportSheet(false);
+        setReportReason(null);
+        setReportDescription("");
       } else {
         Toast.show({
           type: "error",
@@ -281,8 +304,10 @@ export default function DiscoveryProfileView() {
         text1: "Failed to submit report",
         position: "bottom",
       });
+    } finally {
+      setReportLoading(false);
     }
-  }, [profile]);
+  }, [profile, reportReason, reportDescription]);
   
   // Animated styles for buttons
   const passAnimatedStyle = useAnimatedStyle(() => ({
@@ -435,44 +460,154 @@ export default function DiscoveryProfileView() {
         )}
       </Animated.View>
       
-      {/* Report Sheet (Simple modal for now) */}
+      {/* Report Sheet — multi-step: reason → description → submit */}
       {showReportSheet && (
         <View style={styles.reportOverlay}>
           <Pressable
             style={styles.reportBackdrop}
-            onPress={() => setShowReportSheet(false)}
+            onPress={() => {
+              setShowReportSheet(false);
+              setReportReason(null);
+              setReportDescription("");
+            }}
           />
           <View style={[styles.reportSheet, { paddingBottom: insets.bottom + 20, backgroundColor: viewColors.background }]}>
             <View style={[styles.reportHandle, { backgroundColor: viewColors.separator }]} />
             <Text style={[styles.reportTitle, { color: viewColors.text }]}>Report this profile</Text>
             <Text style={[styles.reportSubtitle, { color: viewColors.secondaryText }]}>
-              Why are you reporting {profile.DisplayName || "this user"}?
+              {!reportReason
+                ? `Why are you reporting ${profile.DisplayName || "this user"}?`
+                : "Add any additional details to help us review this report."}
             </Text>
             
-            {[
-              "Inappropriate photos",
-              "Fake profile",
-              "Harassment",
-              "Spam",
-              "Other",
-            ].map((reason) => (
-              <Pressable
-                key={reason}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  handleReport(reason);
-                }}
-                style={[styles.reportOption, { borderBottomColor: viewColors.separator }]}
-              >
-                <Text style={[styles.reportOptionText, { color: viewColors.text }]}>{reason}</Text>
-                <PlatformIcon name="chevron-right" size={20} color={viewColors.secondaryText} />
-              </Pressable>
-            ))}
+            {/* Step 1: Reason selection */}
+            {!reportReason ? (
+              <>
+                {[
+                  { value: "Inappropriate photos", label: "Inappropriate photos" },
+                  { value: "Fake profile", label: "Fake or spam profile" },
+                  { value: "Harassment", label: "Harassment or bullying" },
+                  { value: "Underage", label: "User appears underage" },
+                  { value: "Scam", label: "Scammer or catfish" },
+                  { value: "Spam", label: "Spam" },
+                  { value: "Other", label: "Other" },
+                ].map((reason) => (
+                  <Pressable
+                    key={reason.value}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setReportReason(reason.value);
+                    }}
+                    style={[styles.reportOption, { borderBottomColor: viewColors.separator }]}
+                  >
+                    <Text style={[styles.reportOptionText, { color: viewColors.text }]}>{reason.label}</Text>
+                    <PlatformIcon name="chevron-right" size={20} color={viewColors.secondaryText} />
+                  </Pressable>
+                ))}
+              </>
+            ) : (
+              /* Step 2: Description + submit */
+              <View style={{ width: "100%", paddingHorizontal: 4 }}>
+                {/* Selected reason badge */}
+                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
+                  <View style={{
+                    backgroundColor: isDark ? "rgba(239,68,68,0.15)" : "#FEF2F2",
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 16,
+                  }}>
+                    <Text style={{ color: isDark ? "#FCA5A5" : "#DC2626", fontSize: 13, fontWeight: "600" }}>
+                      {reportReason}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => {
+                      setReportReason(null);
+                      setReportDescription("");
+                    }}
+                    style={{ marginLeft: 8 }}
+                  >
+                    <Text style={{ color: viewColors.secondaryText, fontSize: 13 }}>Change</Text>
+                  </Pressable>
+                </View>
+
+                {/* Description input */}
+                <Text style={{ color: viewColors.text, fontSize: 14, fontWeight: "500", marginBottom: 6 }}>
+                  {reportReason === "Other"
+                    ? "Please describe the issue (required)"
+                    : "Additional details (optional)"}
+                </Text>
+                <TextInput
+                  value={reportDescription}
+                  onChangeText={setReportDescription}
+                  placeholder={
+                    reportReason === "Other"
+                      ? "Describe what happened..."
+                      : "Provide more context to help us review..."
+                  }
+                  placeholderTextColor={viewColors.secondaryText}
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  style={{
+                    borderWidth: 1,
+                    borderColor: reportReason === "Other" && !reportDescription.trim()
+                      ? (isDark ? "#7F1D1D" : "#FCA5A5")
+                      : (isDark ? "#38383A" : "#D1D5DB"),
+                    borderRadius: 12,
+                    paddingHorizontal: 14,
+                    paddingTop: 12,
+                    paddingBottom: 12,
+                    minHeight: 100,
+                    fontSize: 15,
+                    color: viewColors.text,
+                    backgroundColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.02)",
+                    marginBottom: 4,
+                  }}
+                  autoFocus
+                />
+                {reportReason === "Other" && !reportDescription.trim() && (
+                  <Text style={{ color: "#EF4444", fontSize: 12, marginBottom: 8 }}>
+                    A description is required when selecting &quot;Other&quot;
+                  </Text>
+                )}
+
+                {/* Submit button */}
+                <Pressable
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                    handleReportSubmit();
+                  }}
+                  disabled={reportLoading || (reportReason === "Other" && !reportDescription.trim())}
+                  style={{
+                    backgroundColor:
+                      reportLoading || (reportReason === "Other" && !reportDescription.trim())
+                        ? (isDark ? "#374151" : "#D1D5DB")
+                        : "#EF4444",
+                    borderRadius: 12,
+                    paddingVertical: 14,
+                    alignItems: "center",
+                    marginTop: 12,
+                    opacity: reportLoading ? 0.7 : 1,
+                  }}
+                >
+                  {reportLoading ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <Text style={{ color: "white", fontSize: 15, fontWeight: "600" }}>
+                      Submit Report
+                    </Text>
+                  )}
+                </Pressable>
+              </View>
+            )}
             
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setShowReportSheet(false);
+                setReportReason(null);
+                setReportDescription("");
               }}
               style={styles.reportCancel}
             >

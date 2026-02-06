@@ -70,12 +70,17 @@ async function callBlockAction(
  */
 async function callReportAction(
   reportedUserId: string,
-  reason: string
+  reason: string,
+  description?: string
 ): Promise<{ success: boolean; msg?: string }> {
   const response = await fetch("/api/reports", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ reported_user_id: reportedUserId, reason }),
+    body: JSON.stringify({
+      reported_user_id: reportedUserId,
+      reason,
+      description: description || null,
+    }),
   });
   return response.json();
 }
@@ -222,8 +227,8 @@ export function DiscoverProfileView() {
   }, [advanceToNext, markActedOn]);
   
   // Handle Report action
-  const handleReport = useCallback(async (userId: string, reason: string): Promise<{ success: boolean; msg?: string }> => {
-    const result = await callReportAction(userId, reason);
+  const handleReport = useCallback(async (userId: string, reason: string, description?: string): Promise<{ success: boolean; msg?: string }> => {
+    const result = await callReportAction(userId, reason, description);
     
     if (result.success) {
       // Mark as acted on and advance to next profile after reporting

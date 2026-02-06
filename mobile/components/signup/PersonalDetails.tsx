@@ -215,6 +215,7 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               onChangeText={(text) => updateData({ FirstName: text })}
               placeholder="First Name"
               placeholderTextColor={themedColors.placeholder}
+              autoCapitalize="words"
               autoComplete="given-name"
               textContentType="givenName"
               style={{paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, flex: 1, color: themedColors.text }}
@@ -227,6 +228,7 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
               onChangeText={(text) => updateData({ LastName: text })}
               placeholder="Last Name"
               placeholderTextColor={themedColors.placeholder}
+              autoCapitalize="words"
               autoComplete="family-name"
               textContentType="familyName"
               style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: themedColors.text }}
@@ -241,6 +243,7 @@ const PersonalDetails = ({ data, updateData, onNext, error }: any) => {
             onChangeText={(text) => updateData({ DisplayName: text })}
             placeholder="Display Name"
             placeholderTextColor={themedColors.placeholder}
+            autoCapitalize="words"
             autoComplete="name"
             textContentType="name"
             style={{ paddingVertical: Platform.OS == 'ios' ? 18 : 10, paddingHorizontal: 16, color: themedColors.text }}

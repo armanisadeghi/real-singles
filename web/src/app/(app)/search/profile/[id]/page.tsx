@@ -201,11 +201,15 @@ export default function SearchProfilePage() {
     return result;
   }, [recordAction, getDisplayName]);
 
-  const handleReport = useCallback(async (targetUserId: string, reason: string) => {
+  const handleReport = useCallback(async (targetUserId: string, reason: string, description?: string) => {
     const response = await fetch("/api/reports", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reported_user_id: targetUserId, reason }),
+      body: JSON.stringify({
+        reported_user_id: targetUserId,
+        reason,
+        description: description || null,
+      }),
     });
     return response.json();
   }, []);

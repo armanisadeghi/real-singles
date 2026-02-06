@@ -5,7 +5,9 @@
  *
  * Step 17: Political Views (split from old BeliefsStep)
  * Uses option cards since 6 options fit without scroll.
- * Includes "Prefer not to say" as a selectable option card.
+ * "Prefer not to say" is a UI-only card — tracked via markFieldAsPreferNot().
+ *
+ * NOTE: "prefer_not_to_say" is NOT a valid DbPolitical value.
  */
 
 import {
@@ -13,19 +15,19 @@ import {
   OnboardingOptionCards,
 } from "../OnboardingStepWrapper";
 import { POLITICAL_OPTIONS } from "@/types";
+import type { DbPolitical } from "@/types/db-constraints";
 
 interface PoliticalViewsStepProps {
-  politicalViews: string;
-  onPoliticalViewsChange: (value: string) => void;
+  politicalViews: DbPolitical | "";
+  onPoliticalViewsChange: (value: DbPolitical | "") => void;
   isPreferNot: boolean;
   onPreferNotChange: (isPreferNot: boolean) => void;
 }
 
-// Extend options with "Prefer not to say" as a selectable card
-const POLITICAL_WITH_PREFER_NOT = [
+const DISPLAY_OPTIONS = [
   ...POLITICAL_OPTIONS,
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
-] as const;
+  { value: "prefer_not_to_say" as const, label: "Prefer not to say" },
+];
 
 export function PoliticalViewsStep({
   politicalViews,
@@ -41,14 +43,14 @@ export function PoliticalViewsStep({
       if (isPreferNot) {
         onPreferNotChange(false);
       }
-      onPoliticalViewsChange(value);
+      onPoliticalViewsChange(value as DbPolitical);
     }
   };
 
   return (
     <OnboardingStepWrapper title="What are your political views?">
       <OnboardingOptionCards
-        options={POLITICAL_WITH_PREFER_NOT}
+        options={DISPLAY_OPTIONS}
         selected={isPreferNot ? "prefer_not_to_say" : politicalViews || null}
         onChange={handleChange}
       />
