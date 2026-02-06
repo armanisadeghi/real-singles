@@ -132,7 +132,7 @@ export default function GroupChat() {
 
             // Check if user is already a member
             const joinedGroups = await chatClient.groupManager.getJoinedGroups();
-            isMember = joinedGroups.some(g => g.groupId === effectiveGroupId);
+            isMember = joinedGroups.some((g: any) => g.groupId === effectiveGroupId);
             console.log("User is member:", isMember);
           }
 

@@ -15,6 +15,7 @@ interface SpeedDatingSession {
   gender_preference: string | null;
   age_min: number | null;
   age_max: number | null;
+  price: number | null;
   status: string;
   registration_count: number;
 }
@@ -36,6 +37,7 @@ async function getSessions(): Promise<SpeedDatingSession[]> {
       gender_preference,
       age_min,
       age_max,
+      price,
       status,
       speed_dating_registrations(count)
     `)
@@ -60,6 +62,7 @@ async function getSessions(): Promise<SpeedDatingSession[]> {
     gender_preference: session.gender_preference,
     age_min: session.age_min,
     age_max: session.age_max,
+    price: session.price,
     status: session.status || "scheduled",
     registration_count: Array.isArray(session.speed_dating_registrations)
       ? session.speed_dating_registrations.length
@@ -91,6 +94,12 @@ function getStatusColor(status: string): string {
     default:
       return "bg-slate-100 text-slate-800";
   }
+}
+
+function formatPrice(price: number | null): string {
+  if (price === null || price === undefined) return "—";
+  if (price === 0) return "Free";
+  return `$${price % 1 === 0 ? price.toFixed(0) : price.toFixed(2)}`;
 }
 
 function formatDuration(minutes: number | null): string {
@@ -168,6 +177,9 @@ export default async function AdminSpeedDatingPage() {
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Preferences
                   </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Price
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Status
                   </th>
@@ -219,12 +231,21 @@ export default async function AdminSpeedDatingPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-slate-600">
                         {session.age_min && session.age_max
-                          ? `Ages ${session.age_min}-${session.age_max}`
+                          ? `Ages ${session.age_min}–${session.age_max}`
+                          : session.age_min
+                          ? `Ages ${session.age_min}+`
+                          : session.age_max
+                          ? `Ages ≤${session.age_max}`
                           : "Any age"}
                       </div>
                       <div className="text-xs text-slate-400">
                         {session.gender_preference || "Mixed"}
                       </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <span className="text-sm text-slate-600">
+                        {formatPrice(session.price)}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span

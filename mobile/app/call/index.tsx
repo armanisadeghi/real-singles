@@ -21,17 +21,20 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useThemeColors } from '@/context/ThemeContext';
-// Import Agora SDK
-import {
-    ChannelProfileType,
-    ClientRoleType,
-    createAgoraRtcEngine,
-    IRtcEngine,
-    IRtcEngineEventHandler,
-    RtcConnection,
-    RtcSurfaceView,
-    VideoSourceType,
-} from 'react-native-agora';
+
+// Conditional import for native-only Agora SDK
+let ChannelProfileType: any, ClientRoleType: any, createAgoraRtcEngine: any, RtcSurfaceView: any, VideoSourceType: any;
+type IRtcEngine = any;
+type IRtcEngineEventHandler = any;
+type RtcConnection = any;
+if (Platform.OS !== 'web') {
+    const Agora = require('react-native-agora');
+    ChannelProfileType = Agora.ChannelProfileType;
+    ClientRoleType = Agora.ClientRoleType;
+    createAgoraRtcEngine = Agora.createAgoraRtcEngine;
+    RtcSurfaceView = Agora.RtcSurfaceView;
+    VideoSourceType = Agora.VideoSourceType;
+}
 
 const Call = () => {
     const router = useRouter();

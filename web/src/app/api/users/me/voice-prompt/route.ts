@@ -128,8 +128,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate MIME type
-    if (!VOICE_PROMPT_MIME_TYPES.includes(file.type as typeof VOICE_PROMPT_MIME_TYPES[number])) {
+    // Validate MIME type (strip codec parameters like ";codecs=opus" from browser MediaRecorder)
+    const baseMimeType = file.type.split(";")[0].trim();
+    if (!VOICE_PROMPT_MIME_TYPES.includes(baseMimeType as typeof VOICE_PROMPT_MIME_TYPES[number])) {
       return NextResponse.json(
         {
           success: false,
@@ -160,7 +161,7 @@ export async function POST(request: NextRequest) {
     const oldVoicePromptPath = existingProfile?.voice_prompt_url;
 
     // Generate file path
-    const fileExtension = file.name.split(".").pop() || getExtensionFromMimeType(file.type);
+    const fileExtension = file.name.split(".").pop() || getExtensionFromMimeType(baseMimeType);
     const filePath = getVoicePromptPath(user.id, fileExtension);
 
     // Convert File to ArrayBuffer for upload
@@ -171,7 +172,7 @@ export async function POST(request: NextRequest) {
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKETS.GALLERY)
       .upload(filePath, fileBuffer, {
-        contentType: file.type,
+        contentType: baseMimeType,
         cacheControl: "3600",
         upsert: false,
       });

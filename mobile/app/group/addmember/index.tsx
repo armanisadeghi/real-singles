@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  Platform,
   Text,
   TouchableOpacity,
   View,
@@ -18,7 +19,15 @@ import Toast from "react-native-toast-message";
 
 import { getCurrentUserId, MEDIA_BASE_URL } from "@/utils/token";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ChatConversationType, ChatGroupOptions, ChatGroupStyle } from "react-native-agora-chat";
+
+// Conditional import for native-only Agora Chat SDK
+let ChatConversationType: any, ChatGroupOptions: any, ChatGroupStyle: any;
+if (Platform.OS !== 'web') {
+  const AgoraChat = require("react-native-agora-chat");
+  ChatConversationType = AgoraChat.ChatConversationType;
+  ChatGroupOptions = AgoraChat.ChatGroupOptions;
+  ChatGroupStyle = AgoraChat.ChatGroupStyle;
+}
 
 export default function Addmember() {
   const { GroupName, GroupImage } = useLocalSearchParams();

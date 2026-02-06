@@ -13,6 +13,9 @@ interface EventListItem {
   max_attendees: number | null;
   city: string | null;
   state: string | null;
+  age_min: number | null;
+  age_max: number | null;
+  price: number | null;
 }
 
 async function getEvents(): Promise<EventListItem[]> {
@@ -20,7 +23,7 @@ async function getEvents(): Promise<EventListItem[]> {
 
   const { data: events, error } = await supabase
     .from("events")
-    .select("id, title, event_type, start_datetime, status, current_attendees, max_attendees, city, state")
+    .select("id, title, event_type, start_datetime, status, current_attendees, max_attendees, city, state, age_min, age_max, price")
     .order("start_datetime", { ascending: false })
     .limit(100);
 
@@ -40,6 +43,9 @@ async function getEvents(): Promise<EventListItem[]> {
     max_attendees: event.max_attendees,
     city: event.city,
     state: event.state,
+    age_min: event.age_min,
+    age_max: event.age_max,
+    price: event.price,
   }));
 }
 
@@ -67,6 +73,19 @@ function getStatusColor(status: string): string {
     default:
       return "bg-slate-100 text-slate-800";
   }
+}
+
+function formatAgeRange(min: number | null, max: number | null): string {
+  if (min && max) return `${min}–${max}`;
+  if (min) return `${min}+`;
+  if (max) return `≤${max}`;
+  return "—";
+}
+
+function formatPrice(price: number | null): string {
+  if (price === null || price === undefined) return "—";
+  if (price === 0) return "Free";
+  return `$${price % 1 === 0 ? price.toFixed(0) : price.toFixed(2)}`;
 }
 
 function getEventTypeLabel(type: string): string {
@@ -145,6 +164,12 @@ export default async function AdminEventsPage() {
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Location
                   </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Ages
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Price
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Status
                   </th>
@@ -188,6 +213,16 @@ export default async function AdminEventsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-slate-600">
                         {[event.city, event.state].filter(Boolean).join(", ") || "—"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <span className="text-sm text-slate-600">
+                        {formatAgeRange(event.age_min, event.age_max)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <span className="text-sm text-slate-600">
+                        {formatPrice(event.price)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

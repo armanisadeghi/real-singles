@@ -27,8 +27,15 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// Conditional import for native-only Maps SDK
+let MapView: any, Marker: any;
+if (Platform.OS !== 'web') {
+  const Maps = require("react-native-maps");
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+}
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const HERO_HEIGHT = SCREEN_WIDTH * 0.65; // 16:10 aspect ratio approximately

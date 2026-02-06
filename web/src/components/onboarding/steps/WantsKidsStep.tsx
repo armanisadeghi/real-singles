@@ -6,10 +6,12 @@
  * Step 22: Do you want children? (split from old KidsStep)
  * Uses option cards for a clean, list-based selection.
  * "Prefer not to say" is a UI-only card — tracked via markFieldAsPreferNot().
+ * Auto-advances after selection with a brief delay.
  *
  * NOTE: "prefer_not_to_say" is NOT a valid DbWantsKids value.
  */
 
+import { useRef, useEffect } from "react";
 import {
   OnboardingStepWrapper,
   OnboardingOptionCards,
@@ -22,6 +24,8 @@ interface WantsKidsStepProps {
   onWantsKidsChange: (value: DbWantsKids | "") => void;
   isPreferNot: boolean;
   onPreferNotChange: (isPreferNot: boolean) => void;
+  /** Called after selection to auto-advance to next step */
+  onAutoAdvance?: () => Promise<void>;
 }
 
 const DISPLAY_OPTIONS = [
@@ -34,8 +38,21 @@ export function WantsKidsStep({
   onWantsKidsChange,
   isPreferNot,
   onPreferNotChange,
+  onAutoAdvance,
 }: WantsKidsStepProps) {
+  const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
+    };
+  }, []);
+
+  const currentSelected = isPreferNot ? "prefer_not_to_say" : wantsKids || null;
+
   const handleChange = (value: string) => {
+    if (value === currentSelected) return;
+
     if (value === "prefer_not_to_say") {
       onPreferNotChange(true);
       onWantsKidsChange("");
@@ -45,13 +62,20 @@ export function WantsKidsStep({
       }
       onWantsKidsChange(value as DbWantsKids);
     }
+
+    if (onAutoAdvance) {
+      if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
+      autoAdvanceTimer.current = setTimeout(() => {
+        onAutoAdvance();
+      }, 400);
+    }
   };
 
   return (
     <OnboardingStepWrapper title="Do you want children?">
       <OnboardingOptionCards
         options={DISPLAY_OPTIONS}
-        selected={isPreferNot ? "prefer_not_to_say" : wantsKids || null}
+        selected={currentSelected}
         onChange={handleChange}
       />
     </OnboardingStepWrapper>

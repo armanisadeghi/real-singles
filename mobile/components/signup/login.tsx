@@ -5,9 +5,14 @@ import { useThemeColors } from "@/context/ThemeContext";
 import React, { useState } from "react";
 import { Image, Modal, Platform, PlatformColor, ScrollView, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Pdf from "react-native-pdf";
 import { WebView } from "react-native-webview";
 import GradientButton from "../ui/GradientButton";
+
+// Conditional import for native-only PDF library
+let Pdf: any = null;
+if (Platform.OS !== 'web') {
+  Pdf = require("react-native-pdf").default;
+}
 
 const SignupLogin = ({
   data,
@@ -140,7 +145,7 @@ const SignupLogin = ({
             <Pdf
               source={pdfSource}
               style={{ flex: 1, width: "100%" }}
-              onError={(error) => console.log("PDF load error:", error)}
+              onError={(error: any) => console.log("PDF load error:", error)}
             />
           )}
         </SafeAreaView>

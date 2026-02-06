@@ -186,6 +186,7 @@ export function useOnboarding(
         city: profileData.City || "",
         zip_code: profileData.ZipCode || "",
         state: profileData.State || "",
+        street_address: profileData.StreetAddress || "",
         occupation: profileData.Occupation || "",
         company: profileData.Company || "",
         education: profileData.Education || "",
@@ -282,6 +283,7 @@ export function useOnboarding(
     if (profileData.country) values.Country = profileData.country;
     if (profileData.city) values.City = profileData.city;
     if (profileData.zip_code) values.ZipCode = profileData.zip_code;
+    if (profileData.street_address) values.StreetAddress = profileData.street_address;
     if (profileData.occupation) values.Occupation = profileData.occupation;
     if (profileData.company) values.Company = profileData.company;
     if (profileData.education) values.Education = profileData.education;

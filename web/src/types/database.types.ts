@@ -1545,6 +1545,7 @@ export type Database = {
           social_link_1: string | null
           social_link_2: string | null
           state: string | null
+          street_address: string | null
           updated_at: string | null
           user_id: string | null
           verification_selfie_url: string | null
@@ -1621,6 +1622,7 @@ export type Database = {
           social_link_1?: string | null
           social_link_2?: string | null
           state?: string | null
+          street_address?: string | null
           updated_at?: string | null
           user_id?: string | null
           verification_selfie_url?: string | null
@@ -1697,6 +1699,7 @@ export type Database = {
           social_link_1?: string | null
           social_link_2?: string | null
           state?: string | null
+          street_address?: string | null
           updated_at?: string | null
           user_id?: string | null
           verification_selfie_url?: string | null
@@ -2807,6 +2810,20 @@ export type Database = {
       can_create_conversation: {
         Args: { p_user_a: string; p_user_b: string }
         Returns: boolean
+      }
+      count_reports_by_reported_user: {
+        Args: { user_ids: string[] }
+        Returns: {
+          count: number
+          user_id: string
+        }[]
+      }
+      count_reports_by_reporter: {
+        Args: { user_ids: string[] }
+        Returns: {
+          count: number
+          user_id: string
+        }[]
       }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:

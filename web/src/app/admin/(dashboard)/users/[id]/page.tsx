@@ -124,6 +124,7 @@ interface ProfileDetail {
   state?: string | null;
   city?: string | null;
   zip_code?: string | null;
+  street_address?: string | null;
   hometown?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -1395,6 +1396,12 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                             <p className="font-medium text-gray-900 dark:text-gray-100">{profile.hometown}</p>
                           </div>
                         )}
+                        {profile?.street_address && (
+                          <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-3 sm:col-span-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Street Address (Private)</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.street_address}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -2263,6 +2270,16 @@ export default function AdminUserDetailPage({ params }: PageProps) {
                   type="text"
                   value={editForm.hometown || ""}
                   onChange={(e) => setEditForm({ ...editForm, hometown: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Street Address (Private — shipping only)</label>
+                <input
+                  type="text"
+                  value={editForm.street_address || ""}
+                  onChange={(e) => setEditForm({ ...editForm, street_address: e.target.value })}
+                  placeholder="Never shown to other users"
                   className="w-full px-3 py-2 text-sm border dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 />
               </div>

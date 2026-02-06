@@ -21,10 +21,15 @@ import {
   View
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import Pdf from "react-native-pdf";
 import Toast from "react-native-toast-message";
 import { WebView } from "react-native-webview";
 import { useThemeColors } from "@/context/ThemeContext";
+
+// Conditional import for native-only PDF library
+let Pdf: any = null;
+if (Platform.OS !== 'web') {
+  Pdf = require("react-native-pdf").default;
+}
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -274,7 +279,7 @@ const Login = () => {
             <Pdf
               source={pdfSource}
               style={{ flex: 1, width: "100%" }}
-              onError={(error) => console.log("PDF load error:", error)}
+              onError={(error: any) => console.log("PDF load error:", error)}
             />
           )}
         </SafeAreaView>

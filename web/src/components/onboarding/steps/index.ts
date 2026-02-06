@@ -8,6 +8,7 @@ export { GenderStep } from "./GenderStep";
 export { InterestedInStep } from "./InterestedInStep";
 export { PhotosStep } from "./PhotosStep";
 export { VerificationSelfieStep } from "./VerificationSelfieStep";
+export type { VerificationSelfieStepHandle } from "./VerificationSelfieStep";
 export { PhysicalStep } from "./PhysicalStep";
 export { EthnicityStep } from "./EthnicityStep";
 export { MaritalStatusStep } from "./MaritalStatusStep";

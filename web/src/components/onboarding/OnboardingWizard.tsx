@@ -45,6 +45,16 @@ import {
   SocialLinksStep,
   CompleteStep,
 } from "./steps";
+import type { VerificationSelfieStepHandle } from "./steps";
+import type {
+  DbMaritalStatus,
+  DbPolitical,
+  DbSmoking,
+  DbDrinking,
+  DbMarijuana,
+  DbHasKids,
+  DbWantsKids,
+} from "@/types/db-constraints";
 
 interface OnboardingWizardProps {
   resume?: boolean;
@@ -54,6 +64,7 @@ interface OnboardingWizardProps {
 export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizardProps) {
   const router = useRouter();
   const stepContentRef = useRef<HTMLDivElement>(null);
+  const selfieStepRef = useRef<VerificationSelfieStepHandle>(null);
 
   const {
     currentStep,
@@ -111,6 +122,15 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
 
     return true;
   }, [currentStepConfig, stepValues, photoCount, profile]);
+
+  // Wrapped continue handler — intercepts for selfie step
+  const handleContinue = useCallback(() => {
+    if (currentStepConfig?.id === "verification-selfie" && selfieStepRef.current) {
+      const handled = selfieStepRef.current.handleContinue();
+      if (handled) return; // Step handled it internally (save photo or block)
+    }
+    saveAndContinue();
+  }, [currentStepConfig?.id, saveAndContinue]);
 
   // Handle close/exit
   const handleClose = useCallback(() => {
@@ -179,7 +199,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
             inputs[currentIndex + 1].focus();
           } else if (canContinue && !isSaving) {
             // Last input — continue
-            saveAndContinue();
+            handleContinue();
           }
         }
         return;
@@ -190,12 +210,12 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
       if (tagName === "input" || tagName === "select") return;
 
       e.preventDefault();
-      saveAndContinue();
+      handleContinue();
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentStepConfig?.needsKeyboard, canContinue, isSaving, saveAndContinue]);
+  }, [currentStepConfig?.needsKeyboard, canContinue, isSaving, handleContinue]);
 
   // Render loading state
   if (isLoading) {
@@ -249,6 +269,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
       case "verification-selfie":
         return (
           <VerificationSelfieStep
+            ref={selfieStepRef}
             hasVerificationSelfie={!!profile?.verification_selfie_url}
             onSelfieChange={refreshProfile}
             onSaveAndContinue={saveAndContinue}
@@ -287,7 +308,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
       case "marital-status":
         return (
           <MaritalStatusStep
-            maritalStatus={(stepValues.MaritalStatus as string) || ""}
+            maritalStatus={(stepValues.MaritalStatus as DbMaritalStatus | "") || ""}
             onMaritalStatusChange={(v) => setFieldValue("MaritalStatus", v)}
             isPreferNot={isFieldPreferNot("marital_status")}
             onPreferNotChange={async (isPreferNot) => {
@@ -298,6 +319,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
                 await removeFieldFromPreferNot("marital_status");
               }
             }}
+            onAutoAdvance={saveAndContinue}
           />
         );
 
@@ -315,9 +337,11 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
             country={(stepValues.Country as string) || ""}
             city={(stepValues.City as string) || ""}
             zipCode={(stepValues.ZipCode as string) || ""}
+            streetAddress={(stepValues.StreetAddress as string) || ""}
             onCountryChange={(v) => setFieldValue("Country", v)}
             onCityChange={(v) => setFieldValue("City", v)}
             onZipCodeChange={(v) => setFieldValue("ZipCode", v)}
+            onStreetAddressChange={(v) => setFieldValue("StreetAddress", v)}
           />
         );
 
@@ -353,13 +377,14 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
                 await removeFieldFromPreferNot("religion");
               }
             }}
+            onAutoAdvance={saveAndContinue}
           />
         );
 
       case "political-views":
         return (
           <PoliticalViewsStep
-            politicalViews={(stepValues.PoliticalViews as string) || ""}
+            politicalViews={(stepValues.PoliticalViews as DbPolitical | "") || ""}
             onPoliticalViewsChange={(v) => setFieldValue("PoliticalViews", v)}
             isPreferNot={isFieldPreferNot("political_views")}
             onPreferNotChange={async (isPreferNot) => {
@@ -370,6 +395,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
                 await removeFieldFromPreferNot("political_views");
               }
             }}
+            onAutoAdvance={saveAndContinue}
           />
         );
 
@@ -392,9 +418,9 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
       case "habits":
         return (
           <HabitsStep
-            smoking={(stepValues.Smoking as string) || ""}
-            drinking={(stepValues.Drinking as string) || ""}
-            marijuana={(stepValues.Marijuana as string) || ""}
+            smoking={(stepValues.Smoking as DbSmoking | "") || ""}
+            drinking={(stepValues.Drinking as DbDrinking | "") || ""}
+            marijuana={(stepValues.Marijuana as DbMarijuana | "") || ""}
             onSmokingChange={(v) => setFieldValue("Smoking", v)}
             onDrinkingChange={(v) => setFieldValue("Drinking", v)}
             onMarijuanaChange={(v) => setFieldValue("Marijuana", v)}
@@ -431,7 +457,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
       case "has-kids":
         return (
           <HasKidsStep
-            hasKids={(stepValues.HasKids as string) || ""}
+            hasKids={(stepValues.HasKids as DbHasKids | "") || ""}
             onHasKidsChange={(v) => setFieldValue("HasKids", v)}
             isPreferNot={isFieldPreferNot("has_kids")}
             onPreferNotChange={async (isPreferNot) => {
@@ -442,13 +468,14 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
                 await removeFieldFromPreferNot("has_kids");
               }
             }}
+            onAutoAdvance={saveAndContinue}
           />
         );
 
       case "wants-kids":
         return (
           <WantsKidsStep
-            wantsKids={(stepValues.WantsKids as string) || ""}
+            wantsKids={(stepValues.WantsKids as DbWantsKids | "") || ""}
             onWantsKidsChange={(v) => setFieldValue("WantsKids", v)}
             isPreferNot={isFieldPreferNot("wants_kids")}
             onPreferNotChange={async (isPreferNot) => {
@@ -459,6 +486,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
                 await removeFieldFromPreferNot("wants_kids");
               }
             }}
+            onAutoAdvance={saveAndContinue}
           />
         );
 
@@ -697,7 +725,7 @@ export function OnboardingWizard({ resume = false, targetStep }: OnboardingWizar
         <OnboardingNav
           onBack={goBack}
           onSkip={currentStepConfig?.allowSkip ? saveAndSkip : undefined}
-          onContinue={saveAndContinue}
+          onContinue={handleContinue}
           canGoBack={canGoBack}
           canSkip={currentStepConfig?.allowSkip ?? false}
           canContinue={canContinue}

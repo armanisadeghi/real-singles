@@ -45,7 +45,7 @@ export async function GET() {
       .select(`
         first_name, last_name, date_of_birth, gender, looking_for, zodiac_sign, bio,
         looking_for_description, dating_intentions, profile_image_url,
-        city, state, country, zip_code, latitude, longitude, hometown,
+        city, state, country, zip_code, street_address, latitude, longitude, hometown,
         height_inches, body_type, ethnicity,
         marital_status, religion, political_views, education, occupation, company, schools, languages,
         smoking, drinking, marijuana, exercise,
@@ -193,6 +193,7 @@ export async function GET() {
     State: profile?.state || "",
     Country: profile?.country || "",
     ZipCode: profile?.zip_code || "",
+    StreetAddress: profile?.street_address || "",
     Address: profile?.city && profile?.state ? `${profile.city}, ${profile.state}` : "",
     Latitude: profile?.latitude?.toString() || "",
     Longitude: profile?.longitude?.toString() || "",
@@ -410,6 +411,7 @@ export async function PUT(request: Request) {
       Country: "country",
       ZipCode: "zip_code",
       Zipcode: "zip_code", // Mobile alias (lowercase c)
+      StreetAddress: "street_address",
       Latitude: "latitude",
       Longitude: "longitude",
       

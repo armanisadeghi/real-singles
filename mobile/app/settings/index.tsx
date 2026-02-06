@@ -26,9 +26,14 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
-import Pdf from "react-native-pdf";
 import Toast from "react-native-toast-message";
 import WebView from "react-native-webview";
+
+// Conditional import for native-only PDF library
+let Pdf: any = null;
+if (Platform.OS !== 'web') {
+  Pdf = require("react-native-pdf").default;
+}
 
 export default function Settings() {
   const [appleUserInfo, setAppleUserInfo] = React.useState<any>()
@@ -331,7 +336,7 @@ export default function Settings() {
                 <Pdf
                   source={pdfSource}
                   style={{ flex: 1, width: "100%" }}
-                  onError={(error) => console.log("PDF load error:", error)}
+                  onError={(error: any) => console.log("PDF load error:", error)}
                 />
               )}
             </SafeAreaView>

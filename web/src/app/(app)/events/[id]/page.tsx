@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Calendar,
   MapPin,
@@ -12,8 +12,12 @@ import {
   CalendarPlus,
   Loader2,
   ExternalLink,
+  DollarSign,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface EventDetail {
   EventID: string;
@@ -41,7 +45,6 @@ interface EventDetail {
     status: string;
   }>;
   HostedBy?: string;
-  // TODO: Add to database and API
   AgeMin?: number;
   AgeMax?: number;
   Price?: string;
@@ -50,10 +53,25 @@ interface EventDetail {
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRsvpLoading, setIsRsvpLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Handle payment callback from Stripe
+  useEffect(() => {
+    const paymentStatus = searchParams.get("payment");
+    if (paymentStatus === "success") {
+      setMessage({ type: "success", text: "Payment successful! You are now registered for this event." });
+      // Clean URL
+      window.history.replaceState({}, "", `/events/${resolvedParams.id}`);
+    } else if (paymentStatus === "canceled") {
+      setMessage({ type: "error", text: "Payment was canceled. You can try again." });
+      window.history.replaceState({}, "", `/events/${resolvedParams.id}`);
+    }
+  }, [searchParams, resolvedParams.id]);
 
   useEffect(() => {
     fetchEvent();
@@ -83,6 +101,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   const handleRsvp = async () => {
     if (!event) return;
     setIsRsvpLoading(true);
+    setMessage(null);
     
     try {
       const isCurrentlyRegistered = event.isMarkInterested === 1;
@@ -92,7 +111,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
       const data = await res.json();
       
       if (data.success) {
-        // Update local state
+        // Check if payment is required (paid event)
+        if (data.status === "requires_payment" && data.data?.checkoutUrl) {
+          // Redirect to Stripe Checkout
+          window.location.href = data.data.checkoutUrl;
+          return;
+        }
+
+        // Free event - update local state
         setEvent(prev => prev ? {
           ...prev,
           isMarkInterested: isCurrentlyRegistered ? 0 : 1,
@@ -101,11 +127,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
             : prev.CurrentAttendees + 1,
         } : null);
       } else {
-        alert(data.msg || "Failed to update RSVP");
+        setMessage({ type: "error", text: data.msg || "Failed to update RSVP" });
       }
     } catch (err) {
       console.error("Error updating RSVP:", err);
-      alert("Failed to update RSVP. Please try again.");
+      setMessage({ type: "error", text: "Failed to update RSVP. Please try again." });
     } finally {
       setIsRsvpLoading(false);
     }
@@ -123,20 +149,18 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-      } catch (err) {
+      } catch {
         // User cancelled or error
       }
     } else {
-      // Fallback: copy to clipboard
       await navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
+      setMessage({ type: "success", text: "Link copied to clipboard!" });
     }
   };
 
   const handleAddToCalendar = () => {
     if (!event) return;
 
-    // Create ICS file content
     const formatDateForICS = (dateStr: string, timeStr?: string) => {
       const date = new Date(dateStr);
       if (timeStr) {
@@ -190,8 +214,6 @@ END:VCALENDAR`;
     
     const address = [event.Street, event.City, event.State].filter(Boolean).join(", ");
     const query = encodeURIComponent(address);
-    
-    // Use Google Maps URL (works on all platforms)
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, "_blank");
   };
 
@@ -234,6 +256,8 @@ END:VCALENDAR`;
   const isRegistered = event.isMarkInterested === 1;
   const location = [event.City, event.State].filter(Boolean).join(", ");
   const fullAddress = [event.VenueName, event.Street, location].filter(Boolean).join(", ");
+  const eventPrice = event.Price ? parseFloat(event.Price) : 0;
+  const isPaidEvent = eventPrice > 0;
 
   return (
     <div className="min-h-dvh bg-gray-50 dark:bg-neutral-950 pb-24">
@@ -272,10 +296,48 @@ END:VCALENDAR`;
             <CalendarPlus className="w-5 h-5 text-gray-700 dark:text-gray-300" />
           </button>
         </div>
+
+        {/* Price badge on hero */}
+        {isPaidEvent && (
+          <div className="absolute bottom-4 right-4 px-4 py-2 bg-white/95 dark:bg-neutral-800/95 backdrop-blur rounded-full shadow-sm">
+            <span className="font-bold text-green-600 dark:text-green-400 text-lg">
+              ${eventPrice.toFixed(2)}
+            </span>
+          </div>
+        )}
       </div>
+
+      {/* Message Banner */}
+      {message && (
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-4">
+          <div
+            className={cn(
+              "flex items-center gap-3 p-4 rounded-xl",
+              message.type === "success"
+                ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+                : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
+            )}
+          >
+            {message.type === "success" ? (
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
+            ) : (
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            )}
+            <p className="flex-1 text-sm">{message.text}</p>
+            <button
+              onClick={() => setMessage(null)}
+              className="text-current opacity-60 hover:opacity-100"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 -mt-8 relative z-10">
+        {message && <div className="h-4" />}
+        
         {/* Main card */}
         <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-black/20 p-6 mb-6">
           {/* Title and RSVP */}
@@ -291,19 +353,30 @@ END:VCALENDAR`;
               )}
             </div>
             
+            {/* RSVP Button */}
             <button
               onClick={handleRsvp}
               disabled={isRsvpLoading || event.Status === "cancelled"}
-              className={`flex-shrink-0 px-6 py-2.5 rounded-full font-medium transition-all flex items-center gap-2 ${
+              className={cn(
+                "flex-shrink-0 px-6 py-2.5 rounded-full font-medium transition-all flex items-center gap-2",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
                 isRegistered
                   ? "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-neutral-700"
-                  : "bg-pink-500 text-white hover:bg-pink-600"
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  : isPaidEvent
+                    ? "bg-green-500 text-white hover:bg-green-600"
+                    : "bg-pink-500 text-white hover:bg-pink-600"
+              )}
             >
               {isRsvpLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
+              ) : isPaidEvent && !isRegistered ? (
+                <DollarSign className="w-4 h-4" />
               ) : null}
-              {isRegistered ? "Cancel RSVP" : "RSVP"}
+              {isRegistered
+                ? "Cancel RSVP"
+                : isPaidEvent
+                  ? `RSVP — $${eventPrice.toFixed(2)}`
+                  : "RSVP"}
             </button>
           </div>
 
@@ -382,15 +455,15 @@ END:VCALENDAR`;
               </div>
             )}
 
-            {event.Price && parseFloat(event.Price) > 0 && (
+            {isPaidEvent && (
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                  <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">Cost</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">Ticket Price</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    ${parseFloat(event.Price).toFixed(2)}
+                    ${eventPrice.toFixed(2)} per person
                   </p>
                 </div>
               </div>
@@ -407,8 +480,6 @@ END:VCALENDAR`;
             </div>
           )}
         </div>
-
-        {/* Removed "Who's going" section per requirement */}
       </div>
     </div>
   );

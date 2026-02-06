@@ -24,8 +24,16 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// Conditional import for native-only Maps SDK
+let MapView: any, Marker: any, PROVIDER_GOOGLE: any;
+if (Platform.OS !== 'web') {
+  const Maps = require("react-native-maps");
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+  PROVIDER_GOOGLE = Maps.PROVIDER_GOOGLE;
+}
 import { useThemeColors } from "@/context/ThemeContext";
 
 export default function NearBy() {

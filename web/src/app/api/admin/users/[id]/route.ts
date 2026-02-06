@@ -143,7 +143,7 @@ export async function PATCH(
     // Physical
     "height_inches", "body_type", "ethnicity",
     // Location
-    "country", "state", "city", "zip_code", "hometown", "latitude", "longitude",
+    "country", "state", "city", "zip_code", "street_address", "hometown", "latitude", "longitude",
     // Lifestyle
     "marital_status", "religion", "political_views", "education", "occupation", 
     "company", "schools", "smoking", "drinking", "marijuana", "exercise", "languages",

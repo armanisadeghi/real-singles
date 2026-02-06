@@ -4,9 +4,14 @@
  * VerificationSelfieStep
  *
  * Step 6: Capture verification selfie
+ *
+ * Exposes a handleContinue() method via ref so the parent wizard can
+ * intercept the Continue button. When the user is in "preview" state
+ * (photo captured but not yet saved), pressing Continue will default
+ * to saving the photo and advancing — preventing silent photo loss.
  */
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Camera, RefreshCw, Check, X, ShieldCheck } from "lucide-react";
 import { OnboardingStepWrapper } from "../OnboardingStepWrapper";
 import { cn } from "@/lib/utils";
@@ -17,13 +22,20 @@ interface VerificationSelfieStepProps {
   onSaveAndContinue?: () => Promise<void>;
 }
 
+/** Methods exposed to the parent wizard via ref */
+export interface VerificationSelfieStepHandle {
+  /** Returns true if this step handled the continue action internally */
+  handleContinue: () => boolean;
+}
+
 type CaptureState = "idle" | "capturing" | "preview" | "saving" | "done" | "permission-denied";
 
-export function VerificationSelfieStep({
+export const VerificationSelfieStep = forwardRef<VerificationSelfieStepHandle, VerificationSelfieStepProps>(
+  function VerificationSelfieStep({
   hasVerificationSelfie,
   onSelfieChange,
   onSaveAndContinue,
-}: VerificationSelfieStepProps) {
+}: VerificationSelfieStepProps, ref) {
   const [state, setState] = useState<CaptureState>(
     hasVerificationSelfie ? "done" : "idle"
   );
@@ -193,6 +205,23 @@ export function VerificationSelfieStep({
       setError("Failed to delete selfie");
     }
   }, [onSelfieChange]);
+
+  // Expose handleContinue to parent wizard via ref
+  useImperativeHandle(ref, () => ({
+    handleContinue: () => {
+      if (state === "preview" && previewUrl) {
+        // Default to saving the photo and continuing
+        saveSelfie(true);
+        return true; // We handled it
+      }
+      if (state === "capturing") {
+        // User is mid-capture — don't advance, do nothing
+        return true; // We handled it (by blocking)
+      }
+      // For idle, done, permission-denied, saving — let default continue proceed
+      return false;
+    },
+  }), [state, previewUrl, saveSelfie]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -458,4 +487,4 @@ export function VerificationSelfieStep({
       )}
     </OnboardingStepWrapper>
   );
-}
+});

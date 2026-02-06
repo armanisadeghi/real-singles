@@ -38,6 +38,7 @@ export interface ProfileData {
   city?: string | null;
   zip_code?: string | null;
   state?: string | null;
+  street_address?: string | null;
 
   // Lifestyle
   occupation?: string | null;

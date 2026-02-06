@@ -8,11 +8,13 @@
  * "Prefer not to say" is a UI-only card — it calls markFieldAsPreferNot()
  * which tracks the preference separately. The field value stays "" (unset),
  * which saveAndContinue strips before sending to the API.
+ * Auto-advances after selection with a brief delay.
  *
  * NOTE: "prefer_not_to_say" is NOT a valid DbMaritalStatus value.
  * The DB constraint only allows: never_married | separated | divorced | widowed
  */
 
+import { useRef, useEffect } from "react";
 import {
   OnboardingStepWrapper,
   OnboardingOptionCards,
@@ -25,6 +27,8 @@ interface MaritalStatusStepProps {
   onMaritalStatusChange: (value: DbMaritalStatus | "") => void;
   isPreferNot: boolean;
   onPreferNotChange: (isPreferNot: boolean) => void;
+  /** Called after selection to auto-advance to next step */
+  onAutoAdvance?: () => Promise<void>;
 }
 
 /**
@@ -41,18 +45,36 @@ export function MaritalStatusStep({
   onMaritalStatusChange,
   isPreferNot,
   onPreferNotChange,
+  onAutoAdvance,
 }: MaritalStatusStepProps) {
+  const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
+    };
+  }, []);
+
+  const currentSelected = isPreferNot ? "prefer_not_to_say" : maritalStatus || null;
+
   const handleChange = (value: string) => {
+    if (value === currentSelected) return;
+
     if (value === "prefer_not_to_say") {
-      // UI-only: mark as prefer not, clear the DB field value
       onPreferNotChange(true);
       onMaritalStatusChange("");
     } else {
       if (isPreferNot) {
         onPreferNotChange(false);
       }
-      // Safe cast — value comes from MARITAL_STATUS_OPTIONS which is typed
       onMaritalStatusChange(value as DbMaritalStatus);
+    }
+
+    if (onAutoAdvance) {
+      if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
+      autoAdvanceTimer.current = setTimeout(() => {
+        onAutoAdvance();
+      }, 400);
     }
   };
 
@@ -60,7 +82,7 @@ export function MaritalStatusStep({
     <OnboardingStepWrapper title="What's your marital status?">
       <OnboardingOptionCards
         options={DISPLAY_OPTIONS}
-        selected={isPreferNot ? "prefer_not_to_say" : maritalStatus || null}
+        selected={currentSelected}
         onChange={handleChange}
       />
     </OnboardingStepWrapper>

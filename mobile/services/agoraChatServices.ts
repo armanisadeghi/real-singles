@@ -15,15 +15,20 @@
  */
 
 import { getAgoraChatToken } from "@/lib/api";
-import {
-  ChatClient,
-  ChatConversationType,
-  ChatGroupOptions,
-  ChatGroupStyle,
-  ChatMessage,
-  ChatMessageChatType,
-  ChatOptions,
-} from "react-native-agora-chat";
+import { Platform } from "react-native";
+
+// Conditional import for native-only Agora Chat SDK
+let ChatClient: any, ChatConversationType: any, ChatGroupOptions: any, ChatMessageChatType: any, ChatOptions: any, ChatGroupStyle: any, ChatMessage: any;
+if (Platform.OS !== 'web') {
+  const AgoraChat = require("react-native-agora-chat");
+  ChatClient = AgoraChat.ChatClient;
+  ChatConversationType = AgoraChat.ChatConversationType;
+  ChatGroupOptions = AgoraChat.ChatGroupOptions;
+  ChatMessageChatType = AgoraChat.ChatMessageChatType;
+  ChatOptions = AgoraChat.ChatOptions;
+  ChatGroupStyle = AgoraChat.ChatGroupStyle;
+  ChatMessage = AgoraChat.ChatMessage;
+}
 
 const appKey = process.env.EXPO_PUBLIC_AGORA_CHAT_APP_KEY!;
 export const chatClient = ChatClient.getInstance();
@@ -186,10 +191,10 @@ export const sendCustomMessage = async (
 };
 
 export const setupMessageListener = (
-  callback: (messages: ChatMessage[]) => void
+  callback: (messages: any[]) => void
 ) => {
   const listener = {
-    onMessagesReceived: (messages: ChatMessage[]) => {
+    onMessagesReceived: (messages: any[]) => {
       callback(messages);
     },
   };
@@ -277,7 +282,7 @@ export interface AgoraGroupOptions {
   owner: string;
   members?: string[];
   maxCount?: number;
-  style?: ChatGroupStyle;
+  style?: any;
 }
 
 export const createAgoraGroup = async ({
@@ -480,7 +485,7 @@ export const getAllJoinedGroupsDetailed = async () => {
   try {
     const groups = await chatClient.groupManager.getJoinedGroups();
     console.log(`📋 Found ${groups.length} joined groups:`);
-    groups.forEach((g, i) => {
+    groups.forEach((g: any, i: number) => {
       console.log(`  ${i + 1}. ID: ${g.groupId}, Name: ${g.groupName}, Owner: ${g.owner}`);
     });
     return groups;

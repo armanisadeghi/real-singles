@@ -22,8 +22,15 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
 import GradientButton from "./ui/GradientButton";
+
+// Conditional import for native-only Maps SDK
+let MapView: any, Marker: any;
+if (Platform.OS !== 'web') {
+  const Maps = require("react-native-maps");
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+}
 
 const BACKGROUND_COLORS = [
   "#F44336", // Red

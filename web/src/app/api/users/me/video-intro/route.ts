@@ -128,8 +128,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate MIME type
-    if (!VIDEO_INTRO_MIME_TYPES.includes(file.type as typeof VIDEO_INTRO_MIME_TYPES[number])) {
+    // Validate MIME type (strip codec parameters like ";codecs=vp9,opus" from browser MediaRecorder)
+    const baseMimeType = file.type.split(";")[0].trim();
+    if (!VIDEO_INTRO_MIME_TYPES.includes(baseMimeType as typeof VIDEO_INTRO_MIME_TYPES[number])) {
       return NextResponse.json(
         {
           success: false,
@@ -160,7 +161,7 @@ export async function POST(request: NextRequest) {
     const oldVideoIntroPath = existingProfile?.video_intro_url;
 
     // Generate file path
-    const fileExtension = file.name.split(".").pop() || getExtensionFromMimeType(file.type);
+    const fileExtension = file.name.split(".").pop() || getExtensionFromMimeType(baseMimeType);
     const filePath = getVideoIntroPath(user.id, fileExtension);
 
     // Convert File to ArrayBuffer for upload
@@ -171,7 +172,7 @@ export async function POST(request: NextRequest) {
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKETS.GALLERY)
       .upload(filePath, fileBuffer, {
-        contentType: file.type,
+        contentType: baseMimeType,
         cacheControl: "3600",
         upsert: false,
       });

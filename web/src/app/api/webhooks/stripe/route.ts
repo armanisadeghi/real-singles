@@ -153,6 +153,14 @@ async function handleCheckoutCompleted(
     })
     .eq("stripe_checkout_session_id", session.id);
 
+  // ============================
+  // EVENT REGISTRATION PAYMENT
+  // ============================
+  if (metadata.type === "event_registration") {
+    await handleEventRegistrationPayment(supabase, session.id, metadata);
+    return; // Don't process as a regular order
+  }
+
   // Parse metadata
   const paymentMethod = metadata.payment_method || "stripe";
   const pointsToDeduct = parseInt(metadata.points_to_deduct || "0", 10);
@@ -487,6 +495,73 @@ async function handleInvoicePaymentFailed(
         .eq("stripe_subscription_id", invoiceData.subscription);
     }
   }
+}
+
+/**
+ * Handle event registration payment completion
+ */
+async function handleEventRegistrationPayment(
+  supabase: ReturnType<typeof createAdminClient>,
+  sessionId: string,
+  metadata: Record<string, string>
+) {
+  const eventId = metadata.event_id;
+  const userId = metadata.user_id;
+
+  if (!eventId || !userId) {
+    console.error("Missing event_id or user_id in event registration metadata");
+    return;
+  }
+
+  console.log(`Completing event registration: event=${eventId}, user=${userId}`);
+
+  // Get payment record
+  const { data: payment } = await supabase
+    .from("payments")
+    .select("id")
+    .eq("stripe_checkout_session_id", sessionId)
+    .single();
+
+  // Update attendee record from pending_payment → registered
+  const { data: attendee, error: attendeeError } = await supabase
+    .from("event_attendees")
+    .update({
+      status: "registered",
+      payment_id: payment?.id || null,
+    })
+    .eq("event_id", eventId)
+    .eq("user_id", userId)
+    .eq("status", "pending_payment")
+    .select()
+    .single();
+
+  if (attendeeError) {
+    console.error("Error updating event attendee:", attendeeError);
+    // Try inserting if update failed (edge case)
+    await supabase.from("event_attendees").upsert({
+      event_id: eventId,
+      user_id: userId,
+      status: "registered",
+      payment_id: payment?.id || null,
+      stripe_checkout_session_id: sessionId,
+    }, { onConflict: "event_id,user_id" });
+  }
+
+  // Increment attendee count
+  const { data: event } = await supabase
+    .from("events")
+    .select("current_attendees")
+    .eq("id", eventId)
+    .single();
+
+  if (event) {
+    await supabase
+      .from("events")
+      .update({ current_attendees: (event.current_attendees || 0) + 1 })
+      .eq("id", eventId);
+  }
+
+  console.log(`Event registration completed: event=${eventId}, user=${userId}`);
 }
 
 /**
