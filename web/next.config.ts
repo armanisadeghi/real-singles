@@ -7,11 +7,10 @@ import type { NextConfig } from "next";
  * See /PERFORMANCE-STANDARDS.md for full requirements
  */
 const nextConfig: NextConfig = {
-  // Set Turbopack root to current working directory to avoid workspace root confusion
-  // This prevents Next.js from inferring the monorepo root when multiple lockfiles exist
-  // process.cwd() returns the absolute path of the directory where the command is executed
+  // Set Turbopack root to the monorepo root to help resolve packages with pnpm hoisting
+  // The root node_modules contains the hoisted packages that need to be resolved
   turbopack: {
-    root: process.cwd(),
+    root: "/Users/armanisadeghi/Code/real-singles",
   },
 
   // ==========================================================================

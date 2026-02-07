@@ -199,8 +199,8 @@ PODS:
     - hermes-engine/Pre-built (= 0.81.5)
   - hermes-engine/Pre-built (0.81.5)
   - HyphenateChat (4.10.2)
-  - libavif/core (0.11.1)
-  - libavif/libdav1d (0.11.1):
+  - libavif/core (1.0.0)
+  - libavif/libdav1d (1.0.0):
     - libavif/core
     - libdav1d (>= 0.6.0)
   - libdav1d (1.2.0)
@@ -3329,9 +3329,9 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - SDWebImage (5.21.5):
-    - SDWebImage/Core (= 5.21.5)
-  - SDWebImage/Core (5.21.5)
+  - SDWebImage (5.21.6):
+    - SDWebImage/Core (= 5.21.6)
+  - SDWebImage/Core (5.21.6)
   - SDWebImageAVIFCoder (0.11.1):
     - libavif/core (>= 0.11.0)
     - SDWebImage (~> 5.10)
@@ -3436,7 +3436,7 @@ DEPENDENCIES:
   - "react-native-cameraroll (from `../node_modules/@react-native-camera-roll/camera-roll`)"
   - react-native-chat-sdk (from `../node_modules/react-native-agora-chat`)
   - react-native-full-screen-notification-incoming-call (from `../node_modules/react-native-full-screen-notification-incoming-call`)
-  - react-native-google-maps (from `/Users/armansadeghi/Code/real-singles/mobile/node_modules/react-native-maps`)
+  - react-native-google-maps (from `/Users/armanisadeghi/Code/real-singles/mobile/node_modules/react-native-maps`)
   - react-native-ios-context-menu (from `../node_modules/react-native-ios-context-menu`)
   - react-native-ios-utilities (from `../node_modules/react-native-ios-utilities`)
   - react-native-maps (from `../node_modules/react-native-maps`)
@@ -3671,7 +3671,7 @@ EXTERNAL SOURCES:
   react-native-full-screen-notification-incoming-call:
     :path: "../node_modules/react-native-full-screen-notification-incoming-call"
   react-native-google-maps:
-    :path: "/Users/armansadeghi/Code/real-singles/mobile/node_modules/react-native-maps"
+    :path: "/Users/armanisadeghi/Code/real-singles/mobile/node_modules/react-native-maps"
   react-native-ios-context-menu:
     :path: "../node_modules/react-native-ios-context-menu"
   react-native-ios-utilities:
@@ -3822,7 +3822,7 @@ SPEC CHECKSUMS:
   GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d
   hermes-engine: 9f4dfe93326146a1c99eb535b1cb0b857a3cd172
   HyphenateChat: 6924f613947f6301bee909fc12c3bb01b50f52c6
-  libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
+  libavif: 5f8e715bea24debec477006f21ef9e95432e254d
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
@@ -3912,7 +3912,7 @@ SPEC CHECKSUMS:
   RNScreens: 0bbf16c074ae6bb1058a7bf2d1ae017f4306797c
   RNSVG: 6f39605a4c4d200b11435c35bd077553c6b5963a
   RNWorklets: ad0606bee2a8103c14adb412149789c60b72bfb2
-  SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
+  SDWebImage: 1bb6a1b84b6fe87b972a102bdc77dd589df33477
   SDWebImageAVIFCoder: afe194a084e851f70228e4be35ef651df0fc5c57
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
