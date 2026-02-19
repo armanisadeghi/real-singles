@@ -25,6 +25,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [referralCode, setReferralCode] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -38,15 +40,15 @@ export default function RegisterPage() {
     const checkAuth = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (user) {
         router.replace("/discover");
         return;
       }
-      
+
       setCheckingAuth(false);
     };
-    
+
     checkAuth();
   }, [router]);
 
@@ -63,6 +65,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setSubmitAttempted(true);
 
     // Validate passwords match
     if (password !== confirmPassword) {
@@ -225,7 +228,12 @@ export default function RegisterPage() {
               id="confirmPassword"
               type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setSubmitAttempted(false);
+              }}
+              onBlur={() => setConfirmPasswordTouched(true)}
+              onFocus={() => setConfirmPasswordTouched(false)}
               required
               minLength={8}
               placeholder="Re-enter"
@@ -233,10 +241,10 @@ export default function RegisterPage() {
             />
           </div>
         </div>
-        {password && confirmPassword && password !== confirmPassword && (
+        {password && confirmPassword && (confirmPasswordTouched || submitAttempted) && password !== confirmPassword && (
           <p className="text-xs text-red-600 dark:text-red-400 -mt-1">Passwords do not match</p>
         )}
-        {password && confirmPassword && password === confirmPassword && (
+        {password && confirmPassword && (confirmPasswordTouched || submitAttempted) && password === confirmPassword && (
           <p className="text-xs text-green-600 dark:text-green-400 -mt-1">Passwords match</p>
         )}
 
@@ -253,9 +261,8 @@ export default function RegisterPage() {
               setReferralFromLink(false);
             }}
             placeholder="Enter code if you have one"
-            className={`w-full px-3 py-2.5 border rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent text-base ${
-              referralFromLink ? "border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20" : "border-gray-300 dark:border-neutral-600"
-            }`}
+            className={`w-full px-3 py-2.5 border rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-brand-primary focus:border-transparent text-base ${referralFromLink ? "border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20" : "border-gray-300 dark:border-neutral-600"
+              }`}
           />
           {referralFromLink && (
             <p className="mt-1 text-xs text-green-600 dark:text-green-400">
