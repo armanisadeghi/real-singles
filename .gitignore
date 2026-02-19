@@ -97,3 +97,6 @@ supabase/.temp/
 
 # Misc
 *.pem
+
+# matrx-dev-tools backups
+.env-backups/

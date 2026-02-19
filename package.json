@@ -16,12 +16,17 @@
     "ship": "tsx scripts/deploy.ts",
     "ship:minor": "tsx scripts/deploy.ts --minor",
     "ship:major": "tsx scripts/deploy.ts --major",
-    "env:pull": "pnpm env:pull:web && pnpm env:pull:mobile",
-    "env:push": "pnpm env:push:web && pnpm env:push:mobile",
+    "env:pull": "bash scripts/matrx/env-sync.sh pull",
+    "env:push": "bash scripts/matrx/env-sync.sh push",
     "env:pull:web": "doppler secrets download --project real-singles --config web --no-file --format env > web/.env.local && echo '✓ Web env updated from Doppler'",
     "env:push:web": "doppler secrets upload --project real-singles --config web web/.env.local && echo '✓ Web env pushed to Doppler'",
     "env:pull:mobile": "doppler secrets download --project real-singles --config mobile --no-file --format env > mobile/.env && echo '✓ Mobile env updated from Doppler'",
-    "env:push:mobile": "doppler secrets upload --project real-singles --config mobile mobile/.env && echo '✓ Mobile env pushed to Doppler'"
+    "env:push:mobile": "doppler secrets upload --project real-singles --config mobile mobile/.env && echo '✓ Mobile env pushed to Doppler'",
+    "tools:update": "curl -sL https://raw.githubusercontent.com/armanisadeghi/matrx-dev-tools/main/install.sh | bash",
+    "env:diff": "bash scripts/matrx/env-sync.sh diff",
+    "env:status": "bash scripts/matrx/env-sync.sh status",
+    "env:pull:force": "bash scripts/matrx/env-sync.sh pull --force",
+    "env:push:force": "bash scripts/matrx/env-sync.sh push --force"
   },
   "packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264",
   "devDependencies": {
