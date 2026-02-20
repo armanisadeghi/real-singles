@@ -1,5 +1,7 @@
 # Mobile & Web Performance Standards - REQUIRED IMPLEMENTATION
 
+> **Official guide:** `~/.arman/rules/nextjs-best-practices/nextjs-guide.md` — Section 16 covers web-side performance enforcement (forbidden patterns, image transforms, query rules, budgets). This document covers the full mobile + web implementation plan.
+
 **Effective Immediately**: All applications must implement these performance standards. This is not optional.
 
 ---

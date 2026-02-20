@@ -1,5 +1,7 @@
 # Route Naming Conventions
 
+> **Official guide:** `~/.arman/rules/nextjs-best-practices/nextjs-guide.md` — Section 11 (Route Architecture & Conventions) covers route group ownership rules and conflict detection. This document covers project-specific route assignments.
+
 This document establishes route naming conventions to prevent route conflicts between different route groups.
 
 ## Problem

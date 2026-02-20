@@ -2,6 +2,9 @@
 
 Modern dating app with dual platforms sharing a single Supabase backend. Live on App Store, Play Store, and Vercel. 100+ API endpoints.
 
+> **Official Next.js/React/TypeScript best practices:** `~/.arman/rules/nextjs-best-practices/nextjs-guide.md`
+> That guide is the single source of truth for rendering, caching, performance, mobile, Tailwind, APIs, and more. This file covers project-specific conventions only.
+
 ---
 
 ## Codebase Structure

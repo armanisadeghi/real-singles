@@ -5,6 +5,8 @@ description: Enforce mobile and web performance standards including cache-first 
 
 # Performance Expert
 
+> **Official guide:** `~/.arman/rules/nextjs-best-practices/nextjs-guide.md` — Section 16 covers web performance enforcement. This skill adds mobile-specific patterns (MMKV, FlashList) and audit workflows.
+
 > Every screen loads instantly from cache. Every image is optimized. Every query selects only what it needs. No exceptions.
 
 ## 1. Local-First Data Architecture

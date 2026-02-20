@@ -1,5 +1,7 @@
 # Z-Index System
 
+> **Official guide:** `~/.arman/rules/nextjs-best-practices/nextjs-guide.md` — Section 11 covers the semantic z-index architecture pattern. This document covers project-specific z-index assignments and safe area utilities.
+
 This document defines the z-index hierarchy used across the application to ensure proper layering and prevent positioning bugs.
 
 ## The Problem We Solved
