@@ -1,11 +1,11 @@
 ---
-description: MANDATORY performance standards - data caching, image optimization, query efficiency, list rendering. See also ~/.arman/rules/nextjs-best-practices/nextjs-guide.md Section 16.
+description: MANDATORY performance standards - data caching, image optimization, query efficiency, list rendering. See also ~/.arman/rules/nextjs-best-practices/nextjs-guide.md Section 15.
 alwaysApply: true
 ---
 
 # Performance Standards
 
-> **Official guide:** `~/.arman/rules/nextjs-best-practices/nextjs-guide.md` — Section 16 (Performance Enforcement) covers forbidden patterns, image transforms, query rules, and budgets. This file covers project-specific enforcement details.
+> **Official guide:** `~/.arman/rules/nextjs-best-practices/nextjs-guide.md` — §15 (Operational Best Practices) covers forbidden patterns, image transforms, query rules, and budgets. This file covers project-specific enforcement details.
 
 **Report ANY violation you notice — even while working on unrelated tasks.**
 

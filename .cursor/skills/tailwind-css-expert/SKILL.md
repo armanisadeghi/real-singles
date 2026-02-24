@@ -1,6 +1,6 @@
 # Tailwind CSS 4.1+ Expert
 
-> **Official guide:** `~/.arman/rules/nextjs-best-practices/nextjs-guide.md` — Section 14 (Tailwind CSS 4.1 & Design System) covers CSS-first config, semantic tokens, container queries, and animation tokens. This skill provides project-specific dark mode mappings and glass component patterns.
+> **Official guide:** `~/.arman/rules/nextjs-best-practices/nextjs-guide.md` — §13 (Styling Architecture) covers the Tailwind design-system mandate. This skill provides project-specific dark mode mappings and glass component patterns.
 
 Expert guidance for Tailwind CSS 4.1+ with deep knowledge of CSS-first configuration, light/dark theming, modern CSS features, and React/Next.js integration.
 
