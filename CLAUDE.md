@@ -128,3 +128,7 @@ Matching system, real-time messaging, video/audio calls (LiveKit), events (speed
 ## Available Commands
 
 Run `/command-name` to invoke specialized workflows. See `.claude/commands/` for full list including: `/audit-api`, `/audit-performance`, `/verify-parity`, `/android-expert`, `/ios-expert`, `/supabase-help`, `/tailwind-expert`, `/plan-feature`
+
+## Package extraction (2026-08-29)
+
+Cross-repo system-of-record: /Users/armanisadeghi/code/common-docs/systems/communications/meet/HANDOFF.md — read it before touching the LiveKit calling code in ANY repo. This repo's LiveKit web implementation (`web/src/components/video-call/`, `app/api/livekit/token/`) is the named extraction source for the `@ai-matrx/meet` package. The Agora mobile calling code is dropped — not extraction material, not reference material.
