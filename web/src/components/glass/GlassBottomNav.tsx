@@ -133,12 +133,8 @@ export function GlassBottomNav() {
       <div
         className={cn(
           "rounded-3xl overflow-hidden relative",
-          // Base glass with warm gradient tint
-          // iOS 26 insight: Glass needs color to blur. Over white backgrounds,
-          // we add a subtle warm tint so it never looks like plain white.
-          "bg-gradient-to-r from-rose-100/80 via-white/85 to-amber-100/80",
-          "dark:from-neutral-800/85 dark:via-neutral-900/80 dark:to-neutral-800/85",
-          "backdrop-blur-xl backdrop-saturate-150",
+          // Backdrop filter — edges blur/saturate more, center stays clearer
+          "backdrop-blur-[10px] backdrop-saturate-200",
           // Border - slightly tinted for warmth
           "border border-rose-200/30 dark:border-white/10",
           // Stronger shadow for separation from white backgrounds
@@ -150,6 +146,13 @@ export function GlassBottomNav() {
           "dark:before:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]",
           "before:pointer-events-none"
         )}
+        style={{
+          // Radial gradient: heavy tint at edges, nearly clear in the center
+          // This mimics Apple's Liquid Glass — the perimeter does the work,
+          // the center is almost fully transparent so content reads through.
+          background:
+            "radial-gradient(ellipse 90% 120% at 50% 50%, rgba(255,255,255,0.08) 0%, rgba(255,240,235,0.28) 55%, rgba(255,220,210,0.52) 80%, rgba(255,200,190,0.60) 100%)",
+        }}
       >
         <div className="flex items-stretch px-1" role="list">
           {navItems.map((item) => (

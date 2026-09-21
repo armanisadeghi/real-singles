@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 /**
  * Next.js Configuration
@@ -10,7 +11,7 @@ const nextConfig: NextConfig = {
   // Set Turbopack root to the monorepo root to help resolve packages with pnpm hoisting
   // The root node_modules contains the hoisted packages that need to be resolved
   turbopack: {
-    root: "/Users/armanisadeghi/Code/real-singles",
+    root: path.resolve(__dirname, ".."),
   },
 
   // ==========================================================================

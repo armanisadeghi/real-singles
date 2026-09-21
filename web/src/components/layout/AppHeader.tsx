@@ -163,7 +163,37 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
 
   return (
     <>
-    <header className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm shadow-sm sticky top-0" style={{ zIndex: 'var(--z-sticky)' }}>
+    {/*
+      LiquidGlass only works correctly on position:fixed — sticky/absolute
+      both break the SVG filter coordinate space. So we use fixed + a spacer
+      div that reserves the same height in the document flow.
+    */}
+
+    {/* Spacer — holds the header's space in document flow */}
+    <div className="h-14 sm:h-16" aria-hidden="true" />
+
+    <header
+      className="fixed top-0 left-0 right-0 overflow-hidden"
+      style={{ zIndex: 'var(--z-sticky)' }}
+    >
+      {/*
+        Glass layer — extends 80px BELOW the header so the mask fade
+        has real physical space to work across, not just 56px.
+        overflow-hidden on the header clips it visually.
+      */}
+      <div
+        className="absolute left-0 right-0 top-0 pointer-events-none backdrop-blur-[10px] backdrop-saturate-200"
+        style={{
+          height: "calc(100% + 80px)",
+          background: "radial-gradient(ellipse 120% 160% at 50% 0%, rgba(255,200,190,0.60) 0%, rgba(255,220,210,0.52) 30%, rgba(255,240,235,0.28) 60%, rgba(255,255,255,0.04) 100%)",
+          // Mask fades from fully opaque at top to transparent at the very bottom of the extended area
+          WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 40%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.3) 80%, transparent 100%)",
+          maskImage: "linear-gradient(to bottom, black 0%, black 40%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.3) 80%, transparent 100%)",
+        }}
+      />
+      {/* Inner highlight — top edge only */}
+      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_1px_2px_rgba(255,255,255,0.7)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]" />
+
       {/* Skip to main content link */}
       <a
         href="#main-content"
@@ -173,7 +203,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
         Skip to main content
       </a>
       
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Left side: Logo, Filters, Points */}
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -208,9 +238,9 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
               aria-label="Search filters"
               className={cn(
                 "p-2 rounded-full transition-colors",
-                "hover:bg-gray-100 dark:hover:bg-neutral-800 active:bg-gray-200 dark:active:bg-neutral-700",
+                "hover:bg-white/20 active:bg-white/30",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
-                filtersApplied && "bg-pink-50 dark:bg-pink-900/20"
+                filtersApplied && "bg-pink-500/20"
               )}
             >
               <SlidersHorizontal 
@@ -253,7 +283,7 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
                 setShowProfileMenu(true);
               }}
               aria-label={`Profile menu for ${user.displayName}`}
-              className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-neutral-800 active:bg-gray-200 dark:active:bg-neutral-700 rounded-full p-1 sm:pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+              className="flex items-center gap-2 hover:bg-white/20 active:bg-white/30 rounded-full p-1 sm:pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             >
               <Avatar
                 src={user.profileImage}
