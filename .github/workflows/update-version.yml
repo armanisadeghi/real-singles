@@ -19,6 +19,7 @@ jobs:
   update-version:
     name: Update Version in Database
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     # Only run on the web directory
     defaults:
